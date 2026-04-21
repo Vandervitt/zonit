@@ -17,10 +17,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  const payload = JSON.parse(rawBody) as {
+  let payload: {
     meta: { event_name: string; custom_data?: { user_id?: string } };
     data: { id: string; attributes: { customer_id: number; variant_id: number; status: string } };
   };
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
   const eventName = payload.meta.event_name;
   if (!SUBSCRIPTION_EVENTS.has(eventName)) {

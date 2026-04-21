@@ -14,7 +14,7 @@ export async function GET() {
     "SELECT ls_customer_id FROM users WHERE id = $1",
     [session.user.id],
   );
-  const lsCustomerId = result.rows[0]?.ls_customer_id as string | null;
+  const lsCustomerId = result.rows[0]?.ls_customer_id as string | undefined;
 
   if (!lsCustomerId) {
     return NextResponse.json({ error: "No active subscription" }, { status: 404 });
