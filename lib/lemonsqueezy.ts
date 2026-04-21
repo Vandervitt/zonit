@@ -62,7 +62,8 @@ export function verifyWebhookSignature(
   rawBody: string,
   signature: string,
 ): boolean {
-  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET!;
+  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
+  if (!secret || !signature) return false;
   const hmac = crypto.createHmac("sha256", secret);
   const digest = hmac.update(rawBody).digest("hex");
   try {

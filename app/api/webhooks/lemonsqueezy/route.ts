@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing user_id in custom_data" }, { status: 400 });
   }
 
-  const { customer_id, variant_id } = payload.data.attributes;
+  const { customer_id, variant_id, status } = payload.data.attributes;
   const subscriptionId = payload.data.id;
   const isCancelled = eventName === "subscription_cancelled" || eventName === "subscription_expired";
 
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       [userId],
     );
   } else {
-    const plan = getPlanFromVariantId(variant_id);
+    const plan = status === "paused" ? "free" : getPlanFromVariantId(variant_id);
     await pool.query(
       `UPDATE users
        SET plan = $1, ls_customer_id = $2, ls_subscription_id = $3
