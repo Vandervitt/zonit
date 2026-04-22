@@ -1,0 +1,143 @@
+{
+    "templateId": "tpl_vip_crypto",
+    "templateName": "Crypto VIP Signals",
+    "themeConfig": {
+        "mode": "dark",
+        "primaryColor": "#10B981"
+    },
+    "hero": {
+        "badge": "🚨 DOORS CLOSING SOON",
+        "title": "Trade alongside \n7-figure crypto whales.",
+        "subtitle": "Get daily accurate entry/exit signals. Stop losing money to the market.",
+        "background": {
+            "type": "color",
+            "value": "#000000"
+        },
+        "cta": {
+            "text": "Message Admin on Telegram",
+            "url": "https://t.me/...",
+            "icon": "Telegram",
+            "theme": "telegram"
+        },
+        "trustText": "Currently 94/100 spots filled."
+    },
+    "upperBlocks": [
+        {
+            "id": "ub-1",
+            "type": "Features",
+            "data": {
+                "title": "Inside the VIP Room",
+                "items": [
+                    {
+                        "id": "f1",
+                        "icon": "Target",
+                        "title": "Exact Entry/Exit",
+                        "description": "We tell you exactly when to buy and sell."
+                    },
+                    {
+                        "id": "f2",
+                        "icon": "TrendingUp",
+                        "title": "Market Analysis",
+                        "description": "Daily video breakdowns of BTC & ETH."
+                    }
+                ]
+            }
+        }
+    ],
+    "bundles": {
+        "title": "Choose Your Access",
+        "tiers": [
+            {
+                "id": "tier-1",
+                "name": "Monthly Pass",
+                "price": "$99",
+                "unit": "/mo",
+                "description": "Cancel anytime.",
+                "features": [
+                    "Daily Signals",
+                    "Risk Management Guide"
+                ],
+                "cta": {
+                    "text": "Join Monthly via TG",
+                    "url": "https://t.me/..."
+                }
+            },
+            {
+                "id": "tier-2",
+                "name": "Lifetime Whale Access",
+                "price": "$499",
+                "unit": " one-time",
+                "description": "Never pay again.",
+                "features": [
+                    "All Monthly Perks",
+                    "1-on-1 Mentorship",
+                    "Altcoin Hidden Gems"
+                ],
+                "tag": "BEST ROI",
+                "cta": {
+                    "text": "Get Lifetime via TG",
+                    "url": "https://t.me/...",
+                    "theme": "telegram"
+                }
+            }
+        ]
+    },
+    "howItWorks": {
+        "title": "How to Join",
+        "steps": [
+            {
+                "id": "s1",
+                "icon": "Telegram",
+                "title": "DM the Admin",
+                "description": "Click the button to open a chat with our official admin."
+            },
+            {
+                "id": "s2",
+                "icon": "CreditCard",
+                "title": "Send Payment",
+                "description": "Pay securely via USDT (TRC20) or Crypto."
+            },
+            {
+                "id": "s3",
+                "icon": "Unlock",
+                "title": "Get VIP Link",
+                "description": "Receive your private invite link instantly."
+            }
+        ]
+    },
+    "lowerBlocks": [
+        {
+            "id": "lb-1",
+            "type": "Reviews",
+            "data": {
+                "title": "Members Are Winning",
+                "subtitle": "Swipe to see recent profit screenshots from our VIP members.",
+                "items": [
+                    {
+                        "id": "r1",
+                        "authorName": "@CryptoJohn",
+                        "rating": 5,
+                        "content": "Made my monthly fee back in 2 hours with the SOL signal.",
+                        "proofImage": "profit-screenshot-1.png"
+                    }
+                ]
+            }
+        }
+    ],
+    "footer": {
+        "brandName": "WhaleSignals LLC",
+        "copyrightYear": "2024",
+        "contactEmail": "admin@whalesignals.io",
+        "links": [
+            {
+                "text": "Privacy Policy",
+                "url": "/privacy"
+            },
+            {
+                "text": "Terms of Service",
+                "url": "/terms"
+            }
+        ],
+        "disclaimer": "RISK WARNING: Trading cryptocurrencies involves high risk. We do not provide financial advice. Past performance is not indicative of future results."
+    }
+}

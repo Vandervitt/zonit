@@ -1,0 +1,144 @@
+{
+    "templateId": "tpl_highticket_service",
+    "templateName": "Premium Service Lead Gen",
+    "themeConfig": {
+        "mode": "light",
+        "primaryColor": "#0F172A"
+    },
+    "hero": {
+        "title": "Transform your smile \nwith world-class experts.",
+        "subtitle": "Premium dental implants in Istanbul. Save up to 70% compared to UK/US clinics.",
+        "background": {
+            "type": "image",
+            "value": "clinic-bg.jpg",
+            "overlayOpacity": 0.6
+        },
+        "cta": {
+            "text": "Get a Free Treatment Plan",
+            "url": "https://wa.me/...",
+            "icon": "MessageCircle",
+            "theme": "primary"
+        },
+        "trustText": "Speak with a real medical coordinator • Free X-Ray Review"
+    },
+    "upperBlocks": [
+        {
+            "id": "ub-1",
+            "type": "AuthorityStory",
+            "data": {
+                "title": "Excellence in Dental Care",
+                "paragraphs": [
+                    "Founded by Dr. Kaya in 2005, our clinic has served over 5,000 international patients..."
+                ],
+                "image": {
+                    "src": "doctor-team.jpg",
+                    "alt": "Our Medical Team"
+                },
+                "stats": [
+                    {
+                        "label": "Years Experience",
+                        "value": "18+"
+                    },
+                    {
+                        "label": "Happy Patients",
+                        "value": "5,000+"
+                    }
+                ]
+            }
+        }
+    ],
+    "bundles": {
+        "title": "Start Your Journey",
+        "subtitle": "No hidden fees. Full transparency.",
+        "tiers": [
+            {
+                "id": "tier-1",
+                "name": "Free Online Consultation",
+                "price": "$0",
+                "description": "Let our doctors evaluate your case.",
+                "features": [
+                    "X-Ray Analysis",
+                    "Cost Estimation",
+                    "Video Call option"
+                ],
+                "cta": {
+                    "text": "Request Consultation",
+                    "url": "https://wa.me/...",
+                    "theme": "secondary"
+                }
+            },
+            {
+                "id": "tier-2",
+                "name": "All-Inclusive VIP Package",
+                "price": "Custom Quote",
+                "description": "Flights, hotel, and treatment sorted.",
+                "features": [
+                    "5-Star Hotel Stay",
+                    "Airport VIP Transfer",
+                    "Full Treatment"
+                ],
+                "tag": "MOST POPULAR",
+                "cta": {
+                    "text": "Get VIP Quote on WA",
+                    "url": "https://wa.me/...",
+                    "theme": "primary"
+                }
+            }
+        ]
+    },
+    "howItWorks": {
+        "title": "Your Medical Journey",
+        "steps": [
+            {
+                "id": "s1",
+                "icon": "Mail",
+                "title": "Send X-Rays",
+                "description": "Chat with us and send your dental photos."
+            },
+            {
+                "id": "s2",
+                "icon": "Calendar",
+                "title": "Get Treatment Plan",
+                "description": "Receive a detailed plan and fixed quote."
+            },
+            {
+                "id": "s3",
+                "icon": "Plane",
+                "title": "Fly & Smile",
+                "description": "We handle your accommodation and transfers."
+            }
+        ]
+    },
+    "lowerBlocks": [
+        {
+            "id": "lb-1",
+            "type": "FAQ",
+            "data": {
+                "title": "Common Questions",
+                "items": [
+                    {
+                        "id": "q1",
+                        "question": "Do you arrange flights?",
+                        "answer": "We assist with booking, but flights are not included in the base package."
+                    }
+                ]
+            }
+        }
+    ],
+    "footer": {
+        "brandName": "Istanbul Premium Dental",
+        "copyrightYear": "2024",
+        "contactEmail": "hello@ipdental.com",
+        "links": [
+            {
+                "text": "Privacy Policy",
+                "url": "/privacy"
+            },
+            {
+                "text": "Terms",
+                "url": "/terms"
+            }
+        ],
+        "disclaimer": "Medical disclaimer: Results may vary. Please consult with our certified doctors."
+    }
+}

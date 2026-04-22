@@ -1,0 +1,140 @@
+{
+    "templateId": "tpl_cod_product",
+    "templateName": "COD E-commerce Product",
+    "themeConfig": {
+        "mode": "light",
+        "primaryColor": "#EF4444"
+    },
+    "hero": {
+        "badge": "🔥 50% OFF TODAY ONLY",
+        "title": "Upgrade your life \nwithout breaking the bank.",
+        "subtitle": "Join 10,000+ happy customers. Pay ONLY when you receive the product.",
+        "background": {
+            "type": "image",
+            "value": "product-hero-bg.jpg",
+            "overlayOpacity": 0.4
+        },
+        "cta": {
+            "text": "Claim Offer on WhatsApp",
+            "url": "https://wa.me/...",
+            "icon": "WhatsApp",
+            "theme": "whatsapp"
+        },
+        "trustText": "No Credit Card Required • Cash on Delivery"
+    },
+    "upperBlocks": [
+        {
+            "id": "ub-1",
+            "type": "TrustBanner",
+            "data": {
+                "theme": "light",
+                "badges": [
+                    {
+                        "id": "b1",
+                        "icon": "Truck",
+                        "text": "Free Local Delivery"
+                    },
+                    {
+                        "id": "b2",
+                        "icon": "ShieldCheck",
+                        "text": "Pay Cash on Delivery"
+                    }
+                ]
+            }
+        }
+    ],
+    "bundles": {
+        "title": "Choose Your Package",
+        "tiers": [
+            {
+                "id": "tier-1",
+                "name": "Single Pack",
+                "price": "$29",
+                "originalPrice": "$58",
+                "description": "Perfect for trying it out.",
+                "features": [
+                    "1x Item",
+                    "Standard Shipping"
+                ],
+                "cta": {
+                    "text": "Order 1 via WhatsApp",
+                    "url": "https://wa.me/..."
+                }
+            },
+            {
+                "id": "tier-2",
+                "name": "Family Bundle (Buy 2 Get 1 Free)",
+                "price": "$58",
+                "originalPrice": "$174",
+                "description": "Best value for sharing.",
+                "features": [
+                    "3x Items",
+                    "Free Express Delivery",
+                    "Priority Support"
+                ],
+                "tag": "BEST SELLER",
+                "cta": {
+                    "text": "Order Bundle via WhatsApp",
+                    "url": "https://wa.me/...",
+                    "theme": "primary"
+                }
+            }
+        ]
+    },
+    "howItWorks": {
+        "title": "How to Order?",
+        "steps": [
+            {
+                "id": "s1",
+                "icon": "MessageCircle",
+                "title": "Chat with Us",
+                "description": "Click the button to open WhatsApp."
+            },
+            {
+                "id": "s2",
+                "icon": "MapPin",
+                "title": "Send Details",
+                "description": "Send us your delivery address and name."
+            },
+            {
+                "id": "s3",
+                "icon": "Truck",
+                "title": "Pay on Delivery",
+                "description": "Receive the item in 2-3 days and pay cash to the driver."
+            }
+        ]
+    },
+    "lowerBlocks": [
+        {
+            "id": "lb-1",
+            "type": "Reviews",
+            "data": {
+                "title": "Real Customer Photos",
+                "items": [
+                    {
+                        "id": "r1",
+                        "authorName": "Sarah M.",
+                        "rating": 5,
+                        "content": "Got it exactly as described. The delivery guy was very polite!",
+                        "proofImage": "buyer-photo-1.jpg"
+                    }
+                ]
+            }
+        }
+    ],
+    "footer": {
+        "brandName": "TrendMart COD",
+        "copyrightYear": "2024",
+        "contactEmail": "support@trendmart.com",
+        "links": [
+            {
+                "text": "Privacy Policy",
+                "url": "/privacy"
+            },
+            {
+                "text": "Terms of Service",
+                "url": "/terms"
+            }
+        ]
+    }
+}
