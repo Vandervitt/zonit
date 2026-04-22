@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   BarChart2,
@@ -11,10 +12,19 @@ import {
   Settings,
   HelpCircle,
   Grid2x2,
+  Globe,
+  LogOut,
+  CreditCard,
+  Link2,
 } from "lucide-react";
+import { PlanBadge } from "./billing/PlanBadge";
+import { Routes } from "@/lib/constants";
+import type { PlanId } from "@/lib/plans";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+  { icon: Globe, label: "Sites", href: "/sites" },
+  { icon: Link2, label: "Domains", href: "/domains" },
   { icon: BarChart2, label: "Statistics", href: "/statistics" },
   { icon: CheckSquare, label: "Task list", href: "/tasks" },
   { icon: FileText, label: "Report", href: "/reports" },
@@ -22,12 +32,14 @@ const navItems = [
 ];
 
 const otherItems = [
+  { icon: CreditCard, label: "Billing", href: Routes.Billing },
   { icon: Settings, label: "Settings", href: "/settings" },
   { icon: HelpCircle, label: "Help", href: "/help" },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   return (
     <aside className="w-52 min-h-screen bg-white/80 backdrop-blur-sm flex flex-col py-6 px-4 shrink-0 shadow-sm">
@@ -94,16 +106,34 @@ export function Sidebar() {
       <div className="flex-1" />
 
       {/* User */}
-      <div className="flex items-center gap-3 px-2 py-2">
-        <img
-          src="https://images.unsplash.com/photo-1672685667592-0392f458f46f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBtYW4lMjBwb3J0cmFpdCUyMGhlYWRzaG90fGVufDF8fHx8MTc3NjEwOTcxM3ww&ixlib=rb-4.1.0&q=80&w=1080"
-          alt="Darrell Steward"
-          className="w-9 h-9 rounded-full object-cover shrink-0"
-        />
-        <div className="overflow-hidden">
-          <p className="text-sm text-slate-800 truncate">Darrell Steward</p>
-          <p className="text-xs text-slate-400 truncate">dsteward@gmail.com</p>
+      <div className="flex items-center gap-2 px-2 py-2">
+        {session?.user?.image ? (
+          <img
+            src={session.user.image}
+            alt={session.user.name ?? ""}
+            className="w-9 h-9 rounded-full object-cover shrink-0"
+          />
+        ) : (
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 to-pink-600 flex items-center justify-center shrink-0 text-white text-sm font-medium">
+            {session?.user?.name?.[0]?.toUpperCase() ?? "?"}
+          </div>
+        )}
+        <div className="overflow-hidden flex-1">
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm text-slate-800 truncate">{session?.user?.name ?? ""}</p>
+            {session?.user?.plan && (
+              <PlanBadge plan={(session.user.plan) as PlanId} />
+            )}
+          </div>
+          <p className="text-xs text-slate-400 truncate">{session?.user?.email ?? ""}</p>
         </div>
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+          title="Sign out"
+        >
+          <LogOut className="w-4 h-4" />
+        </button>
       </div>
     </aside>
   );
