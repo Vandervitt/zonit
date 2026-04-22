@@ -7,9 +7,7 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
-import { Separator } from "../ui/separator";
 import { cn } from "../ui/utils";
 import {
   HeroForm, BundlesForm, HowItWorksForm, FooterForm,
@@ -49,15 +47,27 @@ interface BlockMeta {
 }
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
-  Hero: <Zap className="w-4 h-4 text-rose-500" />,
-  ProductBundles: <Package className="w-4 h-4 text-indigo-500" />,
-  HowItWorks: <List className="w-4 h-4 text-sky-500" />,
-  MicroFooter: <FileText className="w-4 h-4 text-slate-500" />,
-  Features: <Sparkles className="w-4 h-4 text-violet-500" />,
-  Reviews: <MessageSquare className="w-4 h-4 text-emerald-500" />,
-  TrustBanner: <Shield className="w-4 h-4 text-amber-500" />,
-  AuthorityStory: <User className="w-4 h-4 text-orange-500" />,
-  FAQ: <HelpCircle className="w-4 h-4 text-pink-500" />,
+  Hero: <Zap className="w-3.5 h-3.5 text-rose-400" />,
+  ProductBundles: <Package className="w-3.5 h-3.5 text-indigo-400" />,
+  HowItWorks: <List className="w-3.5 h-3.5 text-sky-400" />,
+  MicroFooter: <FileText className="w-3.5 h-3.5 text-zinc-400" />,
+  Features: <Sparkles className="w-3.5 h-3.5 text-violet-400" />,
+  Reviews: <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />,
+  TrustBanner: <Shield className="w-3.5 h-3.5 text-amber-400" />,
+  AuthorityStory: <User className="w-3.5 h-3.5 text-orange-400" />,
+  FAQ: <HelpCircle className="w-3.5 h-3.5 text-pink-400" />,
+};
+
+const TYPE_BG: Record<string, string> = {
+  Hero: "bg-rose-500/10",
+  ProductBundles: "bg-indigo-500/10",
+  HowItWorks: "bg-sky-500/10",
+  MicroFooter: "bg-zinc-500/10",
+  Features: "bg-violet-500/10",
+  Reviews: "bg-emerald-500/10",
+  TrustBanner: "bg-amber-500/10",
+  AuthorityStory: "bg-orange-500/10",
+  FAQ: "bg-pink-500/10",
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -76,7 +86,6 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
   const [addOpen, setAddOpen] = useState(false);
   const setExpandedKey = onExpandedKeyChange;
 
-  // Build ordered list of all block metas
   const blockList: BlockMeta[] = [
     { key: FixedBlockKey.Hero, label: TYPE_LABEL.Hero, icon: TYPE_ICON.Hero, required: true, type: "Hero" },
     ...data.upperBlocks.map(b => ({
@@ -131,7 +140,6 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     if (meta.key === FixedBlockKey.Footer) {
       return <FooterForm data={data.footer as MicroFooterSchema} onChange={footer => onChange({ ...data, footer })} />;
     }
-    // Optional blocks
     const updateOptional = (blockId: string, newData: OptionalBlock["data"]) => {
       onChange({
         ...data,
@@ -158,10 +166,12 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border-r border-border">
-      <div className="p-4 border-b border-border shrink-0">
-        <p className="text-sm text-slate-700">模块编辑</p>
-        <p className="text-xs text-muted-foreground mt-0.5">{blockList.length} 个模块</p>
+    <div className="flex flex-col h-full bg-zinc-950">
+      <div className="px-4 py-3.5 shrink-0 border-b border-zinc-800/60 flex items-center gap-2">
+        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">模块编辑</span>
+        <span className="ml-auto font-mono text-[10px] bg-zinc-900 text-zinc-600 px-1.5 py-0.5 rounded">
+          {blockList.length}
+        </span>
       </div>
 
       <ScrollArea className="flex-1 min-h-0 overflow-hidden">
@@ -170,43 +180,48 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
           collapsible
           value={expandedKey}
           onValueChange={v => setExpandedKey(v)}
-          className="px-3"
+          className="divide-y divide-zinc-800/40"
         >
-          {blockList.map((meta, index) => (
+          {blockList.map((meta) => (
             <AccordionItem
               key={meta.key}
               value={meta.key}
-              className={cn(
-                "border-b border-border/50 last:border-0",
-              )}
+              className="border-0"
             >
-              <AccordionTrigger className="hover:no-underline py-3 gap-2">
+              <AccordionTrigger
+                className={cn(
+                  "hover:no-underline py-2.5 px-4 gap-2 transition-colors",
+                  "hover:bg-zinc-900 data-[state=open]:bg-zinc-900",
+                  "[&>svg]:text-zinc-700 data-[state=open]:[&>svg]:text-zinc-500",
+                )}
+              >
                 <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                  <div className={cn(
+                    "w-6 h-6 rounded-md flex items-center justify-center shrink-0",
+                    TYPE_BG[meta.type] ?? "bg-zinc-800",
+                  )}>
                     {meta.icon}
                   </div>
-                  <div className="min-w-0 flex-1 text-left">
-                    <p className="text-xs text-slate-800 truncate">{meta.label}</p>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
+                  <p className="text-xs text-zinc-300 truncate flex-1 text-left">{meta.label}</p>
+                  <div className="flex items-center gap-1.5 shrink-0">
                     {meta.required ? (
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">必填</Badge>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-600 font-medium">必填</span>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 text-muted-foreground">可选</Badge>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded border border-zinc-800 text-zinc-600 font-medium">可选</span>
                     )}
                     {!meta.required && expandedKey === meta.key && (
                       <div
                         role="button"
-                        className="h-6 w-6 inline-flex items-center justify-center rounded-md hover:bg-accent cursor-pointer"
+                        className="h-5 w-5 inline-flex items-center justify-center rounded hover:bg-rose-500/10 cursor-pointer transition-colors group"
                         onClick={e => { e.stopPropagation(); removeOptionalBlock(meta.key); }}
                       >
-                        <Trash2 className="w-3 h-3 text-destructive" />
+                        <Trash2 className="w-3 h-3 text-zinc-600 group-hover:text-rose-400 transition-colors" />
                       </div>
                     )}
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-1 pb-4">
+              <AccordionContent className="bg-zinc-900 border-t border-zinc-800/60 px-4 pb-6 pt-3">
                 {renderForm(meta)}
               </AccordionContent>
             </AccordionItem>
@@ -214,12 +229,11 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
         </Accordion>
       </ScrollArea>
 
-      {/* Add Block Button */}
-      <div className="p-3 border-t border-border shrink-0">
+      <div className="p-3 border-t border-zinc-800/60 shrink-0">
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className="w-full text-xs gap-1.5"
+          className="w-full text-xs gap-1.5 h-8 bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 border border-zinc-800 hover:border-zinc-700 rounded-md transition-colors"
           onClick={() => setAddOpen(true)}
           disabled={existingOptionalTypes.length >= 5}
         >

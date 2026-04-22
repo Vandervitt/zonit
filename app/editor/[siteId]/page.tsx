@@ -207,7 +207,7 @@ export default function SiteEditorPage() {
 
       {/* ── Main Body ───────────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-100 shrink-0 h-full flex flex-col overflow-hidden bg-white border-r border-zinc-200 shadow-sm">
+        <aside className="w-100 shrink-0 h-full flex flex-col overflow-hidden bg-zinc-950 border-r border-zinc-800/60">
           <BlockEditorPanel data={data} onChange={handleDataChange} expandedKey={expandedKey} onExpandedKeyChange={setExpandedKey} />
         </aside>
 
