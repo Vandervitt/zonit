@@ -1,6 +1,6 @@
 import { Search, ChevronDown, Calendar } from "lucide-react";
 import { SalesFunnelCard } from "../../components/SalesFunnelCard";
-import { AICoPilotCard } from "../../components/AICoPilotCard";
+// import { AICoPilotCard } from "../../components/AICoPilotCard";
 import { HighRiskCustomers } from "../../components/HighRiskCustomers";
 
 export default function App() {
@@ -40,7 +40,7 @@ export default function App() {
         {/* Top Row: Funnel + AI Co-Pilot */}
         <div className="grid grid-cols-[1fr_220px] gap-4">
           <SalesFunnelCard />
-          <AICoPilotCard />
+          {/* <AICoPilotCard /> */}
         </div>
 
         {/* Bottom Row: High-Risk Customers */}

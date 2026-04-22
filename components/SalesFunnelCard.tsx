@@ -32,7 +32,7 @@ const metrics = [
 
 export function SalesFunnelCard() {
   return (
-    <div className="bg-white rounded-2xl p-5 flex flex-col gap-4 shadow-sm">
+    <div className="bg-white rounded-2xl p-5 flex flex-col gap-4 shadow-sm w-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-slate-800">Sales Funnel Analytics</h3>
