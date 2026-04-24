@@ -33,14 +33,59 @@ function StarRating({ rating }: { rating: number }) {
 // ── Block Renderers ──────────────────────────────────────────────────────────
 
 function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primaryColor: string; highlight?: boolean }) {
-  const bg = data.background.type === BackgroundType.Color ? data.background.value : undefined;
+  const v = data.variant ?? 'overlay';
   const bgImg = data.background.type === BackgroundType.Image ? data.background.value : undefined;
+  const bgColor = data.background.type === BackgroundType.Color ? data.background.value : undefined;
+
+  const textContent = (
+    <>
+      {data.badge && (
+        <div className="inline-block px-3 py-1 rounded-full text-xs mb-3" style={{ backgroundColor: primaryColor + "20", color: primaryColor }}>
+          {data.badge}
+        </div>
+      )}
+      <h1 className="text-xl leading-snug mb-2 text-slate-800" style={{ whiteSpace: "pre-line" }}>
+        {data.title}
+      </h1>
+      <p className="text-xs leading-relaxed mb-4 text-slate-500">{data.subtitle}</p>
+      <button
+        className="px-5 py-2.5 rounded-full text-sm text-white"
+        style={{ backgroundColor: ctaThemeColor(data.cta.theme, primaryColor) }}
+      >
+        {data.cta.text}
+      </button>
+      {data.trustText && (
+        <p className="text-xs mt-2 text-slate-400">{data.trustText}</p>
+      )}
+    </>
+  );
+
+  if (v === 'split-left' || v === 'split-right') {
+    return (
+      <section
+        id="hero"
+        className="px-5 py-8"
+        style={{ backgroundColor: bgColor ?? '#f8f9ff', boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}
+      >
+        <div className={`flex items-center gap-4 ${v === 'split-right' ? 'flex-row-reverse' : 'flex-row'}`}>
+          <div className="flex-1 min-w-0">{textContent}</div>
+          {bgImg && (
+            <div className="w-2/5 shrink-0">
+              <img src={bgImg} alt="" className="w-full h-32 object-cover rounded-xl" />
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  // overlay (default)
   return (
     <section
       id="hero"
       className="relative px-5 py-12 text-center"
       style={{
-        backgroundColor: bg ?? "#f8f9ff",
+        backgroundColor: bgColor ?? "#f8f9ff",
         backgroundImage: bgImg ? `url(${bgImg})` : undefined,
         backgroundSize: "cover",
         backgroundPosition: "center",
