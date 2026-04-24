@@ -67,7 +67,7 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
         className="px-5 py-8"
         style={{ backgroundColor: bgColor ?? '#f8f9ff', boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}
       >
-        <div className={`flex items-center gap-4 ${v === 'split-right' ? 'flex-row-reverse' : 'flex-row'}`}>
+        <div className={`flex items-center gap-4 ${v === 'split-right' ? 'flex-row-reverse' : ''}`}>
           <div className="flex-1 min-w-0">{textContent}</div>
           {bgImg && (
             <div className="w-2/5 shrink-0">
@@ -196,7 +196,7 @@ function AuthorityBlock({ data, primaryColor, id, highlight }: { data: Authority
 
   return (
     <section id={id} className="px-5 py-10 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-      <div className={`flex gap-4 items-start ${v === 'image-right' ? 'flex-row-reverse' : 'flex-row'}`}>
+      <div className={`flex gap-4 items-start ${v === 'image-right' ? 'flex-row-reverse' : ''}`}>
         {imageEl && <div className="w-2/5 shrink-0">{imageEl}</div>}
         {textEl}
       </div>
