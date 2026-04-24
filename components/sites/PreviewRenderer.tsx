@@ -44,7 +44,7 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
           {data.badge}
         </div>
       )}
-      <h1 className="text-xl leading-snug mb-2 text-slate-800" style={{ whiteSpace: "pre-line" }}>
+      <h1 className="text-xl leading-snug mb-2 text-slate-800 whitespace-pre-line">
         {data.title}
       </h1>
       <p className="text-xs leading-relaxed mb-4 text-slate-500">{data.subtitle}</p>
