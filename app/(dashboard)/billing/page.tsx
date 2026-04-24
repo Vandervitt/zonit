@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -18,23 +18,26 @@ const UPGRADE_HIGHLIGHTS: Partial<Record<PlanId, string[]>> = {
   agency: ["无限站点 + 无限域名", "含灰色行业高转化模板", "AI 自动多语言翻译", "一切 Pro 功能"],
 };
 
-export default function BillingPage() {
-  const { data: session } = useSession();
+function SuccessToast() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [portalLoading, setPortalLoading] = useState(false);
-
-  const currentPlanId = (session?.user?.plan ?? "free") as PlanId;
-  const currentPlan = PLANS[currentPlanId];
-  const currentIdx = PLAN_ORDER.indexOf(currentPlanId);
-
   useEffect(() => {
     if (searchParams.get("success") === "1") {
       toast.success("订阅成功！套餐将在几秒内生效。");
       router.replace(Routes.Billing);
     }
   }, [searchParams, router]);
+  return null;
+}
+
+export default function BillingPage() {
+  const { data: session } = useSession();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const currentPlanId = (session?.user?.plan ?? "free") as PlanId;
+  const currentPlan = PLANS[currentPlanId];
+  const currentIdx = PLAN_ORDER.indexOf(currentPlanId);
 
   async function handleUpgrade(planId: string) {
     setLoadingPlan(planId);
@@ -76,6 +79,7 @@ export default function BillingPage() {
 
   return (
     <main className="flex flex-col w-full px-6 py-6 max-w-3xl">
+      <Suspense><SuccessToast /></Suspense>
       <div className="mb-6">
         <h1 className="text-slate-800 text-2xl">Billing</h1>
         <p className="text-sm text-muted-foreground mt-0.5">管理你的订阅套餐</p>

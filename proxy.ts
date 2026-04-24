@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSlugByCustomDomain } from "@/lib/domains-db";
 
-export const runtime = "nodejs";
-
 const PUBLIC_PATHS = ["/login", "/register", "/api/auth", "/api/register"];
 
 const appHostname = process.env.NEXT_PUBLIC_APP_URL
