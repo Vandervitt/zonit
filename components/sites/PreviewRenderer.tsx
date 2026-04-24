@@ -248,7 +248,7 @@ function BundlesBlock({ data, primaryColor, highlight }: { data: BundlesSchema; 
     <section id="bundles" className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
       {data.subtitle && <p className="text-xs text-center text-slate-500 mb-6">{data.subtitle}</p>}
-      <div className={v === 'cards-column' ? "grid grid-cols-2 gap-3" : "space-y-4"}>
+      <div className={v === 'cards-row' ? "grid grid-cols-2 gap-3" : "space-y-4"}>
         {data.tiers.map(tierCard)}
       </div>
     </section>
@@ -281,7 +281,7 @@ function ReviewsBlock({ data, id, highlight }: { data: ReviewsSchema; id?: strin
   const v = data.variant ?? 'grid';
 
   const reviewCard = (item: ReviewItem) => (
-    <div key={item.id} className={`bg-slate-50 rounded-xl p-4 ${v === 'carousel' ? 'w-56 shrink-0' : ''}`}>
+    <div key={item.id} className={`bg-slate-50 rounded-xl p-4 ${v === 'carousel' ? 'w-56 shrink-0 snap-start' : ''}`}>
       <div className="flex items-start gap-2 mb-2">
         <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 shrink-0">
           {item.authorName.charAt(0)}
