@@ -11,6 +11,7 @@ import type {
   MicroFooterSchema,
   FeaturesSchema,
   ReviewsSchema,
+  ReviewItem,
   TrustBannerSchema,
   AuthoritySchema,
   FAQSchema,
@@ -277,36 +278,48 @@ function HowItWorksBlock({ data, primaryColor, highlight }: { data: HowItWorksSc
 }
 
 function ReviewsBlock({ data, id, highlight }: { data: ReviewsSchema; id?: string; highlight?: boolean }) {
+  const v = data.variant ?? 'grid';
+
+  const reviewCard = (item: ReviewItem) => (
+    <div key={item.id} className={`bg-slate-50 rounded-xl p-4 ${v === 'carousel' ? 'w-56 shrink-0' : ''}`}>
+      <div className="flex items-start gap-2 mb-2">
+        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 shrink-0">
+          {item.authorName.charAt(0)}
+        </div>
+        <div>
+          <p className="text-xs text-slate-800">{item.authorName}</p>
+          {item.authorRole && <p className="text-[10px] text-slate-400">{item.authorRole}</p>}
+        </div>
+        <div className="ml-auto">
+          <StarRating rating={item.rating} />
+        </div>
+      </div>
+      <p className="text-xs text-slate-600 leading-relaxed">{item.content}</p>
+    </div>
+  );
+
   return (
-    <section id={id} className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-      <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
-      {data.subtitle && <p className="text-xs text-center text-slate-500 mb-2">{data.subtitle}</p>}
-      {data.averageRating && (
-        <div className="flex items-center justify-center gap-2 mb-5">
-          <span className="text-2xl text-amber-400 font-bold">{data.averageRating}</span>
-          <StarRating rating={Math.round(data.averageRating)} />
-          {data.totalReviews && <span className="text-xs text-slate-400">({data.totalReviews})</span>}
+    <section id={id} className="py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      <div className="px-5">
+        <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
+        {data.subtitle && <p className="text-xs text-center text-slate-500 mb-2">{data.subtitle}</p>}
+        {data.averageRating && (
+          <div className="flex items-center justify-center gap-2 mb-5">
+            <span className="text-2xl text-amber-400 font-bold">{data.averageRating}</span>
+            <StarRating rating={Math.round(data.averageRating)} />
+            {data.totalReviews && <span className="text-xs text-slate-400">({data.totalReviews})</span>}
+          </div>
+        )}
+      </div>
+      {v === 'carousel' ? (
+        <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory">
+          {data.items.map(reviewCard)}
+        </div>
+      ) : (
+        <div className="px-5 space-y-3">
+          {data.items.map(reviewCard)}
         </div>
       )}
-      <div className="space-y-3">
-        {data.items.map(item => (
-          <div key={item.id} className="bg-slate-50 rounded-xl p-4">
-            <div className="flex items-start gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 shrink-0">
-                {item.authorName.charAt(0)}
-              </div>
-              <div>
-                <p className="text-xs text-slate-800">{item.authorName}</p>
-                {item.authorRole && <p className="text-[10px] text-slate-400">{item.authorRole}</p>}
-              </div>
-              <div className="ml-auto">
-                <StarRating rating={item.rating} />
-              </div>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed">{item.content}</p>
-          </div>
-        ))}
-      </div>
     </section>
   );
 }
