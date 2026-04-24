@@ -160,34 +160,46 @@ function FeaturesBlock({ data, primaryColor, id, highlight }: { data: FeaturesSc
 }
 
 function AuthorityBlock({ data, primaryColor, id, highlight }: { data: AuthoritySchema; primaryColor: string; id?: string; highlight?: boolean }) {
-  return (
-    <section id={id} className="px-5 py-10 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-      <p className="text-lg text-slate-800 mb-1">{data.title}</p>
-      {data.subtitle && <p className="text-xs text-slate-500 mb-4">{data.subtitle}</p>}
-      {data.image.src && (
-        <img src={data.image.src} alt={data.image.alt} className="w-full h-36 object-cover rounded-xl mb-4" />
-      )}
-      <div className="space-y-2">
+  const v = data.variant ?? 'image-left';
+
+  const imageEl = data.image.src ? (
+    <img src={data.image.src} alt={data.image.alt} className="w-full h-28 object-cover rounded-xl" />
+  ) : null;
+
+  const textEl = (
+    <div className="flex-1 min-w-0">
+      <p className="text-base text-slate-800 mb-1">{data.title}</p>
+      {data.subtitle && <p className="text-xs text-slate-500 mb-3">{data.subtitle}</p>}
+      <div className="space-y-1.5">
         {data.paragraphs.map((p, i) => (
           <p key={i} className="text-xs text-slate-600 leading-relaxed">{p}</p>
         ))}
       </div>
       {data.stats && data.stats.length > 0 && (
-        <div className="flex gap-4 mt-5 pt-4 border-t border-slate-200">
+        <div className="flex gap-4 mt-4 pt-3 border-t border-slate-200">
           {data.stats.map((s, i) => (
             <div key={i} className="text-center">
-              <p className="text-xl" style={{ color: primaryColor }}>{s.value}</p>
-              <p className="text-xs text-slate-500">{s.label}</p>
+              <p className="text-lg" style={{ color: primaryColor }}>{s.value}</p>
+              <p className="text-[10px] text-slate-500">{s.label}</p>
             </div>
           ))}
         </div>
       )}
       {data.signature && (
-        <div className="mt-4 pt-3 border-t border-slate-200">
+        <div className="mt-3 pt-2 border-t border-slate-200">
           <p className="text-sm text-slate-800">{data.signature.name}</p>
           <p className="text-xs text-slate-500">{data.signature.role}</p>
         </div>
       )}
+    </div>
+  );
+
+  return (
+    <section id={id} className="px-5 py-10 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      <div className={`flex gap-4 items-start ${v === 'image-right' ? 'flex-row-reverse' : 'flex-row'}`}>
+        {imageEl && <div className="w-2/5 shrink-0">{imageEl}</div>}
+        {textEl}
+      </div>
     </section>
   );
 }
