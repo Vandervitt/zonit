@@ -6,6 +6,7 @@ import type {
   LandingPageTemplate,
   HeroSchema,
   BundlesSchema,
+  BundleTier,
   HowItWorksSchema,
   MicroFooterSchema,
   FeaturesSchema,
@@ -205,45 +206,49 @@ function AuthorityBlock({ data, primaryColor, id, highlight }: { data: Authority
 }
 
 function BundlesBlock({ data, primaryColor, highlight }: { data: BundlesSchema; primaryColor: string; highlight?: boolean }) {
+  const v = data.variant ?? 'cards-row';
+
+  const tierCard = (tier: BundleTier) => (
+    <div key={tier.id} className="border-2 rounded-2xl p-4 relative" style={{ borderColor: tier.tag ? primaryColor : "#e2e8f0" }}>
+      {tier.tag && (
+        <div className="absolute -top-3 left-4 px-2 py-0.5 rounded-full text-xs text-white" style={{ backgroundColor: primaryColor }}>
+          {tier.tag}
+        </div>
+      )}
+      <div className="flex justify-between items-start mb-2">
+        <div>
+          <p className="text-sm text-slate-800">{tier.name}</p>
+          <p className="text-xs text-slate-500">{tier.description}</p>
+        </div>
+        <div className="text-right shrink-0 ml-2">
+          <p className="text-xl" style={{ color: primaryColor }}>{tier.price}</p>
+          {tier.originalPrice && (
+            <p className="text-xs text-slate-400 line-through">{tier.originalPrice}</p>
+          )}
+        </div>
+      </div>
+      <ul className="space-y-1 my-3">
+        {tier.features.map((f, i) => (
+          <li key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
+            <span className="text-emerald-500 text-base leading-none">✓</span> {f}
+          </li>
+        ))}
+      </ul>
+      <button
+        className="w-full py-2 rounded-full text-xs text-white mt-2"
+        style={{ backgroundColor: ctaThemeColor(tier.cta.theme, primaryColor) }}
+      >
+        {tier.cta.text}
+      </button>
+    </div>
+  );
+
   return (
     <section id="bundles" className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
       {data.subtitle && <p className="text-xs text-center text-slate-500 mb-6">{data.subtitle}</p>}
-      <div className="space-y-4">
-        {data.tiers.map(tier => (
-          <div key={tier.id} className="border-2 rounded-2xl p-4 relative" style={{ borderColor: tier.tag ? primaryColor : "#e2e8f0" }}>
-            {tier.tag && (
-              <div className="absolute -top-3 left-4 px-2 py-0.5 rounded-full text-xs text-white" style={{ backgroundColor: primaryColor }}>
-                {tier.tag}
-              </div>
-            )}
-            <div className="flex justify-between items-start mb-2">
-              <div>
-                <p className="text-sm text-slate-800">{tier.name}</p>
-                <p className="text-xs text-slate-500">{tier.description}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-xl" style={{ color: primaryColor }}>{tier.price}</p>
-                {tier.originalPrice && (
-                  <p className="text-xs text-slate-400 line-through">{tier.originalPrice}</p>
-                )}
-              </div>
-            </div>
-            <ul className="space-y-1 my-3">
-              {tier.features.map((f, i) => (
-                <li key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
-                  <span className="text-emerald-500 text-base leading-none">✓</span> {f}
-                </li>
-              ))}
-            </ul>
-            <button
-              className="w-full py-2 rounded-full text-xs text-white mt-2"
-              style={{ backgroundColor: ctaThemeColor(tier.cta.theme, primaryColor) }}
-            >
-              {tier.cta.text}
-            </button>
-          </div>
-        ))}
+      <div className={v === 'cards-column' ? "grid grid-cols-2 gap-3" : "space-y-4"}>
+        {data.tiers.map(tierCard)}
       </div>
     </section>
   );
