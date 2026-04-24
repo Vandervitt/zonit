@@ -30,6 +30,7 @@ export interface HeroSchema {
   };
   cta: CallToAction;            // 主按钮
   trustText?: string;           // 按钮下方的小字背书，如 "No credit card required"
+  variant?: 'overlay' | 'split-left' | 'split-right';
 }
 
 
@@ -50,6 +51,7 @@ export interface BundlesSchema {
   title: string;
   subtitle?: string;
   tiers: BundleTier[];          // 通常 1 到 3 个
+  variant?: 'cards-row' | 'cards-column';
 }
 
 // 引导用户如何通过 WhatsApp/TG 交易，打消疑虑
@@ -112,6 +114,7 @@ export interface ReviewsSchema {
   averageRating?: number;       // 如 4.9
   totalReviews?: string;        // 如 "10k+ Reviews"
   items: ReviewItem[];
+  variant?: 'grid' | 'carousel';
 }
 
 // 一排横向排列的信任徽章
@@ -140,6 +143,7 @@ export interface AuthoritySchema {
     name: string;
     role: string;
   };
+  variant?: 'image-left' | 'image-right';
 }
 
 // 常见问题解答
