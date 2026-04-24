@@ -1,1 +1,1 @@
-/Users/lajiao/Work/zonit/AGENTS.md
+AGENTS.md
