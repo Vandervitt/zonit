@@ -14,6 +14,7 @@ import {
   FeaturesForm, ReviewsForm, TrustBannerForm, AuthorityForm, FAQForm,
 } from "./BlockForms";
 import { AddBlockDialog } from "./AddBlockDialog";
+import { AiRewriteButton } from "../editor/AiRewriteButton";
 import { getDefaultBlockData } from "../../lib/templates";
 import { BlockZone, FixedBlockKey } from "../../lib/constants";
 import type {
@@ -129,16 +130,52 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
 
   const renderForm = (meta: BlockMeta) => {
     if (meta.key === FixedBlockKey.Hero) {
-      return <HeroForm data={data.hero as HeroSchema} onChange={hero => onChange({ ...data, hero })} />;
+      return (
+        <>
+          <AiRewriteButton
+            blockType="Hero"
+            currentData={data.hero}
+            onSuccess={d => onChange({ ...data, hero: d as HeroSchema })}
+          />
+          <HeroForm data={data.hero as HeroSchema} onChange={hero => onChange({ ...data, hero })} />
+        </>
+      );
     }
     if (meta.key === FixedBlockKey.Bundles) {
-      return <BundlesForm data={data.bundles as BundlesSchema} onChange={bundles => onChange({ ...data, bundles })} />;
+      return (
+        <>
+          <AiRewriteButton
+            blockType="ProductBundles"
+            currentData={data.bundles}
+            onSuccess={d => onChange({ ...data, bundles: d as BundlesSchema })}
+          />
+          <BundlesForm data={data.bundles as BundlesSchema} onChange={bundles => onChange({ ...data, bundles })} />
+        </>
+      );
     }
     if (meta.key === FixedBlockKey.HowItWorks) {
-      return <HowItWorksForm data={data.howItWorks as HowItWorksSchema} onChange={howItWorks => onChange({ ...data, howItWorks })} />;
+      return (
+        <>
+          <AiRewriteButton
+            blockType="HowItWorks"
+            currentData={data.howItWorks}
+            onSuccess={d => onChange({ ...data, howItWorks: d as HowItWorksSchema })}
+          />
+          <HowItWorksForm data={data.howItWorks as HowItWorksSchema} onChange={howItWorks => onChange({ ...data, howItWorks })} />
+        </>
+      );
     }
     if (meta.key === FixedBlockKey.Footer) {
-      return <FooterForm data={data.footer as MicroFooterSchema} onChange={footer => onChange({ ...data, footer })} />;
+      return (
+        <>
+          <AiRewriteButton
+            blockType="MicroFooter"
+            currentData={data.footer}
+            onSuccess={d => onChange({ ...data, footer: d as MicroFooterSchema })}
+          />
+          <FooterForm data={data.footer as MicroFooterSchema} onChange={footer => onChange({ ...data, footer })} />
+        </>
+      );
     }
     const updateOptional = (blockId: string, newData: OptionalBlock["data"]) => {
       onChange({
@@ -151,15 +188,60 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     if (!block) return null;
     switch (block.type) {
       case "Features":
-        return <FeaturesForm data={block.data as FeaturesSchema} onChange={d => updateOptional(block.id, d)} />;
+        return (
+          <>
+            <AiRewriteButton
+              blockType="Features"
+              currentData={block.data}
+              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
+            />
+            <FeaturesForm data={block.data as FeaturesSchema} onChange={d => updateOptional(block.id, d)} />
+          </>
+        );
       case "Reviews":
-        return <ReviewsForm data={block.data as ReviewsSchema} onChange={d => updateOptional(block.id, d)} />;
+        return (
+          <>
+            <AiRewriteButton
+              blockType="Reviews"
+              currentData={block.data}
+              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
+            />
+            <ReviewsForm data={block.data as ReviewsSchema} onChange={d => updateOptional(block.id, d)} />
+          </>
+        );
       case "TrustBanner":
-        return <TrustBannerForm data={block.data as TrustBannerSchema} onChange={d => updateOptional(block.id, d)} />;
+        return (
+          <>
+            <AiRewriteButton
+              blockType="TrustBanner"
+              currentData={block.data}
+              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
+            />
+            <TrustBannerForm data={block.data as TrustBannerSchema} onChange={d => updateOptional(block.id, d)} />
+          </>
+        );
       case "AuthorityStory":
-        return <AuthorityForm data={block.data as AuthoritySchema} onChange={d => updateOptional(block.id, d)} />;
+        return (
+          <>
+            <AiRewriteButton
+              blockType="AuthorityStory"
+              currentData={block.data}
+              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
+            />
+            <AuthorityForm data={block.data as AuthoritySchema} onChange={d => updateOptional(block.id, d)} />
+          </>
+        );
       case "FAQ":
-        return <FAQForm data={block.data as FAQSchema} onChange={d => updateOptional(block.id, d)} />;
+        return (
+          <>
+            <AiRewriteButton
+              blockType="FAQ"
+              currentData={block.data}
+              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
+            />
+            <FAQForm data={block.data as FAQSchema} onChange={d => updateOptional(block.id, d)} />
+          </>
+        );
       default:
         return null;
     }
