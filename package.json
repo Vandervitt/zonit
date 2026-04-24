@@ -6,7 +6,11 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate": "node-pg-migrate -m migrations",
+    "migrate:up": "node-pg-migrate up -m migrations",
+    "migrate:down": "node-pg-migrate down -m migrations",
+    "migrate:create": "node-pg-migrate create -m migrations"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.2",
@@ -85,6 +89,7 @@
     "@vitejs/plugin-react": "4.7.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
+    "node-pg-migrate": "^8.0.4",
     "tailwindcss": "4.1.12",
     "typescript": "^5"
   }
