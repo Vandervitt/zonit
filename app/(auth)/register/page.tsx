@@ -1,21 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Grid2x2 } from "lucide-react";
+import { Grid2x2, TicketCheck } from "lucide-react";
 import IndustryOnboardingDialog from "@/components/IndustryOnboardingDialog";
 import { Routes, ApiRoutes, AuthProvider } from "@/lib/constants";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isInvited, setIsInvited] = useState(false);
+
+  // 如果有 token，可以尝试在挂载时进行一些视觉反馈或预校验（可选）
+  useEffect(() => {
+    if (token) {
+      setIsInvited(true);
+      // 注意：这里可以增加一个 API 来通过 token 预取用户邮箱，提高体验
+    }
+  }, [token]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,7 +37,12 @@ export default function RegisterPage() {
     const res = await fetch(ApiRoutes.Register, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ 
+        name, 
+        email, 
+        password,
+        token // 将邀请 token 传给后端
+      }),
     });
 
     if (!res.ok) {
@@ -50,7 +67,14 @@ export default function RegisterPage() {
       </div>
 
       <h1 className="text-2xl text-slate-800 mb-1">Create account</h1>
-      <p className="text-sm text-slate-400 mb-6">Sign up to get started</p>
+      <p className="text-sm text-slate-400 mb-4">Sign up to get started</p>
+
+      {isInvited && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-xl mb-6">
+          <TicketCheck className="w-4 h-4 text-emerald-600" />
+          <span className="text-xs text-emerald-700 font-medium">专属邀请权益已应用</span>
+        </div>
+      )}
 
       <button
         onClick={() => signIn(AuthProvider.Google, { callbackUrl: Routes.Home })}
