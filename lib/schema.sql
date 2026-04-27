@@ -64,3 +64,7 @@ ALTER TABLE sites ADD COLUMN IF NOT EXISTS custom_domain TEXT UNIQUE;
 -- v3: Lemon Squeezy billing columns
 ALTER TABLE users ADD COLUMN IF NOT EXISTS ls_customer_id TEXT UNIQUE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS ls_subscription_id TEXT UNIQUE;
+
+-- v4: user role
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'USER'
+  CHECK (role IN ('USER', 'ADMIN', 'SUPER_ADMIN'));
