@@ -2,15 +2,16 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { UserRole } from "@/lib/constants";
 import Link from "next/link";
-import { 
-  Users, 
-  LayoutGrid, 
-  Settings, 
-  BarChart3, 
-  ShieldCheck, 
+import {
+  Users,
+  LayoutGrid,
+  Settings,
+  BarChart3,
+  ShieldCheck,
   LogOut,
   ChevronRight,
-  Globe
+  Globe,
+  FileJson
 } from "lucide-react";
 
 async function AdminSidebar() {
@@ -20,6 +21,7 @@ async function AdminSidebar() {
     { icon: BarChart3, label: "Overview", href: "/admin" },
     { icon: Users, label: "Users", href: "/admin/users" },
     { icon: LayoutGrid, label: "Sites", href: "/admin/sites" },
+    { icon: FileJson, label: "Templates", href: "/admin/templates" },
     { icon: Settings, label: "Platform Settings", href: "/admin/settings" },
   ];
 

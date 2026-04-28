@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { toast } from "sonner";
 import { cn } from "./ui/utils";
-import { PRESET_TEMPLATES } from "../lib/templates";
+import { useTemplates } from "../lib/use-templates";
 import { createSite } from "../lib/site-store";
 import { TemplateId, siteEditorPath } from "../lib/constants";
 
@@ -58,14 +59,19 @@ interface Props {
 
 export default function IndustryOnboardingDialog({ open, onSkip }: Props) {
   const router = useRouter();
+  const { templates } = useTemplates();
   const [loading, setLoading] = useState<string | null>(null);
 
   function handleSelect(industryId: string) {
     if (loading) return;
     const industry = INDUSTRIES.find(i => i.id === industryId)!;
+    const template = templates.find(t => t.id === industry.templateId);
+    if (!template) {
+      toast.error("该行业模板尚未配置，请联系管理员上传");
+      return;
+    }
     setLoading(industryId);
 
-    const template = PRESET_TEMPLATES.find(t => t.id === industry.templateId)!;
     const site = createSite(`我的${industry.label}落地页`, template.id, {
       ...template.data,
       templateId: template.id,

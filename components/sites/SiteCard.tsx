@@ -13,15 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Site } from "../../lib/site-store";
-import { PRESET_TEMPLATES } from "../../lib/templates";
+import { useTemplates } from "../../lib/use-templates";
 import { siteEditorPath } from "../../lib/constants";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("zh-CN", { year: "numeric", month: "short", day: "numeric" });
-}
-
-function getTemplateInfo(templateId: string) {
-  return PRESET_TEMPLATES.find(t => t.id === templateId);
 }
 
 interface Props {
@@ -31,7 +27,8 @@ interface Props {
 
 export function SiteCard({ site, onDelete }: Props) {
   const router = useRouter();
-  const tpl = getTemplateInfo(site.templateId);
+  const { templates } = useTemplates();
+  const tpl = templates.find(t => t.id === site.templateId);
 
   return (
     <Card

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import {
   Dialog,
@@ -12,7 +12,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { cn } from "../ui/utils";
-import { PRESET_TEMPLATES } from "../../lib/templates";
+import { useTemplates } from "../../lib/use-templates";
 import { createSite, isSiteNameUnique } from "../../lib/site-store";
 
 interface Props {
@@ -22,9 +22,16 @@ interface Props {
 }
 
 export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
-  const [selectedId, setSelectedId] = useState<string>(PRESET_TEMPLATES[0].id);
+  const { templates, loading } = useTemplates();
+  const [selectedId, setSelectedId] = useState<string>("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!selectedId && templates.length > 0) {
+      setSelectedId(templates[0].id);
+    }
+  }, [templates, selectedId]);
 
   const handleConfirm = () => {
     const trimmed = name.trim();
@@ -40,7 +47,11 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
       setError("该站点名称已存在，请换一个");
       return;
     }
-    const template = PRESET_TEMPLATES.find(t => t.id === selectedId)!;
+    const template = templates.find(t => t.id === selectedId);
+    if (!template) {
+      setError("请选择一个模板");
+      return;
+    }
     const site = createSite(trimmed, selectedId, {
       ...template.data,
       templateId: selectedId,
@@ -48,7 +59,7 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
     });
     setName("");
     setError("");
-    setSelectedId(PRESET_TEMPLATES[0].id);
+    setSelectedId(templates[0]?.id ?? "");
     onCreated(site.id);
   };
 
@@ -56,7 +67,7 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
     if (!v) {
       setName("");
       setError("");
-      setSelectedId(PRESET_TEMPLATES[0].id);
+      setSelectedId(templates[0]?.id ?? "");
     }
     onOpenChange(v);
   };
@@ -72,8 +83,13 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
           {/* Template Selection */}
           <div>
             <Label className="text-sm mb-3 block">选择模板</Label>
+            {loading ? (
+              <p className="text-xs text-muted-foreground py-4">模板加载中...</p>
+            ) : templates.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-4">暂无可用模板，请联系管理员上传</p>
+            ) : (
             <div className="grid grid-cols-2 gap-3">
-              {PRESET_TEMPLATES.map(tpl => (
+              {templates.map(tpl => (
                 <button
                   key={tpl.id}
                   type="button"
@@ -110,6 +126,7 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
                 </button>
               ))}
             </div>
+            )}
           </div>
 
           {/* Site Name */}
