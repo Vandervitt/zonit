@@ -9,6 +9,7 @@ import {
   getDomainByName,
   insertDomain,
   updateDomain,
+  getEnabledDomainCount,
 } from "@/lib/domains-db";
 import { addDomainToProject } from "@/lib/vercel";
 
@@ -35,9 +36,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: ApiErrors.INVALID_DOMAIN }, { status: 400 });
   }
 
+  // Check plan limits
+  const currentPlan = (session.user.plan ?? "free") as keyof typeof PLANS;
+  const limit = PLANS[currentPlan].domainsLimit;
+  const count = await getEnabledDomainCount(session.user.id);
+
   const existing = await getDomainByName(domain);
   if (existing) {
-    return NextResponse.json({ error: ApiErrors.DOMAIN_TAKEN }, { status: 409 });
+    if (existing.user_id !== session.user.id) {
+      return NextResponse.json({ error: ApiErrors.DOMAIN_TAKEN }, { status: 409 });
+    }
+
+    // If enabling a domain that was disabled, check limit
+    if (!existing.enabled && limit !== Infinity && count >= limit) {
+      return NextResponse.json({ error: ApiErrors.LIMIT_EXCEEDED }, { status: 403 });
+    }
+    
+    // If it belongs to the same user, update the siteId and re-add to Vercel (idempotent)
+    try {
+      await addDomainToProject(domain);
+    } catch (err) {
+      console.error("Vercel API error (ignoring if already exists):", err);
+    }
+
+    const updated = await updateDomain(existing.id, session.user.id, { site_id: siteId, enabled: true });
+    return NextResponse.json(updated, { status: 200 });
+  }
+
+  // New domain, check limit
+  if (limit !== Infinity && count >= limit) {
+    return NextResponse.json({ error: ApiErrors.LIMIT_EXCEEDED }, { status: 403 });
   }
 
   let vercelConfig;
