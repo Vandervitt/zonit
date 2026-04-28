@@ -11,6 +11,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **React Components**: Use PascalCase
 - **Events**: Use camelCase
 - **Naming**: Use clear, descriptive names with consistent casing
+- **Middleware**: The project`s middleware file is **proxy.ts**
 
 ## Styling
 

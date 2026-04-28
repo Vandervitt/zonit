@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { handleTenancy } from "@/lib/proxy/tenant-proxy";
 import { handleAuth } from "@/lib/proxy/auth-proxy";
 
+// export const runtime = "nodejs";
+
 export const proxy = auth(async (req) => {
   // 1. Handle Multi-tenancy (Rewrites)
   const tenancyResponse = await handleTenancy(req);
