@@ -19,9 +19,9 @@ async function getUsers() {
   const result = await pool.query(`
     SELECT id, name, email, plan, role, ls_customer_id, trial_expires_at, invited_at,
     (SELECT COUNT(*) FROM sites WHERE user_id = users.id) as site_count
-    FROM users 
-    ORDER BY created_at DESC
-  `);
+    FROM users
+    ORDER BY invited_at DESC NULLS LAST, email
+`);
   return result.rows;
 }
 
