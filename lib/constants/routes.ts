@@ -11,8 +11,15 @@ export enum Routes {
 export enum ApiRoutes {
   Sites = '/api/sites',
   Domains = '/api/domains',
+  Templates = '/api/templates',
   Register = '/api/register',
+  BillingCheckout = '/api/billing/checkout',
+  BillingPortal = '/api/billing/portal',
+  AdminTemplates = '/api/admin/templates',
+  AdminInvite = '/api/admin/invite',
 }
+
+export const apiAdminTemplatePath = (id: string) => `/api/admin/templates/${id}`;
 
 export const siteEditorPath = (id: string) => `/editor/${id}`;
 export const sitePath = (slug: string) => `/site/${slug}`;
