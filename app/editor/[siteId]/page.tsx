@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
+import useSWR from "swr";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Save, Globe, Check, Loader2, EyeOff, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { BlockEditorPanel } from "@/components/sites/BlockEditorPanel";
 import { PreviewPane } from "@/components/sites/PreviewPane";
 import { PublishDialog } from "@/components/sites/PublishDialog";
-import { getSiteById, updateSite, isSiteNameUnique, dbRowToSite } from "@/lib/site-store";
+import { getSiteById, updateSite, isSiteNameUnique, dbRowToSite, type Site } from "@/lib/site-store";
 import type { LandingPageTemplate } from "@/types/schema";
 import { Routes, apiSitePath, sitePath } from "@/lib/constants";
 
@@ -27,31 +28,31 @@ export default function SiteEditorPage() {
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [nameError, setNameError] = useState("");
   const [expandedKey, setExpandedKey] = useState("hero");
+  const [hydratedSiteId, setHydratedSiteId] = useState<string | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch(apiSitePath(siteId));
-        if (res.ok) {
-          const site = dbRowToSite(await res.json());
-          setName(site.name);
-          setData(site.data);
-          setPublished(site.published);
-          setSlug(site.slug);
-          return;
-        }
-      } catch { /* fall through to localStorage */ }
+  const siteQuery = useSWR<Site>(
+    siteId ? apiSitePath(siteId) : null,
+    async (url: string) => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return dbRowToSite(await res.json());
+    },
+  );
 
-      const site = getSiteById(siteId!);
-      if (!site) { router.push(Routes.Sites); return; }
+  // 一次性把远端/本地兜底数据灌入可编辑的本地 state（render-phase setState 模式）
+  if (siteId && hydratedSiteId !== siteId) {
+    const site = siteQuery.data ?? (siteQuery.error ? getSiteById(siteId) : undefined);
+    if (site) {
       setName(site.name);
       setData(site.data);
       setPublished(site.published);
       setSlug(site.slug);
+      setHydratedSiteId(siteId);
+    } else if (siteQuery.error) {
+      router.push(Routes.Sites);
     }
-    void load();
-  }, [siteId, router]);
+  }
 
   const autoSave = useCallback(
     (newData: LandingPageTemplate, newName: string) => {

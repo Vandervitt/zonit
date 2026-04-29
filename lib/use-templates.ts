@@ -1,49 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR, { mutate } from "swr";
 import type { PresetTemplate } from "@/lib/templates";
+import { ApiRoutes } from "@/lib/constants";
 
-let cache: PresetTemplate[] | null = null;
-let pending: Promise<PresetTemplate[]> | null = null;
-
-function fetchTemplates(): Promise<PresetTemplate[]> {
-  if (cache) return Promise.resolve(cache);
-  if (!pending) {
-    pending = fetch("/api/templates")
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((d: { templates: PresetTemplate[] }) => {
-        cache = d.templates;
-        return cache;
-      })
-      .catch(e => {
-        console.error("Failed to load templates", e);
-        return [] as PresetTemplate[];
-      })
-      .finally(() => { pending = null; });
-  }
-  return pending;
+interface TemplatesResponse {
+  templates: PresetTemplate[];
 }
 
+/** 失效模板缓存（如管理后台新增/删除模板后调用） */
 export function invalidateTemplatesCache() {
-  cache = null;
+  void mutate(ApiRoutes.Templates);
 }
 
 export function useTemplates() {
-  const [templates, setTemplates] = useState<PresetTemplate[]>(cache ?? []);
-  const [loading, setLoading] = useState(!cache);
+  const { data, error, isLoading, mutate: revalidate } = useSWR<TemplatesResponse>(
+    ApiRoutes.Templates,
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchTemplates().then(t => {
-      if (cancelled) return;
-      setTemplates(t);
-      setLoading(false);
-    });
-    return () => { cancelled = true; };
-  }, []);
-
-  return { templates, loading };
+  return {
+    templates: data?.templates ?? [],
+    isLoading,
+    error,
+    mutate: revalidate,
+  };
 }
