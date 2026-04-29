@@ -8,6 +8,8 @@ import { Grid2x2, TicketCheck } from "lucide-react";
 import IndustryOnboardingDialog from "@/components/IndustryOnboardingDialog";
 import { Routes, ApiRoutes, AuthProvider } from "@/lib/constants";
 import { withLogger } from "@/lib/logger";
+import { jsonRequest } from "@/lib/api/fetcher";
+import { useMutation } from "@/lib/api/use-mutation";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -17,71 +19,43 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isInvited, setIsInvited] = useState(false);
 
-  // 如果有 token，可以尝试在挂载时进行一些视觉反馈或预校验（可选）
   useEffect(() => {
-    if (token) {
-      setIsInvited(true);
-      // 注意：这里可以增加一个 API 来通过 token 预取用户邮箱，提高体验
-    }
+    if (token) setIsInvited(true);
   }, [token]);
 
-  async function handleGoogleSignIn() {
-    setGoogleLoading(true);
-    try {
-      await withLogger("GOOGLE_SIGN_IN", "auth/google", "POST", {}, () => 
-        signIn(AuthProvider.Google, { callbackUrl: Routes.Home })
-      );
-    } catch (err) {
-      console.error(err);
-      setGoogleLoading(false);
-    }
-  }
+  const googleSignIn = useMutation(
+    () => withLogger("GOOGLE_SIGN_IN", "auth/google", "POST", {}, () =>
+      signIn(AuthProvider.Google, { callbackUrl: Routes.Home }),
+    ),
+  );
 
-  async function handleSubmit(e: React.FormEvent) {
+  // 行内显示错误（不弹 toast）：从 ApiError.message 拿后端 error 字段
+  const register = useMutation(
+    async (payload: { name: string; email: string; password: string; token: string | null }) => {
+      await withLogger("USER_REGISTRATION", ApiRoutes.Register, "POST", payload, () =>
+        jsonRequest(ApiRoutes.Register, "POST", payload),
+      );
+      await withLogger("CREDENTIALS_SIGN_IN", "auth/credentials", "POST", { email: payload.email }, () =>
+        signIn(AuthProvider.Credentials, { email: payload.email, password: payload.password, redirect: false }),
+      );
+    },
+    {
+      errorToast: false,
+      onSuccess: () => setShowOnboarding(true),
+    },
+  );
+
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    const payload = { 
-      name, 
-      email, 
-      password,
-      token // 将邀请 token 传给后端
-    };
-
-    try {
-      const res = await withLogger("USER_REGISTRATION", ApiRoutes.Register, "POST", payload, () => 
-        fetch(ApiRoutes.Register, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        })
-      );
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error ?? "Registration failed.");
-        setLoading(false);
-        return;
-      }
-
-      await withLogger("CREDENTIALS_SIGN_IN", "auth/credentials", "POST", { email }, () => 
-        signIn(AuthProvider.Credentials, { email, password, redirect: false })
-      );
-
-      setLoading(false);
-      setShowOnboarding(true);
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
-      setLoading(false);
-    }
+    void register.trigger({ name, email, password, token });
   }
+
+  const error = register.error?.message;
+  const loading = register.isMutating;
+  const googleLoading = googleSignIn.isMutating;
 
   return (
     <div className="w-full max-w-sm bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-8">
@@ -103,7 +77,7 @@ export default function RegisterPage() {
       )}
 
       <button
-        onClick={handleGoogleSignIn}
+        onClick={() => void googleSignIn.trigger()}
         disabled={googleLoading || loading}
         className="w-full flex items-center justify-center gap-3 border border-slate-200 rounded-xl py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
       >

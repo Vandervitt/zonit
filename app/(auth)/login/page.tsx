@@ -6,42 +6,45 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Grid2x2 } from "lucide-react";
 import { Routes, AuthProvider } from "@/lib/constants";
+import { useMutation } from "@/lib/api/use-mutation";
+import { ApiError } from "@/lib/api/fetcher";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+  const [oauthProvider, setOauthProvider] = useState<AuthProvider | null>(null);
+
+  const oauthSignIn = useMutation(
+    (provider: AuthProvider) => signIn(provider, { callbackUrl: Routes.Home }),
+  );
+
+  const credentialsSignIn = useMutation(
+    async (args: { email: string; password: string }) => {
+      const res = await signIn(AuthProvider.Credentials, { ...args, redirect: false });
+      if (res?.error) throw new ApiError(401, "Invalid email or password.");
+      return res;
+    },
+    {
+      errorToast: false,
+      onSuccess: () => { router.push(Routes.Home); router.refresh(); },
+    },
+  );
 
   async function handleOAuthSignIn(provider: AuthProvider) {
-    setOauthLoading(provider);
-    try {
-      await signIn(provider, { callbackUrl: Routes.Home });
-    } catch (err) {
-      console.error(err);
-      setOauthLoading(null);
-    }
+    setOauthProvider(provider);
+    await oauthSignIn.trigger(provider);
+    setOauthProvider(null);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-    const res = await signIn(AuthProvider.Credentials, {
-      email,
-      password,
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.error) {
-      setError("Invalid email or password.");
-    } else {
-      router.push(Routes.Home);
-      router.refresh();
-    }
+    void credentialsSignIn.trigger({ email, password });
   }
+
+  const error = credentialsSignIn.error?.message;
+  const loading = credentialsSignIn.isMutating;
+  const oauthLoading = oauthProvider;
 
   return (
     <div className="w-full max-w-sm bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-8">
