@@ -20,6 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ApiRoutes } from "@/lib/constants";
+import { jsonRequest, ApiError } from "@/lib/api/fetcher";
+import { useMutation } from "@/lib/api/use-mutation";
 
 interface Site {
   id: string;
@@ -33,47 +35,48 @@ interface Props {
   onAdded: () => void;
 }
 
+const DOMAIN_ERROR_MAP: Record<string, string> = {
+  invalid_domain: "域名格式不正确",
+  domain_taken: "该域名已被其他账号绑定",
+  vercel_api_error: "Vercel API 调用失败，请稍后重试",
+};
+
+function mapDomainError(err: ApiError): string {
+  return (err.code && DOMAIN_ERROR_MAP[err.code]) || "添加失败，请重试";
+}
+
 export function AddDomainDialog({ open, onOpenChange, sites, onAdded }: Props) {
   const [domain, setDomain] = useState("");
   const [siteId, setSiteId] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [cname, setCname] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const addMutation = useMutation(
+    (payload: { domain: string; siteId: string }) =>
+      jsonRequest<{ cname: string }>(ApiRoutes.Domains, "POST", payload),
+    {
+      errorToast: false,
+      onSuccess: ({ cname: newCname }) => {
+        setCname(newCname);
+        onAdded();
+      },
+    },
+  );
 
   function reset() {
     setDomain("");
     setSiteId("");
-    setError("");
     setCname(null);
     setCopied(false);
+    addMutation.reset();
   }
 
-  async function handleSubmit() {
-    setError("");
-    setLoading(true);
-    try {
-      const res = await fetch(ApiRoutes.Domains, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain, siteId }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        setError(
-          json.error === "invalid_domain" ? "域名格式不正确" :
-          json.error === "domain_taken" ? "该域名已被其他账号绑定" :
-          json.error === "vercel_api_error" ? "Vercel API 调用失败，请稍后重试" :
-          "添加失败，请重试"
-        );
-        return;
-      }
-      setCname(json.cname);
-      onAdded();
-    } finally {
-      setLoading(false);
-    }
+  function handleSubmit() {
+    void addMutation.trigger({ domain, siteId });
   }
+
+  const error = addMutation.error ? mapDomainError(addMutation.error) : "";
+  const loading = addMutation.isMutating;
 
   function handleCopy() {
     if (!cname) return;
