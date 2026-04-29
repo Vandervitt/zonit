@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PLANS, PLAN_ORDER } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
-import { Routes } from "@/lib/constants";
+import { Routes, ApiRoutes } from "@/lib/constants";
+import { fetcher, jsonRequest } from "@/lib/api/fetcher";
+import { useMutation } from "@/lib/api/use-mutation";
 
 const UPGRADE_HIGHLIGHTS: Partial<Record<PlanId, string[]>> = {
   starter: ["3 个站点 + 1 个自定义域名", "5 款王牌爆款模板", "1× Meta Pixel 追踪"],
@@ -33,49 +35,40 @@ function SuccessToast() {
 export default function BillingPage() {
   const { data: session } = useSession();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [portalLoading, setPortalLoading] = useState(false);
 
   const currentPlanId = (session?.user?.plan ?? "free") as PlanId;
   const currentPlan = PLANS[currentPlanId];
   const currentIdx = PLAN_ORDER.indexOf(currentPlanId);
 
+  const checkout = useMutation(
+    (planId: string) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCheckout, "POST", { planId }),
+    {
+      errorToast: () => "无法创建结账链接，请稍后重试",
+      onSuccess: (res) => {
+        if (res.checkoutUrl) window.location.href = res.checkoutUrl;
+        else toast.error("无法创建结账链接，请稍后重试");
+      },
+    },
+  );
+
+  const portal = useMutation(
+    () => fetcher<{ portalUrl?: string }>(ApiRoutes.BillingPortal),
+    {
+      errorToast: () => "无法获取管理链接，请稍后重试",
+      onSuccess: (res) => {
+        if (res.portalUrl) window.location.href = res.portalUrl;
+        else toast.error("无法获取管理链接，请稍后重试");
+      },
+    },
+  );
+
   async function handleUpgrade(planId: string) {
     setLoadingPlan(planId);
-    try {
-      const res = await fetch("/api/billing/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
-      });
-      const { checkoutUrl, error } = await res.json() as { checkoutUrl?: string; error?: string };
-      if (error || !checkoutUrl) {
-        toast.error("无法创建结账链接，请稍后重试");
-        return;
-      }
-      window.location.href = checkoutUrl;
-    } catch {
-      toast.error("网络错误，请稍后重试");
-    } finally {
-      setLoadingPlan(null);
-    }
+    await checkout.trigger(planId);
+    setLoadingPlan(null);
   }
 
-  async function handlePortal() {
-    setPortalLoading(true);
-    try {
-      const res = await fetch("/api/billing/portal");
-      const { portalUrl, error } = await res.json() as { portalUrl?: string; error?: string };
-      if (error || !portalUrl) {
-        toast.error("无法获取管理链接，请稍后重试");
-        return;
-      }
-      window.location.href = portalUrl;
-    } catch {
-      toast.error("网络错误，请稍后重试");
-    } finally {
-      setPortalLoading(false);
-    }
-  }
+  const portalLoading = portal.isMutating;
 
   return (
     <main className="flex flex-col w-full px-6 py-6 max-w-3xl">
@@ -98,7 +91,7 @@ export default function BillingPage() {
                 variant="outline"
                 size="sm"
                 className="gap-1.5"
-                onClick={handlePortal}
+                onClick={() => void portal.trigger()}
                 disabled={portalLoading}
               >
                 <Settings className="w-3.5 h-3.5" />
