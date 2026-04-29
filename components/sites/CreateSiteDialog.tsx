@@ -22,7 +22,7 @@ interface Props {
 }
 
 export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
-  const { templates, loading } = useTemplates();
+  const { templates, isLoading } = useTemplates();
   const [selectedId, setSelectedId] = useState<string>("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
@@ -83,7 +83,7 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
           {/* Template Selection */}
           <div>
             <Label className="text-sm mb-3 block">选择模板</Label>
-            {loading ? (
+            {isLoading ? (
               <p className="text-xs text-muted-foreground py-4">模板加载中...</p>
             ) : templates.length === 0 ? (
               <p className="text-xs text-muted-foreground py-4">暂无可用模板，请联系管理员上传</p>

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { Globe, Loader2, ExternalLink, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { LandingPageTemplate } from "@/types/schema";
 import { apiSitePath, ApiRoutes } from "@/lib/constants";
+import { jsonRequest, ApiError } from "@/lib/api/fetcher";
+import { useMutation } from "@/lib/api/use-mutation";
 
 interface Domain {
   id: string;
@@ -69,34 +72,28 @@ export function PublishDialog({
 }: PublishDialogProps) {
   const [publishType, setPublishType] = useState<"default" | "custom">("default");
   const [slug, setSlug] = useState(initialSlug ?? "");
-  const [domains, setDomains] = useState<Domain[]>([]);
   const [selectedDomainId, setSelectedDomainId] = useState<string>("");
   const [prefix, setPrefix] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [openSession, setOpenSession] = useState(0);
 
-  useEffect(() => {
-    if (open) {
-      setSlug(initialSlug ?? "");
-      setError("");
-      fetchDomains();
-    }
-  }, [open, initialSlug]);
+  // 仅在 dialog 打开时拉取 domains
+  const domainsQuery = useSWR<Domain[]>(open ? ApiRoutes.Domains : null);
+  const domains = domainsQuery.data ?? [];
 
-  const fetchDomains = async () => {
-    try {
-      const res = await fetch(ApiRoutes.Domains);
-      if (res.ok) {
-        const data = await res.json();
-        setDomains(data);
-        if (data.length > 0) {
-          setSelectedDomainId(data[0].id);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch domains", err);
-    }
-  };
+  // 每次 open 切到 true 重置表单状态（render-phase setState 模式）
+  if (open && openSession === 0) {
+    setOpenSession(1);
+    setSlug(initialSlug ?? "");
+    setError("");
+  } else if (!open && openSession === 1) {
+    setOpenSession(0);
+  }
+
+  // 域名加载完成后默认选中第一个
+  if (domains.length > 0 && !selectedDomainId) {
+    setSelectedDomainId(domains[0].id);
+  }
 
   const selectedDomain = domains.find(d => d.id === selectedDomainId);
   const customDomain = selectedDomain 
@@ -107,76 +104,59 @@ export function PublishDialog({
     ? (slug ? `${window.location.origin}/site/${slug}` : "")
     : (customDomain ? `https://${customDomain}` : "");
 
-  const handleSubmit = async () => {
-    const trimmedSlug = slug.trim();
-    const slugError = validateSlug(trimmedSlug);
-    if (slugError) {
-      setError(slugError);
-      return;
-    }
-
-    if (publishType === "custom") {
-      if (!selectedDomainId) {
-        setError("请选择一个域名");
-        return;
-      }
-      const prefixError = validatePrefix(prefix);
-      if (prefixError) {
-        setError(prefixError);
-        return;
-      }
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
+  const publishMutation = useMutation(
+    async (args: { trimmedSlug: string }) => {
+      const { trimmedSlug } = args;
       // 1. Update site status and slug
-      const siteRes = await fetch(apiSitePath(siteId), {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ published: true, slug: trimmedSlug, name: siteName, data: siteData }),
-      });
-
-      if (siteRes.status === 409) {
-        setError("该访问地址已被占用，请换一个试试");
-        setLoading(false);
-        return;
+      try {
+        await jsonRequest(apiSitePath(siteId), "PUT", {
+          published: true, slug: trimmedSlug, name: siteName, data: siteData,
+        });
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 409) {
+          throw new ApiError(409, "该访问地址已被占用，请换一个试试");
+        }
+        throw new ApiError(0, "发布失败，请稍后重试");
       }
-      if (!siteRes.ok) {
-        setError("发布失败，请稍后重试");
-        setLoading(false);
-        return;
-      }
-
       // 2. If custom domain selected, register it
       if (publishType === "custom" && customDomain) {
-        const domainRes = await fetch(ApiRoutes.Domains, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ domain: customDomain, siteId }),
-        });
-        
-        if (!domainRes.ok) {
-          const domainJson = await domainRes.json();
-          if (domainJson.error === "domain_taken") {
-            setError("该域名已被其他站点绑定");
-          } else {
-            setError("绑定自定义域名失败，但站点已发布到默认地址");
+        try {
+          await jsonRequest(ApiRoutes.Domains, "POST", { domain: customDomain, siteId });
+        } catch (err) {
+          if (err instanceof ApiError && err.code === "domain_taken") {
+            throw new ApiError(err.status, "该域名已被其他站点绑定");
           }
-          setLoading(false);
-          return;
+          throw new ApiError(0, "绑定自定义域名失败，但站点已发布到默认地址");
         }
       }
+      return trimmedSlug;
+    },
+    {
+      errorToast: false,
+      onError: (err) => { setError(err.message); return false; },
+      onSuccess: (trimmedSlug) => {
+        onSuccess(trimmedSlug);
+        onOpenChange(false);
+      },
+    },
+  );
 
-      onSuccess(trimmedSlug);
-      onOpenChange(false);
-    } catch {
-      setError("网络异常，请检查连接后重试");
-    } finally {
-      setLoading(false);
+  const handleSubmit = () => {
+    const trimmedSlug = slug.trim();
+    const slugError = validateSlug(trimmedSlug);
+    if (slugError) { setError(slugError); return; }
+
+    if (publishType === "custom") {
+      if (!selectedDomainId) { setError("请选择一个域名"); return; }
+      const prefixError = validatePrefix(prefix);
+      if (prefixError) { setError(prefixError); return; }
     }
+
+    setError("");
+    void publishMutation.trigger({ trimmedSlug });
   };
+
+  const loading = publishMutation.isMutating;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

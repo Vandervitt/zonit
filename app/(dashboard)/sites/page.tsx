@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useMemo } from "react";
+import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
+import { QueryState } from "../../../components/ui/QueryState";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,13 +30,29 @@ import type { PlanId } from "../../../lib/plans";
 export default function SitesPage() {
   const router = useRouter();
   const { data: session } = useSession();
-  const [sites, setSites] = useState<Site[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
   const currentPlan = (session?.user?.plan ?? "free") as PlanId;
+
+  const sitesQuery = useSWR<Site[]>(
+    ApiRoutes.Sites,
+    async (url: string) => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const rows = await res.json();
+      return rows.map(dbRowToSite);
+    },
+  );
+
+  // 网络失败兜底：使用 localStorage 数据
+  const sites = useMemo<Site[]>(() => {
+    if (sitesQuery.data) return sitesQuery.data;
+    if (sitesQuery.error) return getSites();
+    return [];
+  }, [sitesQuery.data, sitesQuery.error]);
 
   function handleNewSite() {
     const limit = PLANS[currentPlan].sitesLimit;
@@ -45,31 +63,15 @@ export default function SitesPage() {
     }
   }
 
-  const loadSites = useCallback(async () => {
-    try {
-      const res = await fetch(ApiRoutes.Sites);
-      if (res.ok) {
-        const rows = await res.json();
-        setSites(rows.map(dbRowToSite));
-        return;
-      }
-    } catch { /* fall through */ }
-    setSites(getSites());
-  }, []);
-
-  useEffect(() => {
-    void loadSites();
-  }, [loadSites]);
-
-  const handleCreated = useCallback((siteId: string) => {
-    void loadSites();
+  const handleCreated = (siteId: string) => {
+    void sitesQuery.mutate();
     router.push(siteEditorPath(siteId));
-  }, [router, loadSites]);
+  };
 
   const handleDelete = () => {
     if (!deleteId) return;
     deleteSite(deleteId);
-    setSites(prev => prev.filter(s => s.id !== deleteId));
+    void sitesQuery.mutate();
     setDeleteId(null);
   };
 
@@ -104,15 +106,17 @@ export default function SitesPage() {
 
       {/* Content */}
       <div className="flex-1 px-6 pb-6 overflow-auto">
-        {filtered.length === 0 ? (
-          <EmptyState onNew={handleNewSite} hasSearch={!!search} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(site => (
-              <SiteCard key={site.id} site={site} onDelete={setDeleteId} />
-            ))}
-          </div>
-        )}
+        <QueryState query={{ ...sitesQuery, data: sites }}>
+          {() => filtered.length === 0 ? (
+            <EmptyState onNew={handleNewSite} hasSearch={!!search} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filtered.map(site => (
+                <SiteCard key={site.id} site={site} onDelete={setDeleteId} />
+              ))}
+            </div>
+          )}
+        </QueryState>
       </div>
 
       {/* Create Dialog */}
