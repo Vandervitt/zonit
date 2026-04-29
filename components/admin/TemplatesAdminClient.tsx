@@ -16,6 +16,9 @@ import {
 import { PreviewRenderer } from "@/components/sites/PreviewRenderer";
 import { PresetTemplateSchema } from "@/lib/schema.zod";
 import { invalidateTemplatesCache } from "@/lib/use-templates";
+import { jsonRequest } from "@/lib/api/fetcher";
+import { useMutation } from "@/lib/api/use-mutation";
+import { ApiRoutes, apiAdminTemplatePath } from "@/lib/constants";
 import type { PresetTemplate } from "@/lib/templates";
 import type { ZodIssue } from "zod";
 
@@ -34,8 +37,35 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
   const [parsed, setParsed] = useState<PresetTemplate | null>(null);
   const [parseError, setParseError] = useState<ParseError | null>(null);
   const [fileName, setFileName] = useState<string>("");
-  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const saveMutation = useMutation(
+    (payload: PresetTemplate) =>
+      jsonRequest<{ template: PresetTemplate }>(ApiRoutes.AdminTemplates, "POST", payload),
+    {
+      onSuccess: ({ template: saved }) => {
+        setTemplates(prev => {
+          const exists = prev.some(t => t.id === saved.id);
+          return exists ? prev.map(t => (t.id === saved.id ? saved : t)) : [...prev, saved];
+        });
+        invalidateTemplatesCache();
+        toast.success(`模板 "${saved.name}" 已保存`);
+        clearSelection();
+      },
+    },
+  );
+
+  const deleteMutation = useMutation(
+    (args: { id: string; name: string }) =>
+      jsonRequest(apiAdminTemplatePath(args.id), "DELETE").then(() => args),
+    {
+      onSuccess: ({ id, name }) => {
+        setTemplates(prev => prev.filter(t => t.id !== id));
+        invalidateTemplatesCache();
+        toast.success(`模板 "${name}" 已删除`);
+      },
+    },
+  );
 
   function handleFile(file: File) {
     setFileName(file.name);
@@ -84,49 +114,17 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
     setFileName("");
   }
 
-  async function handleSave() {
+  function handleSave() {
     if (!parsed) return;
-    setSaving(true);
-    try {
-      const res = await fetch("/api/admin/templates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "保存失败");
-      }
-      const saved: PresetTemplate = data.template;
-      setTemplates(prev => {
-        const exists = prev.some(t => t.id === saved.id);
-        return exists ? prev.map(t => (t.id === saved.id ? saved : t)) : [...prev, saved];
-      });
-      invalidateTemplatesCache();
-      toast.success(`模板 "${saved.name}" 已保存`);
-      clearSelection();
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setSaving(false);
-    }
+    void saveMutation.trigger(parsed);
   }
 
-  async function handleDelete(id: string, name: string) {
+  function handleDelete(id: string, name: string) {
     if (!confirm(`确认删除模板 "${name}"？此操作不可撤销。`)) return;
-    try {
-      const res = await fetch(`/api/admin/templates/${id}`, { method: "DELETE" });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "删除失败");
-      }
-      setTemplates(prev => prev.filter(t => t.id !== id));
-      invalidateTemplatesCache();
-      toast.success(`模板 "${name}" 已删除`);
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
+    void deleteMutation.trigger({ id, name });
   }
+
+  const saving = saveMutation.isMutating;
 
   function handleReupload(t: PresetTemplate) {
     setParsed(t);

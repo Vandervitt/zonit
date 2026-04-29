@@ -23,44 +23,34 @@ import {
 import { UserPlus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PLANS, PlanId } from "@/lib/plans";
+import { ApiRoutes } from "@/lib/constants";
+import { jsonRequest } from "@/lib/api/fetcher";
+import { useMutation } from "@/lib/api/use-mutation";
 
 export function InviteUserDialog() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [plan, setPlan] = useState<PlanId>("pro");
   const [duration, setDuration] = useState("15");
 
-  const handleInvite = async (e: React.FormEvent) => {
+  const inviteMutation = useMutation(
+    (payload: { email: string; plan: PlanId; duration_days: number }) =>
+      jsonRequest(ApiRoutes.AdminInvite, "POST", payload),
+    {
+      onSuccess: () => {
+        toast.success("邀请已发送！邮件正在派送中。");
+        setIsOpen(false);
+        setEmail("");
+      },
+    },
+  );
+
+  const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const res = await fetch("/api/admin/invite", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          plan,
-          duration_days: parseInt(duration),
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to send invitation");
-      }
-
-      toast.success("邀请已发送！邮件正在派送中。");
-      setIsOpen(false);
-      setEmail("");
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsLoading(false);
-    }
+    void inviteMutation.trigger({ email, plan, duration_days: parseInt(duration) });
   };
+
+  const isLoading = inviteMutation.isMutating;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
