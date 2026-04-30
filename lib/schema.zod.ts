@@ -44,6 +44,18 @@ const HeroMediaSchema = z.object({
   playsInline: z.boolean().optional(),
 });
 
+const CountdownSchemaZ = z.object({
+  title: z.string().optional(),
+  subtitle: z.string().optional(),
+  endsAt: NonEmpty,
+  expiredFallback: z.object({
+    title: z.string().optional(),
+    subtitle: z.string().optional(),
+  }).optional(),
+  cta: CallToActionSchema.optional(),
+  variant: z.enum(['banner', 'section']).optional(),
+});
+
 const HeroSchemaZ = z.object({
   badge: z.string().optional(),
   title: NonEmpty,
@@ -59,6 +71,7 @@ const HeroSchemaZ = z.object({
   highlights: z.array(HeroHighlightSchema).optional(),
   proofPoints: z.array(HeroProofPointSchema).optional(),
   media: HeroMediaSchema.optional(),
+  countdown: CountdownSchemaZ.optional(),
   variant: z.enum(['overlay', 'split-left', 'split-right']).optional(),
 });
 
@@ -135,6 +148,7 @@ const ReviewItemSchema = z.object({
   rating: z.number().min(1).max(5),
   content: NonEmpty,
   proofImage: z.string().optional(),
+  videoUrl: z.string().optional(),
   sourcePlatform: z.string().optional(),
   verified: z.boolean().optional(),
   reviewDate: z.string().optional(),
@@ -197,6 +211,89 @@ const FAQSchemaZ = z.object({
   contactCta: CallToActionSchema.optional(),
 });
 
+const BeforeAfterPairSchema = z.object({
+  id: NonEmpty,
+  before: ImageMetaSchema,
+  after: ImageMetaSchema,
+  caption: z.string().optional(),
+});
+
+const BeforeAfterSchemaZ = z.object({
+  title: NonEmpty,
+  subtitle: z.string().optional(),
+  pairs: z.array(BeforeAfterPairSchema).min(1),
+  variant: z.enum(['side-by-side', 'slider']).optional(),
+  disclaimer: z.string().optional(),
+});
+
+const LeadFormFieldSchema = z.object({
+  id: NonEmpty,
+  name: NonEmpty,
+  label: NonEmpty,
+  type: z.enum(['text', 'email', 'phone', 'select', 'textarea', 'checkbox']),
+  required: z.boolean().optional(),
+  placeholder: z.string().optional(),
+  options: z.array(z.object({ label: NonEmpty, value: NonEmpty })).optional(),
+});
+
+const LeadFormSchemaZ = z.object({
+  title: NonEmpty,
+  subtitle: z.string().optional(),
+  fields: z.array(LeadFormFieldSchema).min(1),
+  submitText: NonEmpty,
+  successMessage: z.string().optional(),
+  webhookUrl: z.string().optional(),
+  consentText: z.string().optional(),
+  eventName: z.string().optional(),
+});
+
+const MediaLogoSchema = z.object({
+  id: NonEmpty,
+  name: NonEmpty,
+  image: NonEmpty,
+  url: z.string().optional(),
+});
+
+const MediaLogosSchemaZ = z.object({
+  title: z.string().optional(),
+  logos: z.array(MediaLogoSchema).min(1),
+  variant: z.enum(['mono', 'color']).optional(),
+});
+
+const VideoTestimonialItemSchema = z.object({
+  id: NonEmpty,
+  authorName: NonEmpty,
+  authorRole: z.string().optional(),
+  videoUrl: NonEmpty,
+  poster: z.string().optional(),
+  duration: z.string().optional(),
+  quote: z.string().optional(),
+  country: z.string().optional(),
+});
+
+const VideoTestimonialsSchemaZ = z.object({
+  title: NonEmpty,
+  subtitle: z.string().optional(),
+  items: z.array(VideoTestimonialItemSchema).min(1),
+  variant: z.enum(['carousel', 'grid']).optional(),
+});
+
+const GuaranteeBadgeSchema = z.object({
+  id: NonEmpty,
+  icon: NonEmpty,
+  text: NonEmpty,
+  subtext: z.string().optional(),
+});
+
+const GuaranteeSchemaZ = z.object({
+  title: NonEmpty,
+  subtitle: z.string().optional(),
+  description: z.string().optional(),
+  badges: z.array(GuaranteeBadgeSchema).optional(),
+  image: z.string().optional(),
+  cta: CallToActionSchema.optional(),
+});
+
 const SeoMetaSchema = z.object({
   title: NonEmpty,
   description: NonEmpty,
@@ -236,6 +333,12 @@ const PageBlockSchema = z.discriminatedUnion('type', [
   block('TrustBanner', TrustBannerSchemaZ),
   block('AuthorityStory', AuthoritySchemaZ),
   block('FAQ', FAQSchemaZ),
+  block('Countdown', CountdownSchemaZ),
+  block('BeforeAfter', BeforeAfterSchemaZ),
+  block('LeadForm', LeadFormSchemaZ),
+  block('MediaLogos', MediaLogosSchemaZ),
+  block('VideoTestimonials', VideoTestimonialsSchemaZ),
+  block('Guarantee', GuaranteeSchemaZ),
 ]);
 
 const OptionalBlockSchema = z.discriminatedUnion('type', [
@@ -244,6 +347,12 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('TrustBanner', TrustBannerSchemaZ),
   block('AuthorityStory', AuthoritySchemaZ),
   block('FAQ', FAQSchemaZ),
+  block('Countdown', CountdownSchemaZ),
+  block('BeforeAfter', BeforeAfterSchemaZ),
+  block('LeadForm', LeadFormSchemaZ),
+  block('MediaLogos', MediaLogosSchemaZ),
+  block('VideoTestimonials', VideoTestimonialsSchemaZ),
+  block('Guarantee', GuaranteeSchemaZ),
 ]);
 
 export const LandingPageTemplateSchema = z.object({
@@ -259,7 +368,9 @@ export const LandingPageTemplateSchema = z.object({
   howItWorks: HowItWorksSchemaZ,
   footer: MicroFooterSchemaZ,
   upperBlocks: z.array(OptionalBlockSchema),
+  afterBundles: z.array(OptionalBlockSchema).optional(),
   lowerBlocks: z.array(OptionalBlockSchema),
+  stickyCta: CallToActionSchema.optional(),
 });
 
 export const PresetTemplateSchema = z.object({

@@ -83,6 +83,43 @@ const TYPE_LABEL: Record<string, string> = {
   FAQ: "常见问题",
 };
 
+function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
+  const id = crypto.randomUUID();
+
+  switch (type) {
+    case "Features":
+      return { id, type, data: getDefaultBlockData(type) as FeaturesSchema };
+    case "Reviews":
+      return { id, type, data: getDefaultBlockData(type) as ReviewsSchema };
+    case "TrustBanner":
+      return { id, type, data: getDefaultBlockData(type) as TrustBannerSchema };
+    case "AuthorityStory":
+      return { id, type, data: getDefaultBlockData(type) as AuthoritySchema };
+    case "FAQ":
+      return { id, type, data: getDefaultBlockData(type) as FAQSchema };
+    default:
+      // Countdown/BeforeAfter/LeadForm/MediaLogos/VideoTestimonials/Guarantee 在 Phase 2b 接入编辑器
+      throw new Error(`Block type "${type}" is in schema but not yet wired in editor`);
+  }
+}
+
+function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["data"]): OptionalBlock {
+  switch (block.type) {
+    case "Features":
+      return { ...block, data: newData as FeaturesSchema };
+    case "Reviews":
+      return { ...block, data: newData as ReviewsSchema };
+    case "TrustBanner":
+      return { ...block, data: newData as TrustBannerSchema };
+    case "AuthorityStory":
+      return { ...block, data: newData as AuthoritySchema };
+    case "FAQ":
+      return { ...block, data: newData as FAQSchema };
+    default:
+      throw new Error(`Block type "${block.type}" is in schema but not yet wired in editor`);
+  }
+}
+
 export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyChange }: Props) {
   const [addOpen, setAddOpen] = useState(false);
   const setExpandedKey = onExpandedKeyChange;
@@ -106,11 +143,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
   ] as OptionalBlockType[];
 
   const handleAddBlock = (type: OptionalBlockType, zone: BlockZone.Upper | BlockZone.Lower) => {
-    const newBlock: OptionalBlock = {
-      id: crypto.randomUUID(),
-      type,
-      data: getDefaultBlockData(type) as OptionalBlock["data"],
-    };
+    const newBlock = createOptionalBlock(type);
     if (zone === BlockZone.Upper) {
       onChange({ ...data, upperBlocks: [...data.upperBlocks, newBlock] });
     } else {
@@ -180,8 +213,8 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     const updateOptional = (blockId: string, newData: OptionalBlock["data"]) => {
       onChange({
         ...data,
-        upperBlocks: data.upperBlocks.map(b => b.id === blockId ? { ...b, data: newData } : b),
-        lowerBlocks: data.lowerBlocks.map(b => b.id === blockId ? { ...b, data: newData } : b),
+        upperBlocks: data.upperBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
+        lowerBlocks: data.lowerBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
       });
     };
     const block = [...data.upperBlocks, ...data.lowerBlocks].find(b => b.id === meta.key);

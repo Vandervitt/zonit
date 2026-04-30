@@ -54,6 +54,19 @@ export interface HeroMedia {
   playsInline?: boolean;  // iOS 不写会强制全屏播放
 }
 
+// 倒计时（限时优惠真正起作用的形式）—— 既可独立成 Block，也可内嵌在 Hero
+export interface CountdownSchema {
+  title?: string;
+  subtitle?: string;
+  endsAt: string;               // ISO 日期字符串
+  expiredFallback?: {           // 过期后的兜底文案，避免显示负数
+    title?: string;
+    subtitle?: string;
+  };
+  cta?: CallToAction;
+  variant?: 'banner' | 'section';
+}
+
 // HeroSection (首屏主视觉)
 export interface HeroSchema {
   badge?: string;               // 顶部小标签，如 "🔥 Limited Time Offer"
@@ -70,6 +83,7 @@ export interface HeroSchema {
   highlights?: HeroHighlight[]; // 首屏利益点，快速降低跳出
   proofPoints?: HeroProofPoint[]; // 首屏证明信息，建立初始信任
   media?: HeroMedia;            // 首屏辅助视觉
+  countdown?: CountdownSchema;  // 首屏内嵌倒计时（限时活动）
   variant?: 'overlay' | 'split-left' | 'split-right';
 }
 
@@ -152,6 +166,7 @@ export interface ReviewItem {
   rating: number;               // 1-5 星
   content: string;              // 评价文字
   proofImage?: string;          // 证据截图！(适用于展示 TG 聊天记录、减肥前后图、收益截图)
+  videoUrl?: string;            // 短视频证言（YouTube/Vimeo/直链均可）
   sourcePlatform?: string;      // 如 "Trustpilot", "WhatsApp", "Telegram"
   verified?: boolean;           // 是否为已验证评价
   reviewDate?: string;          // ISO 日期字符串
@@ -223,6 +238,96 @@ export interface FAQSchema {
   contactCta?: CallToAction;    // 底部追加一个 "还有问题？联系客服" 的按钮
 }
 
+// 前后对比（减肥/医美/健身/装修等垂类的核心转化模块）
+export interface BeforeAfterPair {
+  id: string;
+  before: ImageMeta;
+  after: ImageMeta;
+  caption?: string;             // 如 "After 12 weeks", "Lost 18 lbs"
+}
+
+export interface BeforeAfterSchema {
+  title: string;
+  subtitle?: string;
+  pairs: BeforeAfterPair[];
+  variant?: 'side-by-side' | 'slider'; // slider 为可拖动对比
+  disclaimer?: string;          // 如 "Results may vary"，医美/减肥合规必备
+}
+
+// Lead 表单（高客单服务类替代 WhatsApp 直跳）
+export type LeadFormFieldType = 'text' | 'email' | 'phone' | 'select' | 'textarea' | 'checkbox';
+
+export interface LeadFormField {
+  id: string;
+  name: string;                 // 提交时的字段 key
+  label: string;
+  type: LeadFormFieldType;
+  required?: boolean;
+  placeholder?: string;
+  options?: { label: string; value: string }[]; // 用于 select
+}
+
+export interface LeadFormSchema {
+  title: string;
+  subtitle?: string;
+  fields: LeadFormField[];
+  submitText: string;
+  successMessage?: string;
+  webhookUrl?: string;          // 提交目标，未填则走默认收件箱
+  consentText?: string;         // GDPR 同意文本
+  eventName?: string;           // 提交埋点事件名
+}
+
+// 媒体 Logo 墙 / "As seen on"（与 TrustBanner 区分：那是功能徽章，这是权威机构 logo）
+export interface MediaLogo {
+  id: string;
+  name: string;                 // 媒体名称，如 "Forbes", "TechCrunch"
+  image: string;                // logo URL
+  url?: string;                 // 可点击跳原文
+}
+
+export interface MediaLogosSchema {
+  title?: string;               // 如 "As seen on", "Featured in"
+  logos: MediaLogo[];
+  variant?: 'mono' | 'color';   // 是否统一灰度处理
+}
+
+// 视频证言（与 ReviewItem.videoUrl 区别：这是独立成 Section，专门展示视频证言）
+export interface VideoTestimonialItem {
+  id: string;
+  authorName: string;
+  authorRole?: string;          // 如 "Verified Buyer", "MD - Skin Clinic"
+  videoUrl: string;
+  poster?: string;              // 视频封面
+  duration?: string;            // 如 "0:45"
+  quote?: string;               // 视频里的核心金句，便于无声播放也能 get 点
+  country?: string;
+}
+
+export interface VideoTestimonialsSchema {
+  title: string;
+  subtitle?: string;
+  items: VideoTestimonialItem[];
+  variant?: 'carousel' | 'grid';
+}
+
+// 退款 / 风险反转（把 BundleTier.guaranteeText 拎出来做成完整 Section）
+export interface GuaranteeBadge {
+  id: string;
+  icon: IconType;
+  text: string;
+  subtext?: string;
+}
+
+export interface GuaranteeSchema {
+  title: string;
+  subtitle?: string;
+  description?: string;         // 退款承诺正文
+  badges?: GuaranteeBadge[];    // 如 "100% Money Back", "Free Returns", "Secure Checkout"
+  image?: string;               // 徽章/印章图（"30-day guarantee" 圆章）
+  cta?: CallToAction;           // "阅读完整政策"
+}
+
 export interface SeoMeta {
   title: string;
   description: string;
@@ -251,16 +356,22 @@ export interface PageMeta {
 
 // PageBlock 包装器
 // 定义模块的标识符
-export type BlockType = 
-  | 'Hero' 
-  | 'ProductBundles' 
-  | 'HowItWorks' 
-  | 'MicroFooter' 
-  | 'Features' 
-  | 'Reviews' 
-  | 'TrustBanner' 
-  | 'AuthorityStory' 
-  | 'FAQ';
+export type BlockType =
+  | 'Hero'
+  | 'ProductBundles'
+  | 'HowItWorks'
+  | 'MicroFooter'
+  | 'Features'
+  | 'Reviews'
+  | 'TrustBanner'
+  | 'AuthorityStory'
+  | 'FAQ'
+  | 'Countdown'
+  | 'BeforeAfter'
+  | 'LeadForm'
+  | 'MediaLogos'
+  | 'VideoTestimonials'
+  | 'Guarantee';
 
 type BlockBase<TType extends BlockType, TData> = {
   id: string;          // 唯一ID (UUID)
@@ -279,7 +390,13 @@ export type PageBlock =
   | BlockBase<'Reviews', ReviewsSchema>
   | BlockBase<'TrustBanner', TrustBannerSchema>
   | BlockBase<'AuthorityStory', AuthoritySchema>
-  | BlockBase<'FAQ', FAQSchema>;
+  | BlockBase<'FAQ', FAQSchema>
+  | BlockBase<'Countdown', CountdownSchema>
+  | BlockBase<'BeforeAfter', BeforeAfterSchema>
+  | BlockBase<'LeadForm', LeadFormSchema>
+  | BlockBase<'MediaLogos', MediaLogosSchema>
+  | BlockBase<'VideoTestimonials', VideoTestimonialsSchema>
+  | BlockBase<'Guarantee', GuaranteeSchema>;
 
 // 整个落地页的最终数据结构 (存入数据库的 JSON)
 export interface LandingPageData {
@@ -295,7 +412,13 @@ export type OptionalBlockType =
   | 'Reviews'
   | 'TrustBanner'
   | 'AuthorityStory'
-  | 'FAQ';
+  | 'FAQ'
+  | 'Countdown'
+  | 'BeforeAfter'
+  | 'LeadForm'
+  | 'MediaLogos'
+  | 'VideoTestimonials'
+  | 'Guarantee';
 
 // 用 Extract 派生，避免与 PageBlock 手抄造成漂移
 export type OptionalBlock = Extract<PageBlock, { type: OptionalBlockType }>;
@@ -321,10 +444,16 @@ export interface LandingPageTemplate {
   // ==========================================
   // 🟢 可选动态区：允许用户在规定区域内增删改排
   // ==========================================
-  
-  // 位于 Hero 和 Bundles 之间的区域（适合放：信任条、卖点、权威背书）
-  upperBlocks: OptionalBlock[];   
 
-  // 位于 HowItWorks 和 Footer 之间的区域（适合放：评价截图、FAQ）
+  // 位于 Hero 和 Bundles 之间的区域（适合放：信任条、卖点、权威背书、媒体 logo 墙）
+  upperBlocks: OptionalBlock[];
+
+  // 位于 Bundles 和 HowItWorks 之间的区域（适合放：评价截图、视频证言、退款承诺、Before/After）
+  afterBundles?: OptionalBlock[];
+
+  // 位于 HowItWorks 和 Footer 之间的区域（适合放：FAQ、Lead 表单、底部 CTA 倒计时）
   lowerBlocks: OptionalBlock[];
+
+  // 全站悬浮 CTA（移动端转化主力，常用于 WhatsApp/Telegram 直跳）
+  stickyCta?: CallToAction;
 }
