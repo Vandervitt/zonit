@@ -201,6 +201,11 @@ function TierEditor({ tier, onChange, onRemove, index }: { tier: BundleTier; onC
           <Button variant="ghost" size="sm" className={addBtn} onClick={addFeature}><Plus className="w-3 h-3" />添加权益</Button>
         </div>
       </div>
+      <ImagePickerField
+        label="套餐配图"
+        value={tier.image ?? ""}
+        onChange={url => onChange({ ...tier, image: url || undefined })}
+      />
       <CtaFields value={tier.cta} onChange={cta => onChange({ ...tier, cta })} />
     </div>
   );
@@ -381,6 +386,16 @@ function ReviewEditor({ item, onChange, onRemove }: { item: ReviewItem; onChange
         <button className={`${delBtn} mt-5`} onClick={onRemove}><X className="w-3 h-3" /></button>
       </div>
       <Field label="评价内容"><Textarea className={`${dt} min-h-[60px]`} value={item.content} onChange={e => onChange({ ...item, content: e.target.value })} /></Field>
+      <ImagePickerField
+        label="头像"
+        value={item.avatar ?? ""}
+        onChange={url => onChange({ ...item, avatar: url || undefined })}
+      />
+      <ImagePickerField
+        label="证据截图"
+        value={item.proofImage ?? ""}
+        onChange={url => onChange({ ...item, proofImage: url || undefined })}
+      />
     </div>
   );
 }
