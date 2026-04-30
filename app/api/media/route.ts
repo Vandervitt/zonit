@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
   if (!isImage && !isVideo) {
     return NextResponse.json({ error: "仅支持图片和视频文件" }, { status: 400 });
   }
+  if (file.type === "image/svg+xml") {
+    return NextResponse.json({ error: "不支持 SVG 格式" }, { status: 400 });
+  }
   if (file.size > MAX_SIZE) {
     return NextResponse.json({ error: "文件不能超过 100MB" }, { status: 400 });
   }

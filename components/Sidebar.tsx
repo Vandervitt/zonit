@@ -26,7 +26,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: Globe, label: "Sites", href: "/sites" },
   { icon: Link2, label: "Domains", href: "/domains" },
-  { icon: Image, label: "素材库", href: "/media" },
+  { icon: Image, label: "素材库", href: Routes.Media },
   { icon: BarChart2, label: "Statistics", href: "/statistics" },
   { icon: CheckSquare, label: "Task list", href: "/tasks" },
   { icon: FileText, label: "Report", href: "/reports" },
