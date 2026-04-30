@@ -1,6 +1,7 @@
+// components/sites/ImagePickerField.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ImageIcon } from "lucide-react";
 import {
   Dialog,
@@ -10,8 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MediaGrid } from "@/components/media/MediaGrid";
+import { UploadZone } from "@/components/media/UploadZone";
+import { ApiRoutes } from "@/lib/constants";
+import type { MediaItem } from "@/lib/media-db";
 
-// 与 BlockForms.tsx 保持一致的暗色输入框样式
 const di =
   "h-9 text-sm bg-zinc-800/60 border-zinc-700/70 text-zinc-100 placeholder:text-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-500/60 focus-visible:border-zinc-600";
 
@@ -26,17 +30,49 @@ interface ImagePickerFieldProps {
   label: string;
   value: string;
   onChange: (url: string) => void;
+  accept?: "image" | "video" | "all";
 }
 
-export function ImagePickerField({ label, value, onChange }: ImagePickerFieldProps) {
+export function ImagePickerField({
+  label,
+  value,
+  onChange,
+  accept = "image",
+}: ImagePickerFieldProps) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"unsplash" | "media">("unsplash");
+
+  // Unsplash state
   const [query, setQuery] = useState("");
   const [photos, setPhotos] = useState<UnsplashPhoto[]>([]);
-  const [selected, setSelected] = useState<UnsplashPhoto | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<UnsplashPhoto | null>(null);
   const [loading, setLoading] = useState(false);
   const [noKey, setNoKey] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+
+  // Media library state
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  const [mediaLoading, setMediaLoading] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
+
+  const mediaType = accept === "all" ? undefined : accept;
+
+  const fetchMedia = async () => {
+    setMediaLoading(true);
+    try {
+      const url = mediaType
+        ? `${ApiRoutes.Media}?type=${mediaType}`
+        : ApiRoutes.Media;
+      const res = await fetch(url);
+      if (res.ok) setMediaItems(await res.json());
+    } finally {
+      setMediaLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (open && tab === "media") fetchMedia();
+  }, [open, tab]);
 
   const search = async () => {
     if (!query.trim()) return;
@@ -66,22 +102,45 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
   };
 
   const handleOpen = () => {
-    setSelected(null);
+    setSelectedPhoto(null);
+    setSelectedMedia(null);
     setOpen(true);
   };
 
   const confirm = () => {
-    if (!selected) return;
-    onChange(selected.urls.regular);
+    if (tab === "unsplash" && selectedPhoto) {
+      onChange(selectedPhoto.urls.regular);
+    } else if (tab === "media" && selectedMedia) {
+      onChange(selectedMedia.url);
+    }
     setOpen(false);
-    setSelected(null);
+    setSelectedPhoto(null);
+    setSelectedMedia(null);
   };
+
+  const handleMediaUploaded = (item: MediaItem) => {
+    setMediaItems((prev) => [item, ...prev]);
+    setSelectedMedia(item);
+  };
+
+  const handleMediaDeleted = (id: string) => {
+    setMediaItems((prev) => prev.filter((i) => i.id !== id));
+    if (selectedMedia?.id === id) setSelectedMedia(null);
+  };
+
+  const confirmDisabled =
+    tab === "unsplash" ? !selectedPhoto : !selectedMedia;
+
+  const confirmLabel = accept === "video" ? "使用此视频" : "使用此图片";
 
   const fieldId = `img-picker-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
   return (
     <div className="space-y-1.5">
-      <label htmlFor={fieldId} className="text-[11px] uppercase tracking-widest text-zinc-500 font-medium block">
+      <label
+        htmlFor={fieldId}
+        className="text-[11px] uppercase tracking-widest text-zinc-500 font-medium block"
+      >
         {label}
       </label>
 
@@ -173,12 +232,18 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
 
                 {noKey && (
                   <p className="text-xs text-amber-400 text-center py-4">
-                    请先配置 <code className="bg-zinc-800 px-1 rounded">UNSPLASH_ACCESS_KEY</code> 环境变量
+                    请先配置{" "}
+                    <code className="bg-zinc-800 px-1 rounded">
+                      UNSPLASH_ACCESS_KEY
+                    </code>{" "}
+                    环境变量
                   </p>
                 )}
 
                 {searchError && (
-                  <p className="text-xs text-rose-400 text-center py-4">{searchError}</p>
+                  <p className="text-xs text-rose-400 text-center py-4">
+                    {searchError}
+                  </p>
                 )}
 
                 {photos.length > 0 && (
@@ -187,10 +252,10 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
                       {photos.map((photo) => (
                         <button
                           key={photo.id}
-                          onClick={() => setSelected(photo)}
+                          onClick={() => setSelectedPhoto(photo)}
                           title={photo.user.name}
                           className={`aspect-square rounded-md overflow-hidden border-2 transition-colors ${
-                            selected?.id === photo.id
+                            selectedPhoto?.id === photo.id
                               ? "border-blue-500"
                               : "border-transparent hover:border-zinc-500"
                           }`}
@@ -219,15 +284,26 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
                 )}
               </div>
             ) : (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center mx-auto mb-3 text-2xl">
-                  🗂
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-zinc-500">
+                    {mediaLoading ? "加载中…" : `${mediaItems.length} 个素材`}
+                  </p>
+                  <UploadZone
+                    onUploaded={handleMediaUploaded}
+                    compact
+                    accept={accept}
+                  />
                 </div>
-                <p className="text-sm text-zinc-400 mb-1">素材库即将上线</p>
-                <p className="text-xs text-zinc-600">上传并管理你自己的图片素材</p>
-                <span className="inline-block mt-2 text-[10px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded-full">
-                  Coming soon
-                </span>
+                {!mediaLoading && (
+                  <MediaGrid
+                    items={mediaItems}
+                    onDeleted={handleMediaDeleted}
+                    onSelect={setSelectedMedia}
+                    selectedId={selectedMedia?.id}
+                    variant="dark"
+                  />
+                )}
               </div>
             )}
           </div>
@@ -244,10 +320,10 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
             <Button
               size="sm"
               onClick={confirm}
-              disabled={!selected}
+              disabled={confirmDisabled}
               className="h-8 px-4 text-xs bg-zinc-100 text-zinc-900 hover:bg-white disabled:opacity-40"
             >
-              使用此图片
+              {confirmLabel}
             </Button>
           </div>
         </DialogContent>
