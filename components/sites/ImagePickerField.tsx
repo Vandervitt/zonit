@@ -36,10 +36,12 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
   const [selected, setSelected] = useState<UnsplashPhoto | null>(null);
   const [loading, setLoading] = useState(false);
   const [noKey, setNoKey] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const search = async () => {
     if (!query.trim()) return;
     setLoading(true);
+    setSearchError(null);
     try {
       const res = await fetch(
         `/api/unsplash/search?q=${encodeURIComponent(query)}&per_page=8`,
@@ -52,6 +54,8 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
         setPhotos(data.results);
         setNoKey(false);
       }
+    } catch {
+      setSearchError("搜索失败，请重试");
     } finally {
       setLoading(false);
     }
@@ -69,9 +73,11 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
     setSelected(null);
   };
 
+  const fieldId = `img-picker-${label.toLowerCase().replace(/\s+/g, "-")}`;
+
   return (
     <div className="space-y-1.5">
-      <label className="text-[11px] uppercase tracking-widest text-zinc-500 font-medium block">
+      <label htmlFor={fieldId} className="text-[11px] uppercase tracking-widest text-zinc-500 font-medium block">
         {label}
       </label>
 
@@ -107,6 +113,7 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
               <ImageIcon className="w-4 h-4 text-zinc-600" />
             </div>
             <button
+              id={fieldId}
               onClick={handleOpen}
               className="h-7 px-3 text-xs bg-zinc-800 border border-zinc-700 rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700 transition-colors"
             >
@@ -164,6 +171,10 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
                   <p className="text-xs text-amber-400 text-center py-4">
                     请先配置 <code className="bg-zinc-800 px-1 rounded">UNSPLASH_ACCESS_KEY</code> 环境变量
                   </p>
+                )}
+
+                {searchError && (
+                  <p className="text-xs text-rose-400 text-center py-4">{searchError}</p>
                 )}
 
                 {photos.length > 0 && (
