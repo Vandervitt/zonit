@@ -133,7 +133,7 @@ export function HeroForm({ data, onChange }: { data: HeroSchema; onChange: (d: H
         <Select
           value={data.background.type}
           onValueChange={v =>
-            onChange({ ...data, background: { ...data.background, type: v as "color" | "image" | "video" } })
+            onChange({ ...data, background: { ...data.background, type: v as "color" | "image" | "video", value: "" } })
           }
         >
           <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
