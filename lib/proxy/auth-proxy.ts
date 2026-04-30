@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { UserRole } from "@/lib/constants";
 
-export const PUBLIC_PATHS = ["/login", "/register", "/pricing", "/api/auth", "/api/register"];
+export const PUBLIC_PATHS = ["/login", "/register", "/pricing", "/api/auth", "/api/register", "/api/unsplash"];
 
 export function handleAuth(req: NextRequest & { auth?: any }) {
   const { pathname } = req.nextUrl;
