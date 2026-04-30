@@ -1,0 +1,213 @@
+{
+    "templateId": "tpl_cod_beauty_cn",
+    "templateName": "Beauty Product COD (中文)",
+    "themeConfig": {
+        "mode": "light",
+        "primaryColor": "#EC4899"
+    },
+    "hero": {
+        "badge": "🔥 限时特惠 今日5折",
+        "title": "焕活美肌 绽放光彩\n无需预付 货到付款",
+        "subtitle": "加入15,000+满意客户的美丽之旅。收货后再付款，零风险购物体验。",
+        "background": {
+            "type": "image",
+            "value": "https://images.unsplash.com/photo-1643379850274-77d2e3703ef9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
+            "overlayOpacity": 0.5
+        },
+        "cta": {
+            "text": "微信咨询领取优惠",
+            "url": "https://wa.me/",
+            "icon": "MessageCircle",
+            "theme": "whatsapp"
+        },
+        "trustText": "无需信用卡 • 货到付款 • 7天无理由退换"
+    },
+    "upperBlocks": [
+        {
+            "id": "ub-1",
+            "type": "TrustBanner",
+            "data": {
+                "badges": [
+                    { "id": "b1", "icon": "Truck",       "text": "全国包邮", "subtext": "2-3天送达" },
+                    { "id": "b2", "icon": "ShieldCheck", "text": "货到付款", "subtext": "验货后支付" },
+                    { "id": "b3", "icon": "Award",       "text": "正品保证", "subtext": "假一赔十" },
+                    { "id": "b4", "icon": "Clock",       "text": "7天退换",  "subtext": "无忧售后" }
+                ]
+            }
+        }
+    ],
+    "bundles": {
+        "title": "选择您的专属套餐",
+        "subtitle": "每一款都是精心调配，让您的肌肤焕发自然光彩",
+        "tiers": [
+            {
+                "id": "tier-1",
+                "name": "体验装",
+                "price": "¥199",
+                "originalPrice": "¥398",
+                "description": "适合初次尝试，体验奢华护肤",
+                "features": [
+                    "1瓶玻尿酸精华液 30ml",
+                    "标准配送",
+                    "产品使用指南",
+                    "专属客服支持"
+                ],
+                "image": "https://images.unsplash.com/photo-1643379850623-7eb6442cd262?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+                "cta": {
+                    "text": "微信下单",
+                    "url": "https://wa.me/",
+                    "icon": "MessageCircle"
+                }
+            },
+            {
+                "id": "tier-2",
+                "name": "美肌套装",
+                "price": "¥398",
+                "originalPrice": "¥1194",
+                "description": "买2送1，全家共享美丽时光",
+                "features": [
+                    "3瓶玻尿酸精华液 30ml",
+                    "免费极速配送",
+                    "赠送面部按摩仪",
+                    "专属美容顾问",
+                    "优先客服通道",
+                    "独家美肌护理课程"
+                ],
+                "image": "https://images.unsplash.com/photo-1643379852776-308d9bbf8645?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+                "tag": "最超值",
+                "cta": {
+                    "text": "微信下单",
+                    "url": "https://wa.me/",
+                    "icon": "MessageCircle",
+                    "theme": "primary"
+                }
+            },
+            {
+                "id": "tier-3",
+                "name": "尊享礼盒",
+                "price": "¥598",
+                "originalPrice": "¥1990",
+                "description": "全套护肤方案，奢华美肌体验",
+                "features": [
+                    "5瓶玻尿酸精华液 30ml",
+                    "赠送2瓶保湿乳液",
+                    "精美礼盒包装",
+                    "免费极速配送",
+                    "VIP专属客服",
+                    "定制护肤方案",
+                    "终身美容咨询"
+                ],
+                "image": "https://images.unsplash.com/photo-1643379850325-03959e1c2162?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
+                "tag": "限量版",
+                "cta": {
+                    "text": "微信下单",
+                    "url": "https://wa.me/",
+                    "icon": "MessageCircle"
+                }
+            }
+        ]
+    },
+    "howItWorks": {
+        "title": "如何下单？",
+        "subtitle": "简单四步，开启您的美肌之旅",
+        "steps": [
+            {
+                "id": "s1",
+                "icon": "MessageCircle",
+                "title": "微信联系",
+                "description": "点击按钮，通过微信与我们的美容顾问沟通"
+            },
+            {
+                "id": "s2",
+                "icon": "MapPin",
+                "title": "提交信息",
+                "description": "告诉我们您的姓名、收货地址和联系方式"
+            },
+            {
+                "id": "s3",
+                "icon": "Truck",
+                "title": "快速配送",
+                "description": "2-3个工作日内，产品将送达您的手中"
+            },
+            {
+                "id": "s4",
+                "icon": "Package",
+                "title": "验货付款",
+                "description": "当面验货满意后，再支付现金给快递员"
+            }
+        ]
+    },
+    "lowerBlocks": [
+        {
+            "id": "lb-1",
+            "type": "Reviews",
+            "data": {
+                "title": "真实客户评价",
+                "subtitle": "15,000+位满意客户的真实反馈",
+                "averageRating": 4.9,
+                "totalReviews": "15,234条评价",
+                "items": [
+                    {
+                        "id": "r1",
+                        "authorName": "张小姐",
+                        "authorRole": "北京",
+                        "rating": 5,
+                        "content": "用了两周，皮肤明显变得水润有光泽！货到付款很放心，收货后验货才付钱。客服态度也很好，会继续回购！",
+                        "proofImage": "https://images.unsplash.com/photo-1643379850623-7eb6442cd262?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"
+                    },
+                    {
+                        "id": "r2",
+                        "authorName": "李女士",
+                        "authorRole": "上海",
+                        "rating": 5,
+                        "content": "朋友推荐的，效果真的超出预期！敏感肌也能用，完全不刺激。包装很精致，送人自用都合适。快递很快，两天就到了。",
+                        "proofImage": "https://images.unsplash.com/photo-1643379852776-308d9bbf8645?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"
+                    },
+                    {
+                        "id": "r3",
+                        "authorName": "王小姐",
+                        "authorRole": "广州",
+                        "rating": 5,
+                        "content": "买了家庭套装，性价比超高！妈妈也很喜欢用。货到付款的方式让人很安心，不用担心被骗。产品是正品，包装完好。",
+                        "proofImage": "https://images.unsplash.com/photo-1643379850325-03959e1c2162?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"
+                    },
+                    {
+                        "id": "r4",
+                        "authorName": "陈女士",
+                        "authorRole": "深圳",
+                        "rating": 5,
+                        "content": "第三次购买了！每次用完都会回购。皮肤毛孔变细了，肤色也均匀了很多。客服推荐的使用方法很有用，感谢！",
+                        "proofImage": "https://images.unsplash.com/photo-1590393802688-ab3fd7c186f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"
+                    },
+                    {
+                        "id": "r5",
+                        "authorName": "刘小姐",
+                        "authorRole": "成都",
+                        "rating": 5,
+                        "content": "作为干皮星人，终于找到适合的产品了！吸收快不油腻，早晚都在用。配送速度快，包装保护得很好，没有破损。",
+                        "proofImage": "https://images.unsplash.com/photo-1643379850274-77d2e3703ef9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"
+                    },
+                    {
+                        "id": "r6",
+                        "authorName": "周女士",
+                        "authorRole": "杭州",
+                        "rating": 5,
+                        "content": "同事看到我皮肤变好都来问用的什么！已经推荐给好几个朋友了。货到付款很方便，不用提前付钱，收到再给钱更放心。",
+                        "proofImage": "https://images.unsplash.com/photo-1643379850623-7eb6442cd262?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"
+                    }
+                ]
+            }
+        }
+    ],
+    "footer": {
+        "brandName": "美肌优选 BeautyChoice",
+        "copyrightYear": "2024",
+        "contactEmail": "support@beautychoice.com",
+        "links": [
+            { "text": "隐私政策", "url": "/privacy" },
+            { "text": "服务条款", "url": "/terms" },
+            { "text": "配送说明", "url": "/shipping" },
+            { "text": "联系我们", "url": "/contact" }
+        ]
+    }
+}

@@ -122,6 +122,7 @@ export interface TrustBadge {
   id: string;
   icon: IconType;
   text: string;                 // 如 "24/7 Human Support", "Cash on Delivery"
+  subtext?: string;             // 副文本，如 "2-3天送达", "验货后支付"
 }
 
 export interface TrustBannerSchema {
