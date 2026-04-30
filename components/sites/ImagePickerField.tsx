@@ -46,6 +46,10 @@ export function ImagePickerField({ label, value, onChange }: ImagePickerFieldPro
       const res = await fetch(
         `/api/unsplash/search?q=${encodeURIComponent(query)}&per_page=8`,
       );
+      if (!res.ok) {
+        setSearchError("搜索失败，请重试");
+        return;
+      }
       const data = await res.json();
       if (data._demo) {
         setNoKey(true);
