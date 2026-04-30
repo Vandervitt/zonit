@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { hostname: "lh3.googleusercontent.com" },
+      { hostname: "*.public.blob.vercel-storage.com" },
     ],
   },
 };
