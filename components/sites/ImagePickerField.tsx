@@ -57,22 +57,18 @@ export function ImagePickerField({
 
   const mediaType = accept === "all" ? undefined : accept;
 
-  const fetchMedia = async () => {
-    setMediaLoading(true);
-    try {
-      const url = mediaType
-        ? `${ApiRoutes.Media}?type=${mediaType}`
-        : ApiRoutes.Media;
-      const res = await fetch(url);
-      if (res.ok) setMediaItems(await res.json());
-    } finally {
-      setMediaLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (open && tab === "media") fetchMedia();
-  }, [open, tab]);
+    if (!open || tab !== "media") return;
+    setMediaLoading(true);
+    const url = mediaType
+      ? `${ApiRoutes.Media}?type=${mediaType}`
+      : ApiRoutes.Media;
+    fetch(url)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setMediaItems)
+      .catch(() => {})
+      .finally(() => setMediaLoading(false));
+  }, [open, tab, mediaType]);
 
   const search = async () => {
     if (!query.trim()) return;
@@ -131,7 +127,8 @@ export function ImagePickerField({
   const confirmDisabled =
     tab === "unsplash" ? !selectedPhoto : !selectedMedia;
 
-  const confirmLabel = accept === "video" ? "使用此视频" : "使用此图片";
+  const confirmLabel =
+    tab === "media" && selectedMedia?.type === "video" ? "使用此视频" : "使用此图片";
 
   const fieldId = `img-picker-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
