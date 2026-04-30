@@ -2,16 +2,46 @@ import { z } from 'zod';
 
 const NonEmpty = z.string().min(1);
 
+const BillingPeriodSchema = z.enum(['one-time', 'day', 'week', 'month', 'quarter', 'year', 'lifetime', 'custom']);
+
 const CallToActionSchema = z.object({
   text: NonEmpty,
   url: NonEmpty,
   icon: z.string().optional(),
   theme: z.enum(['primary', 'secondary', 'whatsapp', 'telegram']).optional(),
+  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'checkout', 'form', 'external']).optional(),
+  target: z.enum(['_self', '_blank']).optional(),
+  rel: z.string().optional(),
+  prefilledMessage: z.string().optional(),
+  eventName: z.string().optional(),
+  trackingId: z.string().optional(),
 });
 
 const ImageMetaSchema = z.object({
   src: NonEmpty,
   alt: z.string(),
+});
+
+const HeroHighlightSchema = z.object({
+  id: NonEmpty,
+  text: NonEmpty,
+  icon: z.string().optional(),
+});
+
+const HeroProofPointSchema = z.object({
+  label: NonEmpty,
+  value: z.string().optional(),
+});
+
+const HeroMediaSchema = z.object({
+  type: z.enum(['image', 'video']),
+  src: NonEmpty,
+  alt: z.string().optional(),
+  poster: z.string().optional(),
+  autoplay: z.boolean().optional(),
+  muted: z.boolean().optional(),
+  loop: z.boolean().optional(),
+  playsInline: z.boolean().optional(),
 });
 
 const HeroSchemaZ = z.object({
@@ -24,7 +54,11 @@ const HeroSchemaZ = z.object({
     overlayOpacity: z.number().min(0).max(1).optional(),
   }),
   cta: CallToActionSchema,
+  secondaryCta: CallToActionSchema.optional(),
   trustText: z.string().optional(),
+  highlights: z.array(HeroHighlightSchema).optional(),
+  proofPoints: z.array(HeroProofPointSchema).optional(),
+  media: HeroMediaSchema.optional(),
   variant: z.enum(['overlay', 'split-left', 'split-right']).optional(),
 });
 
@@ -37,6 +71,12 @@ const BundleTierSchema = z.object({
   features: z.array(z.string()),
   tag: z.string().optional(),
   image: z.string().optional(),
+  currency: z.string().optional(),
+  billingPeriod: BillingPeriodSchema.optional(),
+  discountLabel: z.string().optional(),
+  guaranteeText: z.string().optional(),
+  urgencyText: z.string().optional(),
+  isRecommended: z.boolean().optional(),
   cta: CallToActionSchema,
 });
 
@@ -95,6 +135,10 @@ const ReviewItemSchema = z.object({
   rating: z.number().min(1).max(5),
   content: NonEmpty,
   proofImage: z.string().optional(),
+  sourcePlatform: z.string().optional(),
+  verified: z.boolean().optional(),
+  reviewDate: z.string().optional(),
+  country: z.string().optional(),
 });
 
 const ReviewsSchemaZ = z.object({
@@ -102,6 +146,11 @@ const ReviewsSchemaZ = z.object({
   subtitle: z.string().optional(),
   averageRating: z.number().min(0).max(5).optional(),
   totalReviews: z.string().optional(),
+  ratingSummary: z.object({
+    average: z.number().min(0).max(5),
+    scale: z.number().positive().optional(),
+    totalLabel: z.string().optional(),
+  }).optional(),
   items: z.array(ReviewItemSchema).min(1),
   variant: z.enum(['grid', 'carousel']).optional(),
 });
@@ -110,11 +159,18 @@ const TrustBadgeSchema = z.object({
   id: NonEmpty,
   icon: NonEmpty,
   text: NonEmpty,
+  subtext: z.string().optional(),
 });
 
 const TrustBannerSchemaZ = z.object({
   theme: z.enum(['light', 'dark', 'brand']).optional(),
   badges: z.array(TrustBadgeSchema).min(1),
+});
+
+const AuthorityCredentialSchema = z.object({
+  id: NonEmpty,
+  label: NonEmpty,
+  image: z.string().optional(),
 });
 
 const AuthoritySchemaZ = z.object({
@@ -123,6 +179,7 @@ const AuthoritySchemaZ = z.object({
   paragraphs: z.array(z.string()).min(1),
   image: ImageMetaSchema,
   stats: z.array(z.object({ label: NonEmpty, value: NonEmpty })).optional(),
+  credentials: z.array(AuthorityCredentialSchema).optional(),
   signature: z.object({ name: NonEmpty, role: NonEmpty }).optional(),
   variant: z.enum(['image-left', 'image-right']).optional(),
 });
@@ -140,12 +197,53 @@ const FAQSchemaZ = z.object({
   contactCta: CallToActionSchema.optional(),
 });
 
+const SeoMetaSchema = z.object({
+  title: NonEmpty,
+  description: NonEmpty,
+  canonicalUrl: z.string().optional(),
+  ogImage: z.string().optional(),
+  robots: z.string().optional(),
+});
+
+const AnalyticsPixelSchema = z.object({
+  provider: z.enum(['meta', 'google', 'tiktok', 'linkedin', 'x', 'custom']),
+  id: NonEmpty,
+});
+
+const AnalyticsConfigSchema = z.object({
+  pixels: z.array(AnalyticsPixelSchema).optional(),
+  experimentId: z.string().optional(),
+});
+
+const PageMetaSchema = z.object({
+  locale: z.string().optional(),
+  market: z.string().optional(),
+  currency: z.string().optional(),
+  seo: SeoMetaSchema.optional(),
+  analytics: AnalyticsConfigSchema.optional(),
+});
+
+const block = <T extends string, D extends z.ZodTypeAny>(type: T, data: D) =>
+  z.object({ id: NonEmpty, type: z.literal(type), data, variantKey: z.string().optional() });
+
+const PageBlockSchema = z.discriminatedUnion('type', [
+  block('Hero', HeroSchemaZ),
+  block('ProductBundles', BundlesSchemaZ),
+  block('HowItWorks', HowItWorksSchemaZ),
+  block('MicroFooter', MicroFooterSchemaZ),
+  block('Features', FeaturesSchemaZ),
+  block('Reviews', ReviewsSchemaZ),
+  block('TrustBanner', TrustBannerSchemaZ),
+  block('AuthorityStory', AuthoritySchemaZ),
+  block('FAQ', FAQSchemaZ),
+]);
+
 const OptionalBlockSchema = z.discriminatedUnion('type', [
-  z.object({ id: NonEmpty, type: z.literal('Features'), data: FeaturesSchemaZ }),
-  z.object({ id: NonEmpty, type: z.literal('Reviews'), data: ReviewsSchemaZ }),
-  z.object({ id: NonEmpty, type: z.literal('TrustBanner'), data: TrustBannerSchemaZ }),
-  z.object({ id: NonEmpty, type: z.literal('AuthorityStory'), data: AuthoritySchemaZ }),
-  z.object({ id: NonEmpty, type: z.literal('FAQ'), data: FAQSchemaZ }),
+  block('Features', FeaturesSchemaZ),
+  block('Reviews', ReviewsSchemaZ),
+  block('TrustBanner', TrustBannerSchemaZ),
+  block('AuthorityStory', AuthoritySchemaZ),
+  block('FAQ', FAQSchemaZ),
 ]);
 
 export const LandingPageTemplateSchema = z.object({
@@ -155,6 +253,7 @@ export const LandingPageTemplateSchema = z.object({
     mode: z.enum(['light', 'dark']),
     primaryColor: NonEmpty,
   }),
+  pageMeta: PageMetaSchema.optional(),
   hero: HeroSchemaZ,
   bundles: BundlesSchemaZ,
   howItWorks: HowItWorksSchemaZ,
