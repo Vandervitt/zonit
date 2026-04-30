@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   }
 
   const mediaType = isImage ? "image" : "video";
-  const blob = await put(file.name, file, { access: "public" });
+  const blob = await put(file.name, file, { access: "public", addRandomSuffix: true });
   const item = await insertMedia(session.user.id, blob.url, file.name, mediaType, file.size);
 
   return NextResponse.json(item, { status: 201 });

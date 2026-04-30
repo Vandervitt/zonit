@@ -19,8 +19,8 @@ export async function DELETE(
     return NextResponse.json({ error: ApiErrors.NOT_FOUND }, { status: 404 });
   }
 
-  await del(item.url);
   await deleteMedia(id, session.user.id);
+  await del(item.url);
 
   return new NextResponse(null, { status: 204 });
 }
