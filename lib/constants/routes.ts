@@ -4,6 +4,7 @@ export enum Routes {
   Register = '/register',
   Sites = '/sites',
   Domains = '/domains',
+  Media = '/media',
   Billing = '/billing',
   Pricing = '/pricing',
 }
@@ -11,6 +12,7 @@ export enum Routes {
 export enum ApiRoutes {
   Sites = '/api/sites',
   Domains = '/api/domains',
+  Media = '/api/media',
   Templates = '/api/templates',
   Register = '/api/register',
   BillingCheckout = '/api/billing/checkout',
@@ -20,6 +22,7 @@ export enum ApiRoutes {
 }
 
 export const apiAdminTemplatePath = (id: string) => `/api/admin/templates/${id}`;
+export const apiMediaPath = (id: string) => `/api/media/${id}`;
 
 export const siteEditorPath = (id: string) => `/editor/${id}`;
 export const sitePath = (slug: string) => `/site/${slug}`;
