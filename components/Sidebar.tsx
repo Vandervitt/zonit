@@ -16,6 +16,7 @@ import {
   LogOut,
   CreditCard,
   Link2,
+  Image,
 } from "lucide-react";
 import { PlanBadge } from "./billing/PlanBadge";
 import { Routes } from "@/lib/constants";
@@ -25,6 +26,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: Globe, label: "Sites", href: "/sites" },
   { icon: Link2, label: "Domains", href: "/domains" },
+  { icon: Image, label: "素材库", href: "/media" },
   { icon: BarChart2, label: "Statistics", href: "/statistics" },
   { icon: CheckSquare, label: "Task list", href: "/tasks" },
   { icon: FileText, label: "Report", href: "/reports" },
