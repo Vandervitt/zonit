@@ -14,6 +14,7 @@ import { Badge } from "../ui/badge";
 import { cn } from "../ui/utils";
 import { useTemplates } from "../../lib/use-templates";
 import { createSite, isSiteNameUnique } from "../../lib/site-store";
+import { heroBackgroundStyle } from "../../lib/templates";
 
 interface Props {
   open: boolean;
@@ -89,42 +90,50 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
               <p className="text-xs text-muted-foreground py-4">暂无可用模板，请联系管理员上传</p>
             ) : (
             <div className="grid grid-cols-2 gap-3">
-              {templates.map(tpl => (
-                <button
-                  key={tpl.id}
-                  type="button"
-                  onClick={() => setSelectedId(tpl.id)}
-                  className={cn(
-                    "relative rounded-xl border-2 overflow-hidden text-left transition-all hover:shadow-md",
-                    selectedId === tpl.id
-                      ? "border-primary shadow-sm"
-                      : "border-transparent hover:border-border",
-                  )}
-                >
-                  {/* Gradient Preview */}
-                  <div className={`h-20 bg-gradient-to-br ${tpl.gradient} relative`}>
-                    {selectedId === tpl.id && (
-                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow">
-                        <Check className="w-3 h-3 text-primary" />
-                      </div>
+              {templates.map(tpl => {
+                const bgStyle = heroBackgroundStyle(tpl);
+                const hasBg = Object.keys(bgStyle).length > 0;
+                const isSelected = selectedId === tpl.id;
+                return (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => setSelectedId(tpl.id)}
+                    className={cn(
+                      "relative rounded-xl overflow-hidden text-left transition-all duration-200 hover:scale-[1.02]",
+                      isSelected
+                        ? "shadow-xl ring-2 ring-inset ring-primary"
+                        : "shadow-md hover:shadow-xl",
                     )}
-                    <div className="absolute bottom-2 left-3">
-                      <Badge
-                        variant="secondary"
-                        className="text-[10px] px-1.5 py-0 bg-white/20 text-white border-white/30"
-                      >
-                        {tpl.category}
-                      </Badge>
+                  >
+                    {/* Hero Preview */}
+                    <div
+                      className={`h-24 relative ${!hasBg ? `bg-gradient-to-br ${tpl.gradient}` : ""}`}
+                      style={bgStyle}
+                    >
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow">
+                          <Check className="w-3 h-3 text-primary" />
+                        </div>
+                      )}
+                      <div className="absolute bottom-2 left-3">
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] px-1.5 py-0 bg-black/30 text-white border-0"
+                        >
+                          {tpl.category}
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Info */}
-                  <div className="p-3 bg-white">
-                    <p className="text-sm text-slate-800">{tpl.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{tpl.description}</p>
-                  </div>
-                </button>
-              ))}
+                    {/* Info */}
+                    <div className="p-3 bg-white">
+                      <p className="text-sm text-slate-800">{tpl.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{tpl.description}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
             )}
           </div>

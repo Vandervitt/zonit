@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { LandingPageTemplate } from '@/types/schema';
 
 export interface PresetTemplate {
@@ -8,6 +9,14 @@ export interface PresetTemplate {
   accentColor: string;
   gradient: string;
   data: LandingPageTemplate;
+}
+
+export function heroBackgroundStyle(tpl: PresetTemplate | undefined): CSSProperties {
+  const bg = tpl?.data?.hero?.background;
+  if (!bg) return {};
+  if (bg.type === "image") return { backgroundImage: `url(${bg.value})`, backgroundSize: "cover", backgroundPosition: "center" };
+  if (bg.type === "color") return { backgroundColor: bg.value };
+  return {};
 }
 
 export function getDefaultBlockData(type: string) {

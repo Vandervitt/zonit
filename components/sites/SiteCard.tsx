@@ -15,6 +15,7 @@ import {
 import { Site } from "../../lib/site-store";
 import { useTemplates } from "../../lib/use-templates";
 import { siteEditorPath } from "../../lib/constants";
+import { heroBackgroundStyle } from "../../lib/templates";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("zh-CN", { year: "numeric", month: "short", day: "numeric" });
@@ -29,28 +30,23 @@ export function SiteCard({ site, onDelete }: Props) {
   const router = useRouter();
   const { templates } = useTemplates();
   const tpl = templates.find(t => t.id === site.templateId);
+  const bgStyle = heroBackgroundStyle(tpl);
+  const hasBg = Object.keys(bgStyle).length > 0;
 
   return (
     <Card
-      className="bg-white/80 border-0 shadow-sm hover:shadow-md transition-shadow group cursor-pointer overflow-hidden"
+      className="border-0 shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.02] group cursor-pointer overflow-hidden gap-0"
       onClick={() => router.push(siteEditorPath(site.id))}
     >
-      {/* Preview Strip */}
+      {/* Hero Preview */}
       <div
-        className={`h-24 bg-gradient-to-br ${tpl?.gradient ?? "from-slate-400 to-slate-600"} relative`}
+        className={`h-32 relative ${!hasBg ? `bg-gradient-to-br ${tpl?.gradient ?? "from-slate-400 to-slate-600"}` : ""}`}
+        style={bgStyle}
       >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Globe className="w-8 h-8 text-white/40" />
-        </div>
-        {site.published && (
-          <Badge className="absolute top-2 right-2 bg-emerald-500 text-white border-0 text-xs">
-            已发布
-          </Badge>
-        )}
-        {!site.published && (
-          <Badge variant="secondary" className="absolute top-2 right-2 text-xs">
-            草稿
-          </Badge>
+        {site.published ? (
+          <Badge className="absolute top-2 right-2 bg-emerald-500 text-white border-0 text-xs">已发布</Badge>
+        ) : (
+          <Badge variant="secondary" className="absolute top-2 right-2 text-xs">草稿</Badge>
         )}
       </div>
 
@@ -70,7 +66,6 @@ export function SiteCard({ site, onDelete }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" onClick={e => e.stopPropagation()}>
               <DropdownMenuItem onClick={() => router.push(siteEditorPath(site.id))}>
-
                 <Edit3 className="w-4 h-4 mr-2" /> 编辑
               </DropdownMenuItem>
               <DropdownMenuItem>

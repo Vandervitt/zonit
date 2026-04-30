@@ -5,6 +5,8 @@ import { Upload, FileJson, Trash2, RefreshCw, AlertCircle, CheckCircle2 } from "
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -14,13 +16,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PreviewRenderer } from "@/components/sites/PreviewRenderer";
-import { PresetTemplateSchema } from "@/lib/schema.zod";
+import { LandingPageTemplateSchema } from "@/lib/schema.zod";
 import { invalidateTemplatesCache } from "@/lib/use-templates";
 import { jsonRequest } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 import { ApiRoutes, apiAdminTemplatePath } from "@/lib/constants";
 import type { PresetTemplate } from "@/lib/templates";
+import type { LandingPageTemplate } from "@/types/schema";
 import type { ZodIssue } from "zod";
+
+interface TemplateMeta {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  accentColor: string;
+  gradient: string;
+}
 
 interface Props {
   initialTemplates: PresetTemplate[];
@@ -32,9 +44,12 @@ interface ParseError {
   issues?: ZodIssue[];
 }
 
+const EMPTY_META: TemplateMeta = { id: "", name: "", description: "", category: "", accentColor: "", gradient: "" };
+
 export function TemplatesAdminClient({ initialTemplates }: Props) {
   const [templates, setTemplates] = useState(initialTemplates);
-  const [parsed, setParsed] = useState<PresetTemplate | null>(null);
+  const [parsedData, setParsedData] = useState<LandingPageTemplate | null>(null);
+  const [meta, setMeta] = useState<TemplateMeta>(EMPTY_META);
   const [parseError, setParseError] = useState<ParseError | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,6 +69,10 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
       },
     },
   );
+
+  function setMetaField(field: keyof TemplateMeta, value: string) {
+    setMeta(prev => ({ ...prev, [field]: value }));
+  }
 
   const deleteMutation = useMutation(
     (args: { id: string; name: string }) =>
@@ -76,13 +95,15 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
       try {
         raw = JSON.parse(text);
       } catch (e) {
-        setParsed(null);
+        setParsedData(null);
+        setMeta(EMPTY_META);
         setParseError({ type: "json", message: (e as Error).message });
         return;
       }
-      const result = PresetTemplateSchema.safeParse(raw);
+      const result = LandingPageTemplateSchema.safeParse(raw);
       if (!result.success) {
-        setParsed(null);
+        setParsedData(null);
+        setMeta(EMPTY_META);
         setParseError({
           type: "schema",
           message: "JSON 不符合落地页 Schema",
@@ -90,7 +111,15 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
         });
         return;
       }
-      setParsed(result.data);
+      setParsedData(result.data as LandingPageTemplate);
+      setMeta({
+        id: result.data.templateId,
+        name: result.data.templateName,
+        description: "",
+        category: "",
+        accentColor: result.data.themeConfig.primaryColor,
+        gradient: "",
+      });
       setParseError(null);
     };
     reader.readAsText(file);
@@ -109,14 +138,15 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
   }
 
   function clearSelection() {
-    setParsed(null);
+    setParsedData(null);
+    setMeta(EMPTY_META);
     setParseError(null);
     setFileName("");
   }
 
   function handleSave() {
-    if (!parsed) return;
-    void saveMutation.trigger(parsed);
+    if (!parsedData) return;
+    void saveMutation.trigger({ ...meta, data: parsedData });
   }
 
   function handleDelete(id: string, name: string) {
@@ -127,12 +157,14 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
   const saving = saveMutation.isMutating;
 
   function handleReupload(t: PresetTemplate) {
-    setParsed(t);
+    setParsedData(t.data);
+    setMeta({ id: t.id, name: t.name, description: t.description, category: t.category, accentColor: t.accentColor, gradient: t.gradient });
     setParseError(null);
     setFileName(`${t.id}.json (从已有模板导入)`);
   }
 
-  const isOverwrite = parsed && templates.some(t => t.id === parsed.id);
+  const metaReady = meta.id && meta.name && meta.description && meta.category && meta.accentColor && meta.gradient;
+  const isOverwrite = parsedData && templates.some(t => t.id === meta.id);
 
   return (
     <div className="space-y-6">
@@ -159,6 +191,7 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
               type="file"
               accept="application/json,.json"
               onChange={onPickFile}
+              onClick={e => e.stopPropagation()}
               className="hidden"
             />
           </div>
@@ -195,21 +228,45 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
             </div>
           )}
 
-          {parsed && !parseError && (
+          {parsedData && !parseError && (
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 space-y-3">
               <div className="flex items-center gap-2 text-emerald-700">
                 <CheckCircle2 className="w-4 h-4" />
-                <span className="text-sm font-semibold">校验通过</span>
+                <span className="text-sm font-semibold">Schema 校验通过，请补全模板信息</span>
               </div>
-              <dl className="text-xs space-y-1 text-slate-600">
-                <div className="flex"><dt className="w-20 text-slate-400">ID</dt><dd className="font-mono">{parsed.id}</dd></div>
-                <div className="flex"><dt className="w-20 text-slate-400">名称</dt><dd>{parsed.name}</dd></div>
-                <div className="flex"><dt className="w-20 text-slate-400">类别</dt><dd>{parsed.category}</dd></div>
-                <div className="flex"><dt className="w-20 text-slate-400">描述</dt><dd>{parsed.description}</dd></div>
-              </dl>
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-slate-600">ID</Label>
+                    <Input className="h-7 text-xs font-mono" value={meta.id} onChange={e => setMetaField("id", e.target.value)} placeholder="tpl_xxx" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-slate-600">类别</Label>
+                    <Input className="h-7 text-xs" value={meta.category} onChange={e => setMetaField("category", e.target.value)} placeholder="COD / 服务 / …" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-600">名称</Label>
+                  <Input className="h-7 text-xs" value={meta.name} onChange={e => setMetaField("name", e.target.value)} placeholder="模板显示名称" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-slate-600">描述</Label>
+                  <Input className="h-7 text-xs" value={meta.description} onChange={e => setMetaField("description", e.target.value)} placeholder="一句话描述模板用途" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-slate-600">主色（accentColor）</Label>
+                    <Input className="h-7 text-xs font-mono" value={meta.accentColor} onChange={e => setMetaField("accentColor", e.target.value)} placeholder="#EC4899" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-slate-600">渐变（gradient）</Label>
+                    <Input className="h-7 text-xs" value={meta.gradient} onChange={e => setMetaField("gradient", e.target.value)} placeholder="from-pink-500 to-rose-500" />
+                  </div>
+                </div>
+              </div>
               <Button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || !metaReady}
                 className="w-full bg-indigo-600 hover:bg-indigo-700"
               >
                 {saving ? "保存中..." : isOverwrite ? "覆盖保存" : "保存模板"}
@@ -222,11 +279,11 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
         <Card className="p-0 overflow-hidden bg-slate-100">
           <div className="bg-slate-800 text-slate-300 text-xs px-4 py-2 flex items-center justify-between">
             <span>实时预览</span>
-            {parsed && <span className="font-mono">{parsed.data.templateName}</span>}
+            {parsedData && <span className="font-mono">{parsedData.templateName}</span>}
           </div>
           <div className="h-[680px] overflow-y-auto bg-white">
-            {parsed ? (
-              <PreviewRenderer template={parsed.data} />
+            {parsedData ? (
+              <PreviewRenderer template={parsedData} />
             ) : (
               <div className="h-full flex items-center justify-center text-slate-400 text-sm">
                 上传 JSON 后此处将显示实时预览
