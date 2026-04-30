@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { ImagePickerField } from "./ImagePickerField";
 import type {
   HeroSchema,
   BundlesSchema,
@@ -128,21 +129,37 @@ export function HeroForm({ data, onChange }: { data: HeroSchema; onChange: (d: H
         <Textarea className={`${dt} min-h-[60px]`} value={data.subtitle} onChange={e => onChange({ ...data, subtitle: e.target.value })} placeholder="Supporting text that describes your offer..." />
       </Field>
       <SectionDivider label="背景设置" />
-      <div className="grid grid-cols-2 gap-2">
-        <Field label="类型">
-          <Select value={data.background.type} onValueChange={v => onChange({ ...data, background: { ...data.background, type: v as "color" | "image" | "video" } })}>
-            <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
-            <SelectContent className={dsc}>
-              <SelectItem value={BackgroundType.Color} className={dsi}>纯色</SelectItem>
-              <SelectItem value={BackgroundType.Image} className={dsi}>图片</SelectItem>
-              <SelectItem value={BackgroundType.Video} className={dsi}>视频</SelectItem>
-            </SelectContent>
-          </Select>
+      <Field label="类型">
+        <Select
+          value={data.background.type}
+          onValueChange={v =>
+            onChange({ ...data, background: { ...data.background, type: v as "color" | "image" | "video" } })
+          }
+        >
+          <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
+          <SelectContent className={dsc}>
+            <SelectItem value={BackgroundType.Color} className={dsi}>纯色</SelectItem>
+            <SelectItem value={BackgroundType.Image} className={dsi}>图片</SelectItem>
+            <SelectItem value={BackgroundType.Video} className={dsi}>视频</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+      {data.background.type === BackgroundType.Image ? (
+        <ImagePickerField
+          label="背景图片"
+          value={data.background.value}
+          onChange={value => onChange({ ...data, background: { ...data.background, value } })}
+        />
+      ) : (
+        <Field label={data.background.type === BackgroundType.Color ? "颜色 Hex" : "视频 URL"}>
+          <Input
+            className={di}
+            value={data.background.value}
+            onChange={e => onChange({ ...data, background: { ...data.background, value: e.target.value } })}
+            placeholder={data.background.type === BackgroundType.Color ? "#f0f4ff" : "https://..."}
+          />
         </Field>
-        <Field label={data.background.type === BackgroundType.Color ? "颜色 Hex" : "URL"}>
-          <Input className={di} value={data.background.value} onChange={e => onChange({ ...data, background: { ...data.background, value: e.target.value } })} placeholder={data.background.type === BackgroundType.Color ? "#f0f4ff" : "https://..."} />
-        </Field>
-      </div>
+      )}
       <SectionDivider label="转化" />
       <CtaFields value={data.cta} onChange={cta => onChange({ ...data, cta })} />
       <Field label="按钮下方背书文字">
@@ -451,10 +468,18 @@ export function AuthorityForm({ data, onChange }: { data: AuthoritySchema; onCha
         <Button variant="ghost" size="sm" className={addBtn} onClick={addParagraph}><Plus className="w-3 h-3" />添加段落</Button>
       </div>
       <SectionDivider label="配图" />
-      <div className="grid grid-cols-2 gap-2">
-        <Field label="图片 URL"><Input className={di} value={data.image.src} onChange={e => onChange({ ...data, image: { ...data.image, src: e.target.value } })} /></Field>
-        <Field label="Alt 文本"><Input className={di} value={data.image.alt} onChange={e => onChange({ ...data, image: { ...data.image, alt: e.target.value } })} /></Field>
-      </div>
+      <ImagePickerField
+        label="图片"
+        value={data.image.src}
+        onChange={src => onChange({ ...data, image: { ...data.image, src } })}
+      />
+      <Field label="Alt 文本">
+        <Input
+          className={di}
+          value={data.image.alt}
+          onChange={e => onChange({ ...data, image: { ...data.image, alt: e.target.value } })}
+        />
+      </Field>
       <SectionDivider label="数据统计" />
       <div className="space-y-1.5">
         {(data.stats ?? []).map((stat, i) => (
