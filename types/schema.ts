@@ -382,12 +382,44 @@ export interface AnalyticsConfig {
   experimentId?: string;        // A/B test 或投放实验标识
 }
 
+export interface AlternateLocale {
+  locale: string;     // BCP 47，如 "en-US" | "es-MX" | "pt-BR"
+  url: string;        // 该 locale 对应的完整 URL
+}
+
 export interface PageMeta {
   locale?: string;              // 如 "en-US"
   market?: string;              // 如 "US", "SEA", "MENA"
   currency?: string;            // 页面默认货币
   seo?: SeoMeta;
   analytics?: AnalyticsConfig;
+  alternateLocales?: AlternateLocale[]; // hreflang 多地区分流
+}
+
+// 站点级合规配置（GDPR cookie consent + age gate）
+export interface CookieConsentConfig {
+  enabled: boolean;
+  title?: string;                          // "We value your privacy"
+  description?: string;
+  acceptText?: string;                     // "Accept All"
+  rejectText?: string;                     // "Reject Non-Essential"
+  learnMoreUrl?: string;                   // 关联隐私政策链接
+  policyVersion?: string;                  // "2024-09-01"，policy 升级后强制重新弹
+}
+
+export interface AgeGateConfig {
+  enabled: boolean;
+  minimumAge: 18 | 21;
+  title?: string;                          // "Are you of legal age?"
+  description?: string;
+  confirmText?: string;
+  rejectText?: string;
+  rejectRedirectUrl?: string;              // 拒绝后跳走，避免合规风险
+}
+
+export interface ComplianceConfig {
+  cookieConsent?: CookieConsentConfig;
+  ageGate?: AgeGateConfig;
 }
 
 // PageBlock 包装器
@@ -498,4 +530,7 @@ export interface LandingPageTemplate {
 
   // 全站悬浮 CTA（移动端转化主力，常用于 WhatsApp/Telegram 直跳）
   stickyCta?: CallToAction;
+
+  // 站点级合规（GDPR cookie banner / age gate）
+  compliance?: ComplianceConfig;
 }

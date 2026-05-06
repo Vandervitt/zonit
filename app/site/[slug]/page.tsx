@@ -6,6 +6,7 @@ import { SiteStatus } from "@/lib/constants";
 import { hasWatermark } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 import { deriveJsonLd } from "@/lib/jsonLd";
+import { ComplianceOverlays } from "@/components/sites/ComplianceOverlays";
 
 // JSON-LD 节点序列化时转义闭合标签，杜绝 </script> 注入
 function serializeJsonLd(node: unknown): string {
@@ -33,8 +34,13 @@ export default async function PublicSitePage({
   const showWatermark = hasWatermark((plan ?? "free") as PlanId);
   const jsonLdNodes = deriveJsonLd(template);
 
+  const alternateLocales = template.pageMeta?.alternateLocales ?? [];
+
   return (
     <>
+      {alternateLocales.map(alt => (
+        <link key={alt.locale} rel="alternate" hrefLang={alt.locale} href={alt.url} />
+      ))}
       {jsonLdNodes.map((node, i) => (
         <script
           key={i}
@@ -44,6 +50,7 @@ export default async function PublicSitePage({
         />
       ))}
       <PreviewRenderer template={template} showWatermark={showWatermark} />
+      {template.compliance && <ComplianceOverlays config={template.compliance} />}
     </>
   );
 }

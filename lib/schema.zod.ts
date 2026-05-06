@@ -342,12 +342,45 @@ const AnalyticsConfigSchema = z.object({
   experimentId: z.string().optional(),
 });
 
+const LocaleTag = z.string().regex(/^[a-z]{2}(-[A-Z]{2})?$/, 'Invalid BCP 47 locale tag');
+
+const AlternateLocaleSchema = z.object({
+  locale: LocaleTag,
+  url: NonEmpty,
+});
+
 const PageMetaSchema = z.object({
   locale: z.string().optional(),
   market: z.string().optional(),
   currency: z.string().optional(),
   seo: SeoMetaSchema.optional(),
   analytics: AnalyticsConfigSchema.optional(),
+  alternateLocales: z.array(AlternateLocaleSchema).optional(),
+});
+
+const CookieConsentSchema = z.object({
+  enabled: z.boolean(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  acceptText: z.string().optional(),
+  rejectText: z.string().optional(),
+  learnMoreUrl: z.string().optional(),
+  policyVersion: z.string().optional(),
+});
+
+const AgeGateSchema = z.object({
+  enabled: z.boolean(),
+  minimumAge: z.union([z.literal(18), z.literal(21)]),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  confirmText: z.string().optional(),
+  rejectText: z.string().optional(),
+  rejectRedirectUrl: z.string().optional(),
+});
+
+const ComplianceSchema = z.object({
+  cookieConsent: CookieConsentSchema.optional(),
+  ageGate: AgeGateSchema.optional(),
 });
 
 const block = <T extends string, D extends z.ZodTypeAny>(type: T, data: D) =>
@@ -405,6 +438,7 @@ export const LandingPageTemplateSchema = z.object({
   afterBundles: z.array(OptionalBlockSchema).optional(),
   lowerBlocks: z.array(OptionalBlockSchema),
   stickyCta: CallToActionSchema.optional(),
+  compliance: ComplianceSchema.optional(),
 });
 
 export const PresetTemplateSchema = z.object({
