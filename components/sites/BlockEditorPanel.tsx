@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video } from "lucide-react";
+import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video, CreditCard, Truck } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -14,6 +14,7 @@ import {
   FeaturesForm, ReviewsForm, TrustBannerForm, AuthorityForm, FAQForm,
   CountdownForm, StickyCtaEditor, BeforeAfterForm, GuaranteeForm,
   LeadFormForm, MediaLogosForm, VideoTestimonialsForm,
+  PaymentBadgesForm, ShippingInfoForm,
 } from "./BlockForms";
 import { AddBlockDialog } from "./AddBlockDialog";
 import { AiRewriteButton } from "../editor/AiRewriteButton";
@@ -36,6 +37,8 @@ import type {
   LeadFormSchema,
   MediaLogosSchema,
   VideoTestimonialsSchema,
+  PaymentBadgesSchema,
+  ShippingInfoSchema,
   OptionalBlock,
   OptionalBlockType,
 } from "@/types/schema";
@@ -73,6 +76,8 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
   LeadForm: <Mail className="w-3.5 h-3.5 text-indigo-400" />,
   MediaLogos: <Newspaper className="w-3.5 h-3.5 text-slate-400" />,
   VideoTestimonials: <Video className="w-3.5 h-3.5 text-fuchsia-400" />,
+  PaymentBadges: <CreditCard className="w-3.5 h-3.5 text-blue-400" />,
+  ShippingInfo: <Truck className="w-3.5 h-3.5 text-cyan-400" />,
   StickyCta: <MousePointerClick className="w-3.5 h-3.5 text-cyan-400" />,
 };
 
@@ -92,6 +97,8 @@ const TYPE_BG: Record<string, string> = {
   LeadForm: "bg-indigo-500/10",
   MediaLogos: "bg-slate-500/10",
   VideoTestimonials: "bg-fuchsia-500/10",
+  PaymentBadges: "bg-blue-500/10",
+  ShippingInfo: "bg-cyan-500/10",
   StickyCta: "bg-cyan-500/10",
 };
 
@@ -111,6 +118,8 @@ const TYPE_LABEL: Record<string, string> = {
   LeadForm: "表单线索",
   MediaLogos: "媒体 Logo 墙",
   VideoTestimonials: "视频证言",
+  PaymentBadges: "支付徽章",
+  ShippingInfo: "配送信息",
   StickyCta: "全站浮动 CTA",
 };
 
@@ -140,6 +149,10 @@ function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
       return { id, type, data: getDefaultBlockData(type) as MediaLogosSchema };
     case "VideoTestimonials":
       return { id, type, data: getDefaultBlockData(type) as VideoTestimonialsSchema };
+    case "PaymentBadges":
+      return { id, type, data: getDefaultBlockData(type) as PaymentBadgesSchema };
+    case "ShippingInfo":
+      return { id, type, data: getDefaultBlockData(type) as ShippingInfoSchema };
   }
 }
 
@@ -167,6 +180,10 @@ function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["
       return { ...block, data: newData as MediaLogosSchema };
     case "VideoTestimonials":
       return { ...block, data: newData as VideoTestimonialsSchema };
+    case "PaymentBadges":
+      return { ...block, data: newData as PaymentBadgesSchema };
+    case "ShippingInfo":
+      return { ...block, data: newData as ShippingInfoSchema };
   }
 }
 
@@ -394,6 +411,14 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             <VideoTestimonialsForm data={block.data as VideoTestimonialsSchema} onChange={d => updateOptional(block.id, d)} />
           </>
         );
+      case "PaymentBadges":
+        return (
+          <PaymentBadgesForm data={block.data as PaymentBadgesSchema} onChange={d => updateOptional(block.id, d)} />
+        );
+      case "ShippingInfo":
+        return (
+          <ShippingInfoForm data={block.data as ShippingInfoSchema} onChange={d => updateOptional(block.id, d)} />
+        );
       default:
         return null;
     }
@@ -471,7 +496,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
           size="sm"
           className="w-full text-xs gap-1.5 h-8 bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 border border-zinc-800 hover:border-zinc-700 rounded-md transition-colors"
           onClick={() => setAddOpen(true)}
-          disabled={existingOptionalTypes.length >= 11}
+          disabled={existingOptionalTypes.length >= 13}
         >
           <Plus className="w-3.5 h-3.5" />
           添加模块

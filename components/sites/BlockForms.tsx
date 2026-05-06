@@ -41,6 +41,10 @@ import type {
   MediaLogo,
   VideoTestimonialsSchema,
   VideoTestimonialItem,
+  PaymentBadgesSchema,
+  PaymentBadge,
+  ShippingInfoSchema,
+  ShippingInfoItem,
 } from "@/types/schema";
 
 // ── Dark style constants ────────────────────────────────────────────────────
@@ -1049,6 +1053,126 @@ export function VideoTestimonialsForm({ data, onChange }: { data: VideoTestimoni
         ))}
         <Button variant="ghost" size="sm" className={addBtn} onClick={addItem}>
           <Plus className="w-3 h-3" />添加证言
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── PaymentBadgesForm ───────────────────────────────────────────────────────
+
+const PAYMENT_PROVIDERS = [
+  "visa", "mastercard", "amex", "paypal", "apple-pay", "google-pay",
+  "cod", "bank-transfer", "crypto",
+];
+
+function PaymentBadgeEditor({ badge, onChange, onRemove }: { badge: PaymentBadge; onChange: (b: PaymentBadge) => void; onRemove: () => void }) {
+  return (
+    <div className={card}>
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">{badge.label || badge.provider}</span>
+        <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <Field label="支付方式">
+          <Select value={badge.provider} onValueChange={v => onChange({ ...badge, provider: v })}>
+            <SelectTrigger className={dst}><SelectValue placeholder="选择" /></SelectTrigger>
+            <SelectContent className={dsc}>
+              {PAYMENT_PROVIDERS.map(p => (
+                <SelectItem key={p} value={p} className={dsi}>{p}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label="显示文案">
+          <Input className={`${di} h-8`} value={badge.label ?? ""} onChange={e => onChange({ ...badge, label: e.target.value })} placeholder="Visa" />
+        </Field>
+      </div>
+    </div>
+  );
+}
+
+export function PaymentBadgesForm({ data, onChange }: { data: PaymentBadgesSchema; onChange: (d: PaymentBadgesSchema) => void }) {
+  const addBadge = () => onChange({
+    ...data,
+    badges: [...data.badges, { id: crypto.randomUUID(), provider: "visa", label: "Visa" }],
+  });
+  return (
+    <div className="space-y-4">
+      <Field label="标题（可选）">
+        <Input className={di} value={data.title ?? ""} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="Secure Payment Methods" />
+      </Field>
+      <Field label="安全提示文案">
+        <Input className={di} value={data.secureNote ?? ""} onChange={e => onChange({ ...data, secureNote: e.target.value })} placeholder="SSL encrypted · PCI-DSS compliant" />
+      </Field>
+      <SectionDivider label="支付方式" />
+      <div className="space-y-2">
+        {data.badges.map((badge, i) => (
+          <PaymentBadgeEditor
+            key={badge.id}
+            badge={badge}
+            onChange={b => onChange({ ...data, badges: data.badges.map((bb, bi) => bi === i ? b : bb) })}
+            onRemove={() => onChange({ ...data, badges: data.badges.filter((_, bi) => bi !== i) })}
+          />
+        ))}
+        <Button variant="ghost" size="sm" className={addBtn} onClick={addBadge}>
+          <Plus className="w-3 h-3" />添加支付方式
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── ShippingInfoForm ────────────────────────────────────────────────────────
+
+function ShippingItemEditor({ item, onChange, onRemove }: { item: ShippingInfoItem; onChange: (i: ShippingInfoItem) => void; onRemove: () => void }) {
+  return (
+    <div className={card}>
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">{item.title || "Item"}</span>
+        <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
+      </div>
+      <Field label="图标">
+        <IconSelect value={item.icon} onChange={v => onChange({ ...item, icon: v })} />
+      </Field>
+      <Field label="标题">
+        <Input className={`${di} h-8`} value={item.title} onChange={e => onChange({ ...item, title: e.target.value })} placeholder="Worldwide Shipping" />
+      </Field>
+      <Field label="描述">
+        <Textarea className={`${dt} min-h-[50px]`} value={item.description} onChange={e => onChange({ ...item, description: e.target.value })} placeholder="Free over $50, 7-14 days" />
+      </Field>
+    </div>
+  );
+}
+
+export function ShippingInfoForm({ data, onChange }: { data: ShippingInfoSchema; onChange: (d: ShippingInfoSchema) => void }) {
+  const addItem = () => onChange({
+    ...data,
+    items: [...data.items, { id: crypto.randomUUID(), icon: "Truck", title: "New Item", description: "" }],
+  });
+  return (
+    <div className="space-y-4">
+      <Field label="标题">
+        <Input className={di} value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="Shipping & Returns" />
+      </Field>
+      <Field label="预计送达">
+        <Input className={di} value={data.estimatedDelivery ?? ""} onChange={e => onChange({ ...data, estimatedDelivery: e.target.value })} placeholder="Order today, get it by Oct 12" />
+      </Field>
+      <Field label="退货政策链接">
+        <Input className={di} value={data.returnsPolicyUrl ?? ""} onChange={e => onChange({ ...data, returnsPolicyUrl: e.target.value })} placeholder="https://..." />
+      </Field>
+      <SectionDivider label="保障条目" />
+      <div className="space-y-2">
+        {data.items.map((item, i) => (
+          <ShippingItemEditor
+            key={item.id}
+            item={item}
+            onChange={it => onChange({ ...data, items: data.items.map((ii, idx) => idx === i ? it : ii) })}
+            onRemove={() => onChange({ ...data, items: data.items.filter((_, idx) => idx !== i) })}
+          />
+        ))}
+        <Button variant="ghost" size="sm" className={addBtn} onClick={addItem}>
+          <Plus className="w-3 h-3" />添加条目
         </Button>
       </div>
     </div>

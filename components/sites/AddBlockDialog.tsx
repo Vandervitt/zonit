@@ -8,7 +8,7 @@ import {
 import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
 import { useState } from "react";
-import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video } from "lucide-react";
+import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video, CreditCard, Truck } from "lucide-react";
 import type { OptionalBlockType } from "@/types/schema";
 import { BlockZone } from "@/lib/constants";
 
@@ -97,6 +97,20 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
     description: "高客单咨询场景：收集姓名/邮箱/电话进 CRM",
     icon: <Mail className="w-5 h-5 text-indigo-500" />,
     zone: BlockZone.Lower,
+  },
+  {
+    type: "PaymentBadges",
+    label: "支付徽章",
+    description: "Visa / Mastercard / COD 支付方式集合，强化信任",
+    icon: <CreditCard className="w-5 h-5 text-blue-500" />,
+    zone: BlockZone.Middle,
+  },
+  {
+    type: "ShippingInfo",
+    label: "配送信息",
+    description: "全球配送、关税承担、退货政策，COD 场景必备",
+    icon: <Truck className="w-5 h-5 text-cyan-500" />,
+    zone: BlockZone.Middle,
   },
 ];
 

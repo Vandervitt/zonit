@@ -294,6 +294,32 @@ const GuaranteeSchemaZ = z.object({
   cta: CallToActionSchema.optional(),
 });
 
+const PaymentBadgeSchema = z.object({
+  id: NonEmpty,
+  provider: NonEmpty,
+  label: z.string().optional(),
+});
+
+const PaymentBadgesSchemaZ = z.object({
+  title: z.string().optional(),
+  badges: z.array(PaymentBadgeSchema).min(1),
+  secureNote: z.string().optional(),
+});
+
+const ShippingInfoItemSchema = z.object({
+  id: NonEmpty,
+  icon: NonEmpty,
+  title: NonEmpty,
+  description: NonEmpty,
+});
+
+const ShippingInfoSchemaZ = z.object({
+  title: NonEmpty,
+  items: z.array(ShippingInfoItemSchema).min(1),
+  estimatedDelivery: z.string().optional(),
+  returnsPolicyUrl: z.string().optional(),
+});
+
 const SeoMetaSchema = z.object({
   title: NonEmpty,
   description: NonEmpty,
@@ -339,6 +365,8 @@ const PageBlockSchema = z.discriminatedUnion('type', [
   block('MediaLogos', MediaLogosSchemaZ),
   block('VideoTestimonials', VideoTestimonialsSchemaZ),
   block('Guarantee', GuaranteeSchemaZ),
+  block('PaymentBadges', PaymentBadgesSchemaZ),
+  block('ShippingInfo', ShippingInfoSchemaZ),
 ]);
 
 const OptionalBlockSchema = z.discriminatedUnion('type', [
@@ -353,6 +381,8 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('MediaLogos', MediaLogosSchemaZ),
   block('VideoTestimonials', VideoTestimonialsSchemaZ),
   block('Guarantee', GuaranteeSchemaZ),
+  block('PaymentBadges', PaymentBadgesSchemaZ),
+  block('ShippingInfo', ShippingInfoSchemaZ),
 ]);
 
 export const LandingPageTemplateSchema = z.object({

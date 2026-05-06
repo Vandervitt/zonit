@@ -23,6 +23,8 @@ import type {
   MediaLogosSchema,
   VideoTestimonialsSchema,
   VideoTestimonialItem,
+  PaymentBadgesSchema,
+  ShippingInfoSchema,
   OptionalBlock,
 } from "@/types/schema";
 
@@ -676,6 +678,58 @@ function VideoTestimonialsBlock({ data, id, highlight }: { data: VideoTestimonia
   );
 }
 
+function PaymentBadgesBlock({ data, id, highlight }: { data: PaymentBadgesSchema; id?: string; highlight?: boolean }) {
+  return (
+    <section id={id} className="px-5 py-8 bg-white" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      {data.title && (
+        <p className="text-[11px] uppercase tracking-widest text-center text-slate-400 mb-4">{data.title}</p>
+      )}
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {data.badges.map(badge => (
+          <div key={badge.id} className="px-3 py-1.5 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-700">
+            {badge.label || badge.provider}
+          </div>
+        ))}
+      </div>
+      {data.secureNote && (
+        <p className="text-[10px] text-slate-400 text-center mt-3">{data.secureNote}</p>
+      )}
+    </section>
+  );
+}
+
+function ShippingInfoBlock({ data, primaryColor, id, highlight }: { data: ShippingInfoSchema; primaryColor: string; id?: string; highlight?: boolean }) {
+  return (
+    <section id={id} className="px-5 py-10 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
+      {data.estimatedDelivery && (
+        <p className="text-xs text-center text-slate-500 mb-6">{data.estimatedDelivery}</p>
+      )}
+      <div className="grid grid-cols-1 gap-3">
+        {data.items.map(item => (
+          <div key={item.id} className="flex gap-3 bg-white rounded-xl p-3.5 border border-slate-100">
+            <div
+              className="w-9 h-9 rounded-lg flex items-center justify-center text-sm shrink-0"
+              style={{ backgroundColor: primaryColor + "20", color: primaryColor }}
+            >
+              ◆
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm text-slate-800">{item.title}</p>
+              <p className="text-xs text-slate-500 leading-relaxed">{item.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {data.returnsPolicyUrl && (
+        <p className="text-xs text-center mt-4">
+          <a href={data.returnsPolicyUrl} className="text-slate-500 underline">View full returns policy</a>
+        </p>
+      )}
+    </section>
+  );
+}
+
 function FooterBlock({ data, highlight }: { data: MicroFooterSchema; highlight?: boolean }) {
   return (
     <footer id="footer" className="bg-slate-800 text-white px-5 py-8 text-center" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
@@ -723,6 +777,8 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       case "LeadForm": return <LeadFormBlock key={block.id} id={block.id} data={block.data as LeadFormSchema} primaryColor={pc} highlight={hl} />;
       case "MediaLogos": return <MediaLogosBlock key={block.id} id={block.id} data={block.data as MediaLogosSchema} highlight={hl} />;
       case "VideoTestimonials": return <VideoTestimonialsBlock key={block.id} id={block.id} data={block.data as VideoTestimonialsSchema} highlight={hl} />;
+      case "PaymentBadges": return <PaymentBadgesBlock key={block.id} id={block.id} data={block.data as PaymentBadgesSchema} highlight={hl} />;
+      case "ShippingInfo": return <ShippingInfoBlock key={block.id} id={block.id} data={block.data as ShippingInfoSchema} primaryColor={pc} highlight={hl} />;
       default: return null;
     }
   };

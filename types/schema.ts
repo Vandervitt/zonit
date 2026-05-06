@@ -328,6 +328,38 @@ export interface GuaranteeSchema {
   cta?: CallToAction;           // "阅读完整政策"
 }
 
+// 支付徽章（COD/中东市场专属信任 section）
+export type PaymentProvider =
+  | 'visa' | 'mastercard' | 'amex' | 'paypal' | 'apple-pay' | 'google-pay'
+  | 'cod' | 'bank-transfer' | 'crypto' | (string & {});
+
+export interface PaymentBadge {
+  id: string;
+  provider: PaymentProvider;
+  label?: string;
+}
+
+export interface PaymentBadgesSchema {
+  title?: string;               // 'Secure Payment Methods'
+  badges: PaymentBadge[];
+  secureNote?: string;          // 'SSL encrypted · PCI-DSS compliant'
+}
+
+// 配送信息（跨境/COD 场景必备）
+export interface ShippingInfoItem {
+  id: string;
+  icon: IconType;
+  title: string;                // 'Worldwide Shipping'
+  description: string;          // 'Free over $50, 7-14 days'
+}
+
+export interface ShippingInfoSchema {
+  title: string;
+  items: ShippingInfoItem[];
+  estimatedDelivery?: string;   // 'Order today, get it by Oct 12'
+  returnsPolicyUrl?: string;
+}
+
 export interface SeoMeta {
   title: string;
   description: string;
@@ -371,7 +403,9 @@ export type BlockType =
   | 'LeadForm'
   | 'MediaLogos'
   | 'VideoTestimonials'
-  | 'Guarantee';
+  | 'Guarantee'
+  | 'PaymentBadges'
+  | 'ShippingInfo';
 
 type BlockBase<TType extends BlockType, TData> = {
   id: string;          // 唯一ID (UUID)
@@ -396,7 +430,9 @@ export type PageBlock =
   | BlockBase<'LeadForm', LeadFormSchema>
   | BlockBase<'MediaLogos', MediaLogosSchema>
   | BlockBase<'VideoTestimonials', VideoTestimonialsSchema>
-  | BlockBase<'Guarantee', GuaranteeSchema>;
+  | BlockBase<'Guarantee', GuaranteeSchema>
+  | BlockBase<'PaymentBadges', PaymentBadgesSchema>
+  | BlockBase<'ShippingInfo', ShippingInfoSchema>;
 
 // 整个落地页的最终数据结构 (存入数据库的 JSON)
 export interface LandingPageData {
@@ -418,7 +454,9 @@ export type OptionalBlockType =
   | 'LeadForm'
   | 'MediaLogos'
   | 'VideoTestimonials'
-  | 'Guarantee';
+  | 'Guarantee'
+  | 'PaymentBadges'
+  | 'ShippingInfo';
 
 // 用 Extract 派生，避免与 PageBlock 手抄造成漂移
 export type OptionalBlock = Extract<PageBlock, { type: OptionalBlockType }>;

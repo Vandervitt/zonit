@@ -116,6 +116,25 @@ export function getDefaultBlockData(type: string) {
         },
       ],
     },
+    PaymentBadges: {
+      title: 'Secure Payment Methods',
+      secureNote: 'SSL encrypted · PCI-DSS compliant',
+      badges: [
+        { id: crypto.randomUUID(), provider: 'visa', label: 'Visa' },
+        { id: crypto.randomUUID(), provider: 'mastercard', label: 'Mastercard' },
+        { id: crypto.randomUUID(), provider: 'paypal', label: 'PayPal' },
+        { id: crypto.randomUUID(), provider: 'cod', label: 'Cash on Delivery' },
+      ],
+    },
+    ShippingInfo: {
+      title: 'Shipping & Returns',
+      estimatedDelivery: 'Order today, get it within 7-14 business days',
+      items: [
+        { id: crypto.randomUUID(), icon: 'Truck', title: 'Worldwide Shipping', description: 'Free over $50 · 7-14 days' },
+        { id: crypto.randomUUID(), icon: 'Shield', title: 'Customs Covered', description: 'No surprise fees on delivery' },
+        { id: crypto.randomUUID(), icon: 'RotateCcw', title: 'Easy Returns', description: '30-day no-question returns' },
+      ],
+    },
     Guarantee: {
       title: 'Risk-Free Guarantee',
       subtitle: 'Try it with complete confidence',
