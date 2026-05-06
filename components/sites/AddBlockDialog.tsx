@@ -8,7 +8,7 @@ import {
 import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
 import { useState } from "react";
-import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle } from "lucide-react";
+import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video } from "lucide-react";
 import type { OptionalBlockType } from "@/types/schema";
 import { BlockZone } from "@/lib/constants";
 
@@ -56,13 +56,57 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
     icon: <HelpCircle className="w-5 h-5 text-rose-500" />,
     zone: BlockZone.Lower,
   },
+  {
+    type: "Countdown",
+    label: "倒计时",
+    description: "限时活动倒计时，制造稀缺感与紧迫感",
+    icon: <Timer className="w-5 h-5 text-orange-500" />,
+    zone: BlockZone.Both,
+  },
+  {
+    type: "BeforeAfter",
+    label: "前后对比",
+    description: "图片前后对比展示真实效果，适合医美/减肥/装修",
+    icon: <ArrowLeftRight className="w-5 h-5 text-teal-500" />,
+    zone: BlockZone.Middle,
+  },
+  {
+    type: "Guarantee",
+    label: "退款承诺",
+    description: "风险反转，30 天无理由退款 + 安全付款徽章",
+    icon: <BadgeCheck className="w-5 h-5 text-green-500" />,
+    zone: BlockZone.Middle,
+  },
+  {
+    type: "MediaLogos",
+    label: "媒体 Logo 墙",
+    description: "As seen on Forbes / TechCrunch，强化第三方权威背书",
+    icon: <Newspaper className="w-5 h-5 text-slate-500" />,
+    zone: BlockZone.Upper,
+  },
+  {
+    type: "VideoTestimonials",
+    label: "视频证言",
+    description: "UGC 视频证言，TikTok/Reels 时代的转化利器",
+    icon: <Video className="w-5 h-5 text-fuchsia-500" />,
+    zone: BlockZone.Lower,
+  },
+  {
+    type: "LeadForm",
+    label: "表单线索",
+    description: "高客单咨询场景：收集姓名/邮箱/电话进 CRM",
+    icon: <Mail className="w-5 h-5 text-indigo-500" />,
+    zone: BlockZone.Lower,
+  },
 ];
+
+type AddZone = BlockZone.Upper | BlockZone.Middle | BlockZone.Lower;
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   existingTypes: OptionalBlockType[];
-  onAdd: (type: OptionalBlockType, zone: BlockZone.Upper | BlockZone.Lower) => void;
+  onAdd: (type: OptionalBlockType, zone: AddZone) => void;
 }
 
 export function AddBlockDialog({ open, onOpenChange, existingTypes, onAdd }: Props) {
@@ -73,7 +117,9 @@ export function AddBlockDialog({ open, onOpenChange, existingTypes, onAdd }: Pro
 
   const handleAdd = () => {
     if (!selected) return;
-    const finalZone = selected.zone === BlockZone.Both ? zone : (selected.zone as BlockZone.Upper | BlockZone.Lower);
+    const finalZone: AddZone = selected.zone === BlockZone.Both
+      ? zone
+      : (selected.zone as AddZone);
     onAdd(selected.type, finalZone);
     setSelected(null);
     onOpenChange(false);

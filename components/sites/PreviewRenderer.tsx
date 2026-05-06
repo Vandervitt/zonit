@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ctaThemeColor, BackgroundType, TrustBannerTheme, FeaturesLayout } from "@/lib/constants";
 import type {
   LandingPageTemplate,
@@ -15,6 +15,14 @@ import type {
   TrustBannerSchema,
   AuthoritySchema,
   FAQSchema,
+  CountdownSchema,
+  CallToAction,
+  BeforeAfterSchema,
+  GuaranteeSchema,
+  LeadFormSchema,
+  MediaLogosSchema,
+  VideoTestimonialsSchema,
+  VideoTestimonialItem,
   OptionalBlock,
 } from "@/types/schema";
 
@@ -28,6 +36,103 @@ function StarRating({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map(i => (
         <span key={i} className={i <= rating ? "text-amber-400" : "text-slate-200"}>★</span>
       ))}
+    </div>
+  );
+}
+
+// 倒计时剩余时间计算（每秒更新）
+function useTimeLeft(endsAt: string) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const end = new Date(endsAt).getTime();
+  const diff = Math.max(0, end - now);
+  const expired = diff === 0;
+  const total = Math.floor(diff / 1000);
+  return {
+    expired,
+    days: Math.floor(total / 86400),
+    hours: Math.floor((total % 86400) / 3600),
+    minutes: Math.floor((total % 3600) / 60),
+    seconds: total % 60,
+  };
+}
+
+function CountdownDigits({ data, primaryColor, dense }: { data: CountdownSchema; primaryColor: string; dense?: boolean }) {
+  const t = useTimeLeft(data.endsAt);
+  if (t.expired) {
+    return (
+      <div className="text-center">
+        <p className="text-sm text-slate-700">{data.expiredFallback?.title ?? "Offer Ended"}</p>
+        {data.expiredFallback?.subtitle && (
+          <p className="text-xs text-slate-500 mt-1">{data.expiredFallback.subtitle}</p>
+        )}
+      </div>
+    );
+  }
+  const cell = (n: number, label: string) => (
+    <div className="flex flex-col items-center">
+      <div
+        className={`${dense ? "px-2 py-1 text-base" : "px-3 py-2 text-2xl"} rounded-lg text-white tabular-nums`}
+        style={{ backgroundColor: primaryColor }}
+      >
+        {String(n).padStart(2, "0")}
+      </div>
+      <span className={`${dense ? "text-[9px]" : "text-[10px]"} text-slate-500 mt-1 uppercase tracking-wider`}>{label}</span>
+    </div>
+  );
+  return (
+    <div className={`flex items-center justify-center ${dense ? "gap-1.5" : "gap-2"}`}>
+      {cell(t.days, "Days")}
+      {cell(t.hours, "Hrs")}
+      {cell(t.minutes, "Min")}
+      {cell(t.seconds, "Sec")}
+    </div>
+  );
+}
+
+function CountdownBlock({ data, primaryColor, id, highlight }: { data: CountdownSchema; primaryColor: string; id?: string; highlight?: boolean }) {
+  const banner = data.variant === "banner";
+  if (banner) {
+    return (
+      <section id={id} className="px-4 py-2.5 text-white" style={{ backgroundColor: primaryColor, boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          {data.title && <span className="text-xs">{data.title}</span>}
+          <CountdownDigits data={data} primaryColor="#0f172a" dense />
+        </div>
+      </section>
+    );
+  }
+  return (
+    <section id={id} className="px-5 py-8 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      {data.title && <p className="text-base text-center text-slate-800 mb-1">{data.title}</p>}
+      {data.subtitle && <p className="text-xs text-center text-slate-500 mb-4">{data.subtitle}</p>}
+      <CountdownDigits data={data} primaryColor={primaryColor} />
+      {data.cta && (
+        <div className="text-center mt-4">
+          <button
+            className="px-5 py-2.5 rounded-full text-sm text-white"
+            style={{ backgroundColor: ctaThemeColor(data.cta.theme, primaryColor) }}
+          >
+            {data.cta.text}
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function StickyCtaBar({ cta, primaryColor }: { cta: CallToAction; primaryColor: string }) {
+  return (
+    <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 px-3 py-2 z-40">
+      <button
+        className="w-full py-2.5 rounded-full text-sm text-white font-medium"
+        style={{ backgroundColor: ctaThemeColor(cta.theme, primaryColor) }}
+      >
+        {cta.text}
+      </button>
     </div>
   );
 }
@@ -58,6 +163,11 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
       </button>
       {data.trustText && (
         <p className="text-xs mt-2 text-slate-400">{data.trustText}</p>
+      )}
+      {data.countdown && (
+        <div className="mt-4">
+          <CountdownDigits data={data.countdown} primaryColor={primaryColor} dense />
+        </div>
       )}
     </>
   );
@@ -119,6 +229,11 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
           <p className="text-xs mt-3" style={{ color: bgImg ? "rgba(255,255,255,0.7)" : "#94a3b8" }}>
             {data.trustText}
           </p>
+        )}
+        {data.countdown && (
+          <div className="mt-5">
+            <CountdownDigits data={data.countdown} primaryColor={primaryColor} dense />
+          </div>
         )}
       </div>
     </section>
@@ -351,6 +466,216 @@ function FAQBlock({ data, primaryColor, id, highlight }: { data: FAQSchema; prim
   );
 }
 
+function BeforeAfterBlock({ data, id, highlight }: { data: BeforeAfterSchema; id?: string; highlight?: boolean }) {
+  return (
+    <section id={id} className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
+      {data.subtitle && <p className="text-xs text-center text-slate-500 mb-6">{data.subtitle}</p>}
+      <div className="space-y-5">
+        {data.pairs.map(pair => (
+          <div key={pair.id}>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="relative">
+                {pair.before.src && (
+                  <img src={pair.before.src} alt={pair.before.alt} className="w-full h-32 object-cover rounded-xl" />
+                )}
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] bg-slate-800/70 text-white">Before</span>
+              </div>
+              <div className="relative">
+                {pair.after.src && (
+                  <img src={pair.after.src} alt={pair.after.alt} className="w-full h-32 object-cover rounded-xl" />
+                )}
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/90 text-white">After</span>
+              </div>
+            </div>
+            {pair.caption && (
+              <p className="text-xs text-center text-slate-500 mt-2">{pair.caption}</p>
+            )}
+          </div>
+        ))}
+      </div>
+      {data.disclaimer && (
+        <p className="text-[10px] text-slate-400 text-center mt-5 italic">{data.disclaimer}</p>
+      )}
+    </section>
+  );
+}
+
+function GuaranteeBlock({ data, primaryColor, id, highlight }: { data: GuaranteeSchema; primaryColor: string; id?: string; highlight?: boolean }) {
+  return (
+    <section id={id} className="px-5 py-10 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      <div className="flex flex-col items-center text-center">
+        {data.image && (
+          <img src={data.image} alt="" className="w-20 h-20 object-contain mb-3" />
+        )}
+        <p className="text-lg text-slate-800 mb-1">{data.title}</p>
+        {data.subtitle && <p className="text-xs text-slate-500 mb-3">{data.subtitle}</p>}
+        {data.description && (
+          <p className="text-xs text-slate-600 leading-relaxed mb-5 max-w-sm">{data.description}</p>
+        )}
+        {data.badges && data.badges.length > 0 && (
+          <div className="grid grid-cols-3 gap-3 w-full mb-4">
+            {data.badges.map(badge => (
+              <div key={badge.id} className="flex flex-col items-center">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center mb-1.5 text-sm"
+                  style={{ backgroundColor: primaryColor + "20", color: primaryColor }}
+                >
+                  ✓
+                </div>
+                <p className="text-[11px] text-slate-700 leading-tight">{badge.text}</p>
+                {badge.subtext && <p className="text-[9px] text-slate-400 mt-0.5">{badge.subtext}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+        {data.cta && (
+          <button
+            className="px-5 py-2.5 rounded-full text-sm text-white"
+            style={{ backgroundColor: ctaThemeColor(data.cta.theme, primaryColor) }}
+          >
+            {data.cta.text}
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSchema; primaryColor: string; id?: string; highlight?: boolean }) {
+  return (
+    <section id={id} className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
+      {data.subtitle && <p className="text-xs text-center text-slate-500 mb-5">{data.subtitle}</p>}
+      <div className="space-y-2.5 max-w-md mx-auto">
+        {data.fields.map(field => {
+          const labelEl = (
+            <label className="text-xs text-slate-600 mb-1 block">
+              {field.label}
+              {field.required && <span className="text-rose-500 ml-0.5">*</span>}
+            </label>
+          );
+          if (field.type === "textarea") {
+            return (
+              <div key={field.id}>
+                {labelEl}
+                <textarea
+                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400 min-h-[60px] resize-none"
+                  placeholder={field.placeholder}
+                />
+              </div>
+            );
+          }
+          if (field.type === "checkbox") {
+            return (
+              <label key={field.id} className="flex items-center gap-2 text-xs text-slate-600">
+                <input type="checkbox" className="w-3.5 h-3.5" /> {field.label}
+              </label>
+            );
+          }
+          if (field.type === "select") {
+            return (
+              <div key={field.id}>
+                {labelEl}
+                <select className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700">
+                  {(field.options ?? []).map((o, i) => (
+                    <option key={i} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+            );
+          }
+          return (
+            <div key={field.id}>
+              {labelEl}
+              <input
+                type={field.type === "phone" ? "tel" : field.type}
+                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400"
+                placeholder={field.placeholder}
+              />
+            </div>
+          );
+        })}
+        {data.consentText && (
+          <p className="text-[10px] text-slate-400 leading-relaxed pt-1">{data.consentText}</p>
+        )}
+        <button
+          className="w-full py-2.5 rounded-full text-sm text-white mt-2"
+          style={{ backgroundColor: primaryColor }}
+        >
+          {data.submitText}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function MediaLogosBlock({ data, id, highlight }: { data: MediaLogosSchema; id?: string; highlight?: boolean }) {
+  const mono = (data.variant ?? "mono") === "mono";
+  return (
+    <section id={id} className="px-5 py-8 bg-white" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      {data.title && (
+        <p className="text-[11px] uppercase tracking-widest text-center text-slate-400 mb-4">{data.title}</p>
+      )}
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+        {data.logos.map(logo => (
+          logo.image ? (
+            <img
+              key={logo.id}
+              src={logo.image}
+              alt={logo.name}
+              className={`h-6 object-contain ${mono ? "grayscale opacity-60" : ""}`}
+            />
+          ) : (
+            <span key={logo.id} className="text-xs text-slate-400 italic">{logo.name}</span>
+          )
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function VideoTestimonialsBlock({ data, id, highlight }: { data: VideoTestimonialsSchema; id?: string; highlight?: boolean }) {
+  const v = data.variant ?? "carousel";
+  const card = (item: VideoTestimonialItem) => (
+    <div key={item.id} className={`bg-slate-50 rounded-xl overflow-hidden ${v === "carousel" ? "w-44 shrink-0 snap-start" : ""}`}>
+      <div className="relative aspect-[9/16] bg-slate-200">
+        {item.poster ? (
+          <img src={item.poster} alt={item.authorName} className="absolute inset-0 w-full h-full object-cover" />
+        ) : null}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-slate-700 text-sm">▶</div>
+        </div>
+        {item.duration && (
+          <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/60 text-white text-[9px]">{item.duration}</span>
+        )}
+      </div>
+      <div className="p-2.5">
+        <p className="text-xs text-slate-800">{item.authorName}</p>
+        {item.authorRole && <p className="text-[10px] text-slate-400">{item.authorRole}</p>}
+        {item.quote && <p className="text-[11px] text-slate-600 mt-1.5 leading-snug line-clamp-3">"{item.quote}"</p>}
+      </div>
+    </div>
+  );
+  return (
+    <section id={id} className="py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+      <div className="px-5">
+        <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
+        {data.subtitle && <p className="text-xs text-center text-slate-500 mb-5">{data.subtitle}</p>}
+      </div>
+      {v === "carousel" ? (
+        <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory">
+          {data.items.map(card)}
+        </div>
+      ) : (
+        <div className="px-5 grid grid-cols-2 gap-3">
+          {data.items.map(card)}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function FooterBlock({ data, highlight }: { data: MicroFooterSchema; highlight?: boolean }) {
   return (
     <footer id="footer" className="bg-slate-800 text-white px-5 py-8 text-center" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
@@ -392,18 +717,26 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       case "AuthorityStory": return <AuthorityBlock key={block.id} id={block.id} data={block.data as AuthoritySchema} primaryColor={pc} highlight={hl} />;
       case "Reviews": return <ReviewsBlock key={block.id} id={block.id} data={block.data as ReviewsSchema} highlight={hl} />;
       case "FAQ": return <FAQBlock key={block.id} id={block.id} data={block.data as FAQSchema} primaryColor={pc} highlight={hl} />;
+      case "Countdown": return <CountdownBlock key={block.id} id={block.id} data={block.data as CountdownSchema} primaryColor={pc} highlight={hl} />;
+      case "BeforeAfter": return <BeforeAfterBlock key={block.id} id={block.id} data={block.data as BeforeAfterSchema} highlight={hl} />;
+      case "Guarantee": return <GuaranteeBlock key={block.id} id={block.id} data={block.data as GuaranteeSchema} primaryColor={pc} highlight={hl} />;
+      case "LeadForm": return <LeadFormBlock key={block.id} id={block.id} data={block.data as LeadFormSchema} primaryColor={pc} highlight={hl} />;
+      case "MediaLogos": return <MediaLogosBlock key={block.id} id={block.id} data={block.data as MediaLogosSchema} highlight={hl} />;
+      case "VideoTestimonials": return <VideoTestimonialsBlock key={block.id} id={block.id} data={block.data as VideoTestimonialsSchema} highlight={hl} />;
       default: return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="relative min-h-screen bg-white font-sans">
       <HeroBlock data={template.hero} primaryColor={pc} highlight={highlightKey === "hero"} />
       {template.upperBlocks.map(renderOptional)}
       <BundlesBlock data={template.bundles} primaryColor={pc} highlight={highlightKey === "bundles"} />
+      {template.afterBundles?.map(renderOptional)}
       <HowItWorksBlock data={template.howItWorks} primaryColor={pc} highlight={highlightKey === "howItWorks"} />
       {template.lowerBlocks.map(renderOptional)}
       <FooterBlock data={template.footer} highlight={highlightKey === "footer"} />
+      {template.stickyCta && <StickyCtaBar cta={template.stickyCta} primaryColor={pc} />}
       {showWatermark && (
         <div className="fixed bottom-4 right-4 z-50 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-sm pointer-events-none select-none">
           <div className="w-3.5 h-3.5 rounded bg-gradient-to-br from-rose-400 to-pink-600" />

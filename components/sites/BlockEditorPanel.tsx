@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle } from "lucide-react";
+import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -12,6 +12,8 @@ import { cn } from "../ui/utils";
 import {
   HeroForm, BundlesForm, HowItWorksForm, FooterForm,
   FeaturesForm, ReviewsForm, TrustBannerForm, AuthorityForm, FAQForm,
+  CountdownForm, StickyCtaEditor, BeforeAfterForm, GuaranteeForm,
+  LeadFormForm, MediaLogosForm, VideoTestimonialsForm,
 } from "./BlockForms";
 import { AddBlockDialog } from "./AddBlockDialog";
 import { AiRewriteButton } from "../editor/AiRewriteButton";
@@ -28,6 +30,12 @@ import type {
   TrustBannerSchema,
   AuthoritySchema,
   FAQSchema,
+  CountdownSchema,
+  BeforeAfterSchema,
+  GuaranteeSchema,
+  LeadFormSchema,
+  MediaLogosSchema,
+  VideoTestimonialsSchema,
   OptionalBlock,
   OptionalBlockType,
 } from "@/types/schema";
@@ -45,6 +53,8 @@ interface BlockMeta {
   icon: React.ReactNode;
   required: boolean;
   type: string;
+  badgeText?: string;       // 自定义 badge 文案，覆盖默认的"必填/可选"
+  removable?: boolean;      // 显式控制是否可删除，默认按 !required
 }
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
@@ -57,6 +67,13 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
   TrustBanner: <Shield className="w-3.5 h-3.5 text-amber-400" />,
   AuthorityStory: <User className="w-3.5 h-3.5 text-orange-400" />,
   FAQ: <HelpCircle className="w-3.5 h-3.5 text-pink-400" />,
+  Countdown: <Timer className="w-3.5 h-3.5 text-orange-400" />,
+  BeforeAfter: <ArrowLeftRight className="w-3.5 h-3.5 text-teal-400" />,
+  Guarantee: <BadgeCheck className="w-3.5 h-3.5 text-green-400" />,
+  LeadForm: <Mail className="w-3.5 h-3.5 text-indigo-400" />,
+  MediaLogos: <Newspaper className="w-3.5 h-3.5 text-slate-400" />,
+  VideoTestimonials: <Video className="w-3.5 h-3.5 text-fuchsia-400" />,
+  StickyCta: <MousePointerClick className="w-3.5 h-3.5 text-cyan-400" />,
 };
 
 const TYPE_BG: Record<string, string> = {
@@ -69,6 +86,13 @@ const TYPE_BG: Record<string, string> = {
   TrustBanner: "bg-amber-500/10",
   AuthorityStory: "bg-orange-500/10",
   FAQ: "bg-pink-500/10",
+  Countdown: "bg-orange-500/10",
+  BeforeAfter: "bg-teal-500/10",
+  Guarantee: "bg-green-500/10",
+  LeadForm: "bg-indigo-500/10",
+  MediaLogos: "bg-slate-500/10",
+  VideoTestimonials: "bg-fuchsia-500/10",
+  StickyCta: "bg-cyan-500/10",
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -81,6 +105,13 @@ const TYPE_LABEL: Record<string, string> = {
   TrustBanner: "信任条",
   AuthorityStory: "权威背书",
   FAQ: "常见问题",
+  Countdown: "倒计时",
+  BeforeAfter: "前后对比",
+  Guarantee: "退款承诺",
+  LeadForm: "表单线索",
+  MediaLogos: "媒体 Logo 墙",
+  VideoTestimonials: "视频证言",
+  StickyCta: "全站浮动 CTA",
 };
 
 function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
@@ -97,9 +128,18 @@ function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
       return { id, type, data: getDefaultBlockData(type) as AuthoritySchema };
     case "FAQ":
       return { id, type, data: getDefaultBlockData(type) as FAQSchema };
-    default:
-      // Countdown/BeforeAfter/LeadForm/MediaLogos/VideoTestimonials/Guarantee 在 Phase 2b 接入编辑器
-      throw new Error(`Block type "${type}" is in schema but not yet wired in editor`);
+    case "Countdown":
+      return { id, type, data: getDefaultBlockData(type) as CountdownSchema };
+    case "BeforeAfter":
+      return { id, type, data: getDefaultBlockData(type) as BeforeAfterSchema };
+    case "Guarantee":
+      return { id, type, data: getDefaultBlockData(type) as GuaranteeSchema };
+    case "LeadForm":
+      return { id, type, data: getDefaultBlockData(type) as LeadFormSchema };
+    case "MediaLogos":
+      return { id, type, data: getDefaultBlockData(type) as MediaLogosSchema };
+    case "VideoTestimonials":
+      return { id, type, data: getDefaultBlockData(type) as VideoTestimonialsSchema };
   }
 }
 
@@ -115,8 +155,18 @@ function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["
       return { ...block, data: newData as AuthoritySchema };
     case "FAQ":
       return { ...block, data: newData as FAQSchema };
-    default:
-      throw new Error(`Block type "${block.type}" is in schema but not yet wired in editor`);
+    case "Countdown":
+      return { ...block, data: newData as CountdownSchema };
+    case "BeforeAfter":
+      return { ...block, data: newData as BeforeAfterSchema };
+    case "Guarantee":
+      return { ...block, data: newData as GuaranteeSchema };
+    case "LeadForm":
+      return { ...block, data: newData as LeadFormSchema };
+    case "MediaLogos":
+      return { ...block, data: newData as MediaLogosSchema };
+    case "VideoTestimonials":
+      return { ...block, data: newData as VideoTestimonialsSchema };
   }
 }
 
@@ -130,22 +180,29 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
       key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
     })),
     { key: FixedBlockKey.Bundles, label: TYPE_LABEL.ProductBundles, icon: TYPE_ICON.ProductBundles, required: true, type: "ProductBundles" },
+    ...(data.afterBundles ?? []).map(b => ({
+      key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
+    })),
     { key: FixedBlockKey.HowItWorks, label: TYPE_LABEL.HowItWorks, icon: TYPE_ICON.HowItWorks, required: true, type: "HowItWorks" },
     ...data.lowerBlocks.map(b => ({
       key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
     })),
     { key: FixedBlockKey.Footer, label: TYPE_LABEL.MicroFooter, icon: TYPE_ICON.MicroFooter, required: true, type: "MicroFooter" },
+    { key: FixedBlockKey.StickyCta, label: TYPE_LABEL.StickyCta, icon: TYPE_ICON.StickyCta, required: false, type: "StickyCta", badgeText: "全站", removable: false },
   ];
 
   const existingOptionalTypes = [
     ...data.upperBlocks.map(b => b.type),
+    ...(data.afterBundles ?? []).map(b => b.type),
     ...data.lowerBlocks.map(b => b.type),
   ] as OptionalBlockType[];
 
-  const handleAddBlock = (type: OptionalBlockType, zone: BlockZone.Upper | BlockZone.Lower) => {
+  const handleAddBlock = (type: OptionalBlockType, zone: BlockZone.Upper | BlockZone.Middle | BlockZone.Lower) => {
     const newBlock = createOptionalBlock(type);
     if (zone === BlockZone.Upper) {
       onChange({ ...data, upperBlocks: [...data.upperBlocks, newBlock] });
+    } else if (zone === BlockZone.Middle) {
+      onChange({ ...data, afterBundles: [...(data.afterBundles ?? []), newBlock] });
     } else {
       onChange({ ...data, lowerBlocks: [...data.lowerBlocks, newBlock] });
     }
@@ -156,6 +213,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     onChange({
       ...data,
       upperBlocks: data.upperBlocks.filter(b => b.id !== blockId),
+      afterBundles: (data.afterBundles ?? []).filter(b => b.id !== blockId),
       lowerBlocks: data.lowerBlocks.filter(b => b.id !== blockId),
     });
     if (expandedKey === blockId) setExpandedKey(FixedBlockKey.Hero);
@@ -210,14 +268,23 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
         </>
       );
     }
+    if (meta.key === FixedBlockKey.StickyCta) {
+      return (
+        <StickyCtaEditor
+          value={data.stickyCta}
+          onChange={stickyCta => onChange({ ...data, stickyCta })}
+        />
+      );
+    }
     const updateOptional = (blockId: string, newData: OptionalBlock["data"]) => {
       onChange({
         ...data,
         upperBlocks: data.upperBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
+        afterBundles: (data.afterBundles ?? []).map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
         lowerBlocks: data.lowerBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
       });
     };
-    const block = [...data.upperBlocks, ...data.lowerBlocks].find(b => b.id === meta.key);
+    const block = [...data.upperBlocks, ...(data.afterBundles ?? []), ...data.lowerBlocks].find(b => b.id === meta.key);
     if (!block) return null;
     switch (block.type) {
       case "Features":
@@ -275,6 +342,58 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             <FAQForm data={block.data as FAQSchema} onChange={d => updateOptional(block.id, d)} />
           </>
         );
+      case "Countdown":
+        return (
+          <CountdownForm data={block.data as CountdownSchema} onChange={d => updateOptional(block.id, d)} />
+        );
+      case "BeforeAfter":
+        return (
+          <>
+            <AiRewriteButton
+              blockType="BeforeAfter"
+              currentData={block.data}
+              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
+            />
+            <BeforeAfterForm data={block.data as BeforeAfterSchema} onChange={d => updateOptional(block.id, d)} />
+          </>
+        );
+      case "Guarantee":
+        return (
+          <>
+            <AiRewriteButton
+              blockType="Guarantee"
+              currentData={block.data}
+              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
+            />
+            <GuaranteeForm data={block.data as GuaranteeSchema} onChange={d => updateOptional(block.id, d)} />
+          </>
+        );
+      case "LeadForm":
+        return (
+          <>
+            <AiRewriteButton
+              blockType="LeadForm"
+              currentData={block.data}
+              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
+            />
+            <LeadFormForm data={block.data as LeadFormSchema} onChange={d => updateOptional(block.id, d)} />
+          </>
+        );
+      case "MediaLogos":
+        return (
+          <MediaLogosForm data={block.data as MediaLogosSchema} onChange={d => updateOptional(block.id, d)} />
+        );
+      case "VideoTestimonials":
+        return (
+          <>
+            <AiRewriteButton
+              blockType="VideoTestimonials"
+              currentData={block.data}
+              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
+            />
+            <VideoTestimonialsForm data={block.data as VideoTestimonialsSchema} onChange={d => updateOptional(block.id, d)} />
+          </>
+        );
       default:
         return null;
     }
@@ -319,12 +438,14 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
                   </div>
                   <p className="text-xs text-zinc-300 truncate flex-1 text-left">{meta.label}</p>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {meta.required ? (
+                    {meta.badgeText ? (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded border border-zinc-800 text-zinc-500 font-medium">{meta.badgeText}</span>
+                    ) : meta.required ? (
                       <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-600 font-medium">必填</span>
                     ) : (
                       <span className="text-[9px] px-1.5 py-0.5 rounded border border-zinc-800 text-zinc-600 font-medium">可选</span>
                     )}
-                    {!meta.required && expandedKey === meta.key && (
+                    {(meta.removable ?? !meta.required) && expandedKey === meta.key && (
                       <div
                         role="button"
                         className="h-5 w-5 inline-flex items-center justify-center rounded hover:bg-rose-500/10 cursor-pointer transition-colors group"
@@ -350,7 +471,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
           size="sm"
           className="w-full text-xs gap-1.5 h-8 bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 border border-zinc-800 hover:border-zinc-700 rounded-md transition-colors"
           onClick={() => setAddOpen(true)}
-          disabled={existingOptionalTypes.length >= 5}
+          disabled={existingOptionalTypes.length >= 11}
         >
           <Plus className="w-3.5 h-3.5" />
           添加模块

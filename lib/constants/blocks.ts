@@ -11,6 +11,7 @@ export const OPTIONAL_BLOCK_TYPES: OptionalBlockType[] = [
 
 export enum BlockZone {
   Upper = 'upper',
+  Middle = 'middle',
   Lower = 'lower',
   Both = 'both',
 }
@@ -20,4 +21,5 @@ export const FixedBlockKey = {
   Bundles: 'bundles',
   HowItWorks: 'howItWorks',
   Footer: 'footer',
+  StickyCta: 'stickyCta',
 } as const;
