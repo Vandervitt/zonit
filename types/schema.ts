@@ -366,6 +366,10 @@ export interface SeoMeta {
   canonicalUrl?: string;
   ogImage?: string;
   robots?: string;
+  jsonLd?: {
+    autoDerive?: boolean;       // 从 bundles/FAQ/Reviews 等自动派生 schema.org JSON-LD（默认开）
+    custom?: object[];          // 手写补充的 JSON-LD 节点
+  };
 }
 
 export interface AnalyticsPixel {

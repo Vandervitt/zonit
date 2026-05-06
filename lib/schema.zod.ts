@@ -326,6 +326,10 @@ const SeoMetaSchema = z.object({
   canonicalUrl: z.string().optional(),
   ogImage: z.string().optional(),
   robots: z.string().optional(),
+  jsonLd: z.object({
+    autoDerive: z.boolean().optional(),
+    custom: z.array(z.record(z.string(), z.unknown())).optional(),
+  }).optional(),
 });
 
 const AnalyticsPixelSchema = z.object({
