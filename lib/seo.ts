@@ -211,16 +211,15 @@ export async function generateSeoMeta(
     const aiSeo = await generateAiSeo(template);
     if (aiSeo) {
       return {
-        mode: "auto",
         ...aiSeo,
         canonicalUrl: options.canonicalUrl,
         ogImage,
         robots: "index,follow",
         generatedAt: new Date().toISOString(),
-        source: "ai",
         jsonLd: {
           organization: true,
           faqPage: true,
+          contactPoint: true,
         },
       };
     }
@@ -229,16 +228,15 @@ export async function generateSeoMeta(
   }
 
   return {
-    mode: "auto",
     ...fallback,
     canonicalUrl: options.canonicalUrl,
     ogImage,
     robots: "index,follow",
     generatedAt: new Date().toISOString(),
-    source: "fallback",
     jsonLd: {
       organization: true,
       faqPage: true,
+      contactPoint: true,
     },
   };
 }
@@ -247,8 +245,6 @@ export async function withGeneratedSeo(
   template: LandingPageTemplate,
   options: GenerateSeoOptions,
 ): Promise<LandingPageTemplate> {
-  if (template.pageMeta?.seo?.mode === "manual") return template;
-
   const seo = await generateSeoMeta(template, options);
   return {
     ...template,

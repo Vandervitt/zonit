@@ -8,21 +8,38 @@ export type IconType =
   | 'MessageCircle' | 'Calendar' | 'Clock' | 'Award'
   | (string & {});
 
-export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'external';
-export type CtaAction = 'chat' | 'call' | 'email' | 'open_form' | 'scroll_to_form' | 'external_link';
+export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'booking' | 'contact_link';
+export type CtaAction = 'chat' | 'call' | 'email' | 'open_form' | 'scroll_to_form' | 'booking_link' | 'contact_link';
 export type LinkTarget = '_self' | '_blank';
 
 // 通用的行动呼吁按钮 (CTA) 模型 —— 核心转化组件
 export interface CallToAction {
   text: string;           // 按钮文案 (e.g., "Chat on WhatsApp")
-  url?: string;           // 跳转链接；form 类 CTA 可不填
+  url?: string;           // 咨询/预约/联系方式链接；禁止指向 payment / checkout / cart / order 等交易路径；form 类 CTA 可不填
   icon?: IconType;        // 按钮图标
   theme?: 'primary' | 'secondary' | 'whatsapp' | 'telegram'; // 按钮颜色风格
-  channel?: CtaChannel;   // 渠道类型
+  channel?: CtaChannel;   // 引流渠道类型
   action?: CtaAction;     // CTA 行为，限定在咨询/留资/预约路径内
   formTargetId?: string;  // action 为 open_form / scroll_to_form 时定位页面级表单
   target?: LinkTarget;    // 链接打开方式
   prefilledMessage?: string; // 私域沟通时预填消息，减少用户输入成本
+}
+
+// 页面级主转化目标：让全页 CTA 默认围绕同一个咨询/留资动作，避免多入口归因混乱
+export interface PrimaryConversion {
+  channel: CtaChannel;
+  action: CtaAction;
+  label?: string;              // 如 "Book a Free Consultation" / "Chat on WhatsApp"
+  url?: string;                // 咨询/预约/联系方式链接；禁止交易、结账、购物车、订单类链接
+  formTargetId?: string;       // 表单型主转化目标
+  prefilledMessage?: string;   // 私域沟通预填消息
+}
+
+// 移动端悬浮 CTA：海外引流页常用 WhatsApp / Telegram / 电话入口
+export interface StickyCtaConfig extends CallToAction {
+  label?: string;              // 气泡文案，如 "Chat Now" / "Get Free Quote"
+  position?: 'bottom-left' | 'bottom-right';
+  showAfterScrollPercent?: number; // 滚动到页面百分比后出现，0 表示首屏即展示
 }
 
 // 图片模型 (支持传入图片 URL 和 Alt 文本以优化 SEO)
@@ -33,8 +50,8 @@ export interface ImageMeta {
 
 export interface HeroStat {
   id: string;
-  label: string;          // 如 "10k+ Clients", "4.9/5 Rating", "Free Consultation"
-  value?: string;         // 可选数值，用于强调
+  label: string;          // 指标名称，如 "Clients", "Client rating", "Free consultation"
+  value?: string;         // 指标数值，如 "10k+", "4.9/5"；无明确数值时可只用 label
   icon?: IconType;
 }
 
@@ -49,7 +66,7 @@ export interface HeroMedia {
 export interface CountdownSchema {
   title?: string;
   subtitle?: string;
-  endsAt: string;               // ISO 日期字符串
+  endsAt: string;               // 必须带时区的 ISO 日期字符串，如 "2026-12-31T23:59:59+08:00"
   expiredFallback?: {           // 过期后的兜底文案，避免显示负数
     title?: string;
     subtitle?: string;
@@ -70,7 +87,7 @@ export interface HeroSchema {
   };
   cta: CallToAction;            // 主按钮
   secondaryCta?: CallToAction;  // 次按钮，如 "See Results" / "Learn More" / "Check Cases"
-  trustText?: string;           // 按钮下方的小字背书，如 "No credit card required"
+  trustText?: string;           // 按钮下方的小字背书，如 "Free consultation" / "Reply within 10 minutes"
   stats?: HeroStat[];           // 首屏利益点/证明信息，快速降低跳出并建立初始信任
   media?: HeroMedia;            // 首屏辅助视觉
   countdown?: CountdownSchema;  // 首屏内嵌倒计时（限时活动）
@@ -79,24 +96,23 @@ export interface HeroSchema {
 }
 
 
-// 核心转化 Offer —— 展示服务/方案，引导点击咨询或留资
+// 核心咨询入口 —— 展示服务咨询路径，引导点击咨询、预约或留资；不承载定价/购买/结账语义
 export interface OfferOption {
   id: string;
-  name: string;                 // 方案名称，如 "入门咨询", "家庭套餐", "专属服务"
+  name: string;                 // 咨询入口名称，如 "Free Consultation", "Priority Callback", "Expert Assessment"
   labelText?: string;           // 展示标签，如 "Free Quote", "Book Consultation", "Limited Slots"
   description: string;          // 简短描述
   valueProps: string[];         // 核心价值点列表
-  tag?: string;                 // 推荐标签，如 "Most Popular", "Best Value"
-  image?: string;               // 方案配图；showImages 为 true 时 options 建议全部提供
+  tag?: string;                 // 展示/高亮标签，如 "Recommended" / "Fastest Response"
+  image?: string;               // 咨询入口配图；showImages 为 true 时 options 建议全部提供
   urgencyText?: string;         // 真实稀缺提示，如 "Only 12 consultation slots left this week"
-  isRecommended?: boolean;      // 推荐方案，便于视觉突出
-  cta: CallToAction;            // 该方案对应的咨询/留资按钮
+  cta: CallToAction;            // 该咨询入口对应的咨询/留资按钮
 }
 
 export interface OfferSchema {
   title: string;
   subtitle?: string;
-  options: OfferOption[];       // 通常 1 到 3 个咨询/服务选项
+  options: OfferOption[];       // 通常 1 到 3 个咨询/服务入口，避免做成价格表
   showImages?: boolean;         // 统一控制卡片是否展示图片，避免部分卡片有图导致视觉不齐
   variant?: 'cards-row' | 'cards-column';
 }
@@ -122,10 +138,16 @@ export interface FooterLink {
   content?: string;             // 单页落地页内联展示的政策正文
 }
 
+export interface SocialLink {
+  platform: 'facebook' | 'instagram' | 'tiktok' | 'linkedin' | 'youtube' | 'x' | 'whatsapp' | 'telegram' | (string & {});
+  url: string;
+}
+
 export interface MicroFooterSchema {
   brandName: string;            // 品牌名称
   copyrightYear: string;        // 年份
   contactEmail?: string;        // 投诉/联系邮箱
+  socialLinks?: SocialLink[];   // 社媒入口，帮助海外访客验证品牌真实性
   links: FooterLink[];          // 法律条款链接列表
   disclaimer?: string;          // 针对医疗/金融/黑五类的免责声明 (如 "Investment involves risk...")
 }
@@ -185,6 +207,20 @@ export interface TrustBadge {
 export interface TrustBannerSchema {
   theme?: 'light' | 'dark' | 'brand';
   badges: TrustBadge[];
+}
+
+// 媒体报道 / 客户 logo 墙：用于快速建立第三方信任，不替代 TrustBanner 的短文案信任点
+export interface LogoWallItem {
+  id: string;
+  src: string;
+  alt: string;
+  url?: string;
+}
+
+export interface LogoWallSchema {
+  title?: string;               // 如 "As Featured In" / "Trusted By"
+  logos: LogoWallItem[];
+  variant?: 'grayscale' | 'colored';
 }
 
 // 权威背书 / 品牌故事
@@ -267,7 +303,6 @@ export interface AssuranceSchema {
 }
 
 export interface SeoMeta {
-  mode?: 'auto' | 'manual';
   title: string;
   description: string;
   canonicalUrl?: string;
@@ -276,10 +311,12 @@ export interface SeoMeta {
   ogImage?: string;
   robots?: 'index,follow' | 'noindex,nofollow';
   generatedAt?: string;
-  source?: 'ai' | 'fallback' | 'user';
   jsonLd?: {
     organization?: boolean;     // 默认 true
     faqPage?: boolean;          // 默认 true
+    localBusiness?: boolean;    // 本地服务类落地页，如诊所、律所、中介
+    service?: boolean;          // 服务/咨询类结构化信息，不生成 Product / Offer / price
+    contactPoint?: boolean;     // 联系方式结构化信息
   };
 }
 
@@ -337,6 +374,7 @@ export type BlockType =
   | 'Features'
   | 'Reviews'
   | 'TrustBanner'
+  | 'LogoWall'
   | 'AuthorityStory'
   | 'FAQ'
   | 'Countdown'
@@ -357,6 +395,7 @@ export type PageBlock =
   | BlockBase<'Features', FeaturesSchema>
   | BlockBase<'Reviews', ReviewsSchema>
   | BlockBase<'TrustBanner', TrustBannerSchema>
+  | BlockBase<'LogoWall', LogoWallSchema>
   | BlockBase<'AuthorityStory', AuthoritySchema>
   | BlockBase<'FAQ', FAQSchema>
   | BlockBase<'Countdown', CountdownSchema>
@@ -367,6 +406,7 @@ export type OptionalBlockType =
   | 'Features'
   | 'Reviews'
   | 'TrustBanner'
+  | 'LogoWall'
   | 'AuthorityStory'
   | 'FAQ'
   | 'Countdown'
@@ -384,12 +424,13 @@ export interface LandingPageTemplate {
     primaryColor: string;    // 主色调
   };
   pageMeta?: PageMeta;
+  primaryConversion?: PrimaryConversion; // 页面级主咨询/留资目标；模块 CTA 默认应围绕它展开
 
   // ==========================================
   // 🔴 核心模块：Hero / Footer 必须存在；Offer / HowItWorks 是推荐漏斗模块，但不强制
   // ==========================================
   hero: HeroSchema;               // 必须有首屏 (漏斗顶部)
-  offer?: OfferSchema;            // 推荐展示核心咨询/服务选项 (漏斗核心)
+  offer?: OfferSchema;            // 推荐展示核心咨询/服务入口 (漏斗核心)
   howItWorks?: HowItWorksSchema;  // 推荐展示联系流程说明 (打消疑虑)
   footer: MicroFooterSchema;      // 必须有合规页脚 (防封号底线)
 
@@ -410,6 +451,6 @@ export interface LandingPageTemplate {
   leadForm?: LeadFormSchema;
 
   // 全站悬浮 CTA（移动端转化主力，常用于 WhatsApp/Telegram 直跳）
-  stickyCta?: CallToAction;
+  stickyCta?: StickyCtaConfig;
 
 }

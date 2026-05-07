@@ -11,7 +11,7 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
       title: 'E2E Hero',
       subtitle: 'Sub',
       background: { type: 'color', value: '#f8fafc' },
-      cta: { text: 'Contact Us', url: 'https://example.com/contact', channel: 'external' },
+      cta: { text: 'Contact Us', url: 'https://example.com/contact', channel: 'contact_link', action: 'contact_link' },
     },
     offer: {
       title: 'Consultation Options',
@@ -24,7 +24,7 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
         },
         {
           id: 'tier-pro', name: 'Priority Consultation', labelText: 'Book Call', description: 'Recommended consultation',
-          valueProps: ['Feature A', 'Feature B'], isRecommended: true,
+          valueProps: ['Feature A', 'Feature B'], tag: 'Recommended',
           image: 'https://example.com/pro.png',
           cta: { text: 'Book a Call', url: 'https://example.com/pro' },
         },

@@ -9,11 +9,26 @@ const CallToActionSchema = z.object({
   url: NonEmpty.optional(),
   icon: z.string().optional(),
   theme: z.enum(['primary', 'secondary', 'whatsapp', 'telegram']).optional(),
-  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'external']).optional(),
-  action: z.enum(['chat', 'call', 'email', 'open_form', 'scroll_to_form', 'external_link']).optional(),
+  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']).optional(),
+  action: z.enum(['chat', 'call', 'email', 'open_form', 'scroll_to_form', 'booking_link', 'contact_link']).optional(),
   formTargetId: z.string().optional(),
   target: z.enum(['_self', '_blank']).optional(),
   prefilledMessage: z.string().optional(),
+});
+
+const PrimaryConversionSchema = z.object({
+  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']),
+  action: z.enum(['chat', 'call', 'email', 'open_form', 'scroll_to_form', 'booking_link', 'contact_link']),
+  label: z.string().optional(),
+  url: z.string().optional(),
+  formTargetId: z.string().optional(),
+  prefilledMessage: z.string().optional(),
+});
+
+const StickyCtaConfigSchema = CallToActionSchema.extend({
+  label: z.string().optional(),
+  position: z.enum(['bottom-left', 'bottom-right']).optional(),
+  showAfterScrollPercent: z.number().min(0).max(100).optional(),
 });
 
 const ImageMetaSchema = z.object({
@@ -74,7 +89,6 @@ const OfferOptionSchema = z.object({
   tag: z.string().optional(),
   image: z.string().optional(),
   urgencyText: z.string().optional(),
-  isRecommended: z.boolean().optional(),
   cta: CallToActionSchema,
 }).strict();
 
@@ -112,6 +126,10 @@ const MicroFooterSchemaZ = z.object({
   brandName: NonEmpty,
   copyrightYear: NonEmpty,
   contactEmail: z.string().optional(),
+  socialLinks: z.array(z.object({
+    platform: z.string(),
+    url: NonEmpty,
+  })).optional(),
   links: z.array(FooterLinkSchema),
   disclaimer: z.string().optional(),
 });
@@ -168,6 +186,19 @@ const TrustBadgeSchema = z.object({
 const TrustBannerSchemaZ = z.object({
   theme: z.enum(['light', 'dark', 'brand']).optional(),
   badges: z.array(TrustBadgeSchema).min(1),
+});
+
+const LogoWallItemSchema = z.object({
+  id: NonEmpty,
+  src: NonEmpty,
+  alt: z.string(),
+  url: z.string().optional(),
+});
+
+const LogoWallSchemaZ = z.object({
+  title: z.string().optional(),
+  logos: z.array(LogoWallItemSchema).min(1),
+  variant: z.enum(['grayscale', 'colored']).optional(),
 });
 
 const AuthorityCredentialSchema = z.object({
@@ -250,7 +281,6 @@ const AssuranceSchemaZ = z.object({
 
 
 const SeoMetaSchema = z.object({
-  mode: z.enum(['auto', 'manual']).optional(),
   title: NonEmpty,
   description: NonEmpty,
   canonicalUrl: z.string().optional(),
@@ -259,10 +289,12 @@ const SeoMetaSchema = z.object({
   ogImage: z.string().optional(),
   robots: z.enum(['index,follow', 'noindex,nofollow']).optional(),
   generatedAt: z.string().optional(),
-  source: z.enum(['ai', 'fallback', 'user']).optional(),
   jsonLd: z.object({
     organization: z.boolean().optional(),
     faqPage: z.boolean().optional(),
+    localBusiness: z.boolean().optional(),
+    service: z.boolean().optional(),
+    contactPoint: z.boolean().optional(),
   }).strict().optional(),
 });
 
@@ -313,6 +345,7 @@ const PageBlockSchema = z.discriminatedUnion('type', [
   block('Features', FeaturesSchemaZ),
   block('Reviews', ReviewsSchemaZ),
   block('TrustBanner', TrustBannerSchemaZ),
+  block('LogoWall', LogoWallSchemaZ),
   block('AuthorityStory', AuthoritySchemaZ),
   block('FAQ', FAQSchemaZ),
   block('Countdown', CountdownSchemaZ),
@@ -323,6 +356,7 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('Features', FeaturesSchemaZ),
   block('Reviews', ReviewsSchemaZ),
   block('TrustBanner', TrustBannerSchemaZ),
+  block('LogoWall', LogoWallSchemaZ),
   block('AuthorityStory', AuthoritySchemaZ),
   block('FAQ', FAQSchemaZ),
   block('Countdown', CountdownSchemaZ),
@@ -337,6 +371,7 @@ export const LandingPageTemplateSchema = z.object({
     primaryColor: NonEmpty,
   }),
   pageMeta: PageMetaSchema.optional(),
+  primaryConversion: PrimaryConversionSchema.optional(),
   hero: HeroSchemaZ,
   offer: OfferSchemaZ.optional(),
   howItWorks: HowItWorksSchemaZ.optional(),
@@ -345,7 +380,7 @@ export const LandingPageTemplateSchema = z.object({
   afterOffer: z.array(OptionalBlockSchema).optional(),
   lowerBlocks: z.array(OptionalBlockSchema),
   leadForm: LeadFormSchemaZ.optional(),
-  stickyCta: CallToActionSchema.optional(),
+  stickyCta: StickyCtaConfigSchema.optional(),
 });
 
 export const PresetTemplateSchema = z.object({
