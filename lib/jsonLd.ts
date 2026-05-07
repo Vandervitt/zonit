@@ -63,23 +63,26 @@ function deriveOrganization(template: LandingPageTemplate): JsonLdNode {
 
 export function deriveJsonLd(template: LandingPageTemplate): JsonLdNode[] {
   const seo = template.pageMeta?.seo;
-  const auto = seo?.jsonLd?.autoDerive ?? true;
+  const config = seo?.jsonLd;
+  const auto = config?.autoDerive ?? true;
   const nodes: JsonLdNode[] = [];
 
   if (auto) {
     const blocks = allBlocks(template);
-    nodes.push(deriveOrganization(template));
+    if (config?.organization ?? true) {
+      nodes.push(deriveOrganization(template));
+    }
     const faq = findBlock(blocks, 'FAQ');
-    if (faq) nodes.push(deriveFaq(faq.data));
+    if ((config?.faqPage ?? true) && faq) nodes.push(deriveFaq(faq.data));
 
-    if (seo?.jsonLd?.deriveReviews) {
+    if (config?.deriveReviews) {
       const reviews = findBlock(blocks, 'Reviews');
       if (reviews) nodes.push(...deriveReviews(reviews.data));
     }
   }
 
-  if (seo?.jsonLd?.custom?.length) {
-    nodes.push(...(seo.jsonLd.custom as JsonLdNode[]));
+  if (config?.custom?.length) {
+    nodes.push(...(config.custom as JsonLdNode[]));
   }
   return nodes;
 }

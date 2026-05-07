@@ -243,12 +243,19 @@ const AssuranceSchemaZ = z.object({
 
 
 const SeoMetaSchema = z.object({
+  mode: z.enum(['auto', 'manual']).optional(),
   title: NonEmpty,
   description: NonEmpty,
   canonicalUrl: z.string().optional(),
+  ogTitle: z.string().optional(),
+  ogDescription: z.string().optional(),
   ogImage: z.string().optional(),
-  robots: z.string().optional(),
+  robots: z.enum(['index,follow', 'noindex,nofollow']).optional(),
+  generatedAt: z.string().optional(),
+  source: z.enum(['ai', 'fallback', 'user']).optional(),
   jsonLd: z.object({
+    organization: z.boolean().optional(),
+    faqPage: z.boolean().optional(),
     autoDerive: z.boolean().optional(),
     deriveReviews: z.boolean().optional(),
     custom: z.array(z.record(z.string(), z.unknown())).optional(),

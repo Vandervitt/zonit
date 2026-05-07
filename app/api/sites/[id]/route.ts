@@ -4,6 +4,8 @@ import { auth } from "@/auth";
 import pool from "@/lib/db";
 import { ApiErrors } from "@/lib/constants";
 import { SiteStatus } from "@/lib/constants";
+import { withGeneratedSeo } from "@/lib/seo";
+import type { LandingPageTemplate } from "@/types/schema";
 
 export async function GET(_req: NextRequest, ctx: RouteContext<"/api/sites/[id]">) {
   const session = await auth();
@@ -31,6 +33,7 @@ export async function PUT(request: NextRequest, ctx: RouteContext<"/api/sites/[i
   const { id } = await ctx.params;
   const body = await request.json();
   const { name, data, published, slug } = body;
+  let nextData = data;
 
   if (slug !== undefined) {
     const conflict = await pool.query(
@@ -42,6 +45,12 @@ export async function PUT(request: NextRequest, ctx: RouteContext<"/api/sites/[i
     }
   }
 
+  if (published === true && data !== undefined && slug !== undefined) {
+    nextData = await withGeneratedSeo(data as LandingPageTemplate, {
+      canonicalUrl: new URL(`/site/${slug}`, request.url).toString(),
+    });
+  }
+
   const setClauses: string[] = ["updated_at = NOW()"];
   const values: unknown[] = [];
   let idx = 1;
@@ -50,9 +59,9 @@ export async function PUT(request: NextRequest, ctx: RouteContext<"/api/sites/[i
     setClauses.push(`name = $${idx++}`);
     values.push(name);
   }
-  if (data !== undefined) {
+  if (nextData !== undefined) {
     setClauses.push(`data = $${idx++}`);
-    values.push(JSON.stringify(data));
+    values.push(JSON.stringify(nextData));
   }
   if (slug !== undefined) {
     setClauses.push(`slug = $${idx++}`);

@@ -1,3 +1,5 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import pool from "@/lib/db";
 import { PreviewRenderer } from "@/components/sites/PreviewRenderer";
@@ -12,12 +14,7 @@ function serializeJsonLd(node: unknown): string {
   return JSON.stringify(node).replace(/</g, '\\u003c');
 }
 
-export default async function PublicSitePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
+const getPublishedSite = cache(async (slug: string) => {
   const result = await pool.query(
     `SELECT s.data, u.plan
      FROM sites s
@@ -26,10 +23,52 @@ export default async function PublicSitePage({
     [slug, SiteStatus.Published],
   );
 
-  if (!result.rows[0]) notFound();
+  if (!result.rows[0]) return null;
 
-  const { data, plan } = result.rows[0];
-  const template = data as LandingPageTemplate;
+  return {
+    template: result.rows[0].data as LandingPageTemplate,
+    plan: result.rows[0].plan,
+  };
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const site = await getPublishedSite(slug);
+  const seo = site?.template.pageMeta?.seo;
+
+  if (!seo) return {};
+
+  return {
+    title: seo.title,
+    description: seo.description,
+    alternates: seo.canonicalUrl ? { canonical: seo.canonicalUrl } : undefined,
+    robots: seo.robots === "noindex,nofollow"
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
+    openGraph: {
+      title: seo.ogTitle ?? seo.title,
+      description: seo.ogDescription ?? seo.description,
+      url: seo.canonicalUrl,
+      images: seo.ogImage ? [{ url: seo.ogImage }] : undefined,
+    },
+  };
+}
+
+export default async function PublicSitePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const site = await getPublishedSite(slug);
+
+  if (!site) notFound();
+
+  const { template, plan } = site;
   const showWatermark = hasWatermark((plan ?? "free") as PlanId);
   const jsonLdNodes = deriveJsonLd(template);
 

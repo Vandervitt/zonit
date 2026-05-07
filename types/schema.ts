@@ -273,15 +273,21 @@ export interface AssuranceSchema {
 }
 
 export interface SeoMeta {
+  mode?: 'auto' | 'manual';
   title: string;
   description: string;
   canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
   ogImage?: string;
-  robots?: string;
+  robots?: 'index,follow' | 'noindex,nofollow';
+  generatedAt?: string;
+  source?: 'ai' | 'fallback' | 'user';
   jsonLd?: {
-    // 默认只自动派生 Organization / FAQPage；Product/Offer/Review 需显式开启
-    autoDerive?: boolean;       // 开启 Organization + FAQPage 自动派生（默认 true）
-    deriveReviews?: boolean;    // 额外派生 Review / AggregateRating（显式开启）
+    organization?: boolean;     // 默认 true
+    faqPage?: boolean;          // 默认 true
+    autoDerive?: boolean;       // 兼容旧模板：开启 Organization + FAQPage 自动派生（默认 true）
+    deriveReviews?: boolean;    // 兼容旧模板：不建议在引流页默认开启
     custom?: object[];          // 手写补充的 JSON-LD 节点
   };
 }
