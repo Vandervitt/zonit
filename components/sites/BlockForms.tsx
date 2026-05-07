@@ -70,9 +70,9 @@ function SectionDivider({ label }: { label: string }) {
 
 const ICON_OPTIONS = [
   "WhatsApp", "Telegram", "Line", "Phone", "Mail", "ArrowRight",
-  "Star", "Shield", "Truck", "Check", "Heart", "Award", "Zap",
-  "MessageCircle", "ShoppingBag", "Package", "Headphones", "Users",
-  "TrendingUp", "CreditCard", "RotateCcw", "Clock", "Leaf", "Globe",
+  "Star", "Shield", "Calendar", "Check", "Heart", "Award", "Zap",
+  "MessageCircle", "Headphones", "Users",
+  "TrendingUp", "Clock", "Leaf", "Globe",
 ];
 
 function IconSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -137,7 +137,7 @@ function localInputToIso(local: string): string {
 
 const DEFAULT_COUNTDOWN: CountdownSchema = {
   title: "Limited-Time Offer",
-  subtitle: "Special pricing ends soon — act now",
+  subtitle: "Consultation slots are limited this week",
   endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   expiredFallback: { title: "Offer Ended", subtitle: "Stay tuned for the next campaign" },
   variant: "section",
@@ -243,7 +243,7 @@ export function CountdownForm({ data, onChange }: { data: CountdownSchema; onCha
         </Field>
       </div>
       <Field label="副标题">
-        <Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} placeholder="Special pricing ends soon" />
+        <Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} placeholder="Consultation slots are limited this week" />
       </Field>
       <SectionDivider label="过期兜底" />
       <div className="grid grid-cols-2 gap-2">
@@ -520,7 +520,7 @@ function ReviewEditor({ item, onChange, onRemove }: { item: ReviewItem; onChange
 
 export function ReviewsForm({ data, onChange }: { data: ReviewsSchema; onChange: (d: ReviewsSchema) => void }) {
   const addItem = () => {
-    const newItem: ReviewItem = { id: crypto.randomUUID(), authorName: "Happy Customer", rating: 5, content: "Great product!" };
+    const newItem: ReviewItem = { id: crypto.randomUUID(), authorName: "Happy Client", rating: 5, content: "The team responded quickly and helped me understand the next step." };
     onChange({ ...data, items: [...data.items, newItem] });
   };
   return (
@@ -689,7 +689,7 @@ function AssuranceBadgeEditor({ badge, onChange, onRemove }: { badge: AssuranceB
           </div>
         </Field>
       </div>
-      <Field label="副文案"><Input className={`${di} h-8`} value={badge.subtext ?? ""} onChange={e => onChange({ ...badge, subtext: e.target.value })} placeholder="Full refund guaranteed" /></Field>
+      <Field label="副文案"><Input className={`${di} h-8`} value={badge.subtext ?? ""} onChange={e => onChange({ ...badge, subtext: e.target.value })} placeholder="Privacy protected" /></Field>
     </div>
   );
 }
@@ -839,5 +839,4 @@ export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChang
     </div>
   );
 }
-
 

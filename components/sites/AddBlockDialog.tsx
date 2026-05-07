@@ -8,7 +8,7 @@ import {
 import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
 import { useState } from "react";
-import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, BadgeCheck, Mail } from "lucide-react";
+import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, BadgeCheck } from "lucide-react";
 import type { OptionalBlockType } from "@/types/schema";
 import { BlockZone } from "@/lib/constants";
 
@@ -24,13 +24,13 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
   {
     type: "TrustBanner",
     label: "信任条",
-    description: "一排信任徽章，展示安全保障、配送、售后等",
+    description: "一排信任徽章，展示响应速度、隐私保护、专业支持等",
     icon: <Shield className="w-5 h-5 text-sky-500" />,
     zone: BlockZone.Upper,
   },
   {
     type: "Features",
-    label: "产品/服务卖点",
+    label: "服务卖点",
     description: "网格或列表展示核心优势，吸引用户",
     icon: <Sparkles className="w-5 h-5 text-violet-500" />,
     zone: BlockZone.Upper,
@@ -45,7 +45,7 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
   {
     type: "Reviews",
     label: "用户评价",
-    description: "展示真实买家评价、截图或评分，增强信任",
+    description: "展示真实客户评价、截图或评分，增强信任",
     icon: <MessageSquare className="w-5 h-5 text-emerald-500" />,
     zone: BlockZone.Lower,
   },
@@ -69,13 +69,6 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
     description: "免费咨询、响应时效、隐私保护等信任保障徽章",
     icon: <BadgeCheck className="w-5 h-5 text-green-500" />,
     zone: BlockZone.Middle,
-  },
-  {
-    type: "LeadForm",
-    label: "表单线索",
-    description: "高客单咨询场景：收集姓名/邮箱/电话进 CRM",
-    icon: <Mail className="w-5 h-5 text-indigo-500" />,
-    zone: BlockZone.Lower,
   },
 ];
 

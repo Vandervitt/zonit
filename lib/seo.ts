@@ -87,7 +87,6 @@ function summarizeTemplate(template: LandingPageTemplate) {
   const blocks = allBlocks(template);
   const faq = blocks.find(block => block.type === "FAQ");
   const features = blocks.find(block => block.type === "Features");
-  const leadForm = blocks.find(block => block.type === "LeadForm");
 
   return {
     brandName: template.footer.brandName,
@@ -120,10 +119,10 @@ function summarizeTemplate(template: LandingPageTemplate) {
           description: item.description,
         }))
       : undefined,
-    leadForm: leadForm?.type === "LeadForm"
+    leadForm: template.leadForm
       ? {
-          title: leadForm.data.title,
-          submitText: leadForm.data.submitText,
+          title: template.leadForm.title,
+          submitText: template.leadForm.submitText,
         }
       : undefined,
     faq: faq?.type === "FAQ"

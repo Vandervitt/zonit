@@ -1,6 +1,6 @@
 // 给 E2E 用的最小可用 LandingPageTemplate 构造器：4 个必填模块 + 自由拼接 OptionalBlock。
 
-import type { LandingPageTemplate, OptionalBlock } from '@/types/schema';
+import type { LandingPageTemplate, LeadFormSchema, OptionalBlock } from '@/types/schema';
 
 export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): LandingPageTemplate {
   return {
@@ -11,21 +11,21 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
       title: 'E2E Hero',
       subtitle: 'Sub',
       background: { type: 'color', value: '#f8fafc' },
-      cta: { text: 'Buy', url: 'https://example.com/buy', channel: 'external' },
+      cta: { text: 'Contact Us', url: 'https://example.com/contact', channel: 'external' },
     },
     offer: {
-      title: 'Pricing',
+      title: 'Consultation Options',
       tiers: [
         {
-          id: 'tier-basic', name: 'Basic', labelText: '$29', description: 'Entry tier',
+          id: 'tier-basic', name: 'Basic Consultation', labelText: 'Free Quote', description: 'Entry consultation',
           valueProps: ['Feature A'],
-          cta: { text: 'Pick Basic', url: 'https://example.com/basic' },
+          cta: { text: 'Request Info', url: 'https://example.com/basic' },
         },
         {
-          id: 'tier-pro', name: 'Pro', labelText: '$99', description: 'Recommended tier',
+          id: 'tier-pro', name: 'Priority Consultation', labelText: 'Book Call', description: 'Recommended consultation',
           valueProps: ['Feature A', 'Feature B'], isRecommended: true,
           image: 'https://example.com/pro.png',
-          cta: { text: 'Pick Pro', url: 'https://example.com/pro' },
+          cta: { text: 'Book a Call', url: 'https://example.com/pro' },
         },
       ],
     },
@@ -52,8 +52,8 @@ export function faqBlock(): OptionalBlock {
     data: {
       title: 'Frequently Asked Questions',
       items: [
-        { id: 'q1', question: 'Does it ship worldwide?', answer: 'Yes, to 50+ countries.' },
-        { id: 'q2', question: 'Refund policy?', answer: '30-day money back.' },
+        { id: 'q1', question: 'Do you support clients worldwide?', answer: 'Yes, we can consult with clients in multiple regions.' },
+        { id: 'q2', question: 'How do I get started?', answer: 'Send an inquiry and our team will follow up.' },
       ],
     },
   };
@@ -69,24 +69,20 @@ export function reviewsBlock(): OptionalBlock {
       ratingSummary: { average: 4.8, scale: 5, totalLabel: 'Based on 245 reviews' },
       items: [
         { id: 'r1', authorName: 'Alice', rating: 5, content: 'Loved it', reviewDate: '2025-12-01' },
-        { id: 'r2', authorName: 'Bob', rating: 4, content: 'Solid product' },
+        { id: 'r2', authorName: 'Bob', rating: 4, content: 'Helpful consultation' },
       ],
     },
   };
 }
 
-export function leadFormBlock(): OptionalBlock {
+export function leadFormFixture(): LeadFormSchema {
   return {
-    id: 'block-leadform',
-    type: 'LeadForm',
-    data: {
-      title: 'Get a Free Quote',
-      fields: [
-        { id: 'f1', name: 'name', label: 'Full Name', type: 'text', required: true },
-        { id: 'f2', name: 'email', label: 'Email', type: 'email', required: true },
-      ],
-      submitText: 'Send Request',
-      webhookUrl: 'https://hooks.example.com/lead',
-    },
+    title: 'Get a Free Quote',
+    fields: [
+      { id: 'f1', name: 'name', label: 'Full Name', type: 'text', required: true },
+      { id: 'f2', name: 'email', label: 'Email', type: 'email', required: true },
+    ],
+    submitText: 'Send Request',
+    webhookUrl: 'https://hooks.example.com/lead',
   };
 }

@@ -614,7 +614,6 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       case "FAQ": return <FAQBlock key={block.id} id={block.id} data={block.data as FAQSchema} primaryColor={pc} highlight={hl} />;
       case "Countdown": return <CountdownBlock key={block.id} id={block.id} data={block.data as CountdownSchema} primaryColor={pc} highlight={hl} />;
       case "Assurance": return <AssuranceBlock key={block.id} id={block.id} data={block.data as AssuranceSchema} primaryColor={pc} highlight={hl} />;
-      case "LeadForm": return <LeadFormBlock key={block.id} id={block.id} data={block.data as LeadFormSchema} primaryColor={pc} highlight={hl} />;
       default: return null;
     }
   };
@@ -627,6 +626,14 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       {template.afterOffer?.map(renderOptional)}
       <HowItWorksBlock data={template.howItWorks} primaryColor={pc} highlight={highlightKey === "howItWorks"} />
       {template.lowerBlocks.map(renderOptional)}
+      {template.leadForm && (
+        <LeadFormBlock
+          id="leadForm"
+          data={template.leadForm}
+          primaryColor={pc}
+          highlight={highlightKey === "leadForm"}
+        />
+      )}
       <FooterBlock data={template.footer} highlight={highlightKey === "footer"} />
       {template.stickyCta && <StickyCtaBar cta={template.stickyCta} primaryColor={pc} />}
       {showWatermark && (

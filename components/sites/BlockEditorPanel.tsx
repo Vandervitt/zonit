@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, BadgeCheck, Mail } from "lucide-react";
+import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, Mail } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -88,7 +88,7 @@ const TYPE_LABEL: Record<string, string> = {
   Offer: "核心 Offer",
   HowItWorks: "联系流程",
   MicroFooter: "页脚",
-  Features: "产品卖点",
+  Features: "服务卖点",
   Reviews: "用户评价",
   TrustBanner: "信任条",
   AuthorityStory: "权威背书",
@@ -97,6 +97,8 @@ const TYPE_LABEL: Record<string, string> = {
   LeadForm: "表单线索",
   StickyCta: "全站浮动 CTA",
 };
+
+const DEFAULT_LEAD_FORM = getDefaultBlockData("LeadForm") as LeadFormSchema;
 
 function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
   const id = crypto.randomUUID();
@@ -116,8 +118,6 @@ function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
       return { id, type, data: getDefaultBlockData(type) as CountdownSchema };
     case "Assurance":
       return { id, type, data: getDefaultBlockData(type) as AssuranceSchema };
-    case "LeadForm":
-      return { id, type, data: getDefaultBlockData(type) as LeadFormSchema };
   }
 }
 
@@ -137,8 +137,6 @@ function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["
       return { ...block, data: newData as CountdownSchema };
     case "Assurance":
       return { ...block, data: newData as AssuranceSchema };
-    case "LeadForm":
-      return { ...block, data: newData as LeadFormSchema };
   }
 }
 
@@ -159,6 +157,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     ...data.lowerBlocks.map(b => ({
       key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
     })),
+    { key: FixedBlockKey.LeadForm, label: TYPE_LABEL.LeadForm, icon: TYPE_ICON.LeadForm, required: false, type: "LeadForm", badgeText: "单例", removable: false },
     { key: FixedBlockKey.Footer, label: TYPE_LABEL.MicroFooter, icon: TYPE_ICON.MicroFooter, required: true, type: "MicroFooter" },
     { key: FixedBlockKey.StickyCta, label: TYPE_LABEL.StickyCta, icon: TYPE_ICON.StickyCta, required: false, type: "StickyCta", badgeText: "全站", removable: false },
   ];
@@ -248,6 +247,19 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
         />
       );
     }
+    if (meta.key === FixedBlockKey.LeadForm) {
+      const leadForm = data.leadForm ?? DEFAULT_LEAD_FORM;
+      return (
+        <>
+          <AiRewriteButton
+            blockType="LeadForm"
+            currentData={leadForm}
+            onSuccess={d => onChange({ ...data, leadForm: d as LeadFormSchema })}
+          />
+          <LeadFormForm data={leadForm} onChange={leadForm => onChange({ ...data, leadForm })} />
+        </>
+      );
+    }
     const updateOptional = (blockId: string, newData: OptionalBlock["data"]) => {
       onChange({
         ...data,
@@ -327,17 +339,6 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
               onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
             />
             <AssuranceForm data={block.data as AssuranceSchema} onChange={d => updateOptional(block.id, d)} />
-          </>
-        );
-      case "LeadForm":
-        return (
-          <>
-            <AiRewriteButton
-              blockType="LeadForm"
-              currentData={block.data}
-              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
-            />
-            <LeadFormForm data={block.data as LeadFormSchema} onChange={d => updateOptional(block.id, d)} />
           </>
         );
       default:

@@ -8,7 +8,7 @@ export const BLOCK_TYPES: BlockType[] = [
 
 export const OPTIONAL_BLOCK_TYPES: OptionalBlockType[] = [
   'Features', 'Reviews', 'TrustBanner', 'AuthorityStory', 'FAQ',
-  'Countdown', 'LeadForm', 'Assurance',
+  'Countdown', 'Assurance',
 ];
 
 export enum BlockZone {
@@ -23,5 +23,6 @@ export const FixedBlockKey = {
   Offer: 'offer',
   HowItWorks: 'howItWorks',
   Footer: 'footer',
+  LeadForm: 'leadForm',
   StickyCta: 'stickyCta',
 } as const;

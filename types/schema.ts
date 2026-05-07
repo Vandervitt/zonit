@@ -5,7 +5,7 @@
 export type IconType =
   | 'WhatsApp' | 'Telegram' | 'Line' | 'Phone' | 'Mail' | 'ArrowRight'
   | 'Check' | 'Shield' | 'Star' | 'Verified' | 'Secure'
-  | 'MessageCircle' | 'Truck'
+  | 'MessageCircle' | 'Calendar' | 'Clock' | 'Award'
   | (string & {});
 
 export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'external';
@@ -109,7 +109,7 @@ export interface OfferSchema {
 // 引导用户如何通过 WhatsApp/TG 联系，打消疑虑
 export interface StepItem {
   id: string;
-  icon: IconType;               // 如 "MessageCircle", "Check", "Truck"
+  icon: IconType;               // 如 "MessageCircle", "Check", "Calendar"
   title: string;                // 如 "Step 1: Contact Us"
   description: string;          // 如 "Click the button to chat with our team on WhatsApp."
 }
@@ -134,7 +134,7 @@ export interface MicroFooterSchema {
   disclaimer?: string;          // 针对医疗/金融/黑五类的免责声明 (如 "Investment involves risk...")
 }
 
-// 提炼商品或服务的优势
+// 提炼服务、方案或咨询价值的优势
 export interface FeatureItem {
   id: string;
   icon: IconType;               // 卖点图标
@@ -153,7 +153,7 @@ export interface FeaturesSchema {
 export interface ReviewItem {
   id: string;
   authorName: string;
-  authorRole?: string;          // 如 "Verified Buyer", "Member since 2023"
+  authorRole?: string;          // 如 "Verified Client", "Member since 2023"
   avatar?: string;              // 头像URL
   rating: number;               // 1-5 星
   content: string;              // 评价文字
@@ -288,7 +288,6 @@ export interface SeoMeta {
     faqPage?: boolean;          // 默认 true
     autoDerive?: boolean;       // 兼容旧模板：开启 Organization + FAQPage 自动派生（默认 true）
     deriveReviews?: boolean;    // 兼容旧模板：不建议在引流页默认开启
-    custom?: object[];          // 手写补充的 JSON-LD 节点
   };
 }
 
@@ -369,7 +368,6 @@ export type OptionalBlockType =
   | 'AuthorityStory'
   | 'FAQ'
   | 'Countdown'
-  | 'LeadForm'
   | 'Assurance';
 
 // 用 Extract 派生，避免与 PageBlock 手抄造成漂移
@@ -403,8 +401,11 @@ export interface LandingPageTemplate {
   // 位于 Offer 和 HowItWorks 之间的区域（适合放：用户评价、服务承诺）
   afterOffer?: OptionalBlock[];
 
-  // 位于 HowItWorks 和 Footer 之间的区域（适合放：FAQ、Lead 表单、底部 CTA 倒计时）
+  // 位于 HowItWorks 和 Footer 之间的区域（适合放：FAQ、底部 CTA 倒计时）
   lowerBlocks: OptionalBlock[];
+
+  // 页面级线索表单：MVP 仅允许一个，避免多表单/多 webhook/多埋点造成归因和合规复杂度
+  leadForm?: LeadFormSchema;
 
   // 全站悬浮 CTA（移动端转化主力，常用于 WhatsApp/Telegram 直跳）
   stickyCta?: CallToAction;

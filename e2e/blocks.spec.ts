@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { seedPublishedSite, cleanupSite, closeDb, SLUG_PREFIX } from './helpers/db';
-import { makeBaseTemplate, leadFormBlock } from './helpers/template';
+import { makeBaseTemplate, leadFormFixture } from './helpers/template';
 
 const SLUG = `${SLUG_PREFIX}blocks`;
 
@@ -9,7 +9,7 @@ test.describe('Phase 3 / Batch A — LeadForm 渲染', () => {
     await seedPublishedSite(
       SLUG,
       makeBaseTemplate({
-        lowerBlocks: [leadFormBlock()],
+        leadForm: leadFormFixture(),
       }),
     );
   });

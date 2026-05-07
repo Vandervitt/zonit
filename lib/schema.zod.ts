@@ -258,8 +258,7 @@ const SeoMetaSchema = z.object({
     faqPage: z.boolean().optional(),
     autoDerive: z.boolean().optional(),
     deriveReviews: z.boolean().optional(),
-    custom: z.array(z.record(z.string(), z.unknown())).optional(),
-  }).optional(),
+  }).strict().optional(),
 });
 
 const PixelEventSchema = z.object({
@@ -312,7 +311,6 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('AuthorityStory', AuthoritySchemaZ),
   block('FAQ', FAQSchemaZ),
   block('Countdown', CountdownSchemaZ),
-  block('LeadForm', LeadFormSchemaZ),
   block('Assurance', AssuranceSchemaZ),
 ]);
 
@@ -331,6 +329,7 @@ export const LandingPageTemplateSchema = z.object({
   upperBlocks: z.array(OptionalBlockSchema),
   afterOffer: z.array(OptionalBlockSchema).optional(),
   lowerBlocks: z.array(OptionalBlockSchema),
+  leadForm: LeadFormSchemaZ.optional(),
   stickyCta: CallToActionSchema.optional(),
 });
 

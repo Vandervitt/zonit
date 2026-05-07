@@ -29,9 +29,9 @@ export function getDefaultBlockData(type: string) {
       ],
     },
     Reviews: {
-      title: 'Customer Reviews', subtitle: 'Hear from our happy customers', averageRating: 5, totalReviews: '100+',
+      title: 'Client Reviews', subtitle: 'Hear from people who contacted us', averageRating: 5, totalReviews: '100+',
       items: [
-        { id: crypto.randomUUID(), authorName: 'Happy Customer', authorRole: 'Verified Buyer', rating: 5, content: 'Great product, highly recommended!' },
+        { id: crypto.randomUUID(), authorName: 'Happy Client', authorRole: 'Verified Client', rating: 5, content: 'The team responded quickly and guided me through the next step.' },
       ],
     },
     TrustBanner: {
@@ -57,7 +57,7 @@ export function getDefaultBlockData(type: string) {
     },
     Countdown: {
       title: 'Limited-Time Offer',
-      subtitle: 'Special pricing ends soon — act now',
+      subtitle: 'Consultation slots are limited this week',
       endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       expiredFallback: { title: 'Offer Ended', subtitle: 'Stay tuned for the next campaign' },
       variant: 'section',

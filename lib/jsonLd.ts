@@ -80,9 +80,5 @@ export function deriveJsonLd(template: LandingPageTemplate): JsonLdNode[] {
       if (reviews) nodes.push(...deriveReviews(reviews.data));
     }
   }
-
-  if (config?.custom?.length) {
-    nodes.push(...(config.custom as JsonLdNode[]));
-  }
   return nodes;
 }
