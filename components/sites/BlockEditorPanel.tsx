@@ -12,7 +12,7 @@ import { cn } from "../ui/utils";
 import {
   HeroForm, OfferForm, HowItWorksForm, FooterForm,
   FeaturesForm, ReviewsForm, TrustBannerForm, AuthorityForm, FAQForm,
-  CountdownForm, StickyCtaEditor, BeforeAfterForm, GuaranteeForm,
+  CountdownForm, StickyCtaEditor, BeforeAfterForm, AssuranceForm,
   LeadFormForm, MediaLogosForm, VideoTestimonialsForm,
 } from "./BlockForms";
 import { AddBlockDialog } from "./AddBlockDialog";
@@ -32,7 +32,7 @@ import type {
   FAQSchema,
   CountdownSchema,
   BeforeAfterSchema,
-  GuaranteeSchema,
+  AssuranceSchema,
   LeadFormSchema,
   MediaLogosSchema,
   VideoTestimonialsSchema,
@@ -132,8 +132,8 @@ function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
       return { id, type, data: getDefaultBlockData(type) as CountdownSchema };
     case "BeforeAfter":
       return { id, type, data: getDefaultBlockData(type) as BeforeAfterSchema };
-    case "Guarantee":
-      return { id, type, data: getDefaultBlockData(type) as GuaranteeSchema };
+    case "Assurance":
+      return { id, type, data: getDefaultBlockData(type) as AssuranceSchema };
     case "LeadForm":
       return { id, type, data: getDefaultBlockData(type) as LeadFormSchema };
     case "MediaLogos":
@@ -159,8 +159,8 @@ function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["
       return { ...block, data: newData as CountdownSchema };
     case "BeforeAfter":
       return { ...block, data: newData as BeforeAfterSchema };
-    case "Guarantee":
-      return { ...block, data: newData as GuaranteeSchema };
+    case "Assurance":
+      return { ...block, data: newData as AssuranceSchema };
     case "LeadForm":
       return { ...block, data: newData as LeadFormSchema };
     case "MediaLogos":
@@ -357,15 +357,15 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             <BeforeAfterForm data={block.data as BeforeAfterSchema} onChange={d => updateOptional(block.id, d)} />
           </>
         );
-      case "Guarantee":
+      case "Assurance":
         return (
           <>
             <AiRewriteButton
-              blockType="Guarantee"
+              blockType="Assurance"
               currentData={block.data}
               onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
             />
-            <GuaranteeForm data={block.data as GuaranteeSchema} onChange={d => updateOptional(block.id, d)} />
+            <AssuranceForm data={block.data as AssuranceSchema} onChange={d => updateOptional(block.id, d)} />
           </>
         );
       case "LeadForm":

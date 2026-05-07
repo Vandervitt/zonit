@@ -18,7 +18,7 @@ import type {
   CountdownSchema,
   CallToAction,
   BeforeAfterSchema,
-  GuaranteeSchema,
+  AssuranceSchema,
   LeadFormSchema,
   MediaLogosSchema,
   VideoTestimonialsSchema,
@@ -336,8 +336,8 @@ function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; prim
           <p className="text-sm text-slate-800">{tier.name}</p>
           <p className="text-xs text-slate-500">{tier.description}</p>
         </div>
-        {tier.priceText && (
-          <p className="text-xl shrink-0 ml-2" style={{ color: primaryColor }}>{tier.priceText}</p>
+        {tier.labelText && (
+          <p className="text-xl shrink-0 ml-2" style={{ color: primaryColor }}>{tier.labelText}</p>
         )}
       </div>
       <ul className="space-y-1 my-3">
@@ -501,7 +501,7 @@ function BeforeAfterBlock({ data, id, highlight }: { data: BeforeAfterSchema; id
   );
 }
 
-function GuaranteeBlock({ data, primaryColor, id, highlight }: { data: GuaranteeSchema; primaryColor: string; id?: string; highlight?: boolean }) {
+function AssuranceBlock({ data, primaryColor, id, highlight }: { data: AssuranceSchema; primaryColor: string; id?: string; highlight?: boolean }) {
   return (
     <section id={id} className="px-5 py-10 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <div className="flex flex-col items-center text-center">
@@ -720,7 +720,7 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       case "FAQ": return <FAQBlock key={block.id} id={block.id} data={block.data as FAQSchema} primaryColor={pc} highlight={hl} />;
       case "Countdown": return <CountdownBlock key={block.id} id={block.id} data={block.data as CountdownSchema} primaryColor={pc} highlight={hl} />;
       case "BeforeAfter": return <BeforeAfterBlock key={block.id} id={block.id} data={block.data as BeforeAfterSchema} highlight={hl} />;
-      case "Guarantee": return <GuaranteeBlock key={block.id} id={block.id} data={block.data as GuaranteeSchema} primaryColor={pc} highlight={hl} />;
+      case "Assurance": return <AssuranceBlock key={block.id} id={block.id} data={block.data as AssuranceSchema} primaryColor={pc} highlight={hl} />;
       case "LeadForm": return <LeadFormBlock key={block.id} id={block.id} data={block.data as LeadFormSchema} primaryColor={pc} highlight={hl} />;
       case "MediaLogos": return <MediaLogosBlock key={block.id} id={block.id} data={block.data as MediaLogosSchema} highlight={hl} />;
       case "VideoTestimonials": return <VideoTestimonialsBlock key={block.id} id={block.id} data={block.data as VideoTestimonialsSchema} highlight={hl} />;

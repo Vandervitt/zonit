@@ -84,7 +84,7 @@ const HeroSchemaZ = z.object({
 const OfferTierSchema = z.object({
   id: NonEmpty,
   name: NonEmpty,
-  priceText: z.string().optional(),
+  labelText: z.string().optional(),
   description: z.string(),
   valueProps: z.array(z.string()),
   tag: z.string().optional(),
@@ -243,7 +243,7 @@ const LeadFormSchemaZ = z.object({
   fields: z.array(LeadFormFieldSchema).min(1),
   submitText: NonEmpty,
   successMessage: z.string().optional(),
-  webhookUrl: NonEmpty,
+  webhookUrl: z.string().optional(),
   consentText: z.string().optional(),
   eventName: z.string().optional(),
 });
@@ -279,18 +279,18 @@ const VideoTestimonialsSchemaZ = z.object({
   variant: z.enum(['carousel', 'grid']).optional(),
 });
 
-const GuaranteeBadgeSchema = z.object({
+const AssuranceBadgeSchema = z.object({
   id: NonEmpty,
   icon: NonEmpty,
   text: NonEmpty,
   subtext: z.string().optional(),
 });
 
-const GuaranteeSchemaZ = z.object({
+const AssuranceSchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
   description: z.string().optional(),
-  badges: z.array(GuaranteeBadgeSchema).optional(),
+  badges: z.array(AssuranceBadgeSchema).optional(),
   image: z.string().optional(),
   cta: CallToActionSchema.optional(),
 });
@@ -304,6 +304,8 @@ const SeoMetaSchema = z.object({
   robots: z.string().optional(),
   jsonLd: z.object({
     autoDerive: z.boolean().optional(),
+    deriveProduct: z.boolean().optional(),
+    deriveReviews: z.boolean().optional(),
     custom: z.array(z.record(z.string(), z.unknown())).optional(),
   }).optional(),
 });
@@ -386,7 +388,7 @@ const PageBlockSchema = z.discriminatedUnion('type', [
   block('LeadForm', LeadFormSchemaZ),
   block('MediaLogos', MediaLogosSchemaZ),
   block('VideoTestimonials', VideoTestimonialsSchemaZ),
-  block('Guarantee', GuaranteeSchemaZ),
+  block('Assurance', AssuranceSchemaZ),
 ]);
 
 const OptionalBlockSchema = z.discriminatedUnion('type', [
@@ -400,7 +402,7 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('LeadForm', LeadFormSchemaZ),
   block('MediaLogos', MediaLogosSchemaZ),
   block('VideoTestimonials', VideoTestimonialsSchemaZ),
-  block('Guarantee', GuaranteeSchemaZ),
+  block('Assurance', AssuranceSchemaZ),
 ]);
 
 export const LandingPageTemplateSchema = z.object({

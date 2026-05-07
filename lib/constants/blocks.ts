@@ -4,13 +4,13 @@ export const BLOCK_TYPES: BlockType[] = [
   'Hero', 'Offer', 'HowItWorks', 'MicroFooter',
   'Features', 'Reviews', 'TrustBanner', 'AuthorityStory', 'FAQ',
   'Countdown', 'BeforeAfter', 'LeadForm', 'MediaLogos', 'VideoTestimonials',
-  'Guarantee',
+  'Assurance',
 ];
 
 export const OPTIONAL_BLOCK_TYPES: OptionalBlockType[] = [
   'Features', 'Reviews', 'TrustBanner', 'AuthorityStory', 'FAQ',
   'Countdown', 'BeforeAfter', 'LeadForm', 'MediaLogos', 'VideoTestimonials',
-  'Guarantee',
+  'Assurance',
 ];
 
 export enum BlockZone {

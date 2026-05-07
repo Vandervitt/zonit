@@ -17,12 +17,12 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
       title: 'Pricing',
       tiers: [
         {
-          id: 'tier-basic', name: 'Basic', priceText: '$29', description: 'Entry tier',
+          id: 'tier-basic', name: 'Basic', labelText: '$29', description: 'Entry tier',
           valueProps: ['Feature A'],
           cta: { text: 'Pick Basic', url: 'https://example.com/basic' },
         },
         {
-          id: 'tier-pro', name: 'Pro', priceText: '$99', description: 'Recommended tier',
+          id: 'tier-pro', name: 'Pro', labelText: '$99', description: 'Recommended tier',
           valueProps: ['Feature A', 'Feature B'], isRecommended: true,
           image: 'https://example.com/pro.png',
           cta: { text: 'Pick Pro', url: 'https://example.com/pro' },

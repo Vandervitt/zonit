@@ -95,8 +95,8 @@ export interface HeroSchema {
 // 核心转化 Offer —— 展示服务/方案，引导点击咨询或留资
 export interface OfferTier {
   id: string;
-  name: string;                 // 方案名称，如 "Basic", "Family Pack", "VIP Signal"
-  priceText?: string;           // 价格展示文案，如 "$49", "Free Quote", "从 ¥199 起"
+  name: string;                 // 方案名称，如 "入门咨询", "家庭套餐", "专属服务"
+  labelText?: string;           // 展示文案，如 "Free Quote", "Book a Consultation", "From $49"
   description: string;          // 简短描述
   valueProps: string[];         // 核心价值点列表
   tag?: string;                 // 推荐标签，如 "Most Popular", "Best Value"
@@ -273,7 +273,7 @@ export interface LeadFormSchema {
   fields: LeadFormField[];
   submitText: string;
   successMessage?: string;
-  webhookUrl: string;           // 线索提交目标 URL，发布前必填
+  webhookUrl?: string;          // 外部线索接收 URL（高级配置），未填则提交到平台默认 API
   consentText?: string;         // GDPR 同意文本
   eventName?: string;           // 提交埋点事件名
 }
@@ -311,19 +311,19 @@ export interface VideoTestimonialsSchema {
   variant?: 'carousel' | 'grid';
 }
 
-// 退款 / 风险反转
-export interface GuaranteeBadge {
+// 服务承诺 / 信任保障（免费咨询、响应时效、隐私保护等，不绑定退款/交易语义）
+export interface AssuranceBadge {
   id: string;
   icon: IconType;
   text: string;
   subtext?: string;
 }
 
-export interface GuaranteeSchema {
+export interface AssuranceSchema {
   title: string;
   subtitle?: string;
   description?: string;         // 承诺正文
-  badges?: GuaranteeBadge[];
+  badges?: AssuranceBadge[];
   image?: string;               // 徽章/印章图
   cta?: CallToAction;
 }
@@ -335,7 +335,10 @@ export interface SeoMeta {
   ogImage?: string;
   robots?: string;
   jsonLd?: {
-    autoDerive?: boolean;       // 从 FAQ/Reviews 等自动派生 schema.org JSON-LD（默认开）
+    // 默认只自动派生 Organization / FAQPage；Product/Offer/Review 需显式开启
+    autoDerive?: boolean;       // 开启 Organization + FAQPage 自动派生（默认 true）
+    deriveProduct?: boolean;    // 额外派生 Product + Offer 结构化数据（显式开启）
+    deriveReviews?: boolean;    // 额外派生 Review / AggregateRating（显式开启）
     custom?: object[];          // 手写补充的 JSON-LD 节点
   };
 }
@@ -423,7 +426,7 @@ export type BlockType =
   | 'LeadForm'
   | 'MediaLogos'
   | 'VideoTestimonials'
-  | 'Guarantee';
+  | 'Assurance';
 
 type BlockBase<TType extends BlockType, TData> = {
   id: string;          // 唯一ID (UUID)
@@ -448,15 +451,7 @@ export type PageBlock =
   | BlockBase<'LeadForm', LeadFormSchema>
   | BlockBase<'MediaLogos', MediaLogosSchema>
   | BlockBase<'VideoTestimonials', VideoTestimonialsSchema>
-  | BlockBase<'Guarantee', GuaranteeSchema>;
-
-// 整个落地页的最终数据结构 (存入数据库的 JSON)
-export interface LandingPageData {
-  pageId: string;
-  theme: string;       // 行业主题皮肤标识，如 "crypto-dark", "beauty-light"
-  pageMeta?: PageMeta; // SEO、本地化、像素等投放信息
-  blocks: PageBlock[]; // 按顺序排列的页面模块
-}
+  | BlockBase<'Assurance', AssuranceSchema>;
 
 // 1. 抽离可选模块的联合类型
 export type OptionalBlockType =
@@ -470,7 +465,7 @@ export type OptionalBlockType =
   | 'LeadForm'
   | 'MediaLogos'
   | 'VideoTestimonials'
-  | 'Guarantee';
+  | 'Assurance';
 
 // 用 Extract 派生，避免与 PageBlock 手抄造成漂移
 export type OptionalBlock = Extract<PageBlock, { type: OptionalBlockType }>;

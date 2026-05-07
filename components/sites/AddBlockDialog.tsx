@@ -71,9 +71,9 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
     zone: BlockZone.Middle,
   },
   {
-    type: "Guarantee",
-    label: "退款承诺",
-    description: "风险反转，30 天无理由退款 + 安全付款徽章",
+    type: "Assurance",
+    label: "服务承诺",
+    description: "免费咨询、响应时效、隐私保护等信任保障徽章",
     icon: <BadgeCheck className="w-5 h-5 text-green-500" />,
     zone: BlockZone.Middle,
   },

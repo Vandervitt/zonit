@@ -32,8 +32,8 @@ import type {
   CountdownSchema,
   BeforeAfterSchema,
   BeforeAfterPair,
-  GuaranteeSchema,
-  GuaranteeBadge,
+  AssuranceSchema,
+  AssuranceBadge,
   LeadFormSchema,
   LeadFormField,
   LeadFormFieldType,
@@ -333,7 +333,7 @@ function TierEditor({ tier, onChange, onRemove, index }: { tier: OfferTier; onCh
       </div>
       <div className="grid grid-cols-2 gap-2">
         <Field label="名称"><Input className={`${di} h-8`} value={tier.name} onChange={e => onChange({ ...tier, name: e.target.value })} /></Field>
-        <Field label="价格文案"><Input className={`${di} h-8`} value={tier.priceText ?? ""} onChange={e => onChange({ ...tier, priceText: e.target.value })} placeholder="从 $49 起" /></Field>
+        <Field label="展示文案"><Input className={`${di} h-8`} value={tier.labelText ?? ""} onChange={e => onChange({ ...tier, labelText: e.target.value })} placeholder="Free Quote" /></Field>
         <Field label="推荐标签"><Input className={`${di} h-8`} value={tier.tag ?? ""} onChange={e => onChange({ ...tier, tag: e.target.value })} placeholder="Most Popular" /></Field>
         <Field label="紧迫文案"><Input className={`${di} h-8`} value={tier.urgencyText ?? ""} onChange={e => onChange({ ...tier, urgencyText: e.target.value })} placeholder="仅剩 5 名额" /></Field>
       </div>
@@ -782,9 +782,9 @@ export function BeforeAfterForm({ data, onChange }: { data: BeforeAfterSchema; o
   );
 }
 
-// ── GuaranteeForm ───────────────────────────────────────────────────────────
+// ── AssuranceForm ───────────────────────────────────────────────────────────
 
-function GuaranteeBadgeEditor({ badge, onChange, onRemove }: { badge: GuaranteeBadge; onChange: (b: GuaranteeBadge) => void; onRemove: () => void }) {
+function AssuranceBadgeEditor({ badge, onChange, onRemove }: { badge: AssuranceBadge; onChange: (b: AssuranceBadge) => void; onRemove: () => void }) {
   return (
     <div className={card}>
       <div className="grid grid-cols-2 gap-2">
@@ -801,7 +801,7 @@ function GuaranteeBadgeEditor({ badge, onChange, onRemove }: { badge: GuaranteeB
   );
 }
 
-export function GuaranteeForm({ data, onChange }: { data: GuaranteeSchema; onChange: (d: GuaranteeSchema) => void }) {
+export function AssuranceForm({ data, onChange }: { data: AssuranceSchema; onChange: (d: AssuranceSchema) => void }) {
   const addBadge = () => onChange({
     ...data,
     badges: [...(data.badges ?? []), { id: crypto.randomUUID(), icon: "Shield", text: "New Badge" }],
@@ -821,7 +821,7 @@ export function GuaranteeForm({ data, onChange }: { data: GuaranteeSchema; onCha
       <SectionDivider label="信任徽章" />
       <div className="space-y-2">
         {(data.badges ?? []).map((badge, i) => (
-          <GuaranteeBadgeEditor
+          <AssuranceBadgeEditor
             key={badge.id}
             badge={badge}
             onChange={b => onChange({ ...data, badges: (data.badges ?? []).map((bg, bi) => bi === i ? b : bg) })}
@@ -925,7 +925,7 @@ export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChang
         <Field label="提交埋点事件名"><Input className={di} value={data.eventName ?? ""} onChange={e => onChange({ ...data, eventName: e.target.value })} placeholder="lead_form_submit" /></Field>
       </div>
       <Field label="提交后提示语"><Input className={di} value={data.successMessage ?? ""} onChange={e => onChange({ ...data, successMessage: e.target.value })} placeholder="Thanks! We'll be in touch shortly." /></Field>
-      <Field label="Webhook URL"><Input className={di} value={data.webhookUrl} onChange={e => onChange({ ...data, webhookUrl: e.target.value })} placeholder="https://hooks.zapier.com/..." /></Field>
+      <Field label="Webhook URL（可选）"><Input className={di} value={data.webhookUrl ?? ""} onChange={e => onChange({ ...data, webhookUrl: e.target.value || undefined })} placeholder="https://hooks.zapier.com/..." /></Field>
       <Field label="GDPR 同意文本">
         <Textarea className={`${dt} min-h-[50px]`} value={data.consentText ?? ""} onChange={e => onChange({ ...data, consentText: e.target.value })} placeholder="By submitting, you agree to our privacy policy." />
       </Field>

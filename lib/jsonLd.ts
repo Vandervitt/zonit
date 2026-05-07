@@ -1,12 +1,9 @@
 // 从 LandingPageTemplate 派生 schema.org JSON-LD 节点。
 // 纯函数，服务端可调用；返回数组，调用方负责注入 <script type="application/ld+json">。
 //
-// 覆盖范围：
-//   - offer.tiers            → Product + Offer
-//   - any FAQ block          → FAQPage
-//   - any Reviews block      → AggregateRating + 前 5 条 Review
-//   - any VideoTestimonials  → VideoObject[]
-//   - footer                 → Organization
+// 默认派生范围：Organization + FAQPage
+// deriveProduct: true  → Product + Offer（需显式开启）
+// deriveReviews: true  → Review / AggregateRating（需显式开启）
 
 import type {
   LandingPageTemplate,
@@ -31,7 +28,6 @@ function findBlock<T extends OptionalBlock['type']>(
   return blocks.find(b => b.type === type) as Extract<OptionalBlock, { type: T }> | undefined;
 }
 
-// 价格字符串 "$49" / "49" → "49"
 function normalizePrice(raw: string): string | undefined {
   const m = raw.match(/[\d.]+/);
   return m ? m[0] : undefined;
@@ -41,7 +37,7 @@ function deriveProduct(template: LandingPageTemplate, blocks: OptionalBlock[]): 
   const tiers = template.offer.tiers;
   if (!tiers.length) return undefined;
   const main = tiers.find(t => t.isRecommended) ?? tiers[0];
-  const price = main.priceText ? normalizePrice(main.priceText) : undefined;
+  const price = main.labelText ? normalizePrice(main.labelText) : undefined;
   const reviewsBlock = findBlock(blocks, 'Reviews');
   const rating = reviewsBlock?.data.ratingSummary?.average ?? reviewsBlock?.data.averageRating;
 
@@ -123,15 +119,22 @@ export function deriveJsonLd(template: LandingPageTemplate): JsonLdNode[] {
 
   if (auto) {
     const blocks = allBlocks(template);
-    const product = deriveProduct(template, blocks);
-    if (product) nodes.push(product);
+    nodes.push(deriveOrganization(template));
     const faq = findBlock(blocks, 'FAQ');
     if (faq) nodes.push(deriveFaq(faq.data));
-    const reviews = findBlock(blocks, 'Reviews');
-    if (reviews) nodes.push(...deriveReviews(reviews.data));
+
+    if (seo?.jsonLd?.deriveProduct) {
+      const product = deriveProduct(template, blocks);
+      if (product) nodes.push(product);
+    }
+
+    if (seo?.jsonLd?.deriveReviews) {
+      const reviews = findBlock(blocks, 'Reviews');
+      if (reviews) nodes.push(...deriveReviews(reviews.data));
+    }
+
     const videos = findBlock(blocks, 'VideoTestimonials');
     if (videos) nodes.push(...deriveVideos(videos.data));
-    nodes.push(deriveOrganization(template));
   }
 
   if (seo?.jsonLd?.custom?.length) {
