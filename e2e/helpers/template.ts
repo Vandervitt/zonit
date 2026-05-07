@@ -96,7 +96,7 @@ export function videoTestimonialsBlock(): OptionalBlock {
 export function paymentBadgesBlock(): OptionalBlock {
   return {
     id: 'block-payment',
-    type: 'PaymentBadges',
+    type: 'PaymentTrust',
     data: {
       title: 'Secure Payment Methods',
       secureNote: 'SSL encrypted',

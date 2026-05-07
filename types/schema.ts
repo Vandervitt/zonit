@@ -8,7 +8,7 @@ export type IconType =
   | 'MessageCircle' | 'Truck'
   | (string & {});
 
-export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'checkout' | 'form' | 'external';
+export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'external';
 export type LinkTarget = '_self' | '_blank';
 export type BillingPeriod = 'one-time' | 'day' | 'week' | 'month' | 'quarter' | 'year' | 'lifetime' | 'custom';
 
@@ -27,8 +27,6 @@ export interface CallToAction {
   download?: {
     fileUrl: string;                 // 资源 URL
     fileName?: string;               // 下载时的文件名
-    requireLeadCapture?: boolean;    // 是否先弹 LeadForm 再放行
-    leadFormBlockId?: string;        // 关联的 LeadForm block id（同一 template 内）
   };
 }
 
@@ -90,6 +88,7 @@ export interface HeroSchema {
   proofPoints?: HeroProofPoint[]; // 首屏证明信息，建立初始信任
   media?: HeroMedia;            // 首屏辅助视觉
   countdown?: CountdownSchema;  // 首屏内嵌倒计时（限时活动）
+  // split-left / split-right 需配合 media 字段使用；overlay 使用 background 叠加遮罩
   variant?: 'overlay' | 'split-left' | 'split-right';
 }
 
@@ -190,6 +189,7 @@ export interface ReviewsSchema {
     totalLabel?: string;        // 如 "Based on 2,384 reviews"
   };
   items: ReviewItem[];
+  disclaimer?: string;             // 如 "Results may vary"，医疗/金融/减肥类目合规必备
   variant?: 'grid' | 'carousel';
 }
 
@@ -279,7 +279,7 @@ export interface LeadFormSchema {
   fields: LeadFormField[];
   submitText: string;
   successMessage?: string;
-  webhookUrl?: string;          // 提交目标，未填则走默认收件箱
+  webhookUrl?: string;          // 提交目标 URL；未填时由平台层注入默认收件箱，发布前校验层应拒绝为空
   consentText?: string;         // GDPR 同意文本
   eventName?: string;           // 提交埋点事件名
 }
@@ -334,20 +334,21 @@ export interface GuaranteeSchema {
   cta?: CallToAction;           // "阅读完整政策"
 }
 
-// 支付徽章（COD/中东市场专属信任 section）
-export type PaymentProvider =
+// 支付信任徽章（COD/中东市场专属信任 section）
+// 仅展示支付方式 logo 以建立信任，页面本身不接入任何支付渠道
+export type TrustPaymentProvider =
   | 'visa' | 'mastercard' | 'amex' | 'paypal' | 'apple-pay' | 'google-pay'
   | 'cod' | 'bank-transfer' | 'crypto' | (string & {});
 
-export interface PaymentBadge {
+export interface TrustPaymentBadge {
   id: string;
-  provider: PaymentProvider;
+  provider: TrustPaymentProvider;
   label?: string;
 }
 
-export interface PaymentBadgesSchema {
+export interface PaymentTrustSchema {
   title?: string;               // 'Secure Payment Methods'
-  badges: PaymentBadge[];
+  badges: TrustPaymentBadge[];
   secureNote?: string;          // 'SSL encrypted · PCI-DSS compliant'
 }
 
@@ -462,7 +463,7 @@ export type BlockType =
   | 'MediaLogos'
   | 'VideoTestimonials'
   | 'Guarantee'
-  | 'PaymentBadges'
+  | 'PaymentTrust'
   | 'ShippingInfo';
 
 type BlockBase<TType extends BlockType, TData> = {
@@ -489,7 +490,7 @@ export type PageBlock =
   | BlockBase<'MediaLogos', MediaLogosSchema>
   | BlockBase<'VideoTestimonials', VideoTestimonialsSchema>
   | BlockBase<'Guarantee', GuaranteeSchema>
-  | BlockBase<'PaymentBadges', PaymentBadgesSchema>
+  | BlockBase<'PaymentTrust', PaymentTrustSchema>
   | BlockBase<'ShippingInfo', ShippingInfoSchema>;
 
 // 整个落地页的最终数据结构 (存入数据库的 JSON)
@@ -513,7 +514,7 @@ export type OptionalBlockType =
   | 'MediaLogos'
   | 'VideoTestimonials'
   | 'Guarantee'
-  | 'PaymentBadges'
+  | 'PaymentTrust'
   | 'ShippingInfo';
 
 // 用 Extract 派生，避免与 PageBlock 手抄造成漂移

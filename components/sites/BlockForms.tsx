@@ -41,8 +41,8 @@ import type {
   MediaLogo,
   VideoTestimonialsSchema,
   VideoTestimonialItem,
-  PaymentBadgesSchema,
-  PaymentBadge,
+  PaymentTrustSchema,
+  TrustPaymentBadge,
   ShippingInfoSchema,
   ShippingInfoItem,
 } from "@/types/schema";
@@ -148,19 +148,6 @@ function CtaFields({ value, onChange }: { value: CallToAction; onChange: (v: Cal
           <Field label="下载文件名（可选）">
             <Input className={di} value={dl.fileName ?? ""} onChange={e => onChange({ ...value, download: { ...dl, fileName: e.target.value } })} placeholder="lead-magnet.pdf" />
           </Field>
-          <label className="flex items-center gap-2 text-xs text-zinc-300">
-            <input
-              type="checkbox"
-              checked={!!dl.requireLeadCapture}
-              onChange={e => onChange({ ...value, download: { ...dl, requireLeadCapture: e.target.checked } })}
-            />
-            下载前先弹出 LeadForm 收集线索
-          </label>
-          {dl.requireLeadCapture && (
-            <Field label="关联 LeadForm Block ID">
-              <Input className={di} value={dl.leadFormBlockId ?? ""} onChange={e => onChange({ ...value, download: { ...dl, leadFormBlockId: e.target.value } })} placeholder="block-uuid" />
-            </Field>
-          )}
         </div>
       )}
     </div>
@@ -1096,14 +1083,14 @@ export function VideoTestimonialsForm({ data, onChange }: { data: VideoTestimoni
   );
 }
 
-// ── PaymentBadgesForm ───────────────────────────────────────────────────────
+// ── PaymentTrustForm ────────────────────────────────────────────────────────
 
 const PAYMENT_PROVIDERS = [
   "visa", "mastercard", "amex", "paypal", "apple-pay", "google-pay",
   "cod", "bank-transfer", "crypto",
 ];
 
-function PaymentBadgeEditor({ badge, onChange, onRemove }: { badge: PaymentBadge; onChange: (b: PaymentBadge) => void; onRemove: () => void }) {
+function PaymentBadgeEditor({ badge, onChange, onRemove }: { badge: TrustPaymentBadge; onChange: (b: TrustPaymentBadge) => void; onRemove: () => void }) {
   return (
     <div className={card}>
       <div className="flex items-center justify-between">
@@ -1129,7 +1116,7 @@ function PaymentBadgeEditor({ badge, onChange, onRemove }: { badge: PaymentBadge
   );
 }
 
-export function PaymentBadgesForm({ data, onChange }: { data: PaymentBadgesSchema; onChange: (d: PaymentBadgesSchema) => void }) {
+export function PaymentBadgesForm({ data, onChange }: { data: PaymentTrustSchema; onChange: (d: PaymentTrustSchema) => void }) {
   const addBadge = () => onChange({
     ...data,
     badges: [...data.badges, { id: crypto.randomUUID(), provider: "visa", label: "Visa" }],

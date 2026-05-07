@@ -99,9 +99,9 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
     zone: BlockZone.Lower,
   },
   {
-    type: "PaymentBadges",
-    label: "支付徽章",
-    description: "Visa / Mastercard / COD 支付方式集合，强化信任",
+    type: "PaymentTrust",
+    label: "支付信任徽章",
+    description: "Visa / Mastercard / COD 支付方式 logo，仅作信任背书，非支付入口",
     icon: <CreditCard className="w-5 h-5 text-blue-500" />,
     zone: BlockZone.Middle,
   },

@@ -9,11 +9,6 @@ const BillingPeriodSchema = z.enum(['one-time', 'day', 'week', 'month', 'quarter
 const DownloadConfigSchema = z.object({
   fileUrl: NonEmpty,
   fileName: z.string().optional(),
-  requireLeadCapture: z.boolean().optional(),
-  leadFormBlockId: z.string().optional(),
-}).refine(d => !d.requireLeadCapture || !!d.leadFormBlockId, {
-  message: 'requireLeadCapture 为 true 时必须指定 leadFormBlockId',
-  path: ['leadFormBlockId'],
 });
 
 const CallToActionSchema = z.object({
@@ -21,7 +16,7 @@ const CallToActionSchema = z.object({
   url: NonEmpty,
   icon: z.string().optional(),
   theme: z.enum(['primary', 'secondary', 'whatsapp', 'telegram']).optional(),
-  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'checkout', 'form', 'external']).optional(),
+  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'external']).optional(),
   target: z.enum(['_self', '_blank']).optional(),
   rel: z.string().optional(),
   prefilledMessage: z.string().optional(),
@@ -307,15 +302,15 @@ const GuaranteeSchemaZ = z.object({
   cta: CallToActionSchema.optional(),
 });
 
-const PaymentBadgeSchema = z.object({
+const TrustPaymentBadgeSchema = z.object({
   id: NonEmpty,
   provider: NonEmpty,
   label: z.string().optional(),
 });
 
-const PaymentBadgesSchemaZ = z.object({
+const PaymentTrustSchemaZ = z.object({
   title: z.string().optional(),
-  badges: z.array(PaymentBadgeSchema).min(1),
+  badges: z.array(TrustPaymentBadgeSchema).min(1),
   secureNote: z.string().optional(),
 });
 
@@ -424,7 +419,7 @@ const PageBlockSchema = z.discriminatedUnion('type', [
   block('MediaLogos', MediaLogosSchemaZ),
   block('VideoTestimonials', VideoTestimonialsSchemaZ),
   block('Guarantee', GuaranteeSchemaZ),
-  block('PaymentBadges', PaymentBadgesSchemaZ),
+  block('PaymentTrust', PaymentTrustSchemaZ),
   block('ShippingInfo', ShippingInfoSchemaZ),
 ]);
 
@@ -440,7 +435,7 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('MediaLogos', MediaLogosSchemaZ),
   block('VideoTestimonials', VideoTestimonialsSchemaZ),
   block('Guarantee', GuaranteeSchemaZ),
-  block('PaymentBadges', PaymentBadgesSchemaZ),
+  block('PaymentTrust', PaymentTrustSchemaZ),
   block('ShippingInfo', ShippingInfoSchemaZ),
 ]);
 

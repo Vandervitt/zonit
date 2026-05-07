@@ -4,7 +4,7 @@ import { makeBaseTemplate, paymentBadgesBlock, shippingInfoBlock } from './helpe
 
 const SLUG = `${SLUG_PREFIX}blocks`;
 
-test.describe('Phase 3 / Batch A — PaymentBadges + ShippingInfo 渲染', () => {
+test.describe('Phase 3 / Batch A — PaymentTrust + ShippingInfo 渲染', () => {
   test.beforeAll(async () => {
     await seedPublishedSite(
       SLUG,
@@ -19,7 +19,7 @@ test.describe('Phase 3 / Batch A — PaymentBadges + ShippingInfo 渲染', () =>
     await closeDb();
   });
 
-  test('PaymentBadges 模块渲染标题、徽章 label 与安全提示', async ({ page }) => {
+  test('PaymentTrust 模块渲染标题、徽章 label 与安全提示', async ({ page }) => {
     await page.goto(`/site/${SLUG}`);
     await expect(page.getByText('Secure Payment Methods')).toBeVisible();
     await expect(page.getByText('Visa')).toBeVisible();

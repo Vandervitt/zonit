@@ -116,7 +116,7 @@ export function getDefaultBlockData(type: string) {
         },
       ],
     },
-    PaymentBadges: {
+    PaymentTrust: {
       title: 'Secure Payment Methods',
       secureNote: 'SSL encrypted · PCI-DSS compliant',
       badges: [

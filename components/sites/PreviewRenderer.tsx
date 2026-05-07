@@ -23,7 +23,7 @@ import type {
   MediaLogosSchema,
   VideoTestimonialsSchema,
   VideoTestimonialItem,
-  PaymentBadgesSchema,
+  PaymentTrustSchema,
   ShippingInfoSchema,
   OptionalBlock,
 } from "@/types/schema";
@@ -678,7 +678,7 @@ function VideoTestimonialsBlock({ data, id, highlight }: { data: VideoTestimonia
   );
 }
 
-function PaymentBadgesBlock({ data, id, highlight }: { data: PaymentBadgesSchema; id?: string; highlight?: boolean }) {
+function PaymentBadgesBlock({ data, id, highlight }: { data: PaymentTrustSchema; id?: string; highlight?: boolean }) {
   return (
     <section id={id} className="px-5 py-8 bg-white" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       {data.title && (
@@ -777,7 +777,7 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       case "LeadForm": return <LeadFormBlock key={block.id} id={block.id} data={block.data as LeadFormSchema} primaryColor={pc} highlight={hl} />;
       case "MediaLogos": return <MediaLogosBlock key={block.id} id={block.id} data={block.data as MediaLogosSchema} highlight={hl} />;
       case "VideoTestimonials": return <VideoTestimonialsBlock key={block.id} id={block.id} data={block.data as VideoTestimonialsSchema} highlight={hl} />;
-      case "PaymentBadges": return <PaymentBadgesBlock key={block.id} id={block.id} data={block.data as PaymentBadgesSchema} highlight={hl} />;
+      case "PaymentTrust": return <PaymentBadgesBlock key={block.id} id={block.id} data={block.data as PaymentTrustSchema} highlight={hl} />;
       case "ShippingInfo": return <ShippingInfoBlock key={block.id} id={block.id} data={block.data as ShippingInfoSchema} primaryColor={pc} highlight={hl} />;
       default: return null;
     }
