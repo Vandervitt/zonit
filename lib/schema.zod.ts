@@ -167,6 +167,7 @@ const ReviewsSchemaZ = z.object({
     totalLabel: z.string().optional(),
   }).optional(),
   items: z.array(ReviewItemSchema).min(1),
+  disclaimer: z.string().optional(),
   variant: z.enum(['grid', 'carousel']).optional(),
 });
 

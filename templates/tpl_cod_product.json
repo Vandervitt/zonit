@@ -43,38 +43,39 @@
             }
         }
     ],
-    "bundles": {
-        "title": "Choose Your Package",
+    "offer": {
+        "title": "Choose Your Pack",
         "tiers": [
             {
                 "id": "tier-1",
                 "name": "Single Pack",
-                "price": "$29",
-                "originalPrice": "$58",
+                "labelText": "Chat to Order",
                 "description": "Perfect for trying it out.",
-                "features": [
+                "valueProps": [
                     "1x Item",
-                    "Standard Shipping"
+                    "Standard Delivery",
+                    "Cash on Delivery"
                 ],
                 "cta": {
-                    "text": "Order 1 via WhatsApp",
+                    "text": "Get Details on WhatsApp",
                     "url": "https://wa.me/..."
                 }
             },
             {
                 "id": "tier-2",
-                "name": "Family Bundle (Buy 2 Get 1 Free)",
-                "price": "$58",
-                "originalPrice": "$174",
-                "description": "Best value for sharing.",
-                "features": [
+                "name": "Family Bundle",
+                "labelText": "Best Value",
+                "description": "Great for sharing with family.",
+                "valueProps": [
                     "3x Items",
                     "Free Express Delivery",
-                    "Priority Support"
+                    "Priority Support",
+                    "Cash on Delivery"
                 ],
                 "tag": "BEST SELLER",
+                "isRecommended": true,
                 "cta": {
-                    "text": "Order Bundle via WhatsApp",
+                    "text": "Claim Bundle on WhatsApp",
                     "url": "https://wa.me/...",
                     "theme": "primary"
                 }

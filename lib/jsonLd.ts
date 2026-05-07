@@ -2,7 +2,6 @@
 // 纯函数，服务端可调用；返回数组，调用方负责注入 <script type="application/ld+json">。
 //
 // 默认派生范围：Organization + FAQPage
-// deriveProduct: true  → Product + Offer（需显式开启）
 // deriveReviews: true  → Review / AggregateRating（需显式开启）
 
 import type {
@@ -28,43 +27,6 @@ function findBlock<T extends OptionalBlock['type']>(
   return blocks.find(b => b.type === type) as Extract<OptionalBlock, { type: T }> | undefined;
 }
 
-function normalizePrice(raw: string): string | undefined {
-  const m = raw.match(/[\d.]+/);
-  return m ? m[0] : undefined;
-}
-
-function deriveProduct(template: LandingPageTemplate, blocks: OptionalBlock[]): JsonLdNode | undefined {
-  const tiers = template.offer.tiers;
-  if (!tiers.length) return undefined;
-  const main = tiers.find(t => t.isRecommended) ?? tiers[0];
-  const price = main.labelText ? normalizePrice(main.labelText) : undefined;
-  const reviewsBlock = findBlock(blocks, 'Reviews');
-  const rating = reviewsBlock?.data.ratingSummary?.average ?? reviewsBlock?.data.averageRating;
-
-  const node: JsonLdNode = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: main.name,
-    description: main.description || template.offer.title,
-  };
-  if (main.image) node.image = main.image;
-  if (price) {
-    node.offers = {
-      '@type': 'Offer',
-      price,
-      priceCurrency: template.pageMeta?.currency || 'USD',
-      availability: 'https://schema.org/InStock',
-    };
-  }
-  if (rating && reviewsBlock) {
-    node.aggregateRating = {
-      '@type': 'AggregateRating',
-      ratingValue: rating,
-      reviewCount: reviewsBlock.data.items.length,
-    };
-  }
-  return node;
-}
 
 function deriveFaq(faq: FAQSchema): JsonLdNode {
   return {
@@ -122,11 +84,6 @@ export function deriveJsonLd(template: LandingPageTemplate): JsonLdNode[] {
     nodes.push(deriveOrganization(template));
     const faq = findBlock(blocks, 'FAQ');
     if (faq) nodes.push(deriveFaq(faq.data));
-
-    if (seo?.jsonLd?.deriveProduct) {
-      const product = deriveProduct(template, blocks);
-      if (product) nodes.push(product);
-    }
 
     if (seo?.jsonLd?.deriveReviews) {
       const reviews = findBlock(blocks, 'Reviews');

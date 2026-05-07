@@ -81,7 +81,7 @@ export interface HeroSchema {
     overlayOpacity?: number;    // 暗化遮罩透明度 (0-1)，用于凸显白色文字
   };
   cta: CallToAction;            // 主按钮
-  secondaryCta?: CallToAction;  // 次按钮，适合对比 "View Pricing" / "See Results"
+  secondaryCta?: CallToAction;  // 次按钮，如 "See Results" / "Learn More" / "Check Cases"
   trustText?: string;           // 按钮下方的小字背书，如 "No credit card required"
   highlights?: HeroHighlight[]; // 首屏利益点，快速降低跳出
   proofPoints?: HeroProofPoint[]; // 首屏证明信息，建立初始信任
@@ -96,7 +96,7 @@ export interface HeroSchema {
 export interface OfferTier {
   id: string;
   name: string;                 // 方案名称，如 "入门咨询", "家庭套餐", "专属服务"
-  labelText?: string;           // 展示文案，如 "Free Quote", "Book a Consultation", "From $49"
+  labelText?: string;           // 展示标签，如 "Free Quote", "Book Consultation", "Limited Slots"
   description: string;          // 简短描述
   valueProps: string[];         // 核心价值点列表
   tag?: string;                 // 推荐标签，如 "Most Popular", "Best Value"
@@ -337,7 +337,6 @@ export interface SeoMeta {
   jsonLd?: {
     // 默认只自动派生 Organization / FAQPage；Product/Offer/Review 需显式开启
     autoDerive?: boolean;       // 开启 Organization + FAQPage 自动派生（默认 true）
-    deriveProduct?: boolean;    // 额外派生 Product + Offer 结构化数据（显式开启）
     deriveReviews?: boolean;    // 额外派生 Review / AggregateRating（显式开启）
     custom?: object[];          // 手写补充的 JSON-LD 节点
   };
