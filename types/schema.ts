@@ -123,7 +123,8 @@ export interface HowItWorksSchema {
 // 合规模块，防封号必备，全局只能存在一个
 export interface FooterLink {
   text: string;                 // 如 "Privacy Policy", "Terms of Service"
-  url: string;                  // 跳转链接
+  url?: string;                 // 真正需要外跳时使用
+  content?: string;             // 单页落地页内联展示的政策正文
 }
 
 export interface MicroFooterSchema {

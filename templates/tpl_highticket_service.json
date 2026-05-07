@@ -132,11 +132,11 @@
         "links": [
             {
                 "text": "Privacy Policy",
-                "url": "/privacy"
+                "content": "We collect submitted contact details only to respond to your consultation request, coordinate appointment options, and provide patient support. We do not sell your personal information. You can contact hello@ipdental.com to request access, correction, or deletion of your submitted information."
             },
             {
                 "text": "Terms",
-                "url": "/terms"
+                "content": "By submitting an inquiry, you agree that Istanbul Premium Dental may contact you about your request. Information on this page is for consultation purposes only and does not replace an in-person diagnosis or professional medical advice. Treatment plans and eligibility are confirmed after clinical review."
             }
         ],
         "disclaimer": "Medical disclaimer: Results may vary. Please consult with our certified doctors."

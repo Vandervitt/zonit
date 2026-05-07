@@ -107,7 +107,11 @@ const HowItWorksSchemaZ = z.object({
 
 const FooterLinkSchema = z.object({
   text: NonEmpty,
-  url: NonEmpty,
+  url: z.string().optional(),
+  content: z.string().optional(),
+}).refine(link => Boolean(link.url?.trim() || link.content?.trim()), {
+  message: 'Footer link must include either url or content.',
+  path: ['url'],
 });
 
 const MicroFooterSchemaZ = z.object({

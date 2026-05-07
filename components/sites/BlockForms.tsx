@@ -406,7 +406,7 @@ export function HowItWorksForm({ data, onChange }: { data: HowItWorksSchema; onC
 // ── FooterForm ──────────────────────────────────────────────────────────────
 
 export function FooterForm({ data, onChange }: { data: MicroFooterSchema; onChange: (d: MicroFooterSchema) => void }) {
-  const addLink = () => onChange({ ...data, links: [...data.links, { text: "Link", url: "/" }] });
+  const addLink = () => onChange({ ...data, links: [...data.links, { text: "Policy Link", content: "Add policy content here." }] });
   const updateLink = (i: number, link: FooterLink) => onChange({ ...data, links: data.links.map((l, li) => li === i ? link : l) });
   const removeLink = (i: number) => onChange({ ...data, links: data.links.filter((_, li) => li !== i) });
 
@@ -418,12 +418,20 @@ export function FooterForm({ data, onChange }: { data: MicroFooterSchema; onChan
       </div>
       <Field label="联系邮箱"><Input className={di} value={data.contactEmail ?? ""} onChange={e => onChange({ ...data, contactEmail: e.target.value })} /></Field>
       <SectionDivider label="链接" />
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         {data.links.map((link, i) => (
-          <div key={i} className="flex gap-1.5 items-center">
-            <Input className={`${di} h-7 flex-1`} placeholder="文案" value={link.text} onChange={e => updateLink(i, { ...link, text: e.target.value })} />
-            <Input className={`${di} h-7 flex-1`} placeholder="URL" value={link.url} onChange={e => updateLink(i, { ...link, url: e.target.value })} />
-            <button className={delBtn} onClick={() => removeLink(i)}><X className="w-3 h-3" /></button>
+          <div key={i} className="rounded-lg border border-zinc-700/50 bg-zinc-800/20 p-2 space-y-2">
+            <div className="flex gap-1.5 items-center">
+              <Input className={`${di} h-7 flex-1`} placeholder="文案" value={link.text} onChange={e => updateLink(i, { ...link, text: e.target.value })} />
+              <Input className={`${di} h-7 flex-1`} placeholder="外跳 URL（可选）" value={link.url ?? ""} onChange={e => updateLink(i, { ...link, url: e.target.value || undefined })} />
+              <button className={delBtn} onClick={() => removeLink(i)}><X className="w-3 h-3" /></button>
+            </div>
+            <Textarea
+              className={`${dt} min-h-[72px]`}
+              placeholder="弹窗正文（有值时优先弹窗展示）"
+              value={link.content ?? ""}
+              onChange={e => updateLink(i, { ...link, content: e.target.value || undefined })}
+            />
           </div>
         ))}
         <Button variant="ghost" size="sm" className={addBtn} onClick={addLink}><Plus className="w-3 h-3" />添加链接</Button>

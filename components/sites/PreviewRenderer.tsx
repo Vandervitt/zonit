@@ -2,6 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { ctaThemeColor, BackgroundType, TrustBannerTheme, FeaturesLayout } from "@/lib/constants";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import type {
   LandingPageTemplate,
   HeroSchema,
@@ -9,6 +16,7 @@ import type {
   OfferOption,
   HowItWorksSchema,
   MicroFooterSchema,
+  FooterLink,
   FeaturesSchema,
   ReviewsSchema,
   ReviewItem,
@@ -575,6 +583,42 @@ function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSc
 }
 
 function FooterBlock({ data, highlight }: { data: MicroFooterSchema; highlight?: boolean }) {
+  const renderLink = (link: FooterLink, i: number) => {
+    if (link.content?.trim()) {
+      return (
+        <Dialog key={i}>
+          <DialogTrigger className="text-[10px] text-slate-400 hover:text-white underline">
+            {link.text}
+          </DialogTrigger>
+          <DialogContent className="max-h-[calc(100vh-4rem)] overflow-y-auto border-slate-200 bg-white text-slate-900">
+            <DialogHeader>
+              <DialogTitle>{link.text}</DialogTitle>
+            </DialogHeader>
+            <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+              {link.content}
+            </div>
+          </DialogContent>
+        </Dialog>
+      );
+    }
+
+    if (link.url?.trim()) {
+      return (
+        <a
+          key={i}
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[10px] text-slate-400 hover:text-white underline"
+        >
+          {link.text}
+        </a>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <footer id="footer" className="bg-slate-800 text-white px-5 py-8 text-center" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <p className="text-sm mb-3">{data.brandName}</p>
@@ -582,11 +626,7 @@ function FooterBlock({ data, highlight }: { data: MicroFooterSchema; highlight?:
         <p className="text-[10px] text-slate-400 mb-3 leading-relaxed">{data.disclaimer}</p>
       )}
       <div className="flex flex-wrap justify-center gap-3 mb-3">
-        {data.links.map((link, i) => (
-          <a key={i} href={link.url} className="text-[10px] text-slate-400 hover:text-white underline">
-            {link.text}
-          </a>
-        ))}
+        {data.links.map(renderLink)}
       </div>
       {data.contactEmail && (
         <p className="text-[10px] text-slate-400 mb-2">{data.contactEmail}</p>

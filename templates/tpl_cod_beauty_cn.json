@@ -204,10 +204,10 @@
         "copyrightYear": "2024",
         "contactEmail": "support@beautychoice.com",
         "links": [
-            { "text": "隐私政策", "url": "/privacy" },
-            { "text": "服务条款", "url": "/terms" },
-            { "text": "配送说明", "url": "/shipping" },
-            { "text": "联系我们", "url": "/contact" }
+            { "text": "隐私政策", "content": "我们仅会使用您提交的联系方式来回复咨询、确认配送信息并提供客户支持。我们不会出售您的个人信息。如需访问、更正或删除已提交的信息，请联系 support@beautychoice.com。" },
+            { "text": "服务条款", "content": "提交咨询即表示您同意美肌优选 BeautyChoice 可通过您提供的联系方式与您沟通。本页面用于产品咨询和线索收集，具体库存、配送时效和服务细节以客服确认为准。" },
+            { "text": "配送说明", "content": "订单咨询确认后，我们会根据您所在地区安排配送。预计配送时间为 2-3 个工作日，实际时间可能受地址、物流和节假日影响。" },
+            { "text": "联系我们", "content": "如有产品咨询、配送问题或售后需求，请发送邮件至 support@beautychoice.com，我们会尽快回复。" }
         ]
     }
 }

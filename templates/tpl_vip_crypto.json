@@ -131,11 +131,11 @@
         "links": [
             {
                 "text": "Privacy Policy",
-                "url": "/privacy"
+                "content": "We use submitted contact details only to respond to consultation requests, provide account support, and communicate about the services you asked about. We do not sell your personal information. You can contact admin@whalesignals.io to request access, correction, or deletion of your submitted information."
             },
             {
                 "text": "Terms of Service",
-                "url": "/terms"
+                "content": "By submitting an inquiry, you agree that WhaleSignals LLC may contact you about your request. Content on this page is for educational and consultation purposes only and does not constitute financial advice. Trading cryptocurrencies involves risk, and past performance does not guarantee future results."
             }
         ],
         "disclaimer": "RISK WARNING: Trading cryptocurrencies involves high risk. We do not provide financial advice. Past performance is not indicative of future results."

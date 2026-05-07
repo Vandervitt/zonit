@@ -1,4 +1,4 @@
-import type { LandingPageTemplate, OfferSchema, OptionalBlockType, ReviewsSchema, SeoMeta } from './schema';
+import type { FooterLink, LandingPageTemplate, OfferSchema, OptionalBlockType, ReviewsSchema, SeoMeta } from './schema';
 
 // @ts-expect-error offer entries are options, not pricing tiers.
 import type { OfferTier } from './schema';
@@ -36,6 +36,13 @@ const rootLeadFormTemplate: Partial<LandingPageTemplate> = {
 };
 
 void rootLeadFormTemplate;
+
+const inlineComplianceLink: FooterLink = {
+  text: 'Privacy Policy',
+  content: 'We only use submitted contact details to respond to inquiries.',
+};
+
+void inlineComplianceLink;
 
 const leadGenerationOffer: OfferSchema = {
   title: 'Choose a Consultation Path',
