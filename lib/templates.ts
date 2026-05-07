@@ -62,20 +62,6 @@ export function getDefaultBlockData(type: string) {
       expiredFallback: { title: 'Offer Ended', subtitle: 'Stay tuned for the next campaign' },
       variant: 'section',
     },
-    BeforeAfter: {
-      title: 'Real Results',
-      subtitle: 'See the transformation our customers experienced',
-      variant: 'side-by-side',
-      pairs: [
-        {
-          id: crypto.randomUUID(),
-          before: { src: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80', alt: 'Before' },
-          after: { src: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80', alt: 'After' },
-          caption: 'After 12 weeks',
-        },
-      ],
-      disclaimer: 'Results may vary from person to person.',
-    },
     LeadForm: {
       title: 'Get a Free Quote',
       subtitle: 'Tell us about your needs and we\'ll get back within 24 hours',
@@ -89,42 +75,6 @@ export function getDefaultBlockData(type: string) {
         { id: crypto.randomUUID(), name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'you@example.com' },
         { id: crypto.randomUUID(), name: 'phone', label: 'Phone (with country code)', type: 'phone', placeholder: '+1 555 000 1234' },
         { id: crypto.randomUUID(), name: 'message', label: 'How can we help?', type: 'textarea', placeholder: 'Tell us a bit about your project...' },
-      ],
-    },
-    MediaLogos: {
-      title: 'As Featured In',
-      variant: 'mono',
-      logos: [
-        { id: crypto.randomUUID(), name: 'Forbes', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Forbes_logo.svg/320px-Forbes_logo.svg.png' },
-        { id: crypto.randomUUID(), name: 'TechCrunch', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/TechCrunch_logo.svg/320px-TechCrunch_logo.svg.png' },
-        { id: crypto.randomUUID(), name: 'Bloomberg', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/New_Bloomberg_Logo.svg/320px-New_Bloomberg_Logo.svg.png' },
-      ],
-    },
-    VideoTestimonials: {
-      title: 'Hear From Our Customers',
-      subtitle: 'Real stories from verified buyers',
-      variant: 'carousel',
-      items: [
-        {
-          id: crypto.randomUUID(),
-          authorName: 'Sarah M.',
-          authorRole: 'Verified Buyer',
-          videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-          poster: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80',
-          duration: '0:45',
-          quote: 'Honestly the best decision I\'ve made this year.',
-          country: 'United States',
-        },
-      ],
-    },
-    Guarantee: {
-      title: 'Risk-Free Guarantee',
-      subtitle: 'Try it with complete confidence',
-      description: 'If you\'re not 100% satisfied within 30 days, we\'ll refund every penny — no questions asked.',
-      badges: [
-        { id: crypto.randomUUID(), icon: 'Shield', text: '30-Day Money Back', subtext: 'Full refund guaranteed' },
-        { id: crypto.randomUUID(), icon: 'RotateCcw', text: 'Free Returns', subtext: 'On all orders' },
-        { id: crypto.randomUUID(), icon: 'Check', text: 'Secure Checkout', subtext: 'SSL encrypted' },
       ],
     },
   };

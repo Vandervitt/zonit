@@ -9,7 +9,6 @@ import type {
   OptionalBlock,
   FAQSchema,
   ReviewsSchema,
-  VideoTestimonialsSchema,
 } from '@/types/schema';
 
 type JsonLdNode = Record<string, unknown>;
@@ -51,18 +50,6 @@ function deriveReviews(reviews: ReviewsSchema): JsonLdNode[] {
   }));
 }
 
-function deriveVideos(videos: VideoTestimonialsSchema): JsonLdNode[] {
-  return videos.items.map(item => ({
-    '@context': 'https://schema.org',
-    '@type': 'VideoObject',
-    name: `${item.authorName} testimonial`,
-    description: item.quote || `Customer testimonial from ${item.authorName}`,
-    contentUrl: item.videoUrl,
-    ...(item.poster ? { thumbnailUrl: item.poster } : {}),
-    uploadDate: new Date().toISOString().slice(0, 10),
-  }));
-}
-
 function deriveOrganization(template: LandingPageTemplate): JsonLdNode {
   const footer = template.footer;
   return {
@@ -89,9 +76,6 @@ export function deriveJsonLd(template: LandingPageTemplate): JsonLdNode[] {
       const reviews = findBlock(blocks, 'Reviews');
       if (reviews) nodes.push(...deriveReviews(reviews.data));
     }
-
-    const videos = findBlock(blocks, 'VideoTestimonials');
-    if (videos) nodes.push(...deriveVideos(videos.data));
   }
 
   if (seo?.jsonLd?.custom?.length) {

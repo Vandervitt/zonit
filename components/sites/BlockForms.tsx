@@ -30,17 +30,11 @@ import type {
   FAQItem,
   CallToAction,
   CountdownSchema,
-  BeforeAfterSchema,
-  BeforeAfterPair,
   AssuranceSchema,
   AssuranceBadge,
   LeadFormSchema,
   LeadFormField,
   LeadFormFieldType,
-  MediaLogosSchema,
-  MediaLogo,
-  VideoTestimonialsSchema,
-  VideoTestimonialItem,
 } from "@/types/schema";
 
 // ── Dark style constants ────────────────────────────────────────────────────
@@ -97,9 +91,6 @@ function IconSelect({ value, onChange }: { value: string; onChange: (v: string) 
 }
 
 function CtaFields({ value, onChange }: { value: CallToAction; onChange: (v: CallToAction) => void }) {
-  const dl = value.download;
-  const toggleDownload = () =>
-    onChange({ ...value, download: dl ? undefined : { fileUrl: "" } });
   return (
     <div className={`space-y-2.5 ${card}`}>
       <SectionDivider label="行动按钮 CTA" />
@@ -125,27 +116,6 @@ function CtaFields({ value, onChange }: { value: CallToAction; onChange: (v: Cal
           </Select>
         </Field>
       </div>
-      <div className="flex items-center justify-between pt-1">
-        <span className="text-[11px] uppercase tracking-widest text-zinc-500 font-medium">下载行为（Lead Magnet）</span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 px-2 text-[10px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-          onClick={toggleDownload}
-        >
-          {dl ? "移除" : "启用"}
-        </Button>
-      </div>
-      {dl && (
-        <div className="space-y-2">
-          <Field label="文件 URL">
-            <Input className={di} value={dl.fileUrl} onChange={e => onChange({ ...value, download: { ...dl, fileUrl: e.target.value } })} placeholder="https://.../guide.pdf" />
-          </Field>
-          <Field label="下载文件名（可选）">
-            <Input className={di} value={dl.fileName ?? ""} onChange={e => onChange({ ...value, download: { ...dl, fileName: e.target.value } })} placeholder="lead-magnet.pdf" />
-          </Field>
-        </div>
-      )}
     </div>
   );
 }
@@ -705,83 +675,6 @@ export function FAQForm({ data, onChange }: { data: FAQSchema; onChange: (d: FAQ
   );
 }
 
-// ── BeforeAfterForm ─────────────────────────────────────────────────────────
-
-function PairEditor({ pair, onChange, onRemove, index }: { pair: BeforeAfterPair; onChange: (p: BeforeAfterPair) => void; onRemove: () => void; index: number }) {
-  return (
-    <div className={card}>
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">对比 {index + 1}</span>
-        <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
-      </div>
-      <ImagePickerField
-        label="Before 图"
-        value={pair.before.src}
-        onChange={src => onChange({ ...pair, before: { ...pair.before, src } })}
-      />
-      <Field label="Before Alt">
-        <Input className={`${di} h-8`} value={pair.before.alt} onChange={e => onChange({ ...pair, before: { ...pair.before, alt: e.target.value } })} placeholder="Before" />
-      </Field>
-      <ImagePickerField
-        label="After 图"
-        value={pair.after.src}
-        onChange={src => onChange({ ...pair, after: { ...pair.after, src } })}
-      />
-      <Field label="After Alt">
-        <Input className={`${di} h-8`} value={pair.after.alt} onChange={e => onChange({ ...pair, after: { ...pair.after, alt: e.target.value } })} placeholder="After" />
-      </Field>
-      <Field label="说明文字">
-        <Input className={`${di} h-8`} value={pair.caption ?? ""} onChange={e => onChange({ ...pair, caption: e.target.value })} placeholder="After 12 weeks" />
-      </Field>
-    </div>
-  );
-}
-
-export function BeforeAfterForm({ data, onChange }: { data: BeforeAfterSchema; onChange: (d: BeforeAfterSchema) => void }) {
-  const addPair = () => {
-    const newPair: BeforeAfterPair = {
-      id: crypto.randomUUID(),
-      before: { src: "", alt: "Before" },
-      after: { src: "", alt: "After" },
-      caption: "",
-    };
-    onChange({ ...data, pairs: [...data.pairs, newPair] });
-  };
-  return (
-    <div className="space-y-4">
-      <Field label="标题"><Input className={di} value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} /></Field>
-      <Field label="副标题"><Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} /></Field>
-      <Field label="排版">
-        <Select value={data.variant ?? "side-by-side"} onValueChange={v => onChange({ ...data, variant: v as BeforeAfterSchema["variant"] })}>
-          <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
-          <SelectContent className={dsc}>
-            <SelectItem value="side-by-side" className={dsi}>左右并排</SelectItem>
-            <SelectItem value="slider" className={dsi}>滑块对比</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-      <SectionDivider label="对比组" />
-      <div className="space-y-2">
-        {data.pairs.map((pair, i) => (
-          <PairEditor
-            key={pair.id}
-            pair={pair}
-            index={i}
-            onChange={p => onChange({ ...data, pairs: data.pairs.map((pp, pi) => pi === i ? p : pp) })}
-            onRemove={() => onChange({ ...data, pairs: data.pairs.filter((_, pi) => pi !== i) })}
-          />
-        ))}
-        <Button variant="ghost" size="sm" className={addBtn} onClick={addPair}>
-          <Plus className="w-3 h-3" />添加对比
-        </Button>
-      </div>
-      <Field label="免责声明">
-        <Textarea className={`${dt} min-h-[50px]`} value={data.disclaimer ?? ""} onChange={e => onChange({ ...data, disclaimer: e.target.value })} placeholder="Results may vary from person to person." />
-      </Field>
-    </div>
-  );
-}
-
 // ── AssuranceForm ───────────────────────────────────────────────────────────
 
 function AssuranceBadgeEditor({ badge, onChange, onRemove }: { badge: AssuranceBadge; onChange: (b: AssuranceBadge) => void; onRemove: () => void }) {
@@ -947,134 +840,4 @@ export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChang
   );
 }
 
-// ── MediaLogosForm ──────────────────────────────────────────────────────────
-
-function MediaLogoEditor({ logo, onChange, onRemove }: { logo: MediaLogo; onChange: (l: MediaLogo) => void; onRemove: () => void }) {
-  return (
-    <div className={card}>
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">{logo.name || "Logo"}</span>
-        <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
-      </div>
-      <Field label="媒体名称">
-        <Input className={`${di} h-8`} value={logo.name} onChange={e => onChange({ ...logo, name: e.target.value })} placeholder="Forbes" />
-      </Field>
-      <ImagePickerField
-        label="Logo 图片"
-        value={logo.image}
-        onChange={image => onChange({ ...logo, image })}
-      />
-      <Field label="原文链接（可选）">
-        <Input className={`${di} h-8`} value={logo.url ?? ""} onChange={e => onChange({ ...logo, url: e.target.value })} placeholder="https://..." />
-      </Field>
-    </div>
-  );
-}
-
-export function MediaLogosForm({ data, onChange }: { data: MediaLogosSchema; onChange: (d: MediaLogosSchema) => void }) {
-  const addLogo = () => onChange({
-    ...data,
-    logos: [...data.logos, { id: crypto.randomUUID(), name: "Media", image: "" }],
-  });
-  return (
-    <div className="space-y-4">
-      <Field label="标题（可选）">
-        <Input className={di} value={data.title ?? ""} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="As Featured In" />
-      </Field>
-      <Field label="样式">
-        <Select value={data.variant ?? "mono"} onValueChange={v => onChange({ ...data, variant: v as MediaLogosSchema["variant"] })}>
-          <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
-          <SelectContent className={dsc}>
-            <SelectItem value="mono" className={dsi}>统一灰度</SelectItem>
-            <SelectItem value="color" className={dsi}>原色</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-      <SectionDivider label="Logo 列表" />
-      <div className="space-y-2">
-        {data.logos.map((logo, i) => (
-          <MediaLogoEditor
-            key={logo.id}
-            logo={logo}
-            onChange={l => onChange({ ...data, logos: data.logos.map((ll, li) => li === i ? l : ll) })}
-            onRemove={() => onChange({ ...data, logos: data.logos.filter((_, li) => li !== i) })}
-          />
-        ))}
-        <Button variant="ghost" size="sm" className={addBtn} onClick={addLogo}>
-          <Plus className="w-3 h-3" />添加 Logo
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ── VideoTestimonialsForm ───────────────────────────────────────────────────
-
-function VideoItemEditor({ item, onChange, onRemove }: { item: VideoTestimonialItem; onChange: (i: VideoTestimonialItem) => void; onRemove: () => void }) {
-  return (
-    <div className={card}>
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">{item.authorName || "证言"}</span>
-        <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <Field label="作者名"><Input className={`${di} h-8`} value={item.authorName} onChange={e => onChange({ ...item, authorName: e.target.value })} /></Field>
-        <Field label="头衔"><Input className={`${di} h-8`} value={item.authorRole ?? ""} onChange={e => onChange({ ...item, authorRole: e.target.value })} placeholder="Verified Buyer" /></Field>
-        <Field label="国家/地区"><Input className={`${di} h-8`} value={item.country ?? ""} onChange={e => onChange({ ...item, country: e.target.value })} placeholder="United States" /></Field>
-        <Field label="时长"><Input className={`${di} h-8`} value={item.duration ?? ""} onChange={e => onChange({ ...item, duration: e.target.value })} placeholder="0:45" /></Field>
-      </div>
-      <Field label="视频 URL">
-        <Input className={`${di} h-8`} value={item.videoUrl} onChange={e => onChange({ ...item, videoUrl: e.target.value })} placeholder="https://..." />
-      </Field>
-      <ImagePickerField
-        label="封面图"
-        value={item.poster ?? ""}
-        onChange={poster => onChange({ ...item, poster: poster || undefined })}
-      />
-      <Field label="核心金句（无声字幕）">
-        <Textarea className={`${dt} min-h-[50px]`} value={item.quote ?? ""} onChange={e => onChange({ ...item, quote: e.target.value })} placeholder="The best decision I've made this year." />
-      </Field>
-    </div>
-  );
-}
-
-export function VideoTestimonialsForm({ data, onChange }: { data: VideoTestimonialsSchema; onChange: (d: VideoTestimonialsSchema) => void }) {
-  const addItem = () => {
-    const newItem: VideoTestimonialItem = {
-      id: crypto.randomUUID(),
-      authorName: "Customer",
-      videoUrl: "",
-    };
-    onChange({ ...data, items: [...data.items, newItem] });
-  };
-  return (
-    <div className="space-y-4">
-      <Field label="标题"><Input className={di} value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} /></Field>
-      <Field label="副标题"><Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} /></Field>
-      <Field label="排版">
-        <Select value={data.variant ?? "carousel"} onValueChange={v => onChange({ ...data, variant: v as VideoTestimonialsSchema["variant"] })}>
-          <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
-          <SelectContent className={dsc}>
-            <SelectItem value="carousel" className={dsi}>横滑卡片</SelectItem>
-            <SelectItem value="grid" className={dsi}>网格</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-      <SectionDivider label="证言" />
-      <div className="space-y-2">
-        {data.items.map((item, i) => (
-          <VideoItemEditor
-            key={item.id}
-            item={item}
-            onChange={it => onChange({ ...data, items: data.items.map((ii, idx) => idx === i ? it : ii) })}
-            onRemove={() => onChange({ ...data, items: data.items.filter((_, idx) => idx !== i) })}
-          />
-        ))}
-        <Button variant="ghost" size="sm" className={addBtn} onClick={addItem}>
-          <Plus className="w-3 h-3" />添加证言
-        </Button>
-      </div>
-    </div>
-  );
-}
 

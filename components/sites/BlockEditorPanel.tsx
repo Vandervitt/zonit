@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video } from "lucide-react";
+import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, BadgeCheck, Mail } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -12,8 +12,7 @@ import { cn } from "../ui/utils";
 import {
   HeroForm, OfferForm, HowItWorksForm, FooterForm,
   FeaturesForm, ReviewsForm, TrustBannerForm, AuthorityForm, FAQForm,
-  CountdownForm, StickyCtaEditor, BeforeAfterForm, AssuranceForm,
-  LeadFormForm, MediaLogosForm, VideoTestimonialsForm,
+  CountdownForm, StickyCtaEditor, AssuranceForm, LeadFormForm,
 } from "./BlockForms";
 import { AddBlockDialog } from "./AddBlockDialog";
 import { AiRewriteButton } from "../editor/AiRewriteButton";
@@ -31,11 +30,8 @@ import type {
   AuthoritySchema,
   FAQSchema,
   CountdownSchema,
-  BeforeAfterSchema,
   AssuranceSchema,
   LeadFormSchema,
-  MediaLogosSchema,
-  VideoTestimonialsSchema,
   OptionalBlock,
   OptionalBlockType,
 } from "@/types/schema";
@@ -68,11 +64,7 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
   AuthorityStory: <User className="w-3.5 h-3.5 text-orange-400" />,
   FAQ: <HelpCircle className="w-3.5 h-3.5 text-pink-400" />,
   Countdown: <Timer className="w-3.5 h-3.5 text-orange-400" />,
-  BeforeAfter: <ArrowLeftRight className="w-3.5 h-3.5 text-teal-400" />,
-  Guarantee: <BadgeCheck className="w-3.5 h-3.5 text-green-400" />,
   LeadForm: <Mail className="w-3.5 h-3.5 text-indigo-400" />,
-  MediaLogos: <Newspaper className="w-3.5 h-3.5 text-slate-400" />,
-  VideoTestimonials: <Video className="w-3.5 h-3.5 text-fuchsia-400" />,
   StickyCta: <MousePointerClick className="w-3.5 h-3.5 text-cyan-400" />,
 };
 
@@ -87,11 +79,7 @@ const TYPE_BG: Record<string, string> = {
   AuthorityStory: "bg-orange-500/10",
   FAQ: "bg-pink-500/10",
   Countdown: "bg-orange-500/10",
-  BeforeAfter: "bg-teal-500/10",
-  Guarantee: "bg-green-500/10",
   LeadForm: "bg-indigo-500/10",
-  MediaLogos: "bg-slate-500/10",
-  VideoTestimonials: "bg-fuchsia-500/10",
   StickyCta: "bg-cyan-500/10",
 };
 
@@ -106,11 +94,7 @@ const TYPE_LABEL: Record<string, string> = {
   AuthorityStory: "权威背书",
   FAQ: "常见问题",
   Countdown: "倒计时",
-  BeforeAfter: "前后对比",
-  Guarantee: "退款承诺",
   LeadForm: "表单线索",
-  MediaLogos: "媒体 Logo 墙",
-  VideoTestimonials: "视频证言",
   StickyCta: "全站浮动 CTA",
 };
 
@@ -130,16 +114,10 @@ function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
       return { id, type, data: getDefaultBlockData(type) as FAQSchema };
     case "Countdown":
       return { id, type, data: getDefaultBlockData(type) as CountdownSchema };
-    case "BeforeAfter":
-      return { id, type, data: getDefaultBlockData(type) as BeforeAfterSchema };
     case "Assurance":
       return { id, type, data: getDefaultBlockData(type) as AssuranceSchema };
     case "LeadForm":
       return { id, type, data: getDefaultBlockData(type) as LeadFormSchema };
-    case "MediaLogos":
-      return { id, type, data: getDefaultBlockData(type) as MediaLogosSchema };
-    case "VideoTestimonials":
-      return { id, type, data: getDefaultBlockData(type) as VideoTestimonialsSchema };
   }
 }
 
@@ -157,16 +135,10 @@ function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["
       return { ...block, data: newData as FAQSchema };
     case "Countdown":
       return { ...block, data: newData as CountdownSchema };
-    case "BeforeAfter":
-      return { ...block, data: newData as BeforeAfterSchema };
     case "Assurance":
       return { ...block, data: newData as AssuranceSchema };
     case "LeadForm":
       return { ...block, data: newData as LeadFormSchema };
-    case "MediaLogos":
-      return { ...block, data: newData as MediaLogosSchema };
-    case "VideoTestimonials":
-      return { ...block, data: newData as VideoTestimonialsSchema };
   }
 }
 
@@ -346,17 +318,6 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
         return (
           <CountdownForm data={block.data as CountdownSchema} onChange={d => updateOptional(block.id, d)} />
         );
-      case "BeforeAfter":
-        return (
-          <>
-            <AiRewriteButton
-              blockType="BeforeAfter"
-              currentData={block.data}
-              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
-            />
-            <BeforeAfterForm data={block.data as BeforeAfterSchema} onChange={d => updateOptional(block.id, d)} />
-          </>
-        );
       case "Assurance":
         return (
           <>
@@ -377,21 +338,6 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
               onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
             />
             <LeadFormForm data={block.data as LeadFormSchema} onChange={d => updateOptional(block.id, d)} />
-          </>
-        );
-      case "MediaLogos":
-        return (
-          <MediaLogosForm data={block.data as MediaLogosSchema} onChange={d => updateOptional(block.id, d)} />
-        );
-      case "VideoTestimonials":
-        return (
-          <>
-            <AiRewriteButton
-              blockType="VideoTestimonials"
-              currentData={block.data}
-              onSuccess={d => updateOptional(block.id, d as OptionalBlock["data"])}
-            />
-            <VideoTestimonialsForm data={block.data as VideoTestimonialsSchema} onChange={d => updateOptional(block.id, d)} />
           </>
         );
       default:
@@ -471,7 +417,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
           size="sm"
           className="w-full text-xs gap-1.5 h-8 bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 border border-zinc-800 hover:border-zinc-700 rounded-md transition-colors"
           onClick={() => setAddOpen(true)}
-          disabled={existingOptionalTypes.length >= 11}
+          disabled={existingOptionalTypes.length >= 8}
         >
           <Plus className="w-3.5 h-3.5" />
           添加模块

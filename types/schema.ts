@@ -17,16 +17,9 @@ export interface CallToAction {
   url: string;            // 跳转链接 (e.g., "https://wa.me/...")
   icon?: IconType;        // 按钮图标
   theme?: 'primary' | 'secondary' | 'whatsapp' | 'telegram'; // 按钮颜色风格
-  channel?: CtaChannel;   // 渠道类型，便于按入口做转化分析
+  channel?: CtaChannel;   // 渠道类型
   target?: LinkTarget;    // 链接打开方式
-  rel?: string;           // 链接 rel 属性
   prefilledMessage?: string; // 私域沟通时预填消息，减少用户输入成本
-  eventName?: string;     // 埋点事件名
-  trackingId?: string;    // 按钮级追踪标识
-  download?: {
-    fileUrl: string;                 // 资源 URL
-    fileName?: string;               // 下载时的文件名
-  };
 }
 
 // 图片模型 (支持传入图片 URL 和 Alt 文本以优化 SEO)
@@ -164,7 +157,7 @@ export interface ReviewItem {
   avatar?: string;              // 头像URL
   rating: number;               // 1-5 星
   content: string;              // 评价文字
-  proofImage?: string;          // 证据截图！(适用于展示 TG 聊天记录、减肥前后图、收益截图)
+  proofImage?: string;          // 证据截图（如聊天记录截图）
   videoUrl?: string;            // 短视频证言（YouTube/Vimeo/直链均可）
   sourcePlatform?: string;      // 如 "Trustpilot", "WhatsApp", "Telegram"
   verified?: boolean;           // 是否为已验证评价
@@ -191,8 +184,8 @@ export interface ReviewsSchema {
 export interface TrustBadge {
   id: string;
   icon: IconType;
-  text: string;                 // 如 "24/7 Human Support", "Cash on Delivery"
-  subtext?: string;             // 副文本，如 "2-3天送达", "验货后支付"
+  text: string;                 // 如 "24/7 Human Support", "Free Consultation"
+  subtext?: string;
 }
 
 export interface TrustBannerSchema {
@@ -203,7 +196,7 @@ export interface TrustBannerSchema {
 // 权威背书 / 品牌故事
 export interface AuthorityCredential {
   id: string;
-  label: string;                // 如 "FDA Approved", "MD - Harvard 2010", "Best Clinic 2024"
+  label: string;                // 如 "ISO 9001", "10yr+ Experience", "Industry Award"
   image?: string;               // 证书/奖项 logo URL
 }
 
@@ -238,22 +231,6 @@ export interface FAQSchema {
   contactCta?: CallToAction;    // 底部追加一个 "还有问题？联系客服" 的按钮
 }
 
-// 前后对比（减肥/医美/健身/装修等垂类的核心转化模块）
-export interface BeforeAfterPair {
-  id: string;
-  before: ImageMeta;
-  after: ImageMeta;
-  caption?: string;             // 如 "After 12 weeks", "Lost 18 lbs"
-}
-
-export interface BeforeAfterSchema {
-  title: string;
-  subtitle?: string;
-  pairs: BeforeAfterPair[];
-  variant?: 'side-by-side' | 'slider'; // slider 为可拖动对比
-  disclaimer?: string;          // 如 "Results may vary"，医美/减肥合规必备
-}
-
 // Lead 表单（高客单服务类替代 WhatsApp 直跳）
 export type LeadFormFieldType = 'text' | 'email' | 'phone' | 'select' | 'textarea' | 'checkbox';
 
@@ -276,39 +253,6 @@ export interface LeadFormSchema {
   webhookUrl?: string;          // 外部线索接收 URL（高级配置），未填则提交到平台默认 API
   consentText?: string;         // GDPR 同意文本
   eventName?: string;           // 提交埋点事件名
-}
-
-// 媒体 Logo 墙 / "As seen on"（与 TrustBanner 区分：那是功能徽章，这是权威机构 logo）
-export interface MediaLogo {
-  id: string;
-  name: string;                 // 媒体名称，如 "Forbes", "TechCrunch"
-  image: string;                // logo URL
-  url?: string;                 // 可点击跳原文
-}
-
-export interface MediaLogosSchema {
-  title?: string;               // 如 "As seen on", "Featured in"
-  logos: MediaLogo[];
-  variant?: 'mono' | 'color';   // 是否统一灰度处理
-}
-
-// 视频证言（与 ReviewItem.videoUrl 区别：这是独立成 Section，专门展示视频证言）
-export interface VideoTestimonialItem {
-  id: string;
-  authorName: string;
-  authorRole?: string;          // 如 "Verified Buyer", "MD - Skin Clinic"
-  videoUrl: string;
-  poster?: string;              // 视频封面
-  duration?: string;            // 如 "0:45"
-  quote?: string;               // 视频里的核心金句，便于无声播放也能 get 点
-  country?: string;
-}
-
-export interface VideoTestimonialsSchema {
-  title: string;
-  subtitle?: string;
-  items: VideoTestimonialItem[];
-  variant?: 'carousel' | 'grid';
 }
 
 // 服务承诺 / 信任保障（免费咨询、响应时效、隐私保护等，不绑定退款/交易语义）
@@ -365,47 +309,13 @@ export interface AnalyticsPixel {
 
 export interface AnalyticsConfig {
   pixels?: AnalyticsPixel[];
-  experimentId?: string;        // A/B test 或投放实验标识
-}
-
-export interface AlternateLocale {
-  locale: string;     // BCP 47，如 "en-US" | "es-MX" | "pt-BR"
-  url: string;        // 该 locale 对应的完整 URL
 }
 
 export interface PageMeta {
   locale?: string;              // 如 "en-US"
   market?: string;              // 如 "US", "SEA", "MENA"
-  currency?: string;            // 页面默认货币
   seo?: SeoMeta;
   analytics?: AnalyticsConfig;
-  alternateLocales?: AlternateLocale[]; // hreflang 多地区分流
-}
-
-// 站点级合规配置（GDPR cookie consent + age gate）
-export interface CookieConsentConfig {
-  enabled: boolean;
-  title?: string;                          // "We value your privacy"
-  description?: string;
-  acceptText?: string;                     // "Accept All"
-  rejectText?: string;                     // "Reject Non-Essential"
-  learnMoreUrl?: string;                   // 关联隐私政策链接
-  policyVersion?: string;                  // "2024-09-01"，policy 升级后强制重新弹
-}
-
-export interface AgeGateConfig {
-  enabled: boolean;
-  minimumAge: 18 | 21;
-  title?: string;                          // "Are you of legal age?"
-  description?: string;
-  confirmText?: string;
-  rejectText?: string;
-  rejectRedirectUrl?: string;              // 拒绝后跳走，避免合规风险
-}
-
-export interface ComplianceConfig {
-  cookieConsent?: CookieConsentConfig;
-  ageGate?: AgeGateConfig;
 }
 
 // PageBlock 包装器
@@ -421,17 +331,13 @@ export type BlockType =
   | 'AuthorityStory'
   | 'FAQ'
   | 'Countdown'
-  | 'BeforeAfter'
   | 'LeadForm'
-  | 'MediaLogos'
-  | 'VideoTestimonials'
   | 'Assurance';
 
 type BlockBase<TType extends BlockType, TData> = {
-  id: string;          // 唯一ID (UUID)
+  id: string;
   type: TType;
   data: TData;
-  variantKey?: string; // 块级 A/B variant 标识，与 pageMeta.experimentId 配合使用
 };
 
 // 万能的页面区块包装器：用 discriminated union 约束 type 和 data 一一对应
@@ -446,10 +352,7 @@ export type PageBlock =
   | BlockBase<'AuthorityStory', AuthoritySchema>
   | BlockBase<'FAQ', FAQSchema>
   | BlockBase<'Countdown', CountdownSchema>
-  | BlockBase<'BeforeAfter', BeforeAfterSchema>
   | BlockBase<'LeadForm', LeadFormSchema>
-  | BlockBase<'MediaLogos', MediaLogosSchema>
-  | BlockBase<'VideoTestimonials', VideoTestimonialsSchema>
   | BlockBase<'Assurance', AssuranceSchema>;
 
 // 1. 抽离可选模块的联合类型
@@ -460,10 +363,7 @@ export type OptionalBlockType =
   | 'AuthorityStory'
   | 'FAQ'
   | 'Countdown'
-  | 'BeforeAfter'
   | 'LeadForm'
-  | 'MediaLogos'
-  | 'VideoTestimonials'
   | 'Assurance';
 
 // 用 Extract 派生，避免与 PageBlock 手抄造成漂移
@@ -494,7 +394,7 @@ export interface LandingPageTemplate {
   // 位于 Hero 和 Offer 之间的区域（适合放：信任条、卖点、权威背书、媒体 logo 墙）
   upperBlocks: OptionalBlock[];
 
-  // 位于 Offer 和 HowItWorks 之间的区域（适合放：评价截图、视频证言、退款承诺、Before/After）
+  // 位于 Offer 和 HowItWorks 之间的区域（适合放：用户评价、服务承诺）
   afterOffer?: OptionalBlock[];
 
   // 位于 HowItWorks 和 Footer 之间的区域（适合放：FAQ、Lead 表单、底部 CTA 倒计时）
@@ -503,6 +403,4 @@ export interface LandingPageTemplate {
   // 全站悬浮 CTA（移动端转化主力，常用于 WhatsApp/Telegram 直跳）
   stickyCta?: CallToAction;
 
-  // 站点级合规（GDPR cookie banner / age gate）
-  compliance?: ComplianceConfig;
 }

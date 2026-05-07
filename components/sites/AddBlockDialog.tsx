@@ -8,7 +8,7 @@ import {
 import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
 import { useState } from "react";
-import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video } from "lucide-react";
+import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, BadgeCheck, Mail } from "lucide-react";
 import type { OptionalBlockType } from "@/types/schema";
 import { BlockZone } from "@/lib/constants";
 
@@ -64,32 +64,11 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
     zone: BlockZone.Both,
   },
   {
-    type: "BeforeAfter",
-    label: "前后对比",
-    description: "图片前后对比展示真实效果，适合医美/减肥/装修",
-    icon: <ArrowLeftRight className="w-5 h-5 text-teal-500" />,
-    zone: BlockZone.Middle,
-  },
-  {
     type: "Assurance",
     label: "服务承诺",
     description: "免费咨询、响应时效、隐私保护等信任保障徽章",
     icon: <BadgeCheck className="w-5 h-5 text-green-500" />,
     zone: BlockZone.Middle,
-  },
-  {
-    type: "MediaLogos",
-    label: "媒体 Logo 墙",
-    description: "As seen on Forbes / TechCrunch，强化第三方权威背书",
-    icon: <Newspaper className="w-5 h-5 text-slate-500" />,
-    zone: BlockZone.Upper,
-  },
-  {
-    type: "VideoTestimonials",
-    label: "视频证言",
-    description: "UGC 视频证言，TikTok/Reels 时代的转化利器",
-    icon: <Video className="w-5 h-5 text-fuchsia-500" />,
-    zone: BlockZone.Lower,
   },
   {
     type: "LeadForm",

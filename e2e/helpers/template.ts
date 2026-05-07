@@ -75,24 +75,6 @@ export function reviewsBlock(): OptionalBlock {
   };
 }
 
-export function videoTestimonialsBlock(): OptionalBlock {
-  return {
-    id: 'block-video',
-    type: 'VideoTestimonials',
-    data: {
-      title: 'Video Stories',
-      items: [
-        {
-          id: 'v1', authorName: 'Carol',
-          videoUrl: 'https://example.com/v.mp4',
-          poster: 'https://example.com/p.jpg',
-          quote: 'Changed my life',
-        },
-      ],
-    },
-  };
-}
-
 export function leadFormBlock(): OptionalBlock {
   return {
     id: 'block-leadform',

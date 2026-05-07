@@ -17,12 +17,8 @@ import type {
   FAQSchema,
   CountdownSchema,
   CallToAction,
-  BeforeAfterSchema,
   AssuranceSchema,
   LeadFormSchema,
-  MediaLogosSchema,
-  VideoTestimonialsSchema,
-  VideoTestimonialItem,
   OptionalBlock,
 } from "@/types/schema";
 
@@ -466,41 +462,6 @@ function FAQBlock({ data, primaryColor, id, highlight }: { data: FAQSchema; prim
   );
 }
 
-function BeforeAfterBlock({ data, id, highlight }: { data: BeforeAfterSchema; id?: string; highlight?: boolean }) {
-  return (
-    <section id={id} className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-      <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
-      {data.subtitle && <p className="text-xs text-center text-slate-500 mb-6">{data.subtitle}</p>}
-      <div className="space-y-5">
-        {data.pairs.map(pair => (
-          <div key={pair.id}>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="relative">
-                {pair.before.src && (
-                  <img src={pair.before.src} alt={pair.before.alt} className="w-full h-32 object-cover rounded-xl" />
-                )}
-                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] bg-slate-800/70 text-white">Before</span>
-              </div>
-              <div className="relative">
-                {pair.after.src && (
-                  <img src={pair.after.src} alt={pair.after.alt} className="w-full h-32 object-cover rounded-xl" />
-                )}
-                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/90 text-white">After</span>
-              </div>
-            </div>
-            {pair.caption && (
-              <p className="text-xs text-center text-slate-500 mt-2">{pair.caption}</p>
-            )}
-          </div>
-        ))}
-      </div>
-      {data.disclaimer && (
-        <p className="text-[10px] text-slate-400 text-center mt-5 italic">{data.disclaimer}</p>
-      )}
-    </section>
-  );
-}
-
 function AssuranceBlock({ data, primaryColor, id, highlight }: { data: AssuranceSchema; primaryColor: string; id?: string; highlight?: boolean }) {
   return (
     <section id={id} className="px-5 py-10 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
@@ -610,73 +571,6 @@ function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSc
   );
 }
 
-function MediaLogosBlock({ data, id, highlight }: { data: MediaLogosSchema; id?: string; highlight?: boolean }) {
-  const mono = (data.variant ?? "mono") === "mono";
-  return (
-    <section id={id} className="px-5 py-8 bg-white" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-      {data.title && (
-        <p className="text-[11px] uppercase tracking-widest text-center text-slate-400 mb-4">{data.title}</p>
-      )}
-      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-        {data.logos.map(logo => (
-          logo.image ? (
-            <img
-              key={logo.id}
-              src={logo.image}
-              alt={logo.name}
-              className={`h-6 object-contain ${mono ? "grayscale opacity-60" : ""}`}
-            />
-          ) : (
-            <span key={logo.id} className="text-xs text-slate-400 italic">{logo.name}</span>
-          )
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function VideoTestimonialsBlock({ data, id, highlight }: { data: VideoTestimonialsSchema; id?: string; highlight?: boolean }) {
-  const v = data.variant ?? "carousel";
-  const card = (item: VideoTestimonialItem) => (
-    <div key={item.id} className={`bg-slate-50 rounded-xl overflow-hidden ${v === "carousel" ? "w-44 shrink-0 snap-start" : ""}`}>
-      <div className="relative aspect-[9/16] bg-slate-200">
-        {item.poster ? (
-          <img src={item.poster} alt={item.authorName} className="absolute inset-0 w-full h-full object-cover" />
-        ) : null}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-slate-700 text-sm">▶</div>
-        </div>
-        {item.duration && (
-          <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/60 text-white text-[9px]">{item.duration}</span>
-        )}
-      </div>
-      <div className="p-2.5">
-        <p className="text-xs text-slate-800">{item.authorName}</p>
-        {item.authorRole && <p className="text-[10px] text-slate-400">{item.authorRole}</p>}
-        {item.quote && <p className="text-[11px] text-slate-600 mt-1.5 leading-snug line-clamp-3">"{item.quote}"</p>}
-      </div>
-    </div>
-  );
-  return (
-    <section id={id} className="py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-      <div className="px-5">
-        <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
-        {data.subtitle && <p className="text-xs text-center text-slate-500 mb-5">{data.subtitle}</p>}
-      </div>
-      {v === "carousel" ? (
-        <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory">
-          {data.items.map(card)}
-        </div>
-      ) : (
-        <div className="px-5 grid grid-cols-2 gap-3">
-          {data.items.map(card)}
-        </div>
-      )}
-    </section>
-  );
-}
-
-
 function FooterBlock({ data, highlight }: { data: MicroFooterSchema; highlight?: boolean }) {
   return (
     <footer id="footer" className="bg-slate-800 text-white px-5 py-8 text-center" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
@@ -719,11 +613,8 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       case "Reviews": return <ReviewsBlock key={block.id} id={block.id} data={block.data as ReviewsSchema} highlight={hl} />;
       case "FAQ": return <FAQBlock key={block.id} id={block.id} data={block.data as FAQSchema} primaryColor={pc} highlight={hl} />;
       case "Countdown": return <CountdownBlock key={block.id} id={block.id} data={block.data as CountdownSchema} primaryColor={pc} highlight={hl} />;
-      case "BeforeAfter": return <BeforeAfterBlock key={block.id} id={block.id} data={block.data as BeforeAfterSchema} highlight={hl} />;
       case "Assurance": return <AssuranceBlock key={block.id} id={block.id} data={block.data as AssuranceSchema} primaryColor={pc} highlight={hl} />;
       case "LeadForm": return <LeadFormBlock key={block.id} id={block.id} data={block.data as LeadFormSchema} primaryColor={pc} highlight={hl} />;
-      case "MediaLogos": return <MediaLogosBlock key={block.id} id={block.id} data={block.data as MediaLogosSchema} highlight={hl} />;
-      case "VideoTestimonials": return <VideoTestimonialsBlock key={block.id} id={block.id} data={block.data as VideoTestimonialsSchema} highlight={hl} />;
       default: return null;
     }
   };

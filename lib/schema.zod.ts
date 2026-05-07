@@ -4,11 +4,6 @@ import type { BlockType } from '@/types/schema';
 
 const NonEmpty = z.string().min(1);
 
-const DownloadConfigSchema = z.object({
-  fileUrl: NonEmpty,
-  fileName: z.string().optional(),
-});
-
 const CallToActionSchema = z.object({
   text: NonEmpty,
   url: NonEmpty,
@@ -16,11 +11,7 @@ const CallToActionSchema = z.object({
   theme: z.enum(['primary', 'secondary', 'whatsapp', 'telegram']).optional(),
   channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'external']).optional(),
   target: z.enum(['_self', '_blank']).optional(),
-  rel: z.string().optional(),
   prefilledMessage: z.string().optional(),
-  eventName: z.string().optional(),
-  trackingId: z.string().optional(),
-  download: DownloadConfigSchema.optional(),
 });
 
 const ImageMetaSchema = z.object({
@@ -213,21 +204,6 @@ const FAQSchemaZ = z.object({
   contactCta: CallToActionSchema.optional(),
 });
 
-const BeforeAfterPairSchema = z.object({
-  id: NonEmpty,
-  before: ImageMetaSchema,
-  after: ImageMetaSchema,
-  caption: z.string().optional(),
-});
-
-const BeforeAfterSchemaZ = z.object({
-  title: NonEmpty,
-  subtitle: z.string().optional(),
-  pairs: z.array(BeforeAfterPairSchema).min(1),
-  variant: z.enum(['side-by-side', 'slider']).optional(),
-  disclaimer: z.string().optional(),
-});
-
 const LeadFormFieldSchema = z.object({
   id: NonEmpty,
   name: NonEmpty,
@@ -247,37 +223,6 @@ const LeadFormSchemaZ = z.object({
   webhookUrl: z.string().optional(),
   consentText: z.string().optional(),
   eventName: z.string().optional(),
-});
-
-const MediaLogoSchema = z.object({
-  id: NonEmpty,
-  name: NonEmpty,
-  image: NonEmpty,
-  url: z.string().optional(),
-});
-
-const MediaLogosSchemaZ = z.object({
-  title: z.string().optional(),
-  logos: z.array(MediaLogoSchema).min(1),
-  variant: z.enum(['mono', 'color']).optional(),
-});
-
-const VideoTestimonialItemSchema = z.object({
-  id: NonEmpty,
-  authorName: NonEmpty,
-  authorRole: z.string().optional(),
-  videoUrl: NonEmpty,
-  poster: z.string().optional(),
-  duration: z.string().optional(),
-  quote: z.string().optional(),
-  country: z.string().optional(),
-});
-
-const VideoTestimonialsSchemaZ = z.object({
-  title: NonEmpty,
-  subtitle: z.string().optional(),
-  items: z.array(VideoTestimonialItemSchema).min(1),
-  variant: z.enum(['carousel', 'grid']).optional(),
 });
 
 const AssuranceBadgeSchema = z.object({
@@ -305,7 +250,6 @@ const SeoMetaSchema = z.object({
   robots: z.string().optional(),
   jsonLd: z.object({
     autoDerive: z.boolean().optional(),
-    deriveProduct: z.boolean().optional(),
     deriveReviews: z.boolean().optional(),
     custom: z.array(z.record(z.string(), z.unknown())).optional(),
   }).optional(),
@@ -327,52 +271,17 @@ const AnalyticsPixelSchema = z.object({
 
 const AnalyticsConfigSchema = z.object({
   pixels: z.array(AnalyticsPixelSchema).optional(),
-  experimentId: z.string().optional(),
-});
-
-const LocaleTag = z.string().regex(/^[a-z]{2}(-[A-Z]{2})?$/, 'Invalid BCP 47 locale tag');
-
-const AlternateLocaleSchema = z.object({
-  locale: LocaleTag,
-  url: NonEmpty,
 });
 
 const PageMetaSchema = z.object({
   locale: z.string().optional(),
   market: z.string().optional(),
-  currency: z.string().optional(),
   seo: SeoMetaSchema.optional(),
   analytics: AnalyticsConfigSchema.optional(),
-  alternateLocales: z.array(AlternateLocaleSchema).optional(),
-});
-
-const CookieConsentSchema = z.object({
-  enabled: z.boolean(),
-  title: z.string().optional(),
-  description: z.string().optional(),
-  acceptText: z.string().optional(),
-  rejectText: z.string().optional(),
-  learnMoreUrl: z.string().optional(),
-  policyVersion: z.string().optional(),
-});
-
-const AgeGateSchema = z.object({
-  enabled: z.boolean(),
-  minimumAge: z.union([z.literal(18), z.literal(21)]),
-  title: z.string().optional(),
-  description: z.string().optional(),
-  confirmText: z.string().optional(),
-  rejectText: z.string().optional(),
-  rejectRedirectUrl: z.string().optional(),
-});
-
-const ComplianceSchema = z.object({
-  cookieConsent: CookieConsentSchema.optional(),
-  ageGate: AgeGateSchema.optional(),
 });
 
 const block = <T extends string, D extends z.ZodTypeAny>(type: T, data: D) =>
-  z.object({ id: NonEmpty, type: z.literal(type), data, variantKey: z.string().optional() });
+  z.object({ id: NonEmpty, type: z.literal(type), data });
 
 const PageBlockSchema = z.discriminatedUnion('type', [
   block('Hero', HeroSchemaZ),
@@ -385,10 +294,7 @@ const PageBlockSchema = z.discriminatedUnion('type', [
   block('AuthorityStory', AuthoritySchemaZ),
   block('FAQ', FAQSchemaZ),
   block('Countdown', CountdownSchemaZ),
-  block('BeforeAfter', BeforeAfterSchemaZ),
   block('LeadForm', LeadFormSchemaZ),
-  block('MediaLogos', MediaLogosSchemaZ),
-  block('VideoTestimonials', VideoTestimonialsSchemaZ),
   block('Assurance', AssuranceSchemaZ),
 ]);
 
@@ -399,10 +305,7 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('AuthorityStory', AuthoritySchemaZ),
   block('FAQ', FAQSchemaZ),
   block('Countdown', CountdownSchemaZ),
-  block('BeforeAfter', BeforeAfterSchemaZ),
   block('LeadForm', LeadFormSchemaZ),
-  block('MediaLogos', MediaLogosSchemaZ),
-  block('VideoTestimonials', VideoTestimonialsSchemaZ),
   block('Assurance', AssuranceSchemaZ),
 ]);
 
@@ -422,7 +325,6 @@ export const LandingPageTemplateSchema = z.object({
   afterOffer: z.array(OptionalBlockSchema).optional(),
   lowerBlocks: z.array(OptionalBlockSchema),
   stickyCta: CallToActionSchema.optional(),
-  compliance: ComplianceSchema.optional(),
 });
 
 export const PresetTemplateSchema = z.object({
