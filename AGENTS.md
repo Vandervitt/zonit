@@ -4,6 +4,16 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+# Product Positioning
+
+- This project builds overseas landing pages for lead generation.
+- The generated pages should guide visitors to contact, consult, book, or submit a lead.
+- MVP scope: ship simple, high-converting landing pages with the least necessary schema, UI, and logic.
+- Do not design or implement payment flows, checkout pages, pricing checkout logic, order management, subscriptions, carts, refunds, cash-on-delivery, or payment provider integrations.
+- Avoid ecommerce/product-transaction assumptions in schema, copy, components, SEO metadata, analytics events, and generated templates.
+- Prefer lead-generation language such as consultation, quote, booking, contact, inquiry, WhatsApp/Telegram chat, phone, email, or form submission.
+- Treat payments and transaction infrastructure as out of scope unless the product direction is explicitly changed.
+
 # Development Guidelines
 
 ## Code Style
