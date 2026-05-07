@@ -344,6 +344,9 @@ function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; prim
           <p className="text-xl shrink-0 ml-2" style={{ color: primaryColor }}>{option.labelText}</p>
         )}
       </div>
+      {data.showImages && option.image && (
+        <img src={option.image} alt="" className="w-full h-24 object-cover rounded-xl mb-3" />
+      )}
       <ul className="space-y-1 my-3">
         {option.valueProps.map((f, i) => (
           <li key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
@@ -665,9 +668,13 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
     <div className="relative min-h-screen bg-white font-sans">
       <HeroBlock data={template.hero} primaryColor={pc} highlight={highlightKey === "hero"} />
       {template.upperBlocks.map(renderOptional)}
-      <OfferBlock data={template.offer} primaryColor={pc} highlight={highlightKey === "offer"} />
+      {template.offer && (
+        <OfferBlock data={template.offer} primaryColor={pc} highlight={highlightKey === "offer"} />
+      )}
       {template.afterOffer?.map(renderOptional)}
-      <HowItWorksBlock data={template.howItWorks} primaryColor={pc} highlight={highlightKey === "howItWorks"} />
+      {template.howItWorks && (
+        <HowItWorksBlock data={template.howItWorks} primaryColor={pc} highlight={highlightKey === "howItWorks"} />
+      )}
       {template.lowerBlocks.map(renderOptional)}
       {template.leadForm && (
         <LeadFormBlock

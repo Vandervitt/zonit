@@ -51,16 +51,14 @@ function deriveOrganization(template: LandingPageTemplate): JsonLdNode {
 export function deriveJsonLd(template: LandingPageTemplate): JsonLdNode[] {
   const seo = template.pageMeta?.seo;
   const config = seo?.jsonLd;
-  const auto = config?.autoDerive ?? true;
   const nodes: JsonLdNode[] = [];
 
-  if (auto) {
-    const blocks = allBlocks(template);
-    if (config?.organization ?? true) {
-      nodes.push(deriveOrganization(template));
-    }
-    const faq = findBlock(blocks, 'FAQ');
-    if ((config?.faqPage ?? true) && faq) nodes.push(deriveFaq(faq.data));
+  const blocks = allBlocks(template);
+  if (config?.organization ?? true) {
+    nodes.push(deriveOrganization(template));
   }
+  const faq = findBlock(blocks, 'FAQ');
+  if ((config?.faqPage ?? true) && faq) nodes.push(deriveFaq(faq.data));
+
   return nodes;
 }

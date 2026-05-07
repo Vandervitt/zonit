@@ -1,4 +1,4 @@
-// 给 E2E 用的最小可用 LandingPageTemplate 构造器：4 个必填模块 + 自由拼接 OptionalBlock。
+// 给 E2E 用的最小可用 LandingPageTemplate 构造器：核心模块 + 自由拼接 OptionalBlock。
 
 import type { LandingPageTemplate, LeadFormSchema, OptionalBlock } from '@/types/schema';
 
@@ -15,7 +15,8 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
     },
     offer: {
       title: 'Consultation Options',
-      tiers: [
+      showImages: true,
+      options: [
         {
           id: 'tier-basic', name: 'Basic Consultation', labelText: 'Free Quote', description: 'Entry consultation',
           valueProps: ['Feature A'],
@@ -65,7 +66,6 @@ export function reviewsBlock(): OptionalBlock {
     type: 'Reviews',
     data: {
       title: 'Customer Reviews',
-      averageRating: 4.8,
       ratingSummary: { average: 4.8, scale: 5, totalLabel: 'Based on 245 reviews' },
       items: [
         { id: 'r1', authorName: 'Alice', rating: 5, content: 'Loved it', reviewDate: '2025-12-01' },

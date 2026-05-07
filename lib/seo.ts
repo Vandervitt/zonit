@@ -68,7 +68,7 @@ function findOgImage(template: LandingPageTemplate): string | undefined {
   if (template.hero.media?.type === "image") return template.hero.media.src;
   if (template.hero.background.type === "image") return template.hero.background.value;
 
-  for (const option of template.offer.options) {
+  for (const option of template.offer?.options ?? []) {
     if (option.image) return option.image;
   }
 
@@ -97,9 +97,9 @@ function summarizeTemplate(template: LandingPageTemplate) {
       subtitle: template.hero.subtitle,
       badge: template.hero.badge,
       cta: template.hero.cta.text,
-      highlights: template.hero.highlights?.map(item => item.text).slice(0, 4),
+      stats: template.hero.stats?.map(item => item.value ? `${item.value} ${item.label}` : item.label).slice(0, 4),
     },
-    offer: {
+    offer: template.offer ? {
       title: template.offer.title,
       subtitle: template.offer.subtitle,
       options: template.offer.options.slice(0, 3).map(option => ({
@@ -108,8 +108,8 @@ function summarizeTemplate(template: LandingPageTemplate) {
         valueProps: option.valueProps.slice(0, 4),
         cta: option.cta.text,
       })),
-    },
-    howItWorks: template.howItWorks.steps.slice(0, 3).map(step => ({
+    } : undefined,
+    howItWorks: template.howItWorks?.steps.slice(0, 3).map(step => ({
       title: step.title,
       description: step.description,
     })),
@@ -134,10 +134,10 @@ function summarizeTemplate(template: LandingPageTemplate) {
 function fallbackSeo(template: LandingPageTemplate): GeneratedSeo {
   const brandName = cleanText(template.footer.brandName);
   const heroTitle = cleanText(template.hero.title);
-  const offerTitle = cleanText(template.offer.title);
+  const offerTitle = cleanText(template.offer?.title);
   const primaryAction = firstNonEmpty(
     template.hero.cta.text,
-    template.offer.options[0]?.cta.text,
+    template.offer?.options[0]?.cta.text,
     "Contact us",
   );
   const title = limit(

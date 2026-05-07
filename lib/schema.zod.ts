@@ -21,15 +21,11 @@ const ImageMetaSchema = z.object({
   alt: z.string(),
 });
 
-const HeroHighlightSchema = z.object({
+const HeroStatSchema = z.object({
   id: NonEmpty,
-  text: NonEmpty,
-  icon: z.string().optional(),
-});
-
-const HeroProofPointSchema = z.object({
   label: NonEmpty,
   value: z.string().optional(),
+  icon: z.string().optional(),
 });
 
 const HeroMediaSchema = z.object({
@@ -37,10 +33,6 @@ const HeroMediaSchema = z.object({
   src: NonEmpty,
   alt: z.string().optional(),
   poster: z.string().optional(),
-  autoplay: z.boolean().optional(),
-  muted: z.boolean().optional(),
-  loop: z.boolean().optional(),
-  playsInline: z.boolean().optional(),
 });
 
 const CountdownSchemaZ = z.object({
@@ -67,8 +59,7 @@ const HeroSchemaZ = z.object({
   cta: CallToActionSchema,
   secondaryCta: CallToActionSchema.optional(),
   trustText: z.string().optional(),
-  highlights: z.array(HeroHighlightSchema).optional(),
-  proofPoints: z.array(HeroProofPointSchema).optional(),
+  stats: z.array(HeroStatSchema).optional(),
   media: HeroMediaSchema.optional(),
   countdown: CountdownSchemaZ.optional(),
   variant: z.enum(['overlay', 'split-left', 'split-right']).optional(),
@@ -91,6 +82,7 @@ const OfferSchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
   options: z.array(OfferOptionSchema).min(1),
+  showImages: z.boolean().optional(),
   variant: z.enum(['cards-row', 'cards-column']).optional(),
 }).strict();
 
@@ -271,7 +263,6 @@ const SeoMetaSchema = z.object({
   jsonLd: z.object({
     organization: z.boolean().optional(),
     faqPage: z.boolean().optional(),
-    autoDerive: z.boolean().optional(),
   }).strict().optional(),
 });
 
@@ -347,8 +338,8 @@ export const LandingPageTemplateSchema = z.object({
   }),
   pageMeta: PageMetaSchema.optional(),
   hero: HeroSchemaZ,
-  offer: OfferSchemaZ,
-  howItWorks: HowItWorksSchemaZ,
+  offer: OfferSchemaZ.optional(),
+  howItWorks: HowItWorksSchemaZ.optional(),
   footer: MicroFooterSchemaZ,
   upperBlocks: z.array(OptionalBlockSchema),
   afterOffer: z.array(OptionalBlockSchema).optional(),

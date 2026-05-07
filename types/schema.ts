@@ -31,15 +31,11 @@ export interface ImageMeta {
   alt: string;
 }
 
-export interface HeroHighlight {
+export interface HeroStat {
   id: string;
-  text: string;
-  icon?: IconType;
-}
-
-export interface HeroProofPoint {
-  label: string;          // 如 "4.9/5 Rating", "10k+ Customers"
+  label: string;          // 如 "10k+ Clients", "4.9/5 Rating", "Free Consultation"
   value?: string;         // 可选数值，用于强调
+  icon?: IconType;
 }
 
 export interface HeroMedia {
@@ -47,10 +43,6 @@ export interface HeroMedia {
   src: string;
   alt?: string;
   poster?: string;        // 视频封面
-  autoplay?: boolean;
-  muted?: boolean;
-  loop?: boolean;
-  playsInline?: boolean;  // iOS 不写会强制全屏播放
 }
 
 // 倒计时（真实活动截止、预约档期或咨询名额）—— 既可独立成 Block，也可内嵌在 Hero
@@ -79,8 +71,7 @@ export interface HeroSchema {
   cta: CallToAction;            // 主按钮
   secondaryCta?: CallToAction;  // 次按钮，如 "See Results" / "Learn More" / "Check Cases"
   trustText?: string;           // 按钮下方的小字背书，如 "No credit card required"
-  highlights?: HeroHighlight[]; // 首屏利益点，快速降低跳出
-  proofPoints?: HeroProofPoint[]; // 首屏证明信息，建立初始信任
+  stats?: HeroStat[];           // 首屏利益点/证明信息，快速降低跳出并建立初始信任
   media?: HeroMedia;            // 首屏辅助视觉
   countdown?: CountdownSchema;  // 首屏内嵌倒计时（限时活动）
   // split-left / split-right 需配合 media 字段使用；overlay 使用 background 叠加遮罩
@@ -96,7 +87,7 @@ export interface OfferOption {
   description: string;          // 简短描述
   valueProps: string[];         // 核心价值点列表
   tag?: string;                 // 推荐标签，如 "Most Popular", "Best Value"
-  image?: string;               // 方案配图
+  image?: string;               // 方案配图；showImages 为 true 时 options 建议全部提供
   urgencyText?: string;         // 真实稀缺提示，如 "Only 12 consultation slots left this week"
   isRecommended?: boolean;      // 推荐方案，便于视觉突出
   cta: CallToAction;            // 该方案对应的咨询/留资按钮
@@ -106,6 +97,7 @@ export interface OfferSchema {
   title: string;
   subtitle?: string;
   options: OfferOption[];       // 通常 1 到 3 个咨询/服务选项
+  showImages?: boolean;         // 统一控制卡片是否展示图片，避免部分卡片有图导致视觉不齐
   variant?: 'cards-row' | 'cards-column';
 }
 
@@ -161,7 +153,7 @@ export interface ReviewItem {
   avatar?: string;              // 头像URL
   rating: number;               // 1-5 星
   content: string;              // 评价文字
-  proofImage?: string;          // 证据截图（如聊天记录截图）
+  proofImage?: string;          // 证据截图（如聊天记录截图）；同时存在 videoUrl 时优先展示视频
   videoUrl?: string;            // 短视频证言（YouTube/Vimeo/直链均可）
   sourcePlatform?: string;      // 如 "Trustpilot", "WhatsApp", "Telegram"
   verified?: boolean;           // 是否为已验证评价
@@ -288,7 +280,6 @@ export interface SeoMeta {
   jsonLd?: {
     organization?: boolean;     // 默认 true
     faqPage?: boolean;          // 默认 true
-    autoDerive?: boolean;       // 兼容旧模板：开启 Organization + FAQPage 自动派生（默认 true）
   };
 }
 
@@ -395,11 +386,11 @@ export interface LandingPageTemplate {
   pageMeta?: PageMeta;
 
   // ==========================================
-  // 🔴 强制模块：作为根属性存在，不可删除，位置固定
+  // 🔴 核心模块：Hero / Footer 必须存在；Offer / HowItWorks 是推荐漏斗模块，但不强制
   // ==========================================
   hero: HeroSchema;               // 必须有首屏 (漏斗顶部)
-  offer: OfferSchema;             // 必须有核心转化 offer (漏斗核心)
-  howItWorks: HowItWorksSchema;   // 必须有联系流程说明 (打消疑虑)
+  offer?: OfferSchema;            // 推荐展示核心咨询/服务选项 (漏斗核心)
+  howItWorks?: HowItWorksSchema;  // 推荐展示联系流程说明 (打消疑虑)
   footer: MicroFooterSchema;      // 必须有合规页脚 (防封号底线)
 
   // ==========================================

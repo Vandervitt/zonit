@@ -1,4 +1,4 @@
-import type { FooterLink, LandingPageTemplate, OfferSchema, OptionalBlockType, ReviewsSchema, SeoMeta } from './schema';
+import type { FooterLink, HeroSchema, LandingPageTemplate, OfferSchema, OptionalBlockType, ReviewsSchema, SeoMeta } from './schema';
 
 // @ts-expect-error offer entries are options, not pricing tiers.
 import type { OfferTier } from './schema';
@@ -8,7 +8,6 @@ import type { OfferTier } from './schema';
 const leadGenerationJsonLd: SeoMeta['jsonLd'] = {
   organization: true,
   faqPage: true,
-  autoDerive: true,
 };
 
 void leadGenerationJsonLd;
@@ -22,6 +21,11 @@ void arbitraryJsonLd;
 const reviewJsonLd: SeoMeta['jsonLd'] = { deriveReviews: true };
 
 void reviewJsonLd;
+
+// @ts-expect-error autoDerive was removed; JSON-LD derivation is controlled by explicit node switches.
+const legacyAutoDeriveJsonLd: SeoMeta['jsonLd'] = { autoDerive: true };
+
+void legacyAutoDeriveJsonLd;
 
 // @ts-expect-error LeadForm is a single page-level lead capture, not a movable optional block.
 const optionalLeadForm: OptionalBlockType = 'LeadForm';
@@ -41,6 +45,51 @@ const rootLeadFormTemplate: Partial<LandingPageTemplate> = {
 
 void rootLeadFormTemplate;
 
+const minimalLandingPageTemplate: LandingPageTemplate = {
+  templateId: 'minimal-lead-page',
+  templateName: 'Minimal Lead Page',
+  themeConfig: { mode: 'light', primaryColor: '#2563eb' },
+  hero: {
+    title: 'Book a Free Consultation',
+    subtitle: 'Talk with our team before making any decision.',
+    background: { type: 'color', value: '#ffffff' },
+    cta: { text: 'Contact Us', action: 'open_form', channel: 'form' },
+  },
+  footer: {
+    brandName: 'Zonit',
+    copyrightYear: '2026',
+    links: [{ text: 'Privacy Policy', content: 'We only use contact details to respond to inquiries.' }],
+  },
+  upperBlocks: [],
+  lowerBlocks: [],
+};
+
+void minimalLandingPageTemplate;
+
+const heroWithStats: HeroSchema = {
+  title: 'Trusted Consultation',
+  subtitle: 'Fast human response for overseas clients.',
+  background: { type: 'image', value: '/hero.jpg' },
+  cta: { text: 'Chat on WhatsApp', channel: 'whatsapp', action: 'chat' },
+  stats: [
+    { id: 'rating', value: '4.9/5', label: 'Client rating', icon: 'Star' },
+    { id: 'support', label: '24/7 Human Support', icon: 'MessageCircle' },
+  ],
+};
+
+void heroWithStats;
+
+const heroWithLegacyHighlights: HeroSchema = {
+  title: 'Old Shape',
+  subtitle: 'Old split hero trust fields.',
+  background: { type: 'color', value: '#ffffff' },
+  cta: { text: 'Contact Us' },
+  // @ts-expect-error highlights/proofPoints were merged into stats.
+  highlights: [],
+};
+
+void heroWithLegacyHighlights;
+
 const inlineComplianceLink: FooterLink = {
   text: 'Privacy Policy',
   content: 'We only use submitted contact details to respond to inquiries.',
@@ -50,6 +99,7 @@ void inlineComplianceLink;
 
 const leadGenerationOffer: OfferSchema = {
   title: 'Choose a Consultation Path',
+  showImages: false,
   options: [
     {
       id: 'quick-chat',
