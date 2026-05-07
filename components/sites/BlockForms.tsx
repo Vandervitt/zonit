@@ -149,14 +149,6 @@ function localInputToIso(local: string): string {
   return isNaN(d.getTime()) ? "" : d.toISOString();
 }
 
-const DEFAULT_COUNTDOWN: CountdownSchema = {
-  title: "Limited-Time Offer",
-  subtitle: "Consultation slots are limited this week",
-  endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-  expiredFallback: { title: "Offer Ended", subtitle: "Stay tuned for the next campaign" },
-  variant: "section",
-};
-
 const DEFAULT_STICKY_CTA: CallToAction = {
   text: "Chat on WhatsApp",
   url: "https://wa.me/1234567890",
@@ -168,8 +160,6 @@ const DEFAULT_STICKY_CTA: CallToAction = {
 // ── HeroForm ────────────────────────────────────────────────────────────────
 
 export function HeroForm({ data, onChange }: { data: HeroSchema; onChange: (d: HeroSchema) => void }) {
-  const toggleCountdown = () =>
-    onChange({ ...data, countdown: data.countdown ? undefined : DEFAULT_COUNTDOWN });
   return (
     <div className="space-y-4">
       <Field label="顶部标签 Badge">
@@ -218,13 +208,6 @@ export function HeroForm({ data, onChange }: { data: HeroSchema; onChange: (d: H
       <Field label="按钮下方背书文字">
         <Input className={di} value={data.trustText ?? ""} onChange={e => onChange({ ...data, trustText: e.target.value })} placeholder="✓ No credit card required" />
       </Field>
-      <SectionDivider label="首屏内嵌倒计时" />
-      <Button variant="ghost" size="sm" className={addBtn} onClick={toggleCountdown}>
-        {data.countdown ? "禁用倒计时" : "启用倒计时"}
-      </Button>
-      {data.countdown && (
-        <CountdownForm data={data.countdown} onChange={countdown => onChange({ ...data, countdown })} />
-      )}
     </div>
   );
 }

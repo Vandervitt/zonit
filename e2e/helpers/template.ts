@@ -11,7 +11,7 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
       title: 'E2E Hero',
       subtitle: 'Sub',
       background: { type: 'color', value: '#f8fafc' },
-      cta: { text: 'Contact Us', url: 'https://example.com/contact', channel: 'contact_link', action: 'contact_link' },
+      cta: { text: 'Contact Us', url: 'https://example.com/contact', channel: 'contact_link' },
     },
     offer: {
       title: 'Consultation Options',
@@ -68,7 +68,7 @@ export function reviewsBlock(): OptionalBlock {
       title: 'Customer Reviews',
       ratingSummary: { average: 4.8, scale: 5, totalLabel: 'Based on 245 reviews' },
       items: [
-        { id: 'r1', authorName: 'Alice', rating: 5, content: 'Loved it', reviewDate: '2025-12-01' },
+        { id: 'r1', authorName: 'Alice', rating: 5, content: 'Loved it' },
         { id: 'r2', authorName: 'Bob', rating: 4, content: 'Helpful consultation' },
       ],
     },

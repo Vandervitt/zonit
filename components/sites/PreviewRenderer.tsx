@@ -168,11 +168,6 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
       {data.trustText && (
         <p className="text-xs mt-2 text-slate-400">{data.trustText}</p>
       )}
-      {data.countdown && (
-        <div className="mt-4">
-          <CountdownDigits data={data.countdown} primaryColor={primaryColor} dense />
-        </div>
-      )}
     </>
   );
 
@@ -233,11 +228,6 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
           <p className="text-xs mt-3" style={{ color: bgImg ? "rgba(255,255,255,0.7)" : "#94a3b8" }}>
             {data.trustText}
           </p>
-        )}
-        {data.countdown && (
-          <div className="mt-5">
-            <CountdownDigits data={data.countdown} primaryColor={primaryColor} dense />
-          </div>
         )}
       </div>
     </section>
@@ -667,7 +657,7 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
   return (
     <div className="relative min-h-screen bg-white font-sans">
       <HeroBlock data={template.hero} primaryColor={pc} highlight={highlightKey === "hero"} />
-      {template.upperBlocks.map(renderOptional)}
+      {template.upperBlocks?.map(renderOptional)}
       {template.offer && (
         <OfferBlock data={template.offer} primaryColor={pc} highlight={highlightKey === "offer"} />
       )}
@@ -675,7 +665,7 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       {template.howItWorks && (
         <HowItWorksBlock data={template.howItWorks} primaryColor={pc} highlight={highlightKey === "howItWorks"} />
       )}
-      {template.lowerBlocks.map(renderOptional)}
+      {template.lowerBlocks?.map(renderOptional)}
       {template.leadForm && (
         <LeadFormBlock
           id="leadForm"

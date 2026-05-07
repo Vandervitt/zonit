@@ -9,7 +9,6 @@ export type IconType =
   | (string & {});
 
 export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'booking' | 'contact_link';
-export type CtaAction = 'chat' | 'call' | 'email' | 'open_form' | 'scroll_to_form' | 'booking_link' | 'contact_link';
 export type LinkTarget = '_self' | '_blank';
 
 // 通用的行动呼吁按钮 (CTA) 模型 —— 核心转化组件
@@ -19,8 +18,6 @@ export interface CallToAction {
   icon?: IconType;        // 按钮图标
   theme?: 'primary' | 'secondary' | 'whatsapp' | 'telegram'; // 按钮颜色风格
   channel?: CtaChannel;   // 引流渠道类型
-  action?: CtaAction;     // CTA 行为，限定在咨询/留资/预约路径内
-  formTargetId?: string;  // action 为 open_form / scroll_to_form 时定位页面级表单
   target?: LinkTarget;    // 链接打开方式
   prefilledMessage?: string; // 私域沟通时预填消息，减少用户输入成本
 }
@@ -28,16 +25,13 @@ export interface CallToAction {
 // 页面级主转化目标：让全页 CTA 默认围绕同一个咨询/留资动作，避免多入口归因混乱
 export interface PrimaryConversion {
   channel: CtaChannel;
-  action: CtaAction;
-  label?: string;              // 如 "Book a Free Consultation" / "Chat on WhatsApp"
+  label: string;               // 如 "Book a Free Consultation" / "Chat on WhatsApp"
   url?: string;                // 咨询/预约/联系方式链接；禁止交易、结账、购物车、订单类链接
-  formTargetId?: string;       // 表单型主转化目标
   prefilledMessage?: string;   // 私域沟通预填消息
 }
 
 // 移动端悬浮 CTA：海外引流页常用 WhatsApp / Telegram / 电话入口
 export interface StickyCtaConfig extends CallToAction {
-  label?: string;              // 气泡文案，如 "Chat Now" / "Get Free Quote"
   position?: 'bottom-left' | 'bottom-right';
   showAfterScrollPercent?: number; // 滚动到页面百分比后出现，0 表示首屏即展示
 }
@@ -90,7 +84,6 @@ export interface HeroSchema {
   trustText?: string;           // 按钮下方的小字背书，如 "Free consultation" / "Reply within 10 minutes"
   stats?: HeroStat[];           // 首屏利益点/证明信息，快速降低跳出并建立初始信任
   media?: HeroMedia;            // 首屏辅助视觉
-  countdown?: CountdownSchema;  // 首屏内嵌倒计时（限时活动）
   // split-left / split-right 需配合 media 字段使用；overlay 使用 background 叠加遮罩
   variant?: 'overlay' | 'split-left' | 'split-right';
 }
@@ -175,11 +168,8 @@ export interface ReviewItem {
   avatar?: string;              // 头像URL
   rating: number;               // 1-5 星
   content: string;              // 评价文字
-  proofImage?: string;          // 证据截图（如聊天记录截图）；同时存在 videoUrl 时优先展示视频
-  videoUrl?: string;            // 短视频证言（YouTube/Vimeo/直链均可）
+  proofImage?: string;          // 证据截图（如聊天记录截图）
   sourcePlatform?: string;      // 如 "Trustpilot", "WhatsApp", "Telegram"
-  verified?: boolean;           // 是否为已验证评价
-  reviewDate?: string;          // ISO 日期字符串
   country?: string;             // 评价用户国家/地区
 }
 
@@ -439,13 +429,13 @@ export interface LandingPageTemplate {
   // ==========================================
 
   // 位于 Hero 和 Offer 之间的区域（适合放：信任条、卖点、权威背书、媒体 logo 墙）
-  upperBlocks: OptionalBlock[];
+  upperBlocks?: OptionalBlock[];
 
   // 位于 Offer 和 HowItWorks 之间的区域（适合放：用户评价、服务承诺）
   afterOffer?: OptionalBlock[];
 
   // 位于 HowItWorks 和 Footer 之间的区域（适合放：FAQ、底部 CTA 倒计时）
-  lowerBlocks: OptionalBlock[];
+  lowerBlocks?: OptionalBlock[];
 
   // 页面级线索表单：MVP 仅允许一个，避免多表单/多 webhook/多埋点造成归因和合规复杂度
   leadForm?: LeadFormSchema;

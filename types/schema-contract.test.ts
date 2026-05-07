@@ -45,6 +45,27 @@ const rootLeadFormTemplate: Partial<LandingPageTemplate> = {
 
 void rootLeadFormTemplate;
 
+const primaryConversionTemplate: Partial<LandingPageTemplate> = {
+  primaryConversion: {
+    channel: 'whatsapp',
+    label: 'Chat on WhatsApp',
+    url: 'https://wa.me/1234567890',
+    prefilledMessage: 'I would like a consultation.',
+  },
+};
+
+void primaryConversionTemplate;
+
+const primaryConversionWithoutLabel: Partial<LandingPageTemplate> = {
+  primaryConversion: {
+    channel: 'form',
+    // @ts-expect-error primaryConversion keeps a user-facing label as the page conversion anchor.
+    action: 'open_form',
+  },
+};
+
+void primaryConversionWithoutLabel;
+
 const minimalLandingPageTemplate: LandingPageTemplate = {
   templateId: 'minimal-lead-page',
   templateName: 'Minimal Lead Page',
@@ -53,7 +74,7 @@ const minimalLandingPageTemplate: LandingPageTemplate = {
     title: 'Book a Free Consultation',
     subtitle: 'Talk with our team before making any decision.',
     background: { type: 'color', value: '#ffffff' },
-    cta: { text: 'Contact Us', action: 'open_form', channel: 'form' },
+    cta: { text: 'Contact Us', channel: 'form' },
   },
   footer: {
     brandName: 'Zonit',
@@ -70,7 +91,7 @@ const heroWithStats: HeroSchema = {
   title: 'Trusted Consultation',
   subtitle: 'Fast human response for overseas clients.',
   background: { type: 'image', value: '/hero.jpg' },
-  cta: { text: 'Chat on WhatsApp', channel: 'whatsapp', action: 'chat' },
+  cta: { text: 'Chat on WhatsApp', channel: 'whatsapp' },
   stats: [
     { id: 'rating', value: '4.9/5', label: 'Client rating', icon: 'Star' },
     { id: 'support', label: '24/7 Human Support', icon: 'MessageCircle' },
@@ -89,6 +110,19 @@ const heroWithLegacyHighlights: HeroSchema = {
 };
 
 void heroWithLegacyHighlights;
+
+const heroWithInlineCountdown: HeroSchema = {
+  title: 'Old Countdown Shape',
+  subtitle: 'Countdowns now live in optional blocks.',
+  background: { type: 'color', value: '#ffffff' },
+  cta: { text: 'Contact Us' },
+  // @ts-expect-error hero countdown duplicates the standalone Countdown block.
+  countdown: {
+    endsAt: '2026-12-31T23:59:59+08:00',
+  },
+};
+
+void heroWithInlineCountdown;
 
 const inlineComplianceLink: FooterLink = {
   text: 'Privacy Policy',
@@ -145,6 +179,22 @@ const reviewsWithAverageRating: ReviewsSchema = {
 };
 
 void reviewsWithAverageRating;
+
+const reviewsWithVerifiedFlag: ReviewsSchema = {
+  title: 'Client Reviews',
+  items: [
+    {
+      id: 'review-1',
+      authorName: 'Client',
+      rating: 5,
+      content: 'The team responded quickly.',
+      // @ts-expect-error verified needs a real verification mechanism and is out of MVP schema.
+      verified: true,
+    },
+  ],
+};
+
+void reviewsWithVerifiedFlag;
 
 const reviewsWithTotalReviews: ReviewsSchema = {
   title: 'Client Reviews',

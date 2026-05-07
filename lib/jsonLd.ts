@@ -12,9 +12,9 @@ import type {
 type JsonLdNode = Record<string, unknown>;
 
 const allBlocks = (template: LandingPageTemplate): OptionalBlock[] => [
-  ...template.upperBlocks,
+  ...(template.upperBlocks ?? []),
   ...(template.afterOffer ?? []),
-  ...template.lowerBlocks,
+  ...(template.lowerBlocks ?? []),
 ];
 
 function findBlock<T extends OptionalBlock['type']>(

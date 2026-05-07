@@ -119,6 +119,7 @@ function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
     case "Assurance":
       return { id, type, data: getDefaultBlockData(type) as AssuranceSchema };
   }
+  throw new Error(`Unsupported optional block type: ${type}`);
 }
 
 function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["data"]): OptionalBlock {
@@ -138,23 +139,27 @@ function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["
     case "Assurance":
       return { ...block, data: newData as AssuranceSchema };
   }
+  throw new Error(`Unsupported optional block type: ${block.type}`);
 }
 
 export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyChange }: Props) {
   const [addOpen, setAddOpen] = useState(false);
   const setExpandedKey = onExpandedKeyChange;
+  const upperBlocks = data.upperBlocks ?? [];
+  const afterOfferBlocks = data.afterOffer ?? [];
+  const lowerBlocks = data.lowerBlocks ?? [];
 
   const blockList: BlockMeta[] = [
     { key: FixedBlockKey.Hero, label: TYPE_LABEL.Hero, icon: TYPE_ICON.Hero, required: true, type: "Hero" },
-    ...data.upperBlocks.map(b => ({
+    ...upperBlocks.map(b => ({
       key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
     })),
     { key: FixedBlockKey.Offer, label: TYPE_LABEL.Offer, icon: TYPE_ICON.Offer, required: true, type: "Offer" },
-    ...(data.afterOffer ?? []).map(b => ({
+    ...afterOfferBlocks.map(b => ({
       key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
     })),
     { key: FixedBlockKey.HowItWorks, label: TYPE_LABEL.HowItWorks, icon: TYPE_ICON.HowItWorks, required: true, type: "HowItWorks" },
-    ...data.lowerBlocks.map(b => ({
+    ...lowerBlocks.map(b => ({
       key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
     })),
     { key: FixedBlockKey.LeadForm, label: TYPE_LABEL.LeadForm, icon: TYPE_ICON.LeadForm, required: false, type: "LeadForm", badgeText: "单例", removable: false },
@@ -163,19 +168,19 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
   ];
 
   const existingOptionalTypes = [
-    ...data.upperBlocks.map(b => b.type),
-    ...(data.afterOffer ?? []).map(b => b.type),
-    ...data.lowerBlocks.map(b => b.type),
+    ...upperBlocks.map(b => b.type),
+    ...afterOfferBlocks.map(b => b.type),
+    ...lowerBlocks.map(b => b.type),
   ] as OptionalBlockType[];
 
   const handleAddBlock = (type: OptionalBlockType, zone: BlockZone.Upper | BlockZone.Middle | BlockZone.Lower) => {
     const newBlock = createOptionalBlock(type);
     if (zone === BlockZone.Upper) {
-      onChange({ ...data, upperBlocks: [...data.upperBlocks, newBlock] });
+      onChange({ ...data, upperBlocks: [...upperBlocks, newBlock] });
     } else if (zone === BlockZone.Middle) {
-      onChange({ ...data, afterOffer: [...(data.afterOffer ?? []), newBlock] });
+      onChange({ ...data, afterOffer: [...afterOfferBlocks, newBlock] });
     } else {
-      onChange({ ...data, lowerBlocks: [...data.lowerBlocks, newBlock] });
+      onChange({ ...data, lowerBlocks: [...lowerBlocks, newBlock] });
     }
     setExpandedKey(newBlock.id);
   };
@@ -183,9 +188,9 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
   const removeOptionalBlock = (blockId: string) => {
     onChange({
       ...data,
-      upperBlocks: data.upperBlocks.filter(b => b.id !== blockId),
-      afterOffer: (data.afterOffer ?? []).filter(b => b.id !== blockId),
-      lowerBlocks: data.lowerBlocks.filter(b => b.id !== blockId),
+      upperBlocks: upperBlocks.filter(b => b.id !== blockId),
+      afterOffer: afterOfferBlocks.filter(b => b.id !== blockId),
+      lowerBlocks: lowerBlocks.filter(b => b.id !== blockId),
     });
     if (expandedKey === blockId) setExpandedKey(FixedBlockKey.Hero);
   };
@@ -263,12 +268,12 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     const updateOptional = (blockId: string, newData: OptionalBlock["data"]) => {
       onChange({
         ...data,
-        upperBlocks: data.upperBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
-        afterOffer: (data.afterOffer ?? []).map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
-        lowerBlocks: data.lowerBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
+        upperBlocks: upperBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
+        afterOffer: afterOfferBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
+        lowerBlocks: lowerBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
       });
     };
-    const block = [...data.upperBlocks, ...(data.afterOffer ?? []), ...data.lowerBlocks].find(b => b.id === meta.key);
+    const block = [...upperBlocks, ...afterOfferBlocks, ...lowerBlocks].find(b => b.id === meta.key);
     if (!block) return null;
     switch (block.type) {
       case "Features":

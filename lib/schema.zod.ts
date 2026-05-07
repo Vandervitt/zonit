@@ -10,23 +10,18 @@ const CallToActionSchema = z.object({
   icon: z.string().optional(),
   theme: z.enum(['primary', 'secondary', 'whatsapp', 'telegram']).optional(),
   channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']).optional(),
-  action: z.enum(['chat', 'call', 'email', 'open_form', 'scroll_to_form', 'booking_link', 'contact_link']).optional(),
-  formTargetId: z.string().optional(),
   target: z.enum(['_self', '_blank']).optional(),
   prefilledMessage: z.string().optional(),
 });
 
 const PrimaryConversionSchema = z.object({
   channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']),
-  action: z.enum(['chat', 'call', 'email', 'open_form', 'scroll_to_form', 'booking_link', 'contact_link']),
-  label: z.string().optional(),
+  label: NonEmpty,
   url: z.string().optional(),
-  formTargetId: z.string().optional(),
   prefilledMessage: z.string().optional(),
 });
 
 const StickyCtaConfigSchema = CallToActionSchema.extend({
-  label: z.string().optional(),
   position: z.enum(['bottom-left', 'bottom-right']).optional(),
   showAfterScrollPercent: z.number().min(0).max(100).optional(),
 });
@@ -76,7 +71,6 @@ const HeroSchemaZ = z.object({
   trustText: z.string().optional(),
   stats: z.array(HeroStatSchema).optional(),
   media: HeroMediaSchema.optional(),
-  countdown: CountdownSchemaZ.optional(),
   variant: z.enum(['overlay', 'split-left', 'split-right']).optional(),
 });
 
@@ -156,10 +150,7 @@ const ReviewItemSchema = z.object({
   rating: z.number().min(1).max(5),
   content: NonEmpty,
   proofImage: z.string().optional(),
-  videoUrl: z.string().optional(),
   sourcePlatform: z.string().optional(),
-  verified: z.boolean().optional(),
-  reviewDate: z.string().optional(),
   country: z.string().optional(),
 });
 
@@ -376,9 +367,9 @@ export const LandingPageTemplateSchema = z.object({
   offer: OfferSchemaZ.optional(),
   howItWorks: HowItWorksSchemaZ.optional(),
   footer: MicroFooterSchemaZ,
-  upperBlocks: z.array(OptionalBlockSchema),
+  upperBlocks: z.array(OptionalBlockSchema).optional(),
   afterOffer: z.array(OptionalBlockSchema).optional(),
-  lowerBlocks: z.array(OptionalBlockSchema),
+  lowerBlocks: z.array(OptionalBlockSchema).optional(),
   leadForm: LeadFormSchemaZ.optional(),
   stickyCta: StickyCtaConfigSchema.optional(),
 });

@@ -41,9 +41,9 @@ Rules:
 - Use natural search-result copy for humans, not keyword stuffing.`;
 
 const allBlocks = (template: LandingPageTemplate): OptionalBlock[] => [
-  ...template.upperBlocks,
+  ...(template.upperBlocks ?? []),
   ...(template.afterOffer ?? []),
-  ...template.lowerBlocks,
+  ...(template.lowerBlocks ?? []),
 ];
 
 function cleanText(value: string | undefined): string {
