@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video, CreditCard, Truck } from "lucide-react";
+import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, ArrowLeftRight, BadgeCheck, Mail, Newspaper, Video } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -10,11 +10,10 @@ import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { cn } from "../ui/utils";
 import {
-  HeroForm, BundlesForm, HowItWorksForm, FooterForm,
+  HeroForm, OfferForm, HowItWorksForm, FooterForm,
   FeaturesForm, ReviewsForm, TrustBannerForm, AuthorityForm, FAQForm,
   CountdownForm, StickyCtaEditor, BeforeAfterForm, GuaranteeForm,
   LeadFormForm, MediaLogosForm, VideoTestimonialsForm,
-  PaymentBadgesForm, ShippingInfoForm,
 } from "./BlockForms";
 import { AddBlockDialog } from "./AddBlockDialog";
 import { AiRewriteButton } from "../editor/AiRewriteButton";
@@ -23,7 +22,7 @@ import { BlockZone, FixedBlockKey } from "../../lib/constants";
 import type {
   LandingPageTemplate,
   HeroSchema,
-  BundlesSchema,
+  OfferSchema,
   HowItWorksSchema,
   MicroFooterSchema,
   FeaturesSchema,
@@ -37,8 +36,6 @@ import type {
   LeadFormSchema,
   MediaLogosSchema,
   VideoTestimonialsSchema,
-  PaymentTrustSchema,
-  ShippingInfoSchema,
   OptionalBlock,
   OptionalBlockType,
 } from "@/types/schema";
@@ -56,13 +53,13 @@ interface BlockMeta {
   icon: React.ReactNode;
   required: boolean;
   type: string;
-  badgeText?: string;       // 自定义 badge 文案，覆盖默认的"必填/可选"
-  removable?: boolean;      // 显式控制是否可删除，默认按 !required
+  badgeText?: string;
+  removable?: boolean;
 }
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
   Hero: <Zap className="w-3.5 h-3.5 text-rose-400" />,
-  ProductBundles: <Package className="w-3.5 h-3.5 text-indigo-400" />,
+  Offer: <Package className="w-3.5 h-3.5 text-indigo-400" />,
   HowItWorks: <List className="w-3.5 h-3.5 text-sky-400" />,
   MicroFooter: <FileText className="w-3.5 h-3.5 text-zinc-400" />,
   Features: <Sparkles className="w-3.5 h-3.5 text-violet-400" />,
@@ -76,14 +73,12 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
   LeadForm: <Mail className="w-3.5 h-3.5 text-indigo-400" />,
   MediaLogos: <Newspaper className="w-3.5 h-3.5 text-slate-400" />,
   VideoTestimonials: <Video className="w-3.5 h-3.5 text-fuchsia-400" />,
-  PaymentTrust: <CreditCard className="w-3.5 h-3.5 text-blue-400" />,
-  ShippingInfo: <Truck className="w-3.5 h-3.5 text-cyan-400" />,
   StickyCta: <MousePointerClick className="w-3.5 h-3.5 text-cyan-400" />,
 };
 
 const TYPE_BG: Record<string, string> = {
   Hero: "bg-rose-500/10",
-  ProductBundles: "bg-indigo-500/10",
+  Offer: "bg-indigo-500/10",
   HowItWorks: "bg-sky-500/10",
   MicroFooter: "bg-zinc-500/10",
   Features: "bg-violet-500/10",
@@ -97,15 +92,13 @@ const TYPE_BG: Record<string, string> = {
   LeadForm: "bg-indigo-500/10",
   MediaLogos: "bg-slate-500/10",
   VideoTestimonials: "bg-fuchsia-500/10",
-  PaymentTrust: "bg-blue-500/10",
-  ShippingInfo: "bg-cyan-500/10",
   StickyCta: "bg-cyan-500/10",
 };
 
 const TYPE_LABEL: Record<string, string> = {
   Hero: "首屏主视觉",
-  ProductBundles: "套餐/价格",
-  HowItWorks: "购买流程",
+  Offer: "核心 Offer",
+  HowItWorks: "联系流程",
   MicroFooter: "页脚",
   Features: "产品卖点",
   Reviews: "用户评价",
@@ -118,8 +111,6 @@ const TYPE_LABEL: Record<string, string> = {
   LeadForm: "表单线索",
   MediaLogos: "媒体 Logo 墙",
   VideoTestimonials: "视频证言",
-  PaymentTrust: "支付信任徽章",
-  ShippingInfo: "配送信息",
   StickyCta: "全站浮动 CTA",
 };
 
@@ -149,10 +140,6 @@ function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
       return { id, type, data: getDefaultBlockData(type) as MediaLogosSchema };
     case "VideoTestimonials":
       return { id, type, data: getDefaultBlockData(type) as VideoTestimonialsSchema };
-    case "PaymentTrust":
-      return { id, type, data: getDefaultBlockData(type) as PaymentTrustSchema };
-    case "ShippingInfo":
-      return { id, type, data: getDefaultBlockData(type) as ShippingInfoSchema };
   }
 }
 
@@ -180,10 +167,6 @@ function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["
       return { ...block, data: newData as MediaLogosSchema };
     case "VideoTestimonials":
       return { ...block, data: newData as VideoTestimonialsSchema };
-    case "PaymentTrust":
-      return { ...block, data: newData as PaymentTrustSchema };
-    case "ShippingInfo":
-      return { ...block, data: newData as ShippingInfoSchema };
   }
 }
 
@@ -196,8 +179,8 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     ...data.upperBlocks.map(b => ({
       key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
     })),
-    { key: FixedBlockKey.Bundles, label: TYPE_LABEL.ProductBundles, icon: TYPE_ICON.ProductBundles, required: true, type: "ProductBundles" },
-    ...(data.afterBundles ?? []).map(b => ({
+    { key: FixedBlockKey.Offer, label: TYPE_LABEL.Offer, icon: TYPE_ICON.Offer, required: true, type: "Offer" },
+    ...(data.afterOffer ?? []).map(b => ({
       key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
     })),
     { key: FixedBlockKey.HowItWorks, label: TYPE_LABEL.HowItWorks, icon: TYPE_ICON.HowItWorks, required: true, type: "HowItWorks" },
@@ -210,7 +193,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
 
   const existingOptionalTypes = [
     ...data.upperBlocks.map(b => b.type),
-    ...(data.afterBundles ?? []).map(b => b.type),
+    ...(data.afterOffer ?? []).map(b => b.type),
     ...data.lowerBlocks.map(b => b.type),
   ] as OptionalBlockType[];
 
@@ -219,7 +202,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     if (zone === BlockZone.Upper) {
       onChange({ ...data, upperBlocks: [...data.upperBlocks, newBlock] });
     } else if (zone === BlockZone.Middle) {
-      onChange({ ...data, afterBundles: [...(data.afterBundles ?? []), newBlock] });
+      onChange({ ...data, afterOffer: [...(data.afterOffer ?? []), newBlock] });
     } else {
       onChange({ ...data, lowerBlocks: [...data.lowerBlocks, newBlock] });
     }
@@ -230,7 +213,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     onChange({
       ...data,
       upperBlocks: data.upperBlocks.filter(b => b.id !== blockId),
-      afterBundles: (data.afterBundles ?? []).filter(b => b.id !== blockId),
+      afterOffer: (data.afterOffer ?? []).filter(b => b.id !== blockId),
       lowerBlocks: data.lowerBlocks.filter(b => b.id !== blockId),
     });
     if (expandedKey === blockId) setExpandedKey(FixedBlockKey.Hero);
@@ -249,15 +232,15 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
         </>
       );
     }
-    if (meta.key === FixedBlockKey.Bundles) {
+    if (meta.key === FixedBlockKey.Offer) {
       return (
         <>
           <AiRewriteButton
-            blockType="ProductBundles"
-            currentData={data.bundles}
-            onSuccess={d => onChange({ ...data, bundles: d as BundlesSchema })}
+            blockType="Offer"
+            currentData={data.offer}
+            onSuccess={d => onChange({ ...data, offer: d as OfferSchema })}
           />
-          <BundlesForm data={data.bundles as BundlesSchema} onChange={bundles => onChange({ ...data, bundles })} />
+          <OfferForm data={data.offer as OfferSchema} onChange={offer => onChange({ ...data, offer })} />
         </>
       );
     }
@@ -297,11 +280,11 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
       onChange({
         ...data,
         upperBlocks: data.upperBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
-        afterBundles: (data.afterBundles ?? []).map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
+        afterOffer: (data.afterOffer ?? []).map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
         lowerBlocks: data.lowerBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
       });
     };
-    const block = [...data.upperBlocks, ...(data.afterBundles ?? []), ...data.lowerBlocks].find(b => b.id === meta.key);
+    const block = [...data.upperBlocks, ...(data.afterOffer ?? []), ...data.lowerBlocks].find(b => b.id === meta.key);
     if (!block) return null;
     switch (block.type) {
       case "Features":
@@ -411,14 +394,6 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             <VideoTestimonialsForm data={block.data as VideoTestimonialsSchema} onChange={d => updateOptional(block.id, d)} />
           </>
         );
-      case "PaymentTrust":
-        return (
-          <PaymentBadgesForm data={block.data as PaymentTrustSchema} onChange={d => updateOptional(block.id, d)} />
-        );
-      case "ShippingInfo":
-        return (
-          <ShippingInfoForm data={block.data as ShippingInfoSchema} onChange={d => updateOptional(block.id, d)} />
-        );
       default:
         return null;
     }
@@ -496,7 +471,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
           size="sm"
           className="w-full text-xs gap-1.5 h-8 bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 border border-zinc-800 hover:border-zinc-700 rounded-md transition-colors"
           onClick={() => setAddOpen(true)}
-          disabled={existingOptionalTypes.length >= 13}
+          disabled={existingOptionalTypes.length >= 11}
         >
           <Plus className="w-3.5 h-3.5" />
           添加模块

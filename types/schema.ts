@@ -10,7 +10,6 @@ export type IconType =
 
 export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'external';
 export type LinkTarget = '_self' | '_blank';
-export type BillingPeriod = 'one-time' | 'day' | 'week' | 'month' | 'quarter' | 'year' | 'lifetime' | 'custom';
 
 // 通用的行动呼吁按钮 (CTA) 模型 —— 核心转化组件
 export interface CallToAction {
@@ -93,33 +92,28 @@ export interface HeroSchema {
 }
 
 
-// 向用户展示价格或服务梯队，引导点击咨询。
-export interface BundleTier {
+// 核心转化 Offer —— 展示服务/方案，引导点击咨询或留资
+export interface OfferTier {
   id: string;
-  name: string;                 // 套餐名称，如 "Basic", "Family Pack", "VIP Signal"
-  price: string;                // 价格文案，如 "$49", "Free Quote"
-  originalPrice?: string;       // 原价 (用于划线价，制造优惠感)
+  name: string;                 // 方案名称，如 "Basic", "Family Pack", "VIP Signal"
+  priceText?: string;           // 价格展示文案，如 "$49", "Free Quote", "从 ¥199 起"
   description: string;          // 简短描述
-  features: string[];           // 包含的权益列表 (打钩项)
+  valueProps: string[];         // 核心价值点列表
   tag?: string;                 // 推荐标签，如 "Most Popular", "Best Value"
-  image?: string;               // 套餐配图 (卖实体商品时必填)
-  currency?: string;            // ISO 货币代码，如 "USD"
-  billingPeriod?: BillingPeriod; // 价格周期
-  discountLabel?: string;       // 如 "Save 30%"
-  guaranteeText?: string;       // 如 "30-day money-back guarantee"
+  image?: string;               // 方案配图
   urgencyText?: string;         // 如 "Only 12 slots left this week"
-  isRecommended?: boolean;      // 推荐套餐，便于视觉突出
-  cta: CallToAction;            // 该套餐对应的专属咨询按钮
+  isRecommended?: boolean;      // 推荐方案，便于视觉突出
+  cta: CallToAction;            // 该方案对应的咨询/留资按钮
 }
 
-export interface BundlesSchema {
+export interface OfferSchema {
   title: string;
   subtitle?: string;
-  tiers: BundleTier[];          // 通常 1 到 3 个
+  tiers: OfferTier[];           // 通常 1 到 3 个
   variant?: 'cards-row' | 'cards-column';
 }
 
-// 引导用户如何通过 WhatsApp/TG 交易，打消疑虑
+// 引导用户如何通过 WhatsApp/TG 联系，打消疑虑
 export interface StepItem {
   id: string;
   icon: IconType;               // 如 "MessageCircle", "Check", "Truck"
@@ -202,7 +196,7 @@ export interface TrustBadge {
 }
 
 export interface TrustBannerSchema {
-  theme?: 'light' | 'dark' | 'brand'; 
+  theme?: 'light' | 'dark' | 'brand';
   badges: TrustBadge[];
 }
 
@@ -279,7 +273,7 @@ export interface LeadFormSchema {
   fields: LeadFormField[];
   submitText: string;
   successMessage?: string;
-  webhookUrl?: string;          // 提交目标 URL；未填时由平台层注入默认收件箱，发布前校验层应拒绝为空
+  webhookUrl: string;           // 线索提交目标 URL，发布前必填
   consentText?: string;         // GDPR 同意文本
   eventName?: string;           // 提交埋点事件名
 }
@@ -317,7 +311,7 @@ export interface VideoTestimonialsSchema {
   variant?: 'carousel' | 'grid';
 }
 
-// 退款 / 风险反转（把 BundleTier.guaranteeText 拎出来做成完整 Section）
+// 退款 / 风险反转
 export interface GuaranteeBadge {
   id: string;
   icon: IconType;
@@ -328,43 +322,10 @@ export interface GuaranteeBadge {
 export interface GuaranteeSchema {
   title: string;
   subtitle?: string;
-  description?: string;         // 退款承诺正文
-  badges?: GuaranteeBadge[];    // 如 "100% Money Back", "Free Returns", "Secure Checkout"
-  image?: string;               // 徽章/印章图（"30-day guarantee" 圆章）
-  cta?: CallToAction;           // "阅读完整政策"
-}
-
-// 支付信任徽章（COD/中东市场专属信任 section）
-// 仅展示支付方式 logo 以建立信任，页面本身不接入任何支付渠道
-export type TrustPaymentProvider =
-  | 'visa' | 'mastercard' | 'amex' | 'paypal' | 'apple-pay' | 'google-pay'
-  | 'cod' | 'bank-transfer' | 'crypto' | (string & {});
-
-export interface TrustPaymentBadge {
-  id: string;
-  provider: TrustPaymentProvider;
-  label?: string;
-}
-
-export interface PaymentTrustSchema {
-  title?: string;               // 'Secure Payment Methods'
-  badges: TrustPaymentBadge[];
-  secureNote?: string;          // 'SSL encrypted · PCI-DSS compliant'
-}
-
-// 配送信息（跨境/COD 场景必备）
-export interface ShippingInfoItem {
-  id: string;
-  icon: IconType;
-  title: string;                // 'Worldwide Shipping'
-  description: string;          // 'Free over $50, 7-14 days'
-}
-
-export interface ShippingInfoSchema {
-  title: string;
-  items: ShippingInfoItem[];
-  estimatedDelivery?: string;   // 'Order today, get it by Oct 12'
-  returnsPolicyUrl?: string;
+  description?: string;         // 承诺正文
+  badges?: GuaranteeBadge[];
+  image?: string;               // 徽章/印章图
+  cta?: CallToAction;
 }
 
 export interface SeoMeta {
@@ -374,7 +335,7 @@ export interface SeoMeta {
   ogImage?: string;
   robots?: string;
   jsonLd?: {
-    autoDerive?: boolean;       // 从 bundles/FAQ/Reviews 等自动派生 schema.org JSON-LD（默认开）
+    autoDerive?: boolean;       // 从 FAQ/Reviews 等自动派生 schema.org JSON-LD（默认开）
     custom?: object[];          // 手写补充的 JSON-LD 节点
   };
 }
@@ -388,7 +349,7 @@ export type PixelEventTrigger =
 
 export interface PixelEvent {
   trigger: PixelEventTrigger;
-  name: string;                                  // 事件名，如 "Lead", "InitiateCheckout"
+  name: string;                                  // 事件名，如 "Lead", "Contact", "FormSubmit", "WhatsAppClick"
   blockType?: BlockType;                         // block_in_view / cta_click 时定位的目标 block
   delaySeconds?: number;                         // time_on_page 用
   params?: Record<string, string | number>;
@@ -449,7 +410,7 @@ export interface ComplianceConfig {
 // 定义模块的标识符
 export type BlockType =
   | 'Hero'
-  | 'ProductBundles'
+  | 'Offer'
   | 'HowItWorks'
   | 'MicroFooter'
   | 'Features'
@@ -462,9 +423,7 @@ export type BlockType =
   | 'LeadForm'
   | 'MediaLogos'
   | 'VideoTestimonials'
-  | 'Guarantee'
-  | 'PaymentTrust'
-  | 'ShippingInfo';
+  | 'Guarantee';
 
 type BlockBase<TType extends BlockType, TData> = {
   id: string;          // 唯一ID (UUID)
@@ -476,7 +435,7 @@ type BlockBase<TType extends BlockType, TData> = {
 // 万能的页面区块包装器：用 discriminated union 约束 type 和 data 一一对应
 export type PageBlock =
   | BlockBase<'Hero', HeroSchema>
-  | BlockBase<'ProductBundles', BundlesSchema>
+  | BlockBase<'Offer', OfferSchema>
   | BlockBase<'HowItWorks', HowItWorksSchema>
   | BlockBase<'MicroFooter', MicroFooterSchema>
   | BlockBase<'Features', FeaturesSchema>
@@ -489,9 +448,7 @@ export type PageBlock =
   | BlockBase<'LeadForm', LeadFormSchema>
   | BlockBase<'MediaLogos', MediaLogosSchema>
   | BlockBase<'VideoTestimonials', VideoTestimonialsSchema>
-  | BlockBase<'Guarantee', GuaranteeSchema>
-  | BlockBase<'PaymentTrust', PaymentTrustSchema>
-  | BlockBase<'ShippingInfo', ShippingInfoSchema>;
+  | BlockBase<'Guarantee', GuaranteeSchema>;
 
 // 整个落地页的最终数据结构 (存入数据库的 JSON)
 export interface LandingPageData {
@@ -513,9 +470,7 @@ export type OptionalBlockType =
   | 'LeadForm'
   | 'MediaLogos'
   | 'VideoTestimonials'
-  | 'Guarantee'
-  | 'PaymentTrust'
-  | 'ShippingInfo';
+  | 'Guarantee';
 
 // 用 Extract 派生，避免与 PageBlock 手抄造成漂移
 export type OptionalBlock = Extract<PageBlock, { type: OptionalBlockType }>;
@@ -534,19 +489,19 @@ export interface LandingPageTemplate {
   // 🔴 强制模块：作为根属性存在，不可删除，位置固定
   // ==========================================
   hero: HeroSchema;               // 必须有首屏 (漏斗顶部)
-  bundles: BundlesSchema;         // 必须有产品/服务报价 (漏斗核心)
-  howItWorks: HowItWorksSchema;   // 必须有私域交易流程说明 (打消疑虑)
+  offer: OfferSchema;             // 必须有核心转化 offer (漏斗核心)
+  howItWorks: HowItWorksSchema;   // 必须有联系流程说明 (打消疑虑)
   footer: MicroFooterSchema;      // 必须有合规页脚 (防封号底线)
 
   // ==========================================
   // 🟢 可选动态区：允许用户在规定区域内增删改排
   // ==========================================
 
-  // 位于 Hero 和 Bundles 之间的区域（适合放：信任条、卖点、权威背书、媒体 logo 墙）
+  // 位于 Hero 和 Offer 之间的区域（适合放：信任条、卖点、权威背书、媒体 logo 墙）
   upperBlocks: OptionalBlock[];
 
-  // 位于 Bundles 和 HowItWorks 之间的区域（适合放：评价截图、视频证言、退款承诺、Before/After）
-  afterBundles?: OptionalBlock[];
+  // 位于 Offer 和 HowItWorks 之间的区域（适合放：评价截图、视频证言、退款承诺、Before/After）
+  afterOffer?: OptionalBlock[];
 
   // 位于 HowItWorks 和 Footer 之间的区域（适合放：FAQ、Lead 表单、底部 CTA 倒计时）
   lowerBlocks: OptionalBlock[];

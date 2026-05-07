@@ -4,8 +4,6 @@ import type { BlockType } from '@/types/schema';
 
 const NonEmpty = z.string().min(1);
 
-const BillingPeriodSchema = z.enum(['one-time', 'day', 'week', 'month', 'quarter', 'year', 'lifetime', 'custom']);
-
 const DownloadConfigSchema = z.object({
   fileUrl: NonEmpty,
   fileName: z.string().optional(),
@@ -83,28 +81,23 @@ const HeroSchemaZ = z.object({
   variant: z.enum(['overlay', 'split-left', 'split-right']).optional(),
 });
 
-const BundleTierSchema = z.object({
+const OfferTierSchema = z.object({
   id: NonEmpty,
   name: NonEmpty,
-  price: NonEmpty,
-  originalPrice: z.string().optional(),
+  priceText: z.string().optional(),
   description: z.string(),
-  features: z.array(z.string()),
+  valueProps: z.array(z.string()),
   tag: z.string().optional(),
   image: z.string().optional(),
-  currency: z.string().optional(),
-  billingPeriod: BillingPeriodSchema.optional(),
-  discountLabel: z.string().optional(),
-  guaranteeText: z.string().optional(),
   urgencyText: z.string().optional(),
   isRecommended: z.boolean().optional(),
   cta: CallToActionSchema,
 });
 
-const BundlesSchemaZ = z.object({
+const OfferSchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
-  tiers: z.array(BundleTierSchema).min(1),
+  tiers: z.array(OfferTierSchema).min(1),
   variant: z.enum(['cards-row', 'cards-column']).optional(),
 });
 
@@ -250,7 +243,7 @@ const LeadFormSchemaZ = z.object({
   fields: z.array(LeadFormFieldSchema).min(1),
   submitText: NonEmpty,
   successMessage: z.string().optional(),
-  webhookUrl: z.string().optional(),
+  webhookUrl: NonEmpty,
   consentText: z.string().optional(),
   eventName: z.string().optional(),
 });
@@ -302,31 +295,6 @@ const GuaranteeSchemaZ = z.object({
   cta: CallToActionSchema.optional(),
 });
 
-const TrustPaymentBadgeSchema = z.object({
-  id: NonEmpty,
-  provider: NonEmpty,
-  label: z.string().optional(),
-});
-
-const PaymentTrustSchemaZ = z.object({
-  title: z.string().optional(),
-  badges: z.array(TrustPaymentBadgeSchema).min(1),
-  secureNote: z.string().optional(),
-});
-
-const ShippingInfoItemSchema = z.object({
-  id: NonEmpty,
-  icon: NonEmpty,
-  title: NonEmpty,
-  description: NonEmpty,
-});
-
-const ShippingInfoSchemaZ = z.object({
-  title: NonEmpty,
-  items: z.array(ShippingInfoItemSchema).min(1),
-  estimatedDelivery: z.string().optional(),
-  returnsPolicyUrl: z.string().optional(),
-});
 
 const SeoMetaSchema = z.object({
   title: NonEmpty,
@@ -405,7 +373,7 @@ const block = <T extends string, D extends z.ZodTypeAny>(type: T, data: D) =>
 
 const PageBlockSchema = z.discriminatedUnion('type', [
   block('Hero', HeroSchemaZ),
-  block('ProductBundles', BundlesSchemaZ),
+  block('Offer', OfferSchemaZ),
   block('HowItWorks', HowItWorksSchemaZ),
   block('MicroFooter', MicroFooterSchemaZ),
   block('Features', FeaturesSchemaZ),
@@ -419,8 +387,6 @@ const PageBlockSchema = z.discriminatedUnion('type', [
   block('MediaLogos', MediaLogosSchemaZ),
   block('VideoTestimonials', VideoTestimonialsSchemaZ),
   block('Guarantee', GuaranteeSchemaZ),
-  block('PaymentTrust', PaymentTrustSchemaZ),
-  block('ShippingInfo', ShippingInfoSchemaZ),
 ]);
 
 const OptionalBlockSchema = z.discriminatedUnion('type', [
@@ -435,8 +401,6 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('MediaLogos', MediaLogosSchemaZ),
   block('VideoTestimonials', VideoTestimonialsSchemaZ),
   block('Guarantee', GuaranteeSchemaZ),
-  block('PaymentTrust', PaymentTrustSchemaZ),
-  block('ShippingInfo', ShippingInfoSchemaZ),
 ]);
 
 export const LandingPageTemplateSchema = z.object({
@@ -448,11 +412,11 @@ export const LandingPageTemplateSchema = z.object({
   }),
   pageMeta: PageMetaSchema.optional(),
   hero: HeroSchemaZ,
-  bundles: BundlesSchemaZ,
+  offer: OfferSchemaZ,
   howItWorks: HowItWorksSchemaZ,
   footer: MicroFooterSchemaZ,
   upperBlocks: z.array(OptionalBlockSchema),
-  afterBundles: z.array(OptionalBlockSchema).optional(),
+  afterOffer: z.array(OptionalBlockSchema).optional(),
   lowerBlocks: z.array(OptionalBlockSchema),
   stickyCta: CallToActionSchema.optional(),
   compliance: ComplianceSchema.optional(),

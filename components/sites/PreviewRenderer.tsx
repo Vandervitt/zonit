@@ -5,8 +5,8 @@ import { ctaThemeColor, BackgroundType, TrustBannerTheme, FeaturesLayout } from 
 import type {
   LandingPageTemplate,
   HeroSchema,
-  BundlesSchema,
-  BundleTier,
+  OfferSchema,
+  OfferTier,
   HowItWorksSchema,
   MicroFooterSchema,
   FeaturesSchema,
@@ -23,8 +23,6 @@ import type {
   MediaLogosSchema,
   VideoTestimonialsSchema,
   VideoTestimonialItem,
-  PaymentTrustSchema,
-  ShippingInfoSchema,
   OptionalBlock,
 } from "@/types/schema";
 
@@ -323,10 +321,10 @@ function AuthorityBlock({ data, primaryColor, id, highlight }: { data: Authority
   );
 }
 
-function BundlesBlock({ data, primaryColor, highlight }: { data: BundlesSchema; primaryColor: string; highlight?: boolean }) {
+function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; primaryColor: string; highlight?: boolean }) {
   const v = data.variant ?? 'cards-row';
 
-  const tierCard = (tier: BundleTier) => (
+  const tierCard = (tier: OfferTier) => (
     <div key={tier.id} className="border-2 rounded-2xl p-4 relative" style={{ borderColor: tier.tag ? primaryColor : "#e2e8f0" }}>
       {tier.tag && (
         <div className="absolute -top-3 left-4 px-2 py-0.5 rounded-full text-xs text-white" style={{ backgroundColor: primaryColor }}>
@@ -338,20 +336,20 @@ function BundlesBlock({ data, primaryColor, highlight }: { data: BundlesSchema; 
           <p className="text-sm text-slate-800">{tier.name}</p>
           <p className="text-xs text-slate-500">{tier.description}</p>
         </div>
-        <div className="text-right shrink-0 ml-2">
-          <p className="text-xl" style={{ color: primaryColor }}>{tier.price}</p>
-          {tier.originalPrice && (
-            <p className="text-xs text-slate-400 line-through">{tier.originalPrice}</p>
-          )}
-        </div>
+        {tier.priceText && (
+          <p className="text-xl shrink-0 ml-2" style={{ color: primaryColor }}>{tier.priceText}</p>
+        )}
       </div>
       <ul className="space-y-1 my-3">
-        {tier.features.map((f, i) => (
+        {tier.valueProps.map((f, i) => (
           <li key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
             <span className="text-emerald-500 text-base leading-none">✓</span> {f}
           </li>
         ))}
       </ul>
+      {tier.urgencyText && (
+        <p className="text-[10px] text-amber-600 text-center mb-2">{tier.urgencyText}</p>
+      )}
       <button
         className="w-full py-2 rounded-full text-xs text-white mt-2"
         style={{ backgroundColor: ctaThemeColor(tier.cta.theme, primaryColor) }}
@@ -362,7 +360,7 @@ function BundlesBlock({ data, primaryColor, highlight }: { data: BundlesSchema; 
   );
 
   return (
-    <section id="bundles" className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+    <section id="offer" className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
       {data.subtitle && <p className="text-xs text-center text-slate-500 mb-6">{data.subtitle}</p>}
       <div className={v === 'cards-row' ? "grid grid-cols-2 gap-3" : "space-y-4"}>
@@ -678,57 +676,6 @@ function VideoTestimonialsBlock({ data, id, highlight }: { data: VideoTestimonia
   );
 }
 
-function PaymentBadgesBlock({ data, id, highlight }: { data: PaymentTrustSchema; id?: string; highlight?: boolean }) {
-  return (
-    <section id={id} className="px-5 py-8 bg-white" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-      {data.title && (
-        <p className="text-[11px] uppercase tracking-widest text-center text-slate-400 mb-4">{data.title}</p>
-      )}
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        {data.badges.map(badge => (
-          <div key={badge.id} className="px-3 py-1.5 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-700">
-            {badge.label || badge.provider}
-          </div>
-        ))}
-      </div>
-      {data.secureNote && (
-        <p className="text-[10px] text-slate-400 text-center mt-3">{data.secureNote}</p>
-      )}
-    </section>
-  );
-}
-
-function ShippingInfoBlock({ data, primaryColor, id, highlight }: { data: ShippingInfoSchema; primaryColor: string; id?: string; highlight?: boolean }) {
-  return (
-    <section id={id} className="px-5 py-10 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-      <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
-      {data.estimatedDelivery && (
-        <p className="text-xs text-center text-slate-500 mb-6">{data.estimatedDelivery}</p>
-      )}
-      <div className="grid grid-cols-1 gap-3">
-        {data.items.map(item => (
-          <div key={item.id} className="flex gap-3 bg-white rounded-xl p-3.5 border border-slate-100">
-            <div
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-sm shrink-0"
-              style={{ backgroundColor: primaryColor + "20", color: primaryColor }}
-            >
-              ◆
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm text-slate-800">{item.title}</p>
-              <p className="text-xs text-slate-500 leading-relaxed">{item.description}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      {data.returnsPolicyUrl && (
-        <p className="text-xs text-center mt-4">
-          <a href={data.returnsPolicyUrl} className="text-slate-500 underline">View full returns policy</a>
-        </p>
-      )}
-    </section>
-  );
-}
 
 function FooterBlock({ data, highlight }: { data: MicroFooterSchema; highlight?: boolean }) {
   return (
@@ -777,8 +724,6 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       case "LeadForm": return <LeadFormBlock key={block.id} id={block.id} data={block.data as LeadFormSchema} primaryColor={pc} highlight={hl} />;
       case "MediaLogos": return <MediaLogosBlock key={block.id} id={block.id} data={block.data as MediaLogosSchema} highlight={hl} />;
       case "VideoTestimonials": return <VideoTestimonialsBlock key={block.id} id={block.id} data={block.data as VideoTestimonialsSchema} highlight={hl} />;
-      case "PaymentTrust": return <PaymentBadgesBlock key={block.id} id={block.id} data={block.data as PaymentTrustSchema} highlight={hl} />;
-      case "ShippingInfo": return <ShippingInfoBlock key={block.id} id={block.id} data={block.data as ShippingInfoSchema} primaryColor={pc} highlight={hl} />;
       default: return null;
     }
   };
@@ -787,8 +732,8 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
     <div className="relative min-h-screen bg-white font-sans">
       <HeroBlock data={template.hero} primaryColor={pc} highlight={highlightKey === "hero"} />
       {template.upperBlocks.map(renderOptional)}
-      <BundlesBlock data={template.bundles} primaryColor={pc} highlight={highlightKey === "bundles"} />
-      {template.afterBundles?.map(renderOptional)}
+      <OfferBlock data={template.offer} primaryColor={pc} highlight={highlightKey === "offer"} />
+      {template.afterOffer?.map(renderOptional)}
       <HowItWorksBlock data={template.howItWorks} primaryColor={pc} highlight={highlightKey === "howItWorks"} />
       {template.lowerBlocks.map(renderOptional)}
       <FooterBlock data={template.footer} highlight={highlightKey === "footer"} />

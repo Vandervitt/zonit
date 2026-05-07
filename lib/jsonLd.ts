@@ -2,7 +2,7 @@
 // 纯函数，服务端可调用；返回数组，调用方负责注入 <script type="application/ld+json">。
 //
 // 覆盖范围：
-//   - bundles.tiers          → Product + Offer
+//   - offer.tiers            → Product + Offer
 //   - any FAQ block          → FAQPage
 //   - any Reviews block      → AggregateRating + 前 5 条 Review
 //   - any VideoTestimonials  → VideoObject[]
@@ -20,7 +20,7 @@ type JsonLdNode = Record<string, unknown>;
 
 const allBlocks = (template: LandingPageTemplate): OptionalBlock[] => [
   ...template.upperBlocks,
-  ...(template.afterBundles ?? []),
+  ...(template.afterOffer ?? []),
   ...template.lowerBlocks,
 ];
 
@@ -38,11 +38,10 @@ function normalizePrice(raw: string): string | undefined {
 }
 
 function deriveProduct(template: LandingPageTemplate, blocks: OptionalBlock[]): JsonLdNode | undefined {
-  const tiers = template.bundles.tiers;
+  const tiers = template.offer.tiers;
   if (!tiers.length) return undefined;
-  // 优先选 isRecommended 的那条作为主 SKU
   const main = tiers.find(t => t.isRecommended) ?? tiers[0];
-  const price = normalizePrice(main.price);
+  const price = main.priceText ? normalizePrice(main.priceText) : undefined;
   const reviewsBlock = findBlock(blocks, 'Reviews');
   const rating = reviewsBlock?.data.ratingSummary?.average ?? reviewsBlock?.data.averageRating;
 
@@ -50,14 +49,14 @@ function deriveProduct(template: LandingPageTemplate, blocks: OptionalBlock[]): 
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: main.name,
-    description: main.description || template.bundles.title,
+    description: main.description || template.offer.title,
   };
   if (main.image) node.image = main.image;
   if (price) {
     node.offers = {
       '@type': 'Offer',
       price,
-      priceCurrency: main.currency || template.pageMeta?.currency || 'USD',
+      priceCurrency: template.pageMeta?.currency || 'USD',
       availability: 'https://schema.org/InStock',
     };
   }

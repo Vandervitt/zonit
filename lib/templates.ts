@@ -81,6 +81,7 @@ export function getDefaultBlockData(type: string) {
       subtitle: 'Tell us about your needs and we\'ll get back within 24 hours',
       submitText: 'Send Request',
       successMessage: 'Thanks! We\'ll be in touch shortly.',
+      webhookUrl: 'https://hooks.example.com/lead',
       consentText: 'By submitting, you agree to our privacy policy.',
       eventName: 'lead_form_submit',
       fields: [
@@ -114,25 +115,6 @@ export function getDefaultBlockData(type: string) {
           quote: 'Honestly the best decision I\'ve made this year.',
           country: 'United States',
         },
-      ],
-    },
-    PaymentTrust: {
-      title: 'Secure Payment Methods',
-      secureNote: 'SSL encrypted · PCI-DSS compliant',
-      badges: [
-        { id: crypto.randomUUID(), provider: 'visa', label: 'Visa' },
-        { id: crypto.randomUUID(), provider: 'mastercard', label: 'Mastercard' },
-        { id: crypto.randomUUID(), provider: 'paypal', label: 'PayPal' },
-        { id: crypto.randomUUID(), provider: 'cod', label: 'Cash on Delivery' },
-      ],
-    },
-    ShippingInfo: {
-      title: 'Shipping & Returns',
-      estimatedDelivery: 'Order today, get it within 7-14 business days',
-      items: [
-        { id: crypto.randomUUID(), icon: 'Truck', title: 'Worldwide Shipping', description: 'Free over $50 · 7-14 days' },
-        { id: crypto.randomUUID(), icon: 'Shield', title: 'Customs Covered', description: 'No surprise fees on delivery' },
-        { id: crypto.randomUUID(), icon: 'RotateCcw', title: 'Easy Returns', description: '30-day no-question returns' },
       ],
     },
     Guarantee: {

@@ -13,17 +13,17 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
       background: { type: 'color', value: '#f8fafc' },
       cta: { text: 'Buy', url: 'https://example.com/buy', channel: 'external' },
     },
-    bundles: {
+    offer: {
       title: 'Pricing',
       tiers: [
         {
-          id: 'tier-basic', name: 'Basic', price: '$29', description: 'Entry tier',
-          features: ['Feature A'], currency: 'USD',
+          id: 'tier-basic', name: 'Basic', priceText: '$29', description: 'Entry tier',
+          valueProps: ['Feature A'],
           cta: { text: 'Pick Basic', url: 'https://example.com/basic' },
         },
         {
-          id: 'tier-pro', name: 'Pro', price: '$99', description: 'Recommended tier',
-          features: ['Feature A', 'Feature B'], currency: 'USD', isRecommended: true,
+          id: 'tier-pro', name: 'Pro', priceText: '$99', description: 'Recommended tier',
+          valueProps: ['Feature A', 'Feature B'], isRecommended: true,
           image: 'https://example.com/pro.png',
           cta: { text: 'Pick Pro', url: 'https://example.com/pro' },
         },
@@ -93,31 +93,18 @@ export function videoTestimonialsBlock(): OptionalBlock {
   };
 }
 
-export function paymentBadgesBlock(): OptionalBlock {
+export function leadFormBlock(): OptionalBlock {
   return {
-    id: 'block-payment',
-    type: 'PaymentTrust',
+    id: 'block-leadform',
+    type: 'LeadForm',
     data: {
-      title: 'Secure Payment Methods',
-      secureNote: 'SSL encrypted',
-      badges: [
-        { id: 'p1', provider: 'visa', label: 'Visa' },
-        { id: 'p2', provider: 'cod', label: 'Cash on Delivery' },
+      title: 'Get a Free Quote',
+      fields: [
+        { id: 'f1', name: 'name', label: 'Full Name', type: 'text', required: true },
+        { id: 'f2', name: 'email', label: 'Email', type: 'email', required: true },
       ],
-    },
-  };
-}
-
-export function shippingInfoBlock(): OptionalBlock {
-  return {
-    id: 'block-shipping',
-    type: 'ShippingInfo',
-    data: {
-      title: 'Shipping & Returns',
-      estimatedDelivery: 'Order today, get it within 7 days',
-      items: [
-        { id: 's1', icon: 'Truck', title: 'Worldwide Shipping', description: 'Free over $50' },
-      ],
+      submitText: 'Send Request',
+      webhookUrl: 'https://hooks.example.com/lead',
     },
   };
 }

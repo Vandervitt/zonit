@@ -1,16 +1,16 @@
 import type { BlockType, OptionalBlockType } from '@/types/schema';
 
 export const BLOCK_TYPES: BlockType[] = [
-  'Hero', 'ProductBundles', 'HowItWorks', 'MicroFooter',
+  'Hero', 'Offer', 'HowItWorks', 'MicroFooter',
   'Features', 'Reviews', 'TrustBanner', 'AuthorityStory', 'FAQ',
   'Countdown', 'BeforeAfter', 'LeadForm', 'MediaLogos', 'VideoTestimonials',
-  'Guarantee', 'PaymentTrust', 'ShippingInfo',
+  'Guarantee',
 ];
 
 export const OPTIONAL_BLOCK_TYPES: OptionalBlockType[] = [
   'Features', 'Reviews', 'TrustBanner', 'AuthorityStory', 'FAQ',
   'Countdown', 'BeforeAfter', 'LeadForm', 'MediaLogos', 'VideoTestimonials',
-  'Guarantee', 'PaymentTrust', 'ShippingInfo',
+  'Guarantee',
 ];
 
 export enum BlockZone {
@@ -22,7 +22,7 @@ export enum BlockZone {
 
 export const FixedBlockKey = {
   Hero: 'hero',
-  Bundles: 'bundles',
+  Offer: 'offer',
   HowItWorks: 'howItWorks',
   Footer: 'footer',
   StickyCta: 'stickyCta',

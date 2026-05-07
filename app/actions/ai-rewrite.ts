@@ -5,7 +5,7 @@ import OpenAI from "openai";
 const VARIANT_HINTS: Record<string, string> = {
   Hero: "variant 允许值: 'overlay' | 'split-left' | 'split-right'",
   AuthorityStory: "variant 允许值: 'image-left' | 'image-right'",
-  ProductBundles: "variant 允许值: 'cards-row' | 'cards-column'",
+  Offer: "variant 允许值: 'cards-row' | 'cards-column'",
   Reviews: "variant 允许值: 'grid' | 'carousel'",
   Features: "layout 允许值: 'grid' | 'list'",
 };

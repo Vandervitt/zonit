@@ -13,8 +13,8 @@ import {
 import { ImagePickerField } from "./ImagePickerField";
 import type {
   HeroSchema,
-  BundlesSchema,
-  BundleTier,
+  OfferSchema,
+  OfferTier,
   HowItWorksSchema,
   StepItem,
   MicroFooterSchema,
@@ -41,10 +41,6 @@ import type {
   MediaLogo,
   VideoTestimonialsSchema,
   VideoTestimonialItem,
-  PaymentTrustSchema,
-  TrustPaymentBadge,
-  ShippingInfoSchema,
-  ShippingInfoItem,
 } from "@/types/schema";
 
 // ── Dark style constants ────────────────────────────────────────────────────
@@ -322,40 +318,40 @@ export function StickyCtaEditor({ value, onChange }: { value: CallToAction | und
   );
 }
 
-// ── BundlesForm ─────────────────────────────────────────────────────────────
+// ── OfferForm ────────────────────────────────────────────────────────────────
 
-function TierEditor({ tier, onChange, onRemove, index }: { tier: BundleTier; onChange: (t: BundleTier) => void; onRemove: () => void; index: number }) {
-  const addFeature = () => onChange({ ...tier, features: [...tier.features, "New feature"] });
-  const updateFeature = (i: number, val: string) => onChange({ ...tier, features: tier.features.map((f, fi) => fi === i ? val : f) });
-  const removeFeature = (i: number) => onChange({ ...tier, features: tier.features.filter((_, fi) => fi !== i) });
+function TierEditor({ tier, onChange, onRemove, index }: { tier: OfferTier; onChange: (t: OfferTier) => void; onRemove: () => void; index: number }) {
+  const addProp = () => onChange({ ...tier, valueProps: [...tier.valueProps, "New value prop"] });
+  const updateProp = (i: number, val: string) => onChange({ ...tier, valueProps: tier.valueProps.map((f, fi) => fi === i ? val : f) });
+  const removeProp = (i: number) => onChange({ ...tier, valueProps: tier.valueProps.filter((_, fi) => fi !== i) });
 
   return (
     <div className={card}>
       <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">套餐 {index + 1}</span>
+        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">方案 {index + 1}</span>
         <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <Field label="名称"><Input className={`${di} h-8`} value={tier.name} onChange={e => onChange({ ...tier, name: e.target.value })} /></Field>
-        <Field label="价格"><Input className={`${di} h-8`} value={tier.price} onChange={e => onChange({ ...tier, price: e.target.value })} placeholder="$49" /></Field>
-        <Field label="原价（划线价）"><Input className={`${di} h-8`} value={tier.originalPrice ?? ""} onChange={e => onChange({ ...tier, originalPrice: e.target.value })} placeholder="$99" /></Field>
+        <Field label="价格文案"><Input className={`${di} h-8`} value={tier.priceText ?? ""} onChange={e => onChange({ ...tier, priceText: e.target.value })} placeholder="从 $49 起" /></Field>
         <Field label="推荐标签"><Input className={`${di} h-8`} value={tier.tag ?? ""} onChange={e => onChange({ ...tier, tag: e.target.value })} placeholder="Most Popular" /></Field>
+        <Field label="紧迫文案"><Input className={`${di} h-8`} value={tier.urgencyText ?? ""} onChange={e => onChange({ ...tier, urgencyText: e.target.value })} placeholder="仅剩 5 名额" /></Field>
       </div>
       <Field label="简介"><Input className={`${di} h-8`} value={tier.description} onChange={e => onChange({ ...tier, description: e.target.value })} /></Field>
       <div className="space-y-1.5">
-        <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium block">权益列表</label>
+        <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium block">核心价值点</label>
         <div className="space-y-1">
-          {tier.features.map((f, i) => (
+          {tier.valueProps.map((f, i) => (
             <div key={i} className="flex gap-1 items-center">
-              <Input className={`${di} h-7 flex-1`} value={f} onChange={e => updateFeature(i, e.target.value)} />
-              <button className={delBtn} onClick={() => removeFeature(i)}><X className="w-3 h-3" /></button>
+              <Input className={`${di} h-7 flex-1`} value={f} onChange={e => updateProp(i, e.target.value)} />
+              <button className={delBtn} onClick={() => removeProp(i)}><X className="w-3 h-3" /></button>
             </div>
           ))}
-          <Button variant="ghost" size="sm" className={addBtn} onClick={addFeature}><Plus className="w-3 h-3" />添加权益</Button>
+          <Button variant="ghost" size="sm" className={addBtn} onClick={addProp}><Plus className="w-3 h-3" />添加价值点</Button>
         </div>
       </div>
       <ImagePickerField
-        label="套餐配图"
+        label="方案配图"
         value={tier.image ?? ""}
         onChange={url => onChange({ ...tier, image: url || undefined })}
       />
@@ -364,33 +360,32 @@ function TierEditor({ tier, onChange, onRemove, index }: { tier: BundleTier; onC
   );
 }
 
-export function BundlesForm({ data, onChange }: { data: BundlesSchema; onChange: (d: BundlesSchema) => void }) {
+export function OfferForm({ data, onChange }: { data: OfferSchema; onChange: (d: OfferSchema) => void }) {
   const addTier = () => {
-    const newTier: BundleTier = {
+    const newTier: OfferTier = {
       id: crypto.randomUUID(),
-      name: "New Package",
-      price: "$99",
-      description: "Package description",
-      features: ["Feature 1", "Feature 2"],
-      cta: { text: "Order Now", url: "https://wa.me/1234567890", icon: "WhatsApp", theme: "whatsapp" },
+      name: "New Option",
+      description: "Option description",
+      valueProps: ["Value prop 1", "Value prop 2"],
+      cta: { text: "Contact Us", url: "https://wa.me/1234567890", icon: "WhatsApp", theme: "whatsapp" },
     };
     onChange({ ...data, tiers: [...data.tiers, newTier] });
   };
-  const updateTier = (i: number, t: BundleTier) => onChange({ ...data, tiers: data.tiers.map((ti, idx) => idx === i ? t : ti) });
+  const updateTier = (i: number, t: OfferTier) => onChange({ ...data, tiers: data.tiers.map((ti, idx) => idx === i ? t : ti) });
   const removeTier = (i: number) => onChange({ ...data, tiers: data.tiers.filter((_, idx) => idx !== i) });
 
   return (
     <div className="space-y-4">
       <Field label="标题"><Input className={di} value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} /></Field>
       <Field label="副标题"><Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} /></Field>
-      <SectionDivider label="套餐" />
+      <SectionDivider label="方案" />
       <div className="space-y-2">
         {data.tiers.map((tier, i) => (
           <TierEditor key={tier.id} tier={tier} index={i} onChange={t => updateTier(i, t)} onRemove={() => removeTier(i)} />
         ))}
         {data.tiers.length < 3 && (
           <Button variant="ghost" size="sm" className={addBtn} onClick={addTier}>
-            <Plus className="w-3 h-3" />添加套餐
+            <Plus className="w-3 h-3" />添加方案
           </Button>
         )}
       </div>
@@ -930,7 +925,7 @@ export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChang
         <Field label="提交埋点事件名"><Input className={di} value={data.eventName ?? ""} onChange={e => onChange({ ...data, eventName: e.target.value })} placeholder="lead_form_submit" /></Field>
       </div>
       <Field label="提交后提示语"><Input className={di} value={data.successMessage ?? ""} onChange={e => onChange({ ...data, successMessage: e.target.value })} placeholder="Thanks! We'll be in touch shortly." /></Field>
-      <Field label="Webhook URL（可选）"><Input className={di} value={data.webhookUrl ?? ""} onChange={e => onChange({ ...data, webhookUrl: e.target.value })} placeholder="https://hooks.zapier.com/..." /></Field>
+      <Field label="Webhook URL"><Input className={di} value={data.webhookUrl} onChange={e => onChange({ ...data, webhookUrl: e.target.value })} placeholder="https://hooks.zapier.com/..." /></Field>
       <Field label="GDPR 同意文本">
         <Textarea className={`${dt} min-h-[50px]`} value={data.consentText ?? ""} onChange={e => onChange({ ...data, consentText: e.target.value })} placeholder="By submitting, you agree to our privacy policy." />
       </Field>
@@ -1083,122 +1078,3 @@ export function VideoTestimonialsForm({ data, onChange }: { data: VideoTestimoni
   );
 }
 
-// ── PaymentTrustForm ────────────────────────────────────────────────────────
-
-const PAYMENT_PROVIDERS = [
-  "visa", "mastercard", "amex", "paypal", "apple-pay", "google-pay",
-  "cod", "bank-transfer", "crypto",
-];
-
-function PaymentBadgeEditor({ badge, onChange, onRemove }: { badge: TrustPaymentBadge; onChange: (b: TrustPaymentBadge) => void; onRemove: () => void }) {
-  return (
-    <div className={card}>
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">{badge.label || badge.provider}</span>
-        <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <Field label="支付方式">
-          <Select value={badge.provider} onValueChange={v => onChange({ ...badge, provider: v })}>
-            <SelectTrigger className={dst}><SelectValue placeholder="选择" /></SelectTrigger>
-            <SelectContent className={dsc}>
-              {PAYMENT_PROVIDERS.map(p => (
-                <SelectItem key={p} value={p} className={dsi}>{p}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="显示文案">
-          <Input className={`${di} h-8`} value={badge.label ?? ""} onChange={e => onChange({ ...badge, label: e.target.value })} placeholder="Visa" />
-        </Field>
-      </div>
-    </div>
-  );
-}
-
-export function PaymentBadgesForm({ data, onChange }: { data: PaymentTrustSchema; onChange: (d: PaymentTrustSchema) => void }) {
-  const addBadge = () => onChange({
-    ...data,
-    badges: [...data.badges, { id: crypto.randomUUID(), provider: "visa", label: "Visa" }],
-  });
-  return (
-    <div className="space-y-4">
-      <Field label="标题（可选）">
-        <Input className={di} value={data.title ?? ""} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="Secure Payment Methods" />
-      </Field>
-      <Field label="安全提示文案">
-        <Input className={di} value={data.secureNote ?? ""} onChange={e => onChange({ ...data, secureNote: e.target.value })} placeholder="SSL encrypted · PCI-DSS compliant" />
-      </Field>
-      <SectionDivider label="支付方式" />
-      <div className="space-y-2">
-        {data.badges.map((badge, i) => (
-          <PaymentBadgeEditor
-            key={badge.id}
-            badge={badge}
-            onChange={b => onChange({ ...data, badges: data.badges.map((bb, bi) => bi === i ? b : bb) })}
-            onRemove={() => onChange({ ...data, badges: data.badges.filter((_, bi) => bi !== i) })}
-          />
-        ))}
-        <Button variant="ghost" size="sm" className={addBtn} onClick={addBadge}>
-          <Plus className="w-3 h-3" />添加支付方式
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ── ShippingInfoForm ────────────────────────────────────────────────────────
-
-function ShippingItemEditor({ item, onChange, onRemove }: { item: ShippingInfoItem; onChange: (i: ShippingInfoItem) => void; onRemove: () => void }) {
-  return (
-    <div className={card}>
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">{item.title || "Item"}</span>
-        <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
-      </div>
-      <Field label="图标">
-        <IconSelect value={item.icon} onChange={v => onChange({ ...item, icon: v })} />
-      </Field>
-      <Field label="标题">
-        <Input className={`${di} h-8`} value={item.title} onChange={e => onChange({ ...item, title: e.target.value })} placeholder="Worldwide Shipping" />
-      </Field>
-      <Field label="描述">
-        <Textarea className={`${dt} min-h-[50px]`} value={item.description} onChange={e => onChange({ ...item, description: e.target.value })} placeholder="Free over $50, 7-14 days" />
-      </Field>
-    </div>
-  );
-}
-
-export function ShippingInfoForm({ data, onChange }: { data: ShippingInfoSchema; onChange: (d: ShippingInfoSchema) => void }) {
-  const addItem = () => onChange({
-    ...data,
-    items: [...data.items, { id: crypto.randomUUID(), icon: "Truck", title: "New Item", description: "" }],
-  });
-  return (
-    <div className="space-y-4">
-      <Field label="标题">
-        <Input className={di} value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="Shipping & Returns" />
-      </Field>
-      <Field label="预计送达">
-        <Input className={di} value={data.estimatedDelivery ?? ""} onChange={e => onChange({ ...data, estimatedDelivery: e.target.value })} placeholder="Order today, get it by Oct 12" />
-      </Field>
-      <Field label="退货政策链接">
-        <Input className={di} value={data.returnsPolicyUrl ?? ""} onChange={e => onChange({ ...data, returnsPolicyUrl: e.target.value })} placeholder="https://..." />
-      </Field>
-      <SectionDivider label="保障条目" />
-      <div className="space-y-2">
-        {data.items.map((item, i) => (
-          <ShippingItemEditor
-            key={item.id}
-            item={item}
-            onChange={it => onChange({ ...data, items: data.items.map((ii, idx) => idx === i ? it : ii) })}
-            onRemove={() => onChange({ ...data, items: data.items.filter((_, idx) => idx !== i) })}
-          />
-        ))}
-        <Button variant="ghost" size="sm" className={addBtn} onClick={addItem}>
-          <Plus className="w-3 h-3" />添加条目
-        </Button>
-      </div>
-    </div>
-  );
-}

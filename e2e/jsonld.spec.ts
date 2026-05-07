@@ -16,7 +16,7 @@ test.describe('Phase 3 / Batch B — JSON-LD 自动派生', () => {
   test.beforeAll(async () => {
     const tpl = makeBaseTemplate({
       lowerBlocks: [faqBlock()],
-      afterBundles: [reviewsBlock(), videoTestimonialsBlock()],
+      afterOffer: [reviewsBlock(), videoTestimonialsBlock()],
     });
     await seedPublishedSite(SLUG, tpl);
   });

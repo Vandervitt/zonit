@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { seedPublishedSite, cleanupSite, closeDb, SLUG_PREFIX } from './helpers/db';
-import { makeBaseTemplate, paymentBadgesBlock, shippingInfoBlock } from './helpers/template';
+import { makeBaseTemplate, leadFormBlock } from './helpers/template';
 
 const SLUG = `${SLUG_PREFIX}blocks`;
 
-test.describe('Phase 3 / Batch A — PaymentTrust + ShippingInfo 渲染', () => {
+test.describe('Phase 3 / Batch A — LeadForm 渲染', () => {
   test.beforeAll(async () => {
     await seedPublishedSite(
       SLUG,
       makeBaseTemplate({
-        afterBundles: [paymentBadgesBlock(), shippingInfoBlock()],
+        lowerBlocks: [leadFormBlock()],
       }),
     );
   });
@@ -19,19 +19,15 @@ test.describe('Phase 3 / Batch A — PaymentTrust + ShippingInfo 渲染', () => 
     await closeDb();
   });
 
-  test('PaymentTrust 模块渲染标题、徽章 label 与安全提示', async ({ page }) => {
+  test('LeadForm 模块渲染标题与提交按钮', async ({ page }) => {
     await page.goto(`/site/${SLUG}`);
-    await expect(page.getByText('Secure Payment Methods')).toBeVisible();
-    await expect(page.getByText('Visa')).toBeVisible();
-    await expect(page.getByText('Cash on Delivery')).toBeVisible();
-    await expect(page.getByText('SSL encrypted')).toBeVisible();
+    await expect(page.getByText('Get a Free Quote')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send Request' })).toBeVisible();
   });
 
-  test('ShippingInfo 模块渲染标题、预计送达、保障条目', async ({ page }) => {
+  test('LeadForm 渲染必填字段', async ({ page }) => {
     await page.goto(`/site/${SLUG}`);
-    await expect(page.getByText('Shipping & Returns')).toBeVisible();
-    await expect(page.getByText('Order today, get it within 7 days')).toBeVisible();
-    await expect(page.getByText('Worldwide Shipping')).toBeVisible();
-    await expect(page.getByText('Free over $50')).toBeVisible();
+    await expect(page.getByLabel('Full Name')).toBeVisible();
+    await expect(page.getByLabel('Email')).toBeVisible();
   });
 });
