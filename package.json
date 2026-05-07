@@ -11,7 +11,8 @@
     "migrate": "node-pg-migrate -m migrations -d DATABASE_URL_UNPOOLED",
     "migrate:up": "node-pg-migrate up -m migrations -d DATABASE_URL_UNPOOLED",
     "migrate:down": "node-pg-migrate down -m migrations -d DATABASE_URL_UNPOOLED",
-    "migrate:create": "node-pg-migrate create -m migrations"
+    "migrate:create": "node-pg-migrate create -m migrations",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.2",

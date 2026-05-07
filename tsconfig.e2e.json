@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "isolatedModules": false,
+    "jsx": "preserve",
+    "noEmit": true
+  },
+  "include": ["e2e/**/*.ts", "playwright.config.ts"],
+  "exclude": ["node_modules"]
+}
