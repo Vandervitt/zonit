@@ -9,7 +9,6 @@ const leadGenerationJsonLd: SeoMeta['jsonLd'] = {
   organization: true,
   faqPage: true,
   autoDerive: true,
-  deriveReviews: false,
 };
 
 void leadGenerationJsonLd;
@@ -18,6 +17,11 @@ void leadGenerationJsonLd;
 const arbitraryJsonLd: SeoMeta['jsonLd'] = { custom: [{ '@type': 'Product' }] };
 
 void arbitraryJsonLd;
+
+// @ts-expect-error review JSON-LD is out of scope for MVP lead-generation pages.
+const reviewJsonLd: SeoMeta['jsonLd'] = { deriveReviews: true };
+
+void reviewJsonLd;
 
 // @ts-expect-error LeadForm is a single page-level lead capture, not a movable optional block.
 const optionalLeadForm: OptionalBlockType = 'LeadForm';

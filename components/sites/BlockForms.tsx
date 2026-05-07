@@ -35,6 +35,7 @@ import type {
   LeadFormSchema,
   LeadFormField,
   LeadFormFieldType,
+  PixelEventName,
 } from "@/types/schema";
 
 // ── Dark style constants ────────────────────────────────────────────────────
@@ -75,6 +76,19 @@ const ICON_OPTIONS = [
   "TrendingUp", "Clock", "Leaf", "Globe",
 ];
 
+const LEAD_EVENT_OPTIONS: PixelEventName[] = [
+  "Lead",
+  "Contact",
+  "FormSubmit",
+  "WhatsAppClick",
+  "TelegramClick",
+  "LineClick",
+  "PhoneClick",
+  "EmailClick",
+  "ScheduleClick",
+  "QuoteRequest",
+];
+
 function IconSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <Select value={value} onValueChange={onChange}>
@@ -99,7 +113,7 @@ function CtaFields({ value, onChange }: { value: CallToAction; onChange: (v: Cal
           <Input className={di} value={value.text} onChange={e => onChange({ ...value, text: e.target.value })} placeholder="Chat on WhatsApp" />
         </Field>
         <Field label="链接 URL">
-          <Input className={di} value={value.url} onChange={e => onChange({ ...value, url: e.target.value })} placeholder="https://wa.me/..." />
+          <Input className={di} value={value.url ?? ""} onChange={e => onChange({ ...value, url: e.target.value || undefined })} placeholder="https://wa.me/..." />
         </Field>
         <Field label="图标">
           <IconSelect value={value.icon ?? ""} onChange={v => onChange({ ...value, icon: v })} />
@@ -828,7 +842,16 @@ export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChang
       <Field label="副标题"><Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} /></Field>
       <div className="grid grid-cols-2 gap-2">
         <Field label="提交按钮文案"><Input className={di} value={data.submitText} onChange={e => onChange({ ...data, submitText: e.target.value })} placeholder="Send Request" /></Field>
-        <Field label="提交埋点事件名"><Input className={di} value={data.eventName ?? ""} onChange={e => onChange({ ...data, eventName: e.target.value })} placeholder="lead_form_submit" /></Field>
+        <Field label="提交埋点事件名">
+          <Select value={data.eventName ?? "FormSubmit"} onValueChange={v => onChange({ ...data, eventName: v as PixelEventName })}>
+            <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
+            <SelectContent className={dsc}>
+              {LEAD_EVENT_OPTIONS.map(eventName => (
+                <SelectItem key={eventName} value={eventName} className={dsi}>{eventName}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
       </div>
       <Field label="提交后提示语"><Input className={di} value={data.successMessage ?? ""} onChange={e => onChange({ ...data, successMessage: e.target.value })} placeholder="Thanks! We'll be in touch shortly." /></Field>
       <Field label="Webhook URL（可选）"><Input className={di} value={data.webhookUrl ?? ""} onChange={e => onChange({ ...data, webhookUrl: e.target.value || undefined })} placeholder="https://hooks.zapier.com/..." /></Field>

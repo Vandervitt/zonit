@@ -6,10 +6,12 @@ const NonEmpty = z.string().min(1);
 
 const CallToActionSchema = z.object({
   text: NonEmpty,
-  url: NonEmpty,
+  url: NonEmpty.optional(),
   icon: z.string().optional(),
   theme: z.enum(['primary', 'secondary', 'whatsapp', 'telegram']).optional(),
   channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'external']).optional(),
+  action: z.enum(['chat', 'call', 'email', 'open_form', 'scroll_to_form', 'external_link']).optional(),
+  formTargetId: z.string().optional(),
   target: z.enum(['_self', '_blank']).optional(),
   prefilledMessage: z.string().optional(),
 });
@@ -224,7 +226,18 @@ const LeadFormSchemaZ = z.object({
   successMessage: z.string().optional(),
   webhookUrl: z.url().optional(),
   consentText: z.string().optional(),
-  eventName: z.string().optional(),
+  eventName: z.enum([
+    'Lead',
+    'Contact',
+    'FormSubmit',
+    'WhatsAppClick',
+    'TelegramClick',
+    'LineClick',
+    'PhoneClick',
+    'EmailClick',
+    'ScheduleClick',
+    'QuoteRequest',
+  ]).optional(),
 }).strict();
 
 const AssuranceBadgeSchema = z.object({
@@ -259,13 +272,23 @@ const SeoMetaSchema = z.object({
     organization: z.boolean().optional(),
     faqPage: z.boolean().optional(),
     autoDerive: z.boolean().optional(),
-    deriveReviews: z.boolean().optional(),
   }).strict().optional(),
 });
 
 const PixelEventSchema = z.object({
   trigger: z.enum(['page_view', 'cta_click', 'block_in_view', 'form_submit', 'time_on_page']),
-  name: NonEmpty,
+  name: z.enum([
+    'Lead',
+    'Contact',
+    'FormSubmit',
+    'WhatsAppClick',
+    'TelegramClick',
+    'LineClick',
+    'PhoneClick',
+    'EmailClick',
+    'ScheduleClick',
+    'QuoteRequest',
+  ]),
   blockType: z.enum(BLOCK_TYPES as [BlockType, ...BlockType[]]).optional(),
   delaySeconds: z.number().nonnegative().optional(),
   params: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
@@ -302,7 +325,6 @@ const PageBlockSchema = z.discriminatedUnion('type', [
   block('AuthorityStory', AuthoritySchemaZ),
   block('FAQ', FAQSchemaZ),
   block('Countdown', CountdownSchemaZ),
-  block('LeadForm', LeadFormSchemaZ),
   block('Assurance', AssuranceSchemaZ),
 ]);
 

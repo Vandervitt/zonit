@@ -9,15 +9,18 @@ export type IconType =
   | (string & {});
 
 export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'external';
+export type CtaAction = 'chat' | 'call' | 'email' | 'open_form' | 'scroll_to_form' | 'external_link';
 export type LinkTarget = '_self' | '_blank';
 
 // 通用的行动呼吁按钮 (CTA) 模型 —— 核心转化组件
 export interface CallToAction {
   text: string;           // 按钮文案 (e.g., "Chat on WhatsApp")
-  url: string;            // 跳转链接 (e.g., "https://wa.me/...")
+  url?: string;           // 跳转链接；form 类 CTA 可不填
   icon?: IconType;        // 按钮图标
   theme?: 'primary' | 'secondary' | 'whatsapp' | 'telegram'; // 按钮颜色风格
   channel?: CtaChannel;   // 渠道类型
+  action?: CtaAction;     // CTA 行为，限定在咨询/留资/预约路径内
+  formTargetId?: string;  // action 为 open_form / scroll_to_form 时定位页面级表单
   target?: LinkTarget;    // 链接打开方式
   prefilledMessage?: string; // 私域沟通时预填消息，减少用户输入成本
 }
@@ -50,7 +53,7 @@ export interface HeroMedia {
   playsInline?: boolean;  // iOS 不写会强制全屏播放
 }
 
-// 倒计时（限时优惠真正起作用的形式）—— 既可独立成 Block，也可内嵌在 Hero
+// 倒计时（真实活动截止、预约档期或咨询名额）—— 既可独立成 Block，也可内嵌在 Hero
 export interface CountdownSchema {
   title?: string;
   subtitle?: string;
@@ -65,7 +68,7 @@ export interface CountdownSchema {
 
 // HeroSection (首屏主视觉)
 export interface HeroSchema {
-  badge?: string;               // 顶部小标签，如 "🔥 Limited Time Offer"
+  badge?: string;               // 顶部小标签，如 "Free Consultation" / "Limited Booking Slots"
   title: string;                // 主标题，支持换行
   subtitle: string;             // 副标题
   background: {
@@ -94,7 +97,7 @@ export interface OfferOption {
   valueProps: string[];         // 核心价值点列表
   tag?: string;                 // 推荐标签，如 "Most Popular", "Best Value"
   image?: string;               // 方案配图
-  urgencyText?: string;         // 如 "Only 12 slots left this week"
+  urgencyText?: string;         // 真实稀缺提示，如 "Only 12 consultation slots left this week"
   isRecommended?: boolean;      // 推荐方案，便于视觉突出
   cta: CallToAction;            // 该方案对应的咨询/留资按钮
 }
@@ -251,7 +254,7 @@ export interface LeadFormSchema {
   successMessage?: string;
   webhookUrl?: string;          // 外部线索接收 URL（高级配置），未填则提交到平台默认 API
   consentText?: string;         // GDPR 同意文本
-  eventName?: string;           // 提交埋点事件名
+  eventName?: PixelEventName;   // 提交埋点事件名，仅允许留资/咨询类事件
 }
 
 // 服务承诺 / 信任保障（免费咨询、响应时效、隐私保护等，不绑定退款/交易语义）
@@ -286,7 +289,6 @@ export interface SeoMeta {
     organization?: boolean;     // 默认 true
     faqPage?: boolean;          // 默认 true
     autoDerive?: boolean;       // 兼容旧模板：开启 Organization + FAQPage 自动派生（默认 true）
-    deriveReviews?: boolean;    // 兼容旧模板：不建议在引流页默认开启
   };
 }
 
@@ -297,9 +299,21 @@ export type PixelEventTrigger =
   | 'form_submit'
   | 'time_on_page';
 
+export type PixelEventName =
+  | 'Lead'
+  | 'Contact'
+  | 'FormSubmit'
+  | 'WhatsAppClick'
+  | 'TelegramClick'
+  | 'LineClick'
+  | 'PhoneClick'
+  | 'EmailClick'
+  | 'ScheduleClick'
+  | 'QuoteRequest';
+
 export interface PixelEvent {
   trigger: PixelEventTrigger;
-  name: string;                                  // 事件名，如 "Lead", "Contact", "FormSubmit", "WhatsAppClick"
+  name: PixelEventName;                          // 仅允许咨询、联系、预约、留资类事件
   blockType?: BlockType;                         // block_in_view / cta_click 时定位的目标 block
   delaySeconds?: number;                         // time_on_page 用
   params?: Record<string, string | number>;
@@ -335,7 +349,6 @@ export type BlockType =
   | 'AuthorityStory'
   | 'FAQ'
   | 'Countdown'
-  | 'LeadForm'
   | 'Assurance';
 
 type BlockBase<TType extends BlockType, TData> = {
@@ -356,7 +369,6 @@ export type PageBlock =
   | BlockBase<'AuthorityStory', AuthoritySchema>
   | BlockBase<'FAQ', FAQSchema>
   | BlockBase<'Countdown', CountdownSchema>
-  | BlockBase<'LeadForm', LeadFormSchema>
   | BlockBase<'Assurance', AssuranceSchema>;
 
 // 1. 抽离可选模块的联合类型

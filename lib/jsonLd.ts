@@ -2,13 +2,11 @@
 // 纯函数，服务端可调用；返回数组，调用方负责注入 <script type="application/ld+json">。
 //
 // 默认派生范围：Organization + FAQPage
-// deriveReviews: true  → Review / AggregateRating（需显式开启）
 
 import type {
   LandingPageTemplate,
   OptionalBlock,
   FAQSchema,
-  ReviewsSchema,
 } from '@/types/schema';
 
 type JsonLdNode = Record<string, unknown>;
@@ -39,17 +37,6 @@ function deriveFaq(faq: FAQSchema): JsonLdNode {
   };
 }
 
-function deriveReviews(reviews: ReviewsSchema): JsonLdNode[] {
-  return reviews.items.slice(0, 5).map(item => ({
-    '@context': 'https://schema.org',
-    '@type': 'Review',
-    author: { '@type': 'Person', name: item.authorName },
-    reviewRating: { '@type': 'Rating', ratingValue: item.rating, bestRating: 5 },
-    reviewBody: item.content,
-    ...(item.reviewDate ? { datePublished: item.reviewDate } : {}),
-  }));
-}
-
 function deriveOrganization(template: LandingPageTemplate): JsonLdNode {
   const footer = template.footer;
   return {
@@ -74,11 +61,6 @@ export function deriveJsonLd(template: LandingPageTemplate): JsonLdNode[] {
     }
     const faq = findBlock(blocks, 'FAQ');
     if ((config?.faqPage ?? true) && faq) nodes.push(deriveFaq(faq.data));
-
-    if (config?.deriveReviews) {
-      const reviews = findBlock(blocks, 'Reviews');
-      if (reviews) nodes.push(...deriveReviews(reviews.data));
-    }
   }
   return nodes;
 }
