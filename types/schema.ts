@@ -24,6 +24,12 @@ export interface CallToAction {
   prefilledMessage?: string; // 私域沟通时预填消息，减少用户输入成本
   eventName?: string;     // 埋点事件名
   trackingId?: string;    // 按钮级追踪标识
+  download?: {
+    fileUrl: string;                 // 资源 URL
+    fileName?: string;               // 下载时的文件名
+    requireLeadCapture?: boolean;    // 是否先弹 LeadForm 再放行
+    leadFormBlockId?: string;        // 关联的 LeadForm block id（同一 template 内）
+  };
 }
 
 // 图片模型 (支持传入图片 URL 和 Alt 文本以优化 SEO)
@@ -372,9 +378,25 @@ export interface SeoMeta {
   };
 }
 
+export type PixelEventTrigger =
+  | 'page_view'
+  | 'cta_click'
+  | 'block_in_view'
+  | 'form_submit'
+  | 'time_on_page';
+
+export interface PixelEvent {
+  trigger: PixelEventTrigger;
+  name: string;                                  // 事件名，如 "Lead", "InitiateCheckout"
+  blockType?: BlockType;                         // block_in_view / cta_click 时定位的目标 block
+  delaySeconds?: number;                         // time_on_page 用
+  params?: Record<string, string | number>;
+}
+
 export interface AnalyticsPixel {
   provider: 'meta' | 'google' | 'tiktok' | 'linkedin' | 'x' | 'custom';
   id: string;
+  events?: PixelEvent[];
 }
 
 export interface AnalyticsConfig {

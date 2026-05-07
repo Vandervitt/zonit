@@ -1,8 +1,20 @@
 import { z } from 'zod';
+import { BLOCK_TYPES } from './constants/blocks';
+import type { BlockType } from '@/types/schema';
 
 const NonEmpty = z.string().min(1);
 
 const BillingPeriodSchema = z.enum(['one-time', 'day', 'week', 'month', 'quarter', 'year', 'lifetime', 'custom']);
+
+const DownloadConfigSchema = z.object({
+  fileUrl: NonEmpty,
+  fileName: z.string().optional(),
+  requireLeadCapture: z.boolean().optional(),
+  leadFormBlockId: z.string().optional(),
+}).refine(d => !d.requireLeadCapture || !!d.leadFormBlockId, {
+  message: 'requireLeadCapture 为 true 时必须指定 leadFormBlockId',
+  path: ['leadFormBlockId'],
+});
 
 const CallToActionSchema = z.object({
   text: NonEmpty,
@@ -15,6 +27,7 @@ const CallToActionSchema = z.object({
   prefilledMessage: z.string().optional(),
   eventName: z.string().optional(),
   trackingId: z.string().optional(),
+  download: DownloadConfigSchema.optional(),
 });
 
 const ImageMetaSchema = z.object({
@@ -332,9 +345,18 @@ const SeoMetaSchema = z.object({
   }).optional(),
 });
 
+const PixelEventSchema = z.object({
+  trigger: z.enum(['page_view', 'cta_click', 'block_in_view', 'form_submit', 'time_on_page']),
+  name: NonEmpty,
+  blockType: z.enum(BLOCK_TYPES as [BlockType, ...BlockType[]]).optional(),
+  delaySeconds: z.number().nonnegative().optional(),
+  params: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+});
+
 const AnalyticsPixelSchema = z.object({
   provider: z.enum(['meta', 'google', 'tiktok', 'linkedin', 'x', 'custom']),
   id: NonEmpty,
+  events: z.array(PixelEventSchema).optional(),
 });
 
 const AnalyticsConfigSchema = z.object({

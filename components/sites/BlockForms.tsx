@@ -101,6 +101,9 @@ function IconSelect({ value, onChange }: { value: string; onChange: (v: string) 
 }
 
 function CtaFields({ value, onChange }: { value: CallToAction; onChange: (v: CallToAction) => void }) {
+  const dl = value.download;
+  const toggleDownload = () =>
+    onChange({ ...value, download: dl ? undefined : { fileUrl: "" } });
   return (
     <div className={`space-y-2.5 ${card}`}>
       <SectionDivider label="行动按钮 CTA" />
@@ -126,6 +129,40 @@ function CtaFields({ value, onChange }: { value: CallToAction; onChange: (v: Cal
           </Select>
         </Field>
       </div>
+      <div className="flex items-center justify-between pt-1">
+        <span className="text-[11px] uppercase tracking-widest text-zinc-500 font-medium">下载行为（Lead Magnet）</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 px-2 text-[10px] text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+          onClick={toggleDownload}
+        >
+          {dl ? "移除" : "启用"}
+        </Button>
+      </div>
+      {dl && (
+        <div className="space-y-2">
+          <Field label="文件 URL">
+            <Input className={di} value={dl.fileUrl} onChange={e => onChange({ ...value, download: { ...dl, fileUrl: e.target.value } })} placeholder="https://.../guide.pdf" />
+          </Field>
+          <Field label="下载文件名（可选）">
+            <Input className={di} value={dl.fileName ?? ""} onChange={e => onChange({ ...value, download: { ...dl, fileName: e.target.value } })} placeholder="lead-magnet.pdf" />
+          </Field>
+          <label className="flex items-center gap-2 text-xs text-zinc-300">
+            <input
+              type="checkbox"
+              checked={!!dl.requireLeadCapture}
+              onChange={e => onChange({ ...value, download: { ...dl, requireLeadCapture: e.target.checked } })}
+            />
+            下载前先弹出 LeadForm 收集线索
+          </label>
+          {dl.requireLeadCapture && (
+            <Field label="关联 LeadForm Block ID">
+              <Input className={di} value={dl.leadFormBlockId ?? ""} onChange={e => onChange({ ...value, download: { ...dl, leadFormBlockId: e.target.value } })} placeholder="block-uuid" />
+            </Field>
+          )}
+        </div>
+      )}
     </div>
   );
 }
