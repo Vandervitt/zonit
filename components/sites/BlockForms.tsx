@@ -14,7 +14,7 @@ import { ImagePickerField } from "./ImagePickerField";
 import type {
   HeroSchema,
   OfferSchema,
-  OfferTier,
+  OfferOption,
   HowItWorksSchema,
   StepItem,
   MicroFooterSchema,
@@ -290,10 +290,10 @@ export function StickyCtaEditor({ value, onChange }: { value: CallToAction | und
 
 // ── OfferForm ────────────────────────────────────────────────────────────────
 
-function TierEditor({ tier, onChange, onRemove, index }: { tier: OfferTier; onChange: (t: OfferTier) => void; onRemove: () => void; index: number }) {
-  const addProp = () => onChange({ ...tier, valueProps: [...tier.valueProps, "New value prop"] });
-  const updateProp = (i: number, val: string) => onChange({ ...tier, valueProps: tier.valueProps.map((f, fi) => fi === i ? val : f) });
-  const removeProp = (i: number) => onChange({ ...tier, valueProps: tier.valueProps.filter((_, fi) => fi !== i) });
+function OptionEditor({ option, onChange, onRemove, index }: { option: OfferOption; onChange: (option: OfferOption) => void; onRemove: () => void; index: number }) {
+  const addProp = () => onChange({ ...option, valueProps: [...option.valueProps, "New value prop"] });
+  const updateProp = (i: number, val: string) => onChange({ ...option, valueProps: option.valueProps.map((f, fi) => fi === i ? val : f) });
+  const removeProp = (i: number) => onChange({ ...option, valueProps: option.valueProps.filter((_, fi) => fi !== i) });
 
   return (
     <div className={card}>
@@ -302,16 +302,16 @@ function TierEditor({ tier, onChange, onRemove, index }: { tier: OfferTier; onCh
         <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <Field label="名称"><Input className={`${di} h-8`} value={tier.name} onChange={e => onChange({ ...tier, name: e.target.value })} /></Field>
-        <Field label="展示文案"><Input className={`${di} h-8`} value={tier.labelText ?? ""} onChange={e => onChange({ ...tier, labelText: e.target.value })} placeholder="Free Quote" /></Field>
-        <Field label="推荐标签"><Input className={`${di} h-8`} value={tier.tag ?? ""} onChange={e => onChange({ ...tier, tag: e.target.value })} placeholder="Most Popular" /></Field>
-        <Field label="紧迫文案"><Input className={`${di} h-8`} value={tier.urgencyText ?? ""} onChange={e => onChange({ ...tier, urgencyText: e.target.value })} placeholder="仅剩 5 名额" /></Field>
+        <Field label="名称"><Input className={`${di} h-8`} value={option.name} onChange={e => onChange({ ...option, name: e.target.value })} /></Field>
+        <Field label="展示文案"><Input className={`${di} h-8`} value={option.labelText ?? ""} onChange={e => onChange({ ...option, labelText: e.target.value })} placeholder="Free Quote" /></Field>
+        <Field label="推荐标签"><Input className={`${di} h-8`} value={option.tag ?? ""} onChange={e => onChange({ ...option, tag: e.target.value })} placeholder="Most Popular" /></Field>
+        <Field label="紧迫文案"><Input className={`${di} h-8`} value={option.urgencyText ?? ""} onChange={e => onChange({ ...option, urgencyText: e.target.value })} placeholder="仅剩 5 名额" /></Field>
       </div>
-      <Field label="简介"><Input className={`${di} h-8`} value={tier.description} onChange={e => onChange({ ...tier, description: e.target.value })} /></Field>
+      <Field label="简介"><Input className={`${di} h-8`} value={option.description} onChange={e => onChange({ ...option, description: e.target.value })} /></Field>
       <div className="space-y-1.5">
         <label className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium block">核心价值点</label>
         <div className="space-y-1">
-          {tier.valueProps.map((f, i) => (
+          {option.valueProps.map((f, i) => (
             <div key={i} className="flex gap-1 items-center">
               <Input className={`${di} h-7 flex-1`} value={f} onChange={e => updateProp(i, e.target.value)} />
               <button className={delBtn} onClick={() => removeProp(i)}><X className="w-3 h-3" /></button>
@@ -322,27 +322,27 @@ function TierEditor({ tier, onChange, onRemove, index }: { tier: OfferTier; onCh
       </div>
       <ImagePickerField
         label="方案配图"
-        value={tier.image ?? ""}
-        onChange={url => onChange({ ...tier, image: url || undefined })}
+        value={option.image ?? ""}
+        onChange={url => onChange({ ...option, image: url || undefined })}
       />
-      <CtaFields value={tier.cta} onChange={cta => onChange({ ...tier, cta })} />
+      <CtaFields value={option.cta} onChange={cta => onChange({ ...option, cta })} />
     </div>
   );
 }
 
 export function OfferForm({ data, onChange }: { data: OfferSchema; onChange: (d: OfferSchema) => void }) {
-  const addTier = () => {
-    const newTier: OfferTier = {
+  const addOption = () => {
+    const newOption: OfferOption = {
       id: crypto.randomUUID(),
       name: "New Option",
       description: "Option description",
       valueProps: ["Value prop 1", "Value prop 2"],
       cta: { text: "Contact Us", url: "https://wa.me/1234567890", icon: "WhatsApp", theme: "whatsapp" },
     };
-    onChange({ ...data, tiers: [...data.tiers, newTier] });
+    onChange({ ...data, options: [...data.options, newOption] });
   };
-  const updateTier = (i: number, t: OfferTier) => onChange({ ...data, tiers: data.tiers.map((ti, idx) => idx === i ? t : ti) });
-  const removeTier = (i: number) => onChange({ ...data, tiers: data.tiers.filter((_, idx) => idx !== i) });
+  const updateOption = (i: number, option: OfferOption) => onChange({ ...data, options: data.options.map((item, idx) => idx === i ? option : item) });
+  const removeOption = (i: number) => onChange({ ...data, options: data.options.filter((_, idx) => idx !== i) });
 
   return (
     <div className="space-y-4">
@@ -350,11 +350,11 @@ export function OfferForm({ data, onChange }: { data: OfferSchema; onChange: (d:
       <Field label="副标题"><Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} /></Field>
       <SectionDivider label="方案" />
       <div className="space-y-2">
-        {data.tiers.map((tier, i) => (
-          <TierEditor key={tier.id} tier={tier} index={i} onChange={t => updateTier(i, t)} onRemove={() => removeTier(i)} />
+        {data.options.map((option, i) => (
+          <OptionEditor key={option.id} option={option} index={i} onChange={item => updateOption(i, item)} onRemove={() => removeOption(i)} />
         ))}
-        {data.tiers.length < 3 && (
-          <Button variant="ghost" size="sm" className={addBtn} onClick={addTier}>
+        {data.options.length < 3 && (
+          <Button variant="ghost" size="sm" className={addBtn} onClick={addOption}>
             <Plus className="w-3 h-3" />添加方案
           </Button>
         )}
@@ -523,13 +523,18 @@ export function ReviewsForm({ data, onChange }: { data: ReviewsSchema; onChange:
     const newItem: ReviewItem = { id: crypto.randomUUID(), authorName: "Happy Client", rating: 5, content: "The team responded quickly and helped me understand the next step." };
     onChange({ ...data, items: [...data.items, newItem] });
   };
+  const updateRatingSummary = (patch: Partial<NonNullable<ReviewsSchema["ratingSummary"]>>) => {
+    const current = data.ratingSummary ?? { average: 5 };
+    onChange({ ...data, ratingSummary: { ...current, ...patch } });
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-2">
         <Field label="标题"><Input className={di} value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} /></Field>
         <Field label="副标题"><Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} /></Field>
-        <Field label="平均评分"><Input className={di} type="number" min={1} max={5} step={0.1} value={data.averageRating ?? ""} onChange={e => onChange({ ...data, averageRating: Number(e.target.value) })} /></Field>
-        <Field label="总评论数"><Input className={di} value={data.totalReviews ?? ""} onChange={e => onChange({ ...data, totalReviews: e.target.value })} placeholder="10k+" /></Field>
+        <Field label="平均评分"><Input className={di} type="number" min={1} max={5} step={0.1} value={data.ratingSummary?.average ?? ""} onChange={e => updateRatingSummary({ average: Number(e.target.value) })} /></Field>
+        <Field label="评分总览"><Input className={di} value={data.ratingSummary?.totalLabel ?? ""} onChange={e => updateRatingSummary({ totalLabel: e.target.value || undefined })} placeholder="Based on 248 reviews" /></Field>
       </div>
       <SectionDivider label="评价" />
       <div className="space-y-2">
@@ -839,4 +844,3 @@ export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChang
     </div>
   );
 }
-

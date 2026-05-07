@@ -86,7 +86,7 @@ export interface HeroSchema {
 
 
 // 核心转化 Offer —— 展示服务/方案，引导点击咨询或留资
-export interface OfferTier {
+export interface OfferOption {
   id: string;
   name: string;                 // 方案名称，如 "入门咨询", "家庭套餐", "专属服务"
   labelText?: string;           // 展示标签，如 "Free Quote", "Book Consultation", "Limited Slots"
@@ -102,7 +102,7 @@ export interface OfferTier {
 export interface OfferSchema {
   title: string;
   subtitle?: string;
-  tiers: OfferTier[];           // 通常 1 到 3 个
+  options: OfferOption[];       // 通常 1 到 3 个咨询/服务选项
   variant?: 'cards-row' | 'cards-column';
 }
 
@@ -168,8 +168,6 @@ export interface ReviewItem {
 export interface ReviewsSchema {
   title: string;
   subtitle?: string;
-  averageRating?: number;       // 如 4.9
-  totalReviews?: string;        // 如 "10k+ Reviews"
   ratingSummary?: {
     average: number;
     scale?: number;             // 默认可按 5 分制理解

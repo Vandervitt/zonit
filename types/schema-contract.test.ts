@@ -1,4 +1,7 @@
-import type { LandingPageTemplate, OptionalBlockType, SeoMeta } from './schema';
+import type { LandingPageTemplate, OfferSchema, OptionalBlockType, ReviewsSchema, SeoMeta } from './schema';
+
+// @ts-expect-error offer entries are options, not pricing tiers.
+import type { OfferTier } from './schema';
 
 // Landing pages are lead-generation pages. Do not allow arbitrary JSON-LD
 // that can reintroduce Product/Offer/price transaction schema.
@@ -33,3 +36,64 @@ const rootLeadFormTemplate: Partial<LandingPageTemplate> = {
 };
 
 void rootLeadFormTemplate;
+
+const leadGenerationOffer: OfferSchema = {
+  title: 'Choose a Consultation Path',
+  options: [
+    {
+      id: 'quick-chat',
+      name: 'Quick Chat',
+      description: 'Talk with our team before booking.',
+      valueProps: ['Human response', 'No checkout required'],
+      cta: { text: 'Contact Us', url: 'https://wa.me/1234567890' },
+    },
+  ],
+};
+
+void leadGenerationOffer;
+
+const tieredOffer: OfferSchema = {
+  title: 'Old Shape',
+  // @ts-expect-error OfferSchema no longer exposes ecommerce/SaaS tier language.
+  tiers: [],
+};
+
+void tieredOffer;
+
+const reviewsWithSummary: ReviewsSchema = {
+  title: 'Client Reviews',
+  ratingSummary: {
+    average: 4.9,
+    scale: 5,
+    totalLabel: 'Based on 248 reviews',
+  },
+  items: [
+    { id: 'review-1', authorName: 'Verified Client', rating: 5, content: 'The team responded quickly.' },
+  ],
+};
+
+void reviewsWithSummary;
+
+const reviewsWithAverageRating: ReviewsSchema = {
+  title: 'Client Reviews',
+  // @ts-expect-error rating summary must stay grouped; do not reintroduce top-level averageRating.
+  averageRating: 4.9,
+  items: [
+    { id: 'review-1', authorName: 'Verified Client', rating: 5, content: 'The team responded quickly.' },
+  ],
+};
+
+void reviewsWithAverageRating;
+
+const reviewsWithTotalReviews: ReviewsSchema = {
+  title: 'Client Reviews',
+  // @ts-expect-error total review copy belongs in ratingSummary.totalLabel.
+  totalReviews: '248 reviews',
+  items: [
+    { id: 'review-1', authorName: 'Verified Client', rating: 5, content: 'The team responded quickly.' },
+  ],
+};
+
+void reviewsWithTotalReviews;
+
+void (null as unknown as OfferTier);

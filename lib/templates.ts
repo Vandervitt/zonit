@@ -29,7 +29,8 @@ export function getDefaultBlockData(type: string) {
       ],
     },
     Reviews: {
-      title: 'Client Reviews', subtitle: 'Hear from people who contacted us', averageRating: 5, totalReviews: '100+',
+      title: 'Client Reviews', subtitle: 'Hear from people who contacted us',
+      ratingSummary: { average: 5, totalLabel: 'Based on 100+ reviews' },
       items: [
         { id: crypto.randomUUID(), authorName: 'Happy Client', authorRole: 'Verified Client', rating: 5, content: 'The team responded quickly and guided me through the next step.' },
       ],

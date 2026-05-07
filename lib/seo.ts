@@ -68,8 +68,8 @@ function findOgImage(template: LandingPageTemplate): string | undefined {
   if (template.hero.media?.type === "image") return template.hero.media.src;
   if (template.hero.background.type === "image") return template.hero.background.value;
 
-  for (const tier of template.offer.tiers) {
-    if (tier.image) return tier.image;
+  for (const option of template.offer.options) {
+    if (option.image) return option.image;
   }
 
   for (const block of allBlocks(template)) {
@@ -102,11 +102,11 @@ function summarizeTemplate(template: LandingPageTemplate) {
     offer: {
       title: template.offer.title,
       subtitle: template.offer.subtitle,
-      tiers: template.offer.tiers.slice(0, 3).map(tier => ({
-        name: tier.name,
-        description: tier.description,
-        valueProps: tier.valueProps.slice(0, 4),
-        cta: tier.cta.text,
+      options: template.offer.options.slice(0, 3).map(option => ({
+        name: option.name,
+        description: option.description,
+        valueProps: option.valueProps.slice(0, 4),
+        cta: option.cta.text,
       })),
     },
     howItWorks: template.howItWorks.steps.slice(0, 3).map(step => ({
@@ -137,7 +137,7 @@ function fallbackSeo(template: LandingPageTemplate): GeneratedSeo {
   const offerTitle = cleanText(template.offer.title);
   const primaryAction = firstNonEmpty(
     template.hero.cta.text,
-    template.offer.tiers[0]?.cta.text,
+    template.offer.options[0]?.cta.text,
     "Contact us",
   );
   const title = limit(

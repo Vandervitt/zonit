@@ -6,7 +6,7 @@ import type {
   LandingPageTemplate,
   HeroSchema,
   OfferSchema,
-  OfferTier,
+  OfferOption,
   HowItWorksSchema,
   MicroFooterSchema,
   FeaturesSchema,
@@ -320,37 +320,37 @@ function AuthorityBlock({ data, primaryColor, id, highlight }: { data: Authority
 function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; primaryColor: string; highlight?: boolean }) {
   const v = data.variant ?? 'cards-row';
 
-  const tierCard = (tier: OfferTier) => (
-    <div key={tier.id} className="border-2 rounded-2xl p-4 relative" style={{ borderColor: tier.tag ? primaryColor : "#e2e8f0" }}>
-      {tier.tag && (
+  const optionCard = (option: OfferOption) => (
+    <div key={option.id} className="border-2 rounded-2xl p-4 relative" style={{ borderColor: option.tag ? primaryColor : "#e2e8f0" }}>
+      {option.tag && (
         <div className="absolute -top-3 left-4 px-2 py-0.5 rounded-full text-xs text-white" style={{ backgroundColor: primaryColor }}>
-          {tier.tag}
+          {option.tag}
         </div>
       )}
       <div className="flex justify-between items-start mb-2">
         <div>
-          <p className="text-sm text-slate-800">{tier.name}</p>
-          <p className="text-xs text-slate-500">{tier.description}</p>
+          <p className="text-sm text-slate-800">{option.name}</p>
+          <p className="text-xs text-slate-500">{option.description}</p>
         </div>
-        {tier.labelText && (
-          <p className="text-xl shrink-0 ml-2" style={{ color: primaryColor }}>{tier.labelText}</p>
+        {option.labelText && (
+          <p className="text-xl shrink-0 ml-2" style={{ color: primaryColor }}>{option.labelText}</p>
         )}
       </div>
       <ul className="space-y-1 my-3">
-        {tier.valueProps.map((f, i) => (
+        {option.valueProps.map((f, i) => (
           <li key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
             <span className="text-emerald-500 text-base leading-none">✓</span> {f}
           </li>
         ))}
       </ul>
-      {tier.urgencyText && (
-        <p className="text-[10px] text-amber-600 text-center mb-2">{tier.urgencyText}</p>
+      {option.urgencyText && (
+        <p className="text-[10px] text-amber-600 text-center mb-2">{option.urgencyText}</p>
       )}
       <button
         className="w-full py-2 rounded-full text-xs text-white mt-2"
-        style={{ backgroundColor: ctaThemeColor(tier.cta.theme, primaryColor) }}
+        style={{ backgroundColor: ctaThemeColor(option.cta.theme, primaryColor) }}
       >
-        {tier.cta.text}
+        {option.cta.text}
       </button>
     </div>
   );
@@ -360,7 +360,7 @@ function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; prim
       <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
       {data.subtitle && <p className="text-xs text-center text-slate-500 mb-6">{data.subtitle}</p>}
       <div className={v === 'cards-row' ? "grid grid-cols-2 gap-3" : "space-y-4"}>
-        {data.tiers.map(tierCard)}
+        {data.options.map(optionCard)}
       </div>
     </section>
   );
@@ -390,6 +390,9 @@ function HowItWorksBlock({ data, primaryColor, highlight }: { data: HowItWorksSc
 
 function ReviewsBlock({ data, id, highlight }: { data: ReviewsSchema; id?: string; highlight?: boolean }) {
   const v = data.variant ?? 'grid';
+  const ratingSummary = data.ratingSummary;
+  const ratingScale = ratingSummary?.scale ?? 5;
+  const normalizedRating = ratingSummary ? Math.round((ratingSummary.average / ratingScale) * 5) : 0;
 
   const reviewCard = (item: ReviewItem) => (
     <div key={item.id} className={`bg-slate-50 rounded-xl p-4 ${v === 'carousel' ? 'w-56 shrink-0 snap-start' : ''}`}>
@@ -414,11 +417,11 @@ function ReviewsBlock({ data, id, highlight }: { data: ReviewsSchema; id?: strin
       <div className="px-5">
         <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
         {data.subtitle && <p className="text-xs text-center text-slate-500 mb-2">{data.subtitle}</p>}
-        {data.averageRating && (
+        {ratingSummary && (
           <div className="flex items-center justify-center gap-2 mb-5">
-            <span className="text-2xl text-amber-400 font-bold">{data.averageRating}</span>
-            <StarRating rating={Math.round(data.averageRating)} />
-            {data.totalReviews && <span className="text-xs text-slate-400">({data.totalReviews})</span>}
+            <span className="text-2xl text-amber-400 font-bold">{ratingSummary.average}</span>
+            <StarRating rating={normalizedRating} />
+            {ratingSummary.totalLabel && <span className="text-xs text-slate-400">({ratingSummary.totalLabel})</span>}
           </div>
         )}
       </div>

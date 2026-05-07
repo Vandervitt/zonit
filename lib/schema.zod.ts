@@ -72,7 +72,7 @@ const HeroSchemaZ = z.object({
   variant: z.enum(['overlay', 'split-left', 'split-right']).optional(),
 });
 
-const OfferTierSchema = z.object({
+const OfferOptionSchema = z.object({
   id: NonEmpty,
   name: NonEmpty,
   labelText: z.string().optional(),
@@ -83,14 +83,14 @@ const OfferTierSchema = z.object({
   urgencyText: z.string().optional(),
   isRecommended: z.boolean().optional(),
   cta: CallToActionSchema,
-});
+}).strict();
 
 const OfferSchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
-  tiers: z.array(OfferTierSchema).min(1),
+  options: z.array(OfferOptionSchema).min(1),
   variant: z.enum(['cards-row', 'cards-column']).optional(),
-});
+}).strict();
 
 const StepItemSchema = z.object({
   id: NonEmpty,
@@ -150,17 +150,15 @@ const ReviewItemSchema = z.object({
 const ReviewsSchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
-  averageRating: z.number().min(0).max(5).optional(),
-  totalReviews: z.string().optional(),
   ratingSummary: z.object({
     average: z.number().min(0).max(5),
     scale: z.number().positive().optional(),
     totalLabel: z.string().optional(),
-  }).optional(),
+  }).strict().optional(),
   items: z.array(ReviewItemSchema).min(1),
   disclaimer: z.string().optional(),
   variant: z.enum(['grid', 'carousel']).optional(),
-});
+}).strict();
 
 const TrustBadgeSchema = z.object({
   id: NonEmpty,
@@ -220,10 +218,10 @@ const LeadFormSchemaZ = z.object({
   fields: z.array(LeadFormFieldSchema).min(1),
   submitText: NonEmpty,
   successMessage: z.string().optional(),
-  webhookUrl: z.string().optional(),
+  webhookUrl: z.url().optional(),
   consentText: z.string().optional(),
   eventName: z.string().optional(),
-});
+}).strict();
 
 const AssuranceBadgeSchema = z.object({
   id: NonEmpty,
