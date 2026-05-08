@@ -401,9 +401,11 @@ export function HowItWorksForm({ data, onChange }: { data: HowItWorksSchema; onC
 // ── FooterForm ──────────────────────────────────────────────────────────────
 
 export function FooterForm({ data, onChange }: { data: MicroFooterSchema; onChange: (d: MicroFooterSchema) => void }) {
-  const addLink = () => onChange({ ...data, links: [...data.links, { text: "Policy Link", content: "Add policy content here." }] });
-  const updateLink = (i: number, link: FooterLink) => onChange({ ...data, links: data.links.map((l, li) => li === i ? link : l) });
-  const removeLink = (i: number) => onChange({ ...data, links: data.links.filter((_, li) => li !== i) });
+  const defaultLink: FooterLink = { text: "Privacy Policy", content: "Add privacy policy content here." };
+  const updateLinks = (links: FooterLink[]) => onChange({ ...data, links: links.length ? [links[0], ...links.slice(1)] : [defaultLink] });
+  const addLink = () => updateLinks([...data.links, { text: "Policy Link", content: "Add policy content here." }]);
+  const updateLink = (i: number, link: FooterLink) => updateLinks(data.links.map((l, li) => li === i ? link : l));
+  const removeLink = (i: number) => updateLinks(data.links.filter((_, li) => li !== i));
 
   return (
     <div className="space-y-4">

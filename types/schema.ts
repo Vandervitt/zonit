@@ -45,13 +45,31 @@ export type ConversionDestination =
   | { type: 'email'; email: string }
   | { type: 'form'; formId: string };
 
+export type UrlConversionChannel = Extract<CtaChannel, 'whatsapp' | 'telegram' | 'line' | 'booking' | 'contact_link'>;
+
 // 页面级主转化目标：让全页 CTA 默认围绕同一个咨询/留资动作，避免多入口归因混乱
-export interface PrimaryConversion {
-  channel: CtaChannel;
-  label: string;               // 如 "Book a Free Consultation" / "Chat on WhatsApp"
-  destination: ConversionDestination; // 主转化必须能落到真实入口：私域/电话/邮箱/预约链接/表单
-  prefilledMessage?: string;   // 私域沟通预填消息
-}
+export type PrimaryConversion =
+  | {
+      channel: UrlConversionChannel;
+      label: string;               // 如 "Book a Free Consultation" / "Chat on WhatsApp"
+      destination: Extract<ConversionDestination, { type: 'url' }>; // 私域/预约/联系链接必须落到 URL
+      prefilledMessage?: string;   // 私域沟通预填消息
+    }
+  | {
+      channel: 'phone';
+      label: string;
+      destination: Extract<ConversionDestination, { type: 'phone' }>;
+    }
+  | {
+      channel: 'email';
+      label: string;
+      destination: Extract<ConversionDestination, { type: 'email' }>;
+    }
+  | {
+      channel: 'form';
+      label: string;
+      destination: Extract<ConversionDestination, { type: 'form' }>;
+    };
 
 // 移动端悬浮 CTA：海外引流页常用 WhatsApp / Telegram / 电话入口
 export interface StickyCtaConfig extends CallToAction {
@@ -158,7 +176,7 @@ export interface MicroFooterSchema {
   copyrightYear: string;        // 年份
   contactEmail?: string;        // 投诉/联系邮箱
   socialLinks?: SocialLink[];   // 社媒入口，帮助海外访客验证品牌真实性
-  links: FooterLink[];          // 法律条款链接列表
+  links: [FooterLink, ...FooterLink[]]; // 法律条款链接列表；海外投放页至少需要一个合规入口
   disclaimer?: string;          // 针对医疗/金融/黑五类的免责声明 (如 "Investment involves risk...")
 }
 

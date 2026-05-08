@@ -1,10 +1,15 @@
 import { z } from 'zod';
 
 const NonEmpty = z.string().min(1);
+const TransactionUrlPattern = /(?:^|[/?#&=_-])(payment|checkout|cart|order|subscription|refund|cash-on-delivery|cod)(?:$|[/?#&=_-])/i;
+
+const LeadUrl = NonEmpty.refine(value => !TransactionUrlPattern.test(value), {
+  message: 'Lead-generation URLs must not point to payment, checkout, cart, order, subscription, refund, or COD paths.',
+});
 
 const CallToActionSchema = z.object({
   text: NonEmpty,
-  url: NonEmpty.optional(),
+  url: LeadUrl.optional(),
   icon: z.string().optional(),
   channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']),
   target: z.enum(['_self', '_blank']).optional(),
@@ -26,17 +31,31 @@ const CallToActionSchema = z.object({
   }).optional(),
 });
 
-const PrimaryConversionSchema = z.object({
-  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']),
+const UrlPrimaryConversionSchema = z.object({
+  channel: z.enum(['whatsapp', 'telegram', 'line', 'booking', 'contact_link']),
   label: NonEmpty,
-  destination: z.discriminatedUnion('type', [
-    z.object({ type: z.literal('url'), url: NonEmpty }),
-    z.object({ type: z.literal('phone'), phone: NonEmpty }),
-    z.object({ type: z.literal('email'), email: NonEmpty }),
-    z.object({ type: z.literal('form'), formId: NonEmpty }),
-  ]),
+  destination: z.object({ type: z.literal('url'), url: LeadUrl }),
   prefilledMessage: z.string().optional(),
 }).strict();
+
+const PrimaryConversionSchema = z.union([
+  UrlPrimaryConversionSchema,
+  z.object({
+    channel: z.literal('phone'),
+    label: NonEmpty,
+    destination: z.object({ type: z.literal('phone'), phone: NonEmpty }),
+  }).strict(),
+  z.object({
+    channel: z.literal('email'),
+    label: NonEmpty,
+    destination: z.object({ type: z.literal('email'), email: NonEmpty }),
+  }).strict(),
+  z.object({
+    channel: z.literal('form'),
+    label: NonEmpty,
+    destination: z.object({ type: z.literal('form'), formId: NonEmpty }),
+  }).strict(),
+]);
 
 const StickyCtaConfigSchema = CallToActionSchema.extend({
   position: z.enum(['bottom-left', 'bottom-right']).optional(),
@@ -121,12 +140,17 @@ const HowItWorksSchemaZ = z.object({
 
 const FooterLinkSchema = z.object({
   text: NonEmpty,
-  url: z.string().optional(),
+  url: LeadUrl.optional(),
   content: z.string().optional(),
 }).refine(link => Boolean(link.url?.trim() || link.content?.trim()), {
   message: 'Footer link must include either url or content.',
   path: ['url'],
 });
+
+const FooterLinksSchema = z.array(FooterLinkSchema).min(1).transform(links => [
+  links[0]!,
+  ...links.slice(1),
+] as [z.infer<typeof FooterLinkSchema>, ...z.infer<typeof FooterLinkSchema>[]]);
 
 const MicroFooterSchemaZ = z.object({
   brandName: NonEmpty,
@@ -134,9 +158,9 @@ const MicroFooterSchemaZ = z.object({
   contactEmail: z.string().optional(),
   socialLinks: z.array(z.object({
     platform: z.string(),
-    url: NonEmpty,
+    url: LeadUrl,
   })).optional(),
-  links: z.array(FooterLinkSchema),
+  links: FooterLinksSchema,
   disclaimer: z.string().optional(),
 });
 

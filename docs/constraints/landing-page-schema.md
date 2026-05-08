@@ -3,6 +3,7 @@
 - Product schema should express landing-page marketing logic first; editor, renderer, zod validation, and templates should adapt to the product model.
 - Every landing page must have a `primaryConversion`.
 - `primaryConversion` must point to a real lead path through `destination`: URL, phone, email, or form.
+- `primaryConversion.channel` and `primaryConversion.destination.type` must describe the same lead path.
 - Do not model primary conversion as a loose optional `url`.
 - If `primaryConversion.destination.type` is `form`, the page must include the matching single `leadForm`.
 - A page should have at most one `leadForm`.
@@ -13,5 +14,6 @@
 - Analytics events for generated landing pages must stay lead-generation oriented, not purchase or checkout oriented.
 - Do not require a fixed market or visitor region in the schema.
 - `locale` may be optional and should fall back to English when runtime detection is unavailable.
+- The footer must include at least one compliance link or inline policy entry.
 - Trust and compliance structures should support reviews, trust badges, authority story, FAQ, assurance, privacy policy, and disclaimers.
 - Assurance content must avoid transaction semantics such as refund guarantees or payment protection unless product scope explicitly changes.
