@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { seedPublishedSite, cleanupSite, closeDb, SLUG_PREFIX } from './helpers/db';
+import { seedPublishedSite, cleanupSite, closeDb, SLUG_PREFIX, isDbE2EEnabled } from './helpers/db';
 import {
   makeBaseTemplate, faqBlock, reviewsBlock,
 } from './helpers/template';
@@ -12,6 +12,8 @@ async function readJsonLd(page: Page): Promise<Record<string, unknown>[]> {
 }
 
 test.describe('JSON-LD 自动派生', () => {
+  test.skip(!isDbE2EEnabled, 'Set RUN_DB_E2E=1 to run database-backed e2e tests.');
+
   test.beforeAll(async () => {
     const tpl = makeBaseTemplate({
       blocks: [reviewsBlock(), faqBlock()],

@@ -39,10 +39,16 @@ pnpm exec playwright test e2e/jsonld.spec.ts --headed
 
 ## 关于 fixture 数据库
 
-`helpers/db.ts` 直接读 `.env.local` 的 `DATABASE_URL`。若不希望污染开发库：
+数据库回归默认跳过，避免本地和 CI 在没有测试库密钥时误连开发库或因外部凭据失效失败。
 
-1. 准备独立的 `DATABASE_URL_TEST`，在 CI 中 export 为 `DATABASE_URL`
-2. fixture 全部走 `e2e-` 前缀和固定 user_id，跑完 `globalTeardown` 会按前缀清理
+要运行真实数据库回归：
+
+```bash
+RUN_DB_E2E=1 E2E_DATABASE_URL='postgres://...' pnpm test:e2e
+```
+
+若未提供 `E2E_DATABASE_URL`，测试会回退读取 `.env.local` / `.env` 里的 `DATABASE_URL`。
+fixture 全部走 `e2e-` 前缀和固定 user_id，跑完 `globalTeardown` 会按前缀清理。
 
 ## 增加新用例
 

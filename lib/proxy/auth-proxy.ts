@@ -4,7 +4,13 @@ import { UserRole } from "@/lib/constants";
 
 export const PUBLIC_PATHS = ["/login", "/register", "/pricing", "/api/auth", "/api/register"];
 
-export function handleAuth(req: NextRequest & { auth?: any }) {
+type ProxyAuth = {
+  user?: {
+    role?: UserRole;
+  };
+} | null;
+
+export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
   const { pathname } = req.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 

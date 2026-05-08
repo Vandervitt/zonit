@@ -4,7 +4,7 @@ import debug from "debug";
 const log = debug("zonit:request");
 
 // 内部日志打印逻辑
-const internalLog = (msg: string, data?: any) => {
+const internalLog = (msg: string, data?: unknown) => {
   log(msg, data);
   // 如果是开发环境且没有开启 DEBUG，则强制使用 console.log 打印一行简要信息
   if (process.env.NODE_ENV === "development" && !process.env.DEBUG) {
@@ -24,11 +24,11 @@ export interface WebVitalLog {
   attribution: {
     url: string;
     method: string;
-    params?: any;
-    result?: any;
+    params?: unknown;
+    result?: unknown;
     status?: number;
     error?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -48,7 +48,7 @@ export async function withLogger<T>(
   name: string,
   url: string,
   method: string,
-  params: any,
+  params: unknown,
   fn: () => Promise<T>
 ): Promise<T> {
   const id = generateId();
@@ -60,6 +60,9 @@ export async function withLogger<T>(
   try {
     const result = await fn();
     const duration = performance.now() - startTime;
+    const resultStatus = typeof result === "object" && result !== null && "status" in result
+      ? Number((result as { status?: unknown }).status) || 200
+      : 200;
     
     const logData: WebVitalLog = {
       name,
@@ -72,7 +75,7 @@ export async function withLogger<T>(
         method,
         params: process.env.NODE_ENV === 'production' ? undefined : params, // 生产环境隐藏敏感参数
         result: process.env.NODE_ENV === 'production' ? undefined : result,
-        status: (result as any)?.status || 200,
+        status: resultStatus,
       },
     };
 
@@ -82,8 +85,12 @@ export async function withLogger<T>(
     // Sentry.addBreadcrumb({ category: 'api', message: name, data: logData });
 
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
     const duration = performance.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStatus = typeof error === "object" && error !== null && "status" in error
+      ? Number((error as { status?: unknown }).status) || 500
+      : 500;
     
     const logData: WebVitalLog = {
       name,
@@ -95,8 +102,8 @@ export async function withLogger<T>(
         url,
         method,
         params,
-        error: error.message || String(error),
-        status: error.status || 500,
+        error: errorMessage,
+        status: errorStatus,
       },
     };
 

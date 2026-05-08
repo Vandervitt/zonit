@@ -13,12 +13,6 @@ interface Props {
   expandedKey: string;
 }
 
-const DEVICE_CONFIG: Record<Device, { width: number | "100%"; label: string }> = {
-  mobile: { width: 375, label: "Mobile" },
-  tablet: { width: 768, label: "Tablet" },
-  desktop: { width: "100%", label: "Desktop" },
-};
-
 function IPhoneFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative inline-flex flex-col items-center">

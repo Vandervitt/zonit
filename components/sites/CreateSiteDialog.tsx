@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check } from "lucide-react";
 import {
   Dialog,
@@ -27,12 +27,7 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
   const [selectedId, setSelectedId] = useState<string>("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!selectedId && templates.length > 0) {
-      setSelectedId(templates[0].id);
-    }
-  }, [templates, selectedId]);
+  const selectedTemplateId = selectedId || templates[0]?.id || "";
 
   const handleConfirm = () => {
     const trimmed = name.trim();
@@ -48,14 +43,14 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
       setError("该站点名称已存在，请换一个");
       return;
     }
-    const template = templates.find(t => t.id === selectedId);
+    const template = templates.find(t => t.id === selectedTemplateId);
     if (!template) {
       setError("请选择一个模板");
       return;
     }
-    const site = createSite(trimmed, selectedId, {
+    const site = createSite(trimmed, selectedTemplateId, {
       ...template.data,
-      templateId: selectedId,
+      templateId: selectedTemplateId,
       templateName: trimmed,
     });
     setName("");
@@ -93,7 +88,7 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
               {templates.map(tpl => {
                 const bgStyle = heroBackgroundStyle(tpl);
                 const hasBg = Object.keys(bgStyle).length > 0;
-                const isSelected = selectedId === tpl.id;
+                const isSelected = selectedTemplateId === tpl.id;
                 return (
                   <button
                     key={tpl.id}

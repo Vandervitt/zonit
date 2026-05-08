@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -11,20 +11,16 @@ import { withLogger } from "@/lib/logger";
 import { jsonRequest } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const isInvited = Boolean(token);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [isInvited, setIsInvited] = useState(false);
-
-  useEffect(() => {
-    if (token) setIsInvited(true);
-  }, [token]);
 
   const googleSignIn = useMutation(
     () => withLogger("GOOGLE_SIGN_IN", "auth/google", "POST", {}, () =>
@@ -148,5 +144,13 @@ export default function RegisterPage() {
         onSkip={() => { router.push(Routes.Home); router.refresh(); }}
       />
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="w-full max-w-sm bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-8" />}>
+      <RegisterPageContent />
+    </Suspense>
   );
 }

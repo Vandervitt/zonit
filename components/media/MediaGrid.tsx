@@ -47,7 +47,7 @@ export function MediaGrid({
   if (items.length === 0) {
     return (
       <div className={emptyClass}>
-        还没有素材，点击"上传素材"开始
+        还没有素材，点击 上传素材 开始
       </div>
     );
   }

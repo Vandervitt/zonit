@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { nanoid } from "nanoid";
 import { ApiErrors } from "@/lib/constants";
-import { getUserPlan } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
 import {
   getUserDomains,

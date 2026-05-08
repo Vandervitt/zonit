@@ -175,7 +175,7 @@ export default function BillingPage() {
 
       {currentPlanId !== "free" && (
         <p className="mt-6 text-xs text-slate-400 text-center">
-          如需取消订阅，请通过"管理订阅"进入 Lemon Squeezy 操作
+          如需取消订阅，请通过 管理订阅 进入 Lemon Squeezy 操作
         </p>
       )}
     </main>

@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   LogOut,
   ChevronRight,
-  Globe,
   FileJson
 } from "lucide-react";
 

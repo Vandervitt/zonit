@@ -70,7 +70,7 @@ export default function MediaPage() {
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-400">
             <ImageIcon className="w-10 h-10 text-slate-300" />
-            <p className="text-sm">还没有素材，点击右上角"上传素材"开始</p>
+            <p className="text-sm">还没有素材，点击右上角 上传素材 开始</p>
           </div>
         ) : (
           <MediaGrid items={items} onDeleted={handleDeleted} />

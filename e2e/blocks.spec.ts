@@ -1,10 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { seedPublishedSite, cleanupSite, closeDb, SLUG_PREFIX } from './helpers/db';
+import { seedPublishedSite, cleanupSite, closeDb, SLUG_PREFIX, isDbE2EEnabled } from './helpers/db';
 import { makeBaseTemplate, leadFormFixture } from './helpers/template';
 
 const SLUG = `${SLUG_PREFIX}blocks`;
 
 test.describe('Phase 3 / Batch A — LeadForm 渲染', () => {
+  test.skip(!isDbE2EEnabled, 'Set RUN_DB_E2E=1 to run database-backed e2e tests.');
+
   test.beforeAll(async () => {
     await seedPublishedSite(
       SLUG,

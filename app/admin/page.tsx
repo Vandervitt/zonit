@@ -9,6 +9,14 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+interface LatestSiteRow {
+  id: string;
+  name: string;
+  status: string;
+  created_at: string | Date;
+  user_email: string;
+}
+
 async function getStats() {
   const usersCount = await pool.query("SELECT COUNT(*) FROM users");
   const sitesCount = await pool.query("SELECT COUNT(*) FROM sites");
@@ -25,7 +33,7 @@ async function getStats() {
     totalUsers: parseInt(usersCount.rows[0].count),
     totalSites: parseInt(sitesCount.rows[0].count),
     activeSubs: parseInt(activeSubscriptions.rows[0].count),
-    latestSites: latestSites.rows
+    latestSites: latestSites.rows as LatestSiteRow[],
   };
 }
 
@@ -101,7 +109,7 @@ export default async function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats.latestSites.map((site: any) => (
+              {stats.latestSites.map((site) => (
                 <div key={site.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center border border-slate-200 text-lg">

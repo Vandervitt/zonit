@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       bcrypt.hash(password, 12)
     );
     
-    const userRes = await withLogger("DB_CREATE_USER", "db/users", "INSERT", { name, email, userPlan }, () => 
+    await withLogger("DB_CREATE_USER", "db/users", "INSERT", { name, email, userPlan }, () => 
       client.query(
         "INSERT INTO users (name, email, password_hash, plan, trial_expires_at, invited_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
         [name, email, hash, userPlan, trialExpiresAt, invitationId ? new Date() : null]
