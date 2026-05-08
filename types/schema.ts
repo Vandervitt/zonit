@@ -317,7 +317,7 @@ export type LeadFormExtraFieldType = 'text' | 'select';
 
 export interface LeadFormExtraField {
   id: string;
-  name: string;                 // 提交时的字段 key
+  fieldKey: string;             // 提交时的字段 key，避免与 LeadContactField 的姓名字段 name 混淆
   label: string;
   type: LeadFormExtraFieldType;
   required?: boolean;

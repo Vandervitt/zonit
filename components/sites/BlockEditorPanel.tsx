@@ -85,7 +85,7 @@ const TYPE_BG: Record<string, string> = {
 
 const TYPE_LABEL: Record<string, string> = {
   Hero: "首屏主视觉",
-  Offer: "核心 Offer",
+  Offer: "咨询入口",
   HowItWorks: "联系流程",
   MicroFooter: "页脚",
   Features: "服务卖点",

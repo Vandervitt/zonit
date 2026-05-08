@@ -242,7 +242,7 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs text-slate-600">类别</Label>
-                    <Input className="h-7 text-xs" value={meta.category} onChange={e => setMetaField("category", e.target.value)} placeholder="COD / 服务 / …" />
+                    <Input className="h-7 text-xs" value={meta.category} onChange={e => setMetaField("category", e.target.value)} placeholder="服务咨询 / 医美 / B2B" />
                   </div>
                 </div>
                 <div className="space-y-1">

@@ -44,22 +44,22 @@ export function getDefaultBlockData(type: string) {
     },
     AuthorityStory: {
       title: 'About Us', subtitle: 'Our story and expertise',
-      paragraphs: ['We are passionate about delivering exceptional value to our customers.'],
+      paragraphs: ['We help visitors understand the service and connect with the right team quickly.'],
       image: { src: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=80', alt: 'Our team' },
-      stats: [{ label: 'Years Exp', value: '10+' }, { label: 'Clients', value: '500+' }],
+      stats: [{ label: 'Years Exp', value: '10+' }, { label: 'Inquiries', value: '500+' }],
     },
     FAQ: {
       title: 'Frequently Asked Questions',
       items: [
         { id: crypto.randomUUID(), question: 'How do I get started?', answer: 'Simply reach out to us via the contact button and our team will guide you.' },
-        { id: crypto.randomUUID(), question: 'Is there a free trial?', answer: 'Yes! We offer a risk-free trial period for new customers.' },
+        { id: crypto.randomUUID(), question: 'What happens after I submit my inquiry?', answer: 'Our team reviews your message and contacts you with the next step.' },
       ],
     },
     Countdown: {
-      title: 'Limited-Time Offer',
+      title: 'Limited Consultation Slots',
       subtitle: 'Consultation slots are limited this week',
       endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      expiredFallback: { title: 'Offer Ended', subtitle: 'Stay tuned for the next campaign' },
+      expiredFallback: { title: 'Consultation Window Updated', subtitle: 'Contact us to check the latest availability' },
     },
     LeadForm: {
       id: 'lead-form',

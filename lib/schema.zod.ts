@@ -268,13 +268,13 @@ const FAQSchemaZ = z.object({
 
 const LeadFormExtraFieldSchema = z.object({
   id: NonEmpty,
-  name: NonEmpty,
+  fieldKey: NonEmpty,
   label: NonEmpty,
   type: z.enum(['text', 'select']),
   required: z.boolean().optional(),
   placeholder: z.string().optional(),
   options: z.array(z.object({ label: NonEmpty, value: NonEmpty })).optional(),
-});
+}).strict();
 
 const LeadContactFieldSchema = z.enum(['name', 'phone', 'email', 'whatsapp', 'telegram']);
 const ReachableLeadContactFieldSchema = z.enum(['phone', 'email', 'whatsapp', 'telegram']);

@@ -1,4 +1,5 @@
 import type { BlockType, CallToAction, LandingPage, LandingPageTemplate } from './schema';
+import type { ZodLandingPageTemplate } from '../lib/schema.zod';
 
 // @ts-expect-error offer entries are consultation paths, not pricing tiers.
 import type { OfferTier } from './schema';
@@ -133,5 +134,23 @@ const leadFormWithoutContactField: Partial<LandingPageTemplate> = {
 };
 
 void leadFormWithoutContactField;
+
+const zodLeadFormExtraFieldWithPayloadKey: Partial<ZodLandingPageTemplate> = {
+  leadForm: {
+    id: 'lead-form',
+    title: 'Get a Free Consultation',
+    submitText: 'Send Inquiry',
+    requiredFields: ['name', 'email'],
+    extraFields: [{
+      id: 'budget',
+      fieldKey: 'budget_range',
+      label: 'Budget range',
+      type: 'select',
+      options: [{ label: '$1k - $5k', value: '1k_5k' }],
+    }],
+  },
+};
+
+void zodLeadFormExtraFieldWithPayloadKey;
 
 void (null as unknown as OfferTier);

@@ -224,13 +224,13 @@ export function HeroForm({ data, onChange }: { data: HeroSchema; onChange: (d: H
   return (
     <div className="space-y-4">
       <Field label="顶部标签 Badge">
-        <Input className={di} value={data.badge ?? ""} onChange={e => onChange({ ...data, badge: e.target.value })} placeholder="🔥 Limited Time Offer" />
+        <Input className={di} value={data.badge ?? ""} onChange={e => onChange({ ...data, badge: e.target.value })} placeholder="Free Consultation" />
       </Field>
       <Field label="主标题">
         <Textarea className={`${dt} min-h-[60px]`} value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="Your Main Headline" />
       </Field>
       <Field label="副标题">
-        <Textarea className={`${dt} min-h-[60px]`} value={data.subtitle} onChange={e => onChange({ ...data, subtitle: e.target.value })} placeholder="Supporting text that describes your offer..." />
+        <Textarea className={`${dt} min-h-[60px]`} value={data.subtitle} onChange={e => onChange({ ...data, subtitle: e.target.value })} placeholder="Explain the service value and invite visitors to contact your team." />
       </Field>
       <SectionDivider label="背景设置" />
       <Field label="类型">
@@ -267,7 +267,7 @@ export function HeroForm({ data, onChange }: { data: HeroSchema; onChange: (d: H
       <SectionDivider label="转化" />
       <CtaFields value={data.cta} onChange={cta => onChange({ ...data, cta })} />
       <Field label="按钮下方背书文字">
-        <Input className={di} value={data.trustText ?? ""} onChange={e => onChange({ ...data, trustText: e.target.value })} placeholder="✓ No credit card required" />
+        <Input className={di} value={data.trustText ?? ""} onChange={e => onChange({ ...data, trustText: e.target.value })} placeholder="Reply within 10 minutes" />
       </Field>
     </div>
   );
@@ -287,7 +287,7 @@ export function CountdownForm({ data, onChange }: { data: CountdownSchema; onCha
         />
       </Field>
       <Field label="标题">
-        <Input className={di} value={data.title ?? ""} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="Limited-Time Offer" />
+        <Input className={di} value={data.title ?? ""} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="Limited consultation slots" />
       </Field>
       <Field label="副标题">
         <Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} placeholder="Consultation slots are limited this week" />
@@ -295,7 +295,7 @@ export function CountdownForm({ data, onChange }: { data: CountdownSchema; onCha
       <SectionDivider label="过期兜底" />
       <div className="grid grid-cols-2 gap-2">
         <Field label="过期标题">
-          <Input className={di} value={data.expiredFallback?.title ?? ""} onChange={e => onChange({ ...data, expiredFallback: { ...data.expiredFallback, title: e.target.value } })} placeholder="Offer Ended" />
+          <Input className={di} value={data.expiredFallback?.title ?? ""} onChange={e => onChange({ ...data, expiredFallback: { ...data.expiredFallback, title: e.target.value } })} placeholder="Consultation window updated" />
         </Field>
         <Field label="过期副标题">
           <Input className={di} value={data.expiredFallback?.subtitle ?? ""} onChange={e => onChange({ ...data, expiredFallback: { ...data.expiredFallback, subtitle: e.target.value } })} placeholder="Stay tuned" />
@@ -345,13 +345,13 @@ function OptionEditor({ option, onChange, onRemove, index }: { option: OfferOpti
   return (
     <div className={card}>
       <div className="flex items-center justify-between">
-        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">方案 {index + 1}</span>
+        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-medium">咨询入口 {index + 1}</span>
         <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <Field label="名称"><Input className={`${di} h-8`} value={option.name} onChange={e => onChange({ ...option, name: e.target.value })} /></Field>
+        <Field label="入口名称"><Input className={`${di} h-8`} value={option.name} onChange={e => onChange({ ...option, name: e.target.value })} /></Field>
         <Field label="徽章"><Input className={`${di} h-8`} value={option.badge ?? ""} onChange={e => onChange({ ...option, badge: e.target.value || undefined })} placeholder="Free Quote" /></Field>
-        <Field label="紧迫文案"><Input className={`${di} h-8`} value={option.urgencyText ?? ""} onChange={e => onChange({ ...option, urgencyText: e.target.value })} placeholder="仅剩 5 名额" /></Field>
+        <Field label="真实紧迫提示"><Input className={`${di} h-8`} value={option.urgencyText ?? ""} onChange={e => onChange({ ...option, urgencyText: e.target.value })} placeholder="Only 5 consultation slots left this week" /></Field>
       </div>
       <Field label="简介"><Input className={`${di} h-8`} value={option.description} onChange={e => onChange({ ...option, description: e.target.value })} /></Field>
       <div className="space-y-1.5">
@@ -367,7 +367,7 @@ function OptionEditor({ option, onChange, onRemove, index }: { option: OfferOpti
         </div>
       </div>
       <ImagePickerField
-        label="方案配图"
+        label="咨询入口配图"
         value={option.image ?? ""}
         onChange={url => onChange({ ...option, image: url || undefined })}
       />
@@ -380,9 +380,9 @@ export function OfferForm({ data, onChange }: { data: OfferSchema; onChange: (d:
   const addOption = () => {
     const newOption: OfferOption = {
       id: crypto.randomUUID(),
-      name: "New Option",
-      description: "Option description",
-      valueProps: ["Value prop 1", "Value prop 2"],
+      name: "Free Consultation",
+      description: "Tell us what you need and our team will guide the next step.",
+      valueProps: ["Fast human response", "Clear next-step guidance"],
       cta: { text: "Contact Us", icon: "WhatsApp", channel: "whatsapp", destination: { type: "whatsapp", url: "https://wa.me/1234567890" } },
     };
     onChange({ ...data, options: [...data.options, newOption] });
@@ -394,14 +394,14 @@ export function OfferForm({ data, onChange }: { data: OfferSchema; onChange: (d:
     <div className="space-y-4">
       <Field label="标题"><Input className={di} value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} /></Field>
       <Field label="副标题"><Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} /></Field>
-      <SectionDivider label="方案" />
+      <SectionDivider label="咨询入口" />
       <div className="space-y-2">
         {data.options.map((option, i) => (
           <OptionEditor key={option.id} option={option} index={i} onChange={item => updateOption(i, item)} onRemove={() => removeOption(i)} />
         ))}
         {data.options.length < 3 && (
           <Button variant="ghost" size="sm" className={addBtn} onClick={addOption}>
-            <Plus className="w-3 h-3" />添加方案
+            <Plus className="w-3 h-3" />添加咨询入口
           </Button>
         )}
       </div>
@@ -800,8 +800,8 @@ function LeadExtraFieldEditor({ field, onChange, onRemove }: { field: LeadFormEx
             <button className={delBtn} onClick={onRemove}><X className="w-3 h-3" /></button>
           </div>
         </Field>
-        <Field label="Name (key)">
-          <Input className={`${di} h-8`} value={field.name} onChange={e => onChange({ ...field, name: e.target.value })} placeholder="email" />
+        <Field label="提交字段 Key">
+          <Input className={`${di} h-8`} value={field.fieldKey} onChange={e => onChange({ ...field, fieldKey: e.target.value })} placeholder="budget_range" />
         </Field>
         <Field label="类型">
           <Select value={field.type} onValueChange={v => onChange({ ...field, type: v as LeadFormExtraFieldType })}>
@@ -847,7 +847,7 @@ function LeadExtraFieldEditor({ field, onChange, onRemove }: { field: LeadFormEx
 
 export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChange: (d: LeadFormSchema) => void }) {
   const addField = () => {
-    const newField: LeadFormExtraField = { id: crypto.randomUUID(), name: "interest", label: "Service Needed", type: "text" };
+    const newField: LeadFormExtraField = { id: crypto.randomUUID(), fieldKey: "interest", label: "Service Needed", type: "text" };
     onChange({ ...data, extraFields: [...(data.extraFields ?? []), newField] });
   };
   return (
