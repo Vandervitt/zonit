@@ -9,14 +9,34 @@ const CallToActionSchema = z.object({
   channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']),
   target: z.enum(['_self', '_blank']).optional(),
   prefilledMessage: z.string().optional(),
+  tracking: z.object({
+    eventName: z.enum([
+      'Lead',
+      'Contact',
+      'FormSubmit',
+      'WhatsAppClick',
+      'TelegramClick',
+      'LineClick',
+      'PhoneClick',
+      'EmailClick',
+      'ScheduleClick',
+      'QuoteRequest',
+    ]).optional(),
+    label: z.string().optional(),
+  }).optional(),
 });
 
 const PrimaryConversionSchema = z.object({
   channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']),
   label: NonEmpty,
-  url: z.string().optional(),
+  destination: z.discriminatedUnion('type', [
+    z.object({ type: z.literal('url'), url: NonEmpty }),
+    z.object({ type: z.literal('phone'), phone: NonEmpty }),
+    z.object({ type: z.literal('email'), email: NonEmpty }),
+    z.object({ type: z.literal('form'), formId: NonEmpty }),
+  ]),
   prefilledMessage: z.string().optional(),
-});
+}).strict();
 
 const StickyCtaConfigSchema = CallToActionSchema.extend({
   position: z.enum(['bottom-left', 'bottom-right']).optional(),
@@ -220,11 +240,21 @@ const LeadFormExtraFieldSchema = z.object({
   options: z.array(z.object({ label: NonEmpty, value: NonEmpty })).optional(),
 });
 
+const LeadContactFieldSchema = z.enum(['name', 'phone', 'email', 'whatsapp', 'telegram']);
+const ReachableLeadContactFieldSchema = z.enum(['phone', 'email', 'whatsapp', 'telegram']);
+const LeadFormRequiredFieldsSchema = z.union([
+  z.tuple([ReachableLeadContactFieldSchema]).rest(LeadContactFieldSchema),
+  z.tuple([z.literal('name'), ReachableLeadContactFieldSchema]).rest(LeadContactFieldSchema),
+]);
+
 const LeadFormSchemaZ = z.object({
+  id: NonEmpty,
   title: NonEmpty,
   subtitle: z.string().optional(),
   submitText: NonEmpty,
   successMessage: z.string().optional(),
+  requiredFields: LeadFormRequiredFieldsSchema,
+  optionalFields: z.array(LeadContactFieldSchema).optional(),
   consentText: z.string().optional(),
   includeMessage: z.boolean().optional(),
   extraFields: z.array(LeadFormExtraFieldSchema).max(2).optional(),
@@ -333,6 +363,15 @@ export const LandingPageTemplateSchema = z.object({
   blocks: z.array(OptionalBlockSchema).optional(),
   leadForm: LeadFormSchemaZ.optional(),
   stickyCta: StickyCtaConfigSchema.optional(),
+}).superRefine((template, ctx) => {
+  const destination = template.primaryConversion.destination;
+  if (destination.type === 'form' && template.leadForm?.id !== destination.formId) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['leadForm'],
+      message: 'Form conversion must reference the single page lead form.',
+    });
+  }
 });
 
 export const PresetTemplateSchema = z.object({

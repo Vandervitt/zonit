@@ -441,11 +441,18 @@ function AssuranceBlock({ data, primaryColor, id, highlight }: { data: Assurance
 }
 
 function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSchema; primaryColor: string; id?: string; highlight?: boolean }) {
-  const baseFields = [
-    { id: "name", label: "Full Name", type: "text", placeholder: "Jane Doe", required: true },
-    { id: "phone", label: "Phone", type: "tel", placeholder: "+1 555 000 1234", required: true },
-    { id: "email", label: "Email", type: "email", placeholder: "you@example.com", required: true },
-  ];
+  const baseFieldMeta = {
+    name: { label: "Full Name", type: "text", placeholder: "Jane Doe" },
+    phone: { label: "Phone", type: "tel", placeholder: "+1 555 000 1234" },
+    email: { label: "Email", type: "email", placeholder: "you@example.com" },
+    whatsapp: { label: "WhatsApp", type: "text", placeholder: "+1 555 000 1234" },
+    telegram: { label: "Telegram", type: "text", placeholder: "@username" },
+  } as const;
+  const requiredFields = data.requiredFields.map(field => ({ id: field, ...baseFieldMeta[field], required: true }));
+  const optionalFields = (data.optionalFields ?? [])
+    .filter(field => !data.requiredFields.includes(field))
+    .map(field => ({ id: field, ...baseFieldMeta[field], required: false }));
+  const baseFields = [...requiredFields, ...optionalFields];
 
   return (
     <section id={id} className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>

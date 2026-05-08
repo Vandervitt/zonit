@@ -62,10 +62,12 @@ export function getDefaultBlockData(type: string) {
       expiredFallback: { title: 'Offer Ended', subtitle: 'Stay tuned for the next campaign' },
     },
     LeadForm: {
+      id: 'lead-form',
       title: 'Get a Free Quote',
       subtitle: 'Tell us about your needs and we\'ll get back within 24 hours',
       submitText: 'Send Request',
       successMessage: 'Thanks! We\'ll be in touch shortly.',
+      requiredFields: ['name', 'email'],
       consentText: 'By submitting, you agree to our privacy policy.',
       eventName: 'FormSubmit',
       includeMessage: true,

@@ -26,8 +26,10 @@ void optionalLeadForm;
 
 const rootLeadFormTemplate: Partial<LandingPageTemplate> = {
   leadForm: {
+    id: 'lead-form',
     title: 'Get a Free Consultation',
     submitText: 'Send Inquiry',
+    requiredFields: ['name', 'email'],
     includeMessage: true,
   },
 };
@@ -36,8 +38,10 @@ void rootLeadFormTemplate;
 
 const leadFormWithWebhook: Partial<LandingPageTemplate> = {
   leadForm: {
+    id: 'lead-form',
     title: 'Old Webhook Shape',
     submitText: 'Send Inquiry',
+    requiredFields: ['email'],
     // @ts-expect-error MVP lead forms submit to the platform API, not arbitrary third-party webhooks.
     webhookUrl: 'https://hooks.example.com/lead',
   },
@@ -45,20 +49,44 @@ const leadFormWithWebhook: Partial<LandingPageTemplate> = {
 
 void leadFormWithWebhook;
 
+const leadFormWithoutContactField: Partial<LandingPageTemplate> = {
+  leadForm: {
+    id: 'lead-form',
+    title: 'Incomplete Lead Form',
+    submitText: 'Send Inquiry',
+    // @ts-expect-error lead forms must request at least one real contact field.
+    requiredFields: ['name'],
+  },
+};
+
+void leadFormWithoutContactField;
+
 const primaryConversionTemplate: Partial<LandingPageTemplate> = {
   primaryConversion: {
     channel: 'whatsapp',
     label: 'Chat on WhatsApp',
-    url: 'https://wa.me/1234567890',
+    destination: { type: 'url', url: 'https://wa.me/1234567890' },
     prefilledMessage: 'I would like a consultation.',
   },
 };
 
 void primaryConversionTemplate;
 
+const primaryConversionWithLegacyUrl: Partial<LandingPageTemplate> = {
+  primaryConversion: {
+    channel: 'whatsapp',
+    label: 'Chat on WhatsApp',
+    // @ts-expect-error primaryConversion uses an explicit destination so every conversion has a concrete lead path.
+    url: 'https://wa.me/1234567890',
+  },
+};
+
+void primaryConversionWithLegacyUrl;
+
 const primaryConversionWithoutLabel: Partial<LandingPageTemplate> = {
   primaryConversion: {
     channel: 'form',
+    destination: { type: 'form', formId: 'lead-form' },
     // @ts-expect-error primaryConversion keeps a user-facing label as the page conversion anchor.
     action: 'open_form',
   },
@@ -73,12 +101,19 @@ const minimalLandingPageTemplate: LandingPageTemplate = {
   primaryConversion: {
     channel: 'form',
     label: 'Contact Us',
+    destination: { type: 'form', formId: 'lead-form' },
   },
   hero: {
     title: 'Book a Free Consultation',
     subtitle: 'Talk with our team before making any decision.',
     background: { type: 'color', value: '#ffffff' },
     cta: { text: 'Contact Us', channel: 'form' },
+  },
+  leadForm: {
+    id: 'lead-form',
+    title: 'Get a Free Consultation',
+    submitText: 'Send Inquiry',
+    requiredFields: ['email'],
   },
   footer: {
     brandName: 'Zonit',

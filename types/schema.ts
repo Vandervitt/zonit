@@ -11,6 +11,23 @@ export type IconType =
 export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'booking' | 'contact_link';
 export type LinkTarget = '_self' | '_blank';
 
+export type LeadEventName =
+  | 'Lead'
+  | 'Contact'
+  | 'FormSubmit'
+  | 'WhatsAppClick'
+  | 'TelegramClick'
+  | 'LineClick'
+  | 'PhoneClick'
+  | 'EmailClick'
+  | 'ScheduleClick'
+  | 'QuoteRequest';
+
+export interface CtaTrackingConfig {
+  eventName?: LeadEventName; // 用于投放归因：记录哪个入口产生了咨询/留资动作
+  label?: string;            // 如 "hero_primary" / "sticky_whatsapp" / "faq_contact"
+}
+
 // 通用的行动呼吁按钮 (CTA) 模型 —— 核心转化组件
 export interface CallToAction {
   text: string;           // 按钮文案 (e.g., "Chat on WhatsApp")
@@ -19,13 +36,20 @@ export interface CallToAction {
   channel: CtaChannel;    // 引流渠道类型；所有 CTA 必须能归因到咨询/预约/留资入口
   target?: LinkTarget;    // 链接打开方式
   prefilledMessage?: string; // 私域沟通时预填消息，减少用户输入成本
+  tracking?: CtaTrackingConfig;
 }
+
+export type ConversionDestination =
+  | { type: 'url'; url: string }
+  | { type: 'phone'; phone: string }
+  | { type: 'email'; email: string }
+  | { type: 'form'; formId: string };
 
 // 页面级主转化目标：让全页 CTA 默认围绕同一个咨询/留资动作，避免多入口归因混乱
 export interface PrimaryConversion {
   channel: CtaChannel;
   label: string;               // 如 "Book a Free Consultation" / "Chat on WhatsApp"
-  url?: string;                // 咨询/预约/联系方式链接；禁止交易、结账、购物车、订单类链接
+  destination: ConversionDestination; // 主转化必须能落到真实入口：私域/电话/邮箱/预约链接/表单
   prefilledMessage?: string;   // 私域沟通预填消息
 }
 
@@ -240,7 +264,12 @@ export interface FAQSchema {
   contactCta?: CallToAction;    // 底部追加一个 "还有问题？联系客服" 的按钮
 }
 
-// Lead 表单（高客单服务类替代 WhatsApp 直跳）：基础字段固定为姓名 / 电话 / 邮箱，允许少量行业意向字段
+// Lead 表单（高客单服务类替代 WhatsApp 直跳）：明确收集哪些基础联系方式，允许少量行业意向字段
+export type LeadContactField = 'name' | 'phone' | 'email' | 'whatsapp' | 'telegram';
+export type ReachableLeadContactField = Exclude<LeadContactField, 'name'>;
+export type LeadFormRequiredFields =
+  | [ReachableLeadContactField, ...LeadContactField[]]
+  | ['name', ReachableLeadContactField, ...LeadContactField[]];
 export type LeadFormExtraFieldType = 'text' | 'select';
 
 export interface LeadFormExtraField {
@@ -254,14 +283,17 @@ export interface LeadFormExtraField {
 }
 
 export interface LeadFormSchema {
+  id: string;                   // primaryConversion.destination.formId 指向该表单；MVP 全页最多一个
   title: string;
   subtitle?: string;
   submitText: string;
   successMessage?: string;
+  requiredFields: LeadFormRequiredFields; // 至少包含一个真实可联系字段，不能只收姓名
+  optionalFields?: LeadContactField[];
   consentText?: string;         // GDPR 同意文本
   includeMessage?: boolean;     // 是否展示可选留言字段，默认由渲染器按 true 处理
   extraFields?: LeadFormExtraField[]; // 少量行业意向字段，如 treatment / target country / budget range
-  eventName?: PixelEventName;   // 提交埋点事件名，仅允许留资/咨询类事件
+  eventName?: LeadEventName;    // 提交埋点事件名，仅允许留资/咨询类事件
 }
 
 // 服务承诺 / 信任保障（免费咨询、响应时效、隐私保护等，不绑定退款/交易语义）
@@ -299,17 +331,7 @@ export type PixelEventTrigger =
   | 'form_submit'
   | 'time_on_page';
 
-export type PixelEventName =
-  | 'Lead'
-  | 'Contact'
-  | 'FormSubmit'
-  | 'WhatsAppClick'
-  | 'TelegramClick'
-  | 'LineClick'
-  | 'PhoneClick'
-  | 'EmailClick'
-  | 'ScheduleClick'
-  | 'QuoteRequest';
+export type PixelEventName = LeadEventName;
 
 export interface PixelEvent {
   trigger: PixelEventTrigger;
@@ -393,7 +415,7 @@ export interface LandingPageTemplate {
     primaryColor: string;    // 主色调
   };
   pageMeta?: PageMeta;
-  primaryConversion: PrimaryConversion; // 页面级主咨询/留资目标；模块 CTA 默认应围绕它展开
+  primaryConversion: PrimaryConversion; // 页面级主咨询/留资目标；必须指向真实私域/电话/邮箱/预约/表单入口
 
   // ==========================================
   // 🔴 核心模块：Hero / Footer 必须存在；Offer / HowItWorks 是推荐漏斗模块，但不强制
@@ -411,7 +433,7 @@ export interface LandingPageTemplate {
   // 可选动态模块内部顺序由数组位置决定；推荐漏斗顺序：Trust / Features → Social Proof → FAQ / Countdown
   blocks?: OptionalBlock[];
 
-  // 页面级线索表单：MVP 仅允许一个，避免多表单/多 webhook/多埋点造成归因和合规复杂度
+  // 页面级线索表单：MVP 仅允许一个；当 primaryConversion.destination.type 为 form 时必须存在同 id 表单
   leadForm?: LeadFormSchema;
 
   // 全站悬浮 CTA（移动端转化主力，常用于 WhatsApp/Telegram 直跳）
