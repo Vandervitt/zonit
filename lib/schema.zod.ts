@@ -42,7 +42,7 @@ const CallToActionSchema = z.union([
   leadAction('telegram', z.object({ type: z.literal('telegram'), url: LeadUrl }).strict()),
   leadAction('line', z.object({ type: z.literal('line'), url: LeadUrl }).strict()),
   leadAction('booking', z.object({ type: z.literal('booking'), url: LeadUrl }).strict()),
-  leadAction('contact_link', z.object({ type: z.literal('contact_link'), url: LeadUrl }).strict()),
+  leadAction('consultation_link', z.object({ type: z.literal('consultation_link'), url: LeadUrl }).strict()),
   leadAction('phone', z.object({ type: z.literal('phone'), phone: NonEmpty }).strict()),
   leadAction('email', z.object({ type: z.literal('email'), email: NonEmpty }).strict()),
   leadAction('form', z.object({ type: z.literal('form'), formId: NonEmpty }).strict()),
@@ -63,7 +63,7 @@ const PrimaryConversionSchema = z.union([
   primaryConversion('telegram', z.object({ type: z.literal('telegram'), url: LeadUrl }).strict()),
   primaryConversion('line', z.object({ type: z.literal('line'), url: LeadUrl }).strict()),
   primaryConversion('booking', z.object({ type: z.literal('booking'), url: LeadUrl }).strict()),
-  primaryConversion('contact_link', z.object({ type: z.literal('contact_link'), url: LeadUrl }).strict()),
+  primaryConversion('consultation_link', z.object({ type: z.literal('consultation_link'), url: LeadUrl }).strict()),
   primaryConversion('phone', z.object({ type: z.literal('phone'), phone: NonEmpty }).strict()),
   primaryConversion('email', z.object({ type: z.literal('email'), email: NonEmpty }).strict()),
   primaryConversion('form', z.object({ type: z.literal('form'), formId: NonEmpty }).strict()),
@@ -130,7 +130,7 @@ const OfferOptionSchema = z.object({
   cta: CallToActionSchema,
 }).strict();
 
-const OfferSchemaZ = z.object({
+const ConsultationOptionsSchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
   options: z.array(OfferOptionSchema).min(1),
@@ -247,7 +247,7 @@ const AuthoritySchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
   paragraphs: z.array(z.string()).min(1),
-  image: ImageMetaSchema,
+  image: ImageMetaSchema.optional(),
   stats: z.array(z.object({ label: NonEmpty, value: NonEmpty })).optional(),
   credentials: z.array(AuthorityCredentialSchema).optional(),
   signature: z.object({ name: NonEmpty, role: NonEmpty }).optional(),
@@ -383,23 +383,51 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('Assurance', AssuranceSchemaZ),
 ]);
 
-export const LandingPageSchema = z.object({
+const LandingPageSchemaBase = z.object({
   pageMeta: PageMetaSchema.optional(),
   primaryConversion: PrimaryConversionSchema,
   hero: HeroSchemaZ,
-  offer: OfferSchemaZ.optional(),
+  offer: ConsultationOptionsSchemaZ.optional(),
   howItWorks: HowItWorksSchemaZ.optional(),
   footer: MicroFooterSchemaZ,
   blocks: z.array(OptionalBlockSchema).optional(),
   leadForm: LeadFormSchemaZ.optional(),
   stickyCta: StickyCtaConfigSchema.optional(),
-}).superRefine((template, ctx) => {
-  const destination = template.primaryConversion.destination;
-  if (destination.type === 'form' && template.leadForm?.id !== destination.formId) {
+});
+
+type ParsedLeadAction = z.infer<typeof CallToActionSchema> | z.infer<typeof PrimaryConversionSchema>;
+
+function formIdForAction(action: ParsedLeadAction | undefined): string | undefined {
+  return action?.destination.type === 'form' ? action.destination.formId : undefined;
+}
+
+function collectFormActionIds(template: z.infer<typeof LandingPageSchemaBase>): string[] {
+  const formIds = [
+    formIdForAction(template.primaryConversion),
+    formIdForAction(template.hero.cta),
+    formIdForAction(template.hero.secondaryCta),
+    formIdForAction(template.stickyCta),
+    ...(template.offer?.options.map(option => formIdForAction(option.cta)) ?? []),
+  ];
+
+  for (const block of template.blocks ?? []) {
+    if (block.type === 'Countdown') formIds.push(formIdForAction(block.data.cta));
+    if (block.type === 'FAQ') formIds.push(formIdForAction(block.data.contactCta));
+    if (block.type === 'Assurance') formIds.push(formIdForAction(block.data.cta));
+  }
+
+  return formIds.filter((formId): formId is string => Boolean(formId));
+}
+
+export const LandingPageSchema = LandingPageSchemaBase.superRefine((template, ctx) => {
+  const formActionIds = collectFormActionIds(template);
+  const mismatchedFormId = formActionIds.find(formId => template.leadForm?.id !== formId);
+
+  if (mismatchedFormId) {
     ctx.addIssue({
       code: 'custom',
       path: ['leadForm'],
-      message: 'Form conversion must reference the single page lead form.',
+      message: 'Every form CTA must reference the single page lead form.',
     });
   }
 });

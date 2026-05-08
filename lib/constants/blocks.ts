@@ -1,11 +1,11 @@
-import type { BlockType, OptionalBlockType } from '@/types/schema';
+import type { BlockType } from '@/types/schema';
 
 export const BLOCK_TYPES: BlockType[] = [
   'Features', 'Reviews', 'TrustBanner', 'LogoWall', 'AuthorityStory', 'FAQ',
   'Countdown', 'Assurance',
 ];
 
-export const OPTIONAL_BLOCK_TYPES: OptionalBlockType[] = [
+export const OPTIONAL_BLOCK_TYPES: BlockType[] = [
   'Features', 'Reviews', 'TrustBanner', 'LogoWall', 'AuthorityStory', 'FAQ',
   'Countdown', 'Assurance',
 ];

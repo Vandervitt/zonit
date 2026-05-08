@@ -100,7 +100,7 @@ const CTA_CHANNEL_OPTIONS: CtaChannel[] = [
   "email",
   "form",
   "booking",
-  "contact_link",
+  "consultation_link",
 ];
 
 function destinationValue(destination: LeadDestination): string {
@@ -132,8 +132,8 @@ function destinationForChannel(channel: CtaChannel, value: string): LeadDestinat
       return { type: "line", url: value };
     case "booking":
       return { type: "booking", url: value };
-    case "contact_link":
-      return { type: "contact_link", url: value };
+    case "consultation_link":
+      return { type: "consultation_link", url: value };
   }
 }
 
@@ -648,14 +648,14 @@ export function AuthorityForm({ data, onChange }: { data: AuthoritySchema; onCha
       <SectionDivider label="配图" />
       <ImagePickerField
         label="图片"
-        value={data.image.src}
-        onChange={src => onChange({ ...data, image: { ...data.image, src } })}
+        value={data.image?.src ?? ""}
+        onChange={src => onChange({ ...data, image: { src, alt: data.image?.alt ?? "" } })}
       />
       <Field label="Alt 文本">
         <Input
           className={di}
-          value={data.image.alt}
-          onChange={e => onChange({ ...data, image: { ...data.image, alt: e.target.value } })}
+          value={data.image?.alt ?? ""}
+          onChange={e => onChange({ ...data, image: { src: data.image?.src ?? "", alt: e.target.value } })}
         />
       </Field>
       <SectionDivider label="数据统计" />

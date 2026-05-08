@@ -71,7 +71,7 @@ function findOgImage(template: LandingPageTemplate): string | undefined {
   }
 
   for (const block of allBlocks(template)) {
-    if (block.type === "AuthorityStory") return block.data.image.src;
+    if (block.type === "AuthorityStory" && block.data.image?.src) return block.data.image.src;
     if (block.type === "Reviews") {
       const image = block.data.items.find(item => item.proofImage)?.proofImage;
       if (image) return image;

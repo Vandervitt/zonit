@@ -33,7 +33,7 @@ import type {
   AssuranceSchema,
   LeadFormSchema,
   OptionalBlock,
-  OptionalBlockType,
+  BlockType,
 } from "@/types/schema";
 
 interface Props {
@@ -100,7 +100,7 @@ const TYPE_LABEL: Record<string, string> = {
 
 const DEFAULT_LEAD_FORM = getDefaultBlockData("LeadForm") as LeadFormSchema;
 
-function createOptionalBlock(type: OptionalBlockType): OptionalBlock {
+function createOptionalBlock(type: BlockType): OptionalBlock {
   const id = crypto.randomUUID();
 
   switch (type) {
@@ -159,9 +159,9 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     { key: FixedBlockKey.StickyCta, label: TYPE_LABEL.StickyCta, icon: TYPE_ICON.StickyCta, required: false, type: "StickyCta", badgeText: "全站", removable: false },
   ];
 
-  const existingOptionalTypes = blocks.map(b => b.type) as OptionalBlockType[];
+  const existingOptionalTypes = blocks.map(b => b.type) as BlockType[];
 
-  const handleAddBlock = (type: OptionalBlockType) => {
+  const handleAddBlock = (type: BlockType) => {
     const newBlock = createOptionalBlock(type);
     onChange({ ...data, blocks: [...blocks, newBlock] });
     setExpandedKey(newBlock.id);

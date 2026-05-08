@@ -1,4 +1,4 @@
-import type { CallToAction, LandingPage, LandingPageTemplate, OptionalBlockType } from './schema';
+import type { BlockType, CallToAction, LandingPage, LandingPageTemplate } from './schema';
 
 // @ts-expect-error offer entries are consultation paths, not pricing tiers.
 import type { OfferTier } from './schema';
@@ -63,9 +63,27 @@ const ctaWithMismatchedDestination: CallToAction = {
 void ctaWithMismatchedDestination;
 
 // @ts-expect-error LeadForm is a single page-level lead capture, not a movable optional block.
-const optionalLeadForm: OptionalBlockType = 'LeadForm';
+const optionalLeadForm: BlockType = 'LeadForm';
 
 void optionalLeadForm;
+
+const consultationLinkCta: CallToAction = {
+  text: 'Request Consultation',
+  channel: 'consultation_link',
+  destination: { type: 'consultation_link', url: 'https://example.com/contact' },
+};
+
+void consultationLinkCta;
+
+const legacyContactLinkCta: CallToAction = {
+  text: 'Contact Us',
+  // @ts-expect-error use consultation_link for lead-oriented contact pages, not the loose legacy contact_link channel.
+  channel: 'contact_link',
+  // @ts-expect-error use consultation_link for lead-oriented contact pages, not the loose legacy contact_link destination.
+  destination: { type: 'contact_link', url: 'https://example.com/contact' },
+};
+
+void legacyContactLinkCta;
 
 const landingPageWithoutTemplateMetadata: LandingPage = {
   primaryConversion: {

@@ -215,7 +215,7 @@ function FeaturesBlock({ data, primaryColor, id, highlight }: { data: FeaturesSc
 }
 
 function AuthorityBlock({ data, primaryColor, id, highlight }: { data: AuthoritySchema; primaryColor: string; id?: string; highlight?: boolean }) {
-  const imageEl = data.image.src ? (
+  const imageEl = data.image?.src ? (
     <img src={data.image.src} alt={data.image.alt} className="w-full h-28 object-cover rounded-xl" />
   ) : null;
 

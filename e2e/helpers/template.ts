@@ -8,15 +8,15 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
     templateName: 'E2E Fixture',
     themeConfig: { mode: 'light', primaryColor: '#2563eb' },
     primaryConversion: {
-      channel: 'contact_link',
+      channel: 'consultation_link',
       label: 'Contact Us',
-      destination: { type: 'contact_link', url: 'https://example.com/contact' },
+      destination: { type: 'consultation_link', url: 'https://example.com/contact' },
     },
     hero: {
       title: 'E2E Hero',
       subtitle: 'Sub',
       background: { type: 'color', value: '#f8fafc' },
-      cta: { text: 'Contact Us', channel: 'contact_link', destination: { type: 'contact_link', url: 'https://example.com/contact' } },
+      cta: { text: 'Contact Us', channel: 'consultation_link', destination: { type: 'consultation_link', url: 'https://example.com/contact' } },
     },
     offer: {
       title: 'Consultation Options',
@@ -25,7 +25,7 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
         {
           id: 'tier-basic', name: 'Basic Consultation', badge: 'Free Quote', description: 'Entry consultation',
           valueProps: ['Feature A'],
-          cta: { text: 'Request Info', channel: 'contact_link', destination: { type: 'contact_link', url: 'https://example.com/basic' } },
+          cta: { text: 'Request Info', channel: 'consultation_link', destination: { type: 'consultation_link', url: 'https://example.com/basic' } },
         },
         {
           id: 'tier-pro', name: 'Priority Consultation', badge: 'Recommended', description: 'Recommended consultation',

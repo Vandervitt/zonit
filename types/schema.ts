@@ -8,7 +8,7 @@ export type IconType =
   | 'MessageCircle' | 'Calendar' | 'Clock' | 'Award'
   | (string & {});
 
-export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'booking' | 'contact_link';
+export type CtaChannel = 'whatsapp' | 'telegram' | 'line' | 'phone' | 'email' | 'form' | 'booking' | 'consultation_link';
 export type LinkTarget = '_self' | '_blank';
 
 export type LeadEventName =
@@ -33,13 +33,50 @@ export type UrlLeadDestination =
   | { type: 'telegram'; url: string }
   | { type: 'line'; url: string }
   | { type: 'booking'; url: string }
-  | { type: 'contact_link'; url: string };
+  | { type: 'consultation_link'; url: string }; // 咨询/联系页面入口，不用于购买、结账、购物车、订单或订阅
 
 export type LeadDestination =
   | UrlLeadDestination
   | { type: 'phone'; phone: string }
   | { type: 'email'; email: string }
   | { type: 'form'; formId: string };
+
+type LeadActionCore =
+  | {
+      channel: 'whatsapp';
+      destination: Extract<LeadDestination, { type: 'whatsapp' }>;
+      prefilledMessage?: string; // 私域沟通时预填消息，减少用户输入成本
+    }
+  | {
+      channel: 'telegram';
+      destination: Extract<LeadDestination, { type: 'telegram' }>;
+      prefilledMessage?: string;
+    }
+  | {
+      channel: 'line';
+      destination: Extract<LeadDestination, { type: 'line' }>;
+      prefilledMessage?: string;
+    }
+  | {
+      channel: 'booking';
+      destination: Extract<LeadDestination, { type: 'booking' }>;
+    }
+  | {
+      channel: 'consultation_link';
+      destination: Extract<LeadDestination, { type: 'consultation_link' }>;
+    }
+  | {
+      channel: 'phone';
+      destination: Extract<LeadDestination, { type: 'phone' }>;
+    }
+  | {
+      channel: 'email';
+      destination: Extract<LeadDestination, { type: 'email' }>;
+    }
+  | {
+      channel: 'form';
+      destination: Extract<LeadDestination, { type: 'form' }>;
+    };
 
 // 通用的行动呼吁按钮 (CTA) 模型 —— 核心转化组件
 type CallToActionBase = {
@@ -49,90 +86,12 @@ type CallToActionBase = {
   tracking?: CtaTrackingConfig;
 };
 
-export type CallToAction =
-  | (CallToActionBase & {
-      channel: 'whatsapp';
-      destination: Extract<LeadDestination, { type: 'whatsapp' }>;
-      prefilledMessage?: string; // 私域沟通时预填消息，减少用户输入成本
-    })
-  | (CallToActionBase & {
-      channel: 'telegram';
-      destination: Extract<LeadDestination, { type: 'telegram' }>;
-      prefilledMessage?: string;
-    })
-  | (CallToActionBase & {
-      channel: 'line';
-      destination: Extract<LeadDestination, { type: 'line' }>;
-      prefilledMessage?: string;
-    })
-  | (CallToActionBase & {
-      channel: 'booking';
-      destination: Extract<LeadDestination, { type: 'booking' }>;
-    })
-  | (CallToActionBase & {
-      channel: 'contact_link';
-      destination: Extract<LeadDestination, { type: 'contact_link' }>;
-    })
-  | (CallToActionBase & {
-      channel: 'phone';
-      destination: Extract<LeadDestination, { type: 'phone' }>;
-    })
-  | (CallToActionBase & {
-      channel: 'email';
-      destination: Extract<LeadDestination, { type: 'email' }>;
-    })
-  | (CallToActionBase & {
-      channel: 'form';
-      destination: Extract<LeadDestination, { type: 'form' }>;
-    });
-
-export type ConversionDestination = LeadDestination;
+export type CallToAction = CallToActionBase & LeadActionCore;
 
 // 页面级主转化目标：让全页 CTA 默认围绕同一个咨询/留资动作，避免多入口归因混乱
-export type PrimaryConversion =
-  | {
-      channel: 'whatsapp';
-      label: string;               // 如 "Chat on WhatsApp"
-      destination: Extract<LeadDestination, { type: 'whatsapp' }>;
-      prefilledMessage?: string;   // 私域沟通预填消息
-    }
-  | {
-      channel: 'telegram';
-      label: string;
-      destination: Extract<LeadDestination, { type: 'telegram' }>;
-      prefilledMessage?: string;
-    }
-  | {
-      channel: 'line';
-      label: string;
-      destination: Extract<LeadDestination, { type: 'line' }>;
-      prefilledMessage?: string;
-    }
-  | {
-      channel: 'booking';
-      label: string;               // 如 "Book a Free Consultation" / "Chat on WhatsApp"
-      destination: Extract<LeadDestination, { type: 'booking' }>;
-    }
-  | {
-      channel: 'contact_link';
-      label: string;
-      destination: Extract<LeadDestination, { type: 'contact_link' }>;
-    }
-  | {
-      channel: 'phone';
-      label: string;
-      destination: Extract<LeadDestination, { type: 'phone' }>;
-    }
-  | {
-      channel: 'email';
-      label: string;
-      destination: Extract<LeadDestination, { type: 'email' }>;
-    }
-  | {
-      channel: 'form';
-      label: string;
-      destination: Extract<LeadDestination, { type: 'form' }>;
-    };
+export type PrimaryConversion = LeadActionCore & {
+  label: string;               // 如 "Chat on WhatsApp" / "Book a Free Consultation"
+};
 
 // 移动端悬浮 CTA：海外引流页常用 WhatsApp / Telegram / 电话入口
 export type StickyCtaConfig = CallToAction & {
@@ -201,12 +160,15 @@ export interface OfferOption {
   cta: CallToAction;            // 该咨询入口对应的咨询/留资按钮
 }
 
-export interface OfferSchema {
+export interface ConsultationOptionsSchema {
   title: string;
   subtitle?: string;
   options: OfferOption[];       // 通常 1 到 3 个咨询/服务入口，避免做成价格表
   showImages?: boolean;         // 统一控制卡片是否展示图片，避免部分卡片有图导致视觉不齐
 }
+
+// 兼容既有编辑器和模板命名；产品语义以 ConsultationOptionsSchema 为准
+export type OfferSchema = ConsultationOptionsSchema;
 
 // 引导用户如何通过 WhatsApp/TG 联系，打消疑虑
 export interface StepItem {
@@ -319,7 +281,7 @@ export interface AuthoritySchema {
   title: string;
   subtitle?: string;
   paragraphs: string[];         // 品牌/专家故事描述，建议 1-3 段
-  image: ImageMeta;             // 创始人/医生照片 或 诊所环境图
+  image?: ImageMeta;            // 创始人/医生照片、诊所环境图或证书图；MVP 允许无真实图片
   stats?: {                     // 履历数字展示
     label: string;              // 如 "Years Exp"
     value: string;              // 如 "15+"
@@ -464,10 +426,7 @@ export type PageBlock =
   | BlockBase<'Countdown', CountdownSchema>
   | BlockBase<'Assurance', AssuranceSchema>;
 
-export type OptionalBlockType = BlockType;
-
-// 用 Extract 派生，避免与 PageBlock 手抄造成漂移
-export type OptionalBlock = Extract<PageBlock, { type: OptionalBlockType }>;
+export type OptionalBlock = PageBlock;
 
 // 强约束的落地页产品模型：只表达引流页漏斗、信任、合规与线索路径
 export interface LandingPage {
@@ -476,7 +435,7 @@ export interface LandingPage {
 
   // 核心漏斗：Hero / Footer 必须存在；Offer / HowItWorks 是推荐漏斗模块，但不强制
   hero: HeroSchema;               // 必须有首屏 (漏斗顶部)
-  offer?: OfferSchema;            // 推荐展示核心咨询/服务入口 (漏斗核心)
+  offer?: ConsultationOptionsSchema; // 推荐展示核心咨询/服务入口 (漏斗核心)，不是价格、套餐或促销表
   howItWorks?: HowItWorksSchema;  // 推荐展示联系流程说明 (打消疑虑)
   footer: MicroFooterSchema;      // 必须有合规页脚 (防封号底线)
 

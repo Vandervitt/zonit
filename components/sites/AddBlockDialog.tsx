@@ -9,10 +9,10 @@ import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
 import { useState } from "react";
 import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, BadgeCheck } from "lucide-react";
-import type { OptionalBlockType } from "@/types/schema";
+import type { BlockType } from "@/types/schema";
 
 interface BlockOption {
-  type: OptionalBlockType;
+  type: BlockType;
   label: string;
   description: string;
   icon: React.ReactNode;
@@ -66,8 +66,8 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  existingTypes: OptionalBlockType[];
-  onAdd: (type: OptionalBlockType) => void;
+  existingTypes: BlockType[];
+  onAdd: (type: BlockType) => void;
 }
 
 export function AddBlockDialog({ open, onOpenChange, existingTypes, onAdd }: Props) {
