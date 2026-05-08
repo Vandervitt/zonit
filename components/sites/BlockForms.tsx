@@ -519,6 +519,9 @@ function ReviewEditor({ item, onChange, onRemove }: { item: ReviewItem; onChange
         value={item.proofImage ?? ""}
         onChange={url => onChange({ ...item, proofImage: url || undefined })}
       />
+      <Field label="视频见证链接">
+        <Input className={di} value={item.proofVideo ?? ""} onChange={e => onChange({ ...item, proofVideo: e.target.value || undefined })} placeholder="https://example.com/testimonial.mp4" />
+      </Field>
     </div>
   );
 }
@@ -837,7 +840,6 @@ export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChang
         </Field>
       </div>
       <Field label="提交后提示语"><Input className={di} value={data.successMessage ?? ""} onChange={e => onChange({ ...data, successMessage: e.target.value })} placeholder="Thanks! We'll be in touch shortly." /></Field>
-      <Field label="Webhook URL（可选）"><Input className={di} value={data.webhookUrl ?? ""} onChange={e => onChange({ ...data, webhookUrl: e.target.value || undefined })} placeholder="https://hooks.zapier.com/..." /></Field>
       <Field label="GDPR 同意文本">
         <Textarea className={`${dt} min-h-[50px]`} value={data.consentText ?? ""} onChange={e => onChange({ ...data, consentText: e.target.value })} placeholder="By submitting, you agree to our privacy policy." />
       </Field>

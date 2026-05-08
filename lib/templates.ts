@@ -68,9 +68,8 @@ export function getDefaultBlockData(type: string) {
       subtitle: 'Tell us about your needs and we\'ll get back within 24 hours',
       submitText: 'Send Request',
       successMessage: 'Thanks! We\'ll be in touch shortly.',
-      webhookUrl: 'https://hooks.example.com/lead',
       consentText: 'By submitting, you agree to our privacy policy.',
-      eventName: 'lead_form_submit',
+      eventName: 'FormSubmit',
       fields: [
         { id: crypto.randomUUID(), name: 'name', label: 'Full Name', type: 'text', required: true, placeholder: 'Jane Doe' },
         { id: crypto.randomUUID(), name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'you@example.com' },

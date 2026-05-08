@@ -169,6 +169,7 @@ export interface ReviewItem {
   rating: number;               // 1-5 星
   content: string;              // 评价文字
   proofImage?: string;          // 证据截图（如聊天记录截图）
+  proofVideo?: string;          // 视频见证链接（如 TikTok/Meta 投放页常用的客户反馈视频）
   sourcePlatform?: string;      // 如 "Trustpilot", "WhatsApp", "Telegram"
   country?: string;             // 评价用户国家/地区
 }
@@ -223,7 +224,7 @@ export interface AuthorityCredential {
 export interface AuthoritySchema {
   title: string;
   subtitle?: string;
-  paragraphs: string[];         // 多段落的故事描述
+  paragraphs: string[];         // 品牌/专家故事描述，建议 1-3 段
   image: ImageMeta;             // 创始人/医生照片 或 诊所环境图
   stats?: {                     // 履历数字展示
     label: string;              // 如 "Years Exp"
@@ -270,7 +271,6 @@ export interface LeadFormSchema {
   fields: LeadFormField[];
   submitText: string;
   successMessage?: string;
-  webhookUrl?: string;          // 外部线索接收 URL（高级配置），未填则提交到平台默认 API
   consentText?: string;         // GDPR 同意文本
   eventName?: PixelEventName;   // 提交埋点事件名，仅允许留资/咨询类事件
 }
@@ -301,13 +301,6 @@ export interface SeoMeta {
   ogImage?: string;
   robots?: 'index,follow' | 'noindex,nofollow';
   generatedAt?: string;
-  jsonLd?: {
-    organization?: boolean;     // 默认 true
-    faqPage?: boolean;          // 默认 true
-    localBusiness?: boolean;    // 本地服务类落地页，如诊所、律所、中介
-    service?: boolean;          // 服务/咨询类结构化信息，不生成 Product / Offer / price
-    contactPoint?: boolean;     // 联系方式结构化信息
-  };
 }
 
 export type PixelEventTrigger =
@@ -332,9 +325,6 @@ export type PixelEventName =
 export interface PixelEvent {
   trigger: PixelEventTrigger;
   name: PixelEventName;                          // 仅允许咨询、联系、预约、留资类事件
-  blockType?: BlockType;                         // block_in_view / cta_click 时定位的目标 block
-  delaySeconds?: number;                         // time_on_page 用
-  params?: Record<string, string | number>;
 }
 
 export interface AnalyticsPixel {
@@ -428,14 +418,8 @@ export interface LandingPageTemplate {
   // 🟢 可选动态区：允许用户在规定区域内增删改排
   // ==========================================
 
-  // 位于 Hero 和 Offer 之间的区域（适合放：信任条、卖点、权威背书、媒体 logo 墙）
-  upperBlocks?: OptionalBlock[];
-
-  // 位于 Offer 和 HowItWorks 之间的区域（适合放：用户评价、服务承诺）
-  afterOffer?: OptionalBlock[];
-
-  // 位于 HowItWorks 和 Footer 之间的区域（适合放：FAQ、底部 CTA 倒计时）
-  lowerBlocks?: OptionalBlock[];
+  // 可选动态模块，顺序由数组位置决定；推荐漏斗顺序：Trust / Features → Social Proof → FAQ / Countdown
+  blocks?: OptionalBlock[];
 
   // 页面级线索表单：MVP 仅允许一个，避免多表单/多 webhook/多埋点造成归因和合规复杂度
   leadForm?: LeadFormSchema;

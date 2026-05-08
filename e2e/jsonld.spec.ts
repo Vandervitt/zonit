@@ -14,8 +14,7 @@ async function readJsonLd(page: Page): Promise<Record<string, unknown>[]> {
 test.describe('JSON-LD 自动派生', () => {
   test.beforeAll(async () => {
     const tpl = makeBaseTemplate({
-      lowerBlocks: [faqBlock()],
-      afterOffer: [reviewsBlock()],
+      blocks: [reviewsBlock(), faqBlock()],
     });
     await seedPublishedSite(SLUG, tpl);
   });
@@ -33,13 +32,14 @@ test.describe('JSON-LD 自动派生', () => {
     expect(types).toContain('Organization');
     expect(types).toContain('FAQPage');
 
-    const org = nodes.find(n => n['@type'] === 'Organization') as Record<string, any>;
+    const org = nodes.find(n => n['@type'] === 'Organization') as Record<string, unknown>;
     expect(org.name).toBe('E2E Brand');
     expect(org.email).toBe('hello@e2e.test');
 
-    const faq = nodes.find(n => n['@type'] === 'FAQPage') as Record<string, any>;
-    expect(faq.mainEntity).toHaveLength(2);
-    expect(faq.mainEntity[0].name).toContain('worldwide');
+    const faq = nodes.find(n => n['@type'] === 'FAQPage') as Record<string, unknown>;
+    const faqItems = faq.mainEntity as Array<Record<string, unknown>>;
+    expect(faqItems).toHaveLength(2);
+    expect(faqItems[0].name).toContain('worldwide');
   });
 
   test('JSON-LD 内的 < 已被转义，避免 </script> 注入', async ({ page }) => {

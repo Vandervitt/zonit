@@ -410,6 +410,9 @@ function ReviewsBlock({ data, id, highlight }: { data: ReviewsSchema; id?: strin
         </div>
       </div>
       <p className="text-xs text-slate-600 leading-relaxed">{item.content}</p>
+      {item.proofVideo && (
+        <video className="mt-3 aspect-video w-full rounded-lg bg-slate-200 object-cover" src={item.proofVideo} controls />
+      )}
     </div>
   );
 
@@ -445,7 +448,7 @@ function FAQBlock({ data, primaryColor, id, highlight }: { data: FAQSchema; prim
       <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
       {data.subtitle && <p className="text-xs text-center text-slate-500 mb-6">{data.subtitle}</p>}
       <div className="space-y-3">
-        {data.items.map((item, i) => (
+        {data.items.map(item => (
           <div key={item.id} className="bg-white rounded-xl p-4">
             <p className="text-sm text-slate-800 mb-1.5">{item.question}</p>
             <p className="text-xs text-slate-500 leading-relaxed">{item.answer}</p>
@@ -657,15 +660,13 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
   return (
     <div className="relative min-h-screen bg-white font-sans">
       <HeroBlock data={template.hero} primaryColor={pc} highlight={highlightKey === "hero"} />
-      {template.upperBlocks?.map(renderOptional)}
       {template.offer && (
         <OfferBlock data={template.offer} primaryColor={pc} highlight={highlightKey === "offer"} />
       )}
-      {template.afterOffer?.map(renderOptional)}
+      {template.blocks?.map(renderOptional)}
       {template.howItWorks && (
         <HowItWorksBlock data={template.howItWorks} primaryColor={pc} highlight={highlightKey === "howItWorks"} />
       )}
-      {template.lowerBlocks?.map(renderOptional)}
       {template.leadForm && (
         <LeadFormBlock
           id="leadForm"

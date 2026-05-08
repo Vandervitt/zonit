@@ -17,7 +17,7 @@ import {
 import { AddBlockDialog } from "./AddBlockDialog";
 import { AiRewriteButton } from "../editor/AiRewriteButton";
 import { getDefaultBlockData } from "../../lib/templates";
-import { BlockZone, FixedBlockKey } from "../../lib/constants";
+import { FixedBlockKey } from "../../lib/constants";
 import type {
   LandingPageTemplate,
   HeroSchema,
@@ -145,52 +145,32 @@ function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["
 export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyChange }: Props) {
   const [addOpen, setAddOpen] = useState(false);
   const setExpandedKey = onExpandedKeyChange;
-  const upperBlocks = data.upperBlocks ?? [];
-  const afterOfferBlocks = data.afterOffer ?? [];
-  const lowerBlocks = data.lowerBlocks ?? [];
+  const blocks = data.blocks ?? [];
 
   const blockList: BlockMeta[] = [
     { key: FixedBlockKey.Hero, label: TYPE_LABEL.Hero, icon: TYPE_ICON.Hero, required: true, type: "Hero" },
-    ...upperBlocks.map(b => ({
-      key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
-    })),
     { key: FixedBlockKey.Offer, label: TYPE_LABEL.Offer, icon: TYPE_ICON.Offer, required: true, type: "Offer" },
-    ...afterOfferBlocks.map(b => ({
+    ...blocks.map(b => ({
       key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
     })),
     { key: FixedBlockKey.HowItWorks, label: TYPE_LABEL.HowItWorks, icon: TYPE_ICON.HowItWorks, required: true, type: "HowItWorks" },
-    ...lowerBlocks.map(b => ({
-      key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
-    })),
     { key: FixedBlockKey.LeadForm, label: TYPE_LABEL.LeadForm, icon: TYPE_ICON.LeadForm, required: false, type: "LeadForm", badgeText: "单例", removable: false },
     { key: FixedBlockKey.Footer, label: TYPE_LABEL.MicroFooter, icon: TYPE_ICON.MicroFooter, required: true, type: "MicroFooter" },
     { key: FixedBlockKey.StickyCta, label: TYPE_LABEL.StickyCta, icon: TYPE_ICON.StickyCta, required: false, type: "StickyCta", badgeText: "全站", removable: false },
   ];
 
-  const existingOptionalTypes = [
-    ...upperBlocks.map(b => b.type),
-    ...afterOfferBlocks.map(b => b.type),
-    ...lowerBlocks.map(b => b.type),
-  ] as OptionalBlockType[];
+  const existingOptionalTypes = blocks.map(b => b.type) as OptionalBlockType[];
 
-  const handleAddBlock = (type: OptionalBlockType, zone: BlockZone.Upper | BlockZone.Middle | BlockZone.Lower) => {
+  const handleAddBlock = (type: OptionalBlockType) => {
     const newBlock = createOptionalBlock(type);
-    if (zone === BlockZone.Upper) {
-      onChange({ ...data, upperBlocks: [...upperBlocks, newBlock] });
-    } else if (zone === BlockZone.Middle) {
-      onChange({ ...data, afterOffer: [...afterOfferBlocks, newBlock] });
-    } else {
-      onChange({ ...data, lowerBlocks: [...lowerBlocks, newBlock] });
-    }
+    onChange({ ...data, blocks: [...blocks, newBlock] });
     setExpandedKey(newBlock.id);
   };
 
   const removeOptionalBlock = (blockId: string) => {
     onChange({
       ...data,
-      upperBlocks: upperBlocks.filter(b => b.id !== blockId),
-      afterOffer: afterOfferBlocks.filter(b => b.id !== blockId),
-      lowerBlocks: lowerBlocks.filter(b => b.id !== blockId),
+      blocks: blocks.filter(b => b.id !== blockId),
     });
     if (expandedKey === blockId) setExpandedKey(FixedBlockKey.Hero);
   };
@@ -268,12 +248,10 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     const updateOptional = (blockId: string, newData: OptionalBlock["data"]) => {
       onChange({
         ...data,
-        upperBlocks: upperBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
-        afterOffer: afterOfferBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
-        lowerBlocks: lowerBlocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
+        blocks: blocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
       });
     };
-    const block = [...upperBlocks, ...afterOfferBlocks, ...lowerBlocks].find(b => b.id === meta.key);
+    const block = blocks.find(b => b.id === meta.key);
     if (!block) return null;
     switch (block.type) {
       case "Features":

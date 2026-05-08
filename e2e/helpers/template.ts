@@ -40,8 +40,7 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
       contactEmail: 'hello@e2e.test',
       links: [{ text: 'Privacy', url: '/privacy' }],
     },
-    upperBlocks: [],
-    lowerBlocks: [],
+    blocks: [],
     ...overrides,
   };
 }
@@ -83,6 +82,5 @@ export function leadFormFixture(): LeadFormSchema {
       { id: 'f2', name: 'email', label: 'Email', type: 'email', required: true },
     ],
     submitText: 'Send Request',
-    webhookUrl: 'https://hooks.example.com/lead',
   };
 }

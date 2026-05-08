@@ -1,140 +1,138 @@
 {
-    "templateId": "tpl_cod_product",
-    "templateName": "COD E-commerce Product",
-    "themeConfig": {
-        "mode": "light",
-        "primaryColor": "#EF4444"
+  "templateId": "tpl_cod_product",
+  "templateName": "COD E-commerce Product",
+  "themeConfig": {
+    "mode": "light",
+    "primaryColor": "#EF4444"
+  },
+  "hero": {
+    "badge": "🔥 50% OFF TODAY ONLY",
+    "title": "Upgrade your life \nwithout breaking the bank.",
+    "subtitle": "Join 10,000+ happy customers. Pay ONLY when you receive the product.",
+    "background": {
+      "type": "image",
+      "value": "product-hero-bg.jpg",
+      "overlayOpacity": 0.4
     },
-    "hero": {
-        "badge": "🔥 50% OFF TODAY ONLY",
-        "title": "Upgrade your life \nwithout breaking the bank.",
-        "subtitle": "Join 10,000+ happy customers. Pay ONLY when you receive the product.",
-        "background": {
-            "type": "image",
-            "value": "product-hero-bg.jpg",
-            "overlayOpacity": 0.4
-        },
+    "cta": {
+      "text": "Claim Offer on WhatsApp",
+      "url": "https://wa.me/...",
+      "icon": "WhatsApp",
+      "theme": "whatsapp"
+    },
+    "trustText": "No Credit Card Required • Cash on Delivery"
+  },
+  "offer": {
+    "title": "Choose Your Pack",
+    "tiers": [
+      {
+        "id": "tier-1",
+        "name": "Single Pack",
+        "labelText": "Chat to Order",
+        "description": "Perfect for trying it out.",
+        "valueProps": [
+          "1x Item",
+          "Standard Delivery",
+          "Cash on Delivery"
+        ],
         "cta": {
-            "text": "Claim Offer on WhatsApp",
-            "url": "https://wa.me/...",
-            "icon": "WhatsApp",
-            "theme": "whatsapp"
-        },
-        "trustText": "No Credit Card Required • Cash on Delivery"
-    },
-    "upperBlocks": [
-        {
-            "id": "ub-1",
-            "type": "TrustBanner",
-            "data": {
-                "theme": "light",
-                "badges": [
-                    {
-                        "id": "b1",
-                        "icon": "Truck",
-                        "text": "Free Local Delivery"
-                    },
-                    {
-                        "id": "b2",
-                        "icon": "ShieldCheck",
-                        "text": "Pay Cash on Delivery"
-                    }
-                ]
-            }
+          "text": "Get Details on WhatsApp",
+          "url": "https://wa.me/..."
         }
-    ],
-    "offer": {
-        "title": "Choose Your Pack",
-        "tiers": [
-            {
-                "id": "tier-1",
-                "name": "Single Pack",
-                "labelText": "Chat to Order",
-                "description": "Perfect for trying it out.",
-                "valueProps": [
-                    "1x Item",
-                    "Standard Delivery",
-                    "Cash on Delivery"
-                ],
-                "cta": {
-                    "text": "Get Details on WhatsApp",
-                    "url": "https://wa.me/..."
-                }
-            },
-            {
-                "id": "tier-2",
-                "name": "Family Bundle",
-                "labelText": "Best Value",
-                "description": "Great for sharing with family.",
-                "valueProps": [
-                    "3x Items",
-                    "Free Express Delivery",
-                    "Priority Support",
-                    "Cash on Delivery"
-                ],
-                "tag": "Recommended",
-                "cta": {
-                    "text": "Claim Bundle on WhatsApp",
-                    "url": "https://wa.me/...",
-                    "theme": "primary"
-                }
-            }
-        ]
-    },
-    "howItWorks": {
-        "title": "How to Order?",
-        "steps": [
-            {
-                "id": "s1",
-                "icon": "MessageCircle",
-                "title": "Chat with Us",
-                "description": "Click the button to open WhatsApp."
-            },
-            {
-                "id": "s2",
-                "icon": "MapPin",
-                "title": "Send Details",
-                "description": "Send us your delivery address and name."
-            },
-            {
-                "id": "s3",
-                "icon": "Truck",
-                "title": "Pay on Delivery",
-                "description": "Receive the item in 2-3 days and pay cash to the driver."
-            }
-        ]
-    },
-    "lowerBlocks": [
-        {
-            "id": "lb-1",
-            "type": "Reviews",
-            "data": {
-                "title": "Real Customer Photos",
-                "items": [
-                    {
-                        "id": "r1",
-                        "authorName": "Sarah M.",
-                        "rating": 5,
-                        "content": "Got it exactly as described. The delivery guy was very polite!",
-                        "proofImage": "buyer-photo-1.jpg"
-                    }
-                ]
-            }
+      },
+      {
+        "id": "tier-2",
+        "name": "Family Bundle",
+        "labelText": "Best Value",
+        "description": "Great for sharing with family.",
+        "valueProps": [
+          "3x Items",
+          "Free Express Delivery",
+          "Priority Support",
+          "Cash on Delivery"
+        ],
+        "tag": "Recommended",
+        "cta": {
+          "text": "Claim Bundle on WhatsApp",
+          "url": "https://wa.me/...",
+          "theme": "primary"
         }
-    ],
-    "footer": {
-        "brandName": "TrendMart COD",
-        "copyrightYear": "2024",
-        "contactEmail": "support@trendmart.com",
-        "links": [
-            {
-                "text": "Privacy Policy",
-                "content": "We collect the contact details you submit only to respond to your inquiry, arrange consultation, confirm delivery details, and provide customer support. We do not sell your personal information. You can contact support@trendmart.com to request access, correction, or deletion of your submitted information."
-            },
-            {
-                "text": "Terms of Service",
-                "content": "By submitting an inquiry, you agree that TrendMart COD may contact you about your request through the contact details you provide. Information on this page is for product consultation and lead generation only. Final availability, delivery timing, and service details will be confirmed by our support team."
-            }
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "How to Order?",
+    "steps": [
+      {
+        "id": "s1",
+        "icon": "MessageCircle",
+        "title": "Chat with Us",
+        "description": "Click the button to open WhatsApp."
+      },
+      {
+        "id": "s2",
+        "icon": "MapPin",
+        "title": "Send Details",
+        "description": "Send us your delivery address and name."
+      },
+      {
+        "id": "s3",
+        "icon": "Truck",
+        "title": "Pay on Delivery",
+        "description": "Receive the item in 2-3 days and pay cash to the driver."
+      }
+    ]
+  },
+  "footer": {
+    "brandName": "TrendMart COD",
+    "copyrightYear": "2024",
+    "contactEmail": "support@trendmart.com",
+    "links": [
+      {
+        "text": "Privacy Policy",
+        "content": "We collect the contact details you submit only to respond to your inquiry, arrange consultation, confirm delivery details, and provide customer support. We do not sell your personal information. You can contact support@trendmart.com to request access, correction, or deletion of your submitted information."
+      },
+      {
+        "text": "Terms of Service",
+        "content": "By submitting an inquiry, you agree that TrendMart COD may contact you about your request through the contact details you provide. Information on this page is for product consultation and lead generation only. Final availability, delivery timing, and service details will be confirmed by our support team."
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "id": "ub-1",
+      "type": "TrustBanner",
+      "data": {
+        "theme": "light",
+        "badges": [
+          {
+            "id": "b1",
+            "icon": "Truck",
+            "text": "Free Local Delivery"
+          },
+          {
+            "id": "b2",
+            "icon": "ShieldCheck",
+            "text": "Pay Cash on Delivery"
+          }
         ]
+      }
+    },
+    {
+      "id": "lb-1",
+      "type": "Reviews",
+      "data": {
+        "title": "Real Customer Photos",
+        "items": [
+          {
+            "id": "r1",
+            "authorName": "Sarah M.",
+            "rating": 5,
+            "content": "Got it exactly as described. The delivery guy was very polite!",
+            "proofImage": "buyer-photo-1.jpg"
+          }
+        ]
+      }
     }
+  ]
 }

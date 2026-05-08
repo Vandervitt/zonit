@@ -1,6 +1,4 @@
 import { z } from 'zod';
-import { BLOCK_TYPES } from './constants/blocks';
-import type { BlockType } from '@/types/schema';
 
 const NonEmpty = z.string().min(1);
 
@@ -150,6 +148,7 @@ const ReviewItemSchema = z.object({
   rating: z.number().min(1).max(5),
   content: NonEmpty,
   proofImage: z.string().optional(),
+  proofVideo: z.string().optional(),
   sourcePlatform: z.string().optional(),
   country: z.string().optional(),
 });
@@ -238,7 +237,6 @@ const LeadFormSchemaZ = z.object({
   fields: z.array(LeadFormFieldSchema).min(1),
   submitText: NonEmpty,
   successMessage: z.string().optional(),
-  webhookUrl: z.url().optional(),
   consentText: z.string().optional(),
   eventName: z.enum([
     'Lead',
@@ -280,13 +278,6 @@ const SeoMetaSchema = z.object({
   ogImage: z.string().optional(),
   robots: z.enum(['index,follow', 'noindex,nofollow']).optional(),
   generatedAt: z.string().optional(),
-  jsonLd: z.object({
-    organization: z.boolean().optional(),
-    faqPage: z.boolean().optional(),
-    localBusiness: z.boolean().optional(),
-    service: z.boolean().optional(),
-    contactPoint: z.boolean().optional(),
-  }).strict().optional(),
 });
 
 const PixelEventSchema = z.object({
@@ -303,9 +294,6 @@ const PixelEventSchema = z.object({
     'ScheduleClick',
     'QuoteRequest',
   ]),
-  blockType: z.enum(BLOCK_TYPES as [BlockType, ...BlockType[]]).optional(),
-  delaySeconds: z.number().nonnegative().optional(),
-  params: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
 });
 
 const AnalyticsPixelSchema = z.object({
@@ -367,9 +355,7 @@ export const LandingPageTemplateSchema = z.object({
   offer: OfferSchemaZ.optional(),
   howItWorks: HowItWorksSchemaZ.optional(),
   footer: MicroFooterSchemaZ,
-  upperBlocks: z.array(OptionalBlockSchema).optional(),
-  afterOffer: z.array(OptionalBlockSchema).optional(),
-  lowerBlocks: z.array(OptionalBlockSchema).optional(),
+  blocks: z.array(OptionalBlockSchema).optional(),
   leadForm: LeadFormSchemaZ.optional(),
   stickyCta: StickyCtaConfigSchema.optional(),
 });

@@ -41,9 +41,7 @@ Rules:
 - Use natural search-result copy for humans, not keyword stuffing.`;
 
 const allBlocks = (template: LandingPageTemplate): OptionalBlock[] => [
-  ...(template.upperBlocks ?? []),
-  ...(template.afterOffer ?? []),
-  ...(template.lowerBlocks ?? []),
+  ...(template.blocks ?? []),
 ];
 
 function cleanText(value: string | undefined): string {
@@ -216,11 +214,6 @@ export async function generateSeoMeta(
         ogImage,
         robots: "index,follow",
         generatedAt: new Date().toISOString(),
-        jsonLd: {
-          organization: true,
-          faqPage: true,
-          contactPoint: true,
-        },
       };
     }
   } catch {
@@ -233,11 +226,6 @@ export async function generateSeoMeta(
     ogImage,
     robots: "index,follow",
     generatedAt: new Date().toISOString(),
-    jsonLd: {
-      organization: true,
-      faqPage: true,
-      contactPoint: true,
-    },
   };
 }
 

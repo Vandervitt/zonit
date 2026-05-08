@@ -3,29 +3,21 @@ import type { FooterLink, HeroSchema, LandingPageTemplate, OfferSchema, Optional
 // @ts-expect-error offer entries are options, not pricing tiers.
 import type { OfferTier } from './schema';
 
-// Landing pages are lead-generation pages. Do not allow arbitrary JSON-LD
-// that can reintroduce Product/Offer/price transaction schema.
-const leadGenerationJsonLd: SeoMeta['jsonLd'] = {
-  organization: true,
-  faqPage: true,
+const seoWithoutJsonLd: SeoMeta = {
+  title: 'Lead generation page',
+  description: 'Contact our team for a consultation.',
 };
 
-void leadGenerationJsonLd;
+void seoWithoutJsonLd;
 
-// @ts-expect-error custom JSON-LD is out of scope for the MVP landing-page schema.
-const arbitraryJsonLd: SeoMeta['jsonLd'] = { custom: [{ '@type': 'Product' }] };
+const seoWithJsonLdSwitches: SeoMeta = {
+  title: 'Old SEO Shape',
+  description: 'JSON-LD switches are derived by the renderer now.',
+  // @ts-expect-error JSON-LD switches are renderer inference, not content schema.
+  jsonLd: { organization: true, faqPage: true },
+};
 
-void arbitraryJsonLd;
-
-// @ts-expect-error review JSON-LD is out of scope for MVP lead-generation pages.
-const reviewJsonLd: SeoMeta['jsonLd'] = { deriveReviews: true };
-
-void reviewJsonLd;
-
-// @ts-expect-error autoDerive was removed; JSON-LD derivation is controlled by explicit node switches.
-const legacyAutoDeriveJsonLd: SeoMeta['jsonLd'] = { autoDerive: true };
-
-void legacyAutoDeriveJsonLd;
+void seoWithJsonLdSwitches;
 
 // @ts-expect-error LeadForm is a single page-level lead capture, not a movable optional block.
 const optionalLeadForm: OptionalBlockType = 'LeadForm';
@@ -44,6 +36,20 @@ const rootLeadFormTemplate: Partial<LandingPageTemplate> = {
 };
 
 void rootLeadFormTemplate;
+
+const leadFormWithWebhook: Partial<LandingPageTemplate> = {
+  leadForm: {
+    title: 'Old Webhook Shape',
+    fields: [
+      { id: 'name', name: 'name', label: 'Full Name', type: 'text' },
+    ],
+    submitText: 'Send Inquiry',
+    // @ts-expect-error MVP lead forms submit to the platform API, not arbitrary third-party webhooks.
+    webhookUrl: 'https://hooks.example.com/lead',
+  },
+};
+
+void leadFormWithWebhook;
 
 const primaryConversionTemplate: Partial<LandingPageTemplate> = {
   primaryConversion: {
@@ -81,8 +87,7 @@ const minimalLandingPageTemplate: LandingPageTemplate = {
     copyrightYear: '2026',
     links: [{ text: 'Privacy Policy', content: 'We only use contact details to respond to inquiries.' }],
   },
-  upperBlocks: [],
-  lowerBlocks: [],
+  blocks: [],
 };
 
 void minimalLandingPageTemplate;
@@ -168,6 +173,21 @@ const reviewsWithSummary: ReviewsSchema = {
 };
 
 void reviewsWithSummary;
+
+const reviewsWithVideoProof: ReviewsSchema = {
+  title: 'Client Reviews',
+  items: [
+    {
+      id: 'review-1',
+      authorName: 'Verified Client',
+      rating: 5,
+      content: 'The team responded quickly.',
+      proofVideo: 'https://example.com/testimonial.mp4',
+    },
+  ],
+};
+
+void reviewsWithVideoProof;
 
 const reviewsWithAverageRating: ReviewsSchema = {
   title: 'Client Reviews',

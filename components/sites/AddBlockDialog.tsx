@@ -10,14 +10,12 @@ import { cn } from "../ui/utils";
 import { useState } from "react";
 import { Check, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, BadgeCheck } from "lucide-react";
 import type { OptionalBlockType } from "@/types/schema";
-import { BlockZone } from "@/lib/constants";
 
 interface BlockOption {
   type: OptionalBlockType;
   label: string;
   description: string;
   icon: React.ReactNode;
-  zone: BlockZone;
 }
 
 const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
@@ -26,73 +24,60 @@ const ALL_OPTIONAL_BLOCKS: BlockOption[] = [
     label: "信任条",
     description: "一排信任徽章，展示响应速度、隐私保护、专业支持等",
     icon: <Shield className="w-5 h-5 text-sky-500" />,
-    zone: BlockZone.Upper,
   },
   {
     type: "Features",
     label: "服务卖点",
     description: "网格或列表展示核心优势，吸引用户",
     icon: <Sparkles className="w-5 h-5 text-violet-500" />,
-    zone: BlockZone.Upper,
   },
   {
     type: "AuthorityStory",
     label: "权威背书",
     description: "创始人故事、专家认证、品牌数据展示",
     icon: <User className="w-5 h-5 text-amber-500" />,
-    zone: BlockZone.Both,
   },
   {
     type: "Reviews",
     label: "用户评价",
     description: "展示真实客户评价、截图或评分，增强信任",
     icon: <MessageSquare className="w-5 h-5 text-emerald-500" />,
-    zone: BlockZone.Lower,
   },
   {
     type: "FAQ",
     label: "常见问题",
     description: "解答用户疑虑，引导点击咨询",
     icon: <HelpCircle className="w-5 h-5 text-rose-500" />,
-    zone: BlockZone.Lower,
   },
   {
     type: "Countdown",
     label: "倒计时",
     description: "限时活动倒计时，制造稀缺感与紧迫感",
     icon: <Timer className="w-5 h-5 text-orange-500" />,
-    zone: BlockZone.Both,
   },
   {
     type: "Assurance",
     label: "服务承诺",
     description: "免费咨询、响应时效、隐私保护等信任保障徽章",
     icon: <BadgeCheck className="w-5 h-5 text-green-500" />,
-    zone: BlockZone.Middle,
   },
 ];
-
-type AddZone = BlockZone.Upper | BlockZone.Middle | BlockZone.Lower;
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   existingTypes: OptionalBlockType[];
-  onAdd: (type: OptionalBlockType, zone: AddZone) => void;
+  onAdd: (type: OptionalBlockType) => void;
 }
 
 export function AddBlockDialog({ open, onOpenChange, existingTypes, onAdd }: Props) {
   const [selected, setSelected] = useState<BlockOption | null>(null);
-  const [zone, setZone] = useState<BlockZone.Upper | BlockZone.Lower>(BlockZone.Lower);
 
   const available = ALL_OPTIONAL_BLOCKS.filter(b => !existingTypes.includes(b.type));
 
   const handleAdd = () => {
     if (!selected) return;
-    const finalZone: AddZone = selected.zone === BlockZone.Both
-      ? zone
-      : (selected.zone as AddZone);
-    onAdd(selected.type, finalZone);
+    onAdd(selected.type);
     setSelected(null);
     onOpenChange(false);
   };
@@ -135,28 +120,6 @@ export function AddBlockDialog({ open, onOpenChange, existingTypes, onAdd }: Pro
               </button>
             ))}
 
-            {/* Zone selector for "both" zone blocks */}
-            {selected?.zone === BlockZone.Both && (
-              <div className="flex items-center gap-2 pt-2">
-                <p className="text-xs text-muted-foreground">插入位置：</p>
-                <Button
-                  size="sm"
-                  variant={zone === BlockZone.Upper ? "default" : "outline"}
-                  className="text-xs h-7"
-                  onClick={() => setZone(BlockZone.Upper)}
-                >
-                  Hero 之后
-                </Button>
-                <Button
-                  size="sm"
-                  variant={zone === BlockZone.Lower ? "default" : "outline"}
-                  className="text-xs h-7"
-                  onClick={() => setZone(BlockZone.Lower)}
-                >
-                  HowItWorks 之后
-                </Button>
-              </div>
-            )}
           </div>
         )}
 

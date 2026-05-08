@@ -12,9 +12,7 @@ import type {
 type JsonLdNode = Record<string, unknown>;
 
 const allBlocks = (template: LandingPageTemplate): OptionalBlock[] => [
-  ...(template.upperBlocks ?? []),
-  ...(template.afterOffer ?? []),
-  ...(template.lowerBlocks ?? []),
+  ...(template.blocks ?? []),
 ];
 
 function findBlock<T extends OptionalBlock['type']>(
@@ -49,16 +47,12 @@ function deriveOrganization(template: LandingPageTemplate): JsonLdNode {
 }
 
 export function deriveJsonLd(template: LandingPageTemplate): JsonLdNode[] {
-  const seo = template.pageMeta?.seo;
-  const config = seo?.jsonLd;
   const nodes: JsonLdNode[] = [];
 
   const blocks = allBlocks(template);
-  if (config?.organization ?? true) {
-    nodes.push(deriveOrganization(template));
-  }
+  nodes.push(deriveOrganization(template));
   const faq = findBlock(blocks, 'FAQ');
-  if ((config?.faqPage ?? true) && faq) nodes.push(deriveFaq(faq.data));
+  if (faq) nodes.push(deriveFaq(faq.data));
 
   return nodes;
 }
