@@ -8,7 +8,10 @@
   "primaryConversion": {
     "channel": "whatsapp",
     "label": "咨询美容顾问",
-    "url": "https://wa.me/"
+    "destination": {
+      "type": "whatsapp",
+      "url": "https://wa.me/"
+    }
   },
   "hero": {
     "badge": "免费肤质咨询",
@@ -20,9 +23,12 @@
     },
     "cta": {
       "text": "咨询美容顾问",
-      "url": "https://wa.me/",
       "icon": "MessageCircle",
-      "channel": "whatsapp"
+      "channel": "whatsapp",
+      "destination": {
+        "type": "whatsapp",
+        "url": "https://wa.me/"
+      }
     },
     "trustText": "无需结账 • 真实客服 • 个性化建议"
   },
@@ -44,9 +50,12 @@
         "image": "https://images.unsplash.com/photo-1643379850623-7eb6442cd262?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
         "cta": {
           "text": "微信咨询",
-          "url": "https://wa.me/",
           "icon": "MessageCircle",
-          "channel": "whatsapp"
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/"
+          }
         }
       },
       {
@@ -63,9 +72,12 @@
         "badge": "推荐",
         "cta": {
           "text": "微信咨询方案",
-          "url": "https://wa.me/",
           "icon": "MessageCircle",
-          "channel": "whatsapp"
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/"
+          }
         }
       },
       {
@@ -81,9 +93,12 @@
         "badge": "限量名额",
         "cta": {
           "text": "预约顾问回访",
-          "url": "https://wa.me/",
           "icon": "MessageCircle",
-          "channel": "whatsapp"
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/"
+          }
         }
       }
     ]

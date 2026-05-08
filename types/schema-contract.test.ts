@@ -1,4 +1,4 @@
-import type { LandingPageTemplate, OptionalBlockType } from './schema';
+import type { CallToAction, LandingPage, LandingPageTemplate, OptionalBlockType } from './schema';
 
 // @ts-expect-error offer entries are consultation paths, not pricing tiers.
 import type { OfferTier } from './schema';
@@ -7,7 +7,7 @@ const primaryConversionTemplate: Partial<LandingPageTemplate> = {
   primaryConversion: {
     channel: 'whatsapp',
     label: 'Chat on WhatsApp',
-    destination: { type: 'url', url: 'https://wa.me/1234567890' },
+    destination: { type: 'whatsapp', url: 'https://wa.me/1234567890' },
     prefilledMessage: 'I would like a consultation.',
   },
 };
@@ -36,10 +36,61 @@ const primaryConversionWithMismatchedDestination: Partial<LandingPageTemplate> =
 
 void primaryConversionWithMismatchedDestination;
 
+const ctaWithDestination: CallToAction = {
+  text: 'Chat on WhatsApp',
+  channel: 'whatsapp',
+  destination: { type: 'whatsapp', url: 'https://wa.me/1234567890' },
+};
+
+void ctaWithDestination;
+
+const ctaWithLooseUrl: CallToAction = {
+  text: 'Chat on WhatsApp',
+  channel: 'whatsapp',
+  // @ts-expect-error CTAs must use destination, not a loose optional url.
+  url: 'https://wa.me/1234567890',
+};
+
+void ctaWithLooseUrl;
+
+const ctaWithMismatchedDestination: CallToAction = {
+  text: 'Chat on WhatsApp',
+  channel: 'whatsapp',
+  // @ts-expect-error CTA channel and destination must describe the same lead path.
+  destination: { type: 'email', email: 'hello@example.com' },
+};
+
+void ctaWithMismatchedDestination;
+
 // @ts-expect-error LeadForm is a single page-level lead capture, not a movable optional block.
 const optionalLeadForm: OptionalBlockType = 'LeadForm';
 
 void optionalLeadForm;
+
+const landingPageWithoutTemplateMetadata: LandingPage = {
+  primaryConversion: {
+    channel: 'email',
+    label: 'Email Us',
+    destination: { type: 'email', email: 'hello@example.com' },
+  },
+  hero: {
+    title: 'Lead Page',
+    subtitle: 'Book a consultation.',
+    background: { type: 'color', value: '#ffffff' },
+    cta: {
+      text: 'Email Us',
+      channel: 'email',
+      destination: { type: 'email', email: 'hello@example.com' },
+    },
+  },
+  footer: {
+    brandName: 'Lead Brand',
+    copyrightYear: '2026',
+    links: [{ text: 'Privacy Policy', content: 'Privacy policy content.' }],
+  },
+};
+
+void landingPageWithoutTemplateMetadata;
 
 const rootLeadFormTemplate: Partial<LandingPageTemplate> = {
   leadForm: {

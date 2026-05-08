@@ -7,11 +7,9 @@ const LeadUrl = NonEmpty.refine(value => !TransactionUrlPattern.test(value), {
   message: 'Lead-generation URLs must not point to payment, checkout, cart, order, subscription, refund, or COD paths.',
 });
 
-const CallToActionSchema = z.object({
+const CallToActionBaseSchema = z.object({
   text: NonEmpty,
-  url: LeadUrl.optional(),
   icon: z.string().optional(),
-  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']),
   target: z.enum(['_self', '_blank']).optional(),
   prefilledMessage: z.string().optional(),
   tracking: z.object({
@@ -31,36 +29,50 @@ const CallToActionSchema = z.object({
   }).optional(),
 });
 
-const UrlPrimaryConversionSchema = z.object({
-  channel: z.enum(['whatsapp', 'telegram', 'line', 'booking', 'contact_link']),
+const leadAction = <TChannel extends string, TDestination extends z.ZodTypeAny>(
+  channel: TChannel,
+  destination: TDestination,
+) => CallToActionBaseSchema.extend({
+  channel: z.literal(channel),
+  destination,
+}).strict();
+
+const CallToActionSchema = z.union([
+  leadAction('whatsapp', z.object({ type: z.literal('whatsapp'), url: LeadUrl }).strict()),
+  leadAction('telegram', z.object({ type: z.literal('telegram'), url: LeadUrl }).strict()),
+  leadAction('line', z.object({ type: z.literal('line'), url: LeadUrl }).strict()),
+  leadAction('booking', z.object({ type: z.literal('booking'), url: LeadUrl }).strict()),
+  leadAction('contact_link', z.object({ type: z.literal('contact_link'), url: LeadUrl }).strict()),
+  leadAction('phone', z.object({ type: z.literal('phone'), phone: NonEmpty }).strict()),
+  leadAction('email', z.object({ type: z.literal('email'), email: NonEmpty }).strict()),
+  leadAction('form', z.object({ type: z.literal('form'), formId: NonEmpty }).strict()),
+]);
+
+const primaryConversion = <TChannel extends string, TDestination extends z.ZodTypeAny>(
+  channel: TChannel,
+  destination: TDestination,
+) => z.object({
+  channel: z.literal(channel),
   label: NonEmpty,
-  destination: z.object({ type: z.literal('url'), url: LeadUrl }),
+  destination,
   prefilledMessage: z.string().optional(),
 }).strict();
 
 const PrimaryConversionSchema = z.union([
-  UrlPrimaryConversionSchema,
-  z.object({
-    channel: z.literal('phone'),
-    label: NonEmpty,
-    destination: z.object({ type: z.literal('phone'), phone: NonEmpty }),
-  }).strict(),
-  z.object({
-    channel: z.literal('email'),
-    label: NonEmpty,
-    destination: z.object({ type: z.literal('email'), email: NonEmpty }),
-  }).strict(),
-  z.object({
-    channel: z.literal('form'),
-    label: NonEmpty,
-    destination: z.object({ type: z.literal('form'), formId: NonEmpty }),
-  }).strict(),
+  primaryConversion('whatsapp', z.object({ type: z.literal('whatsapp'), url: LeadUrl }).strict()),
+  primaryConversion('telegram', z.object({ type: z.literal('telegram'), url: LeadUrl }).strict()),
+  primaryConversion('line', z.object({ type: z.literal('line'), url: LeadUrl }).strict()),
+  primaryConversion('booking', z.object({ type: z.literal('booking'), url: LeadUrl }).strict()),
+  primaryConversion('contact_link', z.object({ type: z.literal('contact_link'), url: LeadUrl }).strict()),
+  primaryConversion('phone', z.object({ type: z.literal('phone'), phone: NonEmpty }).strict()),
+  primaryConversion('email', z.object({ type: z.literal('email'), email: NonEmpty }).strict()),
+  primaryConversion('form', z.object({ type: z.literal('form'), formId: NonEmpty }).strict()),
 ]);
 
-const StickyCtaConfigSchema = CallToActionSchema.extend({
+const StickyCtaConfigSchema = z.intersection(CallToActionSchema, z.object({
   position: z.enum(['bottom-left', 'bottom-right']).optional(),
   showAfterScrollPercent: z.number().min(0).max(100).optional(),
-});
+}));
 
 const ImageMetaSchema = z.object({
   src: NonEmpty,
@@ -371,13 +383,7 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('Assurance', AssuranceSchemaZ),
 ]);
 
-export const LandingPageTemplateSchema = z.object({
-  templateId: NonEmpty,
-  templateName: NonEmpty,
-  themeConfig: z.object({
-    mode: z.enum(['light', 'dark']),
-    primaryColor: NonEmpty,
-  }),
+export const LandingPageSchema = z.object({
   pageMeta: PageMetaSchema.optional(),
   primaryConversion: PrimaryConversionSchema,
   hero: HeroSchemaZ,
@@ -398,6 +404,15 @@ export const LandingPageTemplateSchema = z.object({
   }
 });
 
+export const LandingPageTemplateSchema = LandingPageSchema.extend({
+  templateId: NonEmpty,
+  templateName: NonEmpty,
+  themeConfig: z.object({
+    mode: z.enum(['light', 'dark']),
+    primaryColor: NonEmpty,
+  }),
+});
+
 export const PresetTemplateSchema = z.object({
   id: NonEmpty,
   name: NonEmpty,
@@ -409,4 +424,5 @@ export const PresetTemplateSchema = z.object({
 });
 
 export type ZodPresetTemplate = z.infer<typeof PresetTemplateSchema>;
+export type ZodLandingPage = z.infer<typeof LandingPageSchema>;
 export type ZodLandingPageTemplate = z.infer<typeof LandingPageTemplateSchema>;

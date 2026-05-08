@@ -8,7 +8,10 @@
   "primaryConversion": {
     "channel": "whatsapp",
     "label": "Get a Free Treatment Plan",
-    "url": "https://wa.me/..."
+    "destination": {
+      "type": "whatsapp",
+      "url": "https://wa.me/..."
+    }
   },
   "hero": {
     "title": "Transform your smile \nwith world-class experts.",
@@ -19,9 +22,12 @@
     },
     "cta": {
       "text": "Get a Free Treatment Plan",
-      "url": "https://wa.me/...",
       "icon": "MessageCircle",
-      "channel": "whatsapp"
+      "channel": "whatsapp",
+      "destination": {
+        "type": "whatsapp",
+        "url": "https://wa.me/..."
+      }
     },
     "trustText": "Speak with a real medical coordinator • Free X-Ray Review"
   },
@@ -40,8 +46,11 @@
         ],
         "cta": {
           "text": "Request Consultation",
-          "url": "https://wa.me/...",
-          "channel": "whatsapp"
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/..."
+          }
         }
       },
       {
@@ -56,8 +65,11 @@
         "badge": "MOST POPULAR",
         "cta": {
           "text": "Get VIP Quote on WA",
-          "url": "https://wa.me/...",
-          "channel": "whatsapp"
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/..."
+          }
         }
       }
     ]

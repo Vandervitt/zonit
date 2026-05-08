@@ -24,10 +24,10 @@ import type {
   AuthoritySchema,
   FAQSchema,
   CountdownSchema,
-  CallToAction,
   AssuranceSchema,
   LeadFormSchema,
   OptionalBlock,
+  StickyCtaConfig,
 } from "@/types/schema";
 
 const HIGHLIGHT_STYLE = "0 0 0 3px #3b82f6";
@@ -117,7 +117,7 @@ function CountdownBlock({ data, primaryColor, id, highlight }: { data: Countdown
   );
 }
 
-function StickyCtaBar({ cta, primaryColor }: { cta: CallToAction; primaryColor: string }) {
+function StickyCtaBar({ cta, primaryColor }: { cta: StickyCtaConfig; primaryColor: string }) {
   return (
     <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 px-3 py-2 z-40">
       <button

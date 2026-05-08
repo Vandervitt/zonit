@@ -8,7 +8,10 @@
   "primaryConversion": {
     "channel": "whatsapp",
     "label": "Ask for Product Details",
-    "url": "https://wa.me/..."
+    "destination": {
+      "type": "whatsapp",
+      "url": "https://wa.me/..."
+    }
   },
   "hero": {
     "badge": "Limited Consultation Slots",
@@ -20,9 +23,12 @@
     },
     "cta": {
       "text": "Ask on WhatsApp",
-      "url": "https://wa.me/...",
       "icon": "WhatsApp",
-      "channel": "whatsapp"
+      "channel": "whatsapp",
+      "destination": {
+        "type": "whatsapp",
+        "url": "https://wa.me/..."
+      }
     },
     "trustText": "Free consultation • Human support"
   },
@@ -41,8 +47,11 @@
         ],
         "cta": {
           "text": "Get Details on WhatsApp",
-          "url": "https://wa.me/...",
-          "channel": "whatsapp"
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/..."
+          }
         }
       },
       {
@@ -58,8 +67,11 @@
         ],
         "cta": {
           "text": "Request a Callback",
-          "url": "https://wa.me/...",
-          "channel": "whatsapp"
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/..."
+          }
         }
       }
     ]

@@ -8,7 +8,10 @@
   "primaryConversion": {
     "channel": "telegram",
     "label": "Message Admin on Telegram",
-    "url": "https://t.me/..."
+    "destination": {
+      "type": "telegram",
+      "url": "https://t.me/..."
+    }
   },
   "hero": {
     "badge": "🚨 DOORS CLOSING SOON",
@@ -20,9 +23,12 @@
     },
     "cta": {
       "text": "Message Admin on Telegram",
-      "url": "https://t.me/...",
       "icon": "Telegram",
-      "channel": "telegram"
+      "channel": "telegram",
+      "destination": {
+        "type": "telegram",
+        "url": "https://t.me/..."
+      }
     },
     "trustText": "Currently 94/100 spots filled."
   },
@@ -39,8 +45,11 @@
         ],
         "cta": {
           "text": "Ask on Telegram",
-          "url": "https://t.me/...",
-          "channel": "telegram"
+          "channel": "telegram",
+          "destination": {
+            "type": "telegram",
+            "url": "https://t.me/..."
+          }
         }
       },
       {
@@ -55,8 +64,11 @@
         "badge": "FASTEST RESPONSE",
         "cta": {
           "text": "Request Details via TG",
-          "url": "https://t.me/...",
-          "channel": "telegram"
+          "channel": "telegram",
+          "destination": {
+            "type": "telegram",
+            "url": "https://t.me/..."
+          }
         }
       }
     ]

@@ -1,7 +1,6 @@
 import type { BlockType, OptionalBlockType } from '@/types/schema';
 
 export const BLOCK_TYPES: BlockType[] = [
-  'Hero', 'Offer', 'HowItWorks', 'MicroFooter',
   'Features', 'Reviews', 'TrustBanner', 'LogoWall', 'AuthorityStory', 'FAQ',
   'Countdown', 'Assurance',
 ];

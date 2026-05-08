@@ -10,13 +10,13 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
     primaryConversion: {
       channel: 'contact_link',
       label: 'Contact Us',
-      url: 'https://example.com/contact',
+      destination: { type: 'contact_link', url: 'https://example.com/contact' },
     },
     hero: {
       title: 'E2E Hero',
       subtitle: 'Sub',
       background: { type: 'color', value: '#f8fafc' },
-      cta: { text: 'Contact Us', url: 'https://example.com/contact', channel: 'contact_link' },
+      cta: { text: 'Contact Us', channel: 'contact_link', destination: { type: 'contact_link', url: 'https://example.com/contact' } },
     },
     offer: {
       title: 'Consultation Options',
@@ -25,13 +25,13 @@ export function makeBaseTemplate(overrides: Partial<LandingPageTemplate> = {}): 
         {
           id: 'tier-basic', name: 'Basic Consultation', badge: 'Free Quote', description: 'Entry consultation',
           valueProps: ['Feature A'],
-          cta: { text: 'Request Info', url: 'https://example.com/basic', channel: 'contact_link' },
+          cta: { text: 'Request Info', channel: 'contact_link', destination: { type: 'contact_link', url: 'https://example.com/basic' } },
         },
         {
           id: 'tier-pro', name: 'Priority Consultation', badge: 'Recommended', description: 'Recommended consultation',
           valueProps: ['Feature A', 'Feature B'],
           image: 'https://example.com/pro.png',
-          cta: { text: 'Book a Call', url: 'https://example.com/pro', channel: 'booking' },
+          cta: { text: 'Book a Call', channel: 'booking', destination: { type: 'booking', url: 'https://example.com/pro' } },
         },
       ],
     },
@@ -81,8 +81,10 @@ export function reviewsBlock(): OptionalBlock {
 
 export function leadFormFixture(): LeadFormSchema {
   return {
+    id: 'lead-form',
     title: 'Get a Free Quote',
     submitText: 'Send Request',
+    requiredFields: ['email'],
     includeMessage: true,
   };
 }
