@@ -28,6 +28,7 @@ import type {
   LeadFormSchema,
   OptionalBlock,
   StickyCtaConfig,
+  CallToAction,
 } from "@/types/schema";
 
 const HIGHLIGHT_STYLE = "0 0 0 3px #3b82f6";
@@ -41,6 +42,57 @@ function StarRating({ rating }: { rating: number }) {
         <span key={i} className={i <= rating ? "text-amber-400" : "text-slate-200"}>★</span>
       ))}
     </div>
+  );
+}
+
+function leadCtaHref(cta: CallToAction): string {
+  switch (cta.destination.type) {
+    case "phone":
+      return `tel:${cta.destination.phone}`;
+    case "email":
+      return `mailto:${cta.destination.email}`;
+    case "form":
+      return `#${cta.destination.formId}`;
+    case "whatsapp": {
+      const prefilledMessage = "prefilledMessage" in cta ? cta.prefilledMessage : undefined;
+      if (!prefilledMessage) return cta.destination.url;
+      try {
+        const url = new URL(cta.destination.url);
+        url.searchParams.set("text", prefilledMessage);
+        return url.toString();
+      } catch {
+        const separator = cta.destination.url.includes("?") ? "&" : "?";
+        return `${cta.destination.url}${separator}text=${encodeURIComponent(prefilledMessage)}`;
+      }
+    }
+    default:
+      return cta.destination.url;
+  }
+}
+
+function ctaRel(target: string | undefined): string | undefined {
+  return target === "_blank" ? "noopener noreferrer" : undefined;
+}
+
+function LeadCta({
+  cta,
+  primaryColor,
+  className,
+}: {
+  cta: CallToAction;
+  primaryColor: string;
+  className: string;
+}) {
+  return (
+    <a
+      href={leadCtaHref(cta)}
+      target={cta.target}
+      rel={ctaRel(cta.target)}
+      className={className}
+      style={{ backgroundColor: ctaThemeColor(cta.channel, primaryColor) }}
+    >
+      {cta.text}
+    </a>
   );
 }
 
@@ -69,7 +121,7 @@ function CountdownDigits({ data, primaryColor, dense }: { data: CountdownSchema;
   if (t.expired) {
     return (
       <div className="text-center">
-        <p className="text-sm text-slate-700">{data.expiredFallback?.title ?? "Offer Ended"}</p>
+        <p className="text-sm text-slate-700">{data.expiredFallback?.title ?? "Consultation window updated"}</p>
         {data.expiredFallback?.subtitle && (
           <p className="text-xs text-slate-500 mt-1">{data.expiredFallback.subtitle}</p>
         )}
@@ -105,12 +157,7 @@ function CountdownBlock({ data, primaryColor, id, highlight }: { data: Countdown
       <CountdownDigits data={data} primaryColor={primaryColor} />
       {data.cta && (
         <div className="text-center mt-4">
-          <button
-            className="px-5 py-2.5 rounded-full text-sm text-white"
-            style={{ backgroundColor: ctaThemeColor(data.cta.channel, primaryColor) }}
-          >
-            {data.cta.text}
-          </button>
+          <LeadCta cta={data.cta} primaryColor={primaryColor} className="inline-flex px-5 py-2.5 rounded-full text-sm text-white" />
         </div>
       )}
     </section>
@@ -120,12 +167,11 @@ function CountdownBlock({ data, primaryColor, id, highlight }: { data: Countdown
 function StickyCtaBar({ cta, primaryColor }: { cta: StickyCtaConfig; primaryColor: string }) {
   return (
     <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 px-3 py-2 z-40">
-      <button
+      <LeadCta
+        cta={cta}
+        primaryColor={primaryColor}
         className="w-full py-2.5 rounded-full text-sm text-white font-medium"
-        style={{ backgroundColor: ctaThemeColor(cta.channel, primaryColor) }}
-      >
-        {cta.text}
-      </button>
+      />
     </div>
   );
 }
@@ -163,12 +209,11 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
         <p className="text-sm leading-relaxed mb-6 max-w-sm mx-auto" style={{ color: bgImg ? "rgba(255,255,255,0.85)" : "#64748b" }}>
           {data.subtitle}
         </p>
-        <button
+        <LeadCta
+          cta={data.cta}
+          primaryColor={primaryColor}
           className="px-5 py-2.5 rounded-full text-sm text-white"
-          style={{ backgroundColor: ctaThemeColor(data.cta.channel, primaryColor) }}
-        >
-          {data.cta.text}
-        </button>
+        />
         {data.trustText && (
           <p className="text-xs mt-3" style={{ color: bgImg ? "rgba(255,255,255,0.7)" : "#94a3b8" }}>
             {data.trustText}
@@ -284,12 +329,11 @@ function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; prim
       {option.urgencyText && (
         <p className="text-[10px] text-amber-600 text-center mb-2">{option.urgencyText}</p>
       )}
-      <button
+      <LeadCta
+        cta={option.cta}
+        primaryColor={primaryColor}
         className="w-full py-2 rounded-full text-xs text-white mt-2"
-        style={{ backgroundColor: ctaThemeColor(option.cta.channel, primaryColor) }}
-      >
-        {option.cta.text}
-      </button>
+      />
     </div>
   );
 
@@ -387,12 +431,11 @@ function FAQBlock({ data, primaryColor, id, highlight }: { data: FAQSchema; prim
       </div>
       {data.contactCta && (
         <div className="mt-6 text-center">
-          <button
+          <LeadCta
+            cta={data.contactCta}
+            primaryColor={primaryColor}
             className="px-5 py-2.5 rounded-full text-sm text-white"
-            style={{ backgroundColor: ctaThemeColor(data.contactCta.channel, primaryColor) }}
-          >
-            {data.contactCta.text}
-          </button>
+          />
         </div>
       )}
     </section>
@@ -428,12 +471,11 @@ function AssuranceBlock({ data, primaryColor, id, highlight }: { data: Assurance
           </div>
         )}
         {data.cta && (
-          <button
+          <LeadCta
+            cta={data.cta}
+            primaryColor={primaryColor}
             className="px-5 py-2.5 rounded-full text-sm text-white"
-            style={{ backgroundColor: ctaThemeColor(data.cta.channel, primaryColor) }}
-          >
-            {data.cta.text}
-          </button>
+          />
         )}
       </div>
     </section>
@@ -458,7 +500,7 @@ function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSc
     <section id={id} className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
       {data.subtitle && <p className="text-xs text-center text-slate-500 mb-5">{data.subtitle}</p>}
-      <div className="space-y-2.5 max-w-md mx-auto">
+      <form id={data.id} className="space-y-2.5 max-w-md mx-auto" onSubmit={event => event.preventDefault()}>
         {baseFields.map(field => (
           <div key={field.id}>
             <label className="text-xs text-slate-600 mb-1 block">
@@ -466,9 +508,11 @@ function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSc
               {field.required && <span className="text-rose-500 ml-0.5">*</span>}
             </label>
             <input
+              name={field.id}
               type={field.type}
               className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400"
               placeholder={field.placeholder}
+              required={field.required}
             />
           </div>
         ))}
@@ -480,7 +524,7 @@ function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSc
                   {field.label}
                   {field.required && <span className="text-rose-500 ml-0.5">*</span>}
                 </label>
-                <select className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700">
+                <select name={field.fieldKey} required={field.required} className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700">
                   {(field.options ?? []).map((o, i) => (
                     <option key={i} value={o.value}>{o.label}</option>
                   ))}
@@ -495,9 +539,11 @@ function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSc
                 {field.required && <span className="text-rose-500 ml-0.5">*</span>}
               </label>
               <input
+                name={field.fieldKey}
                 type="text"
                 className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400"
                 placeholder={field.placeholder}
+                required={field.required}
               />
             </div>
           );
@@ -506,6 +552,7 @@ function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSc
           <div>
             <label className="text-xs text-slate-600 mb-1 block">Message</label>
             <textarea
+              name="message"
               className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400 min-h-[60px] resize-none"
               placeholder="Tell us what you need help with..."
             />
@@ -515,12 +562,13 @@ function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSc
           <p className="text-[10px] text-slate-400 leading-relaxed pt-1">{data.consentText}</p>
         )}
         <button
+          type="submit"
           className="w-full py-2.5 rounded-full text-sm text-white mt-2"
           style={{ backgroundColor: primaryColor }}
         >
           {data.submitText}
         </button>
-      </div>
+      </form>
     </section>
   );
 }
