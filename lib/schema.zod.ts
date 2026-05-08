@@ -6,8 +6,7 @@ const CallToActionSchema = z.object({
   text: NonEmpty,
   url: NonEmpty.optional(),
   icon: z.string().optional(),
-  theme: z.enum(['primary', 'secondary', 'whatsapp', 'telegram']).optional(),
-  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']).optional(),
+  channel: z.enum(['whatsapp', 'telegram', 'line', 'phone', 'email', 'form', 'booking', 'contact_link']),
   target: z.enum(['_self', '_blank']).optional(),
   prefilledMessage: z.string().optional(),
 });
@@ -52,7 +51,6 @@ const CountdownSchemaZ = z.object({
     subtitle: z.string().optional(),
   }).optional(),
   cta: CallToActionSchema.optional(),
-  variant: z.enum(['banner', 'section']).optional(),
 });
 
 const HeroSchemaZ = z.object({
@@ -62,23 +60,20 @@ const HeroSchemaZ = z.object({
   background: z.object({
     type: z.enum(['image', 'color', 'video']),
     value: NonEmpty,
-    overlayOpacity: z.number().min(0).max(1).optional(),
   }),
   cta: CallToActionSchema,
   secondaryCta: CallToActionSchema.optional(),
   trustText: z.string().optional(),
   stats: z.array(HeroStatSchema).optional(),
   media: HeroMediaSchema.optional(),
-  variant: z.enum(['overlay', 'split-left', 'split-right']).optional(),
 });
 
 const OfferOptionSchema = z.object({
   id: NonEmpty,
   name: NonEmpty,
-  labelText: z.string().optional(),
   description: z.string(),
   valueProps: z.array(z.string()),
-  tag: z.string().optional(),
+  badge: z.string().optional(),
   image: z.string().optional(),
   urgencyText: z.string().optional(),
   cta: CallToActionSchema,
@@ -89,7 +84,6 @@ const OfferSchemaZ = z.object({
   subtitle: z.string().optional(),
   options: z.array(OfferOptionSchema).min(1),
   showImages: z.boolean().optional(),
-  variant: z.enum(['cards-row', 'cards-column']).optional(),
 }).strict();
 
 const StepItemSchema = z.object({
@@ -137,7 +131,6 @@ const FeaturesSchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
   items: z.array(FeatureItemSchema).min(1),
-  layout: z.enum(['grid', 'list']).optional(),
 });
 
 const ReviewItemSchema = z.object({
@@ -163,7 +156,6 @@ const ReviewsSchemaZ = z.object({
   }).strict().optional(),
   items: z.array(ReviewItemSchema).min(1),
   disclaimer: z.string().optional(),
-  variant: z.enum(['grid', 'carousel']).optional(),
 }).strict();
 
 const TrustBadgeSchema = z.object({
@@ -174,7 +166,6 @@ const TrustBadgeSchema = z.object({
 });
 
 const TrustBannerSchemaZ = z.object({
-  theme: z.enum(['light', 'dark', 'brand']).optional(),
   badges: z.array(TrustBadgeSchema).min(1),
 });
 
@@ -188,7 +179,6 @@ const LogoWallItemSchema = z.object({
 const LogoWallSchemaZ = z.object({
   title: z.string().optional(),
   logos: z.array(LogoWallItemSchema).min(1),
-  variant: z.enum(['grayscale', 'colored']).optional(),
 });
 
 const AuthorityCredentialSchema = z.object({
@@ -205,7 +195,6 @@ const AuthoritySchemaZ = z.object({
   stats: z.array(z.object({ label: NonEmpty, value: NonEmpty })).optional(),
   credentials: z.array(AuthorityCredentialSchema).optional(),
   signature: z.object({ name: NonEmpty, role: NonEmpty }).optional(),
-  variant: z.enum(['image-left', 'image-right']).optional(),
 });
 
 const FAQItemSchema = z.object({
@@ -221,11 +210,11 @@ const FAQSchemaZ = z.object({
   contactCta: CallToActionSchema.optional(),
 });
 
-const LeadFormFieldSchema = z.object({
+const LeadFormExtraFieldSchema = z.object({
   id: NonEmpty,
   name: NonEmpty,
   label: NonEmpty,
-  type: z.enum(['text', 'email', 'phone', 'select', 'textarea', 'checkbox']),
+  type: z.enum(['text', 'select']),
   required: z.boolean().optional(),
   placeholder: z.string().optional(),
   options: z.array(z.object({ label: NonEmpty, value: NonEmpty })).optional(),
@@ -234,10 +223,11 @@ const LeadFormFieldSchema = z.object({
 const LeadFormSchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
-  fields: z.array(LeadFormFieldSchema).min(1),
   submitText: NonEmpty,
   successMessage: z.string().optional(),
   consentText: z.string().optional(),
+  includeMessage: z.boolean().optional(),
+  extraFields: z.array(LeadFormExtraFieldSchema).max(2).optional(),
   eventName: z.enum([
     'Lead',
     'Contact',
@@ -316,21 +306,6 @@ const PageMetaSchema = z.object({
 const block = <T extends string, D extends z.ZodTypeAny>(type: T, data: D) =>
   z.object({ id: NonEmpty, type: z.literal(type), data });
 
-const PageBlockSchema = z.discriminatedUnion('type', [
-  block('Hero', HeroSchemaZ),
-  block('Offer', OfferSchemaZ),
-  block('HowItWorks', HowItWorksSchemaZ),
-  block('MicroFooter', MicroFooterSchemaZ),
-  block('Features', FeaturesSchemaZ),
-  block('Reviews', ReviewsSchemaZ),
-  block('TrustBanner', TrustBannerSchemaZ),
-  block('LogoWall', LogoWallSchemaZ),
-  block('AuthorityStory', AuthoritySchemaZ),
-  block('FAQ', FAQSchemaZ),
-  block('Countdown', CountdownSchemaZ),
-  block('Assurance', AssuranceSchemaZ),
-]);
-
 const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('Features', FeaturesSchemaZ),
   block('Reviews', ReviewsSchemaZ),
@@ -350,7 +325,7 @@ export const LandingPageTemplateSchema = z.object({
     primaryColor: NonEmpty,
   }),
   pageMeta: PageMetaSchema.optional(),
-  primaryConversion: PrimaryConversionSchema.optional(),
+  primaryConversion: PrimaryConversionSchema,
   hero: HeroSchemaZ,
   offer: OfferSchemaZ.optional(),
   howItWorks: HowItWorksSchemaZ.optional(),

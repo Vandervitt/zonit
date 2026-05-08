@@ -1,67 +1,71 @@
 {
   "templateId": "tpl_cod_product",
-  "templateName": "COD E-commerce Product",
+  "templateName": "Product Inquiry Lead Page",
   "themeConfig": {
     "mode": "light",
     "primaryColor": "#EF4444"
   },
+  "primaryConversion": {
+    "channel": "whatsapp",
+    "label": "Ask for Product Details",
+    "url": "https://wa.me/..."
+  },
   "hero": {
-    "badge": "🔥 50% OFF TODAY ONLY",
+    "badge": "Limited Consultation Slots",
     "title": "Upgrade your life \nwithout breaking the bank.",
-    "subtitle": "Join 10,000+ happy customers. Pay ONLY when you receive the product.",
+    "subtitle": "Chat with our team for product details, availability, and a personalized quote.",
     "background": {
       "type": "image",
-      "value": "product-hero-bg.jpg",
-      "overlayOpacity": 0.4
+      "value": "product-hero-bg.jpg"
     },
     "cta": {
-      "text": "Claim Offer on WhatsApp",
+      "text": "Ask on WhatsApp",
       "url": "https://wa.me/...",
       "icon": "WhatsApp",
-      "theme": "whatsapp"
+      "channel": "whatsapp"
     },
-    "trustText": "No Credit Card Required • Cash on Delivery"
+    "trustText": "Free consultation • Human support"
   },
   "offer": {
-    "title": "Choose Your Pack",
-    "tiers": [
+    "title": "Choose an Inquiry Path",
+    "options": [
       {
         "id": "tier-1",
-        "name": "Single Pack",
-        "labelText": "Chat to Order",
-        "description": "Perfect for trying it out.",
+        "name": "Quick Product Consultation",
+        "badge": "Free Quote",
+        "description": "Ask our team whether this solution fits your needs.",
         "valueProps": [
-          "1x Item",
-          "Standard Delivery",
-          "Cash on Delivery"
+          "Product details",
+          "Availability check",
+          "Human support"
         ],
         "cta": {
           "text": "Get Details on WhatsApp",
-          "url": "https://wa.me/..."
+          "url": "https://wa.me/...",
+          "channel": "whatsapp"
         }
       },
       {
         "id": "tier-2",
-        "name": "Family Bundle",
-        "labelText": "Best Value",
-        "description": "Great for sharing with family.",
+        "name": "Priority Callback",
+        "badge": "Recommended",
+        "description": "Share your needs and get a guided recommendation.",
         "valueProps": [
-          "3x Items",
-          "Free Express Delivery",
+          "Personalized quote",
+          "Fast response",
           "Priority Support",
-          "Cash on Delivery"
+          "Simple inquiry path"
         ],
-        "tag": "Recommended",
         "cta": {
-          "text": "Claim Bundle on WhatsApp",
+          "text": "Request a Callback",
           "url": "https://wa.me/...",
-          "theme": "primary"
+          "channel": "whatsapp"
         }
       }
     ]
   },
   "howItWorks": {
-    "title": "How to Order?",
+    "title": "How to Get Details",
     "steps": [
       {
         "id": "s1",
@@ -72,29 +76,29 @@
       {
         "id": "s2",
         "icon": "MapPin",
-        "title": "Send Details",
-        "description": "Send us your delivery address and name."
+        "title": "Share Your Needs",
+        "description": "Tell us your location, preferences, and questions."
       },
       {
         "id": "s3",
-        "icon": "Truck",
-        "title": "Pay on Delivery",
-        "description": "Receive the item in 2-3 days and pay cash to the driver."
+        "icon": "Check",
+        "title": "Get a Recommendation",
+        "description": "Our team will follow up with availability and next steps."
       }
     ]
   },
   "footer": {
-    "brandName": "TrendMart COD",
+    "brandName": "TrendMart",
     "copyrightYear": "2024",
     "contactEmail": "support@trendmart.com",
     "links": [
       {
         "text": "Privacy Policy",
-        "content": "We collect the contact details you submit only to respond to your inquiry, arrange consultation, confirm delivery details, and provide customer support. We do not sell your personal information. You can contact support@trendmart.com to request access, correction, or deletion of your submitted information."
+        "content": "We collect the contact details you submit only to respond to your inquiry, arrange consultation, and provide customer support. We do not sell your personal information. You can contact support@trendmart.com to request access, correction, or deletion of your submitted information."
       },
       {
         "text": "Terms of Service",
-        "content": "By submitting an inquiry, you agree that TrendMart COD may contact you about your request through the contact details you provide. Information on this page is for product consultation and lead generation only. Final availability, delivery timing, and service details will be confirmed by our support team."
+        "content": "By submitting an inquiry, you agree that TrendMart may contact you about your request through the contact details you provide. Information on this page is for product consultation and lead generation only. Final availability and service details will be confirmed by our support team."
       }
     ]
   },
@@ -103,7 +107,6 @@
       "id": "ub-1",
       "type": "TrustBanner",
       "data": {
-        "theme": "light",
         "badges": [
           {
             "id": "b1",
@@ -113,7 +116,7 @@
           {
             "id": "b2",
             "icon": "ShieldCheck",
-            "text": "Pay Cash on Delivery"
+            "text": "Privacy Protected"
           }
         ]
       }

@@ -3,8 +3,8 @@ export const PlatformColors = {
   telegram: '#0088cc',
 } as const;
 
-export function ctaThemeColor(theme: string | undefined, fallback: string): string {
-  if (theme === 'whatsapp') return PlatformColors.whatsapp;
-  if (theme === 'telegram') return PlatformColors.telegram;
+export function ctaThemeColor(channel: string | undefined, fallback: string): string {
+  if (channel === 'whatsapp') return PlatformColors.whatsapp;
+  if (channel === 'telegram') return PlatformColors.telegram;
   return fallback;
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { ctaThemeColor, BackgroundType, TrustBannerTheme, FeaturesLayout } from "@/lib/constants";
+import { ctaThemeColor, BackgroundType } from "@/lib/constants";
 import {
   Dialog,
   DialogContent,
@@ -98,17 +98,6 @@ function CountdownDigits({ data, primaryColor, dense }: { data: CountdownSchema;
 }
 
 function CountdownBlock({ data, primaryColor, id, highlight }: { data: CountdownSchema; primaryColor: string; id?: string; highlight?: boolean }) {
-  const banner = data.variant === "banner";
-  if (banner) {
-    return (
-      <section id={id} className="px-4 py-2.5 text-white" style={{ backgroundColor: primaryColor, boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-        <div className="flex items-center justify-center gap-3 flex-wrap">
-          {data.title && <span className="text-xs">{data.title}</span>}
-          <CountdownDigits data={data} primaryColor="#0f172a" dense />
-        </div>
-      </section>
-    );
-  }
   return (
     <section id={id} className="px-5 py-8 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       {data.title && <p className="text-base text-center text-slate-800 mb-1">{data.title}</p>}
@@ -118,7 +107,7 @@ function CountdownBlock({ data, primaryColor, id, highlight }: { data: Countdown
         <div className="text-center mt-4">
           <button
             className="px-5 py-2.5 rounded-full text-sm text-white"
-            style={{ backgroundColor: ctaThemeColor(data.cta.theme, primaryColor) }}
+            style={{ backgroundColor: ctaThemeColor(data.cta.channel, primaryColor) }}
           >
             {data.cta.text}
           </button>
@@ -133,7 +122,7 @@ function StickyCtaBar({ cta, primaryColor }: { cta: CallToAction; primaryColor: 
     <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 px-3 py-2 z-40">
       <button
         className="w-full py-2.5 rounded-full text-sm text-white font-medium"
-        style={{ backgroundColor: ctaThemeColor(cta.theme, primaryColor) }}
+        style={{ backgroundColor: ctaThemeColor(cta.channel, primaryColor) }}
       >
         {cta.text}
       </button>
@@ -144,53 +133,9 @@ function StickyCtaBar({ cta, primaryColor }: { cta: CallToAction; primaryColor: 
 // ── Block Renderers ──────────────────────────────────────────────────────────
 
 function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primaryColor: string; highlight?: boolean }) {
-  const v = data.variant ?? 'overlay';
   const bgImg = data.background.type === BackgroundType.Image ? data.background.value : undefined;
   const bgColor = data.background.type === BackgroundType.Color ? data.background.value : undefined;
 
-  const textContent = (
-    <>
-      {data.badge && (
-        <div className="inline-block px-3 py-1 rounded-full text-xs mb-3" style={{ backgroundColor: primaryColor + "20", color: primaryColor }}>
-          {data.badge}
-        </div>
-      )}
-      <h1 className="text-xl leading-snug mb-2 text-slate-800 whitespace-pre-line">
-        {data.title}
-      </h1>
-      <p className="text-xs leading-relaxed mb-4 text-slate-500">{data.subtitle}</p>
-      <button
-        className="px-5 py-2.5 rounded-full text-sm text-white"
-        style={{ backgroundColor: ctaThemeColor(data.cta.theme, primaryColor) }}
-      >
-        {data.cta.text}
-      </button>
-      {data.trustText && (
-        <p className="text-xs mt-2 text-slate-400">{data.trustText}</p>
-      )}
-    </>
-  );
-
-  if (v === 'split-left' || v === 'split-right') {
-    return (
-      <section
-        id="hero"
-        className="px-5 py-8"
-        style={{ backgroundColor: bgColor ?? '#f8f9ff', boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}
-      >
-        <div className={`flex items-center gap-4 ${v === 'split-right' ? 'flex-row-reverse' : ''}`}>
-          <div className="flex-1 min-w-0">{textContent}</div>
-          {bgImg && (
-            <div className="w-2/5 shrink-0">
-              <img src={bgImg} alt="" className="w-full h-32 object-cover rounded-xl" />
-            </div>
-          )}
-        </div>
-      </section>
-    );
-  }
-
-  // overlay (default)
   return (
     <section
       id="hero"
@@ -204,7 +149,7 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
       }}
     >
       {bgImg && (
-        <div className="absolute inset-0" style={{ backgroundColor: `rgba(0,0,0,${data.background.overlayOpacity ?? 0.4})` }} />
+        <div className="absolute inset-0 bg-black/40" />
       )}
       <div className="relative z-10">
         {data.badge && (
@@ -220,7 +165,7 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
         </p>
         <button
           className="px-5 py-2.5 rounded-full text-sm text-white"
-          style={{ backgroundColor: ctaThemeColor(data.cta.theme, primaryColor) }}
+          style={{ backgroundColor: ctaThemeColor(data.cta.channel, primaryColor) }}
         >
           {data.cta.text}
         </button>
@@ -235,14 +180,13 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
 }
 
 function TrustBannerBlock({ data, id, highlight }: { data: TrustBannerSchema; id?: string; highlight?: boolean }) {
-  const dark = data.theme === TrustBannerTheme.Dark;
   return (
-    <section id={id} className="px-4 py-4" style={{ backgroundColor: dark ? "#1e293b" : "#f8fafc", boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
+    <section id={id} className="px-4 py-4 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
         {data.badges.map(badge => (
           <div key={badge.id} className="flex items-center gap-1.5">
-            <span className="text-xs" style={{ color: dark ? "#94a3b8" : "#64748b" }}>✦</span>
-            <span className="text-xs" style={{ color: dark ? "#e2e8f0" : "#475569" }}>{badge.text}</span>
+            <span className="text-xs text-slate-500">✦</span>
+            <span className="text-xs text-slate-600">{badge.text}</span>
           </div>
         ))}
       </div>
@@ -255,7 +199,7 @@ function FeaturesBlock({ data, primaryColor, id, highlight }: { data: FeaturesSc
     <section id={id} className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
       {data.subtitle && <p className="text-xs text-center text-slate-500 mb-6">{data.subtitle}</p>}
-      <div className={`gap-4 ${data.layout === FeaturesLayout.List ? "flex flex-col" : "grid grid-cols-2"}`}>
+      <div className="grid grid-cols-2 gap-4">
         {data.items.map(item => (
           <div key={item.id} className="bg-slate-50 rounded-xl p-4">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-2 text-sm" style={{ backgroundColor: primaryColor + "20", color: primaryColor }}>
@@ -271,8 +215,6 @@ function FeaturesBlock({ data, primaryColor, id, highlight }: { data: FeaturesSc
 }
 
 function AuthorityBlock({ data, primaryColor, id, highlight }: { data: AuthoritySchema; primaryColor: string; id?: string; highlight?: boolean }) {
-  const v = data.variant ?? 'image-left';
-
   const imageEl = data.image.src ? (
     <img src={data.image.src} alt={data.image.alt} className="w-full h-28 object-cover rounded-xl" />
   ) : null;
@@ -307,7 +249,7 @@ function AuthorityBlock({ data, primaryColor, id, highlight }: { data: Authority
 
   return (
     <section id={id} className="px-5 py-10 bg-slate-50" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
-      <div className={`flex gap-4 items-start ${v === 'image-right' ? 'flex-row-reverse' : ''}`}>
+      <div className="flex gap-4 items-start">
         {imageEl && <div className="w-2/5 shrink-0">{imageEl}</div>}
         {textEl}
       </div>
@@ -316,13 +258,11 @@ function AuthorityBlock({ data, primaryColor, id, highlight }: { data: Authority
 }
 
 function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; primaryColor: string; highlight?: boolean }) {
-  const v = data.variant ?? 'cards-row';
-
   const optionCard = (option: OfferOption) => (
-    <div key={option.id} className="border-2 rounded-2xl p-4 relative" style={{ borderColor: option.tag ? primaryColor : "#e2e8f0" }}>
-      {option.tag && (
+    <div key={option.id} className="border-2 rounded-2xl p-4 relative" style={{ borderColor: option.badge ? primaryColor : "#e2e8f0" }}>
+      {option.badge && (
         <div className="absolute -top-3 left-4 px-2 py-0.5 rounded-full text-xs text-white" style={{ backgroundColor: primaryColor }}>
-          {option.tag}
+          {option.badge}
         </div>
       )}
       <div className="flex justify-between items-start mb-2">
@@ -330,9 +270,6 @@ function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; prim
           <p className="text-sm text-slate-800">{option.name}</p>
           <p className="text-xs text-slate-500">{option.description}</p>
         </div>
-        {option.labelText && (
-          <p className="text-xl shrink-0 ml-2" style={{ color: primaryColor }}>{option.labelText}</p>
-        )}
       </div>
       {data.showImages && option.image && (
         <img src={option.image} alt="" className="w-full h-24 object-cover rounded-xl mb-3" />
@@ -349,7 +286,7 @@ function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; prim
       )}
       <button
         className="w-full py-2 rounded-full text-xs text-white mt-2"
-        style={{ backgroundColor: ctaThemeColor(option.cta.theme, primaryColor) }}
+        style={{ backgroundColor: ctaThemeColor(option.cta.channel, primaryColor) }}
       >
         {option.cta.text}
       </button>
@@ -360,7 +297,7 @@ function OfferBlock({ data, primaryColor, highlight }: { data: OfferSchema; prim
     <section id="offer" className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
       {data.subtitle && <p className="text-xs text-center text-slate-500 mb-6">{data.subtitle}</p>}
-      <div className={v === 'cards-row' ? "grid grid-cols-2 gap-3" : "space-y-4"}>
+      <div className="grid grid-cols-2 gap-3">
         {data.options.map(optionCard)}
       </div>
     </section>
@@ -390,13 +327,12 @@ function HowItWorksBlock({ data, primaryColor, highlight }: { data: HowItWorksSc
 }
 
 function ReviewsBlock({ data, id, highlight }: { data: ReviewsSchema; id?: string; highlight?: boolean }) {
-  const v = data.variant ?? 'grid';
   const ratingSummary = data.ratingSummary;
   const ratingScale = ratingSummary?.scale ?? 5;
   const normalizedRating = ratingSummary ? Math.round((ratingSummary.average / ratingScale) * 5) : 0;
 
   const reviewCard = (item: ReviewItem) => (
-    <div key={item.id} className={`bg-slate-50 rounded-xl p-4 ${v === 'carousel' ? 'w-56 shrink-0 snap-start' : ''}`}>
+    <div key={item.id} className="bg-slate-50 rounded-xl p-4">
       <div className="flex items-start gap-2 mb-2">
         <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600 shrink-0">
           {item.authorName.charAt(0)}
@@ -429,15 +365,9 @@ function ReviewsBlock({ data, id, highlight }: { data: ReviewsSchema; id?: strin
           </div>
         )}
       </div>
-      {v === 'carousel' ? (
-        <div className="flex gap-3 overflow-x-auto px-5 pb-2 snap-x snap-mandatory">
-          {data.items.map(reviewCard)}
-        </div>
-      ) : (
-        <div className="px-5 space-y-3">
-          {data.items.map(reviewCard)}
-        </div>
-      )}
+      <div className="px-5 space-y-3">
+        {data.items.map(reviewCard)}
+      </div>
     </section>
   );
 }
@@ -459,7 +389,7 @@ function FAQBlock({ data, primaryColor, id, highlight }: { data: FAQSchema; prim
         <div className="mt-6 text-center">
           <button
             className="px-5 py-2.5 rounded-full text-sm text-white"
-            style={{ backgroundColor: ctaThemeColor(data.contactCta.theme, primaryColor) }}
+            style={{ backgroundColor: ctaThemeColor(data.contactCta.channel, primaryColor) }}
           >
             {data.contactCta.text}
           </button>
@@ -500,7 +430,7 @@ function AssuranceBlock({ data, primaryColor, id, highlight }: { data: Assurance
         {data.cta && (
           <button
             className="px-5 py-2.5 rounded-full text-sm text-white"
-            style={{ backgroundColor: ctaThemeColor(data.cta.theme, primaryColor) }}
+            style={{ backgroundColor: ctaThemeColor(data.cta.channel, primaryColor) }}
           >
             {data.cta.text}
           </button>
@@ -511,40 +441,38 @@ function AssuranceBlock({ data, primaryColor, id, highlight }: { data: Assurance
 }
 
 function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSchema; primaryColor: string; id?: string; highlight?: boolean }) {
+  const baseFields = [
+    { id: "name", label: "Full Name", type: "text", placeholder: "Jane Doe", required: true },
+    { id: "phone", label: "Phone", type: "tel", placeholder: "+1 555 000 1234", required: true },
+    { id: "email", label: "Email", type: "email", placeholder: "you@example.com", required: true },
+  ];
+
   return (
     <section id={id} className="px-5 py-10" style={{ boxShadow: highlight ? HIGHLIGHT_STYLE : undefined }}>
       <p className="text-lg text-center text-slate-800 mb-1">{data.title}</p>
       {data.subtitle && <p className="text-xs text-center text-slate-500 mb-5">{data.subtitle}</p>}
       <div className="space-y-2.5 max-w-md mx-auto">
-        {data.fields.map(field => {
-          const labelEl = (
+        {baseFields.map(field => (
+          <div key={field.id}>
             <label className="text-xs text-slate-600 mb-1 block">
               {field.label}
               {field.required && <span className="text-rose-500 ml-0.5">*</span>}
             </label>
-          );
-          if (field.type === "textarea") {
-            return (
-              <div key={field.id}>
-                {labelEl}
-                <textarea
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400 min-h-[60px] resize-none"
-                  placeholder={field.placeholder}
-                />
-              </div>
-            );
-          }
-          if (field.type === "checkbox") {
-            return (
-              <label key={field.id} className="flex items-center gap-2 text-xs text-slate-600">
-                <input type="checkbox" className="w-3.5 h-3.5" /> {field.label}
-              </label>
-            );
-          }
+            <input
+              type={field.type}
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400"
+              placeholder={field.placeholder}
+            />
+          </div>
+        ))}
+        {data.extraFields?.map(field => {
           if (field.type === "select") {
             return (
               <div key={field.id}>
-                {labelEl}
+                <label className="text-xs text-slate-600 mb-1 block">
+                  {field.label}
+                  {field.required && <span className="text-rose-500 ml-0.5">*</span>}
+                </label>
                 <select className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700">
                   {(field.options ?? []).map((o, i) => (
                     <option key={i} value={o.value}>{o.label}</option>
@@ -555,15 +483,27 @@ function LeadFormBlock({ data, primaryColor, id, highlight }: { data: LeadFormSc
           }
           return (
             <div key={field.id}>
-              {labelEl}
+              <label className="text-xs text-slate-600 mb-1 block">
+                {field.label}
+                {field.required && <span className="text-rose-500 ml-0.5">*</span>}
+              </label>
               <input
-                type={field.type === "phone" ? "tel" : field.type}
+                type="text"
                 className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400"
                 placeholder={field.placeholder}
               />
             </div>
           );
         })}
+        {data.includeMessage !== false && (
+          <div>
+            <label className="text-xs text-slate-600 mb-1 block">Message</label>
+            <textarea
+              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400 min-h-[60px] resize-none"
+              placeholder="Tell us what you need help with..."
+            />
+          </div>
+        )}
         {data.consentText && (
           <p className="text-[10px] text-slate-400 leading-relaxed pt-1">{data.consentText}</p>
         )}
@@ -663,10 +603,10 @@ export function PreviewRenderer({ template, highlightKey = "", showWatermark = f
       {template.offer && (
         <OfferBlock data={template.offer} primaryColor={pc} highlight={highlightKey === "offer"} />
       )}
-      {template.blocks?.map(renderOptional)}
       {template.howItWorks && (
         <HowItWorksBlock data={template.howItWorks} primaryColor={pc} highlight={highlightKey === "howItWorks"} />
       )}
+      {template.blocks?.map(renderOptional)}
       {template.leadForm && (
         <LeadFormBlock
           id="leadForm"

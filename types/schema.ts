@@ -16,8 +16,7 @@ export interface CallToAction {
   text: string;           // 按钮文案 (e.g., "Chat on WhatsApp")
   url?: string;           // 咨询/预约/联系方式链接；禁止指向 payment / checkout / cart / order 等交易路径；form 类 CTA 可不填
   icon?: IconType;        // 按钮图标
-  theme?: 'primary' | 'secondary' | 'whatsapp' | 'telegram'; // 按钮颜色风格
-  channel?: CtaChannel;   // 引流渠道类型
+  channel: CtaChannel;    // 引流渠道类型；所有 CTA 必须能归因到咨询/预约/留资入口
   target?: LinkTarget;    // 链接打开方式
   prefilledMessage?: string; // 私域沟通时预填消息，减少用户输入成本
 }
@@ -56,7 +55,7 @@ export interface HeroMedia {
   poster?: string;        // 视频封面
 }
 
-// 倒计时（真实活动截止、预约档期或咨询名额）—— 既可独立成 Block，也可内嵌在 Hero
+// 倒计时（真实活动截止、预约档期或咨询名额）—— 作为独立可选 Block 使用
 export interface CountdownSchema {
   title?: string;
   subtitle?: string;
@@ -66,7 +65,6 @@ export interface CountdownSchema {
     subtitle?: string;
   };
   cta?: CallToAction;
-  variant?: 'banner' | 'section';
 }
 
 // HeroSection (首屏主视觉)
@@ -77,15 +75,12 @@ export interface HeroSchema {
   background: {
     type: 'image' | 'color' | 'video';
     value: string;              // 图片/视频URL 或 颜色代码
-    overlayOpacity?: number;    // 暗化遮罩透明度 (0-1)，用于凸显白色文字
   };
   cta: CallToAction;            // 主按钮
   secondaryCta?: CallToAction;  // 次按钮，如 "See Results" / "Learn More" / "Check Cases"
   trustText?: string;           // 按钮下方的小字背书，如 "Free consultation" / "Reply within 10 minutes"
   stats?: HeroStat[];           // 首屏利益点/证明信息，快速降低跳出并建立初始信任
   media?: HeroMedia;            // 首屏辅助视觉
-  // split-left / split-right 需配合 media 字段使用；overlay 使用 background 叠加遮罩
-  variant?: 'overlay' | 'split-left' | 'split-right';
 }
 
 
@@ -93,10 +88,9 @@ export interface HeroSchema {
 export interface OfferOption {
   id: string;
   name: string;                 // 咨询入口名称，如 "Free Consultation", "Priority Callback", "Expert Assessment"
-  labelText?: string;           // 展示标签，如 "Free Quote", "Book Consultation", "Limited Slots"
   description: string;          // 简短描述
   valueProps: string[];         // 核心价值点列表
-  tag?: string;                 // 展示/高亮标签，如 "Recommended" / "Fastest Response"
+  badge?: string;               // 展示标签，如 "Free Quote" / "Recommended" / "Fastest Response"
   image?: string;               // 咨询入口配图；showImages 为 true 时 options 建议全部提供
   urgencyText?: string;         // 真实稀缺提示，如 "Only 12 consultation slots left this week"
   cta: CallToAction;            // 该咨询入口对应的咨询/留资按钮
@@ -107,7 +101,6 @@ export interface OfferSchema {
   subtitle?: string;
   options: OfferOption[];       // 通常 1 到 3 个咨询/服务入口，避免做成价格表
   showImages?: boolean;         // 统一控制卡片是否展示图片，避免部分卡片有图导致视觉不齐
-  variant?: 'cards-row' | 'cards-column';
 }
 
 // 引导用户如何通过 WhatsApp/TG 联系，打消疑虑
@@ -157,7 +150,6 @@ export interface FeaturesSchema {
   title: string;
   subtitle?: string;
   items: FeatureItem[];
-  layout?: 'grid' | 'list';     // 支持网格展示或列表展示
 }
 
 // Reviews section
@@ -184,7 +176,6 @@ export interface ReviewsSchema {
   };
   items: ReviewItem[];
   disclaimer?: string;             // 如 "Results may vary"，医疗/金融/减肥类目合规必备
-  variant?: 'grid' | 'carousel';
 }
 
 // 一排横向排列的信任徽章
@@ -196,7 +187,6 @@ export interface TrustBadge {
 }
 
 export interface TrustBannerSchema {
-  theme?: 'light' | 'dark' | 'brand';
   badges: TrustBadge[];
 }
 
@@ -211,7 +201,6 @@ export interface LogoWallItem {
 export interface LogoWallSchema {
   title?: string;               // 如 "As Featured In" / "Trusted By"
   logos: LogoWallItem[];
-  variant?: 'grayscale' | 'colored';
 }
 
 // 权威背书 / 品牌故事
@@ -235,7 +224,6 @@ export interface AuthoritySchema {
     name: string;
     role: string;
   };
-  variant?: 'image-left' | 'image-right';
 }
 
 // 常见问题解答
@@ -252,14 +240,14 @@ export interface FAQSchema {
   contactCta?: CallToAction;    // 底部追加一个 "还有问题？联系客服" 的按钮
 }
 
-// Lead 表单（高客单服务类替代 WhatsApp 直跳）
-export type LeadFormFieldType = 'text' | 'email' | 'phone' | 'select' | 'textarea' | 'checkbox';
+// Lead 表单（高客单服务类替代 WhatsApp 直跳）：基础字段固定为姓名 / 电话 / 邮箱，允许少量行业意向字段
+export type LeadFormExtraFieldType = 'text' | 'select';
 
-export interface LeadFormField {
+export interface LeadFormExtraField {
   id: string;
   name: string;                 // 提交时的字段 key
   label: string;
-  type: LeadFormFieldType;
+  type: LeadFormExtraFieldType;
   required?: boolean;
   placeholder?: string;
   options?: { label: string; value: string }[]; // 用于 select
@@ -268,10 +256,11 @@ export interface LeadFormField {
 export interface LeadFormSchema {
   title: string;
   subtitle?: string;
-  fields: LeadFormField[];
   submitText: string;
   successMessage?: string;
   consentText?: string;         // GDPR 同意文本
+  includeMessage?: boolean;     // 是否展示可选留言字段，默认由渲染器按 true 处理
+  extraFields?: LeadFormExtraField[]; // 少量行业意向字段，如 treatment / target country / budget range
   eventName?: PixelEventName;   // 提交埋点事件名，仅允许留资/咨询类事件
 }
 
@@ -404,7 +393,7 @@ export interface LandingPageTemplate {
     primaryColor: string;    // 主色调
   };
   pageMeta?: PageMeta;
-  primaryConversion?: PrimaryConversion; // 页面级主咨询/留资目标；模块 CTA 默认应围绕它展开
+  primaryConversion: PrimaryConversion; // 页面级主咨询/留资目标；模块 CTA 默认应围绕它展开
 
   // ==========================================
   // 🔴 核心模块：Hero / Footer 必须存在；Offer / HowItWorks 是推荐漏斗模块，但不强制
@@ -418,7 +407,8 @@ export interface LandingPageTemplate {
   // 🟢 可选动态区：允许用户在规定区域内增删改排
   // ==========================================
 
-  // 可选动态模块，顺序由数组位置决定；推荐漏斗顺序：Trust / Features → Social Proof → FAQ / Countdown
+  // 页面渲染顺序固定为：hero -> offer -> howItWorks -> blocks -> leadForm -> footer。
+  // 可选动态模块内部顺序由数组位置决定；推荐漏斗顺序：Trust / Features → Social Proof → FAQ / Countdown
   blocks?: OptionalBlock[];
 
   // 页面级线索表单：MVP 仅允许一个，避免多表单/多 webhook/多埋点造成归因和合规复杂度

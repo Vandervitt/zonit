@@ -1,100 +1,95 @@
 {
   "templateId": "tpl_cod_beauty_cn",
-  "templateName": "Beauty Product COD (中文)",
+  "templateName": "Beauty Product Lead Page (中文)",
   "themeConfig": {
     "mode": "light",
     "primaryColor": "#EC4899"
   },
+  "primaryConversion": {
+    "channel": "whatsapp",
+    "label": "咨询美容顾问",
+    "url": "https://wa.me/"
+  },
   "hero": {
-    "badge": "🔥 限时特惠 今日5折",
-    "title": "焕活美肌 绽放光彩\n无需预付 货到付款",
-    "subtitle": "加入15,000+满意客户的美丽之旅。收货后再付款，零风险购物体验。",
+    "badge": "免费肤质咨询",
+    "title": "焕活美肌 绽放光彩\n先咨询再选择",
+    "subtitle": "加入15,000+满意客户的美丽之旅。与美容顾问沟通肤质、需求和适合方案。",
     "background": {
       "type": "image",
-      "value": "https://images.unsplash.com/photo-1643379850274-77d2e3703ef9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
-      "overlayOpacity": 0.5
+      "value": "https://images.unsplash.com/photo-1643379850274-77d2e3703ef9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920"
     },
     "cta": {
-      "text": "微信咨询领取优惠",
+      "text": "咨询美容顾问",
       "url": "https://wa.me/",
       "icon": "MessageCircle",
-      "theme": "whatsapp"
+      "channel": "whatsapp"
     },
-    "trustText": "无需信用卡 • 货到付款 • 7天无理由退换"
+    "trustText": "无需结账 • 真实客服 • 个性化建议"
   },
-  "bundles": {
-    "title": "选择您的专属套餐",
+  "offer": {
+    "title": "选择您的咨询入口",
     "subtitle": "每一款都是精心调配，让您的肌肤焕发自然光彩",
-    "tiers": [
+    "options": [
       {
         "id": "tier-1",
-        "name": "体验装",
-        "price": "¥199",
-        "originalPrice": "¥398",
-        "description": "适合初次尝试，体验奢华护肤",
-        "features": [
-          "1瓶玻尿酸精华液 30ml",
-          "标准配送",
+        "name": "基础肤质咨询",
+        "badge": "免费咨询",
+        "description": "适合初次了解，根据肤质获得初步建议",
+        "valueProps": [
+          "肤质沟通",
+          "适合人群说明",
           "产品使用指南",
           "专属客服支持"
         ],
         "image": "https://images.unsplash.com/photo-1643379850623-7eb6442cd262?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
         "cta": {
-          "text": "微信下单",
+          "text": "微信咨询",
           "url": "https://wa.me/",
-          "icon": "MessageCircle"
+          "icon": "MessageCircle",
+          "channel": "whatsapp"
         }
       },
       {
         "id": "tier-2",
-        "name": "美肌套装",
-        "price": "¥398",
-        "originalPrice": "¥1194",
-        "description": "买2送1，全家共享美丽时光",
-        "features": [
-          "3瓶玻尿酸精华液 30ml",
-          "免费极速配送",
-          "赠送面部按摩仪",
+        "name": "进阶美肌方案咨询",
+        "description": "由顾问根据需求推荐护理方案",
+        "valueProps": [
+          "护理重点分析",
           "专属美容顾问",
           "优先客服通道",
           "独家美肌护理课程"
         ],
         "image": "https://images.unsplash.com/photo-1643379852776-308d9bbf8645?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-        "tag": "最超值",
+        "badge": "推荐",
         "cta": {
-          "text": "微信下单",
+          "text": "微信咨询方案",
           "url": "https://wa.me/",
           "icon": "MessageCircle",
-          "theme": "primary"
+          "channel": "whatsapp"
         }
       },
       {
         "id": "tier-3",
-        "name": "尊享礼盒",
-        "price": "¥598",
-        "originalPrice": "¥1990",
-        "description": "全套护肤方案，奢华美肌体验",
-        "features": [
-          "5瓶玻尿酸精华液 30ml",
-          "赠送2瓶保湿乳液",
-          "精美礼盒包装",
-          "免费极速配送",
+        "name": "尊享顾问回访",
+        "description": "适合希望获得更完整护肤建议的用户",
+        "valueProps": [
           "VIP专属客服",
           "定制护肤方案",
           "终身美容咨询"
         ],
         "image": "https://images.unsplash.com/photo-1643379850325-03959e1c2162?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-        "tag": "限量版",
+        "badge": "限量名额",
         "cta": {
-          "text": "微信下单",
+          "text": "预约顾问回访",
           "url": "https://wa.me/",
-          "icon": "MessageCircle"
+          "icon": "MessageCircle",
+          "channel": "whatsapp"
         }
       }
     ]
   },
   "howItWorks": {
-    "title": "如何下单？",
+    "title": "如何咨询？",
     "subtitle": "简单四步，开启您的美肌之旅",
     "steps": [
       {
@@ -106,20 +101,20 @@
       {
         "id": "s2",
         "icon": "MapPin",
-        "title": "提交信息",
-        "description": "告诉我们您的姓名、收货地址和联系方式"
+        "title": "说明需求",
+        "description": "告诉我们您的肤质、护肤目标和联系方式"
       },
       {
         "id": "s3",
-        "icon": "Truck",
-        "title": "快速配送",
-        "description": "2-3个工作日内，产品将送达您的手中"
+        "icon": "Check",
+        "title": "获得建议",
+        "description": "美容顾问会根据您的情况给出下一步建议"
       },
       {
         "id": "s4",
-        "icon": "Package",
-        "title": "验货付款",
-        "description": "当面验货满意后，再支付现金给快递员"
+        "icon": "Calendar",
+        "title": "预约回访",
+        "description": "需要进一步沟通时，可预约顾问回访"
       }
     ]
   },
@@ -130,15 +125,15 @@
     "links": [
       {
         "text": "隐私政策",
-        "content": "我们仅会使用您提交的联系方式来回复咨询、确认配送信息并提供客户支持。我们不会出售您的个人信息。如需访问、更正或删除已提交的信息，请联系 support@beautychoice.com。"
+        "content": "我们仅会使用您提交的联系方式来回复咨询并提供客户支持。我们不会出售您的个人信息。如需访问、更正或删除已提交的信息，请联系 support@beautychoice.com。"
       },
       {
         "text": "服务条款",
-        "content": "提交咨询即表示您同意美肌优选 BeautyChoice 可通过您提供的联系方式与您沟通。本页面用于产品咨询和线索收集，具体库存、配送时效和服务细节以客服确认为准。"
+        "content": "提交咨询即表示您同意美肌优选 BeautyChoice 可通过您提供的联系方式与您沟通。本页面用于产品咨询和线索收集，具体服务细节以客服确认为准。"
       },
       {
-        "text": "配送说明",
-        "content": "订单咨询确认后，我们会根据您所在地区安排配送。预计配送时间为 2-3 个工作日，实际时间可能受地址、物流和节假日影响。"
+        "text": "咨询说明",
+        "content": "提交咨询后，我们会根据您所在地区和需求安排客服回复。实际回复时间可能受节假日和咨询量影响。"
       },
       {
         "text": "联系我们",
@@ -161,8 +156,8 @@
           {
             "id": "b2",
             "icon": "ShieldCheck",
-            "text": "货到付款",
-            "subtext": "验货后支付"
+            "text": "隐私保护",
+            "subtext": "仅用于回复咨询"
           },
           {
             "id": "b3",
@@ -173,8 +168,8 @@
           {
             "id": "b4",
             "icon": "Clock",
-            "text": "7天退换",
-            "subtext": "无忧售后"
+            "text": "快速响应",
+            "subtext": "客服跟进"
           }
         ]
       }
@@ -185,15 +180,17 @@
       "data": {
         "title": "真实客户评价",
         "subtitle": "15,000+位满意客户的真实反馈",
-        "averageRating": 4.9,
-        "totalReviews": "15,234条评价",
+        "ratingSummary": {
+          "average": 4.9,
+          "totalLabel": "15,234条评价"
+        },
         "items": [
           {
             "id": "r1",
             "authorName": "张小姐",
             "authorRole": "北京",
             "rating": 5,
-            "content": "用了两周，皮肤明显变得水润有光泽！货到付款很放心，收货后验货才付钱。客服态度也很好，会继续回购！",
+            "content": "用了两周，皮肤明显变得水润有光泽！先咨询顾问再决定很放心。客服态度也很好，会继续回购！",
             "proofImage": "https://images.unsplash.com/photo-1643379850623-7eb6442cd262?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"
           },
           {
@@ -209,7 +206,7 @@
             "authorName": "王小姐",
             "authorRole": "广州",
             "rating": 5,
-            "content": "买了家庭套装，性价比超高！妈妈也很喜欢用。货到付款的方式让人很安心，不用担心被骗。产品是正品，包装完好。",
+            "content": "咨询了进阶方案，妈妈也很喜欢用。顾问讲解很细致，让人很安心。产品是正品，包装完好。",
             "proofImage": "https://images.unsplash.com/photo-1643379850325-03959e1c2162?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"
           },
           {
@@ -233,7 +230,7 @@
             "authorName": "周女士",
             "authorRole": "杭州",
             "rating": 5,
-            "content": "同事看到我皮肤变好都来问用的什么！已经推荐给好几个朋友了。货到付款很方便，不用提前付钱，收到再给钱更放心。",
+            "content": "同事看到我皮肤变好都来问用的什么！已经推荐给好几个朋友了。先和顾问沟通再选择更放心。",
             "proofImage": "https://images.unsplash.com/photo-1643379850623-7eb6442cd262?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400"
           }
         ]

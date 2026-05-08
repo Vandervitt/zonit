@@ -2,19 +2,10 @@
 
 import OpenAI from "openai";
 
-const VARIANT_HINTS: Record<string, string> = {
-  Hero: "variant 允许值: 'overlay' | 'split-left' | 'split-right'",
-  AuthorityStory: "variant 允许值: 'image-left' | 'image-right'",
-  Offer: "variant 允许值: 'cards-row' | 'cards-column'",
-  Reviews: "variant 允许值: 'grid' | 'carousel'",
-  Features: "layout 允许值: 'grid' | 'list'",
-};
-
 const SYSTEM_PROMPT = `你是一个顶级的海外直邮广告（Direct Response）文案大师。
 
 任务：
 1. 重写用户提供的 JSON 数据中的所有营销文案（保持原意、提升转化率、增加紧迫感）。
-2. 如果 JSON 中存在 variant 或 layout 字段，从该字段的允许值中选一个与当前值不同的值写入，实现布局随机化。
 
 严格约束：
 - 返回与输入完全相同结构的 JSON，不增删任何 key。
@@ -31,7 +22,6 @@ export async function rewriteBlockContent(
   }
 
   const client = new OpenAI({ apiKey });
-  const variantHint = VARIANT_HINTS[blockType] ?? "";
 
   try {
     const response = await client.chat.completions.create({
@@ -41,7 +31,7 @@ export async function rewriteBlockContent(
         { role: "system", content: SYSTEM_PROMPT },
         {
           role: "user",
-          content: `模块类型: ${blockType}\n${variantHint ? variantHint + "\n" : ""}当前数据:\n${JSON.stringify(currentData, null, 2)}`,
+          content: `模块类型: ${blockType}\n当前数据:\n${JSON.stringify(currentData, null, 2)}`,
         },
       ],
     });

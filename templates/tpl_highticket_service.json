@@ -5,32 +5,35 @@
     "mode": "light",
     "primaryColor": "#0F172A"
   },
+  "primaryConversion": {
+    "channel": "whatsapp",
+    "label": "Get a Free Treatment Plan",
+    "url": "https://wa.me/..."
+  },
   "hero": {
     "title": "Transform your smile \nwith world-class experts.",
     "subtitle": "Premium dental implants in Istanbul. Save up to 70% compared to UK/US clinics.",
     "background": {
       "type": "image",
-      "value": "clinic-bg.jpg",
-      "overlayOpacity": 0.6
+      "value": "clinic-bg.jpg"
     },
     "cta": {
       "text": "Get a Free Treatment Plan",
       "url": "https://wa.me/...",
       "icon": "MessageCircle",
-      "theme": "primary"
+      "channel": "whatsapp"
     },
     "trustText": "Speak with a real medical coordinator • Free X-Ray Review"
   },
-  "bundles": {
+  "offer": {
     "title": "Start Your Journey",
     "subtitle": "No hidden fees. Full transparency.",
-    "tiers": [
+    "options": [
       {
         "id": "tier-1",
         "name": "Free Online Consultation",
-        "price": "$0",
         "description": "Let our doctors evaluate your case.",
-        "features": [
+        "valueProps": [
           "X-Ray Analysis",
           "Cost Estimation",
           "Video Call option"
@@ -38,24 +41,23 @@
         "cta": {
           "text": "Request Consultation",
           "url": "https://wa.me/...",
-          "theme": "secondary"
+          "channel": "whatsapp"
         }
       },
       {
         "id": "tier-2",
         "name": "All-Inclusive VIP Package",
-        "price": "Custom Quote",
         "description": "Flights, hotel, and treatment sorted.",
-        "features": [
+        "valueProps": [
           "5-Star Hotel Stay",
           "Airport VIP Transfer",
           "Full Treatment"
         ],
-        "tag": "MOST POPULAR",
+        "badge": "MOST POPULAR",
         "cta": {
           "text": "Get VIP Quote on WA",
           "url": "https://wa.me/...",
-          "theme": "primary"
+          "channel": "whatsapp"
         }
       }
     ]

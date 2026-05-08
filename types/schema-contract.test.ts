@@ -27,11 +27,8 @@ void optionalLeadForm;
 const rootLeadFormTemplate: Partial<LandingPageTemplate> = {
   leadForm: {
     title: 'Get a Free Consultation',
-    fields: [
-      { id: 'name', name: 'name', label: 'Full Name', type: 'text', required: true },
-      { id: 'email', name: 'email', label: 'Email', type: 'email', required: true },
-    ],
     submitText: 'Send Inquiry',
+    includeMessage: true,
   },
 };
 
@@ -40,9 +37,6 @@ void rootLeadFormTemplate;
 const leadFormWithWebhook: Partial<LandingPageTemplate> = {
   leadForm: {
     title: 'Old Webhook Shape',
-    fields: [
-      { id: 'name', name: 'name', label: 'Full Name', type: 'text' },
-    ],
     submitText: 'Send Inquiry',
     // @ts-expect-error MVP lead forms submit to the platform API, not arbitrary third-party webhooks.
     webhookUrl: 'https://hooks.example.com/lead',
@@ -76,6 +70,10 @@ const minimalLandingPageTemplate: LandingPageTemplate = {
   templateId: 'minimal-lead-page',
   templateName: 'Minimal Lead Page',
   themeConfig: { mode: 'light', primaryColor: '#2563eb' },
+  primaryConversion: {
+    channel: 'form',
+    label: 'Contact Us',
+  },
   hero: {
     title: 'Book a Free Consultation',
     subtitle: 'Talk with our team before making any decision.',
@@ -109,7 +107,7 @@ const heroWithLegacyHighlights: HeroSchema = {
   title: 'Old Shape',
   subtitle: 'Old split hero trust fields.',
   background: { type: 'color', value: '#ffffff' },
-  cta: { text: 'Contact Us' },
+  cta: { text: 'Contact Us', channel: 'form' },
   // @ts-expect-error highlights/proofPoints were merged into stats.
   highlights: [],
 };
@@ -120,7 +118,7 @@ const heroWithInlineCountdown: HeroSchema = {
   title: 'Old Countdown Shape',
   subtitle: 'Countdowns now live in optional blocks.',
   background: { type: 'color', value: '#ffffff' },
-  cta: { text: 'Contact Us' },
+  cta: { text: 'Contact Us', channel: 'form' },
   // @ts-expect-error hero countdown duplicates the standalone Countdown block.
   countdown: {
     endsAt: '2026-12-31T23:59:59+08:00',
@@ -144,8 +142,8 @@ const leadGenerationOffer: OfferSchema = {
       id: 'quick-chat',
       name: 'Quick Chat',
       description: 'Talk with our team before booking.',
-      valueProps: ['Human response', 'No checkout required'],
-      cta: { text: 'Contact Us', url: 'https://wa.me/1234567890' },
+      valueProps: ['Human response', 'Simple inquiry path'],
+      cta: { text: 'Contact Us', url: 'https://wa.me/1234567890', channel: 'whatsapp' },
     },
   ],
 };

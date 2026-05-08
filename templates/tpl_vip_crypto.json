@@ -5,6 +5,11 @@
     "mode": "dark",
     "primaryColor": "#10B981"
   },
+  "primaryConversion": {
+    "channel": "telegram",
+    "label": "Message Admin on Telegram",
+    "url": "https://t.me/..."
+  },
   "hero": {
     "badge": "🚨 DOORS CLOSING SOON",
     "title": "Trade alongside \n7-figure crypto whales.",
@@ -17,44 +22,41 @@
       "text": "Message Admin on Telegram",
       "url": "https://t.me/...",
       "icon": "Telegram",
-      "theme": "telegram"
+      "channel": "telegram"
     },
     "trustText": "Currently 94/100 spots filled."
   },
-  "bundles": {
-    "title": "Choose Your Access",
-    "tiers": [
+  "offer": {
+    "title": "Choose Your Consultation Path",
+    "options": [
       {
         "id": "tier-1",
-        "name": "Monthly Pass",
-        "price": "$99",
-        "unit": "/mo",
-        "description": "Cancel anytime.",
-        "features": [
+        "name": "Strategy Fit Check",
+        "description": "Ask our admin whether the VIP room fits your trading goals.",
+        "valueProps": [
           "Daily Signals",
           "Risk Management Guide"
         ],
         "cta": {
-          "text": "Join Monthly via TG",
-          "url": "https://t.me/..."
+          "text": "Ask on Telegram",
+          "url": "https://t.me/...",
+          "channel": "telegram"
         }
       },
       {
         "id": "tier-2",
-        "name": "Lifetime Whale Access",
-        "price": "$499",
-        "unit": " one-time",
-        "description": "Never pay again.",
-        "features": [
+        "name": "VIP Mentorship Inquiry",
+        "description": "Request details about private coaching and market guidance.",
+        "valueProps": [
           "All Monthly Perks",
           "1-on-1 Mentorship",
           "Altcoin Hidden Gems"
         ],
-        "tag": "BEST ROI",
+        "badge": "FASTEST RESPONSE",
         "cta": {
-          "text": "Get Lifetime via TG",
+          "text": "Request Details via TG",
           "url": "https://t.me/...",
-          "theme": "telegram"
+          "channel": "telegram"
         }
       }
     ]
@@ -70,15 +72,15 @@
       },
       {
         "id": "s2",
-        "icon": "CreditCard",
-        "title": "Send Payment",
-        "description": "Pay securely via USDT (TRC20) or Crypto."
+        "icon": "MessageCircle",
+        "title": "Discuss Your Goals",
+        "description": "Tell us your trading experience and what support you need."
       },
       {
         "id": "s3",
-        "icon": "Unlock",
-        "title": "Get VIP Link",
-        "description": "Receive your private invite link instantly."
+        "icon": "Check",
+        "title": "Get Next Steps",
+        "description": "Our admin will explain the available consultation options."
       }
     ]
   },

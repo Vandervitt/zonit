@@ -1,5 +1,5 @@
 import { Plus, X } from "lucide-react";
-import { BackgroundType, CtaTheme, TrustBannerTheme, FeaturesLayout } from "@/lib/constants";
+import { BackgroundType } from "@/lib/constants";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
@@ -33,9 +33,10 @@ import type {
   AssuranceSchema,
   AssuranceBadge,
   LeadFormSchema,
-  LeadFormField,
-  LeadFormFieldType,
+  LeadFormExtraField,
+  LeadFormExtraFieldType,
   PixelEventName,
+  CtaChannel,
 } from "@/types/schema";
 
 // ── Dark style constants ────────────────────────────────────────────────────
@@ -89,6 +90,17 @@ const LEAD_EVENT_OPTIONS: PixelEventName[] = [
   "QuoteRequest",
 ];
 
+const CTA_CHANNEL_OPTIONS: CtaChannel[] = [
+  "whatsapp",
+  "telegram",
+  "line",
+  "phone",
+  "email",
+  "form",
+  "booking",
+  "contact_link",
+];
+
 function IconSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <Select value={value} onValueChange={onChange}>
@@ -118,14 +130,13 @@ function CtaFields({ value, onChange }: { value: CallToAction; onChange: (v: Cal
         <Field label="图标">
           <IconSelect value={value.icon ?? ""} onChange={v => onChange({ ...value, icon: v })} />
         </Field>
-        <Field label="风格">
-          <Select value={value.theme ?? CtaTheme.Primary} onValueChange={v => onChange({ ...value, theme: v as CallToAction["theme"] })}>
+        <Field label="引流渠道">
+          <Select value={value.channel ?? "form"} onValueChange={v => onChange({ ...value, channel: v as CtaChannel })}>
             <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
             <SelectContent className={dsc}>
-              <SelectItem value={CtaTheme.Primary} className={dsi}>Primary</SelectItem>
-              <SelectItem value={CtaTheme.Secondary} className={dsi}>Secondary</SelectItem>
-              <SelectItem value={CtaTheme.WhatsApp} className={dsi}>WhatsApp</SelectItem>
-              <SelectItem value={CtaTheme.Telegram} className={dsi}>Telegram</SelectItem>
+              {CTA_CHANNEL_OPTIONS.map(channel => (
+                <SelectItem key={channel} value={channel} className={dsi}>{channel}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>
@@ -153,7 +164,6 @@ const DEFAULT_STICKY_CTA: CallToAction = {
   text: "Chat on WhatsApp",
   url: "https://wa.me/1234567890",
   icon: "WhatsApp",
-  theme: "whatsapp",
   channel: "whatsapp",
 };
 
@@ -225,20 +235,9 @@ export function CountdownForm({ data, onChange }: { data: CountdownSchema; onCha
           onChange={e => onChange({ ...data, endsAt: localInputToIso(e.target.value) || data.endsAt })}
         />
       </Field>
-      <div className="grid grid-cols-2 gap-2">
-        <Field label="标题">
-          <Input className={di} value={data.title ?? ""} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="Limited-Time Offer" />
-        </Field>
-        <Field label="样式">
-          <Select value={data.variant ?? "section"} onValueChange={v => onChange({ ...data, variant: v as CountdownSchema["variant"] })}>
-            <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
-            <SelectContent className={dsc}>
-              <SelectItem value="section" className={dsi}>独立区块</SelectItem>
-              <SelectItem value="banner" className={dsi}>顶部横幅</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-      </div>
+      <Field label="标题">
+        <Input className={di} value={data.title ?? ""} onChange={e => onChange({ ...data, title: e.target.value })} placeholder="Limited-Time Offer" />
+      </Field>
       <Field label="副标题">
         <Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} placeholder="Consultation slots are limited this week" />
       </Field>
@@ -300,8 +299,7 @@ function OptionEditor({ option, onChange, onRemove, index }: { option: OfferOpti
       </div>
       <div className="grid grid-cols-2 gap-2">
         <Field label="名称"><Input className={`${di} h-8`} value={option.name} onChange={e => onChange({ ...option, name: e.target.value })} /></Field>
-        <Field label="展示文案"><Input className={`${di} h-8`} value={option.labelText ?? ""} onChange={e => onChange({ ...option, labelText: e.target.value })} placeholder="Free Quote" /></Field>
-        <Field label="推荐标签"><Input className={`${di} h-8`} value={option.tag ?? ""} onChange={e => onChange({ ...option, tag: e.target.value })} placeholder="Most Popular" /></Field>
+        <Field label="徽章"><Input className={`${di} h-8`} value={option.badge ?? ""} onChange={e => onChange({ ...option, badge: e.target.value || undefined })} placeholder="Free Quote" /></Field>
         <Field label="紧迫文案"><Input className={`${di} h-8`} value={option.urgencyText ?? ""} onChange={e => onChange({ ...option, urgencyText: e.target.value })} placeholder="仅剩 5 名额" /></Field>
       </div>
       <Field label="简介"><Input className={`${di} h-8`} value={option.description} onChange={e => onChange({ ...option, description: e.target.value })} /></Field>
@@ -334,7 +332,7 @@ export function OfferForm({ data, onChange }: { data: OfferSchema; onChange: (d:
       name: "New Option",
       description: "Option description",
       valueProps: ["Value prop 1", "Value prop 2"],
-      cta: { text: "Contact Us", url: "https://wa.me/1234567890", icon: "WhatsApp", theme: "whatsapp" },
+      cta: { text: "Contact Us", url: "https://wa.me/1234567890", icon: "WhatsApp", channel: "whatsapp" },
     };
     onChange({ ...data, options: [...data.options, newOption] });
   };
@@ -468,15 +466,6 @@ export function FeaturesForm({ data, onChange }: { data: FeaturesSchema; onChang
     <div className="space-y-4">
       <Field label="标题"><Input className={di} value={data.title} onChange={e => onChange({ ...data, title: e.target.value })} /></Field>
       <Field label="副标题"><Input className={di} value={data.subtitle ?? ""} onChange={e => onChange({ ...data, subtitle: e.target.value })} /></Field>
-      <Field label="布局">
-        <Select value={data.layout ?? FeaturesLayout.Grid} onValueChange={v => onChange({ ...data, layout: v as "grid" | "list" })}>
-          <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
-          <SelectContent className={dsc}>
-            <SelectItem value={FeaturesLayout.Grid} className={dsi}>网格</SelectItem>
-            <SelectItem value={FeaturesLayout.List} className={dsi}>列表</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
       <SectionDivider label="卖点" />
       <div className="space-y-2">
         {data.items.map((item, i) => (
@@ -573,16 +562,6 @@ export function TrustBannerForm({ data, onChange }: { data: TrustBannerSchema; o
   const addBadge = () => onChange({ ...data, badges: [...data.badges, { id: crypto.randomUUID(), icon: "Check", text: "New Badge" }] });
   return (
     <div className="space-y-4">
-      <Field label="主题">
-        <Select value={data.theme ?? TrustBannerTheme.Light} onValueChange={v => onChange({ ...data, theme: v as "light" | "dark" | "brand" })}>
-          <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
-          <SelectContent className={dsc}>
-            <SelectItem value={TrustBannerTheme.Light} className={dsi}>浅色</SelectItem>
-            <SelectItem value={TrustBannerTheme.Dark} className={dsi}>深色</SelectItem>
-            <SelectItem value={TrustBannerTheme.Brand} className={dsi}>品牌色</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
       <SectionDivider label="徽章" />
       <div className="space-y-2">
         {data.badges.map((badge, i) => (
@@ -750,16 +729,12 @@ export function AssuranceForm({ data, onChange }: { data: AssuranceSchema; onCha
 
 // ── LeadFormForm ────────────────────────────────────────────────────────────
 
-const FIELD_TYPE_LABEL: Record<LeadFormFieldType, string> = {
+const FIELD_TYPE_LABEL: Record<LeadFormExtraFieldType, string> = {
   text: "文本",
-  email: "邮箱",
-  phone: "电话",
   select: "下拉",
-  textarea: "多行文本",
-  checkbox: "勾选",
 };
 
-function LeadFieldEditor({ field, onChange, onRemove }: { field: LeadFormField; onChange: (f: LeadFormField) => void; onRemove: () => void }) {
+function LeadExtraFieldEditor({ field, onChange, onRemove }: { field: LeadFormExtraField; onChange: (f: LeadFormExtraField) => void; onRemove: () => void }) {
   const isSelect = field.type === "select";
   const addOption = () =>
     onChange({ ...field, options: [...(field.options ?? []), { label: "Option", value: "option" }] });
@@ -776,10 +751,10 @@ function LeadFieldEditor({ field, onChange, onRemove }: { field: LeadFormField; 
           <Input className={`${di} h-8`} value={field.name} onChange={e => onChange({ ...field, name: e.target.value })} placeholder="email" />
         </Field>
         <Field label="类型">
-          <Select value={field.type} onValueChange={v => onChange({ ...field, type: v as LeadFormFieldType })}>
+          <Select value={field.type} onValueChange={v => onChange({ ...field, type: v as LeadFormExtraFieldType })}>
             <SelectTrigger className={`${dst} h-8`}><SelectValue /></SelectTrigger>
             <SelectContent className={dsc}>
-              {(Object.keys(FIELD_TYPE_LABEL) as LeadFormFieldType[]).map(t => (
+              {(Object.keys(FIELD_TYPE_LABEL) as LeadFormExtraFieldType[]).map(t => (
                 <SelectItem key={t} value={t} className={dsi}>{FIELD_TYPE_LABEL[t]}</SelectItem>
               ))}
             </SelectContent>
@@ -819,8 +794,8 @@ function LeadFieldEditor({ field, onChange, onRemove }: { field: LeadFormField; 
 
 export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChange: (d: LeadFormSchema) => void }) {
   const addField = () => {
-    const newField: LeadFormField = { id: crypto.randomUUID(), name: "field", label: "New Field", type: "text" };
-    onChange({ ...data, fields: [...data.fields, newField] });
+    const newField: LeadFormExtraField = { id: crypto.randomUUID(), name: "interest", label: "Service Needed", type: "text" };
+    onChange({ ...data, extraFields: [...(data.extraFields ?? []), newField] });
   };
   return (
     <div className="space-y-4">
@@ -843,19 +818,33 @@ export function LeadFormForm({ data, onChange }: { data: LeadFormSchema; onChang
       <Field label="GDPR 同意文本">
         <Textarea className={`${dt} min-h-[50px]`} value={data.consentText ?? ""} onChange={e => onChange({ ...data, consentText: e.target.value })} placeholder="By submitting, you agree to our privacy policy." />
       </Field>
-      <SectionDivider label="字段" />
+      <Field label="留言字段">
+        <Select value={data.includeMessage === false ? "no" : "yes"} onValueChange={v => onChange({ ...data, includeMessage: v === "yes" })}>
+          <SelectTrigger className={dst}><SelectValue /></SelectTrigger>
+          <SelectContent className={dsc}>
+            <SelectItem value="yes" className={dsi}>展示可选留言</SelectItem>
+            <SelectItem value="no" className={dsi}>不展示留言</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+      <SectionDivider label="行业意向字段" />
+      <p className="text-xs text-zinc-500 leading-relaxed">
+        基础字段固定为姓名、电话、邮箱。这里只添加 1-2 个行业意向字段，例如服务类型、目标国家或预算范围。
+      </p>
       <div className="space-y-2">
-        {data.fields.map((field, i) => (
-          <LeadFieldEditor
+        {(data.extraFields ?? []).map((field, i) => (
+          <LeadExtraFieldEditor
             key={field.id}
             field={field}
-            onChange={f => onChange({ ...data, fields: data.fields.map((ff, fi) => fi === i ? f : ff) })}
-            onRemove={() => onChange({ ...data, fields: data.fields.filter((_, fi) => fi !== i) })}
+            onChange={f => onChange({ ...data, extraFields: (data.extraFields ?? []).map((ff, fi) => fi === i ? f : ff) })}
+            onRemove={() => onChange({ ...data, extraFields: (data.extraFields ?? []).filter((_, fi) => fi !== i) })}
           />
         ))}
-        <Button variant="ghost" size="sm" className={addBtn} onClick={addField}>
-          <Plus className="w-3 h-3" />添加字段
-        </Button>
+        {(data.extraFields ?? []).length < 2 && (
+          <Button variant="ghost" size="sm" className={addBtn} onClick={addField}>
+            <Plus className="w-3 h-3" />添加意向字段
+          </Button>
+        )}
       </div>
     </div>
   );

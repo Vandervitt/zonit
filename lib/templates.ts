@@ -22,7 +22,7 @@ export function heroBackgroundStyle(tpl: PresetTemplate | undefined): CSSPropert
 export function getDefaultBlockData(type: string) {
   const defaults: Record<string, unknown> = {
     Features: {
-      title: 'Our Features', subtitle: 'What makes us different', layout: 'grid',
+      title: 'Our Features', subtitle: 'What makes us different',
       items: [
         { id: crypto.randomUUID(), icon: 'Star', title: 'Feature One', description: 'Describe this feature briefly.' },
         { id: crypto.randomUUID(), icon: 'Shield', title: 'Feature Two', description: 'Describe this feature briefly.' },
@@ -36,7 +36,6 @@ export function getDefaultBlockData(type: string) {
       ],
     },
     TrustBanner: {
-      theme: 'light',
       badges: [
         { id: crypto.randomUUID(), icon: 'Shield', text: 'Secure' },
         { id: crypto.randomUUID(), icon: 'Star', text: 'Top Rated' },
@@ -61,7 +60,6 @@ export function getDefaultBlockData(type: string) {
       subtitle: 'Consultation slots are limited this week',
       endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       expiredFallback: { title: 'Offer Ended', subtitle: 'Stay tuned for the next campaign' },
-      variant: 'section',
     },
     LeadForm: {
       title: 'Get a Free Quote',
@@ -70,12 +68,8 @@ export function getDefaultBlockData(type: string) {
       successMessage: 'Thanks! We\'ll be in touch shortly.',
       consentText: 'By submitting, you agree to our privacy policy.',
       eventName: 'FormSubmit',
-      fields: [
-        { id: crypto.randomUUID(), name: 'name', label: 'Full Name', type: 'text', required: true, placeholder: 'Jane Doe' },
-        { id: crypto.randomUUID(), name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'you@example.com' },
-        { id: crypto.randomUUID(), name: 'phone', label: 'Phone (with country code)', type: 'phone', placeholder: '+1 555 000 1234' },
-        { id: crypto.randomUUID(), name: 'message', label: 'How can we help?', type: 'textarea', placeholder: 'Tell us a bit about your project...' },
-      ],
+      includeMessage: true,
+      extraFields: [],
     },
   };
   return defaults[type] || {};
