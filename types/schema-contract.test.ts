@@ -1,4 +1,11 @@
-import type { BlockType, CallToAction, LandingPage, LandingPageTemplate } from './schema';
+import type {
+  BlockType,
+  CallToAction,
+  LandingPage,
+  LandingPageTemplate,
+  LeadMagnetSchema,
+  PageBlock,
+} from './schema';
 import type { ZodLandingPageTemplate } from '../lib/schema.zod';
 
 // @ts-expect-error offer entries are consultation paths, not pricing tiers.
@@ -67,6 +74,44 @@ void ctaWithMismatchedDestination;
 const optionalLeadForm: BlockType = 'LeadForm';
 
 void optionalLeadForm;
+
+// @ts-expect-error visual attraction blocks stay consultation-oriented, not product showcase blocks.
+const productShowcaseBlock: BlockType = 'ProductShowcase';
+
+void productShowcaseBlock;
+
+const leadMagnetBlock: PageBlock = {
+  id: 'lead-magnet',
+  type: 'LeadMagnet',
+  data: {
+    title: 'Get a Free Skin Assessment',
+    subtitle: 'Share your concern and receive a personalized next-step suggestion.',
+    incentive: 'Personalized consultation summary',
+    valueProps: ['No payment required', 'Human reply within 10 minutes'],
+    cta: {
+      text: 'Start Assessment',
+      channel: 'form',
+      destination: { type: 'form', formId: 'lead-form' },
+    },
+  },
+};
+
+void leadMagnetBlock;
+
+const leadMagnetWithRendererClass: LeadMagnetSchema = {
+  title: 'Get a Free Skin Assessment',
+  incentive: 'Personalized consultation summary',
+  valueProps: ['No payment required'],
+  cta: {
+    text: 'Start Assessment',
+    channel: 'form',
+    destination: { type: 'form', formId: 'lead-form' },
+  },
+  // @ts-expect-error schema describes marketing content, not renderer CSS classes.
+  className: 'rounded-2xl bg-white',
+};
+
+void leadMagnetWithRendererClass;
 
 const consultationLinkCta: CallToAction = {
   text: 'Request Consultation',

@@ -205,6 +205,7 @@ const ReviewItemSchema = z.object({
 const ReviewsSchemaZ = z.object({
   title: NonEmpty,
   subtitle: z.string().optional(),
+  presentation: z.enum(['cards', 'chat_screenshots', 'video_grid']).optional(),
   ratingSummary: z.object({
     average: z.number().min(0).max(5),
     scale: z.number().positive().optional(),
@@ -224,6 +225,81 @@ const TrustBadgeSchema = z.object({
 const TrustBannerSchemaZ = z.object({
   badges: z.array(TrustBadgeSchema).min(1),
 });
+
+const PainPointItemSchema = z.object({
+  id: NonEmpty,
+  icon: z.string().optional(),
+  title: NonEmpty,
+  description: z.string(),
+  visual: ImageMetaSchema.optional(),
+}).strict();
+
+const PainPointsSchemaZ = z.object({
+  title: NonEmpty,
+  subtitle: z.string().optional(),
+  items: z.array(PainPointItemSchema).min(1),
+  cta: CallToActionSchema.optional(),
+}).strict();
+
+const LeadMagnetSchemaZ = z.object({
+  title: NonEmpty,
+  subtitle: z.string().optional(),
+  incentive: NonEmpty,
+  valueProps: z.array(z.string()).min(1),
+  image: ImageMetaSchema.optional(),
+  trustText: z.string().optional(),
+  cta: CallToActionSchema,
+}).strict();
+
+const ProofCaseItemSchema = z.object({
+  id: NonEmpty,
+  title: NonEmpty,
+  concern: z.string().optional(),
+  outcome: z.string().optional(),
+  timeframe: z.string().optional(),
+  beforeImage: ImageMetaSchema.optional(),
+  afterImage: ImageMetaSchema.optional(),
+  image: ImageMetaSchema.optional(),
+  testimonial: z.string().optional(),
+  cta: CallToActionSchema.optional(),
+}).strict();
+
+const ProofCasesSchemaZ = z.object({
+  title: NonEmpty,
+  subtitle: z.string().optional(),
+  cases: z.array(ProofCaseItemSchema).min(1),
+  disclaimer: z.string().optional(),
+}).strict();
+
+const VisualGalleryItemSchema = z.object({
+  id: NonEmpty,
+  image: ImageMetaSchema,
+  title: z.string().optional(),
+  description: z.string().optional(),
+  tag: z.string().optional(),
+}).strict();
+
+const VisualGallerySchemaZ = z.object({
+  title: NonEmpty,
+  subtitle: z.string().optional(),
+  items: z.array(VisualGalleryItemSchema).min(1),
+  cta: CallToActionSchema.optional(),
+  disclaimer: z.string().optional(),
+}).strict();
+
+const MetricsItemSchema = z.object({
+  id: NonEmpty,
+  label: NonEmpty,
+  value: NonEmpty,
+  context: z.string().optional(),
+  icon: z.string().optional(),
+}).strict();
+
+const MetricsSchemaZ = z.object({
+  title: z.string().optional(),
+  subtitle: z.string().optional(),
+  items: z.array(MetricsItemSchema).min(1),
+}).strict();
 
 const LogoWallItemSchema = z.object({
   id: NonEmpty,
@@ -376,6 +452,11 @@ const OptionalBlockSchema = z.discriminatedUnion('type', [
   block('Features', FeaturesSchemaZ),
   block('Reviews', ReviewsSchemaZ),
   block('TrustBanner', TrustBannerSchemaZ),
+  block('PainPoints', PainPointsSchemaZ),
+  block('LeadMagnet', LeadMagnetSchemaZ),
+  block('ProofCases', ProofCasesSchemaZ),
+  block('VisualGallery', VisualGallerySchemaZ),
+  block('Metrics', MetricsSchemaZ),
   block('LogoWall', LogoWallSchemaZ),
   block('AuthorityStory', AuthoritySchemaZ),
   block('FAQ', FAQSchemaZ),
@@ -414,6 +495,12 @@ function collectFormActionIds(template: z.infer<typeof LandingPageSchemaBase>): 
     if (block.type === 'Countdown') formIds.push(formIdForAction(block.data.cta));
     if (block.type === 'FAQ') formIds.push(formIdForAction(block.data.contactCta));
     if (block.type === 'Assurance') formIds.push(formIdForAction(block.data.cta));
+    if (block.type === 'PainPoints') formIds.push(formIdForAction(block.data.cta));
+    if (block.type === 'LeadMagnet') formIds.push(formIdForAction(block.data.cta));
+    if (block.type === 'ProofCases') {
+      formIds.push(...block.data.cases.map(proofCase => formIdForAction(proofCase.cta)));
+    }
+    if (block.type === 'VisualGallery') formIds.push(formIdForAction(block.data.cta));
   }
 
   return formIds.filter((formId): formId is string => Boolean(formId));

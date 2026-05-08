@@ -137,14 +137,16 @@ export interface HeroSchema {
   title: string;                // 主标题，支持换行
   subtitle: string;             // 副标题
   background: {
-    type: 'image' | 'color' | 'video';
-    value: string;              // 图片/视频URL 或 颜色代码
+    type: 'image' | 'color' | 'video' | 'gradient';
+    value: string;              // 图片/视频URL、颜色代码或渐变值
+    overlay?: string;           // 背景遮罩，如 "rgba(0,0,0,0.45)"，控制文字可读性
   };
+  layout?: 'center' | 'split'; // center=文字居中全屏，split=左文右图分栏；默认 center
   cta: CallToAction;            // 主按钮
   secondaryCta?: CallToAction;  // 次按钮，如 "See Results" / "Learn More" / "Check Cases"
   trustText?: string;           // 按钮下方的小字背书，如 "Free consultation" / "Reply within 10 minutes"
   stats?: HeroStat[];           // 首屏利益点/证明信息，快速降低跳出并建立初始信任
-  media?: HeroMedia;            // 首屏辅助视觉
+  media?: HeroMedia;            // 首屏辅助视觉；layout 为 split 时作为右侧主图
 }
 
 
@@ -176,6 +178,7 @@ export interface StepItem {
   icon: IconType;               // 如 "MessageCircle", "Check", "Calendar"
   title: string;                // 如 "Step 1: Contact Us"
   description: string;          // 如 "Click the button to chat with our team on WhatsApp."
+  image?: ImageMeta;            // 步骤配图，视觉化流程说明；有图版比纯图标转化更高
 }
 
 export interface HowItWorksSchema {
@@ -236,6 +239,7 @@ export interface ReviewItem {
 export interface ReviewsSchema {
   title: string;
   subtitle?: string;
+  presentation?: 'cards' | 'chat_screenshots' | 'video_grid'; // 渲染器可据此选择评价的展示变体，不改变评价语义
   ratingSummary?: {
     average: number;
     scale?: number;             // 默认可按 5 分制理解
@@ -255,6 +259,86 @@ export interface TrustBadge {
 
 export interface TrustBannerSchema {
   badges: TrustBadge[];
+}
+
+// 痛点 / 理想状态共鸣：用于首屏之后继续吸引用户，帮助访客快速判断“这和我有关”
+export interface PainPointItem {
+  id: string;
+  icon?: IconType;
+  title: string;
+  description: string;
+  visual?: ImageMeta;            // 痛点场景或理想状态图，不表达商品售卖
+}
+
+export interface PainPointsSchema {
+  title: string;
+  subtitle?: string;
+  items: PainPointItem[];
+  cta?: CallToAction;
+}
+
+// 留资钩子：把“咨询”包装成用户可获得的轻量结果，如评估、报价、方案建议或档期确认
+export interface LeadMagnetSchema {
+  title: string;
+  subtitle?: string;
+  incentive: string;             // 如 "Free assessment report" / "Personalized quote" / "Style match"
+  valueProps: string[];          // 用户留资后能得到什么，避免写成商品权益或购买优惠
+  image?: ImageMeta;
+  trustText?: string;            // 如 "No payment required" / "No obligation consultation"
+  cta: CallToAction;
+}
+
+// 视觉证明案例：展示结果、过程或服务前后变化；高风险行业必须配合 disclaimer
+export interface ProofCaseItem {
+  id: string;
+  title: string;
+  concern?: string;              // 用户原始问题或咨询目标
+  outcome?: string;              // 咨询或服务后获得的结果描述，避免绝对化承诺
+  timeframe?: string;            // 如 "After 4 weeks" / "Same-day consultation"
+  beforeImage?: ImageMeta;
+  afterImage?: ImageMeta;
+  image?: ImageMeta;             // 无前后对比时使用的案例主图
+  testimonial?: string;
+  cta?: CallToAction;
+}
+
+export interface ProofCasesSchema {
+  title: string;
+  subtitle?: string;
+  cases: ProofCaseItem[];
+  disclaimer?: string;           // 如 "Results may vary"，医美/健康/金融等类目建议必填
+}
+
+// 视觉图库：展示真实场景、过程、效果、团队或环境，负责第一眼吸引与代入感
+export interface VisualGalleryItem {
+  id: string;
+  image: ImageMeta;
+  title?: string;
+  description?: string;
+  tag?: string;
+}
+
+export interface VisualGallerySchema {
+  title: string;
+  subtitle?: string;
+  items: VisualGalleryItem[];
+  cta?: CallToAction;
+  disclaimer?: string;
+}
+
+// 指标证明：把服务规模、响应速度、满意度、经验等可信数字独立展示
+export interface MetricsItem {
+  id: string;
+  label: string;
+  value: string;
+  context?: string;
+  icon?: IconType;
+}
+
+export interface MetricsSchema {
+  title?: string;
+  subtitle?: string;
+  items: MetricsItem[];
 }
 
 // 媒体报道 / 客户 logo 墙：用于快速建立第三方信任，不替代 TrustBanner 的短文案信任点
@@ -403,6 +487,11 @@ export type BlockType =
   | 'Features'
   | 'Reviews'
   | 'TrustBanner'
+  | 'PainPoints'
+  | 'LeadMagnet'
+  | 'ProofCases'
+  | 'VisualGallery'
+  | 'Metrics'
   | 'LogoWall'
   | 'AuthorityStory'
   | 'FAQ'
@@ -420,6 +509,11 @@ export type PageBlock =
   | BlockBase<'Features', FeaturesSchema>
   | BlockBase<'Reviews', ReviewsSchema>
   | BlockBase<'TrustBanner', TrustBannerSchema>
+  | BlockBase<'PainPoints', PainPointsSchema>
+  | BlockBase<'LeadMagnet', LeadMagnetSchema>
+  | BlockBase<'ProofCases', ProofCasesSchema>
+  | BlockBase<'VisualGallery', VisualGallerySchema>
+  | BlockBase<'Metrics', MetricsSchema>
   | BlockBase<'LogoWall', LogoWallSchema>
   | BlockBase<'AuthorityStory', AuthoritySchema>
   | BlockBase<'FAQ', FAQSchema>
@@ -456,6 +550,10 @@ export interface LandingPageTemplate extends LandingPage {
   templateName: string;
   themeConfig: {
     mode: 'light' | 'dark';
-    primaryColor: string;    // 主色调
+    primaryColor: string;                            // 主色调，用于 CTA 按钮、高亮等
+    accentColor?: string;                            // 辅助色，用于徽章、标签等次要强调
+    fontFamily?: 'sans' | 'serif' | 'display' | string; // 字体风格；display 适合美妆/高端品牌
+    borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full'; // 全局圆角风格
+    spacing?: 'compact' | 'normal' | 'relaxed';     // 区块间距，影响整体疏密感
   };
 }
