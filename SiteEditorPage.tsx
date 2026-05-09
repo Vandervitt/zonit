@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip
 import { BlockEditorPanel } from "./components/sites/BlockEditorPanel";
 import { PreviewPane } from "./components/sites/PreviewPane";
 import { getSiteById, updateSite, isSiteNameUnique } from "./lib/site-store";
+import { isExtractedTemplateData, type PresetTemplateData } from "./lib/templates";
 import type { LandingPageTemplate } from "./types/schema";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -18,7 +19,7 @@ export function SiteEditorPage() {
 
   const site = getSiteById(siteId!);
   const [name, setName] = useState(site?.name ?? "");
-  const [data, setData] = useState<LandingPageTemplate | null>(site?.data ?? null);
+  const [data, setData] = useState<PresetTemplateData | null>(site?.data ?? null);
   const [published, setPublished] = useState(site?.published ?? false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [nameError, setNameError] = useState("");
@@ -31,7 +32,7 @@ export function SiteEditorPage() {
 
   // Auto-save on data change (debounced)
   const autoSave = useCallback(
-    (newData: LandingPageTemplate, newName: string) => {
+    (newData: PresetTemplateData, newName: string) => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => {
         if (!siteId) return;
@@ -147,7 +148,16 @@ export function SiteEditorPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Left 40%: Block Editor */}
         <div className="w-[40%] flex flex-col overflow-hidden border-r border-border">
-          <BlockEditorPanel data={data} onChange={handleDataChange} expandedKey={expandedKey} onExpandedKeyChange={setExpandedKey} />
+          {isExtractedTemplateData(data) ? (
+            <div className="h-full bg-zinc-950 p-4 text-sm text-zinc-400">
+              <p className="text-zinc-200 font-medium mb-2">抽取模板</p>
+              <p className="text-xs leading-5">
+                此模板使用原始抽取数据和专用渲染器复现，当前不经过通用模块编辑器改写。
+              </p>
+            </div>
+          ) : (
+            <BlockEditorPanel data={data} onChange={handleDataChange} expandedKey={expandedKey} onExpandedKeyChange={setExpandedKey} />
+          )}
         </div>
 
         {/* Right 60%: Preview */}

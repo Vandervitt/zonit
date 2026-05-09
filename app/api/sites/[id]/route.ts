@@ -5,6 +5,7 @@ import pool from "@/lib/db";
 import { ApiErrors } from "@/lib/constants";
 import { SiteStatus } from "@/lib/constants";
 import { withGeneratedSeo } from "@/lib/seo";
+import { isExtractedTemplateData } from "@/lib/templates";
 import type { LandingPageTemplate } from "@/types/schema";
 
 export async function GET(_req: NextRequest, ctx: RouteContext<"/api/sites/[id]">) {
@@ -45,7 +46,7 @@ export async function PUT(request: NextRequest, ctx: RouteContext<"/api/sites/[i
     }
   }
 
-  if (published === true && data !== undefined && slug !== undefined) {
+  if (published === true && data !== undefined && slug !== undefined && !isExtractedTemplateData(data)) {
     nextData = await withGeneratedSeo(data as LandingPageTemplate, {
       canonicalUrl: new URL(`/site/${slug}`, request.url).toString(),
     });

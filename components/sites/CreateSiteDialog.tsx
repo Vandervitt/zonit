@@ -14,7 +14,7 @@ import { Badge } from "../ui/badge";
 import { cn } from "../ui/utils";
 import { useTemplates } from "../../lib/use-templates";
 import { createSite, isSiteNameUnique } from "../../lib/site-store";
-import { heroBackgroundStyle } from "../../lib/templates";
+import { heroBackgroundStyle, isExtractedTemplateData } from "../../lib/templates";
 
 interface Props {
   open: boolean;
@@ -48,11 +48,18 @@ export function CreateSiteDialog({ open, onOpenChange, onCreated }: Props) {
       setError("请选择一个模板");
       return;
     }
-    const site = createSite(trimmed, selectedTemplateId, {
-      ...template.data,
-      templateId: selectedTemplateId,
-      templateName: trimmed,
-    });
+    const siteData = isExtractedTemplateData(template.data)
+      ? {
+          ...template.data,
+          templateId: selectedTemplateId,
+          templateName: trimmed,
+        }
+      : {
+          ...template.data,
+          templateId: selectedTemplateId,
+          templateName: trimmed,
+        };
+    const site = createSite(trimmed, selectedTemplateId, siteData);
     setName("");
     setError("");
     setSelectedId(templates[0]?.id ?? "");

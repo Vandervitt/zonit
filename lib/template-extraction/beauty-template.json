@@ -1,0 +1,669 @@
+{
+  "templateId": "extracted-beauty-landing-page",
+  "templateName": "Extracted Beauty Landing Page",
+  "modules": [
+    { "id": "module-hero", "type": "hero", "dataKey": "hero", "stylesKey": "hero" },
+    { "id": "module-stats", "type": "stats", "dataKey": "stats", "stylesKey": "stats" },
+    { "id": "module-offer", "type": "offer", "dataKey": "offer", "stylesKey": "offer" },
+    { "id": "module-product-showcase", "type": "productShowcase", "dataKey": "productShowcase", "stylesKey": "productShowcase" },
+    { "id": "module-before-after", "type": "beforeAfter", "dataKey": "beforeAfter", "stylesKey": "beforeAfter" },
+    { "id": "module-video-testimonials", "type": "videoTestimonials", "dataKey": "videoTestimonials", "stylesKey": "videoTestimonials" },
+    { "id": "module-how-it-works", "type": "howItWorks", "dataKey": "howItWorks", "stylesKey": "howItWorks" },
+    { "id": "module-trust", "type": "trustBanner", "dataKey": "trustBanner", "stylesKey": "trustBanner" },
+    { "id": "module-logo-wall", "type": "logoWall", "dataKey": "logoWall", "stylesKey": "logoWall" },
+    { "id": "module-features", "type": "features", "dataKey": "features", "stylesKey": "features" },
+    { "id": "module-reviews", "type": "reviews", "dataKey": "reviews", "stylesKey": "reviews" },
+    { "id": "module-authority", "type": "authority", "dataKey": "authority", "stylesKey": "authority" },
+    { "id": "module-countdown", "type": "countdown", "dataKey": "countdown", "stylesKey": "countdown" },
+    { "id": "module-faq", "type": "faq", "dataKey": "faq", "stylesKey": "faq" },
+    { "id": "module-assurance", "type": "assurance", "dataKey": "assurance", "stylesKey": "assurance" },
+    { "id": "module-footer", "type": "footer", "dataKey": "footer", "stylesKey": "footer" },
+    { "id": "module-sticky-cta", "type": "stickyCta", "dataKey": "stickyCta", "stylesKey": "stickyCta" }
+  ],
+  "content": {
+    "hero": {
+      "badge": "✨ Free Consultation Available",
+      "title": "Transform Your Skin with\nPersonalized Beauty Solutions",
+      "subtitle": "Get expert skincare guidance tailored to your unique needs. Our certified beauty consultants help you achieve radiant, glowing skin.",
+      "background": {
+        "src": "https://images.unsplash.com/photo-1519084278803-b94f11e1c63b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
+        "alt": ""
+      },
+      "media": {
+        "src": "https://images.unsplash.com/photo-1747324831504-5ee9aa8eec59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800",
+        "alt": "Woman holding premium skincare product"
+      },
+      "cta": {
+        "text": "Start Free Consultation",
+        "icon": "WhatsApp",
+        "channel": "whatsapp",
+        "destination": { "type": "whatsapp", "url": "https://wa.me/15551234567" },
+        "prefilledMessage": "Hi! I'd like to book a free beauty consultation.",
+        "tracking": { "eventName": "WhatsAppClick", "label": "hero_primary" }
+      },
+      "secondaryCta": {
+        "text": "See Success Stories",
+        "icon": "Star",
+        "channel": "consultation_link",
+        "destination": { "type": "consultation_link", "url": "#reviews" },
+        "target": "_self"
+      },
+      "trustText": "✓ Reply within 10 minutes · Free skin analysis",
+      "stats": [
+        { "id": "stat-1", "label": "Happy Clients", "value": "15,000+", "icon": "Star" },
+        { "id": "stat-2", "label": "Client Rating", "value": "4.9/5", "icon": "Award" },
+        { "id": "stat-3", "label": "Expert Consultants", "value": "50+", "icon": "Verified" }
+      ]
+    },
+    "stats": {
+      "title": "Trusted by Thousands Worldwide",
+      "subtitle": "Join our growing community of satisfied clients achieving their skincare goals",
+      "items": [
+        { "id": "stats-1", "value": "15,000+", "label": "Happy Clients", "icon": "👥", "image": { "src": "https://images.unsplash.com/photo-1733685373532-e67c3f68786a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", "alt": "Happy Clients" } },
+        { "id": "stats-2", "value": "98%", "label": "Success Rate", "icon": "⭐", "image": { "src": "https://images.unsplash.com/photo-1710196598595-7dcfd465bd77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", "alt": "Success Rate" } },
+        { "id": "stats-3", "value": "50+", "label": "Expert Consultants", "icon": "💎", "image": { "src": "https://images.unsplash.com/photo-1760488029475-41ff1eaa904b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", "alt": "Expert Consultants" } },
+        { "id": "stats-4", "value": "10 min", "label": "Average Response Time", "icon": "⚡", "image": { "src": "https://images.unsplash.com/photo-1747324831504-5ee9aa8eec59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", "alt": "Average Response Time" } }
+      ]
+    },
+    "offer": {
+      "title": "Choose Your Beauty Journey",
+      "subtitle": "Select the consultation service that fits your needs",
+      "showImages": true,
+      "options": [
+        {
+          "id": "offer-1",
+          "name": "Free Consultation",
+          "description": "Perfect for first-time clients",
+          "badge": "Most Popular",
+          "image": "https://images.unsplash.com/photo-1733685373532-e67c3f68786a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800",
+          "valueProps": ["One-on-one expert consultation", "Personalized skincare routine", "Product recommendations", "No obligation required"],
+          "urgencyText": "Only 8 slots left this week",
+          "cta": {
+            "text": "Book Free Consultation",
+            "icon": "Calendar",
+            "channel": "whatsapp",
+            "destination": { "type": "whatsapp", "url": "https://wa.me/15551234567" },
+            "prefilledMessage": "I want to book a free consultation",
+            "tracking": { "eventName": "WhatsAppClick", "label": "offer_free_consultation" }
+          }
+        },
+        {
+          "id": "offer-2",
+          "name": "Premium Assessment",
+          "description": "Advanced skin analysis & treatment plan",
+          "badge": "Recommended",
+          "image": "https://images.unsplash.com/photo-1775642548281-fcf81fd6f2a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800",
+          "valueProps": ["Comprehensive skin analysis", "Custom treatment roadmap", "3-month follow-up support", "Priority scheduling"],
+          "cta": {
+            "text": "Get Premium Assessment",
+            "icon": "Award",
+            "channel": "whatsapp",
+            "destination": { "type": "whatsapp", "url": "https://wa.me/15551234567" },
+            "prefilledMessage": "I'm interested in the Premium Assessment",
+            "tracking": { "eventName": "WhatsAppClick", "label": "offer_premium" }
+          }
+        },
+        {
+          "id": "offer-3",
+          "name": "Quick Chat",
+          "description": "Have questions? Chat with us now",
+          "image": "https://images.unsplash.com/photo-1556741533-927182355585?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800",
+          "valueProps": ["Instant response via WhatsApp", "Quick product advice", "General beauty tips", "Available 24/7"],
+          "cta": {
+            "text": "Chat Now",
+            "icon": "MessageCircle",
+            "channel": "whatsapp",
+            "destination": { "type": "whatsapp", "url": "https://wa.me/15551234567" },
+            "prefilledMessage": "Hi! I have a quick question about skincare",
+            "tracking": { "eventName": "WhatsAppClick", "label": "offer_quick_chat" }
+          }
+        }
+      ]
+    },
+    "productShowcase": {
+      "title": "Premium Products We Recommend",
+      "subtitle": "Our experts carefully select only the highest quality, dermatologist-approved products",
+      "items": [
+        { "id": "product-1", "image": { "src": "https://images.unsplash.com/photo-1654973433534-1238e06f6b38?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800", "alt": "Premium Serums" }, "title": "Premium Serums", "description": "Scientifically formulated for maximum results" },
+        { "id": "product-2", "image": { "src": "https://images.unsplash.com/photo-1527632911563-ee5b6d53465b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800", "alt": "Luxury Skincare" }, "title": "Luxury Skincare", "description": "Dermatologist-approved formulations" },
+        { "id": "product-3", "image": { "src": "https://images.unsplash.com/photo-1629380106682-6736d2c327ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800", "alt": "Daily Essentials" }, "title": "Daily Essentials", "description": "Everything your skin needs" },
+        { "id": "product-4", "image": { "src": "https://images.unsplash.com/photo-1619451379285-b8f2894897b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800", "alt": "Treatment Solutions" }, "title": "Treatment Solutions", "description": "Targeted care for specific concerns" }
+      ],
+      "note": "Get personalized product recommendations in your free consultation"
+    },
+    "beforeAfter": {
+      "title": "Real Results from Real People",
+      "subtitle": "See the transformations our clients have achieved with personalized skincare guidance",
+      "labels": { "before": "BEFORE", "after": "AFTER", "client": "Client", "concern": "Concern", "timeline": "Timeline" },
+      "items": [
+        { "id": "before-after-1", "before": { "src": "https://images.unsplash.com/photo-1684014286330-ddbeb4a40c92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Sarah M. before" }, "after": { "src": "https://images.unsplash.com/photo-1710196598595-7dcfd465bd77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Sarah M. after" }, "name": "Sarah M.", "concern": "Acne & Dark Spots", "duration": "6 weeks" },
+        { "id": "before-after-2", "before": { "src": "https://images.unsplash.com/photo-1733685373007-58f63acf3a60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Jessica L. before" }, "after": { "src": "https://images.unsplash.com/photo-1760488029475-41ff1eaa904b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Jessica L. after" }, "name": "Jessica L.", "concern": "Dull Skin & Fine Lines", "duration": "8 weeks" },
+        { "id": "before-after-3", "before": { "src": "https://images.unsplash.com/photo-1733685372988-69a356984436?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Emily R. before" }, "after": { "src": "https://images.unsplash.com/photo-1747324831504-5ee9aa8eec59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Emily R. after" }, "name": "Emily R.", "concern": "Uneven Skin Tone", "duration": "4 weeks" }
+      ],
+      "disclaimer": "* Individual results may vary. Photos are from real clients who followed our personalized skincare routines."
+    },
+    "videoTestimonials": {
+      "title": "See Real Transformations",
+      "subtitle": "Watch our clients share their skincare success stories",
+      "items": [
+        { "id": "video-1", "thumbnail": { "src": "https://images.unsplash.com/photo-1710196598595-7dcfd465bd77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Sarah M." }, "name": "Sarah M.", "title": "From Acne to Clear Skin", "duration": "2:15" },
+        { "id": "video-2", "thumbnail": { "src": "https://images.unsplash.com/photo-1760488029475-41ff1eaa904b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Jessica L." }, "name": "Jessica L.", "title": "My Skin Transformation Journey", "duration": "1:45" },
+        { "id": "video-3", "thumbnail": { "src": "https://images.unsplash.com/photo-1747324831504-5ee9aa8eec59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Emily R." }, "name": "Emily R.", "title": "How I Got Glowing Skin", "duration": "2:30" }
+      ],
+      "closingText": "Ready to start your own transformation journey?",
+      "cta": {
+        "text": "Start Your Free Consultation",
+        "icon": "ArrowRight",
+        "channel": "whatsapp",
+        "destination": { "type": "whatsapp", "url": "https://wa.me/15551234567" },
+        "prefilledMessage": "Hi! I'm interested in a beauty consultation."
+      }
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Get started in 3 simple steps",
+      "stepImages": [
+        { "src": "https://images.unsplash.com/photo-1733685373532-e67c3f68786a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", "alt": "Step 1: Contact Us" },
+        { "src": "https://images.unsplash.com/photo-1775642548281-fcf81fd6f2a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", "alt": "Step 2: Share Your Goals" },
+        { "src": "https://images.unsplash.com/photo-1712482937676-398342a92e81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", "alt": "Step 3: Get Your Plan" }
+      ],
+      "steps": [
+        { "id": "step-1", "icon": "MessageCircle", "title": "Step 1: Contact Us", "description": "Click the WhatsApp button to start a conversation with our beauty experts. We respond within 10 minutes." },
+        { "id": "step-2", "icon": "Check", "title": "Step 2: Share Your Goals", "description": "Tell us about your skin concerns and beauty goals. Our consultants will ask a few questions to understand your needs." },
+        { "id": "step-3", "icon": "Calendar", "title": "Step 3: Get Your Plan", "description": "Receive a personalized skincare routine and product recommendations tailored just for you." }
+      ]
+    },
+    "trustBanner": {
+      "background": { "src": "https://images.unsplash.com/photo-1739980296455-3f8d6051ca20?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920", "alt": "" },
+      "badges": [
+        { "id": "trust-1", "icon": "Verified", "text": "Certified Experts", "subtext": "Licensed professionals" },
+        { "id": "trust-2", "icon": "Shield", "text": "Safe & Natural", "subtext": "100% organic products" },
+        { "id": "trust-3", "icon": "Star", "text": "15K+ Happy Clients", "subtext": "4.9/5 rating" },
+        { "id": "trust-4", "icon": "MessageCircle", "text": "Fast Response", "subtext": "Reply within 10 min" }
+      ]
+    },
+    "logoWall": {
+      "title": "As Featured In",
+      "logos": [
+        { "id": "logo-1", "src": "https://images.unsplash.com/photo-1654973433534-1238e06f6b38?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200", "alt": "Beauty Magazine" },
+        { "id": "logo-2", "src": "https://images.unsplash.com/photo-1527632911563-ee5b6d53465b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200", "alt": "Luxury Cosmetics Review" },
+        { "id": "logo-3", "src": "https://images.unsplash.com/photo-1770981667079-d59bbacc0739?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200", "alt": "Skincare Insider" },
+        { "id": "logo-4", "src": "https://images.unsplash.com/photo-1739980296455-3f8d6051ca20?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200", "alt": "Beauty & Wellness" },
+        { "id": "logo-5", "src": "https://images.unsplash.com/photo-1776015036303-1087ac99dc4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200", "alt": "Professional Beauty" }
+      ]
+    },
+    "features": {
+      "title": "Why Choose RadiantGlow Beauty",
+      "subtitle": "Expert care for your unique beauty needs",
+      "decorations": [
+        { "src": "https://images.unsplash.com/photo-1527632911563-ee5b6d53465b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800", "alt": "" },
+        { "src": "https://images.unsplash.com/photo-1770981667079-d59bbacc0739?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800", "alt": "" }
+      ],
+      "items": [
+        { "id": "feature-1", "icon": "Award", "title": "Expert Consultants", "description": "Our team consists of certified beauty therapists and skincare specialists with 10+ years of experience." },
+        { "id": "feature-2", "icon": "Shield", "title": "Personalized Solutions", "description": "Every skin is unique. We create customized routines based on your skin type, concerns, and lifestyle." },
+        { "id": "feature-3", "icon": "Star", "title": "Premium Products", "description": "We only recommend dermatologist-approved, cruelty-free products that deliver real results." },
+        { "id": "feature-4", "icon": "MessageCircle", "title": "24/7 Support", "description": "Questions about your routine? Our team is always available via WhatsApp to guide you." },
+        { "id": "feature-5", "icon": "Verified", "title": "Proven Results", "description": "Join 15,000+ satisfied clients who have transformed their skin with our expert guidance." },
+        { "id": "feature-6", "icon": "Check", "title": "No Commitments", "description": "Start with a free consultation. No hidden fees, no pressure, just honest beauty advice." }
+      ]
+    },
+    "reviews": {
+      "title": "What Our Clients Say",
+      "subtitle": "Real results from real people",
+      "ratingSummary": { "average": 4.9, "scale": 5, "totalLabel": "Based on 2,847 reviews" },
+      "items": [
+        { "id": "review-1", "authorName": "Sarah M.", "authorRole": "Verified Client", "avatar": "https://i.pravatar.cc/150?img=1", "rating": 5, "content": "The consultation was amazing! They helped me understand my skin type and created a perfect routine. My acne cleared up in just 6 weeks!", "proofImage": "https://images.unsplash.com/photo-1684014286330-ddbeb4a40c92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "sourcePlatform": "WhatsApp", "country": "United States" },
+        { "id": "review-2", "authorName": "Jessica L.", "authorRole": "Member since 2023", "avatar": "https://i.pravatar.cc/150?img=5", "rating": 5, "content": "I was skeptical at first, but the free consultation convinced me. The expert really knew what she was talking about. My skin has never looked better!", "proofImage": "https://images.unsplash.com/photo-1733685373007-58f63acf3a60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "sourcePlatform": "Trustpilot", "country": "Canada" },
+        { "id": "review-3", "authorName": "Emily R.", "authorRole": "Verified Client", "avatar": "https://i.pravatar.cc/150?img=9", "rating": 5, "content": "Best decision ever! The personalized skincare routine they created for me actually works. I tried so many products before, nothing compared to this.", "proofImage": "https://images.unsplash.com/photo-1710196598595-7dcfd465bd77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "sourcePlatform": "WhatsApp", "country": "United Kingdom" },
+        { "id": "review-4", "authorName": "Amanda K.", "authorRole": "Verified Client", "avatar": "https://i.pravatar.cc/150?img=10", "rating": 5, "content": "The team is so professional and responsive! They answered all my questions and helped me build confidence in my skincare journey.", "proofImage": "https://images.unsplash.com/photo-1760488029475-41ff1eaa904b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "sourcePlatform": "WhatsApp", "country": "Australia" }
+      ],
+      "verifiedPrefix": "✓ Verified via",
+      "proofImageSuffix": "'s result",
+      "disclaimer": "Individual results may vary. Testimonials are from real clients but results depend on individual skin conditions and commitment to the recommended routine."
+    },
+    "authority": {
+      "title": "Meet Our Founder",
+      "subtitle": "Dr. Rachel Chen, Licensed Esthetician & Skincare Expert",
+      "image": { "src": "https://images.unsplash.com/photo-1733685372988-69a356984436?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600", "alt": "Dr. Rachel Chen, Founder and Lead Beauty Consultant" },
+      "paragraphs": [
+        "With over 15 years of experience in the beauty industry, Dr. Rachel Chen founded RadiantGlow Beauty with a simple mission: make expert skincare advice accessible to everyone.",
+        "After seeing countless clients struggle with confusing product claims and cookie-cutter routines, she created a personalized consultation service that puts your unique needs first.",
+        "Today, our team of certified consultants has helped over 15,000 clients achieve their dream skin through science-backed, personalized guidance."
+      ],
+      "stats": [
+        { "label": "Years Experience", "value": "15+" },
+        { "label": "Clients Helped", "value": "15K+" },
+        { "label": "Success Rate", "value": "98%" }
+      ],
+      "credentialsTitle": "Credentials & Certifications",
+      "credentials": [
+        { "id": "cred-1", "label": "Licensed Esthetician" },
+        { "id": "cred-2", "label": "Certified Skincare Specialist" },
+        { "id": "cred-3", "label": "Member, American Academy of Dermatology" }
+      ],
+      "signature": { "name": "Dr. Rachel Chen", "role": "Founder & Lead Consultant" }
+    },
+    "countdown": {
+      "title": "⏰ Limited Time: Free Consultation Slots",
+      "subtitle": "Only 8 consultation slots available this week. Book yours before they're gone!",
+      "endsAt": "2026-05-15T23:59:59-07:00",
+      "background": { "src": "https://images.unsplash.com/photo-1629380106682-6736d2c327ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920", "alt": "" },
+      "labels": ["Days", "Hours", "Minutes", "Seconds"],
+      "expiredFallback": { "title": "Free Consultations Still Available", "subtitle": "Contact us to check current availability" },
+      "cta": {
+        "text": "Book Your Free Slot Now",
+        "icon": "Calendar",
+        "channel": "whatsapp",
+        "destination": { "type": "whatsapp", "url": "https://wa.me/15551234567" },
+        "prefilledMessage": "I want to book a free consultation slot",
+        "tracking": { "eventName": "WhatsAppClick", "label": "countdown_cta" }
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know",
+      "items": [
+        { "id": "faq-1", "question": "Is the consultation really free?", "answer": "Yes! Your first consultation is completely free with no obligations. We want to help you understand your skin and provide value before you make any decisions." },
+        { "id": "faq-2", "question": "How does the consultation work?", "answer": "Simply click the WhatsApp button, and one of our certified consultants will chat with you. We'll ask about your skin concerns, goals, and current routine, then provide personalized recommendations." },
+        { "id": "faq-3", "question": "Do I need to buy products from you?", "answer": "Not at all! We provide honest recommendations based on your needs. Some clients prefer to purchase through us, while others buy elsewhere. Our goal is to guide you, not pressure you." },
+        { "id": "faq-4", "question": "How long does a consultation take?", "answer": "Most consultations take 15-30 minutes via WhatsApp chat. You can take your time and ask as many questions as you need." },
+        { "id": "faq-5", "question": "What if I'm not satisfied?", "answer": "Your satisfaction is our priority. If you're not happy with the recommendations, we'll work with you to adjust the plan. Our free consultation means zero risk for you." },
+        { "id": "faq-6", "question": "Can I contact you after the consultation?", "answer": "Absolutely! We provide ongoing support via WhatsApp. Have questions about your routine? Just message us anytime." }
+      ],
+      "contactCta": {
+        "text": "Still Have Questions? Chat With Us",
+        "icon": "MessageCircle",
+        "channel": "whatsapp",
+        "destination": { "type": "whatsapp", "url": "https://wa.me/15551234567" },
+        "prefilledMessage": "I have a question about the consultation service",
+        "tracking": { "eventName": "WhatsAppClick", "label": "faq_contact" }
+      }
+    },
+    "assurance": {
+      "title": "Our Promise to You",
+      "subtitle": "Your trust means everything to us",
+      "description": "We're committed to providing honest, expert guidance that puts your skin health first. No gimmicks, no false promises—just real results from certified professionals.",
+      "imageAlt": "Assurance",
+      "closingText": "Ready to transform your skin with expert guidance?",
+      "badges": [
+        { "id": "assurance-1", "icon": "Shield", "text": "Privacy Protected", "subtext": "Your information is safe" },
+        { "id": "assurance-2", "icon": "Verified", "text": "Certified Experts", "subtext": "Licensed professionals only" },
+        { "id": "assurance-3", "icon": "MessageCircle", "text": "Fast Response", "subtext": "Reply within 10 minutes" },
+        { "id": "assurance-4", "icon": "Check", "text": "No Obligation", "subtext": "Free consultation, no strings" }
+      ],
+      "cta": {
+        "text": "Start Your Free Consultation",
+        "icon": "WhatsApp",
+        "channel": "whatsapp",
+        "destination": { "type": "whatsapp", "url": "https://wa.me/15551234567" },
+        "prefilledMessage": "I'm ready to start my free consultation",
+        "tracking": { "eventName": "WhatsAppClick", "label": "assurance_cta" }
+      }
+    },
+    "footer": {
+      "brandName": "RadiantGlow Beauty",
+      "copyrightYear": "2026",
+      "contactEmail": "support@radiantglowbeauty.com",
+      "socialIcons": { "facebook": "F", "instagram": "IG", "tiktok": "TT", "linkedin": "in", "youtube": "YT", "x": "X", "whatsapp": "WA", "telegram": "TG" },
+      "socialLinks": [
+        { "platform": "instagram", "url": "https://instagram.com/radiantglowbeauty" },
+        { "platform": "facebook", "url": "https://facebook.com/radiantglowbeauty" },
+        { "platform": "tiktok", "url": "https://tiktok.com/@radiantglowbeauty" },
+        { "platform": "whatsapp", "url": "https://wa.me/15551234567" }
+      ],
+      "links": [
+        { "text": "Privacy Policy", "content": "We respect your privacy and are committed to protecting your personal information. Any information shared during consultations is kept strictly confidential." },
+        { "text": "Terms of Service", "content": "By using our consultation services, you agree to our terms. Consultations are for informational purposes only and do not replace professional medical advice." }
+      ],
+      "closeLabel": "×",
+      "rightsText": "All rights reserved.",
+      "disclaimer": "Results may vary. Individual results depend on skin type, condition, and adherence to recommended routines. Consultation services are for informational purposes and do not constitute medical advice. For medical concerns, please consult a dermatologist."
+    },
+    "stickyCta": {
+      "text": "Chat on WhatsApp",
+      "icon": "WhatsApp",
+      "channel": "whatsapp",
+      "destination": { "type": "whatsapp", "url": "https://wa.me/15551234567" },
+      "prefilledMessage": "Hi! I'm interested in a beauty consultation.",
+      "position": "bottom-right",
+      "showAfterScrollPercent": 10,
+      "tracking": { "eventName": "WhatsAppClick", "label": "sticky_whatsapp" }
+    }
+  },
+  "styles": {
+    "page": { "root": "min-h-screen bg-white" },
+    "shared": {
+      "container": "container mx-auto px-4",
+      "sectionHeader": "text-center mb-16",
+      "h2": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-gray-600 max-w-2xl mx-auto"
+    },
+    "hero": {
+      "section": "relative min-h-screen flex items-center overflow-hidden",
+      "backgroundImage": "absolute inset-0 w-full h-full object-cover",
+      "overlay": "absolute inset-0 bg-gradient-to-b from-black/40 to-black/20",
+      "container": "container mx-auto px-4 py-20 relative z-10",
+      "layoutWithMedia": "max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center",
+      "content": "text-left",
+      "badgeWrapper": "inline-block bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full mb-6 shadow-md",
+      "badgeText": "text-pink-600 font-medium",
+      "title": "text-5xl md:text-6xl lg:text-7xl mb-6 leading-tight text-white drop-shadow-lg",
+      "subtitle": "text-xl md:text-2xl mb-8 max-w-3xl text-white drop-shadow-lg",
+      "ctaRow": "flex flex-col sm:flex-row gap-4 justify-start mb-6",
+      "trustText": "text-sm mb-12 text-white/90",
+      "mediaWrapper": "relative",
+      "mediaImage": "rounded-2xl shadow-2xl w-full h-auto",
+      "statsGrid": "grid grid-cols-3 gap-4 mt-8",
+      "statCard": "bg-white/90 backdrop-blur-sm p-4 rounded-xl shadow-lg text-center",
+      "statIcon": "flex items-center justify-center mb-2",
+      "statValue": "text-2xl font-bold text-gray-900 mb-1",
+      "statLabel": "text-xs text-gray-600"
+    },
+    "stats": {
+      "section": "py-20 bg-gradient-to-br from-pink-600 to-rose-500 relative overflow-hidden",
+      "pattern": "absolute top-0 left-0 w-full h-full [background-image:radial-gradient(circle,white_1px,transparent_1px)] [background-size:30px_30px]",
+      "patternWrapper": "absolute inset-0 opacity-10",
+      "container": "container mx-auto px-4 relative z-10",
+      "header": "text-center mb-12",
+      "title": "text-4xl md:text-5xl mb-4 text-white",
+      "subtitle": "text-xl text-white/90 max-w-2xl mx-auto",
+      "grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto",
+      "card": "group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-300",
+      "imageFrame": "aspect-square overflow-hidden",
+      "image": "w-full h-full object-cover opacity-30 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500",
+      "content": "absolute inset-0 flex flex-col items-center justify-center p-6 text-center",
+      "icon": "text-5xl mb-3",
+      "value": "text-5xl font-bold text-white mb-2",
+      "label": "text-lg text-white/90 font-medium"
+    },
+    "offer": {
+      "section": "py-20 bg-gradient-to-b from-white to-pink-50",
+      "container": "container mx-auto px-4",
+      "header": "text-center mb-16",
+      "title": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-gray-600 max-w-2xl mx-auto",
+      "grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto",
+      "card": "bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300 flex flex-col",
+      "imageFrame": "h-48 overflow-hidden",
+      "image": "w-full h-full object-cover",
+      "body": "p-6 flex-1 flex flex-col",
+      "topRow": "flex items-start justify-between mb-3",
+      "name": "text-2xl font-bold text-gray-900",
+      "badge": "bg-pink-600 text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ml-2",
+      "description": "text-gray-600 mb-4",
+      "list": "space-y-2 mb-6 flex-1",
+      "listItem": "flex items-start gap-2",
+      "check": "text-pink-600 mt-1",
+      "valueProp": "text-gray-700",
+      "urgency": "text-sm text-orange-600 font-medium mb-4",
+      "buttonExtra": "w-full"
+    },
+    "productShowcase": {
+      "section": "py-20 bg-white",
+      "container": "container mx-auto px-4",
+      "header": "text-center mb-16",
+      "title": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-gray-600 max-w-2xl mx-auto",
+      "grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-12",
+      "card": "group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300",
+      "imageFrame": "aspect-[3/4] overflow-hidden",
+      "image": "w-full h-full object-cover group-hover:scale-110 transition-transform duration-500",
+      "overlay": "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6",
+      "name": "text-xl font-bold text-white mb-2",
+      "description": "text-sm text-white/90",
+      "noteWrapper": "text-center",
+      "note": "text-gray-600 mb-4"
+    },
+    "beforeAfter": {
+      "section": "py-20 bg-gradient-to-b from-white to-pink-50",
+      "container": "container mx-auto px-4",
+      "header": "text-center mb-16",
+      "title": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-gray-600 max-w-2xl mx-auto",
+      "outer": "max-w-6xl mx-auto",
+      "tabs": "flex justify-center gap-4 mb-8 flex-wrap",
+      "tab": "px-6 py-3 rounded-full font-medium transition-all duration-300",
+      "tabActive": "bg-pink-600 text-white shadow-lg",
+      "tabInactive": "bg-white text-gray-700 hover:bg-pink-50",
+      "panel": "bg-white rounded-2xl shadow-2xl overflow-hidden",
+      "imageGrid": "grid md:grid-cols-2 gap-0",
+      "imageCell": "relative aspect-[3/4] md:aspect-auto",
+      "beforeBadge": "absolute top-4 left-4 bg-gray-900/80 text-white px-4 py-2 rounded-full text-sm font-bold z-10",
+      "afterBadge": "absolute top-4 left-4 bg-pink-600 text-white px-4 py-2 rounded-full text-sm font-bold z-10",
+      "image": "w-full h-full object-cover",
+      "meta": "p-8 bg-gradient-to-r from-pink-50 to-white",
+      "metaGrid": "grid md:grid-cols-3 gap-6 text-center",
+      "metaLabel": "text-sm text-gray-600 mb-1",
+      "metaValue": "text-xl font-bold text-gray-900",
+      "timelineValue": "text-xl font-bold text-pink-600",
+      "disclaimerWrapper": "text-center mt-8",
+      "disclaimer": "text-sm text-gray-500"
+    },
+    "videoTestimonials": {
+      "section": "py-20 bg-gray-900 text-white relative overflow-hidden",
+      "decorTop": "absolute top-0 left-0 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl",
+      "decorBottom": "absolute bottom-0 right-0 w-96 h-96 bg-rose-600/20 rounded-full blur-3xl",
+      "container": "container mx-auto px-4 relative z-10",
+      "header": "text-center mb-16",
+      "title": "text-4xl md:text-5xl mb-4",
+      "subtitle": "text-xl text-gray-300 max-w-2xl mx-auto",
+      "grid": "grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto",
+      "card": "group relative overflow-hidden rounded-2xl shadow-2xl cursor-pointer hover:shadow-pink-500/50 transition-all duration-300",
+      "frame": "aspect-[9/16] overflow-hidden relative",
+      "image": "w-full h-full object-cover group-hover:scale-110 transition-transform duration-500",
+      "playOverlay": "absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-colors duration-300",
+      "playCircle": "w-20 h-20 bg-white/90 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-xl",
+      "playTriangle": "w-0 h-0 border-l-[20px] border-l-pink-600 border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent ml-1",
+      "duration": "absolute top-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium",
+      "info": "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6",
+      "name": "font-bold text-xl mb-1",
+      "itemTitle": "text-sm text-gray-300",
+      "closing": "text-center mt-12",
+      "closingText": "text-gray-400 mb-6"
+    },
+    "howItWorks": {
+      "section": "py-20 bg-gradient-to-b from-pink-50 to-white",
+      "container": "container mx-auto px-4",
+      "header": "text-center mb-16",
+      "title": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-gray-600 max-w-2xl mx-auto",
+      "grid": "grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto",
+      "card": "relative",
+      "content": "text-center",
+      "number": "absolute -top-4 -left-4 w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold text-xl shadow-lg z-10",
+      "imageFrame": "mb-6 rounded-2xl overflow-hidden shadow-xl",
+      "image": "w-full h-64 object-cover",
+      "iconFrame": "inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full mb-4 -mt-8 relative z-10 shadow-lg",
+      "icon": "text-white",
+      "stepTitle": "text-2xl font-bold text-gray-900 mb-3",
+      "description": "text-gray-600 leading-relaxed",
+      "arrow": "hidden md:block absolute top-32 -right-6 text-pink-400 text-4xl"
+    },
+    "trustBanner": {
+      "section": "py-16 relative overflow-hidden",
+      "background": "absolute inset-0",
+      "backgroundImage": "w-full h-full object-cover",
+      "overlay": "absolute inset-0 bg-gradient-to-r from-pink-600/90 to-rose-500/90",
+      "container": "container mx-auto px-4 relative z-10",
+      "grid": "grid grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto",
+      "badge": "text-center text-white transform hover:scale-110 transition-transform duration-300",
+      "iconFrame": "inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-md rounded-full mb-4 border-2 border-white/30 shadow-xl",
+      "icon": "text-white",
+      "text": "font-bold text-xl mb-1 drop-shadow-lg",
+      "subtext": "text-sm text-pink-100 drop-shadow-lg"
+    },
+    "logoWall": {
+      "section": "py-16 bg-gray-50",
+      "container": "container mx-auto px-4",
+      "title": "text-2xl md:text-3xl font-bold text-center text-gray-900 mb-12",
+      "grid": "flex flex-wrap justify-center items-center gap-8 md:gap-12 max-w-5xl mx-auto",
+      "link": "block",
+      "image": "h-16 md:h-20 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100"
+    },
+    "features": {
+      "section": "py-20 bg-white relative overflow-hidden",
+      "decorTop": "absolute top-0 right-0 w-1/3 h-1/2 opacity-10",
+      "decorBottom": "absolute bottom-0 left-0 w-1/3 h-1/2 opacity-10",
+      "decorImage": "w-full h-full object-cover",
+      "container": "container mx-auto px-4 relative z-10",
+      "header": "text-center mb-16",
+      "title": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-gray-600 max-w-2xl mx-auto",
+      "grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto",
+      "card": "p-8 rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border border-pink-100 hover:border-pink-300",
+      "iconFrame": "inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl mb-4 shadow-lg",
+      "icon": "text-white",
+      "itemTitle": "text-xl font-bold text-gray-900 mb-3",
+      "description": "text-gray-600 leading-relaxed"
+    },
+    "reviews": {
+      "section": "py-20 bg-gradient-to-b from-pink-50 to-white",
+      "container": "container mx-auto px-4",
+      "header": "text-center mb-16",
+      "title": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-gray-600 max-w-2xl mx-auto",
+      "summaryWrapper": "mt-6",
+      "summary": "inline-flex items-center gap-2 bg-white px-6 py-3 rounded-full shadow-md",
+      "average": "text-3xl font-bold text-gray-900",
+      "stars": "flex gap-1",
+      "total": "text-sm text-gray-600 ml-2",
+      "grid": "grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto",
+      "card": "bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300",
+      "authorRow": "flex items-center gap-4 mb-4",
+      "avatar": "w-12 h-12 rounded-full object-cover",
+      "authorMeta": "flex-1",
+      "author": "font-bold text-gray-900",
+      "role": "text-sm text-gray-600",
+      "country": "text-sm text-gray-500",
+      "reviewStars": "flex gap-1 mb-3",
+      "starActive": "text-yellow-400 fill-yellow-400",
+      "starInactive": "text-gray-300",
+      "content": "text-gray-700 mb-4",
+      "proofFrame": "mb-3 rounded-lg overflow-hidden",
+      "proofImage": "w-full h-48 object-cover",
+      "source": "text-sm text-pink-600 font-medium",
+      "disclaimerWrapper": "mt-12 text-center",
+      "disclaimer": "text-sm text-gray-500 max-w-3xl mx-auto"
+    },
+    "authority": {
+      "section": "py-20 bg-white",
+      "container": "container mx-auto px-4",
+      "inner": "max-w-4xl mx-auto",
+      "header": "text-center mb-12",
+      "title": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-pink-600 font-medium",
+      "imageWrapper": "mb-8 text-center",
+      "image": "w-48 h-48 rounded-full object-cover mx-auto shadow-xl",
+      "stats": "grid grid-cols-3 gap-6 mb-12",
+      "stat": "text-center p-6 bg-pink-50 rounded-xl",
+      "statValue": "text-3xl font-bold text-pink-600 mb-1",
+      "statLabel": "text-gray-600",
+      "paragraphs": "space-y-4 mb-8",
+      "paragraph": "text-lg text-gray-700 leading-relaxed",
+      "credentials": "bg-gradient-to-br from-pink-50 to-white p-6 rounded-xl mb-8",
+      "credentialsTitle": "text-xl font-bold text-gray-900 mb-4",
+      "credentialsList": "space-y-2",
+      "credential": "flex items-center gap-2",
+      "check": "text-pink-600",
+      "credentialText": "text-gray-700",
+      "signature": "text-center pt-8 border-t border-gray-200",
+      "signatureName": "text-2xl font-bold text-gray-900",
+      "signatureRole": "text-gray-600"
+    },
+    "countdown": {
+      "section": "py-20 relative overflow-hidden",
+      "expiredSection": "py-20 bg-gradient-to-r from-pink-600 to-rose-500",
+      "background": "absolute inset-0",
+      "backgroundImage": "w-full h-full object-cover",
+      "overlay": "absolute inset-0 bg-gradient-to-r from-pink-600/95 to-rose-500/95",
+      "container": "container mx-auto px-4 relative z-10",
+      "expiredContainer": "container mx-auto px-4",
+      "inner": "max-w-4xl mx-auto text-center text-white",
+      "expiredInner": "max-w-3xl mx-auto text-center text-white",
+      "title": "text-4xl md:text-6xl mb-4 font-bold drop-shadow-lg",
+      "expiredTitle": "text-4xl md:text-5xl mb-4",
+      "subtitle": "text-xl md:text-2xl mb-12 drop-shadow-lg",
+      "expiredSubtitle": "text-xl",
+      "grid": "grid grid-cols-4 gap-4 mb-12 max-w-3xl mx-auto",
+      "unit": "bg-white/20 backdrop-blur-md border-2 border-white/30 p-6 md:p-8 rounded-2xl shadow-2xl hover:bg-white/30 transition-all duration-300",
+      "value": "text-4xl md:text-6xl font-bold mb-2 drop-shadow-lg",
+      "label": "text-sm md:text-base uppercase tracking-wider font-semibold",
+      "buttonWrapper": "inline-block",
+      "buttonExtra": "bg-white text-pink-600 hover:bg-pink-50 hover:scale-105 shadow-2xl transform transition-all duration-300"
+    },
+    "faq": {
+      "section": "py-20 bg-gradient-to-b from-white to-pink-50",
+      "container": "container mx-auto px-4",
+      "header": "text-center mb-16",
+      "title": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-gray-600 max-w-2xl mx-auto",
+      "list": "max-w-3xl mx-auto space-y-4",
+      "item": "bg-white rounded-xl shadow-md overflow-hidden",
+      "button": "w-full px-6 py-5 text-left flex justify-between items-center hover:bg-pink-50 transition-colors duration-200",
+      "question": "font-bold text-lg text-gray-900 pr-4",
+      "toggle": "text-pink-600 text-2xl flex-shrink-0",
+      "answerWrapper": "px-6 pb-5",
+      "answer": "text-gray-700 leading-relaxed",
+      "ctaWrapper": "text-center mt-12"
+    },
+    "assurance": {
+      "section": "py-20 bg-gradient-to-br from-pink-50 via-white to-rose-50 relative overflow-hidden",
+      "decorTop": "absolute top-10 right-10 w-72 h-72 bg-pink-200 rounded-full opacity-20 blur-3xl",
+      "decorBottom": "absolute bottom-10 left-10 w-96 h-96 bg-rose-200 rounded-full opacity-20 blur-3xl",
+      "container": "container mx-auto px-4 relative z-10",
+      "inner": "max-w-5xl mx-auto",
+      "header": "text-center mb-12",
+      "title": "text-4xl md:text-5xl mb-4 text-gray-900",
+      "subtitle": "text-xl text-gray-600 mb-6",
+      "description": "text-lg text-gray-700 max-w-3xl mx-auto",
+      "badges": "grid grid-cols-2 md:grid-cols-4 gap-6 mb-12",
+      "badge": "text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-pink-100 hover:border-pink-300",
+      "iconFrame": "inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full mb-4 shadow-lg",
+      "icon": "text-white",
+      "badgeText": "font-bold text-gray-900 mb-2 text-lg",
+      "badgeSubtext": "text-sm text-gray-600",
+      "imageWrapper": "mb-8 text-center",
+      "image": "max-w-xs mx-auto drop-shadow-2xl",
+      "ctaPanel": "text-center bg-white p-8 rounded-2xl shadow-xl",
+      "closingText": "text-lg text-gray-700 mb-6"
+    },
+    "footer": {
+      "footer": "bg-gray-900 text-white py-12",
+      "container": "container mx-auto px-4",
+      "inner": "max-w-4xl mx-auto",
+      "header": "text-center mb-8",
+      "brand": "text-2xl font-bold mb-2",
+      "email": "text-pink-400 hover:text-pink-300",
+      "socials": "flex justify-center gap-4 mb-8",
+      "social": "w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full transition-colors duration-200",
+      "socialText": "text-xs font-bold",
+      "links": "flex flex-wrap justify-center gap-6 mb-8 text-sm",
+      "link": "text-gray-400 hover:text-white transition-colors duration-200 underline",
+      "disclaimerPanel": "border-t border-gray-700 pt-6 mb-6",
+      "disclaimer": "text-xs text-gray-400 text-center max-w-3xl mx-auto",
+      "copyright": "text-center text-sm text-gray-500",
+      "modalOverlay": "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4",
+      "modal": "bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-8",
+      "modalHeader": "flex justify-between items-start mb-6",
+      "modalTitle": "text-2xl font-bold text-gray-900",
+      "close": "text-gray-500 hover:text-gray-700 text-3xl leading-none",
+      "modalContent": "text-gray-700 leading-relaxed"
+    },
+    "stickyCta": {
+      "base": "fixed bottom-4 z-50 bg-pink-600 text-white px-6 py-4 rounded-full shadow-2xl hover:bg-pink-700 transition-all duration-300 flex items-center gap-3 animate-bounce hover:animate-none",
+      "right": "right-4",
+      "left": "left-4",
+      "text": "font-bold"
+    },
+    "ctaButton": {
+      "base": "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200",
+      "primary": "bg-pink-600 text-white hover:bg-pink-700 shadow-lg hover:shadow-xl",
+      "secondary": "bg-white text-pink-600 border-2 border-pink-600 hover:bg-pink-50",
+      "ghost": "text-gray-700 hover:bg-gray-100",
+      "sm": "px-4 py-2 text-sm",
+      "md": "px-6 py-3 text-base",
+      "lg": "px-8 py-4 text-lg"
+    }
+  }
+}

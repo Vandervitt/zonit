@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { PreviewRenderer } from "@/components/sites/PreviewRenderer";
-import type { LandingPageTemplate } from "@/types/schema";
+import type { PresetTemplateData } from "@/lib/templates";
 
 export default function PreviewPage() {
-  const [template, setTemplate] = useState<LandingPageTemplate | null>(null);
+  const [template, setTemplate] = useState<PresetTemplateData | null>(null);
   const [highlightKey, setHighlightKey] = useState("");
   const [showWatermark, setShowWatermark] = useState(false);
 
@@ -13,7 +13,7 @@ export default function PreviewPage() {
     const handler = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
       if (e.data?.type === "PREVIEW_UPDATE" && e.data.data) {
-        setTemplate(e.data.data as LandingPageTemplate);
+        setTemplate(e.data.data as PresetTemplateData);
         if (typeof e.data.showWatermark === "boolean") {
           setShowWatermark(e.data.showWatermark);
         }

@@ -2,14 +2,14 @@ import { useRef, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Monitor, Tablet, Smartphone } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import type { LandingPageTemplate } from "@/types/schema";
+import type { PresetTemplateData } from "@/lib/templates";
 import { hasWatermark } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 
 type Device = "mobile" | "tablet" | "desktop";
 
 interface Props {
-  data: LandingPageTemplate;
+  data: PresetTemplateData;
   expandedKey: string;
 }
 

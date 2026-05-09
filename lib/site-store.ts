@@ -1,4 +1,4 @@
-import type { LandingPageTemplate } from '@/types/schema';
+import type { PresetTemplateData } from '@/lib/templates';
 import { STORAGE_KEY } from './constants/storage';
 import { ApiRoutes, apiSitePath } from './constants/routes';
 import { SiteStatus } from './constants/status';
@@ -11,7 +11,7 @@ export interface Site {
   createdAt: string;
   updatedAt: string;
   published: boolean;
-  data: LandingPageTemplate;
+  data: PresetTemplateData;
 }
 
 
@@ -40,7 +40,7 @@ export function isSiteNameUnique(name: string, excludeId?: string): boolean {
   );
 }
 
-export function createSite(name: string, templateId: string, data: LandingPageTemplate): Site {
+export function createSite(name: string, templateId: string, data: PresetTemplateData): Site {
   const sites = getSites();
   const newSite: Site = {
     id: `site_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -101,6 +101,6 @@ export function dbRowToSite(row: Record<string, unknown>): Site {
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
     published: row.status === SiteStatus.Published,
-    data: row.data as LandingPageTemplate,
+    data: row.data as PresetTemplateData,
   };
 }

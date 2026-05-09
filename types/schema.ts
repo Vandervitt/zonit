@@ -522,6 +522,91 @@ export type PageBlock =
 
 export type OptionalBlock = PageBlock;
 
+export type CoreModuleType =
+  | 'Hero'
+  | 'Offer'
+  | 'HowItWorks'
+  | 'LeadForm'
+  | 'MicroFooter'
+  | 'StickyCta';
+
+export type LandingPageModuleType = CoreModuleType | BlockType;
+
+export type ModuleVariant =
+  | 'default'
+  | 'center'
+  | 'split'
+  | 'cards'
+  | 'compact'
+  | 'featured'
+  | string;
+
+export interface ModuleDefinition {
+  id: string;
+  type: LandingPageModuleType;
+  contentKey: string;
+  enabled?: boolean;
+  variant?: ModuleVariant;
+  label?: string;
+}
+
+export type ModuleAlignment = 'left' | 'center' | 'right';
+export type ModuleMediaPosition = 'left' | 'right' | 'top' | 'bottom';
+export type ModuleHeight = 'compact' | 'medium' | 'large' | 'full';
+export type ModuleCardStyle = 'plain' | 'bordered' | 'shadow';
+export type ModuleImageRatio = 'square' | 'portrait' | 'landscape' | 'wide';
+
+export interface ModuleLayoutConfig {
+  alignment?: ModuleAlignment;
+  mediaPosition?: ModuleMediaPosition;
+  height?: ModuleHeight;
+  columns?: 1 | 2 | 3 | 4;
+  cardStyle?: ModuleCardStyle;
+  imageRatio?: ModuleImageRatio;
+  ctaPlacement?: 'inline' | 'stacked' | 'footer';
+}
+
+export type LandingPageModuleContent =
+  | HeroSchema
+  | ConsultationOptionsSchema
+  | HowItWorksSchema
+  | MicroFooterSchema
+  | LeadFormSchema
+  | StickyCtaConfig
+  | OptionalBlock['data'];
+
+export type LandingPageContentMap = Record<string, LandingPageModuleContent>;
+
+export interface LandingPageDesignConfig {
+  mode: 'light' | 'dark';
+  palette: {
+    primary: string;
+    accent?: string;
+    background?: string;
+    surface?: string;
+    text?: string;
+  };
+  typography?: {
+    family?: 'sans' | 'serif' | 'display' | string;
+  };
+  radius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+  density?: 'compact' | 'normal' | 'relaxed';
+  buttonStyle?: 'solid' | 'outline' | 'soft';
+  imageStyle?: 'sharp' | 'rounded' | 'soft';
+}
+
+export interface LandingPageLayoutConfig {
+  pageWidth?: 'normal' | 'wide' | 'full';
+  sectionSpacing?: 'compact' | 'normal' | 'relaxed';
+  modules?: Record<string, ModuleLayoutConfig>;
+  [moduleId: string]: ModuleLayoutConfig | LandingPageLayoutConfig['pageWidth'] | LandingPageLayoutConfig['sectionSpacing'] | Record<string, ModuleLayoutConfig> | undefined;
+}
+
+export interface LandingPageIntegrationsConfig {
+  leadFormId?: string;
+  analytics?: AnalyticsConfig;
+}
+
 // 强约束的落地页产品模型：只表达引流页漏斗、信任、合规与线索路径
 export interface LandingPage {
   pageMeta?: PageMeta;
@@ -548,6 +633,12 @@ export interface LandingPage {
 export interface LandingPageTemplate extends LandingPage {
   templateId: string;
   templateName: string;
+  schemaVersion?: 1 | 2;
+  modules?: ModuleDefinition[];
+  content?: LandingPageContentMap;
+  design?: LandingPageDesignConfig;
+  layout?: LandingPageLayoutConfig;
+  integrations?: LandingPageIntegrationsConfig;
   themeConfig: {
     mode: 'light' | 'dark';
     primaryColor: string;                            // 主色调，用于 CTA 按钮、高亮等
@@ -557,3 +648,18 @@ export interface LandingPageTemplate extends LandingPage {
     spacing?: 'compact' | 'normal' | 'relaxed';     // 区块间距，影响整体疏密感
   };
 }
+
+export interface LandingPageTemplateV2 {
+  templateId: string;
+  templateName: string;
+  version: 2;
+  pageMeta?: PageMeta;
+  primaryConversion: PrimaryConversion;
+  modules: ModuleDefinition[];
+  content: LandingPageContentMap;
+  design: LandingPageDesignConfig;
+  layout?: LandingPageLayoutConfig;
+  integrations?: LandingPageIntegrationsConfig;
+}
+
+export type AnyLandingPageTemplate = LandingPageTemplate | LandingPageTemplateV2;

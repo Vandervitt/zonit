@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { UserRole, ApiErrors } from "@/lib/constants";
 import { listPresetTemplates, upsertPresetTemplate } from "@/lib/templates-db";
 import { PresetTemplateSchema } from "@/lib/schema.zod";
+import type { PresetTemplate } from "@/lib/templates";
 
 export async function GET() {
   const session = await auth();
@@ -28,6 +29,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const saved = await upsertPresetTemplate(parsed.data, session.user.id);
+  const saved = await upsertPresetTemplate(parsed.data as PresetTemplate, session.user.id);
   return NextResponse.json({ ok: true, template: saved });
 }

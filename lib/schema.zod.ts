@@ -528,6 +528,121 @@ export const LandingPageTemplateSchema = LandingPageSchema.extend({
   }),
 });
 
+const CoreModuleTypeSchema = z.enum([
+  'Hero',
+  'Offer',
+  'HowItWorks',
+  'LeadForm',
+  'MicroFooter',
+  'StickyCta',
+]);
+
+const LandingPageModuleTypeSchema = z.union([
+  CoreModuleTypeSchema,
+  z.enum([
+    'Features',
+    'Reviews',
+    'TrustBanner',
+    'PainPoints',
+    'LeadMagnet',
+    'ProofCases',
+    'VisualGallery',
+    'Metrics',
+    'LogoWall',
+    'AuthorityStory',
+    'FAQ',
+    'Countdown',
+    'Assurance',
+  ]),
+]);
+
+const ModuleDefinitionSchema = z.object({
+  id: NonEmpty,
+  type: LandingPageModuleTypeSchema,
+  contentKey: NonEmpty,
+  enabled: z.boolean().optional(),
+  variant: z.string().optional(),
+  label: z.string().optional(),
+}).strict();
+
+const ModuleLayoutConfigSchema = z.object({
+  alignment: z.enum(['left', 'center', 'right']).optional(),
+  mediaPosition: z.enum(['left', 'right', 'top', 'bottom']).optional(),
+  height: z.enum(['compact', 'medium', 'large', 'full']).optional(),
+  columns: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).optional(),
+  cardStyle: z.enum(['plain', 'bordered', 'shadow']).optional(),
+  imageRatio: z.enum(['square', 'portrait', 'landscape', 'wide']).optional(),
+  ctaPlacement: z.enum(['inline', 'stacked', 'footer']).optional(),
+}).strict();
+
+const LandingPageContentSchema = z.union([
+  HeroSchemaZ,
+  ConsultationOptionsSchemaZ,
+  HowItWorksSchemaZ,
+  MicroFooterSchemaZ,
+  LeadFormSchemaZ,
+  StickyCtaConfigSchema,
+  FeaturesSchemaZ,
+  ReviewsSchemaZ,
+  TrustBannerSchemaZ,
+  PainPointsSchemaZ,
+  LeadMagnetSchemaZ,
+  ProofCasesSchemaZ,
+  VisualGallerySchemaZ,
+  MetricsSchemaZ,
+  LogoWallSchemaZ,
+  AuthoritySchemaZ,
+  FAQSchemaZ,
+  CountdownSchemaZ,
+  AssuranceSchemaZ,
+]);
+
+export const LandingPageTemplateV2Schema = z.object({
+  templateId: NonEmpty,
+  templateName: NonEmpty,
+  version: z.literal(2),
+  pageMeta: PageMetaSchema.optional(),
+  primaryConversion: PrimaryConversionSchema,
+  modules: z.array(ModuleDefinitionSchema).min(1),
+  content: z.record(NonEmpty, LandingPageContentSchema),
+  design: z.object({
+    mode: z.enum(['light', 'dark']),
+    palette: z.object({
+      primary: NonEmpty,
+      accent: z.string().optional(),
+      background: z.string().optional(),
+      surface: z.string().optional(),
+      text: z.string().optional(),
+    }).strict(),
+    typography: z.object({
+      family: z.string().optional(),
+    }).strict().optional(),
+    radius: z.enum(['none', 'sm', 'md', 'lg', 'full']).optional(),
+    density: z.enum(['compact', 'normal', 'relaxed']).optional(),
+    buttonStyle: z.enum(['solid', 'outline', 'soft']).optional(),
+    imageStyle: z.enum(['sharp', 'rounded', 'soft']).optional(),
+  }).strict(),
+  layout: z.object({
+    pageWidth: z.enum(['normal', 'wide', 'full']).optional(),
+    sectionSpacing: z.enum(['compact', 'normal', 'relaxed']).optional(),
+    modules: z.record(NonEmpty, ModuleLayoutConfigSchema).optional(),
+  }).catchall(ModuleLayoutConfigSchema.optional()).optional(),
+  integrations: z.object({
+    leadFormId: z.string().optional(),
+    analytics: AnalyticsConfigSchema.optional(),
+  }).strict().optional(),
+}).strict().superRefine((template, ctx) => {
+  const missingContent = template.modules.find(module => template.content[module.contentKey] === undefined);
+
+  if (missingContent) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['content', missingContent.contentKey],
+      message: 'Every module must reference an existing content entry.',
+    });
+  }
+});
+
 export const PresetTemplateSchema = z.object({
   id: NonEmpty,
   name: NonEmpty,
@@ -535,9 +650,33 @@ export const PresetTemplateSchema = z.object({
   category: NonEmpty,
   accentColor: NonEmpty,
   gradient: NonEmpty,
+  dataSchema: z.literal('landing_page').default('landing_page'),
+  renderer: z.literal('standard').default('standard'),
   data: LandingPageTemplateSchema,
-});
+}).or(z.object({
+  id: NonEmpty,
+  name: NonEmpty,
+  description: NonEmpty,
+  category: NonEmpty,
+  accentColor: NonEmpty,
+  gradient: NonEmpty,
+  dataSchema: z.literal('extracted_template'),
+  renderer: z.literal('beauty_extracted'),
+  data: z.object({
+    templateId: NonEmpty,
+    templateName: NonEmpty,
+    modules: z.array(z.object({
+      id: NonEmpty,
+      type: NonEmpty,
+      dataKey: NonEmpty,
+      stylesKey: NonEmpty,
+    })),
+    content: z.record(z.string(), z.unknown()),
+    styles: z.record(z.string(), z.record(z.string(), z.string())),
+  }).passthrough(),
+}));
 
 export type ZodPresetTemplate = z.infer<typeof PresetTemplateSchema>;
 export type ZodLandingPage = z.infer<typeof LandingPageSchema>;
 export type ZodLandingPageTemplate = z.infer<typeof LandingPageTemplateSchema>;
+export type ZodLandingPageTemplateV2 = z.infer<typeof LandingPageTemplateV2Schema>;

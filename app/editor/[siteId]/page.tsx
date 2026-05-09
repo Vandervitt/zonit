@@ -11,6 +11,7 @@ import { BlockEditorPanel } from "@/components/sites/BlockEditorPanel";
 import { PreviewPane } from "@/components/sites/PreviewPane";
 import { PublishDialog } from "@/components/sites/PublishDialog";
 import { getSiteById, updateSite, isSiteNameUnique, dbRowToSite, type Site } from "@/lib/site-store";
+import { isExtractedTemplateData, type PresetTemplateData } from "@/lib/templates";
 import type { LandingPageTemplate } from "@/types/schema";
 import { Routes, apiSitePath, sitePath } from "@/lib/constants";
 
@@ -21,7 +22,7 @@ export default function SiteEditorPage() {
   const router = useRouter();
 
   const [name, setName] = useState("");
-  const [data, setData] = useState<LandingPageTemplate | null>(null);
+  const [data, setData] = useState<PresetTemplateData | null>(null);
   const [published, setPublished] = useState(false);
   const [slug, setSlug] = useState<string | undefined>(undefined);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
@@ -55,7 +56,7 @@ export default function SiteEditorPage() {
   }
 
   const autoSave = useCallback(
-    (newData: LandingPageTemplate, newName: string) => {
+    (newData: PresetTemplateData, newName: string) => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => {
         if (!siteId) return;
@@ -209,7 +210,16 @@ export default function SiteEditorPage() {
       {/* ── Main Body ───────────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-100 shrink-0 h-full flex flex-col overflow-hidden bg-zinc-950 border-r border-zinc-800/60">
-          <BlockEditorPanel data={data} onChange={handleDataChange} expandedKey={expandedKey} onExpandedKeyChange={setExpandedKey} />
+          {isExtractedTemplateData(data) ? (
+            <div className="p-4 text-sm text-zinc-400">
+              <p className="text-zinc-200 font-medium mb-2">抽取模板</p>
+              <p className="text-xs leading-5">
+                此模板使用原始抽取数据和专用渲染器复现，当前不经过通用模块编辑器改写。
+              </p>
+            </div>
+          ) : (
+            <BlockEditorPanel data={data} onChange={handleDataChange} expandedKey={expandedKey} onExpandedKeyChange={setExpandedKey} />
+          )}
         </aside>
 
         <main className="flex-1 flex flex-col overflow-hidden bg-zinc-100">

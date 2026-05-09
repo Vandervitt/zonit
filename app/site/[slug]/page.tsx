@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import pool from "@/lib/db";
 import { LandingPageTemplateRenderer } from "@/components/renderer/LandingPageRenderer";
 import type { LandingPageTemplate } from "@/types/schema";
+import { isExtractedTemplateData, type PresetTemplateData } from "@/lib/templates";
 import { SiteStatus } from "@/lib/constants";
 import { hasWatermark } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
@@ -26,7 +27,7 @@ const getPublishedSite = cache(async (slug: string) => {
   if (!result.rows[0]) return null;
 
   return {
-    template: result.rows[0].data as LandingPageTemplate,
+    template: result.rows[0].data as PresetTemplateData,
     plan: result.rows[0].plan,
   };
 });
@@ -38,7 +39,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const site = await getPublishedSite(slug);
-  const seo = site?.template.pageMeta?.seo;
+  const seo = site && !isExtractedTemplateData(site.template)
+    ? site.template.pageMeta?.seo
+    : undefined;
 
   if (!seo) return {};
 
@@ -70,7 +73,9 @@ export default async function PublicSitePage({
 
   const { template, plan } = site;
   const showWatermark = hasWatermark((plan ?? "free") as PlanId);
-  const jsonLdNodes = deriveJsonLd(template);
+  const jsonLdNodes = isExtractedTemplateData(template)
+    ? []
+    : deriveJsonLd(template as LandingPageTemplate);
 
   return (
     <>

@@ -3,7 +3,10 @@ import type {
   CallToAction,
   LandingPage,
   LandingPageTemplate,
+  LandingPageTemplateV2,
   LeadMagnetSchema,
+  ModuleDefinition,
+  ModuleLayoutConfig,
   PageBlock,
 } from './schema';
 import type { ZodLandingPageTemplate } from '../lib/schema.zod';
@@ -197,5 +200,90 @@ const zodLeadFormExtraFieldWithPayloadKey: Partial<ZodLandingPageTemplate> = {
 };
 
 void zodLeadFormExtraFieldWithPayloadKey;
+
+const editableTemplateV2: LandingPageTemplateV2 = {
+  templateId: 'lead-gen-v2',
+  templateName: 'Lead Gen V2',
+  version: 2,
+  pageMeta: { locale: 'en-US' },
+  primaryConversion: {
+    channel: 'form',
+    label: 'Request Consultation',
+    destination: { type: 'form', formId: 'lead-form' },
+  },
+  modules: [
+    { id: 'hero', type: 'Hero', contentKey: 'hero', enabled: true, variant: 'split' },
+    { id: 'proof', type: 'Reviews', contentKey: 'proof', enabled: true, variant: 'cards' },
+    { id: 'leadForm', type: 'LeadForm', contentKey: 'leadForm', enabled: true },
+    { id: 'footer', type: 'MicroFooter', contentKey: 'footer', enabled: true },
+  ],
+  content: {
+    hero: {
+      title: 'Lead Page',
+      subtitle: 'Book a consultation.',
+      background: { type: 'color', value: '#ffffff' },
+      cta: {
+        text: 'Request Consultation',
+        channel: 'form',
+        destination: { type: 'form', formId: 'lead-form' },
+      },
+    },
+    proof: {
+      title: 'Client Reviews',
+      items: [{ id: 'review-1', authorName: 'Client', rating: 5, content: 'Fast response.' }],
+    },
+    leadForm: {
+      id: 'lead-form',
+      title: 'Get a Free Consultation',
+      submitText: 'Send Inquiry',
+      requiredFields: ['name', 'email'],
+    },
+    footer: {
+      brandName: 'Lead Brand',
+      copyrightYear: '2026',
+      links: [{ text: 'Privacy Policy', content: 'Privacy policy content.' }],
+    },
+  },
+  design: {
+    mode: 'light',
+    palette: {
+      primary: '#2563eb',
+      accent: '#f97316',
+    },
+    typography: { family: 'sans' },
+    radius: 'md',
+    density: 'normal',
+    buttonStyle: 'solid',
+    imageStyle: 'rounded',
+  },
+  layout: {
+    hero: { alignment: 'left', mediaPosition: 'right', height: 'large' },
+    proof: { columns: 3, cardStyle: 'bordered' },
+  },
+  integrations: {
+    leadFormId: 'lead-form',
+  },
+};
+
+void editableTemplateV2;
+
+const moduleWithRendererClass: ModuleDefinition = {
+  id: 'hero',
+  type: 'Hero',
+  contentKey: 'hero',
+  enabled: true,
+  // @ts-expect-error modules expose controlled variants, not renderer CSS classes.
+  className: 'grid grid-cols-2',
+};
+
+void moduleWithRendererClass;
+
+const layoutWithRendererClass: ModuleLayoutConfig = {
+  alignment: 'center',
+  // @ts-expect-error layout exposes controlled options, not Tailwind class strings.
+  className: 'px-8 py-24',
+};
+
+void layoutWithRendererClass;
 
 void (null as unknown as OfferTier);

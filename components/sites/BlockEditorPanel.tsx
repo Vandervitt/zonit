@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, Mail } from "lucide-react";
+import { Plus, Trash2, Zap, Package, List, FileText, Sparkles, MessageSquare, Shield, User, HelpCircle, Timer, MousePointerClick, Mail, Palette } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -7,7 +7,16 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { ScrollArea } from "../ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { cn } from "../ui/utils";
 import {
   HeroForm, OfferForm, HowItWorksForm, FooterForm,
@@ -17,6 +26,11 @@ import {
 import { AddBlockDialog } from "./AddBlockDialog";
 import { AiRewriteButton } from "../editor/AiRewriteButton";
 import { getDefaultBlockData } from "../../lib/templates";
+import {
+  setModuleLayout,
+  toLandingPageTemplateV2,
+  toLegacyLandingPageTemplate,
+} from "../../lib/templates/landing-page-v2-adapter";
 import { FixedBlockKey } from "../../lib/constants";
 import type {
   LandingPageTemplate,
@@ -34,6 +48,9 @@ import type {
   LeadFormSchema,
   OptionalBlock,
   BlockType,
+  LandingPageDesignConfig,
+  ModuleDefinition,
+  ModuleLayoutConfig,
 } from "@/types/schema";
 
 interface Props {
@@ -66,6 +83,7 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
   Countdown: <Timer className="w-3.5 h-3.5 text-orange-400" />,
   LeadForm: <Mail className="w-3.5 h-3.5 text-indigo-400" />,
   StickyCta: <MousePointerClick className="w-3.5 h-3.5 text-cyan-400" />,
+  Design: <Palette className="w-3.5 h-3.5 text-fuchsia-400" />,
 };
 
 const TYPE_BG: Record<string, string> = {
@@ -81,6 +99,7 @@ const TYPE_BG: Record<string, string> = {
   Countdown: "bg-orange-500/10",
   LeadForm: "bg-indigo-500/10",
   StickyCta: "bg-cyan-500/10",
+  Design: "bg-fuchsia-500/10",
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -96,6 +115,7 @@ const TYPE_LABEL: Record<string, string> = {
   Countdown: "倒计时",
   LeadForm: "表单线索",
   StickyCta: "全站浮动 CTA",
+  Design: "全局设计",
 };
 
 const DEFAULT_LEAD_FORM = getDefaultBlockData("LeadForm") as LeadFormSchema;
@@ -142,75 +162,292 @@ function replaceOptionalBlockData(block: OptionalBlock, newData: OptionalBlock["
   throw new Error(`Unsupported optional block type: ${block.type}`);
 }
 
+function FieldShell({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-[10px] uppercase tracking-wider text-zinc-500">{label}</Label>
+      {children}
+    </div>
+  );
+}
+
+function DesignControls({
+  design,
+  onChange,
+}: {
+  design: LandingPageDesignConfig;
+  onChange: (design: LandingPageDesignConfig) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <FieldShell label="主色">
+        <Input
+          value={design.palette.primary}
+          onChange={event => onChange({
+            ...design,
+            palette: { ...design.palette, primary: event.target.value },
+          })}
+          className="h-8 bg-zinc-950 border-zinc-800 text-xs text-zinc-200"
+        />
+      </FieldShell>
+
+      <FieldShell label="辅助色">
+        <Input
+          value={design.palette.accent ?? ""}
+          onChange={event => onChange({
+            ...design,
+            palette: { ...design.palette, accent: event.target.value || undefined },
+          })}
+          className="h-8 bg-zinc-950 border-zinc-800 text-xs text-zinc-200"
+        />
+      </FieldShell>
+
+      <div className="grid grid-cols-2 gap-3">
+        <FieldShell label="圆角">
+          <Select
+            value={design.radius ?? "md"}
+            onValueChange={value => onChange({ ...design, radius: value as LandingPageDesignConfig["radius"] })}
+          >
+            <SelectTrigger className="h-8 bg-zinc-950 border-zinc-800 text-xs text-zinc-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {["none", "sm", "md", "lg", "full"].map(value => (
+                <SelectItem key={value} value={value}>{value}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldShell>
+
+        <FieldShell label="密度">
+          <Select
+            value={design.density ?? "normal"}
+            onValueChange={value => onChange({ ...design, density: value as LandingPageDesignConfig["density"] })}
+          >
+            <SelectTrigger className="h-8 bg-zinc-950 border-zinc-800 text-xs text-zinc-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {["compact", "normal", "relaxed"].map(value => (
+                <SelectItem key={value} value={value}>{value}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldShell>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <FieldShell label="按钮">
+          <Select
+            value={design.buttonStyle ?? "solid"}
+            onValueChange={value => onChange({ ...design, buttonStyle: value as LandingPageDesignConfig["buttonStyle"] })}
+          >
+            <SelectTrigger className="h-8 bg-zinc-950 border-zinc-800 text-xs text-zinc-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {["solid", "outline", "soft"].map(value => (
+                <SelectItem key={value} value={value}>{value}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldShell>
+
+        <FieldShell label="图片">
+          <Select
+            value={design.imageStyle ?? "rounded"}
+            onValueChange={value => onChange({ ...design, imageStyle: value as LandingPageDesignConfig["imageStyle"] })}
+          >
+            <SelectTrigger className="h-8 bg-zinc-950 border-zinc-800 text-xs text-zinc-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {["sharp", "rounded", "soft"].map(value => (
+                <SelectItem key={value} value={value}>{value}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldShell>
+      </div>
+    </div>
+  );
+}
+
+function LayoutControls({
+  layout,
+  onChange,
+}: {
+  layout: ModuleLayoutConfig;
+  onChange: (layout: ModuleLayoutConfig) => void;
+}) {
+  return (
+    <div className="mt-5 border-t border-zinc-800 pt-4 space-y-3">
+      <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">布局控制</p>
+      <div className="grid grid-cols-2 gap-3">
+        <FieldShell label="对齐">
+          <Select
+            value={layout.alignment ?? "center"}
+            onValueChange={value => onChange({ ...layout, alignment: value as ModuleLayoutConfig["alignment"] })}
+          >
+            <SelectTrigger className="h-8 bg-zinc-950 border-zinc-800 text-xs text-zinc-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {["left", "center", "right"].map(value => (
+                <SelectItem key={value} value={value}>{value}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldShell>
+
+        <FieldShell label="列数">
+          <Select
+            value={String(layout.columns ?? 3)}
+            onValueChange={value => onChange({ ...layout, columns: Number(value) as ModuleLayoutConfig["columns"] })}
+          >
+            <SelectTrigger className="h-8 bg-zinc-950 border-zinc-800 text-xs text-zinc-200">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {["1", "2", "3", "4"].map(value => (
+                <SelectItem key={value} value={value}>{value}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldShell>
+      </div>
+    </div>
+  );
+}
+
 export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyChange }: Props) {
   const [addOpen, setAddOpen] = useState(false);
   const setExpandedKey = onExpandedKeyChange;
   const blocks = data.blocks ?? [];
+  const v2Template = toLandingPageTemplateV2(data);
+
+  const commitV2 = (nextTemplate: typeof v2Template) => {
+    onChange(toLegacyLandingPageTemplate(nextTemplate, data));
+  };
+
+  const commitLegacy = (nextData: LandingPageTemplate) => {
+    const normalized = toLandingPageTemplateV2({
+      ...nextData,
+      schemaVersion: undefined,
+      modules: undefined,
+      content: undefined,
+      design: undefined,
+      layout: undefined,
+      integrations: undefined,
+    });
+
+    commitV2({
+      ...v2Template,
+      pageMeta: nextData.pageMeta,
+      primaryConversion: nextData.primaryConversion,
+      modules: normalized.modules,
+      content: normalized.content,
+      integrations: {
+        ...v2Template.integrations,
+        leadFormId: nextData.leadForm?.id,
+      },
+    });
+  };
 
   const blockList: BlockMeta[] = [
-    { key: FixedBlockKey.Hero, label: TYPE_LABEL.Hero, icon: TYPE_ICON.Hero, required: true, type: "Hero" },
-    { key: FixedBlockKey.Offer, label: TYPE_LABEL.Offer, icon: TYPE_ICON.Offer, required: true, type: "Offer" },
-    ...blocks.map(b => ({
-      key: b.id, label: TYPE_LABEL[b.type], icon: TYPE_ICON[b.type], required: false, type: b.type,
+    { key: "design", label: TYPE_LABEL.Design, icon: TYPE_ICON.Design, required: true, type: "Design", badgeText: "全局", removable: false },
+    ...v2Template.modules.map(module => ({
+      key: module.id,
+      label: module.label ?? TYPE_LABEL[module.type] ?? module.type,
+      icon: TYPE_ICON[module.type],
+      required: module.type === "Hero" || module.type === "Offer" || module.type === "HowItWorks" || module.type === "MicroFooter",
+      type: module.type,
+      badgeText: module.type === "LeadForm" ? "单例" : module.type === "StickyCta" ? "全站" : undefined,
+      removable: module.type !== "Hero" && module.type !== "Offer" && module.type !== "HowItWorks" && module.type !== "MicroFooter" && module.type !== "LeadForm" && module.type !== "StickyCta",
     })),
-    { key: FixedBlockKey.HowItWorks, label: TYPE_LABEL.HowItWorks, icon: TYPE_ICON.HowItWorks, required: true, type: "HowItWorks" },
-    { key: FixedBlockKey.LeadForm, label: TYPE_LABEL.LeadForm, icon: TYPE_ICON.LeadForm, required: false, type: "LeadForm", badgeText: "单例", removable: false },
-    { key: FixedBlockKey.Footer, label: TYPE_LABEL.MicroFooter, icon: TYPE_ICON.MicroFooter, required: true, type: "MicroFooter" },
-    { key: FixedBlockKey.StickyCta, label: TYPE_LABEL.StickyCta, icon: TYPE_ICON.StickyCta, required: false, type: "StickyCta", badgeText: "全站", removable: false },
   ];
 
   const existingOptionalTypes = blocks.map(b => b.type) as BlockType[];
 
   const handleAddBlock = (type: BlockType) => {
     const newBlock = createOptionalBlock(type);
-    onChange({ ...data, blocks: [...blocks, newBlock] });
+    commitLegacy({ ...data, blocks: [...blocks, newBlock] });
     setExpandedKey(newBlock.id);
   };
 
   const removeOptionalBlock = (blockId: string) => {
-    onChange({
+    commitLegacy({
       ...data,
       blocks: blocks.filter(b => b.id !== blockId),
     });
     if (expandedKey === blockId) setExpandedKey(FixedBlockKey.Hero);
   };
 
+  const renderWithLayout = (module: ModuleDefinition | undefined, form: React.ReactNode) => {
+    if (!module || module.type === "StickyCta" || module.type === "MicroFooter") return form;
+
+    const layout = v2Template.layout?.modules?.[module.id]
+      ?? (v2Template.layout?.[module.id] as ModuleLayoutConfig | undefined)
+      ?? {};
+
+    return (
+      <>
+        {form}
+        <LayoutControls
+          layout={layout}
+          onChange={nextLayout => commitV2(setModuleLayout(v2Template, module.id, nextLayout))}
+        />
+      </>
+    );
+  };
+
   const renderForm = (meta: BlockMeta) => {
-    if (meta.key === FixedBlockKey.Hero) {
+    if (meta.key === "design") {
       return (
+        <DesignControls
+          design={v2Template.design}
+          onChange={design => commitV2({ ...v2Template, design })}
+        />
+      );
+    }
+
+    const moduleConfig = v2Template.modules.find(item => item.id === meta.key);
+
+    if (meta.key === FixedBlockKey.Hero) {
+      return renderWithLayout(moduleConfig, (
         <>
           <AiRewriteButton
             blockType="Hero"
             currentData={data.hero}
-            onSuccess={d => onChange({ ...data, hero: d as HeroSchema })}
+            onSuccess={d => commitLegacy({ ...data, hero: d as HeroSchema })}
           />
-          <HeroForm data={data.hero as HeroSchema} onChange={hero => onChange({ ...data, hero })} />
+          <HeroForm data={data.hero as HeroSchema} onChange={hero => commitLegacy({ ...data, hero })} />
         </>
-      );
+      ));
     }
     if (meta.key === FixedBlockKey.Offer) {
-      return (
+      return renderWithLayout(moduleConfig, (
         <>
           <AiRewriteButton
             blockType="Offer"
             currentData={data.offer}
-            onSuccess={d => onChange({ ...data, offer: d as OfferSchema })}
+            onSuccess={d => commitLegacy({ ...data, offer: d as OfferSchema })}
           />
-          <OfferForm data={data.offer as OfferSchema} onChange={offer => onChange({ ...data, offer })} />
+          <OfferForm data={data.offer as OfferSchema} onChange={offer => commitLegacy({ ...data, offer })} />
         </>
-      );
+      ));
     }
     if (meta.key === FixedBlockKey.HowItWorks) {
-      return (
+      return renderWithLayout(moduleConfig, (
         <>
           <AiRewriteButton
             blockType="HowItWorks"
             currentData={data.howItWorks}
-            onSuccess={d => onChange({ ...data, howItWorks: d as HowItWorksSchema })}
+            onSuccess={d => commitLegacy({ ...data, howItWorks: d as HowItWorksSchema })}
           />
-          <HowItWorksForm data={data.howItWorks as HowItWorksSchema} onChange={howItWorks => onChange({ ...data, howItWorks })} />
+          <HowItWorksForm data={data.howItWorks as HowItWorksSchema} onChange={howItWorks => commitLegacy({ ...data, howItWorks })} />
         </>
-      );
+      ));
     }
     if (meta.key === FixedBlockKey.Footer) {
       return (
@@ -218,9 +455,9 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
           <AiRewriteButton
             blockType="MicroFooter"
             currentData={data.footer}
-            onSuccess={d => onChange({ ...data, footer: d as MicroFooterSchema })}
+            onSuccess={d => commitLegacy({ ...data, footer: d as MicroFooterSchema })}
           />
-          <FooterForm data={data.footer as MicroFooterSchema} onChange={footer => onChange({ ...data, footer })} />
+          <FooterForm data={data.footer as MicroFooterSchema} onChange={footer => commitLegacy({ ...data, footer })} />
         </>
       );
     }
@@ -228,25 +465,25 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
       return (
         <StickyCtaEditor
           value={data.stickyCta}
-          onChange={stickyCta => onChange({ ...data, stickyCta })}
+          onChange={stickyCta => commitLegacy({ ...data, stickyCta })}
         />
       );
     }
     if (meta.key === FixedBlockKey.LeadForm) {
       const leadForm = data.leadForm ?? DEFAULT_LEAD_FORM;
-      return (
+      return renderWithLayout(moduleConfig, (
         <>
           <AiRewriteButton
             blockType="LeadForm"
             currentData={leadForm}
-            onSuccess={d => onChange({ ...data, leadForm: d as LeadFormSchema })}
+            onSuccess={d => commitLegacy({ ...data, leadForm: d as LeadFormSchema })}
           />
-          <LeadFormForm data={leadForm} onChange={leadForm => onChange({ ...data, leadForm })} />
+          <LeadFormForm data={leadForm} onChange={leadForm => commitLegacy({ ...data, leadForm })} />
         </>
-      );
+      ));
     }
     const updateOptional = (blockId: string, newData: OptionalBlock["data"]) => {
-      onChange({
+      commitLegacy({
         ...data,
         blocks: blocks.map(b => b.id === blockId ? replaceOptionalBlockData(b, newData) : b),
       });
@@ -255,7 +492,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
     if (!block) return null;
     switch (block.type) {
       case "Features":
-        return (
+        return renderWithLayout(moduleConfig, (
           <>
             <AiRewriteButton
               blockType="Features"
@@ -264,9 +501,9 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             />
             <FeaturesForm data={block.data as FeaturesSchema} onChange={d => updateOptional(block.id, d)} />
           </>
-        );
+        ));
       case "Reviews":
-        return (
+        return renderWithLayout(moduleConfig, (
           <>
             <AiRewriteButton
               blockType="Reviews"
@@ -275,9 +512,9 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             />
             <ReviewsForm data={block.data as ReviewsSchema} onChange={d => updateOptional(block.id, d)} />
           </>
-        );
+        ));
       case "TrustBanner":
-        return (
+        return renderWithLayout(moduleConfig, (
           <>
             <AiRewriteButton
               blockType="TrustBanner"
@@ -286,9 +523,9 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             />
             <TrustBannerForm data={block.data as TrustBannerSchema} onChange={d => updateOptional(block.id, d)} />
           </>
-        );
+        ));
       case "AuthorityStory":
-        return (
+        return renderWithLayout(moduleConfig, (
           <>
             <AiRewriteButton
               blockType="AuthorityStory"
@@ -297,9 +534,9 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             />
             <AuthorityForm data={block.data as AuthoritySchema} onChange={d => updateOptional(block.id, d)} />
           </>
-        );
+        ));
       case "FAQ":
-        return (
+        return renderWithLayout(moduleConfig, (
           <>
             <AiRewriteButton
               blockType="FAQ"
@@ -308,13 +545,13 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             />
             <FAQForm data={block.data as FAQSchema} onChange={d => updateOptional(block.id, d)} />
           </>
-        );
+        ));
       case "Countdown":
-        return (
+        return renderWithLayout(moduleConfig, (
           <CountdownForm data={block.data as CountdownSchema} onChange={d => updateOptional(block.id, d)} />
-        );
+        ));
       case "Assurance":
-        return (
+        return renderWithLayout(moduleConfig, (
           <>
             <AiRewriteButton
               blockType="Assurance"
@@ -323,7 +560,7 @@ export function BlockEditorPanel({ data, onChange, expandedKey, onExpandedKeyCha
             />
             <AssuranceForm data={block.data as AssuranceSchema} onChange={d => updateOptional(block.id, d)} />
           </>
-        );
+        ));
       default:
         return null;
     }

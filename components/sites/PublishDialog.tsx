@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { LandingPageTemplate } from "@/types/schema";
+import type { PresetTemplateData } from "@/lib/templates";
 import { apiSitePath, ApiRoutes } from "@/lib/constants";
 import { jsonRequest, ApiError } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
@@ -38,7 +38,7 @@ interface PublishDialogProps {
   onOpenChange: (open: boolean) => void;
   siteId: string;
   siteName: string;
-  siteData: LandingPageTemplate;
+  siteData: PresetTemplateData;
   initialSlug?: string;
   onSuccess: (slug: string) => void;
 }
@@ -278,4 +278,3 @@ export function PublishDialog({
     </Dialog>
   );
 }
-

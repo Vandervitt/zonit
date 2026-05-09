@@ -1,4 +1,8 @@
-import type { LandingPage, LandingPageTemplate } from "@/types/schema";
+import type { LandingPage } from "@/types/schema";
+import type { PresetTemplateData } from "@/lib/templates";
+import { isExtractedTemplateData } from "@/lib/templates";
+import { BeautyTemplateRenderer } from "@/components/template-extraction";
+import { TemplateRenderer } from "./TemplateRenderer";
 import { HeroBlock } from "./blocks/HeroBlock";
 import { OfferBlock } from "./blocks/OfferBlock";
 import { HowItWorksBlock } from "./blocks/HowItWorksBlock";
@@ -51,14 +55,12 @@ export function LandingPageTemplateRenderer({
   template,
   showWatermark,
 }: {
-  template: LandingPageTemplate;
+  template: PresetTemplateData;
   showWatermark?: boolean;
 }) {
-  return (
-    <LandingPageRenderer
-      page={template}
-      primaryColor={template.themeConfig.primaryColor}
-      showWatermark={showWatermark}
-    />
-  );
+  if (isExtractedTemplateData(template)) {
+    return <BeautyTemplateRenderer template={template} />;
+  }
+
+  return <TemplateRenderer template={template} showWatermark={showWatermark} />;
 }

@@ -1,5 +1,20 @@
 import type { CSSProperties } from "react";
 import type { LandingPageTemplate } from '@/types/schema';
+import type { ExtractedTemplate } from "@/components/template-extraction/types";
+
+export type PresetTemplateDataSchema = "landing_page" | "extracted_template";
+export type PresetTemplateRenderer = "standard" | "beauty_extracted";
+export type PresetTemplateData = LandingPageTemplate | ExtractedTemplate;
+
+export function isExtractedTemplateData(data: PresetTemplateData | unknown): data is ExtractedTemplate {
+  return Boolean(
+    data
+    && typeof data === "object"
+    && "modules" in data
+    && "content" in data
+    && "styles" in data,
+  );
+}
 
 export interface PresetTemplate {
   id: string;
@@ -8,11 +23,21 @@ export interface PresetTemplate {
   category: string;
   accentColor: string;
   gradient: string;
-  data: LandingPageTemplate;
+  dataSchema: PresetTemplateDataSchema;
+  renderer: PresetTemplateRenderer;
+  data: PresetTemplateData;
 }
 
 export function heroBackgroundStyle(tpl: PresetTemplate | undefined): CSSProperties {
-  const bg = tpl?.data?.hero?.background;
+  if (!tpl || tpl.dataSchema === "extracted_template") {
+    const hero = tpl?.data.content?.hero as { background?: { src?: string } } | undefined;
+    return hero?.background?.src
+      ? { backgroundImage: `url(${hero.background.src})`, backgroundSize: "cover", backgroundPosition: "center" }
+      : {};
+  }
+
+  const data = tpl.data as LandingPageTemplate;
+  const bg = data.hero?.background;
   if (!bg) return {};
   if (bg.type === "image") return { backgroundImage: `url(${bg.value})`, backgroundSize: "cover", backgroundPosition: "center" };
   if (bg.type === "color") return { backgroundColor: bg.value };

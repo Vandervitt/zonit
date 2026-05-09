@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { PreviewRenderer } from "@/components/sites/PreviewRenderer";
-import type { LandingPageTemplate } from "@/types/schema";
+import type { PresetTemplateData } from "@/lib/templates";
 
 export function PreviewPage() {
-  const [template, setTemplate] = useState<LandingPageTemplate | null>(null);
+  const [template, setTemplate] = useState<PresetTemplateData | null>(null);
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (e.data?.type === "PREVIEW_UPDATE" && e.data.data) {
-        setTemplate(e.data.data as LandingPageTemplate);
+        setTemplate(e.data.data as PresetTemplateData);
       }
     };
     window.addEventListener("message", handler);

@@ -21,7 +21,7 @@ import { invalidateTemplatesCache } from "@/lib/use-templates";
 import { jsonRequest } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 import { ApiRoutes, apiAdminTemplatePath } from "@/lib/constants";
-import type { PresetTemplate } from "@/lib/templates";
+import { isExtractedTemplateData, type PresetTemplate } from "@/lib/templates";
 import type { LandingPageTemplate } from "@/types/schema";
 import type { ZodIssue } from "zod";
 
@@ -146,7 +146,12 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
 
   function handleSave() {
     if (!parsedData) return;
-    void saveMutation.trigger({ ...meta, data: parsedData });
+    void saveMutation.trigger({
+      ...meta,
+      dataSchema: "landing_page",
+      renderer: "standard",
+      data: parsedData,
+    });
   }
 
   function handleDelete(id: string, name: string) {
@@ -157,6 +162,11 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
   const saving = saveMutation.isMutating;
 
   function handleReupload(t: PresetTemplate) {
+    if (isExtractedTemplateData(t.data)) {
+      toast.info("抽取模板使用专用渲染器复现，不能通过旧 Schema 上传器改写");
+      return;
+    }
+
     setParsedData(t.data);
     setMeta({ id: t.id, name: t.name, description: t.description, category: t.category, accentColor: t.accentColor, gradient: t.gradient });
     setParseError(null);
