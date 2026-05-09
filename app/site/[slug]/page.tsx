@@ -2,7 +2,7 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import pool from "@/lib/db";
-import { PreviewRenderer } from "@/components/sites/PreviewRenderer";
+import { LandingPageTemplateRenderer } from "@/components/renderer/LandingPageRenderer";
 import type { LandingPageTemplate } from "@/types/schema";
 import { SiteStatus } from "@/lib/constants";
 import { hasWatermark } from "@/lib/plans";
@@ -82,7 +82,7 @@ export default async function PublicSitePage({
           dangerouslySetInnerHTML={{ __html: serializeJsonLd(node) }}
         />
       ))}
-      <PreviewRenderer template={template} showWatermark={showWatermark} />
+      <LandingPageTemplateRenderer template={template} showWatermark={showWatermark} />
     </>
   );
 }

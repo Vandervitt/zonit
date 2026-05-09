@@ -1,0 +1,458 @@
+{
+  "templateId": "tpl_fresh_fruit_lead_gen",
+  "templateName": "Fresh Fruit Lead Gen",
+  "themeConfig": {
+    "mode": "light",
+    "primaryColor": "#167C47"
+  },
+  "pageMeta": {
+    "locale": "en-US",
+    "seo": {
+      "title": "FreshHarvest Fruit Box Consultation",
+      "description": "Request a tailored fresh fruit box recommendation for offices, hotels, and events.",
+      "ogTitle": "Fresh fruit boxes planned around your team",
+      "ogDescription": "Share your serving size and location to receive seasonal fruit box consultation options.",
+      "robots": "index,follow",
+      "generatedAt": "2026-05-08T00:00:00+08:00"
+    },
+    "analytics": {
+      "pixels": [
+        {
+          "provider": "custom",
+          "id": "freshharvest-lead-template",
+          "events": [
+            {
+              "trigger": "page_view",
+              "name": "Lead"
+            },
+            {
+              "trigger": "cta_click",
+              "name": "WhatsAppClick"
+            },
+            {
+              "trigger": "form_submit",
+              "name": "FormSubmit"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "primaryConversion": {
+    "channel": "whatsapp",
+    "label": "Chat on WhatsApp",
+    "destination": {
+      "type": "whatsapp",
+      "url": "https://wa.me/1234567890"
+    },
+    "prefilledMessage": "Hi FreshHarvest, I would like a fruit box consultation for my team."
+  },
+  "hero": {
+    "badge": "B2B fresh fruit sourcing for offices, hotels, and events",
+    "title": "Fresh fruit boxes\nplanned around your team.",
+    "subtitle": "Tell us your location, serving size, and fruit preferences. Our sourcing team will follow up with seasonal options, delivery windows, and a tailored consultation quote.",
+    "background": {
+      "type": "color",
+      "value": "#E9F7D7"
+    },
+    "cta": {
+      "text": "Chat on WhatsApp",
+      "icon": "WhatsApp",
+      "channel": "whatsapp",
+      "destination": {
+        "type": "whatsapp",
+        "url": "https://wa.me/1234567890"
+      },
+      "prefilledMessage": "Hi FreshHarvest, I would like a fruit box consultation for my team.",
+      "tracking": {
+        "eventName": "WhatsAppClick",
+        "label": "hero_primary_whatsapp"
+      }
+    },
+    "secondaryCta": {
+      "text": "View sample boxes",
+      "icon": "ArrowRight",
+      "channel": "consultation_link",
+      "destination": {
+        "type": "consultation_link",
+        "url": "https://freshharvest.example/contact"
+      },
+      "tracking": {
+        "eventName": "Contact",
+        "label": "hero_secondary_samples"
+      }
+    },
+    "trustText": "Human response within 15 minutes. No checkout, only consultation.",
+    "stats": [
+      {
+        "id": "hero-stat-1",
+        "label": "sample plan turnaround",
+        "value": "48h",
+        "icon": "Clock"
+      },
+      {
+        "id": "hero-stat-2",
+        "label": "client rating",
+        "value": "4.9/5",
+        "icon": "Star"
+      },
+      {
+        "id": "hero-stat-3",
+        "label": "weekly teams served",
+        "value": "120+",
+        "icon": "Verified"
+      }
+    ]
+  },
+  "offer": {
+    "title": "Choose a fruit consultation path",
+    "subtitle": "Start with a fast chat, a guided callback, or a sample tasting plan. Each path gathers the right details before our team follows up.",
+    "options": [
+      {
+        "id": "quick-whatsapp-brief",
+        "name": "Quick WhatsApp Brief",
+        "badge": "Fastest response",
+        "description": "Share headcount, city, and preferred fruit styles. Get a concise seasonal recommendation from a real coordinator.",
+        "valueProps": [
+          "Reply in 15 minutes",
+          "Seasonal mix suggestions",
+          "Delivery-window check"
+        ],
+        "cta": {
+          "text": "Chat on WhatsApp",
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/1234567890"
+          },
+          "prefilledMessage": "Hi FreshHarvest, I want a quick fruit box recommendation.",
+          "tracking": {
+            "eventName": "WhatsAppClick",
+            "label": "offer_quick_whatsapp"
+          }
+        }
+      },
+      {
+        "id": "office-fruit-box-plan",
+        "name": "Office Fruit Box Plan",
+        "badge": "Recommended",
+        "description": "For recurring office snacks, pantry programs, and team wellness initiatives that need predictable planning.",
+        "valueProps": [
+          "Servings estimate",
+          "Allergy notes",
+          "Weekly plan guidance"
+        ],
+        "cta": {
+          "text": "Request a Plan",
+          "channel": "form",
+          "destination": {
+            "type": "form",
+            "formId": "fruit-box-lead-form"
+          },
+          "tracking": {
+            "eventName": "FormSubmit",
+            "label": "offer_office_plan_form"
+          }
+        }
+      },
+      {
+        "id": "event-tasting-inquiry",
+        "name": "Event Tasting Inquiry",
+        "badge": "For events",
+        "description": "For launches, hospitality suites, and executive meetings where presentation and freshness matter.",
+        "valueProps": [
+          "Presentation options",
+          "Guest-count planning",
+          "Coordinator follow-up"
+        ],
+        "cta": {
+          "text": "Ask for Event Options",
+          "channel": "email",
+          "destination": {
+            "type": "email",
+            "email": "hello@freshharvest.example"
+          },
+          "tracking": {
+            "eventName": "EmailClick",
+            "label": "offer_event_email"
+          }
+        }
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "From inquiry to fruit plan in three steps",
+    "steps": [
+      {
+        "id": "step-send-brief",
+        "icon": "MessageCircle",
+        "title": "Send your brief",
+        "description": "Tell us serving size, location, fruit preferences, and timing through WhatsApp or the lead form."
+      },
+      {
+        "id": "step-get-recommendations",
+        "icon": "Check",
+        "title": "Get recommendations",
+        "description": "A coordinator suggests seasonal combinations, delivery windows, and next-step options."
+      },
+      {
+        "id": "step-confirm-plan",
+        "icon": "Calendar",
+        "title": "Confirm the plan",
+        "description": "Your team reviews the details and books the preferred follow-up path directly with our coordinator."
+      }
+    ]
+  },
+  "leadForm": {
+    "id": "fruit-box-lead-form",
+    "title": "Get a tailored fruit box recommendation",
+    "subtitle": "Leave reachable contact details and two quick planning notes. Our team will respond with consultation options.",
+    "submitText": "Send inquiry",
+    "successMessage": "Thanks. A FreshHarvest coordinator will contact you shortly.",
+    "requiredFields": [
+      "name",
+      "email"
+    ],
+    "optionalFields": [
+      "phone",
+      "whatsapp"
+    ],
+    "consentText": "By submitting, you agree to be contacted about your fruit consultation request.",
+    "includeMessage": true,
+    "extraFields": [
+      {
+        "id": "company-type",
+        "fieldKey": "company_type",
+        "label": "Company or venue type",
+        "type": "select",
+        "required": true,
+        "options": [
+          {
+            "label": "Office team",
+            "value": "office_team"
+          },
+          {
+            "label": "Hotel or hospitality",
+            "value": "hospitality"
+          },
+          {
+            "label": "Event or meeting",
+            "value": "event"
+          }
+        ]
+      },
+      {
+        "id": "serving-size",
+        "fieldKey": "serving_size",
+        "label": "Estimated serving size",
+        "type": "select",
+        "required": true,
+        "options": [
+          {
+            "label": "Under 30 people",
+            "value": "under_30"
+          },
+          {
+            "label": "30 to 100 people",
+            "value": "30_100"
+          },
+          {
+            "label": "100+ people",
+            "value": "100_plus"
+          }
+        ]
+      }
+    ],
+    "eventName": "FormSubmit"
+  },
+  "footer": {
+    "brandName": "FreshHarvest",
+    "copyrightYear": "2026",
+    "contactEmail": "hello@freshharvest.example",
+    "socialLinks": [
+      {
+        "platform": "whatsapp",
+        "url": "https://wa.me/1234567890"
+      }
+    ],
+    "links": [
+      {
+        "text": "Privacy Policy",
+        "content": "We collect submitted contact details only to respond to fruit consultation requests, prepare recommendations, and coordinate follow-up. We do not sell personal information. Contact hello@freshharvest.example to request access, correction, or deletion of submitted details."
+      },
+      {
+        "text": "Terms of Inquiry",
+        "content": "Information on this page is for consultation and lead generation only. Fruit availability, delivery windows, and service details are confirmed by the FreshHarvest team after reviewing each inquiry."
+      }
+    ],
+    "disclaimer": "Seasonal availability and delivery windows vary by location and inquiry details."
+  },
+  "blocks": [
+    {
+      "id": "trust-banner",
+      "type": "TrustBanner",
+      "data": {
+        "badges": [
+          {
+            "id": "trust-seasonal",
+            "icon": "Verified",
+            "text": "Seasonal sourcing",
+            "subtext": "Fruit recommendations follow local availability."
+          },
+          {
+            "id": "trust-whatsapp",
+            "icon": "WhatsApp",
+            "text": "WhatsApp consultation",
+            "subtext": "Fast path to a human coordinator."
+          },
+          {
+            "id": "trust-privacy",
+            "icon": "Shield",
+            "text": "Privacy protected",
+            "subtext": "Lead details are used only for follow-up."
+          },
+          {
+            "id": "trust-business",
+            "icon": "Award",
+            "text": "Business friendly planning",
+            "subtext": "Built for teams, venues, and events."
+          }
+        ]
+      }
+    },
+    {
+      "id": "features",
+      "type": "Features",
+      "data": {
+        "title": "Fruit planning that starts with real needs",
+        "subtitle": "The page explains the consultation value before asking visitors to leave contact details.",
+        "items": [
+          {
+            "id": "feature-seasonal",
+            "icon": "Star",
+            "title": "Seasonal mix guidance",
+            "description": "Visitors can request fruit combinations that fit timing, location, and serving size."
+          },
+          {
+            "id": "feature-delivery-window",
+            "icon": "Clock",
+            "title": "Delivery-window planning",
+            "description": "The consultation path collects timing requirements before a coordinator follows up."
+          },
+          {
+            "id": "feature-team-notes",
+            "icon": "Check",
+            "title": "Team preference notes",
+            "description": "Light qualification fields help capture allergies, venue type, and serving estimate."
+          }
+        ]
+      }
+    },
+    {
+      "id": "reviews",
+      "type": "Reviews",
+      "data": {
+        "title": "Teams mention freshness first.",
+        "subtitle": "Review proof reinforces response speed and planning quality.",
+        "ratingSummary": {
+          "average": 4.9,
+          "scale": 5,
+          "totalLabel": "Based on recent consultation feedback"
+        },
+        "items": [
+          {
+            "id": "review-maya",
+            "authorName": "Maya R.",
+            "authorRole": "Office Manager",
+            "rating": 5,
+            "content": "The coordinator asked the right questions and sent a clear seasonal plan for our 80-person team.",
+            "sourcePlatform": "WhatsApp",
+            "country": "Singapore"
+          },
+          {
+            "id": "review-daniel",
+            "authorName": "Daniel K.",
+            "authorRole": "Hotel F&B Lead",
+            "rating": 5,
+            "content": "We needed fruit platters for guest arrivals. FreshHarvest helped us compare options and timing without pushing a checkout flow.",
+            "sourcePlatform": "Email",
+            "country": "UAE"
+          }
+        ],
+        "disclaimer": "Feedback reflects individual consultation experiences."
+      }
+    },
+    {
+      "id": "faq",
+      "type": "FAQ",
+      "data": {
+        "title": "Common questions before a fruit consultation",
+        "items": [
+          {
+            "id": "faq-not-purchase",
+            "question": "Is this page for online purchases?",
+            "answer": "No. The page only routes visitors to consultation and lead capture paths. Final availability and next steps are handled by the FreshHarvest team."
+          },
+          {
+            "id": "faq-recurring",
+            "question": "Can visitors request a recurring office plan?",
+            "answer": "Yes. The inquiry path asks for team size, location, and cadence so the team can recommend a realistic plan."
+          },
+          {
+            "id": "faq-contact",
+            "question": "What contact details are needed?",
+            "answer": "At minimum, visitors provide a reachable email or WhatsApp contact so the coordinator can reply."
+          }
+        ],
+        "contactCta": {
+          "text": "Ask a coordinator",
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/1234567890"
+          },
+          "prefilledMessage": "Hi FreshHarvest, I have a question before requesting a fruit box plan.",
+          "tracking": {
+            "eventName": "WhatsAppClick",
+            "label": "faq_contact_whatsapp"
+          }
+        }
+      }
+    },
+    {
+      "id": "assurance",
+      "type": "Assurance",
+      "data": {
+        "title": "A consultation-first fruit page",
+        "description": "Visitors can ask questions, leave contact details, and receive follow-up without being routed into a transaction flow.",
+        "badges": [
+          {
+            "id": "assurance-human",
+            "icon": "MessageCircle",
+            "text": "Human coordinator",
+            "subtext": "Real follow-up after each inquiry."
+          },
+          {
+            "id": "assurance-no-checkout",
+            "icon": "Shield",
+            "text": "Non-transactional page",
+            "subtext": "Designed for lead generation."
+          }
+        ],
+        "cta": {
+          "text": "Start a consultation",
+          "channel": "whatsapp",
+          "destination": {
+            "type": "whatsapp",
+            "url": "https://wa.me/1234567890"
+          },
+          "prefilledMessage": "Hi FreshHarvest, I want to start a fruit box consultation.",
+          "tracking": {
+            "eventName": "WhatsAppClick",
+            "label": "assurance_whatsapp"
+          }
+        }
+      }
+    }
+  ]
+}
