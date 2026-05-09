@@ -15,6 +15,7 @@ Read these constraint files before making related changes:
 - Coding style: `docs/constraints/coding-style.md`
 - Frontend styling rules: `docs/constraints/frontend-style.md`
 - Testing and validation: `docs/constraints/testing-and-validation.md`
+- Local review workflow: `docs/constraints/local-review-workflow.md`
 - Commit rules: `docs/constraints/commit-guidelines.md`
 
 Hard rules:
