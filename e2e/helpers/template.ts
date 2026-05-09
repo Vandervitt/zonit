@@ -84,7 +84,7 @@ export function leadFormFixture(): LeadFormSchema {
     id: 'lead-form',
     title: 'Get a Free Quote',
     submitText: 'Send Request',
-    requiredFields: ['email'],
+    requiredFields: ['name', 'email'],
     includeMessage: true,
   };
 }

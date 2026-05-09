@@ -8,10 +8,10 @@
     "vercel-build": "pnpm migrate:up && next build",
     "start": "next start",
     "lint": "eslint",
-    "migrate": "node-pg-migrate -m migrations -d DATABASE_URL_UNPOOLED",
-    "migrate:up": "node-pg-migrate up -m migrations -d DATABASE_URL_UNPOOLED",
-    "migrate:down": "node-pg-migrate down -m migrations -d DATABASE_URL_UNPOOLED",
-    "migrate:create": "node-pg-migrate create -m migrations",
+    "migrate": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js -m migrations -d DATABASE_URL_UNPOOLED",
+    "migrate:up": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js up -m migrations -d DATABASE_URL_UNPOOLED",
+    "migrate:down": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js down -m migrations -d DATABASE_URL_UNPOOLED",
+    "migrate:create": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js create -m migrations",
     "test:e2e": "playwright test"
   },
   "dependencies": {

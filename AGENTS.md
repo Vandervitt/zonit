@@ -17,6 +17,7 @@ Read these constraint files before making related changes:
 - Testing and validation: `docs/constraints/testing-and-validation.md`
 - Local review workflow: `docs/constraints/local-review-workflow.md`
 - Commit rules: `docs/constraints/commit-guidelines.md`
+- Development database migrations: `docs/dev-database-migration-workflow.md`
 
 Hard rules:
 

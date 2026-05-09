@@ -35,11 +35,12 @@ export function LeadFormBlock({
       <form id={data.id} className="space-y-2.5 max-w-md mx-auto" onSubmit={e => e.preventDefault()}>
         {[...required, ...optional].map(field => (
           <div key={field.id}>
-            <label className="text-xs text-slate-600 mb-1 block">
+            <label htmlFor={`${data.id}-${field.id}`} className="text-xs text-slate-600 mb-1 block">
               {field.label}
               {field.required && <span className="text-rose-500 ml-0.5">*</span>}
             </label>
             <input
+              id={`${data.id}-${field.id}`}
               name={field.id}
               type={field.type}
               required={field.required}
@@ -51,11 +52,12 @@ export function LeadFormBlock({
         {data.extraFields?.map(field =>
           field.type === "select" ? (
             <div key={field.id}>
-              <label className="text-xs text-slate-600 mb-1 block">
+              <label htmlFor={`${data.id}-${field.id}`} className="text-xs text-slate-600 mb-1 block">
                 {field.label}
                 {field.required && <span className="text-rose-500 ml-0.5">*</span>}
               </label>
               <select
+                id={`${data.id}-${field.id}`}
                 name={field.fieldKey}
                 required={field.required}
                 className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700"
@@ -67,11 +69,12 @@ export function LeadFormBlock({
             </div>
           ) : (
             <div key={field.id}>
-              <label className="text-xs text-slate-600 mb-1 block">
+              <label htmlFor={`${data.id}-${field.id}`} className="text-xs text-slate-600 mb-1 block">
                 {field.label}
                 {field.required && <span className="text-rose-500 ml-0.5">*</span>}
               </label>
               <input
+                id={`${data.id}-${field.id}`}
                 name={field.fieldKey}
                 type="text"
                 required={field.required}
@@ -83,8 +86,9 @@ export function LeadFormBlock({
         )}
         {data.includeMessage !== false && (
           <div>
-            <label className="text-xs text-slate-600 mb-1 block">Message</label>
+            <label htmlFor={`${data.id}-message`} className="text-xs text-slate-600 mb-1 block">Message</label>
             <textarea
+              id={`${data.id}-message`}
               name="message"
               placeholder="Tell us what you need help with..."
               className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white text-slate-700 placeholder:text-slate-400 min-h-[60px] resize-none"
