@@ -30,7 +30,7 @@ function CaseCard({ item, primaryColor }: { item: ProofCaseItem; primaryColor: s
           <p className="text-[10px] mt-1" style={{ color: primaryColor }}>{item.timeframe}</p>
         )}
         {item.testimonial && (
-          <p className="text-[10px] text-slate-500 italic mt-2">"{item.testimonial}"</p>
+          <p className="text-[10px] text-slate-500 italic mt-2">&ldquo;{item.testimonial}&rdquo;</p>
         )}
         {item.cta && (
           <div className="mt-2">
