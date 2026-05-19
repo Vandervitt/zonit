@@ -3,6 +3,7 @@ export enum AuthProvider {
   Google = 'google',
   Apple = 'apple',
   Microsoft = 'microsoft-entra-id',
+  Dev = 'dev',
 }
 
 export enum UserRole {

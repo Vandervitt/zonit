@@ -19,6 +19,15 @@ export default function LoginPage() {
     (provider: AuthProvider) => signIn(provider, { callbackUrl: Routes.Home }),
   );
 
+  const devSignIn = useMutation(
+    async () => {
+      const res = await signIn(AuthProvider.Dev, { redirect: false });
+      if (res?.error) throw new ApiError(401, "Dev login failed.");
+      return res;
+    },
+    { onSuccess: () => { router.push(Routes.Home); router.refresh(); } },
+  );
+
   const credentialsSignIn = useMutation(
     async (args: { email: string; password: string }) => {
       const res = await signIn(AuthProvider.Credentials, { ...args, redirect: false });
@@ -156,6 +165,19 @@ export default function LoginPage() {
           Sign up
         </Link>
       </p>
+
+      {process.env.NODE_ENV === "development" && (
+        <div className="mt-4 pt-4 border-t border-dashed border-slate-200">
+          <button
+            type="button"
+            onClick={() => void devSignIn.trigger()}
+            disabled={devSignIn.isMutating}
+            className="w-full py-2 rounded-xl border border-dashed border-amber-300 bg-amber-50 text-amber-700 text-xs font-medium hover:bg-amber-100 transition-colors disabled:opacity-50"
+          >
+            {devSignIn.isMutating ? "Logging in…" : "⚡ Dev Login (local only)"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

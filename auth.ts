@@ -55,7 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        
+
         // 限制 Credentials 登录也必须是信任的域名
         if (!isTrustedEmail(credentials.email as string)) return null;
 
@@ -75,6 +75,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return { id: user.id, name: user.name, email: user.email, image: user.image };
       },
     }),
+    // Dev-only provider: 仅在 NODE_ENV=development 且设置了 DEV_USER_EMAIL 时激活
+    ...(process.env.NODE_ENV === "development" && process.env.DEV_USER_EMAIL
+      ? [
+          Credentials({
+            id: "dev",
+            name: "Dev Login",
+            credentials: {},
+            async authorize() {
+              const email = process.env.DEV_USER_EMAIL!;
+              const result = await pool.query(
+                `INSERT INTO users (email, name)
+                 VALUES ($1, 'Dev User')
+                 ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
+                 RETURNING id, email, name, image`,
+                [email],
+              );
+              const user = result.rows[0];
+              return { id: user.id, name: user.name, email: user.email, image: user.image ?? null };
+            },
+          }),
+        ]
+      : []),
   ],
   pages: {
     signIn: Routes.Login,
