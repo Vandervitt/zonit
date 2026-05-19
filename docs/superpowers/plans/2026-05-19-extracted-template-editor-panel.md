@@ -1,3 +1,32 @@
+# Extracted Template Editor Panel Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Add a light-themed sidebar editor panel for `ExtractedTemplate` data, exposing text-only fields for the `hero` and `faq` modules.
+
+**Architecture:** One new component file (`ExtractedTemplateEditorPanel.tsx`) containing all sub-editors and style constants. Two small edits to the editor page: import the new panel and replace the placeholder `<div>` with it, plus widen the `handleDataChange` type signature.
+
+**Tech Stack:** React, TypeScript, Tailwind CSS, shadcn/ui (`Accordion`, `ScrollArea`, `Input`, `Textarea`, `Button`)
+
+---
+
+## File Map
+
+| File | Action |
+|------|--------|
+| `components/sites/ExtractedTemplateEditorPanel.tsx` | **Create** — full panel + sub-editors |
+| `app/editor/[siteId]/page.tsx` | **Modify** — import panel, replace placeholder, fix type |
+
+---
+
+### Task 1: Create `ExtractedTemplateEditorPanel.tsx`
+
+**Files:**
+- Create: `components/sites/ExtractedTemplateEditorPanel.tsx`
+
+- [ ] **Step 1: Create the file**
+
+```tsx
 "use client";
 
 import { Plus, Trash2, Zap, HelpCircle } from "lucide-react";
@@ -125,13 +154,15 @@ function HeroEditor({
 
 // ── FaqEditor ─────────────────────────────────────────────────────────────
 
+type FaqItem = { id: string; question: string; answer: string };
+
 function FaqItemEditor({
   item,
   onChange,
   onRemove,
 }: {
-  item: FaqContent["items"][number];
-  onChange: (i: FaqContent["items"][number]) => void;
+  item: FaqItem;
+  onChange: (i: FaqItem) => void;
   onRemove: () => void;
 }) {
   return (
@@ -146,7 +177,7 @@ function FaqItemEditor({
             />
           </Field>
         </div>
-        <button type="button" aria-label="删除此问题" className={`${delBtn} mt-5`} onClick={onRemove}>
+        <button className={`${delBtn} mt-5`} onClick={onRemove}>
           <Trash2 className="w-3 h-3" />
         </button>
       </div>
@@ -190,7 +221,7 @@ function FaqEditor({
         <Input
           className={di}
           value={data.subtitle ?? ""}
-          onChange={e => onChange({ ...data, subtitle: e.target.value || undefined })}
+          onChange={e => onChange({ ...data, subtitle: e.target.value })}
         />
       </Field>
       <SectionDivider label="问答列表" />
@@ -251,12 +282,12 @@ export function ExtractedTemplateEditorPanel({
 
   if (editableModules.length === 0) {
     return (
-      <div className="p-4 text-xs text-slate-400 bg-white">此模板没有可编辑的模块。</div>
+      <div className="p-4 text-xs text-slate-400">此模板没有可编辑的模块。</div>
     );
   }
 
   return (
-    <ScrollArea className="flex-1 min-h-0 overflow-hidden bg-white">
+    <ScrollArea className="flex-1 min-h-0 overflow-hidden">
       <Accordion type="single" collapsible className="divide-y divide-slate-100">
         {editableModules.map(mod => {
           const meta = MODULE_META[mod.type];
@@ -275,23 +306,17 @@ export function ExtractedTemplateEditorPanel({
                 </div>
               </AccordionTrigger>
               <AccordionContent className="border-t border-slate-100 px-4 pb-6 pt-3">
-                {!content ? (
-                  <p className="text-xs text-slate-400">数据缺失。</p>
-                ) : (
-                  <>
-                    {mod.type === "hero" && (
-                      <HeroEditor
-                        data={content as HeroContent}
-                        onChange={v => onChange(patchContent(template, mod.dataKey, v))}
-                      />
-                    )}
-                    {mod.type === "faq" && (
-                      <FaqEditor
-                        data={content as FaqContent}
-                        onChange={v => onChange(patchContent(template, mod.dataKey, v))}
-                      />
-                    )}
-                  </>
+                {mod.type === "hero" && (
+                  <HeroEditor
+                    data={content as HeroContent}
+                    onChange={v => onChange(patchContent(template, mod.dataKey, v))}
+                  />
+                )}
+                {mod.type === "faq" && (
+                  <FaqEditor
+                    data={content as FaqContent}
+                    onChange={v => onChange(patchContent(template, mod.dataKey, v))}
+                  />
                 )}
               </AccordionContent>
             </AccordionItem>
@@ -301,3 +326,107 @@ export function ExtractedTemplateEditorPanel({
     </ScrollArea>
   );
 }
+```
+
+- [ ] **Step 2: Run type check**
+
+```bash
+cd /Users/lajiao/Work/zonit && npx tsc --noEmit 2>&1 | head -40
+```
+
+Expected: no errors in `ExtractedTemplateEditorPanel.tsx`. Fix any before continuing.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add components/sites/ExtractedTemplateEditorPanel.tsx
+git commit -m "feat(editor): 新增抽取模板编辑器面板（hero + faq 文本字段）"
+```
+
+---
+
+### Task 2: Wire panel into editor page
+
+**Files:**
+- Modify: `app/editor/[siteId]/page.tsx`
+
+- [ ] **Step 1: Add import**
+
+In `app/editor/[siteId]/page.tsx`, add after the existing imports:
+
+```ts
+import { ExtractedTemplateEditorPanel } from "@/components/sites/ExtractedTemplateEditorPanel";
+```
+
+- [ ] **Step 2: Fix `handleDataChange` type**
+
+Change line 72 from:
+
+```ts
+const handleDataChange = (newData: LandingPageTemplate) => {
+```
+
+to:
+
+```ts
+const handleDataChange = (newData: PresetTemplateData) => {
+```
+
+`PresetTemplateData` is already imported at line 14. `autoSave` and `updateSite` both accept `PresetTemplateData` so no further changes are needed.
+
+- [ ] **Step 3: Replace placeholder with panel**
+
+In the `aside` element (around line 213), replace:
+
+```tsx
+{isExtractedTemplateData(data) ? (
+  <div className="p-4 text-sm text-zinc-400">
+    <p className="text-zinc-200 font-medium mb-2">抽取模板</p>
+    <p className="text-xs leading-5">
+      此模板使用原始抽取数据和专用渲染器复现，当前不经过通用模块编辑器改写。
+    </p>
+  </div>
+) : (
+  <BlockEditorPanel data={data} onChange={handleDataChange} expandedKey={expandedKey} onExpandedKeyChange={setExpandedKey} />
+)}
+```
+
+with:
+
+```tsx
+{isExtractedTemplateData(data) ? (
+  <ExtractedTemplateEditorPanel template={data} onChange={handleDataChange} />
+) : (
+  <BlockEditorPanel data={data} onChange={handleDataChange} expandedKey={expandedKey} onExpandedKeyChange={setExpandedKey} />
+)}
+```
+
+- [ ] **Step 4: Run type check**
+
+```bash
+cd /Users/lajiao/Work/zonit && npx tsc --noEmit 2>&1 | head -40
+```
+
+Expected: no errors. Fix any before continuing.
+
+- [ ] **Step 5: Start dev server and verify manually**
+
+```bash
+npm run dev
+```
+
+Navigate to an extracted-template site in the editor (a site whose `data` has `modules`, `content`, `styles` fields). Verify:
+
+1. Aside shows "首屏" and "常见问题" accordion items (light theme, white background).
+2. Expanding "首屏" shows badge / title / subtitle / background URL / trustText fields pre-filled.
+3. Editing a field updates the preview iframe in real time.
+4. Expanding "常见问题" shows title, subtitle, and the list of Q&A items.
+5. Adding a new Q&A item with "添加问题" works; deleting an existing item with × works.
+6. Standard (non-extracted) templates still show `BlockEditorPanel` as before.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add "app/editor/[siteId]/page.tsx"
+git commit -m "feat(editor): 接入抽取模板编辑器面板，修正 handleDataChange 类型"
+```
