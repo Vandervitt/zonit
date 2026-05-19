@@ -12,7 +12,10 @@
     "migrate:up": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js up -m migrations -d DATABASE_URL_UNPOOLED",
     "migrate:down": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js down -m migrations -d DATABASE_URL_UNPOOLED",
     "migrate:create": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js create -m migrations",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "db:start": "docker compose up -d postgres",
+    "db:stop": "docker compose stop postgres",
+    "db:reset": "docker compose down -v && docker compose up -d postgres"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.2",
