@@ -125,15 +125,13 @@ function HeroEditor({
 
 // ── FaqEditor ─────────────────────────────────────────────────────────────
 
-type FaqItem = { id: string; question: string; answer: string };
-
 function FaqItemEditor({
   item,
   onChange,
   onRemove,
 }: {
-  item: FaqItem;
-  onChange: (i: FaqItem) => void;
+  item: FaqContent["items"][number];
+  onChange: (i: FaqContent["items"][number]) => void;
   onRemove: () => void;
 }) {
   return (
@@ -148,7 +146,7 @@ function FaqItemEditor({
             />
           </Field>
         </div>
-        <button className={`${delBtn} mt-5`} onClick={onRemove}>
+        <button type="button" className={`${delBtn} mt-5`} onClick={onRemove}>
           <Trash2 className="w-3 h-3" />
         </button>
       </div>
@@ -192,7 +190,7 @@ function FaqEditor({
         <Input
           className={di}
           value={data.subtitle ?? ""}
-          onChange={e => onChange({ ...data, subtitle: e.target.value })}
+          onChange={e => onChange({ ...data, subtitle: e.target.value || undefined })}
         />
       </Field>
       <SectionDivider label="问答列表" />
@@ -277,17 +275,23 @@ export function ExtractedTemplateEditorPanel({
                 </div>
               </AccordionTrigger>
               <AccordionContent className="border-t border-slate-100 px-4 pb-6 pt-3">
-                {mod.type === "hero" && (
-                  <HeroEditor
-                    data={content as HeroContent}
-                    onChange={v => onChange(patchContent(template, mod.dataKey, v))}
-                  />
-                )}
-                {mod.type === "faq" && (
-                  <FaqEditor
-                    data={content as FaqContent}
-                    onChange={v => onChange(patchContent(template, mod.dataKey, v))}
-                  />
+                {!content ? (
+                  <p className="text-xs text-slate-400">数据缺失。</p>
+                ) : (
+                  <>
+                    {mod.type === "hero" && (
+                      <HeroEditor
+                        data={content as HeroContent}
+                        onChange={v => onChange(patchContent(template, mod.dataKey, v))}
+                      />
+                    )}
+                    {mod.type === "faq" && (
+                      <FaqEditor
+                        data={content as FaqContent}
+                        onChange={v => onChange(patchContent(template, mod.dataKey, v))}
+                      />
+                    )}
+                  </>
                 )}
               </AccordionContent>
             </AccordionItem>
