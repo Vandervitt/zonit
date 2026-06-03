@@ -923,7 +923,11 @@ function renderModule(template: ExtractedTemplate, moduleId: string) {
 export function BeautyTemplateRenderer({ template = extractedBeautyTemplate }: RendererProps) {
   return (
     <div className={template.styles.page.root}>
-      {template.modules.map((module) => renderModule(template, module.id))}
+      {template.modules.map((module) => (
+        <div key={module.id} id={module.id}>
+          {renderModule(template, module.id)}
+        </div>
+      ))}
     </div>
   );
 }

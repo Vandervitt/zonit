@@ -49,6 +49,7 @@ export default function SiteEditorPage() {
       setData(site.data);
       setPublished(site.published);
       setSlug(site.slug);
+      setExpandedKey(isExtractedTemplateData(site.data) ? site.data.modules[0]?.id ?? "" : "hero");
       setHydratedSiteId(siteId);
     } else if (siteQuery.error) {
       router.push(Routes.Sites);
@@ -211,7 +212,7 @@ export default function SiteEditorPage() {
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-100 shrink-0 h-full flex flex-col overflow-hidden bg-zinc-950 border-r border-zinc-800/60">
           {isExtractedTemplateData(data) ? (
-            <ExtractedTemplateEditorPanel template={data} onChange={handleDataChange} />
+            <ExtractedTemplateEditorPanel template={data} onChange={handleDataChange} expandedKey={expandedKey} onExpandedKeyChange={setExpandedKey} />
           ) : (
             <BlockEditorPanel data={data} onChange={handleDataChange} expandedKey={expandedKey} onExpandedKeyChange={setExpandedKey} />
           )}

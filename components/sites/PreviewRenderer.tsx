@@ -16,7 +16,11 @@ export function PreviewRenderer({
 }) {
   useEffect(() => {
     if (!highlightKey) return;
-    document.getElementById(highlightKey)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    // Wait a frame so a freshly-added/rendered section exists in the DOM before scrolling.
+    const raf = requestAnimationFrame(() => {
+      document.getElementById(highlightKey)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(raf);
   }, [highlightKey]);
 
   if (isExtractedTemplateData(template)) {

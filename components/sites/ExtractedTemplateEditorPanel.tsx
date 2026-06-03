@@ -94,9 +94,13 @@ function renderEditor(
 export function ExtractedTemplateEditorPanel({
   template,
   onChange,
+  expandedKey,
+  onExpandedKeyChange,
 }: {
   template: ExtractedTemplate;
   onChange: (t: ExtractedTemplate) => void;
+  expandedKey: string;
+  onExpandedKeyChange: (key: string) => void;
 }) {
   if (template.modules.length === 0) {
     return <div className="p-4 text-xs text-slate-400 bg-white">此模板没有可编辑的模块。</div>;
@@ -104,7 +108,13 @@ export function ExtractedTemplateEditorPanel({
 
   return (
     <ScrollArea className="flex-1 min-h-0 overflow-hidden bg-white">
-      <Accordion type="single" collapsible className="divide-y divide-slate-100">
+      <Accordion
+        type="single"
+        collapsible
+        value={expandedKey}
+        onValueChange={onExpandedKeyChange}
+        className="divide-y divide-slate-100"
+      >
         {template.modules.map(mod => {
           const meta = MODULE_META[mod.type];
           const content = template.content[mod.dataKey];
