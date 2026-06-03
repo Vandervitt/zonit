@@ -26,3 +26,6 @@ Hard rules:
 - This project uses `proxy.ts` as middleware.
 - Tailwind only: no custom CSS and no inline styles.
 - Commit messages must use Chinese Conventional Commits.
+
+# IMPORTANT
+"IMPORTANT: After finishing the code and passing local tests, you MUST execute git commit with a JSON summary in the message. Do not wait for user input to exit."
