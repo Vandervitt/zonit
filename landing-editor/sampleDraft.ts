@@ -1,37 +1,22 @@
 // landing-editor/sampleDraft.ts
-// 编辑器初始种子：一个结构有效（含 core-value 组成员 features）的 LandingPageDraft。
-import type { LandingSection } from "@/types/schema.draft";
+// 编辑器初始种子：从美妆护肤「肤质咨询」LandingPageDraft 数据文件派生 EditorState，
+// 使 /editor-next 打开即为该落地页，可在各表单中完整复刻与调整。
+import type { LandingPageDraft } from "@/types/schema.draft";
 import type { EditorState } from "./store/editorStore";
-import { withKeys } from "./store/editorStore";
-import { createHero, createFooter } from "./store/defaults";
+import { withKeys, HERO_ID } from "./store/editorStore";
+import { skincareConsultDraft } from "./samples/skincareConsultDraft";
+
+/** 把干净的 LandingPageDraft 适配为编辑器状态（为可排序区块补 _key）。 */
+export function fromDraft(draft: LandingPageDraft): EditorState {
+  return {
+    hero: draft.hero,
+    footer: draft.footer,
+    floatingButton: draft.floatingButton ?? null,
+    sections: withKeys(draft.sections),
+    selectedId: HERO_ID,
+  };
+}
 
 export function createInitialState(): EditorState {
-  const sections: LandingSection[] = [
-    {
-      type: "features",
-      data: {
-        title: "为什么选择我们",
-        subtitle: "三个核心理由",
-        items: [
-          { icon: "✨", title: "专业团队", description: "10 年行业经验，快速响应你的咨询。" },
-          { icon: "⚡", title: "极速响应", description: "10 分钟内回复，不错过每个机会。" },
-        ],
-      },
-    },
-    {
-      type: "faq",
-      data: {
-        title: { icon: "❓", text: "常见问题" },
-        items: [{ question: "如何开始？", answer: "点击咨询按钮，与我们的顾问聊一聊。" }],
-      },
-    },
-  ];
-
-  return {
-    hero: createHero(),
-    footer: createFooter(),
-    floatingButton: null,
-    sections: withKeys(sections),
-    selectedId: "hero",
-  };
+  return fromDraft(skincareConsultDraft);
 }
