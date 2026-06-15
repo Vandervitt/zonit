@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/theme.css";
+@import "../landing-editor/editor-theme.css";
 
 :root {
   --background: #ffffff;
