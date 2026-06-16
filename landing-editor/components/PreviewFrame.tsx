@@ -36,6 +36,17 @@ export function PreviewFrame({ virtualWidth, children }: { virtualWidth: number;
     setBody(doc.body);
   };
 
+  // 无 src 的 iframe 会在浏览器内部立刻完成 about:blank 的加载，
+  // 该原生 load 事件常常在 React 把 onLoad 处理器绑定到 DOM 节点之前就已触发，
+  // 导致 handleLoad 永远不会被调用、body 状态停留在 null、预览内容无法挂载。
+  // 这里在挂载后兜底检测一次：若 contentDocument 已是 complete，直接补跑一次 handleLoad。
+  useEffect(() => {
+    const doc = iframeRef.current?.contentDocument;
+    if (doc && doc.readyState === "complete") {
+      handleLoad();
+    }
+  }, []);
+
   // 父文档 head 变化（Turbopack dev / HMR 新增 <style>）时同步到 iframe
   useEffect(() => {
     const mo = new MutationObserver(() => {
