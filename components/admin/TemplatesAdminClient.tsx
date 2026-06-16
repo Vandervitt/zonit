@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PreviewRenderer } from "@/components/sites/PreviewRenderer";
+import { LandingPageTemplateRenderer } from "@/components/renderer/LandingPageRenderer";
 import { LandingPageTemplateSchema } from "@/lib/schema.zod";
 import { invalidateTemplatesCache } from "@/lib/use-templates";
 import { jsonRequest } from "@/lib/api/fetcher";
@@ -293,7 +293,7 @@ export function TemplatesAdminClient({ initialTemplates }: Props) {
           </div>
           <div className="h-[680px] overflow-y-auto bg-white">
             {parsedData ? (
-              <PreviewRenderer template={parsedData} />
+              <LandingPageTemplateRenderer template={parsedData} />
             ) : (
               <div className="h-full flex items-center justify-center text-slate-400 text-sm">
                 上传 JSON 后此处将显示实时预览

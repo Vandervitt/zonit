@@ -24,7 +24,7 @@ export enum ApiRoutes {
 export const apiAdminTemplatePath = (id: string) => `/api/admin/templates/${id}`;
 export const apiMediaPath = (id: string) => `/api/media/${id}`;
 
-export const siteEditorPath = (id: string) => `/editor/${id}`;
+export const siteEditorPath = (id: string) => `/editor-next?siteId=${id}`;
 export const sitePath = (slug: string) => `/site/${slug}`;
 export const apiSitePath = (id: string) => `/api/sites/${id}`;
 export const apiDomainPath = (id: string) => `/api/domains/${id}`;
