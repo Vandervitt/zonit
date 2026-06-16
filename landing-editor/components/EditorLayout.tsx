@@ -2,7 +2,7 @@
 // landing-editor/components/EditorLayout.tsx
 import { BlockList } from "./BlockList";
 import { EditorDetail } from "./EditorDetail";
-import { JsonOutputPanel } from "./JsonOutputPanel";
+import { PreviewPane } from "./PreviewPane";
 import { ValidationBar } from "./ValidationBar";
 
 export function EditorLayout() {
@@ -19,11 +19,11 @@ export function EditorLayout() {
         <aside className="w-72 shrink-0 overflow-hidden border-r border-edge bg-panel">
           <BlockList />
         </aside>
-        <main className="flex-1 overflow-hidden bg-panel">
+        <main className="w-[420px] shrink-0 overflow-hidden border-r border-edge bg-panel">
           <EditorDetail />
         </main>
-        <aside className="hidden w-[380px] shrink-0 overflow-hidden border-l border-edge lg:block">
-          <JsonOutputPanel />
+        <aside className="min-w-0 flex-1 overflow-hidden">
+          <PreviewPane />
         </aside>
       </div>
     </div>
