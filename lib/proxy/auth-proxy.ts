@@ -8,6 +8,7 @@ export const PUBLIC_PATHS = [
   "/pricing",
   "/site",
   "/preview-next",
+  "/editor-next",
   "/api/auth",
   "/api/register",
   "/api/templates",
