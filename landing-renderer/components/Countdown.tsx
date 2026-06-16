@@ -22,7 +22,7 @@ export function Countdown({ endsAt, tone = "dark" }: { endsAt: string; tone?: "d
   }, [target]);
 
   if (Number.isNaN(target)) return null;
-  const p = parts ?? diff(target);
+  const p = parts ?? { d: 0, h: 0, m: 0, s: 0 };
   const cellCls = tone === "light" ? "bg-slate-100 text-slate-900" : "bg-white/10 text-white";
   const labelCls = tone === "light" ? "text-slate-500" : "text-white/60";
   const cell = (v: number, label: string) => (
