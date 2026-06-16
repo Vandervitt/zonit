@@ -36,7 +36,7 @@ export function SiteCard({ site, onDelete }: Props) {
   return (
     <Card
       className="border-0 shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.02] group cursor-pointer overflow-hidden gap-0"
-      onClick={() => router.push(siteEditorPath(site.id))}
+      onClick={() => router.push(siteEditorPath())}
     >
       {/* Hero Preview */}
       <div
@@ -65,7 +65,7 @@ export function SiteCard({ site, onDelete }: Props) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" onClick={e => e.stopPropagation()}>
-              <DropdownMenuItem onClick={() => router.push(siteEditorPath(site.id))}>
+              <DropdownMenuItem onClick={() => router.push(siteEditorPath())}>
                 <Edit3 className="w-4 h-4 mr-2" /> 编辑
               </DropdownMenuItem>
               <DropdownMenuItem>

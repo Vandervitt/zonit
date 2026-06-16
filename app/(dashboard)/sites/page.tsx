@@ -63,9 +63,9 @@ export default function SitesPage() {
     }
   }
 
-  const handleCreated = (siteId: string) => {
+  const handleCreated = () => {
     void sitesQuery.mutate();
-    router.push(siteEditorPath(siteId));
+    router.push(siteEditorPath());
   };
 
   const handleDelete = () => {

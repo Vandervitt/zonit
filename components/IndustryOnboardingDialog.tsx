@@ -72,13 +72,13 @@ export default function IndustryOnboardingDialog({ open, onSkip }: Props) {
     }
     setLoading(industryId);
 
-    const site = createSite(`我的${industry.label}落地页`, template.id, {
+    createSite(`我的${industry.label}落地页`, template.id, {
       ...template.data,
       templateId: template.id,
       templateName: `我的${industry.label}落地页`,
     });
 
-    router.push(siteEditorPath(site.id));
+    router.push(siteEditorPath());
   }
 
   return (

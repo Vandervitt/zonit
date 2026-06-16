@@ -8,8 +8,8 @@ import { EditorProvider } from "./store/editorStore";
 import { createInitialState } from "./sampleDraft";
 import { EditorLayout } from "./components/EditorLayout";
 
-export function Editor() {
-  const [initial] = useState(createInitialState);
+export function Editor({ templateId }: { templateId?: string }) {
+  const [initial] = useState(() => createInitialState(templateId));
 
   return (
     <DndProvider backend={HTML5Backend}>
