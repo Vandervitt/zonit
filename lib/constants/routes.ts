@@ -7,6 +7,7 @@ export enum Routes {
   Media = '/media',
   Billing = '/billing',
   Pricing = '/pricing',
+  LandingPages = '/landing-pages',
 }
 
 export enum ApiRoutes {
@@ -29,3 +30,10 @@ export const sitePath = (slug: string) => `/site/${slug}`;
 export const apiSitePath = (id: string) => `/api/sites/${id}`;
 export const apiDomainPath = (id: string) => `/api/domains/${id}`;
 export const apiDomainStatusPath = (id: string) => `/api/domains/${id}/status`;
+
+export const landingEditorPath = (id: string) => `/editor-next/${id}`;
+export const landingPreviewPath = (id: string) => `/editor-next/${id}/preview`;
+export const apiLandingPagesPath = () => `/api/landing-pages`;
+export const apiLandingPagePath = (id: string) => `/api/landing-pages/${id}`;
+export const apiLandingPublishPath = (id: string) => `/api/landing-pages/${id}/publish`;
+export const apiLandingUnpublishPath = (id: string) => `/api/landing-pages/${id}/unpublish`;
