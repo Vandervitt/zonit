@@ -23,9 +23,11 @@ function getPool(): Pool {
   if (!connectionString) {
     throw new Error('Missing E2E_DATABASE_URL or DATABASE_URL for database-backed Playwright tests.');
   }
+  // 对齐 lib/db.ts：本地 docker Postgres 不支持 SSL，远端（如 Neon）需要。
+  const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
   pool ??= new Pool({
     connectionString,
-    ssl: { rejectUnauthorized: false },
+    ssl: isLocal ? false : { rejectUnauthorized: false },
   });
   return pool;
 }
