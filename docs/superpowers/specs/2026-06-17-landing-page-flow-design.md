@@ -1,4 +1,4 @@
-# PULSAR 落地页 · 核心流程设计（admin 端）
+# Zap Bridge 落地页 · 核心流程设计（admin 端）
 
 > 工程设计文档：`官网落点(注册/登录) → 选模板 → 编辑 → 预览 → 发布(自有域名) → 管理`。
 
@@ -27,7 +27,7 @@
 
 ## 1. 应用现状（流程所处的整体环境）
 
-PULSAR 是一个仪表盘式 SaaS 应用，本流程嵌在它的既有外壳与导航中：
+Zap Bridge 是一个仪表盘式 SaaS 应用，本流程嵌在它的既有外壳与导航中：
 
 - **应用外壳**：`app/(dashboard)/layout.tsx` = 居中卡片 + `components/Sidebar.tsx`。登录后所有业务页面都在这个壳内。
 - **应用首页**：`/`（`app/(dashboard)/page.tsx`，即 `Routes.Home`），登录后的落点。
