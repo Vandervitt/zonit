@@ -10,6 +10,7 @@ import { Routes, UserRole } from "@/lib/constants";
 import type { PlanId } from "@/lib/plans";
 
 const TRUSTED_DOMAINS = [
+  "zapbridge.com",
   "gmail.com", "googlemail.com",
   "outlook.com", "hotmail.com", "live.com", "msn.com",
   "icloud.com", "me.com", "mac.com"

@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "db:start": "docker compose up -d postgres",
     "db:stop": "docker compose stop postgres",
-    "db:reset": "docker compose down -v && docker compose up -d postgres"
+    "db:reset": "docker compose down -v && docker compose up -d postgres",
+    "db:seed-dev": "tsx scripts/seed-dev-admin.ts"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.2",

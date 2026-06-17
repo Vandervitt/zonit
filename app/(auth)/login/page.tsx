@@ -9,10 +9,14 @@ import { Routes, AuthProvider } from "@/lib/constants";
 import { useMutation } from "@/lib/api/use-mutation";
 import { ApiError } from "@/lib/api/fetcher";
 
+// 本地 dev 默认占位账密：配合 `pnpm db:seed-dev` 种入的 admin 用户，一键登录联调
+const DEV_EMAIL = process.env.NODE_ENV === "development" ? "admin@zapbridge.com" : "";
+const DEV_PASSWORD = process.env.NODE_ENV === "development" ? "Password1!" : "";
+
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(DEV_EMAIL);
+  const [password, setPassword] = useState(DEV_PASSWORD);
   const [oauthProvider, setOauthProvider] = useState<AuthProvider | null>(null);
 
   const oauthSignIn = useMutation(
