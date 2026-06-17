@@ -25,6 +25,7 @@ import type { PlanId } from "@/lib/plans";
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
   { icon: Globe, label: "Sites", href: "/sites" },
+  { icon: FileText, label: "落地页", href: "/landing-pages" },
   { icon: Link2, label: "Domains", href: "/domains" },
   { icon: Image, label: "素材库", href: Routes.Media },
   { icon: BarChart2, label: "Statistics", href: "/statistics" },
