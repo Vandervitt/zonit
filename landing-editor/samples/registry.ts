@@ -6,6 +6,7 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 import { skincareConsultDraft } from "./skincareConsultDraft";
 import { dentalClinicDraft } from "./dentalClinicDraft";
 import { solarHomeDraft } from "./solarHomeDraft";
+import { radiantGlowBeautyDraft } from "./radiantGlowBeautyDraft";
 
 export interface TemplateMeta {
   /** 唯一标识，作为 /editor-next?template=<id> 的取值 */
@@ -46,6 +47,14 @@ export const TEMPLATES: TemplateMeta[] = [
     tagline: "家装太阳能落地页，免费上门测评 + 省电方案咨询。",
     thumbnail: solarHomeDraft.hero.backgroundImage?.src ?? "",
     draft: solarHomeDraft,
+  },
+  {
+    id: "radiantglow",
+    name: "RadiantGlow Beauty",
+    industry: "美妆 / 护肤",
+    tagline: "护肤咨询落地页（含全 12 区块），WhatsApp 免费咨询 + 前后对比。",
+    thumbnail: radiantGlowBeautyDraft.hero.backgroundImage?.src ?? "",
+    draft: radiantGlowBeautyDraft,
   },
 ];
 
