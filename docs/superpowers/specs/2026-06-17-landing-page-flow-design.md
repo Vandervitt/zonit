@@ -15,6 +15,14 @@
 
 登录用户能够：在仪表盘新建落地页 → 选模板 → 在编辑器中编辑并自动保存 → 预览（实时 + 全屏）→ 发布到公开 URL `/p/[slug]` → 可取消发布。全程数据落入新表 `landing_pages`，按用户隔离。
 
+**关于「登录」**：链路第一步的「登录」就是**现有的应用级登录**，本期**不新建任何登录逻辑**，完全复用：
+
+- 认证栈：`auth.ts` 的 NextAuth（`session.strategy = 'jwt'`，提供方 Google/Apple/Microsoft/Credentials/Dev），登录页 `app/(auth)/login`，登录后回 `Routes.Home`（`/`）。
+- 门禁：`proxy.ts` 的 `auth()` 包裹 + `lib/proxy/auth-proxy.ts`；未登录访问受保护页重定向 `/login`，受保护 API 返回 401。
+- 服务端取用户：与现有 sites API 一致 —— `const session = await auth(); session.user.id`（`session` 回调已注入 `user.id`、`user.plan`）。
+
+本期对认证的改动**仅有一处**：把历史例外 `/editor-next` 从 `PUBLIC_PATHS` 移除，使编辑器/预览与 `/(dashboard)/*` 一样受同一套应用登录保护（详见 §5）。
+
 ## 3. 数据模型（全新独立）
 
 新增迁移 `migrations/010_add_landing_pages.js`（遵循 `docs/dev-database-migration-workflow.md`：`pnpm migrate:create add_landing_pages` 编辑后 `pnpm migrate:up`，迁移走 `DATABASE_URL_UNPOOLED`）。
@@ -48,7 +56,7 @@
 | `/editor-next/[id]/preview` | 登录 + owner | 全屏预览当前草稿（`landing-renderer`，整页 owner 视图）|
 | `/p/[slug]` | 公开 | 已发布落地页公开渲染（`landing-renderer/LandingPage`）|
 
-### 4.2 API（全部 `auth()` 鉴权，按 `user_id` 隔离；非 owner 返回 404/403）
+### 4.2 API（沿用现有 `auth()` 鉴权方式，按 `session.user.id` 隔离；非 owner 返回 404/403）
 
 | 方法 + 路径 | 作用 |
 |---|---|
@@ -65,10 +73,12 @@
 
 ## 5. 认证门禁（`lib/proxy/auth-proxy.ts`）
 
-- 从 `PUBLIC_PATHS` **移除** `/editor-next`（编辑/预览需登录）。
+**复用现有应用级登录**，不引入新的认证机制。仅调整 `PUBLIC_PATHS`：
+
+- 从 `PUBLIC_PATHS` **移除** `/editor-next`（它原是免登录例外；移除后编辑器/预览随现有门禁要求登录，未登录自动重定向 `/login`）。
 - 向 `PUBLIC_PATHS` **新增** `/p`（已发布页公开）。
 - `/preview-next`（纯样例 demo）保持现状；`/site` 保持现状。
-- 结果：`/editor-next`、`/editor-next/[id]`、`/editor-next/[id]/preview` 均受登录保护；`/p/[slug]` 公开。
+- 结果：`/editor-next`、`/editor-next/[id]`、`/editor-next/[id]/preview` 与 `/(dashboard)/*` 一样受应用登录保护；`/p/[slug]` 公开。
 
 ## 6. 编辑器改造（`landing-editor/`）
 
