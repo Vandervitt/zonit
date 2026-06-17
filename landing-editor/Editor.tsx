@@ -1,20 +1,32 @@
 "use client";
 // landing-editor/Editor.tsx
-// 编辑器顶层：DnD 后端 + 状态 Provider + 布局。
 import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import type { LandingPageDraft } from "@/types/schema.draft";
 import { EditorProvider } from "./store/editorStore";
-import { createInitialState } from "./sampleDraft";
+import { fromDraft } from "./sampleDraft";
+import { MetaProvider } from "./MetaContext";
 import { EditorLayout } from "./components/EditorLayout";
+import { AutoSave } from "./components/AutoSave";
 
-export function Editor({ templateId }: { templateId?: string }) {
-  const [initial] = useState(() => createInitialState(templateId));
-
+export function Editor({
+  pageId,
+  initialName,
+  initialDraft,
+}: {
+  pageId: string;
+  initialName: string;
+  initialDraft: LandingPageDraft;
+}) {
+  const [initial] = useState(() => fromDraft(initialDraft));
   return (
     <DndProvider backend={HTML5Backend}>
       <EditorProvider initial={initial}>
-        <EditorLayout />
+        <MetaProvider pageId={pageId} initialName={initialName}>
+          <AutoSave />
+          <EditorLayout />
+        </MetaProvider>
       </EditorProvider>
     </DndProvider>
   );
