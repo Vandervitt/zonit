@@ -44,7 +44,7 @@ import { VisualGalleryBlock } from "./blocks/VisualGalleryBlock";
 const WATERMARK = (
   <div className="fixed bottom-4 right-4 z-50 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-sm pointer-events-none select-none">
     <div className="w-3.5 h-3.5 rounded bg-gradient-to-br from-rose-400 to-pink-600" />
-    <span className="text-xs text-slate-500">Powered by <span className="font-medium text-slate-700">PULSAR</span></span>
+    <span className="text-xs text-slate-500">Powered by <span className="font-medium text-slate-700">Zap Bridge</span></span>
   </div>
 );
 

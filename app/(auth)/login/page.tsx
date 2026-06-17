@@ -61,7 +61,7 @@ export default function LoginPage() {
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-400 to-pink-600 flex items-center justify-center">
           <Grid2x2 className="w-4 h-4 text-white" />
         </div>
-        <span className="text-slate-800 tracking-widest text-sm uppercase">PULSAR</span>
+        <span className="text-slate-800 tracking-widest text-sm uppercase">Zap Bridge</span>
       </div>
 
       <h1 className="text-2xl text-slate-800 mb-1">Welcome back</h1>

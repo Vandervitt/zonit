@@ -51,7 +51,7 @@ export function Sidebar() {
           <Grid2x2 className="w-4 h-4 text-white" />
         </div>
         <span className="text-slate-800 tracking-widest text-sm uppercase">
-          PULSAR
+          Zap Bridge
         </span>
       </div>
 
