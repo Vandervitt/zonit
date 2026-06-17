@@ -9,6 +9,7 @@ import {
   insertDomain,
   updateDomain,
   getEnabledDomainCount,
+  bindDomainToLandingPage,
 } from "@/lib/domains-db";
 import { addDomainToProject } from "@/lib/vercel";
 
@@ -29,9 +30,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: ApiErrors.UNAUTHORIZED }, { status: 401 });
   }
 
-  const { domain, siteId } = await request.json();
+  const { domain, siteId, landingPageId } = await request.json();
 
-  if (!domain || !siteId || !DOMAIN_RE.test(domain)) {
+  if (!domain || (!siteId && !landingPageId) || !DOMAIN_RE.test(domain)) {
     return NextResponse.json({ error: ApiErrors.INVALID_DOMAIN }, { status: 400 });
   }
 
@@ -58,6 +59,11 @@ export async function POST(request: Request) {
       console.error("Vercel API error (ignoring if already exists):", err);
     }
 
+    if (landingPageId) {
+      const updated = await updateDomain(existing.id, session.user.id, { enabled: true });
+      await bindDomainToLandingPage(existing.id, session.user.id, landingPageId);
+      return NextResponse.json(updated, { status: 200 });
+    }
     const updated = await updateDomain(existing.id, session.user.id, { site_id: siteId, enabled: true });
     return NextResponse.json(updated, { status: 200 });
   }
@@ -77,7 +83,8 @@ export async function POST(request: Request) {
   const row = await insertDomain({
     id: nanoid(),
     userId: session.user.id,
-    siteId,
+    siteId: siteId ?? null,
+    landingPageId: landingPageId ?? null,
     domain,
   });
 

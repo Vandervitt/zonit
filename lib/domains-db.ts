@@ -4,6 +4,7 @@ export interface DomainRow {
   id: string;
   user_id: string;
   site_id: string | null;
+  landing_page_id?: string | null;
   domain: string;
   enabled: boolean;
   verified: boolean;
@@ -50,14 +51,15 @@ export async function getDomainByName(domain: string): Promise<DomainRow | null>
 export async function insertDomain(params: {
   id: string;
   userId: string;
-  siteId: string;
+  siteId?: string | null;
+  landingPageId?: string | null;
   domain: string;
 }): Promise<DomainRow> {
   const result = await pool.query(
-    `INSERT INTO domains (id, user_id, site_id, domain)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO domains (id, user_id, site_id, landing_page_id, domain)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
-    [params.id, params.userId, params.siteId, params.domain]
+    [params.id, params.userId, params.siteId ?? null, params.landingPageId ?? null, params.domain],
   );
   return result.rows[0];
 }
@@ -109,6 +111,31 @@ export async function getSlugByCustomDomain(domain: string): Promise<string | nu
      WHERE d.domain = $1 AND d.enabled = true AND d.verified = true
        AND s.status = 'published'`,
     [domain]
+  );
+  return result.rows[0]?.slug ?? null;
+}
+
+/** 把一个已验证启用的域名绑定到落地页（一域名一页：清掉它的旧绑定后绑新页）。 */
+export async function bindDomainToLandingPage(
+  domainId: string,
+  userId: string,
+  landingPageId: string,
+): Promise<boolean> {
+  const result = await pool.query(
+    `UPDATE domains SET landing_page_id = $1, site_id = NULL
+     WHERE id = $2 AND user_id = $3 AND enabled = true AND verified = true RETURNING id`,
+    [landingPageId, domainId, userId],
+  );
+  return result.rows.length > 0;
+}
+
+/** 公开渲染解析：自定义域名 → 已发布落地页 slug。 */
+export async function getLandingSlugByCustomDomain(domain: string): Promise<string | null> {
+  const result = await pool.query(
+    `SELECT lp.slug FROM domains d
+       JOIN landing_pages lp ON lp.id = d.landing_page_id
+     WHERE d.domain = $1 AND d.enabled = true AND d.verified = true AND lp.status = 'published'`,
+    [domain],
   );
   return result.rows[0]?.slug ?? null;
 }
