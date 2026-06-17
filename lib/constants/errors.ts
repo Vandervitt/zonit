@@ -10,4 +10,7 @@ export const ApiErrors = {
   INVALID_DOMAIN: 'invalid_domain',
   DOMAIN_TAKEN: 'domain_taken',
   VERCEL_API_ERROR: 'vercel_api_error',
+  VALIDATION_FAILED: 'validation_failed',
+  DOMAIN_REQUIRED: 'domain_required',
+  DOMAIN_NOT_VERIFIED: 'domain_not_verified',
 } as const;
