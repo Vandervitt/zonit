@@ -30,9 +30,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: ApiErrors.UNAUTHORIZED }, { status: 401 });
   }
 
-  const { domain, siteId, landingPageId } = await request.json();
+  const { domain, landingPageId } = await request.json();
 
-  if (!domain || (!siteId && !landingPageId) || !DOMAIN_RE.test(domain)) {
+  if (!domain || !DOMAIN_RE.test(domain)) {
     return NextResponse.json({ error: ApiErrors.INVALID_DOMAIN }, { status: 400 });
   }
 
@@ -52,19 +52,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: ApiErrors.LIMIT_EXCEEDED }, { status: 403 });
     }
     
-    // If it belongs to the same user, update the siteId and re-add to Vercel (idempotent)
+    // Belongs to the same user: re-enable and re-add to Vercel (idempotent)
     try {
       await addDomainToProject(domain);
     } catch (err) {
       console.error("Vercel API error (ignoring if already exists):", err);
     }
 
+    const updated = await updateDomain(existing.id, session.user.id, { enabled: true });
     if (landingPageId) {
-      const updated = await updateDomain(existing.id, session.user.id, { enabled: true });
       await bindDomainToLandingPage(existing.id, session.user.id, landingPageId);
-      return NextResponse.json(updated, { status: 200 });
     }
-    const updated = await updateDomain(existing.id, session.user.id, { site_id: siteId, enabled: true });
     return NextResponse.json(updated, { status: 200 });
   }
 
@@ -83,7 +81,6 @@ export async function POST(request: Request) {
   const row = await insertDomain({
     id: nanoid(),
     userId: session.user.id,
-    siteId: siteId ?? null,
     landingPageId: landingPageId ?? null,
     domain,
   });

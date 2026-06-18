@@ -12,26 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ApiRoutes } from "@/lib/constants";
 import { jsonRequest, ApiError } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 
-interface Site {
-  id: string;
-  name: string;
-}
-
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  sites: Site[];
   onAdded: () => void;
 }
 
@@ -45,14 +32,13 @@ function mapDomainError(err: ApiError): string {
   return (err.code && DOMAIN_ERROR_MAP[err.code]) || "添加失败，请重试";
 }
 
-export function AddDomainDialog({ open, onOpenChange, sites, onAdded }: Props) {
+export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   const [domain, setDomain] = useState("");
-  const [siteId, setSiteId] = useState("");
   const [cname, setCname] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const addMutation = useMutation(
-    (payload: { domain: string; siteId: string }) =>
+    (payload: { domain: string }) =>
       jsonRequest<{ cname: string }>(ApiRoutes.Domains, "POST", payload),
     {
       errorToast: false,
@@ -65,14 +51,13 @@ export function AddDomainDialog({ open, onOpenChange, sites, onAdded }: Props) {
 
   function reset() {
     setDomain("");
-    setSiteId("");
     setCname(null);
     setCopied(false);
     addMutation.reset();
   }
 
   function handleSubmit() {
-    void addMutation.trigger({ domain, siteId });
+    void addMutation.trigger({ domain });
   }
 
   const error = addMutation.error ? mapDomainError(addMutation.error) : "";
@@ -105,23 +90,10 @@ export function AddDomainDialog({ open, onOpenChange, sites, onAdded }: Props) {
                 onChange={e => setDomain(e.target.value.trim().toLowerCase())}
               />
             </div>
-            <div className="space-y-1.5">
-              <Label>绑定到站点</Label>
-              <Select value={siteId} onValueChange={setSiteId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="选择站点…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sites.map(s => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button
               className="w-full"
-              disabled={!domain || !siteId || loading}
+              disabled={!domain || loading}
               onClick={handleSubmit}
             >
               {loading ? "添加中…" : "添加域名"}

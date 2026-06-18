@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface LatestSiteRow {
+interface LatestPageRow {
   id: string;
   name: string;
   status: string;
@@ -19,21 +19,21 @@ interface LatestSiteRow {
 
 async function getStats() {
   const usersCount = await pool.query("SELECT COUNT(*) FROM users");
-  const sitesCount = await pool.query("SELECT COUNT(*) FROM sites");
+  const pagesCount = await pool.query("SELECT COUNT(*) FROM landing_pages");
   const activeSubscriptions = await pool.query("SELECT COUNT(*) FROM users WHERE plan != 'free'");
-  const latestSites = await pool.query(`
-    SELECT s.*, u.email as user_email 
-    FROM sites s 
-    JOIN users u ON s.user_id = u.id 
-    ORDER BY s.created_at DESC 
+  const latestPages = await pool.query(`
+    SELECT lp.*, u.email as user_email
+    FROM landing_pages lp
+    JOIN users u ON lp.user_id = u.id
+    ORDER BY lp.created_at DESC
     LIMIT 5
   `);
 
   return {
     totalUsers: parseInt(usersCount.rows[0].count),
-    totalSites: parseInt(sitesCount.rows[0].count),
+    totalPages: parseInt(pagesCount.rows[0].count),
     activeSubs: parseInt(activeSubscriptions.rows[0].count),
-    latestSites: latestSites.rows as LatestSiteRow[],
+    latestPages: latestPages.rows as LatestPageRow[],
   };
 }
 
@@ -50,8 +50,8 @@ export default async function AdminDashboard() {
       bg: "bg-blue-50"
     },
     {
-      title: "Total Sites",
-      value: stats.totalSites,
+      title: "Total Pages",
+      value: stats.totalPages,
       icon: Globe,
       description: "Created by users",
       color: "text-emerald-600",
@@ -104,12 +104,12 @@ export default async function AdminDashboard() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border-none shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Recently Created Sites</CardTitle>
+            <CardTitle className="text-lg font-semibold">Recently Created Pages</CardTitle>
             <ArrowUpRight className="w-4 h-4 text-slate-400" />
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {stats.latestSites.map((site) => (
+              {stats.latestPages.map((site) => (
                 <div key={site.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center border border-slate-200 text-lg">

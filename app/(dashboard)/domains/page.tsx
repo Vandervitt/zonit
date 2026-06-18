@@ -18,16 +18,10 @@ import type { PlanId } from "@/lib/plans";
 interface Domain {
   id: string;
   domain: string;
-  site_id: string | null;
-  site_name?: string;
+  landing_page_name?: string;
   enabled: boolean;
   verified: boolean;
   created_at: string;
-}
-
-interface Site {
-  id: string;
-  name: string;
 }
 
 export default function DomainsPage() {
@@ -39,9 +33,7 @@ export default function DomainsPage() {
   const domainsLimit = PLANS[currentPlan].domainsLimit;
 
   const domainsQuery = useSWR<Domain[]>(ApiRoutes.Domains);
-  const sitesQuery = useSWR<Site[]>(ApiRoutes.Sites);
   const domains = domainsQuery.data ?? [];
-  const sites = sitesQuery.data ?? [];
   const enabledCount = domains.filter(d => d.enabled).length;
 
   // 后台轮询所有未验证的域名（每 5s）；命中已验证后立刻刷新整张列表
@@ -127,7 +119,7 @@ export default function DomainsPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-800 truncate">{domain.domain}</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {domain.site_name ?? "未绑定站点"}
+                      {domain.landing_page_name ?? "未绑定落地页"}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -175,7 +167,6 @@ export default function DomainsPage() {
       <AddDomainDialog
         open={addOpen}
         onOpenChange={setAddOpen}
-        sites={sites}
         onAdded={() => domainsQuery.mutate()}
       />
       <UpgradeDialog

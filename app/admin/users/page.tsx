@@ -18,7 +18,7 @@ import { UserRole } from "@/lib/constants";
 async function getUsers() {
   const result = await pool.query(`
     SELECT id, name, email, plan, role, ls_customer_id, trial_expires_at, invited_at,
-    (SELECT COUNT(*) FROM sites WHERE user_id = users.id) as site_count
+    (SELECT COUNT(*) FROM landing_pages WHERE user_id = users.id) as page_count
     FROM users
     ORDER BY invited_at DESC NULLS LAST, email
 `);
@@ -53,7 +53,7 @@ export default async function AdminUsersPage() {
             <TableRow>
               <TableHead className="font-semibold text-slate-900">User</TableHead>
               <TableHead className="font-semibold text-slate-900">Plan</TableHead>
-              <TableHead className="font-semibold text-slate-900 text-center">Sites</TableHead>
+              <TableHead className="font-semibold text-slate-900 text-center">Pages</TableHead>
               <TableHead className="font-semibold text-slate-900">Trial Status</TableHead>
               <TableHead className="font-semibold text-slate-900">Role</TableHead>
               <TableHead className="w-10"></TableHead>
@@ -81,7 +81,7 @@ export default async function AdminUsersPage() {
                 </TableCell>
                 <TableCell className="text-center">
                   <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-xs font-bold text-slate-700 border border-slate-200">
-                    {user.site_count}
+                    {user.page_count}
                   </span>
                 </TableCell>
                 <TableCell>

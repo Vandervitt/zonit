@@ -23,7 +23,7 @@ export async function PATCH(
 
   const { id } = await ctx.params;
   const body = await request.json();
-  const { enabled, site_id } = body as { enabled?: boolean; site_id?: string };
+  const { enabled } = body as { enabled?: boolean };
 
   const existing = await getDomainById(id, session.user.id);
   if (!existing) {
@@ -43,7 +43,6 @@ export async function PATCH(
 
   const updated = await updateDomain(id, session.user.id, {
     ...(enabled !== undefined && { enabled }),
-    ...(site_id !== undefined && { site_id }),
   });
 
   return NextResponse.json(updated);

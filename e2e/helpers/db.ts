@@ -3,7 +3,6 @@
 
 import { Pool } from 'pg';
 import { config as loadEnv } from 'dotenv';
-import type { LandingPageTemplate } from '@/types/schema';
 
 loadEnv({ path: '.env.local' });
 loadEnv({ path: '.env' });
@@ -41,24 +40,9 @@ export async function ensureTestUser(): Promise<void> {
   );
 }
 
-export async function seedPublishedSite(slug: string, template: LandingPageTemplate): Promise<void> {
-  if (!slug.startsWith(SLUG_PREFIX)) {
-    throw new Error(`E2E slug must start with "${SLUG_PREFIX}"`);
-  }
-  await getPool().query(
-    `INSERT INTO sites (user_id, name, template_id, slug, status, data, published_at)
-     VALUES ($1, $2, $3, $4, 'published', $5::jsonb, NOW())
-     ON CONFLICT (slug) DO UPDATE SET data = EXCLUDED.data, status = 'published', published_at = NOW()`,
-    [E2E_USER_ID, slug, template.templateId, slug, JSON.stringify(template)],
-  );
-}
-
-export async function cleanupSite(slug: string): Promise<void> {
-  await getPool().query(`DELETE FROM sites WHERE slug = $1`, [slug]);
-}
-
 export async function cleanupAllE2EFixtures(): Promise<void> {
-  await getPool().query(`DELETE FROM sites WHERE slug LIKE $1`, [`${SLUG_PREFIX}%`]);
+  await getPool().query(`DELETE FROM domains WHERE domain LIKE $1`, [`${SLUG_PREFIX}%`]);
+  await getPool().query(`DELETE FROM landing_pages WHERE slug LIKE $1`, [`${SLUG_PREFIX}%`]);
 }
 
 export async function closeDb(): Promise<void> {
