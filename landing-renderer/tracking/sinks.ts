@@ -7,6 +7,8 @@ import { EVENT_MAP, type InternalEvent } from "./events";
 export type EventParams = Record<string, string>;
 
 export interface EventSink {
+  /** 底层 SDK 是否就绪可接收事件（first-party sink 恒为 true）。 */
+  ready(): boolean;
   init(): void;
   track(event: InternalEvent, params: EventParams): void;
 }
@@ -22,6 +24,15 @@ declare global {
 /** 单平台 Pixel sink：假定对应 SDK 已由 TrackingProvider 注入到 window。 */
 export class PixelSink implements EventSink {
   constructor(private readonly config: PixelConfig) {}
+
+  /** 对应平台的全局对象是否已由注入脚本定义（含其 stub）。 */
+  ready(): boolean {
+    const { provider } = this.config;
+    if (provider === "meta") return typeof window.fbq === "function";
+    if (provider === "ga4" || provider === "googleAds") return typeof window.gtag === "function";
+    if (provider === "tiktok") return !!window.ttq;
+    return true;
+  }
 
   init(): void {
     const { provider, id } = this.config;

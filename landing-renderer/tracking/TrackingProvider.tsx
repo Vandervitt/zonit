@@ -12,13 +12,12 @@ const CONSENT_KEY = "lp_consent";
 const UTM_KEY = "lp_utm";
 
 export function TrackingProvider({ tracking, children }: { tracking?: PageTracking; children: ReactNode }) {
-  const consentEnabled = tracking?.consent.enabled ?? true;
+  const consentEnabled = tracking?.consent?.enabled ?? true;
   // SSR 与首帧统一为「未同意/未拒绝」，再由 effect 读 localStorage 校正，避免水合不一致与 SSR 访问 localStorage。
   const [consented, setConsented] = useState<boolean>(false);
   const [declined, setDeclined] = useState<boolean>(false);
   const utmRef = useRef<Record<string, string>>({});
   const sinksRef = useRef<EventSink[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const enabledPixels = (tracking?.pixels ?? []).filter((p) => p.enabled && p.id.trim());
 
@@ -37,13 +36,25 @@ export function TrackingProvider({ tracking, children }: { tracking?: PageTracki
     else if (v === "declined") setDeclined(true);
   }, [consentEnabled]);
 
-  // 同意后：建 sink、init、发 page_view
+  // 同意后：建 sink，待第三方 SDK（next/script 异步注入）就绪再 init + 发 page_view。
+  // 轮询避免 effect 早于注入脚本执行导致首个 page_view 丢失；最长约 5s 兜底。
+  // 注：本组件假定 tracking 不可变（已发布页数据），故 enabledPixels 不随渲染变化。
   useEffect(() => {
     if (!consented || sinksRef.current.length) return;
     sinksRef.current = enabledPixels.map((p) => new PixelSink(p));
-    sinksRef.current.forEach((s) => s.init());
-    sinksRef.current.forEach((s) => s.track("page_view", { ...utmRef.current }));
-    // enabledPixels 取自 props，consented 变 true 时执行一次
+    const fire = () => {
+      sinksRef.current.forEach((s) => s.init());
+      sinksRef.current.forEach((s) => s.track("page_view", { ...utmRef.current }));
+    };
+    let tries = 0;
+    const timer = setInterval(() => {
+      if (sinksRef.current.every((s) => s.ready()) || ++tries > 50) {
+        clearInterval(timer);
+        fire();
+      }
+    }, 100);
+    return () => clearInterval(timer);
+    // enabledPixels 取自不可变 props，consented 变 true 时执行一次
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [consented]);
 
@@ -63,7 +74,7 @@ export function TrackingProvider({ tracking, children }: { tracking?: PageTracki
   const decline = () => { localStorage.setItem(CONSENT_KEY, "declined"); setDeclined(true); };
 
   return (
-    <div ref={containerRef} onClickCapture={onClickCapture}>
+    <div onClickCapture={onClickCapture}>
       {consented && enabledPixels.map((p) => <PixelScript key={p.provider} provider={p.provider} id={p.id} />)}
       {children}
       {consentEnabled && !consented && !declined && (
@@ -85,10 +96,12 @@ function PixelScript({ provider, id }: { provider: string; id: string }) {
     );
   }
   if (provider === "ga4" || provider === "googleAds") {
+    // 固定 id 让 GA4 与 Google Ads 同时启用时共用同一份 gtag 加载器与初始化（Next 按 id 去重）；
+    // 各自的 config(id) 由对应 PixelSink.init 下发，互不影响。
     return (
       <>
-        <Script src={`https://www.googletagmanager.com/gtag/js?id=${id}`} strategy="afterInteractive" />
-        <Script id={`px-g-${id}`} strategy="afterInteractive">{`
+        <Script id="gtag-loader" src={`https://www.googletagmanager.com/gtag/js?id=${id}`} strategy="afterInteractive" />
+        <Script id="gtag-init" strategy="afterInteractive">{`
           window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=window.gtag||gtag;gtag('js',new Date());
         `}</Script>
       </>

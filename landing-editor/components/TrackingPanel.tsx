@@ -19,7 +19,8 @@ export function TrackingPanel({ onClose }: { onClose: () => void }) {
 
   const setPixel = (provider: PixelProvider, id: string) => {
     const rest = t.pixels.filter((p) => p.provider !== provider);
-    const pixels = id.trim() ? [...rest, { provider, id, enabled: true }] : rest;
+    const trimmed = id.trim();
+    const pixels = trimmed ? [...rest, { provider, id: trimmed, enabled: true }] : rest;
     dispatch({ kind: "updateTracking", value: { ...t, pixels } });
   };
   const idOf = (provider: PixelProvider) => t.pixels.find((p) => p.provider === provider)?.id ?? "";
