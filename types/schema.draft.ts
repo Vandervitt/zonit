@@ -241,6 +241,30 @@ export interface FloatingButton {
   link: string;                // 按钮链接
 }
 
+// ============ 页面级追踪（Pixel / UTM / 同意）============
+// 事件名不进 schema：内部事件→各平台标准事件映射为代码内置常量（见 landing-renderer/tracking/events.ts），
+// 用户只填 Pixel ID，从根上杜绝越界交易事件名（非交易硬约束）。
+
+/** 支持的 Pixel 平台（首刀 4 家；扩展只需在此与映射表增项）。 */
+export type PixelProvider = 'meta' | 'ga4' | 'googleAds' | 'tiktok';
+
+/** 单平台 Pixel 配置：用户只填 ID。 */
+export interface PixelConfig {
+  provider: PixelProvider;
+  id: string;        // Pixel / Measurement / Conversion ID
+  enabled: boolean;  // 关闭则不注入（保留已填 ID）
+}
+
+/** 页面级追踪配置。 */
+export interface PageTracking {
+  pixels: PixelConfig[];        // 多方 pixel，按 provider 去重
+  utmPassthrough: boolean;      // 是否把 UTM 拼到 http(s) 外链 CTA
+  consent: {
+    enabled: boolean;           // 是否显示同意条并做 opt-in 门控
+    text?: string;              // 同意条文案（留空用默认）
+  };
+}
+
 // ============ 页面组合 ============
 // 首屏 / 页脚为页面级必填单例，固定在顶部/底部，不进入可排序列表；
 // 其余模块进入 sections[]，可自由增删与排序。
@@ -267,6 +291,7 @@ export interface LandingPageDraft {
   sections: LandingSection[];      // 中部模块，可自由排序；必须性由下方注册表 + 校验保证
   footer: FooterSection;           // 必填，固定页脚
   floatingButton?: FloatingButton; // 悬浮按钮（可选）
+  tracking?: PageTracking;         // 页面级追踪配置（缺省视为无 pixel）
 }
 
 // ============ 方案 C：模块注册表（必须性 / 唯一性元数据） ============
