@@ -4,15 +4,10 @@ import { notFound } from "next/navigation";
 import { LandingPage } from "@/landing-renderer/LandingPage";
 import { getPublishedBySlug } from "@/lib/landing-pages/store";
 import { TrackingProvider } from "@/landing-renderer/tracking/TrackingProvider";
-
-const appHostname = process.env.NEXT_PUBLIC_APP_URL
-  ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname
-  : null;
+import { hostnameOf, isAppHost } from "@/lib/host";
 
 async function isAppHostDirect(): Promise<boolean> {
-  const host = (await headers()).get("host") ?? "";
-  const hostname = host.split(":")[0];
-  return !!appHostname && (hostname === appHostname || hostname.endsWith(`.${appHostname}`));
+  return isAppHost(hostnameOf((await headers()).get("host")));
 }
 
 export async function generateMetadata({
