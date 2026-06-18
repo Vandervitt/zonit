@@ -42,7 +42,7 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
       const json = await res.json();
       if (!res.ok) {
         setError(
-          json.error === "validation_failed" ? "页面结构不完整，无法发布"
+          json.error === "validation_failed" ? "页面校验未通过，无法发布"
           : json.error === "domain_required" ? "请选择一个已验证的域名"
           : json.error === "domain_not_verified" ? "所选域名未验证"
           : "发布失败",
