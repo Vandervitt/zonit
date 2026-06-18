@@ -1,0 +1,53 @@
+// landing-renderer/tracking/sinks.ts
+// 事件 sink 抽象：统一 init/track 接口，TrackingProvider 广播事件给所有 sink。
+// 首刀只实现 PixelSink；first-party 采集 sink 留作后续刀（见文件尾）。
+import type { PixelConfig } from "@/types/schema.draft";
+import { EVENT_MAP, type InternalEvent } from "./events";
+
+export type EventParams = Record<string, string>;
+
+export interface EventSink {
+  init(): void;
+  track(event: InternalEvent, params: EventParams): void;
+}
+
+// 各平台全局对象的最小类型声明
+type Fbq = (...args: unknown[]) => void;
+type Gtag = (...args: unknown[]) => void;
+interface Ttq { load(id: string): void; page(): void; track(name: string, params?: EventParams): void; }
+declare global {
+  interface Window { fbq?: Fbq; gtag?: Gtag; ttq?: Ttq; dataLayer?: unknown[]; }
+}
+
+/** 单平台 Pixel sink：假定对应 SDK 已由 TrackingProvider 注入到 window。 */
+export class PixelSink implements EventSink {
+  constructor(private readonly config: PixelConfig) {}
+
+  init(): void {
+    const { provider, id } = this.config;
+    if (provider === "meta") window.fbq?.("init", id);
+    if (provider === "ga4" || provider === "googleAds") window.gtag?.("config", id);
+    if (provider === "tiktok") window.ttq?.load(id);
+  }
+
+  track(event: InternalEvent, params: EventParams): void {
+    const { provider, id } = this.config;
+    const name = EVENT_MAP[provider][event];
+    if (provider === "meta") {
+      window.fbq?.("track", name, params);
+    } else if (provider === "ga4") {
+      window.gtag?.("event", name, params);
+    } else if (provider === "googleAds") {
+      window.gtag?.("event", name, { send_to: id, ...params });
+    } else if (provider === "tiktok") {
+      if (event === "page_view") window.ttq?.page();
+      else window.ttq?.track(name, params);
+    }
+  }
+}
+
+// 后续刀扩展点：first-party 采集（不在本刀实现）
+// export class BeaconSink implements EventSink {
+//   init() {}
+//   track(event, params) { navigator.sendBeacon("/api/track", JSON.stringify({ event, ...params })); }
+// }
