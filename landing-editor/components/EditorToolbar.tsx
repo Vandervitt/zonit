@@ -6,6 +6,7 @@ import { useEditorState, toDraft } from "../store/editorStore";
 import { collectPublishIssues } from "../lib/publishIssues";
 import { ValidationBar } from "./ValidationBar";
 import { PublishDialog } from "./PublishDialog";
+import { TrackingPanel } from "./TrackingPanel";
 import { landingPreviewPath, Routes } from "@/lib/constants";
 
 const SAVE_LABEL: Record<string, string> = {
@@ -17,6 +18,7 @@ export function EditorToolbar() {
   const state = useEditorState();
   const [publishOpen, setPublishOpen] = useState(false);
   const [blockers, setBlockers] = useState<string[]>([]);
+  const [trackingOpen, setTrackingOpen] = useState(false);
 
   function handlePublish() {
     const issues = collectPublishIssues(toDraft(state));
@@ -42,6 +44,12 @@ export function EditorToolbar() {
       </span>
       <div className="flex-1" />
       <ValidationBar />
+      <button
+        onClick={() => setTrackingOpen(true)}
+        className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
+      >
+        追踪
+      </button>
       <Link
         href={landingPreviewPath(pageId)}
         target="_blank"
@@ -74,6 +82,7 @@ export function EditorToolbar() {
         )}
       </div>
       {publishOpen && <PublishDialog onClose={() => setPublishOpen(false)} />}
+      {trackingOpen && <TrackingPanel onClose={() => setTrackingOpen(false)} />}
     </header>
   );
 }
