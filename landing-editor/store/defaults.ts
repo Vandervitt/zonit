@@ -17,6 +17,7 @@ import type {
   ReviewItem,
   FaqItem,
   GuaranteeItem,
+  PageTracking,
 } from "@/types/schema.draft";
 
 export const createHero = (): HeroSection => ({
@@ -36,6 +37,12 @@ export const createFooter = (): FooterSection => ({
 export const createFloatingButton = (): FloatingButton => ({
   text: "立即咨询",
   link: "",
+});
+
+export const createTracking = (): PageTracking => ({
+  pixels: [],
+  utmPassthrough: true,
+  consent: { enabled: true },
 });
 
 export function createSection(type: LandingSectionType): LandingSection {

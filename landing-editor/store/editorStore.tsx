@@ -16,6 +16,7 @@ import type {
   LandingSection,
   LandingSectionType,
   LandingPageDraft,
+  PageTracking,
 } from "@/types/schema.draft";
 import { createSection, createFloatingButton } from "./defaults";
 
@@ -31,6 +32,7 @@ export interface EditorState {
   floatingButton: FloatingButton | null;
   sections: EditorSection[];
   selectedId: string;
+  tracking: PageTracking;
 }
 
 export type EditorAction =
@@ -39,6 +41,7 @@ export type EditorAction =
   | { kind: "updateFooter"; value: FooterSection }
   | { kind: "updateFloating"; value: FloatingButton }
   | { kind: "toggleFloating"; on: boolean }
+  | { kind: "updateTracking"; value: PageTracking }
   | { kind: "updateSection"; key: string; data: LandingSection["data"] }
   | { kind: "addSection"; sectionType: LandingSectionType }
   | { kind: "removeSection"; key: string }
@@ -65,6 +68,9 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
 
     case "updateFloating":
       return { ...state, floatingButton: action.value };
+
+    case "updateTracking":
+      return { ...state, tracking: action.value };
 
     case "toggleFloating":
       return {
@@ -159,5 +165,6 @@ export function toDraft(state: EditorState): LandingPageDraft {
     footer: state.footer,
   };
   if (state.floatingButton) draft.floatingButton = state.floatingButton;
+  draft.tracking = state.tracking;
   return draft;
 }
