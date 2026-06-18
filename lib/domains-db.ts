@@ -104,17 +104,6 @@ export async function deleteDomainById(id: string, userId: string): Promise<bool
   return result.rows.length > 0;
 }
 
-export async function getSlugByCustomDomain(domain: string): Promise<string | null> {
-  const result = await pool.query(
-    `SELECT s.slug FROM domains d
-     JOIN sites s ON s.id = d.site_id
-     WHERE d.domain = $1 AND d.enabled = true AND d.verified = true
-       AND s.status = 'published'`,
-    [domain]
-  );
-  return result.rows[0]?.slug ?? null;
-}
-
 /** 把一个已验证启用的域名绑定到落地页（一域名一页：清掉它的旧绑定后绑新页）。 */
 export async function bindDomainToLandingPage(
   domainId: string,

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getSlugByCustomDomain } from "@/lib/domains-db";
 import { getLandingSlugByCustomDomain } from "@/lib/domains-db";
 
 const appHostname = process.env.NEXT_PUBLIC_APP_URL
@@ -20,11 +19,6 @@ export async function handleTenancy(req: NextRequest) {
     const landingSlug = await getLandingSlugByCustomDomain(hostname);
     if (landingSlug) {
       return NextResponse.rewrite(new URL(`/p/${landingSlug}`, req.url));
-    }
-    // 回落：旧 sites
-    const slug = await getSlugByCustomDomain(hostname);
-    if (slug) {
-      return NextResponse.rewrite(new URL(`/site/${slug}`, req.url));
     }
     return new NextResponse("Not Found", { status: 404 });
   }

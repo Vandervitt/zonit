@@ -16,6 +16,7 @@ export function Countdown({ endsAt, tone = "dark" }: { endsAt: string; tone?: "d
 
   useEffect(() => {
     if (Number.isNaN(target)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 仅客户端挂载后初始化倒计时，SSR 首帧保持 null 以避免水合不一致
     setParts(diff(target));
     const id = setInterval(() => setParts(diff(target)), 1000);
     return () => clearInterval(id);

@@ -5,7 +5,6 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Grid2x2, TicketCheck } from "lucide-react";
-import IndustryOnboardingDialog from "@/components/IndustryOnboardingDialog";
 import { Routes, ApiRoutes, AuthProvider } from "@/lib/constants";
 import { withLogger } from "@/lib/logger";
 import { jsonRequest } from "@/lib/api/fetcher";
@@ -20,7 +19,6 @@ function RegisterPageContent() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const googleSignIn = useMutation(
     () => withLogger("GOOGLE_SIGN_IN", "auth/google", "POST", {}, () =>
@@ -40,7 +38,7 @@ function RegisterPageContent() {
     },
     {
       errorToast: false,
-      onSuccess: () => setShowOnboarding(true),
+      onSuccess: () => { router.push(Routes.Home); router.refresh(); },
     },
   );
 
@@ -138,11 +136,6 @@ function RegisterPageContent() {
           Sign in
         </Link>
       </p>
-
-      <IndustryOnboardingDialog
-        open={showOnboarding}
-        onSkip={() => { router.push(Routes.Home); router.refresh(); }}
-      />
     </div>
   );
 }

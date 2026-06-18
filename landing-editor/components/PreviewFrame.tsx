@@ -43,6 +43,7 @@ export function PreviewFrame({ virtualWidth, children }: { virtualWidth: number;
   useEffect(() => {
     const doc = iframeRef.current?.contentDocument;
     if (doc && doc.readyState === "complete") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 兜底：about:blank 原生 load 可能早于 onLoad 绑定，挂载后补跑一次
       handleLoad();
     }
   }, []);
