@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LandingPage } from "@/landing-renderer/LandingPage";
 import { getPublishedBySlug } from "@/lib/landing-pages/store";
+import { TrackingProvider } from "@/landing-renderer/tracking/TrackingProvider";
 
 const appHostname = process.env.NEXT_PUBLIC_APP_URL
   ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname
@@ -38,5 +39,9 @@ export default async function PublicLandingPage({
   const page = await getPublishedBySlug(slug);
   if (!page) notFound();
 
-  return <LandingPage page={page.data} />;
+  return (
+    <TrackingProvider tracking={page.data.tracking}>
+      <LandingPage page={page.data} />
+    </TrackingProvider>
+  );
 }
