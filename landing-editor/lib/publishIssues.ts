@@ -9,6 +9,7 @@ import {
   type LandingPageDraft,
 } from "@/types/schema.draft";
 import { collectFieldIssues } from "./validate";
+import { collectTrackingIssues } from "./trackingIssues";
 
 const groupLabels: Record<RequiredGroup, string> = {
   "core-value": "套餐 或 特性",
@@ -26,5 +27,5 @@ export function collectStructureIssues(draft: LandingPageDraft): string[] {
 
 /** 发布门槛的全部未通过项；为空表示可以发布。 */
 export function collectPublishIssues(draft: LandingPageDraft): string[] {
-  return [...collectStructureIssues(draft), ...collectFieldIssues(draft)];
+  return [...collectStructureIssues(draft), ...collectFieldIssues(draft), ...collectTrackingIssues(draft)];
 }
