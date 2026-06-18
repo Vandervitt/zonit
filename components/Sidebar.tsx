@@ -22,20 +22,20 @@ import { Routes } from "@/lib/constants";
 import type { PlanId } from "@/lib/plans";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/" },
-  { icon: FileText, label: "落地页", href: "/landing-pages" },
-  { icon: Link2, label: "Domains", href: "/domains" },
+  { icon: LayoutDashboard, label: "Dashboard", href: Routes.Dashboard },
+  { icon: FileText, label: "落地页", href: Routes.LandingPages },
+  { icon: Link2, label: "Domains", href: Routes.Domains },
   { icon: Image, label: "素材库", href: Routes.Media },
-  { icon: BarChart2, label: "Statistics", href: "/statistics" },
-  { icon: CheckSquare, label: "Task list", href: "/tasks" },
-  { icon: FileText, label: "Report", href: "/reports" },
-  { icon: Bell, label: "Notifications", href: "/notifications" },
+  { icon: BarChart2, label: "Statistics", href: "/admin/statistics" },
+  { icon: CheckSquare, label: "Task list", href: "/admin/tasks" },
+  { icon: FileText, label: "Report", href: "/admin/reports" },
+  { icon: Bell, label: "Notifications", href: "/admin/notifications" },
 ];
 
 const otherItems = [
   { icon: CreditCard, label: "Billing", href: Routes.Billing },
-  { icon: Settings, label: "Settings", href: "/settings" },
-  { icon: HelpCircle, label: "Help", href: "/help" },
+  { icon: Settings, label: "Settings", href: "/admin/settings" },
+  { icon: HelpCircle, label: "Help", href: "/admin/help" },
 ];
 
 export function Sidebar() {

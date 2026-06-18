@@ -1,6 +1,6 @@
 // landing-editor/samples/registry.ts
 //
-// 模板注册表：集中登记 /editor-next 可用的 LandingPageDraft 样例模板。
+// 模板注册表：集中登记 /admin/editor 可用的 LandingPageDraft 样例模板。
 // 选择页与编辑器种子共用本表 —— 新增模板只需在此追加一条。
 import type { LandingPageDraft } from "@/types/schema.draft";
 import { skincareConsultDraft } from "./skincareConsultDraft";
@@ -9,7 +9,7 @@ import { solarHomeDraft } from "./solarHomeDraft";
 import { radiantGlowBeautyDraft } from "./radiantGlowBeautyDraft";
 
 export interface TemplateMeta {
-  /** 唯一标识，作为 /editor-next?template=<id> 的取值 */
+  /** 唯一标识，作为 /admin/editor?template=<id> 的取值 */
   id: string;
   /** 模板名称（选择页卡片标题） */
   name: string;

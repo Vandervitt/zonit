@@ -1,6 +1,6 @@
 // landing-editor/components/TemplateGallery.tsx
 // 模板选择页（从零构建）：进入编辑器前先挑选行业模板。
-// 点击卡片跳转 /editor-next?template=<id>，由页面以对应模板为种子挂载编辑器。
+// 点击卡片跳转 /admin/editor?template=<id>，由页面以对应模板为种子挂载编辑器。
 import { TEMPLATES } from "../samples/registry";
 import { TemplateGalleryCard } from "./TemplateGalleryCard";
 

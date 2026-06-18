@@ -32,7 +32,7 @@ export default function LandingPagesPage() {
     <div className="flex-1 p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-slate-800">落地页</h1>
-        <Link href="/editor-next" className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-700">
+        <Link href="/admin/editor" className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-700">
           + 新建
         </Link>
       </div>
@@ -42,7 +42,7 @@ export default function LandingPagesPage() {
       ) : !data || data.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 p-12 text-center">
           <p className="text-slate-500">还没有落地页</p>
-          <Link href="/editor-next" className="mt-3 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm text-white">从模板新建</Link>
+          <Link href="/admin/editor" className="mt-3 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm text-white">从模板新建</Link>
         </div>
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

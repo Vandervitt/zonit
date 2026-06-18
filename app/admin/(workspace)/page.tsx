@@ -1,7 +1,7 @@
 import { Search, ChevronDown, Calendar } from "lucide-react";
-import { SalesFunnelCard } from "../../components/SalesFunnelCard";
-// import { AICoPilotCard } from "../../components/AICoPilotCard";
-import { HighRiskCustomers } from "../../components/HighRiskCustomers";
+import { SalesFunnelCard } from "@/components/SalesFunnelCard";
+// import { AICoPilotCard } from "@/components/AICoPilotCard";
+import { HighRiskCustomers } from "@/components/HighRiskCustomers";
 
 export default function App() {
   return (

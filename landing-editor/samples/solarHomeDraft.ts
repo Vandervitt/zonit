@@ -1,7 +1,7 @@
 // landing-editor/samples/solarHomeDraft.ts
 //
 // 家装太阳能「免费上门测评 + 省电方案咨询」营销落地页样例（海外 leadgen，非交易）。
-// 仅使用 /editor-next 各表单可见可编辑的字段，确保在编辑器中可完整复刻与调整。
+// 仅使用 /admin/editor 各表单可见可编辑的字段，确保在编辑器中可完整复刻与调整。
 // 转化全程经 WhatsApp 预约上门测评，"savings estimate / quote" 仅为留资话术，
 // 无任何下单 / 结账 / 在线付款 / 订阅语义。
 //

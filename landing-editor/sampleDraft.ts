@@ -1,6 +1,6 @@
 // landing-editor/sampleDraft.ts
 // 编辑器初始种子：按所选模板从注册表取 LandingPageDraft 数据并派生 EditorState，
-// 使 /editor-next?template=<id> 打开即为该落地页，可在各表单中完整复刻与调整。
+// 使 /admin/editor?template=<id> 打开即为该落地页，可在各表单中完整复刻与调整。
 import type { LandingPageDraft } from "@/types/schema.draft";
 import type { EditorState } from "./store/editorStore";
 import { withKeys, HERO_ID } from "./store/editorStore";

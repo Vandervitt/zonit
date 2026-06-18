@@ -1,7 +1,7 @@
 // landing-editor/samples/skincareConsultDraft.ts
 //
 // 美妆 / 护肤品牌「肤质咨询」营销落地页样例（海外 leadgen，非交易）。
-// 仅使用 /editor-next 各表单可见可编辑的字段，确保在编辑器中可完整复刻与调整。
+// 仅使用 /admin/editor 各表单可见可编辑的字段，确保在编辑器中可完整复刻与调整。
 // 转化全程经 WhatsApp 咨询，无任何下单 / 结账 / 订阅语义。
 //
 // 占位资源说明：

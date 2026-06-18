@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 
 test.describe("editor-next 实时预览", () => {
   test("编辑 Hero 标题即时反映到预览 iframe", async ({ page }) => {
-    const res = await page.goto("/editor-next");
+    const res = await page.goto("/admin/editor");
     expect(res?.status()).toBe(200);
 
     // 右栏预览 iframe 存在，预览初始呈现样例 Hero 标题

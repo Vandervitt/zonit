@@ -1,12 +1,14 @@
 export enum Routes {
-  Home = '/',
+  Home = '/',                       // 营销首页（公开）
   Login = '/login',
   Register = '/register',
-  Domains = '/domains',
-  Media = '/media',
-  Billing = '/billing',
+  Dashboard = '/admin',             // 租户后台首页
+  Domains = '/admin/domains',
+  Media = '/admin/media',
+  Billing = '/admin/billing',
   Pricing = '/pricing',
-  LandingPages = '/landing-pages',
+  LandingPages = '/admin/landing-pages',
+  SuperAdmin = '/super-admin',
 }
 
 export enum ApiRoutes {
@@ -26,8 +28,8 @@ export const apiMediaPath = (id: string) => `/api/media/${id}`;
 export const apiDomainPath = (id: string) => `/api/domains/${id}`;
 export const apiDomainStatusPath = (id: string) => `/api/domains/${id}/status`;
 
-export const landingEditorPath = (id: string) => `/editor-next/${id}`;
-export const landingPreviewPath = (id: string) => `/editor-next/${id}/preview`;
+export const landingEditorPath = (id: string) => `/admin/editor/${id}`;
+export const landingPreviewPath = (id: string) => `/admin/editor/${id}/preview`;
 export const apiLandingPagesPath = () => `/api/landing-pages`;
 export const apiLandingPagePath = (id: string) => `/api/landing-pages/${id}`;
 export const apiLandingPublishPath = (id: string) => `/api/landing-pages/${id}/publish`;

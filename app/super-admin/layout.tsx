@@ -15,9 +15,9 @@ async function AdminSidebar() {
   const session = await auth();
   
   const navItems = [
-    { icon: BarChart3, label: "Overview", href: "/admin" },
-    { icon: Users, label: "Users", href: "/admin/users" },
-    { icon: Settings, label: "Platform Settings", href: "/admin/settings" },
+    { icon: BarChart3, label: "Overview", href: "/super-admin" },
+    { icon: Users, label: "Users", href: "/super-admin/users" },
+    { icon: Settings, label: "Platform Settings", href: "/super-admin/settings" },
   ];
 
   return (

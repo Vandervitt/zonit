@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { landingEditorPath } from "@/lib/constants";
 import type { TemplateMeta } from "../samples/registry";
 
 export function TemplateGalleryCard({ template }: { template: TemplateMeta }) {
@@ -18,7 +19,7 @@ export function TemplateGalleryCard({ template }: { template: TemplateMeta }) {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const page = await res.json();
-      router.push(`/editor-next/${page.id}`);
+      router.push(landingEditorPath(page.id));
     } catch {
       setLoading(false);
     }

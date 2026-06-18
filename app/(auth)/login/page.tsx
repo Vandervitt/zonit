@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [oauthProvider, setOauthProvider] = useState<AuthProvider | null>(null);
 
   const oauthSignIn = useMutation(
-    (provider: AuthProvider) => signIn(provider, { callbackUrl: Routes.Home }),
+    (provider: AuthProvider) => signIn(provider, { callbackUrl: Routes.Dashboard }),
   );
 
   const devSignIn = useMutation(
@@ -29,7 +29,7 @@ export default function LoginPage() {
       if (res?.error) throw new ApiError(401, "Dev login failed.");
       return res;
     },
-    { onSuccess: () => { router.push(Routes.Home); router.refresh(); } },
+    { onSuccess: () => { router.push(Routes.Dashboard); router.refresh(); } },
   );
 
   const credentialsSignIn = useMutation(
@@ -40,7 +40,7 @@ export default function LoginPage() {
     },
     {
       errorToast: false,
-      onSuccess: () => { router.push(Routes.Home); router.refresh(); },
+      onSuccess: () => { router.push(Routes.Dashboard); router.refresh(); },
     },
   );
 
