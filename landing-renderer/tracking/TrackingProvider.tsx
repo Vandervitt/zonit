@@ -13,7 +13,9 @@ const UTM_KEY = "lp_utm";
 
 export function TrackingProvider({ tracking, children }: { tracking?: PageTracking; children: ReactNode }) {
   const consentEnabled = tracking?.consent.enabled ?? true;
-  const [consented, setConsented] = useState<boolean>(!consentEnabled);
+  // SSR 与首帧统一为「未同意/未拒绝」，再由 effect 读 localStorage 校正，避免水合不一致与 SSR 访问 localStorage。
+  const [consented, setConsented] = useState<boolean>(false);
+  const [declined, setDeclined] = useState<boolean>(false);
   const utmRef = useRef<Record<string, string>>({});
   const sinksRef = useRef<EventSink[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -27,10 +29,12 @@ export function TrackingProvider({ tracking, children }: { tracking?: PageTracki
     try { utmRef.current = JSON.parse(sessionStorage.getItem(UTM_KEY) ?? "{}"); } catch { utmRef.current = {}; }
   }, []);
 
-  // 读已存同意
+  // 读已存同意（仅客户端）：未启用同意条则视为已同意；否则按 localStorage 校正。
   useEffect(() => {
-    if (!consentEnabled) return;
-    if (localStorage.getItem(CONSENT_KEY) === "accepted") setConsented(true);
+    if (!consentEnabled) { setConsented(true); return; }
+    const v = localStorage.getItem(CONSENT_KEY);
+    if (v === "accepted") setConsented(true);
+    else if (v === "declined") setDeclined(true);
   }, [consentEnabled]);
 
   // 同意后：建 sink、init、发 page_view
@@ -56,13 +60,13 @@ export function TrackingProvider({ tracking, children }: { tracking?: PageTracki
   }, [tracking?.utmPassthrough]);
 
   const accept = () => { localStorage.setItem(CONSENT_KEY, "accepted"); setConsented(true); };
-  const decline = () => { localStorage.setItem(CONSENT_KEY, "declined"); };
+  const decline = () => { localStorage.setItem(CONSENT_KEY, "declined"); setDeclined(true); };
 
   return (
     <div ref={containerRef} onClickCapture={onClickCapture}>
       {consented && enabledPixels.map((p) => <PixelScript key={p.provider} provider={p.provider} id={p.id} />)}
       {children}
-      {consentEnabled && !consented && localStorage.getItem(CONSENT_KEY) !== "declined" && (
+      {consentEnabled && !consented && !declined && (
         <ConsentBar text={tracking?.consent.text} onAccept={accept} onDecline={decline} />
       )}
     </div>
