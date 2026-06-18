@@ -14,6 +14,8 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     };
   }
 
-  // 平台/后台域名：纯认证应用，禁止收录。
-  return { rules: { userAgent: "*", disallow: "/" } };
+  // 平台主域：放开营销面（/、/pricing），禁后台与接口。
+  return {
+    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/super-admin", "/api"] },
+  };
 }
