@@ -14,12 +14,6 @@ import { Routes, ApiRoutes } from "@/lib/constants";
 import { fetcher, jsonRequest } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 
-const UPGRADE_HIGHLIGHTS: Partial<Record<PlanId, string[]>> = {
-  starter: ["3 个站点 + 1 个自定义域名", "5 款王牌爆款模板", "1× Meta Pixel 追踪"],
-  pro: ["20 个站点 + 5 个域名", "全库 15+ 行业模板", "去除品牌水印", "全矩阵像素 + Meta CAPI", "反同质化风控引擎"],
-  agency: ["无限站点 + 无限域名", "含灰色行业高转化模板", "AI 自动多语言翻译", "一切 Pro 功能"],
-};
-
 function SuccessToast() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -83,7 +77,7 @@ export default function BillingPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <PlanBadge plan={currentPlanId} className="text-sm px-3 py-1" />
-            <span className="text-2xl font-bold text-slate-900">{currentPlan.price}</span>
+            <span className="text-2xl font-bold text-slate-900">{currentPlan.priceText}</span>
           </div>
           <div className="flex items-center gap-2">
             {currentPlanId !== "free" && (
@@ -110,9 +104,9 @@ export default function BillingPage() {
 
         <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-3 gap-4 text-sm">
           <div>
-            <p className="text-slate-400 text-xs mb-1">站点上限</p>
+            <p className="text-slate-400 text-xs mb-1">落地页上限</p>
             <p className="text-slate-700 font-medium">
-              {currentPlan.sitesLimit === Infinity ? "无限" : `${currentPlan.sitesLimit} 个`}
+              {currentPlan.landingPagesLimit === Infinity ? "无限" : `${currentPlan.landingPagesLimit} 张`}
             </p>
           </div>
           <div>
@@ -137,7 +131,7 @@ export default function BillingPage() {
           <p className="text-sm font-medium text-slate-600">可升级套餐</p>
           {PLAN_ORDER.slice(currentIdx + 1).map(planId => {
             const plan = PLANS[planId];
-            const highlights = UPGRADE_HIGHLIGHTS[planId] ?? [];
+            const highlights = plan.highlights;
             const isLoading = loadingPlan === planId;
             return (
               <div
@@ -147,7 +141,7 @@ export default function BillingPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <PlanBadge plan={planId} />
-                    <span className="text-slate-700 font-semibold">{plan.price}</span>
+                    <span className="text-slate-700 font-semibold">{plan.priceText}</span>
                   </div>
                   <ul className="space-y-1">
                     {highlights.map(h => (

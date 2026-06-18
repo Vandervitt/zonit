@@ -40,11 +40,11 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm" aria-describedby="upgrade-desc">
         <DialogHeader>
-          <DialogTitle>已达到站点上限</DialogTitle>
+          <DialogTitle>已达到落地页上限</DialogTitle>
           <DialogDescription id="upgrade-desc">
-            {current.label} 套餐最多创建 {current.sitesLimit} 个站点。升级到{" "}
+            {current.label} 套餐最多创建 {current.landingPagesLimit} 张落地页。升级到{" "}
             <span className="font-medium text-slate-800">{target.label}</span> 即可最多管理{" "}
-            {target.sitesLimit === Infinity ? "无限个" : `${target.sitesLimit} 个`}站点。
+            {target.landingPagesLimit === Infinity ? "无限张" : `${target.landingPagesLimit} 张`}落地页。
           </DialogDescription>
         </DialogHeader>
 
@@ -73,7 +73,7 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
               router.push(Routes.Billing);
             }}
           >
-            查看 {target.label} 套餐 · {target.price}
+            查看 {target.label} 套餐 · {target.priceText}
           </Button>
         </DialogFooter>
       </DialogContent>

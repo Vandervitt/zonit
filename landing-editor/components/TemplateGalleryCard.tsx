@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { landingEditorPath } from "@/lib/constants";
+import { toast } from "sonner";
+import { landingEditorPath, Routes } from "@/lib/constants";
 import type { TemplateMeta } from "../samples/registry";
 
 export function TemplateGalleryCard({ template }: { template: TemplateMeta }) {
@@ -17,6 +18,11 @@ export function TemplateGalleryCard({ template }: { template: TemplateMeta }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ templateId: template.id }),
       });
+      if (res.status === 403) {
+        toast.error("已达当前套餐的落地页上限，请升级后再创建");
+        router.push(Routes.Billing);
+        return;
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const page = await res.json();
       router.push(landingEditorPath(page.id));

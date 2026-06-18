@@ -1,64 +1,79 @@
 export type PlanId = "free" | "starter" | "pro" | "agency";
 
 export interface PlanConfig {
+  id: PlanId;
   label: string;
-  price: string;
-  sitesLimit: number;
+  priceText: string;            // 仅展示
+  color: string;
+  highlight?: boolean;          // "最受欢迎"
+  // 后端强制限额
+  landingPagesLimit: number;
   domainsLimit: number;
+  // 特性标记
   hasWatermark: boolean;
   allTemplates: boolean;
-  color: string;
+  advancedTracking: boolean;
+  antiBan: boolean;
+  aiTranslation: boolean;
+  // 升级卡片要点（billing 用）
+  highlights: string[];
 }
 
 export const PLANS: Record<PlanId, PlanConfig> = {
   free: {
-    label: "Free",
-    price: "$0",
-    sitesLimit: 1,
-    domainsLimit: 0,
-    hasWatermark: true,
-    allTemplates: false,
-    color: "slate",
+    id: "free", label: "Free", priceText: "$0", color: "slate",
+    landingPagesLimit: 1, domainsLimit: 0,
+    hasWatermark: true, allTemplates: false, advancedTracking: false, antiBan: false, aiTranslation: false,
+    highlights: ["1 张落地页", "可视化编辑器", "在线预览（发布需升级绑定域名）"],
   },
   starter: {
-    label: "Starter",
-    price: "$29/mo",
-    sitesLimit: 3,
-    domainsLimit: 1,
-    hasWatermark: true,
-    allTemplates: false,
-    color: "blue",
+    id: "starter", label: "Starter", priceText: "$29/mo", color: "blue",
+    landingPagesLimit: 3, domainsLimit: 1,
+    hasWatermark: true, allTemplates: false, advancedTracking: false, antiBan: false, aiTranslation: false,
+    highlights: ["3 张落地页 + 1 个自定义域名", "5 款王牌爆款模板", "1× Meta Pixel 追踪"],
   },
   pro: {
-    label: "Pro",
-    price: "$79/mo",
-    sitesLimit: 20,
-    domainsLimit: 5,
-    hasWatermark: false,
-    allTemplates: true,
-    color: "violet",
+    id: "pro", label: "Pro", priceText: "$79/mo", color: "violet", highlight: true,
+    landingPagesLimit: 20, domainsLimit: 5,
+    hasWatermark: false, allTemplates: true, advancedTracking: true, antiBan: true, aiTranslation: false,
+    highlights: ["20 张落地页 + 5 个域名", "全库 15+ 行业模板", "去除品牌水印", "全矩阵像素 + Meta CAPI", "反同质化风控引擎"],
   },
   agency: {
-    label: "Agency",
-    price: "$199/mo",
-    sitesLimit: Infinity,
-    domainsLimit: Infinity,
-    hasWatermark: false,
-    allTemplates: true,
-    color: "amber",
+    id: "agency", label: "Agency", priceText: "$199/mo", color: "amber",
+    landingPagesLimit: Infinity, domainsLimit: Infinity,
+    hasWatermark: false, allTemplates: true, advancedTracking: true, antiBan: true, aiTranslation: true,
+    highlights: ["无限落地页 + 无限域名", "含高转化行业模板", "AI 自动多语言翻译", "一切 Pro 功能"],
   },
 };
 
-export function getSitesLimit(plan: PlanId): number {
-  return PLANS[plan].sitesLimit;
+export const PLAN_ORDER: PlanId[] = ["free", "starter", "pro", "agency"];
+
+// 对比表行定义：valueFor 返回字符串（额度）或布尔（有无）
+export interface PlanFeatureRow {
+  label: string;
+  valueFor: (plan: PlanConfig) => string | boolean;
 }
 
+const fmtLimit = (n: number, unit: string) => (n === Infinity ? "无限" : n === 0 ? "—" : `${n} ${unit}`);
+
+export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
+  { label: "落地页数量", valueFor: (p) => fmtLimit(p.landingPagesLimit, "张") },
+  { label: "自定义域名", valueFor: (p) => fmtLimit(p.domainsLimit, "个") },
+  { label: "精美模板", valueFor: () => true },
+  { label: "完整视觉编辑器", valueFor: () => true },
+  { label: "基础数据追踪 (1× Meta Pixel)", valueFor: () => true },
+  { label: "去除品牌水印", valueFor: (p) => !p.hasWatermark },
+  { label: "全矩阵像素追踪 (TikTok / CAPI)", valueFor: (p) => p.advancedTracking },
+  { label: "反同质化风控引擎", valueFor: (p) => p.antiBan },
+  { label: "AI 多语言翻译", valueFor: (p) => p.aiTranslation },
+];
+
+export function getLandingPagesLimit(plan: PlanId): number {
+  return PLANS[plan].landingPagesLimit;
+}
 export function hasWatermark(plan: PlanId): boolean {
   return PLANS[plan].hasWatermark;
 }
-
 export function canBindDomain(plan: PlanId): boolean {
   return PLANS[plan].domainsLimit > 0;
 }
-
-export const PLAN_ORDER: PlanId[] = ["free", "starter", "pro", "agency"];
