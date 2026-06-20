@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { deriveSlots, mergeSlots } from "@/lib/ai/slots";
+import type { FilledSlot } from "@/lib/ai/types";
 import { TEMPLATES } from "@/landing-editor/samples/registry";
 
 describe("deriveSlots / mergeSlots", () => {
@@ -27,5 +28,14 @@ describe("deriveSlots / mergeSlots", () => {
     const titleSlot = deriveSlots(merged).find((s) => s.id === slots[0].id);
     expect(titleSlot?.text).toBe("新标题XYZ");
     expect(draft).toEqual(mergeSlots(draft, deriveSlots(draft)));
+  });
+
+  it("FilledSlot（仅 id+text，无 path）经 byId 映射回填——AI 返回的生产路径", () => {
+    const draft = TEMPLATES[0].draft;
+    const slots = deriveSlots(draft);
+    const filled: FilledSlot[] = [{ id: slots[0].id, text: "AI 写的标题" }];
+    const merged = mergeSlots(draft, filled);
+    const found = deriveSlots(merged).find((s) => s.id === slots[0].id);
+    expect(found?.text).toBe("AI 写的标题");
   });
 });

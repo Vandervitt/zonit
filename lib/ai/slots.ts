@@ -1,7 +1,10 @@
 import type { LandingPageDraft } from "@/types/schema.draft";
 import type { Slot, FilledSlot } from "./types";
 
-/** 这些 string 键不是营销文案，跳过：图片/链接/枚举/标识/图标/时间。 */
+/**
+ * 这些键不是营销文案，连同其子树一并跳过：图片/链接/枚举/标识/图标/时间。
+ * `alt` 为图片辅助文字，随图片一起编辑，不开放 AI 单独改写。
+ */
 const NON_TEXT_KEYS = new Set([
   "src", "link", "poster", "id", "provider", "type",
   "endsAt", "alt", "icon", "emoji", "channel",
@@ -24,7 +27,7 @@ export function deriveSlots(draft: LandingPageDraft): Slot[] {
     }
     if (value !== null && typeof value === "object") {
       for (const [k, v] of Object.entries(value)) {
-        if (NON_TEXT_KEYS.has(k) && typeof v === "string") continue;
+        if (NON_TEXT_KEYS.has(k)) continue; // 黑名单键跳过整棵子树，与字符串分支语义一致
         walk(v, [...path, k]);
       }
     }
@@ -45,7 +48,7 @@ export function mergeSlots(
   );
 
   for (const f of filled) {
-    const path = "path" in f && f.path ? f.path : byId.get(f.id);
+    const path = "path" in f ? f.path : byId.get(f.id);
     if (!path) continue;
 
     let cur: Record<string, unknown> | unknown[] = clone as unknown as Record<string, unknown>;
