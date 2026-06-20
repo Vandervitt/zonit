@@ -9,6 +9,7 @@ import { Select } from "../ui/Select";
 import { EmojiInput } from "../ui/EmojiInput";
 import { MediaPicker } from "../ui/MediaPicker";
 import { validateLink, validateMediaUrl } from "../lib/validate";
+import { RewriteButton } from "@/components/ai/RewriteButton";
 
 export function CtaButtonField({
   label = "CTA 按钮",
@@ -22,9 +23,12 @@ export function CtaButtonField({
   return (
     <div className="space-y-2 rounded-lg border border-edge p-2.5">
       <div className="text-xs font-medium text-ink-soft">{label}</div>
-      <Field label="按钮文案">
-        <TextInput value={value.text} onChange={(e) => onChange({ ...value, text: e.target.value })} placeholder="立即咨询" />
-      </Field>
+      <div className="space-y-1">
+        <Field label="按钮文案">
+          <TextInput value={value.text} onChange={(e) => onChange({ ...value, text: e.target.value })} placeholder="立即咨询" />
+        </Field>
+        <RewriteButton field="按钮文案" currentText={value.text} onApply={(t) => onChange({ ...value, text: t })} />
+      </div>
       <Field label="按钮链接" error={validateLink(value.link)}>
         <TextInput
           value={value.link}
@@ -165,15 +169,25 @@ export function TitleSubtitleFields<T extends { title: string; subtitle?: string
 }) {
   return (
     <>
-      <Field label="主标题">
-        <TextInput value={value.title} onChange={(e) => patch({ title: e.target.value } as Partial<T>)} />
-      </Field>
-      <Field label="副标题">
-        <TextInput
-          value={value.subtitle ?? ""}
-          onChange={(e) => patch({ subtitle: e.target.value || undefined } as Partial<T>)}
+      <div className="space-y-1">
+        <Field label="主标题">
+          <TextInput value={value.title} onChange={(e) => patch({ title: e.target.value } as Partial<T>)} />
+        </Field>
+        <RewriteButton field="主标题" currentText={value.title} onApply={(t) => patch({ title: t } as Partial<T>)} />
+      </div>
+      <div className="space-y-1">
+        <Field label="副标题">
+          <TextInput
+            value={value.subtitle ?? ""}
+            onChange={(e) => patch({ subtitle: e.target.value || undefined } as Partial<T>)}
+          />
+        </Field>
+        <RewriteButton
+          field="副标题"
+          currentText={value.subtitle ?? ""}
+          onApply={(t) => patch({ subtitle: t || undefined } as Partial<T>)}
         />
-      </Field>
+      </div>
     </>
   );
 }
