@@ -12,6 +12,8 @@
     "migrate:up": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js up -m migrations -d DATABASE_URL_UNPOOLED",
     "migrate:down": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js down -m migrations -d DATABASE_URL_UNPOOLED",
     "migrate:create": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js create -m migrations",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "playwright test",
     "db:start": "docker compose up -d postgres",
     "db:stop": "docker compose stop postgres",
@@ -108,6 +110,7 @@
     "node-pg-migrate": "^8.0.4",
     "tailwindcss": "4.1.12",
     "typescript": "^5",
-    "undici": "^8.1.0"
+    "undici": "^8.1.0",
+    "vitest": "^3.2.6"
   }
 }
