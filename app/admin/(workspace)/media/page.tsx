@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Typography, Segmented, Empty, Spin } from "antd";
 import useSWR from "swr";
-import { Image as ImageIcon } from "lucide-react";
 import { ApiRoutes } from "@/lib/constants";
 import { MediaGrid } from "@/components/media/MediaGrid";
 import { UploadZone } from "@/components/media/UploadZone";
@@ -29,49 +29,51 @@ export default function MediaPage() {
     void mutate(items.filter((i) => i.id !== id));
   };
 
-  const tabs: { key: FilterTab; label: string }[] = [
-    { key: "all", label: "全部" },
-    { key: "image", label: "图片" },
-    { key: "video", label: "视频" },
+  const segmentedOptions = [
+    { label: "全部", value: "all" },
+    { label: "图片", value: "image" },
+    { label: "视频", value: "video" },
   ];
 
   return (
-    <main className="flex-1 flex flex-col overflow-auto">
+    <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "auto" }}>
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4">
+      <header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "16px 24px",
+        }}
+      >
         <div>
-          <h1 className="text-foreground text-2xl">素材库</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{items.length} 个素材</p>
+          <Typography.Title level={3} style={{ margin: 0 }}>
+            素材库
+          </Typography.Title>
+          <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+            {items.length} 个素材
+          </Typography.Text>
         </div>
         <UploadZone onUploaded={handleUploaded} />
       </header>
 
-      {/* Filter tabs */}
-      <div className="flex gap-1 px-6 border-b border-aqua-100">
-        {tabs.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              filter === key
-                ? "border-aqua-500 text-aqua-600"
-                : "border-transparent text-muted-foreground hover:text-muted-foreground"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Filter */}
+      <div style={{ padding: "0 24px 12px" }}>
+        <Segmented
+          options={segmentedOptions}
+          value={filter}
+          onChange={(val) => setFilter(val as FilterTab)}
+        />
       </div>
 
       {/* Grid */}
-      <div className="flex-1 px-6 py-5 overflow-auto">
+      <div style={{ flex: 1, padding: "0 24px 20px", overflow: "auto" }}>
         {!data ? (
-          <div className="text-muted-foreground text-sm">加载中…</div>
-        ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
-            <ImageIcon className="w-10 h-10 text-muted-foreground/50" />
-            <p className="text-sm">还没有素材，点击右上角 上传素材 开始</p>
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: 80 }}>
+            <Spin size="large" />
           </div>
+        ) : items.length === 0 ? (
+          <Empty description="还没有素材" style={{ paddingTop: 60 }} />
         ) : (
           <MediaGrid items={items} onDeleted={handleDeleted} />
         )}
