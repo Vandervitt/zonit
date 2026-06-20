@@ -1,35 +1,36 @@
 /* landing-editor/editor-theme.css
-   新编辑页（/editor-next）专用「蓝色科技风」主题 token（Tailwind v4 @theme）。
-   这些是新增 token，只有 landing-editor 组件使用对应工具类（bg-brand-600、bg-canvas 等），
-   不影响项目其他页面的现有配色。经 app/globals.css 引入参与 Tailwind 构建。
+   落地页编辑器（/admin/editor）专用主题 token（Tailwind v4 @theme）。
+   与全站「深青·明亮」统一：brand 色阶为深青，中性为干净石板，与 admin（antd #0d9488）呼应。
+   这些 token 仅 landing-editor 组件使用（bg-brand-600、bg-canvas 等），不影响其他页面。
+   经 app/globals.css 引入参与 Tailwind 构建。
 */
 @theme {
-  /* 品牌色阶：专业科技蓝 */
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
+  /* 品牌色阶：深青（与 admin / 官网 primary #0d9488 同族） */
+  --color-brand-50: #effefb;
+  --color-brand-100: #d2fbf3;
+  --color-brand-200: #aef5e9;
+  --color-brand-300: #7fe9da;
+  --color-brand-400: #2dd4bf;
+  --color-brand-500: #14b8a6;
+  --color-brand-600: #0d9488;
+  --color-brand-700: #0f766e;
+  --color-brand-800: #115e59;
+  --color-brand-900: #134e4a;
 
-  /* 中性面（冷调石板蓝，科技感） */
-  --color-canvas: #eef2f8; /* 整页背景 */
+  /* 中性面（干净石板，与 admin 中性一致） */
+  --color-canvas: #f6fafb; /* 整页背景 */
   --color-panel: #ffffff; /* 面板 / 输入背景 */
-  --color-edge: #dbe3ee; /* 边框 */
-  --color-edge-strong: #c2cfe0; /* 悬停边框 */
+  --color-edge: #e7edf3; /* 边框 */
+  --color-edge-strong: #d4dee7; /* 悬停边框 */
 
   /* 文字 */
-  --color-ink: #0f1e36; /* 主文字（深海军蓝） */
-  --color-ink-soft: #44597a; /* 次文字 / 标签 */
-  --color-ink-muted: #8aa0bd; /* 占位 / 弱化 */
+  --color-ink: #1e293b; /* 主文字（石板深灰） */
+  --color-ink-soft: #475569; /* 次文字 / 标签 */
+  --color-ink-muted: #94a3b8; /* 占位 / 弱化 */
 
-  /* 代码面板（深色科技蓝黑） */
-  --color-code-bg: #0a1325;
-  --color-code-edge: #1c2b47;
-  --color-code-fg: #c5d4ea;
-  --color-code-muted: #5e7398;
+  /* 代码面板（深色，略带青绿） */
+  --color-code-bg: #0a1c1a;
+  --color-code-edge: #14302c;
+  --color-code-fg: #cdeae3;
+  --color-code-muted: #5e8980;
 }
