@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
-import { verifyWebhookSignature, getPlanFromVariantId } from "@/lib/lemonsqueezy";
+import { verifyWebhookSignature, getPlanFromVariantId, getCreditsFromVariantId } from "@/lib/lemonsqueezy";
 
 const SUBSCRIPTION_EVENTS = new Set([
   "subscription_created",
@@ -8,6 +8,8 @@ const SUBSCRIPTION_EVENTS = new Set([
   "subscription_cancelled",
   "subscription_expired",
 ]);
+
+const ORDER_EVENT = "order_created";
 
 export async function POST(request: Request) {
   const rawBody = await request.text();
@@ -19,7 +21,7 @@ export async function POST(request: Request) {
 
   let payload: {
     meta: { event_name: string; custom_data?: { user_id?: string } };
-    data: { id: string; attributes: { customer_id: number; variant_id: number; status: string } };
+    data: { id: string; attributes: { customer_id: number; variant_id: number; status: string; first_order_item?: { variant_id: number } } };
   };
   try {
     payload = JSON.parse(rawBody);
@@ -28,6 +30,23 @@ export async function POST(request: Request) {
   }
 
   const eventName = payload.meta.event_name;
+
+  if (eventName === ORDER_EVENT) {
+    const userId = payload.meta.custom_data?.user_id;
+    if (!userId) {
+      return NextResponse.json({ error: "Missing user_id in custom_data" }, { status: 400 });
+    }
+    const variantId = payload.data.attributes.first_order_item?.variant_id ?? payload.data.attributes.variant_id;
+    const credits = getCreditsFromVariantId(variantId);
+    if (credits > 0) {
+      await pool.query(
+        "UPDATE users SET ai_credit_balance = ai_credit_balance + $1 WHERE id = $2",
+        [credits, userId],
+      );
+    }
+    return NextResponse.json({ received: true });
+  }
+
   if (!SUBSCRIPTION_EVENTS.has(eventName)) {
     return NextResponse.json({ received: true });
   }
