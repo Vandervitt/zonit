@@ -55,7 +55,7 @@ export function InviteUserDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+        <Button className="bg-bloom-600 hover:bg-bloom-700 gap-2">
           <UserPlus className="w-4 h-4" />
           邀请用户
         </Button>
@@ -114,7 +114,7 @@ export function InviteUserDialog() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
+              className="w-full bg-bloom-600 hover:bg-bloom-700"
             >
               {isLoading ? (
                 <>

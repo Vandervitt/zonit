@@ -5,9 +5,9 @@ import { PLANS } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 
 const COLOR_MAP: Record<PlanId, string> = {
-  free: "bg-slate-100 text-slate-500",
-  starter: "bg-blue-50 text-blue-600",
-  pro: "bg-violet-50 text-violet-600",
+  free: "bg-bloom-50 text-muted-foreground",
+  starter: "bg-tech-soft/20 text-tech",
+  pro: "bg-bloom-50 text-bloom-600",
   agency: "bg-amber-50 text-amber-600",
 };
 

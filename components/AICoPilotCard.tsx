@@ -22,11 +22,11 @@ export function AICoPilotCard() {
     <div className="bg-white rounded-2xl p-5 flex flex-col gap-4 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-center gap-2">
-        <span className="text-slate-700 text-lg">The</span>
+        <span className="text-foreground/80 text-lg">The</span>
         <span className="bg-rose-500 text-white text-xs px-1.5 py-0.5 rounded-md">
           AI
         </span>
-        <span className="text-slate-700 text-lg">Co-Pilot</span>
+        <span className="text-foreground/80 text-lg">Co-Pilot</span>
       </div>
 
       {/* AI Sphere Image */}
@@ -43,16 +43,16 @@ export function AICoPilotCard() {
       {/* Retention Section */}
       <div>
         <div className="flex items-center justify-between mb-0.5">
-          <span className="text-sm text-slate-700">Retention</span>
-          <button className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors">
+          <span className="text-sm text-foreground/80">Retention</span>
+          <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-muted-foreground transition-colors">
             Monthly <ChevronDown className="w-3 h-3" />
           </button>
         </div>
-        <p className="text-xs text-slate-400">Customer loyalty grew by 8%</p>
+        <p className="text-xs text-muted-foreground">Customer loyalty grew by 8%</p>
 
         {/* Mini Bar Chart */}
-        <div className="mt-3 bg-slate-50 rounded-xl p-3">
-          <p className="text-xs text-slate-400 mb-2">Retention · 2025</p>
+        <div className="mt-3 bg-bloom-50 rounded-xl p-3">
+          <p className="text-xs text-muted-foreground mb-2">Retention · 2025</p>
           <div className="h-16">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={retentionData} barSize={10} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
@@ -60,7 +60,7 @@ export function AICoPilotCard() {
                 <YAxis hide />
                 <Bar
                   dataKey="value"
-                  fill="#3b82f6"
+                  fill="#f03d83"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -70,7 +70,7 @@ export function AICoPilotCard() {
       </div>
 
       {/* Generate Report Button */}
-      <button className="w-full bg-slate-900 text-white text-sm py-3 rounded-xl hover:bg-slate-800 transition-colors">
+      <button className="w-full bg-foreground text-white text-sm py-3 rounded-xl hover:bg-foreground transition-colors">
         Generate Report
       </button>
     </div>

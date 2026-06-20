@@ -88,7 +88,7 @@ export default function DomainsPage() {
     <main className="flex flex-col w-full">
       <header className="flex items-center justify-between px-6 py-4">
         <div>
-          <h1 className="text-slate-800 text-2xl">域名</h1>
+          <h1 className="text-foreground text-2xl">域名</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             已启用 {enabledCount}{domainsLimit === Infinity ? "" : `/${domainsLimit}`} 个域名
           </p>
@@ -105,8 +105,8 @@ export default function DomainsPage() {
           isEmpty={(d) => d.length === 0}
           empty={
             <div className="flex flex-col items-center justify-center py-24 text-center">
-              <Globe className="w-10 h-10 text-slate-300 mb-3" />
-              <p className="text-slate-500">还没有绑定任何域名</p>
+              <Globe className="w-10 h-10 text-muted-foreground/50 mb-3" />
+              <p className="text-muted-foreground">还没有绑定任何域名</p>
               <p className="text-sm text-muted-foreground mt-1">点击「添加域名」开始绑定你的品牌域名</p>
             </div>
           }
@@ -115,9 +115,9 @@ export default function DomainsPage() {
             <div className="rounded-xl border bg-white/80 divide-y">
               {list.map(domain => (
                 <div key={domain.id} className="flex items-center gap-4 px-4 py-3">
-                  <Globe className="w-4 h-4 text-slate-400 shrink-0" />
+                  <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-800 truncate">{domain.domain}</p>
+                    <p className="text-sm text-foreground truncate">{domain.domain}</p>
                     <p className="text-xs text-muted-foreground truncate">
                       {domain.landing_page_name ?? "未绑定落地页"}
                     </p>
@@ -130,7 +130,7 @@ export default function DomainsPage() {
                         <Badge variant="secondary" className="text-xs">待验证</Badge>
                         <button
                           onClick={() => handleCheckStatus(domain)}
-                          className="text-slate-400 hover:text-slate-600"
+                          className="text-muted-foreground hover:text-muted-foreground"
                           title="刷新验证状态"
                         >
                           <RefreshCw className={`w-3.5 h-3.5 ${pendingCheckId === domain.id ? "animate-spin" : ""}`} />
@@ -140,7 +140,7 @@ export default function DomainsPage() {
                     <button
                       onClick={() => handleToggle(domain)}
                       disabled={toggleMutation.isMutating}
-                      className="text-slate-400 hover:text-slate-600 disabled:opacity-50"
+                      className="text-muted-foreground hover:text-muted-foreground disabled:opacity-50"
                       title={domain.enabled ? "停用" : "启用"}
                     >
                       {domain.enabled
@@ -151,7 +151,7 @@ export default function DomainsPage() {
                     <button
                       onClick={() => deleteMutation.trigger(domain)}
                       disabled={deleteMutation.isMutating}
-                      className="text-slate-400 hover:text-destructive disabled:opacity-50"
+                      className="text-muted-foreground hover:text-destructive disabled:opacity-50"
                       title="删除"
                     >
                       <Trash2 className="w-4 h-4" />

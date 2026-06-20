@@ -2,23 +2,9 @@
 @import "../styles/theme.css";
 @import "../landing-editor/editor-theme.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --font-geist-sans: Arial, Helvetica, sans-serif;
-  --font-geist-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-}
-
+/* 全局主题/字体由 styles/theme.css 统一定义（玫瑰智核 · 浅粉科技）。
+ * 这里仅补充等宽字体 token；字体 family 由根布局 next/font 注入的
+ * --font-body / --font-head / --font-mono 变量驱动。 */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-mono-app, "SFMono-Regular", Consolas, "Liberation Mono", monospace);
 }

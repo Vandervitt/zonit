@@ -46,7 +46,7 @@ function RiskBars({ level }: { level: number }) {
                 : i === 2
                 ? "bg-rose-500"
                 : "bg-rose-600"
-              : "bg-slate-200"
+              : "bg-bloom-100"
           }`}
           style={{
             width: 5,
@@ -66,8 +66,8 @@ function FeedbackStars({ count }: { count: number }) {
           key={i}
           className={`w-3.5 h-3.5 ${
             i <= count
-              ? "fill-blue-400 text-blue-400"
-              : "fill-slate-200 text-slate-200"
+              ? "fill-bloom-500 text-bloom-500"
+              : "fill-bloom-100 text-bloom-100"
           }`}
         />
       ))}
@@ -80,8 +80,8 @@ export function HighRiskCustomers() {
     <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-slate-800">High-Risk Customers</h3>
-        <button className="text-sm text-blue-500 hover:text-blue-600 transition-colors">
+        <h3 className="text-foreground">High-Risk Customers</h3>
+        <button className="text-sm text-bloom-600 hover:text-bloom-700 transition-colors">
           See all
         </button>
       </div>
@@ -89,10 +89,10 @@ export function HighRiskCustomers() {
       {/* Table */}
       <div className="w-full">
         {/* Table Header */}
-        <div className="grid grid-cols-[2fr_1fr_2fr_1.5fr_1.5fr_auto] gap-4 px-2 pb-2 border-b border-slate-100">
+        <div className="grid grid-cols-[2fr_1fr_2fr_1.5fr_1.5fr_auto] gap-4 px-2 pb-2 border-b border-bloom-100">
           {["Name", "Risk", "Key factors", "Account value", "Feedback", ""].map(
             (h) => (
-              <span key={h} className="text-xs text-slate-400">
+              <span key={h} className="text-xs text-muted-foreground">
                 {h}
               </span>
             )
@@ -103,7 +103,7 @@ export function HighRiskCustomers() {
         {customers.map((c) => (
           <div
             key={c.id}
-            className="grid grid-cols-[2fr_1fr_2fr_1.5fr_1.5fr_auto] gap-4 items-center px-2 py-3 border-b border-slate-50 hover:bg-slate-50/50 rounded-xl transition-colors"
+            className="grid grid-cols-[2fr_1fr_2fr_1.5fr_1.5fr_auto] gap-4 items-center px-2 py-3 border-b border-bloom-50 hover:bg-bloom-50/50 rounded-xl transition-colors"
           >
             {/* Name */}
             <div className="flex items-center gap-2.5">
@@ -112,23 +112,23 @@ export function HighRiskCustomers() {
                 alt={c.name}
                 className="w-8 h-8 rounded-full object-cover shrink-0"
               />
-              <span className="text-sm text-slate-700 truncate">{c.name}</span>
+              <span className="text-sm text-foreground/80 truncate">{c.name}</span>
             </div>
 
             {/* Risk */}
             <RiskBars level={c.riskLevel} />
 
             {/* Key factor */}
-            <span className="text-sm text-slate-500">{c.keyFactor}</span>
+            <span className="text-sm text-muted-foreground">{c.keyFactor}</span>
 
             {/* Account Value */}
-            <span className="text-sm text-slate-700">{c.accountValue}</span>
+            <span className="text-sm text-foreground/80">{c.accountValue}</span>
 
             {/* Feedback */}
             <FeedbackStars count={c.feedback} />
 
             {/* More */}
-            <button className="text-slate-300 hover:text-slate-500 transition-colors">
+            <button className="text-muted-foreground/50 hover:text-muted-foreground transition-colors">
               <MoreHorizontal className="w-4 h-4" />
             </button>
           </div>

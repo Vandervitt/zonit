@@ -40,22 +40,22 @@ export default function MediaPage() {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4">
         <div>
-          <h1 className="text-slate-800 text-2xl">素材库</h1>
+          <h1 className="text-foreground text-2xl">素材库</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{items.length} 个素材</p>
         </div>
         <UploadZone onUploaded={handleUploaded} />
       </header>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 px-6 border-b border-slate-200">
+      <div className="flex gap-1 px-6 border-b border-bloom-100">
         {tabs.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               filter === key
-                ? "border-slate-800 text-slate-800"
-                : "border-transparent text-slate-400 hover:text-slate-600"
+                ? "border-bloom-500 text-bloom-600"
+                : "border-transparent text-muted-foreground hover:text-muted-foreground"
             }`}
           >
             {label}
@@ -66,10 +66,10 @@ export default function MediaPage() {
       {/* Grid */}
       <div className="flex-1 px-6 py-5 overflow-auto">
         {!data ? (
-          <div className="text-slate-400 text-sm">加载中…</div>
+          <div className="text-muted-foreground text-sm">加载中…</div>
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-400">
-            <ImageIcon className="w-10 h-10 text-slate-300" />
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-muted-foreground">
+            <ImageIcon className="w-10 h-10 text-muted-foreground/50" />
             <p className="text-sm">还没有素材，点击右上角 上传素材 开始</p>
           </div>
         ) : (

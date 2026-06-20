@@ -43,23 +43,23 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
           <DialogTitle>已达到落地页上限</DialogTitle>
           <DialogDescription id="upgrade-desc">
             {current.label} 套餐最多创建 {current.landingPagesLimit} 张落地页。升级到{" "}
-            <span className="font-medium text-slate-800">{target.label}</span> 即可最多管理{" "}
+            <span className="font-medium text-foreground">{target.label}</span> 即可最多管理{" "}
             {target.landingPagesLimit === Infinity ? "无限张" : `${target.landingPagesLimit} 张`}落地页。
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 space-y-1 text-sm">
-          <p className="text-slate-500">升级后还可获得：</p>
+        <div className="rounded-xl border border-bloom-100 bg-bloom-50 p-4 space-y-1 text-sm">
+          <p className="text-muted-foreground">升级后还可获得：</p>
           {current.hasWatermark && !target.hasWatermark && (
-            <p className="text-slate-700">✓ 去除品牌水印</p>
+            <p className="text-foreground/80">✓ 去除品牌水印</p>
           )}
           {target.domainsLimit > current.domainsLimit && (
-            <p className="text-slate-700">
+            <p className="text-foreground/80">
               ✓ 绑定最多 {target.domainsLimit === Infinity ? "无限个" : target.domainsLimit} 个自定义域名
             </p>
           )}
           {target.allTemplates && !current.allTemplates && (
-            <p className="text-slate-700">✓ 解锁全部 15+ 行业模板</p>
+            <p className="text-foreground/80">✓ 解锁全部 15+ 行业模板</p>
           )}
         </div>
 

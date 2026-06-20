@@ -1,84 +1,134 @@
 @custom-variant dark (&:is(.dark *));
 
+/* ================================================================== *
+ * 玫瑰智核 · Luminous Rose Intelligence
+ * 全应用统一主题：浅色为主 + 粉色科技感。
+ * 这里是「全局主题的唯一来源」——改这里即可全应用换肤。
+ *   · :root        → shadcn 语义 token（浅色）
+ *   · .dark         → 暗色变体
+ *   · @theme        → 品牌/科技扩展 token（brand 粉阶 / tech 紫 / glow 光晕）
+ *   · @theme inline → 把语义 token 暴露为 Tailwind 工具类
+ * 复用的渐变/玻璃/光晕等成套样式见 `lib/theme.ts`。
+ * ================================================================== */
+
 :root {
   --font-size: 16px;
-  --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
+
+  /* 基底：极浅粉晨光 / 深玫瑰墨字 */
+  --background: #fff6fb;
+  --foreground: #2c1622;
   --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #030213;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.0058 264.53);
-  --secondary-foreground: #030213;
-  --muted: #ececf0;
-  --muted-foreground: #717182;
-  --accent: #e9ebef;
-  --accent-foreground: #030213;
-  --destructive: #d4183d;
+  --card-foreground: #2c1622;
+  --popover: #ffffff;
+  --popover-foreground: #2c1622;
+
+  /* 品牌主色：玫瑰粉 */
+  --primary: #f03d83;
+  --primary-foreground: #ffffff;
+
+  /* 柔粉表面 */
+  --secondary: #ffe7f1;
+  --secondary-foreground: #b21e5b;
+  --muted: #fbeaf2;
+  --muted-foreground: #9b6f84;
+  --accent: #ffe0ee;
+  --accent-foreground: #b21e5b;
+
+  --destructive: #e11d48;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.1);
+
+  --border: #f7d6e6;
   --input: transparent;
-  --input-background: #f3f3f5;
-  --switch-background: #cbced4;
+  --input-background: #fdeef6;
+  --switch-background: #f3c6db;
+
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #030213;
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --ring: #f56fa6;
+
+  /* 数据图表：粉 → 紫科技色谱 */
+  --chart-1: #f03d83;
+  --chart-2: #7b5cff;
+  --chart-3: #fb6ba0;
+  --chart-4: #b21e5b;
+  --chart-5: #b9a7ff;
+
+  --radius: 0.75rem;
+
+  /* 侧栏：近白微粉 */
+  --sidebar: #fffafc;
+  --sidebar-foreground: #2c1622;
+  --sidebar-primary: #f03d83;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ffe7f1;
+  --sidebar-accent-foreground: #b21e5b;
+  --sidebar-border: #f7d6e6;
+  --sidebar-ring: #f56fa6;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --background: #160a12;
+  --foreground: #ffe9f3;
+  --card: #1e0e18;
+  --card-foreground: #ffe9f3;
+  --popover: #1e0e18;
+  --popover-foreground: #ffe9f3;
+  --primary: #ff5da2;
+  --primary-foreground: #1a0712;
+  --secondary: #2a1320;
+  --secondary-foreground: #ffd6e7;
+  --muted: #2a1320;
+  --muted-foreground: #c79bb0;
+  --accent: #341829;
+  --accent-foreground: #ffd6e7;
+  --destructive: #ff5a78;
+  --destructive-foreground: #1a0712;
+  --border: #3a1f2e;
+  --input: #3a1f2e;
+  --ring: #ff7eb3;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --chart-1: #ff5da2;
+  --chart-2: #a78bff;
+  --chart-3: #ff8fbb;
+  --chart-4: #ff7eb3;
+  --chart-5: #c9b6ff;
+  --sidebar: #1a0c15;
+  --sidebar-foreground: #ffe9f3;
+  --sidebar-primary: #ff5da2;
+  --sidebar-primary-foreground: #1a0712;
+  --sidebar-accent: #2a1320;
+  --sidebar-accent-foreground: #ffd6e7;
+  --sidebar-border: #3a1f2e;
+  --sidebar-ring: #ff7eb3;
+}
+
+/* 品牌 / 科技扩展 token —— 生成 bg-bloom-500 / text-tech / from-glow-pink 等工具类。
+ * 命名用 `bloom`（玫瑰绽放）以避开 landing-editor 的蓝色 `brand` 命名空间。 */
+@theme {
+  --color-bloom-50: #fff1f7;
+  --color-bloom-100: #ffe3ef;
+  --color-bloom-200: #ffc9de;
+  --color-bloom-300: #ff9dc1;
+  --color-bloom-400: #fb6ba0;
+  --color-bloom-500: #f03d83;
+  --color-bloom-600: #d61e69;
+  --color-bloom-700: #b21e5b;
+
+  /* 「智能 / AI」冷调点缀：电光紫 */
+  --color-tech: #7b5cff;
+  --color-tech-soft: #b9a7ff;
+
+  /* 光晕（径向辉光用，配 /透明度 修饰符） */
+  --color-glow-pink: #ff6fb0;
+  --color-glow-violet: #8b6dff;
+  --color-glow-rose: #ffa6c9;
 }
 
 @theme inline {
+  --font-sans: var(--font-body, ui-sans-serif, system-ui, sans-serif);
+  --font-display: var(--font-head, var(--font-body, ui-sans-serif, sans-serif));
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -126,6 +176,7 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
   }
 
   /**
@@ -138,24 +189,28 @@
   }
 
   h1 {
+    font-family: var(--font-display);
     font-size: var(--text-2xl);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h2 {
+    font-family: var(--font-display);
     font-size: var(--text-xl);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h3 {
+    font-family: var(--font-display);
     font-size: var(--text-lg);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h4 {
+    font-family: var(--font-display);
     font-size: var(--text-base);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;

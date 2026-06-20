@@ -67,13 +67,13 @@ export function UploadZone({ onUploaded, compact = false, accept = "all" }: Uplo
         <button
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex items-center gap-2 h-9 px-4 text-sm rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 h-9 px-4 text-sm rounded-lg bg-gradient-to-r from-bloom-500 to-tech text-white hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           <Upload className="w-4 h-4" />
           {uploading ? "上传中…" : "上传素材"}
         </button>
       )}
-      {error && <p className="text-xs text-rose-400 mt-1">{error}</p>}
+      {error && <p className="text-xs text-destructive mt-1">{error}</p>}
     </div>
   );
 }

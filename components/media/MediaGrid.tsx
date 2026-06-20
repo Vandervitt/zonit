@@ -37,12 +37,12 @@ export function MediaGrid({
   const emptyClass =
     variant === "dark"
       ? "text-center py-8 text-zinc-500 text-sm"
-      : "text-center py-12 text-slate-400 text-sm";
+      : "text-center py-12 text-muted-foreground text-sm";
 
-  const cardBg = variant === "dark" ? "bg-zinc-800" : "bg-slate-200";
-  const videoBg = variant === "dark" ? "bg-zinc-900" : "bg-slate-800";
-  const borderSelected = "border-blue-500";
-  const borderHover = variant === "dark" ? "hover:border-zinc-500" : "hover:border-slate-400";
+  const cardBg = variant === "dark" ? "bg-zinc-800" : "bg-bloom-100";
+  const videoBg = variant === "dark" ? "bg-zinc-900" : "bg-foreground";
+  const borderSelected = "border-bloom-500";
+  const borderHover = variant === "dark" ? "hover:border-zinc-500" : "hover:border-bloom-300";
 
   if (items.length === 0) {
     return (
@@ -71,8 +71,8 @@ export function MediaGrid({
               />
             ) : (
               <div className={`w-full h-full ${videoBg} flex flex-col items-center justify-center gap-1`}>
-                <PlayCircle className="w-7 h-7 text-slate-400" />
-                <span className="text-[10px] text-slate-500 px-1 text-center truncate w-full leading-tight">
+                <PlayCircle className="w-7 h-7 text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground px-1 text-center truncate w-full leading-tight">
                   {item.filename}
                 </span>
               </div>
@@ -82,7 +82,7 @@ export function MediaGrid({
             <p className="text-[10px] text-white truncate">{item.filename}</p>
           </div>
           <button
-            className="absolute top-1 right-1 w-5 h-5 rounded bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-600 disabled:opacity-30"
+            className="absolute top-1 right-1 w-5 h-5 rounded bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive disabled:opacity-30"
             onClick={(e) => handleDelete(e, item)}
             disabled={deletingId === item.id}
             title="删除"

@@ -104,7 +104,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
             <p className="text-sm text-muted-foreground">
               域名已添加。请前往你的 DNS 服务商（Cloudflare）添加以下 CNAME 记录，Vercel 将在 DNS 生效后自动签发 SSL 证书。
             </p>
-            <div className="rounded-lg border bg-slate-50 p-4 space-y-3">
+            <div className="rounded-lg border bg-bloom-50 p-4 space-y-3">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">类型</p>
                 <p className="text-sm font-mono">CNAME</p>
@@ -117,7 +117,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
                 <p className="text-xs text-muted-foreground mb-1">值</p>
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-mono flex-1">{cname}</p>
-                  <button onClick={handleCopy} className="text-slate-400 hover:text-slate-600">
+                  <button onClick={handleCopy} className="text-muted-foreground hover:text-muted-foreground">
                     {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>

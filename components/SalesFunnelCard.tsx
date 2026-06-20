@@ -27,7 +27,7 @@ const chartData = [
 const metrics = [
   { value: "123%", label: "ROI", color: "#e8315a" },
   { value: "5%", label: "Click-Through Rate", color: "#f59e0b" },
-  { value: "450K", label: "Daily Active Users", color: "#6366f1" },
+  { value: "450K", label: "Daily Active Users", color: "#7b5cff" },
 ];
 
 export function SalesFunnelCard() {
@@ -35,8 +35,8 @@ export function SalesFunnelCard() {
     <div className="bg-white rounded-2xl p-5 flex flex-col gap-4 shadow-sm w-full">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-slate-800">Sales Funnel Analytics</h3>
-        <button className="flex items-center gap-1 text-sm text-slate-400 border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors">
+        <h3 className="text-foreground">Sales Funnel Analytics</h3>
+        <button className="flex items-center gap-1 text-sm text-muted-foreground border border-bloom-100 rounded-lg px-3 py-1.5 hover:bg-bloom-50 transition-colors">
           This week <ChevronDown className="w-3 h-3" />
         </button>
       </div>
@@ -45,8 +45,8 @@ export function SalesFunnelCard() {
       <div className="grid grid-cols-4 gap-2">
         {funnelData.map((item) => (
           <div key={item.name}>
-            <p className="text-slate-800 text-xl">{(item.value / 1000).toFixed(1).replace('.0','') + 'k'}</p>
-            <p className="text-xs text-slate-400 mt-0.5">{item.name}</p>
+            <p className="text-foreground text-xl">{(item.value / 1000).toFixed(1).replace('.0','') + 'k'}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{item.name}</p>
           </div>
         ))}
       </div>
@@ -60,8 +60,8 @@ export function SalesFunnelCard() {
           >
             <defs>
               <linearGradient id="funnelGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#93c5fd" stopOpacity={0.5} />
-                <stop offset="95%" stopColor="#bfdbfe" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#fbbad6" stopOpacity={0.5} />
+                <stop offset="95%" stopColor="#ffe3ef" stopOpacity={0.05} />
               </linearGradient>
             </defs>
             <XAxis dataKey="x" hide />
@@ -79,7 +79,7 @@ export function SalesFunnelCard() {
             <Area
               type="monotone"
               dataKey="y"
-              stroke="#3b82f6"
+              stroke="#f03d83"
               strokeWidth={2.5}
               fill="url(#funnelGradient)"
               dot={false}
@@ -90,7 +90,7 @@ export function SalesFunnelCard() {
         {/* Percentage labels at bottom */}
         <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1">
           {funnelData.map((item) => (
-            <span key={item.name} className="text-xs text-slate-400">
+            <span key={item.name} className="text-xs text-muted-foreground">
               {item.pct}
             </span>
           ))}
@@ -98,19 +98,19 @@ export function SalesFunnelCard() {
       </div>
 
       {/* Bottom metrics */}
-      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-100">
+      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-bloom-100">
         {metrics.map((m) => (
           <div key={m.label} className="flex flex-col gap-1 p-2">
             <div className="flex items-center justify-between">
-              <span className="text-slate-800 text-lg">{m.value}</span>
-              <MoreHorizontal className="w-4 h-4 text-slate-300" />
+              <span className="text-foreground text-lg">{m.value}</span>
+              <MoreHorizontal className="w-4 h-4 text-muted-foreground/50" />
             </div>
             <div className="flex items-center gap-1.5">
               <span
                 className="w-2 h-2 rounded-full"
                 style={{ backgroundColor: m.color }}
               />
-              <span className="text-xs text-slate-400">{m.label}</span>
+              <span className="text-xs text-muted-foreground">{m.label}</span>
             </div>
           </div>
         ))}
