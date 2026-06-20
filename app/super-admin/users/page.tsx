@@ -1,19 +1,9 @@
 import pool from "@/lib/db";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import type { PlanId } from "@/lib/plans";
-import { MoreVertical, Search, Mail, Clock, CalendarCheck } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { InviteUserDialog } from "@/components/admin/InviteUserDialog";
 import { UserRole } from "@/lib/constants";
+import { Typography, Tag, Card } from "antd";
+import { SuperAdminUsersClient } from "./_client";
 
 async function getUsers() {
   const result = await pool.query(`
@@ -28,97 +18,17 @@ async function getUsers() {
 export default async function AdminUsersPage() {
   const users = await getUsers();
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">User Management</h1>
-          <p className="text-muted-foreground mt-1">Manage platform users and their subscription plans.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input 
-              placeholder="Search users..." 
-              className="pl-9 w-64 bg-white border-aqua-100"
-            />
-          </div>
-          <InviteUserDialog />
-        </div>
-      </div>
+  // 把需要客户端组件渲染的数据序列化传递
+  const tableRows = users.map((u) => ({
+    key: u.id as string,
+    id: u.id as string,
+    name: (u.name ?? "") as string,
+    email: u.email as string,
+    plan: u.plan as PlanId,
+    role: u.role as string,
+    pageCount: Number(u.page_count),
+    invitedAt: u.invited_at ? new Date(u.invited_at).toLocaleString("zh-CN") : null,
+  }));
 
-      <div className="bg-white rounded-xl shadow-sm border border-aqua-100 overflow-hidden">
-        <Table>
-          <TableHeader className="bg-aqua-50">
-            <TableRow>
-              <TableHead className="font-semibold text-foreground">User</TableHead>
-              <TableHead className="font-semibold text-foreground">Plan</TableHead>
-              <TableHead className="font-semibold text-foreground text-center">Pages</TableHead>
-              <TableHead className="font-semibold text-foreground">Trial Status</TableHead>
-              <TableHead className="font-semibold text-foreground">Role</TableHead>
-              <TableHead className="w-10"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user.id} className="hover:bg-aqua-50/50 transition-colors">
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-aqua-50 flex items-center justify-center text-muted-foreground font-medium">
-                      {user.name?.[0]?.toUpperCase() ?? user.email?.[0]?.toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{user.name || 'N/A'}</p>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Mail className="w-3 h-3" />
-                        {user.email}
-                      </div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <PlanBadge plan={user.plan as PlanId} />
-                </TableCell>
-                <TableCell className="text-center">
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-aqua-50 text-xs font-bold text-foreground/80 border border-aqua-100">
-                    {user.page_count}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  {user.trial_expires_at ? (
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600">
-                        <Clock className="w-3.5 h-3.5" />
-                        到期: {new Date(user.trial_expires_at).toLocaleDateString()}
-                      </div>
-                      {user.invited_at && (
-                        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                          <CalendarCheck className="w-3 h-3" />
-                          已受邀加入
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                    user.role === UserRole.SUPER_ADMIN ? 'bg-aqua-100 text-aqua-700' : 'bg-aqua-50 text-muted-foreground'
-                  }`}>
-                    {user.role}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
+  return <SuperAdminUsersClient rows={tableRows} />;
 }
