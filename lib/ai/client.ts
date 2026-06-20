@@ -22,12 +22,67 @@ export function resetAiClient() {
 }
 
 /**
- * provider 解析：默认 OpenAI；AI_PROVIDER=qwen 走通义千问 DashScope 兼容模式。
- * - OpenAI 支持严格 json_schema 结构化输出；
- * - Qwen 兼容端点用 json_object（JSON 模式）。本管线对结构是防御式的
- *   （mergeSlots 丢弃未知槽位 + checkDraftCompliance 复核），不依赖 API 层强制 schema。
+ * 通用 LLM 适配器配置。
+ *
+ * 适配任意「OpenAI 兼容」端点（同 /chat/completions 协议）：OpenAI、通义 Qwen/DashScope、
+ * Gemini 兼容层、DeepSeek、Moonshot、OpenRouter、本地 Ollama/vLLM、Vercel AI Gateway 等。
+ *
+ * 解析优先级（高 → 低）：
+ *   1) 通用 env：AI_BASE_URL / AI_API_KEY / AI_MODEL / AI_JSON_MODE —— 接任意源零代码改动；
+ *   2) 预设：AI_PROVIDER=<name> 填好该源的默认 baseURL / model / json 模式；
+ *   3) 向后兼容：OPENAI_API_KEY / OPENAI_MODEL / OPENAI_BASE_URL（现网不受影响）。
+ *
+ * json 模式：OpenAI 支持严格 json_schema；多数兼容源用 json_object（JSON 模式）。
+ * 本管线对结构是防御式的（mergeSlots 丢弃未知槽位 + checkDraftCompliance 复核），
+ * 不依赖 API 层强制 schema，故 json_object 同样可用。
  */
-type ProviderId = "openai" | "qwen";
+type JsonMode = "json_schema" | "json_object";
+
+interface ProviderPreset {
+  baseURL?: string;
+  defaultModel: string;
+  jsonMode: JsonMode;
+  /** 该预设读取专属 API key 的 env 名（按序回退）。 */
+  apiKeyEnvs: string[];
+}
+
+const PRESETS: Record<string, ProviderPreset> = {
+  openai: {
+    defaultModel: "gpt-4o-mini",
+    jsonMode: "json_schema",
+    apiKeyEnvs: ["OPENAI_API_KEY"],
+  },
+  qwen: {
+    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    defaultModel: "qwen-plus",
+    jsonMode: "json_object",
+    apiKeyEnvs: ["DASHSCOPE_API_KEY", "QWEN_API_KEY"],
+  },
+  gemini: {
+    baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+    defaultModel: "gemini-2.0-flash",
+    jsonMode: "json_object",
+    apiKeyEnvs: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
+  },
+  deepseek: {
+    baseURL: "https://api.deepseek.com/v1",
+    defaultModel: "deepseek-chat",
+    jsonMode: "json_object",
+    apiKeyEnvs: ["DEEPSEEK_API_KEY"],
+  },
+  moonshot: {
+    baseURL: "https://api.moonshot.cn/v1",
+    defaultModel: "moonshot-v1-8k",
+    jsonMode: "json_object",
+    apiKeyEnvs: ["MOONSHOT_API_KEY"],
+  },
+  openrouter: {
+    baseURL: "https://openrouter.ai/api/v1",
+    defaultModel: "openai/gpt-4o-mini",
+    jsonMode: "json_object",
+    apiKeyEnvs: ["OPENROUTER_API_KEY"],
+  },
+};
 
 interface ProviderConfig {
   apiKey: string | undefined;
@@ -36,23 +91,30 @@ interface ProviderConfig {
   strictJsonSchema: boolean;
 }
 
-export function resolveProvider(): ProviderConfig {
-  const provider = (process.env.AI_PROVIDER ?? "openai").toLowerCase() as ProviderId;
-  if (provider === "qwen") {
-    return {
-      apiKey: process.env.DASHSCOPE_API_KEY ?? process.env.QWEN_API_KEY,
-      baseURL:
-        process.env.QWEN_BASE_URL ??
-        "https://dashscope.aliyuncs.com/compatible-mode/v1",
-      model: process.env.QWEN_MODEL ?? "qwen-plus",
-      strictJsonSchema: false,
-    };
+function firstEnv(names: string[]): string | undefined {
+  for (const n of names) {
+    const v = process.env[n];
+    if (v) return v;
   }
+  return undefined;
+}
+
+export function resolveProvider(): ProviderConfig {
+  const providerId = (process.env.AI_PROVIDER ?? "openai").toLowerCase();
+  const preset = PRESETS[providerId] ?? PRESETS.openai;
+  const isOpenAi = preset === PRESETS.openai;
+
+  const jsonMode = (process.env.AI_JSON_MODE as JsonMode | undefined) ?? preset.jsonMode;
+
+  // 向后兼容的 OPENAI_* 只作用于 openai 预设，避免泄漏到其它源（如 qwen 端点用了 OpenAI key）。
+  const legacyBaseURL = isOpenAi ? process.env.OPENAI_BASE_URL : undefined;
+  const legacyModel = isOpenAi ? process.env.OPENAI_MODEL : undefined;
+
   return {
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: process.env.OPENAI_BASE_URL, // 可选；未设时走官方端点
-    model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
-    strictJsonSchema: true,
+    apiKey: process.env.AI_API_KEY ?? firstEnv(preset.apiKeyEnvs),
+    baseURL: process.env.AI_BASE_URL ?? legacyBaseURL ?? preset.baseURL,
+    model: process.env.AI_MODEL ?? legacyModel ?? preset.defaultModel,
+    strictJsonSchema: jsonMode === "json_schema",
   };
 }
 
