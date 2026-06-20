@@ -3,16 +3,17 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { ExternalLink, Check, ArrowRight, Settings } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Typography, Card, Descriptions, Button, Space } from "antd";
+import { CheckOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PLANS, PLAN_ORDER } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 import { Routes, ApiRoutes } from "@/lib/constants";
 import { fetcher, jsonRequest } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
+
+const { Title, Text } = Typography;
 
 function SuccessToast() {
   const searchParams = useSearchParams();
@@ -64,113 +65,127 @@ export default function BillingPage() {
 
   const portalLoading = portal.isMutating;
 
+  const currentPlanDescItems = [
+    {
+      key: "plan",
+      label: "套餐",
+      children: (
+        <Space>
+          <PlanBadge plan={currentPlanId} />
+          <Text strong>{currentPlan.priceText}</Text>
+        </Space>
+      ),
+    },
+    {
+      key: "pages",
+      label: "落地页上限",
+      children: currentPlan.landingPagesLimit === Infinity ? "无限" : `${currentPlan.landingPagesLimit} 张`,
+    },
+    {
+      key: "domains",
+      label: "域名上限",
+      children:
+        currentPlan.domainsLimit === 0
+          ? "不支持"
+          : currentPlan.domainsLimit === Infinity
+          ? "无限"
+          : `${currentPlan.domainsLimit} 个`,
+    },
+    {
+      key: "watermark",
+      label: "品牌水印",
+      children: currentPlan.hasWatermark ? "有" : "无",
+    },
+  ];
+
   return (
-    <main className="flex flex-col w-full px-6 py-6 max-w-3xl">
-      <Suspense><SuccessToast /></Suspense>
-      <div className="mb-6">
-        <h1 className="text-foreground text-2xl">Billing</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">管理你的订阅套餐</p>
+    <main style={{ maxWidth: 720, padding: "24px" }}>
+      <Suspense>
+        <SuccessToast />
+      </Suspense>
+
+      <div style={{ marginBottom: 24 }}>
+        <Title level={3} style={{ marginBottom: 4 }}>
+          账户与计费
+        </Title>
+        <Text type="secondary">管理你的订阅套餐</Text>
       </div>
 
-      <div className="rounded-2xl border border-aqua-100 bg-white p-6 mb-6">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">当前套餐</p>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <PlanBadge plan={currentPlanId} className="text-sm px-3 py-1" />
-            <span className="text-2xl font-bold text-foreground">{currentPlan.priceText}</span>
-          </div>
-          <div className="flex items-center gap-2">
+      <Card
+        title="当前套餐"
+        style={{ marginBottom: 24 }}
+        extra={
+          <Space>
             {currentPlanId !== "free" && (
               <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
+                loading={portalLoading}
                 onClick={() => void portal.trigger()}
-                disabled={portalLoading}
               >
-                <Settings className="w-3.5 h-3.5" />
-                {portalLoading ? "加载中…" : "管理订阅"}
+                管理订阅
               </Button>
             )}
-            <Link
+            <Button
+              type="link"
               href={Routes.Pricing}
               target="_blank"
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-muted-foreground transition-colors"
             >
-              查看完整对比 <ExternalLink className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-aqua-100 grid grid-cols-3 gap-4 text-sm">
-          <div>
-            <p className="text-muted-foreground text-xs mb-1">落地页上限</p>
-            <p className="text-foreground/80 font-medium">
-              {currentPlan.landingPagesLimit === Infinity ? "无限" : `${currentPlan.landingPagesLimit} 张`}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-xs mb-1">域名上限</p>
-            <p className="text-foreground/80 font-medium">
-              {currentPlan.domainsLimit === 0
-                ? "不支持"
-                : currentPlan.domainsLimit === Infinity
-                ? "无限"
-                : `${currentPlan.domainsLimit} 个`}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-xs mb-1">品牌水印</p>
-            <p className="text-foreground/80 font-medium">{currentPlan.hasWatermark ? "有" : "无"}</p>
-          </div>
-        </div>
-      </div>
+              查看完整对比
+            </Button>
+          </Space>
+        }
+      >
+        <Descriptions items={currentPlanDescItems} column={1} size="small" />
+      </Card>
 
       {currentIdx < PLAN_ORDER.length - 1 && (
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-muted-foreground">可升级套餐</p>
-          {PLAN_ORDER.slice(currentIdx + 1).map(planId => {
-            const plan = PLANS[planId];
-            const highlights = plan.highlights;
-            const isLoading = loadingPlan === planId;
-            return (
-              <div
-                key={planId}
-                className="rounded-2xl border border-aqua-100 bg-white p-5 flex items-start justify-between gap-4"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <PlanBadge plan={planId} />
-                    <span className="text-foreground/80 font-semibold">{plan.priceText}</span>
+        <div>
+          <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
+            可升级套餐
+          </Text>
+          <Space direction="vertical" style={{ width: "100%" }} size={12}>
+            {PLAN_ORDER.slice(currentIdx + 1).map((planId) => {
+              const plan = PLANS[planId];
+              const isLoading = loadingPlan === planId;
+              return (
+                <Card key={planId}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+                    <div style={{ flex: 1 }}>
+                      <Space style={{ marginBottom: 8 }}>
+                        <PlanBadge plan={planId} />
+                        <Text strong>{plan.priceText}</Text>
+                      </Space>
+                      <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                        {plan.highlights.map((h) => (
+                          <li key={h} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                            <CheckOutlined style={{ color: "#10b981", fontSize: 12, flexShrink: 0 }} />
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              {h}
+                            </Text>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <Button
+                      type="primary"
+                      loading={isLoading}
+                      disabled={!!loadingPlan && !isLoading}
+                      onClick={() => handleUpgrade(planId)}
+                      style={{ flexShrink: 0 }}
+                    >
+                      升级
+                    </Button>
                   </div>
-                  <ul className="space-y-1">
-                    {highlights.map(h => (
-                      <li key={h} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                        {h}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <Button
-                  size="sm"
-                  variant={planId === "pro" ? "default" : "outline"}
-                  className="shrink-0 gap-1"
-                  onClick={() => handleUpgrade(planId)}
-                  disabled={!!loadingPlan}
-                >
-                  {isLoading ? "跳转中…" : <><span>升级</span> <ArrowRight className="w-3.5 h-3.5" /></>}
-                </Button>
-              </div>
-            );
-          })}
+                </Card>
+              );
+            })}
+          </Space>
         </div>
       )}
 
       {currentPlanId !== "free" && (
-        <p className="mt-6 text-xs text-muted-foreground text-center">
+        <Text type="secondary" style={{ display: "block", marginTop: 24, textAlign: "center", fontSize: 12 }}>
           如需取消订阅，请通过 管理订阅 进入 Lemon Squeezy 操作
-        </p>
+        </Text>
       )}
     </main>
   );

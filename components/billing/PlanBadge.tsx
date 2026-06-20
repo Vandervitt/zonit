@@ -1,31 +1,20 @@
 "use client";
 
-import { cn } from "@/components/ui/utils";
+import { Tag } from "antd";
 import { PLANS } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 
 const COLOR_MAP: Record<PlanId, string> = {
-  free: "bg-aqua-50 text-muted-foreground",
-  starter: "bg-tech-soft/20 text-tech",
-  pro: "bg-aqua-50 text-aqua-600",
-  agency: "bg-amber-50 text-amber-600",
+  free: "default",
+  starter: "blue",
+  pro: "cyan",
+  agency: "gold",
 };
 
-interface Props {
-  plan: PlanId;
-  className?: string;
-}
-
-export function PlanBadge({ plan, className }: Props) {
+export function PlanBadge({ plan, className }: { plan: PlanId; className?: string }) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide",
-        COLOR_MAP[plan],
-        className,
-      )}
-    >
+    <Tag color={COLOR_MAP[plan]} className={className}>
       {PLANS[plan].label}
-    </span>
+    </Tag>
   );
 }
