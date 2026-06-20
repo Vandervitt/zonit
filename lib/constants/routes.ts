@@ -8,12 +8,16 @@ export enum Routes {
   Billing = '/admin/billing',
   Pricing = '/pricing',
   LandingPages = '/admin/landing-pages',
+  Settings = '/admin/settings',
+  Help = '/admin/help',
   SuperAdmin = '/super-admin',
 }
 
 export enum ApiRoutes {
   Domains = '/api/domains',
   Media = '/api/media',
+  LandingPages = '/api/landing-pages',
+  AiUsage = '/api/ai/usage',
   Templates = '/api/templates',
   Register = '/api/register',
   BillingCheckout = '/api/billing/checkout',
