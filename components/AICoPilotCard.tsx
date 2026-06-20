@@ -51,7 +51,7 @@ export function AICoPilotCard() {
         <p className="text-xs text-muted-foreground">Customer loyalty grew by 8%</p>
 
         {/* Mini Bar Chart */}
-        <div className="mt-3 bg-bloom-50 rounded-xl p-3">
+        <div className="mt-3 bg-aqua-50 rounded-xl p-3">
           <p className="text-xs text-muted-foreground mb-2">Retention · 2025</p>
           <div className="h-16">
             <ResponsiveContainer width="100%" height="100%">

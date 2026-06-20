@@ -67,7 +67,7 @@ export function UploadZone({ onUploaded, compact = false, accept = "all" }: Uplo
         <button
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex items-center gap-2 h-9 px-4 text-sm rounded-lg bg-gradient-to-r from-bloom-500 to-tech text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="flex items-center gap-2 h-9 px-4 text-sm rounded-lg bg-gradient-to-r from-aqua-500 to-tech text-white hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           <Upload className="w-4 h-4" />
           {uploading ? "上传中…" : "上传素材"}

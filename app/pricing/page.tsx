@@ -2,9 +2,9 @@ import { PlanComparison } from "@/components/billing/PlanComparison";
 
 export default function PricingPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-bloom-50 via-background to-background py-20 px-4">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-aqua-50 via-background to-background py-20 px-4">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 left-1/2 h-96 w-[40rem] -translate-x-1/2 rounded-full bg-glow-pink/15 blur-3xl" />
+        <div className="absolute -top-32 left-1/2 h-96 w-[40rem] -translate-x-1/2 rounded-full bg-glow-1/15 blur-3xl" />
       </div>
       <div className="relative max-w-5xl mx-auto">
         <div className="text-center mb-14">

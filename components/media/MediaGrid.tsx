@@ -39,10 +39,10 @@ export function MediaGrid({
       ? "text-center py-8 text-zinc-500 text-sm"
       : "text-center py-12 text-muted-foreground text-sm";
 
-  const cardBg = variant === "dark" ? "bg-zinc-800" : "bg-bloom-100";
+  const cardBg = variant === "dark" ? "bg-zinc-800" : "bg-aqua-100";
   const videoBg = variant === "dark" ? "bg-zinc-900" : "bg-foreground";
-  const borderSelected = "border-bloom-500";
-  const borderHover = variant === "dark" ? "hover:border-zinc-500" : "hover:border-bloom-300";
+  const borderSelected = "border-aqua-500";
+  const borderHover = variant === "dark" ? "hover:border-zinc-500" : "hover:border-aqua-300";
 
   if (items.length === 0) {
     return (

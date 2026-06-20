@@ -62,8 +62,8 @@ export default async function AdminDashboard() {
       value: stats.activeSubs,
       icon: CreditCard,
       description: "Paid plans",
-      color: "text-bloom-600",
-      bg: "bg-bloom-50"
+      color: "text-aqua-600",
+      bg: "bg-aqua-50"
     },
     {
       title: "Conversion Rate",
@@ -110,9 +110,9 @@ export default async function AdminDashboard() {
           <CardContent>
             <div className="space-y-4">
               {stats.latestPages.map((site) => (
-                <div key={site.id} className="flex items-center justify-between p-3 rounded-xl bg-bloom-50 border border-bloom-100">
+                <div key={site.id} className="flex items-center justify-between p-3 rounded-xl bg-aqua-50 border border-aqua-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center border border-bloom-100 text-lg">
+                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center border border-aqua-100 text-lg">
                       🎨
                     </div>
                     <div>
@@ -122,7 +122,7 @@ export default async function AdminDashboard() {
                   </div>
                   <div className="text-right">
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase ${
-                      site.status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-bloom-100 text-muted-foreground'
+                      site.status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-aqua-100 text-muted-foreground'
                     }`}>
                       {site.status}
                     </span>
@@ -136,7 +136,7 @@ export default async function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-lg shadow-bloom-500/20 flex flex-col justify-center items-center p-8 text-center bg-gradient-to-br from-bloom-500 to-tech text-white">
+        <Card className="border-none shadow-lg shadow-aqua-500/20 flex flex-col justify-center items-center p-8 text-center bg-gradient-to-br from-aqua-500 to-tech text-white">
           <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-4">
             <Plus className="w-8 h-8" />
           </div>
@@ -144,7 +144,7 @@ export default async function AdminDashboard() {
           <p className="text-white/80 mt-2 mb-6 max-w-[280px]">
             You can extend the admin panel to manage templates, blocks, or global system settings.
           </p>
-          <button className="px-6 py-2.5 bg-white text-bloom-600 rounded-lg font-semibold text-sm hover:bg-bloom-50 transition-colors">
+          <button className="px-6 py-2.5 bg-white text-aqua-600 rounded-lg font-semibold text-sm hover:bg-aqua-50 transition-colors">
             Read Docs
           </button>
         </Card>

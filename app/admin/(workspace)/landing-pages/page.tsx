@@ -32,7 +32,7 @@ export default function LandingPagesPage() {
     <div className="flex-1 p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-foreground">落地页</h1>
-        <Link href="/admin/editor" className="rounded-lg bg-gradient-to-r from-bloom-500 to-tech px-4 py-2 text-sm text-white hover:opacity-90 transition-opacity">
+        <Link href="/admin/editor" className="rounded-lg bg-gradient-to-r from-aqua-500 to-tech px-4 py-2 text-sm text-white hover:opacity-90 transition-opacity">
           + 新建
         </Link>
       </div>
@@ -40,25 +40,25 @@ export default function LandingPagesPage() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">加载中…</p>
       ) : !data || data.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-bloom-100 p-12 text-center">
+        <div className="rounded-2xl border border-dashed border-aqua-100 p-12 text-center">
           <p className="text-muted-foreground">还没有落地页</p>
           <Link href="/admin/editor" className="mt-3 inline-block rounded-lg bg-foreground px-4 py-2 text-sm text-white">从模板新建</Link>
         </div>
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.map((p) => (
-            <li key={p.id} className="rounded-2xl border border-bloom-100 bg-white p-5 shadow-sm">
+            <li key={p.id} className="rounded-2xl border border-aqua-100 bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="truncate font-medium text-foreground">{p.name}</p>
-                <span className={`rounded-full px-2 py-0.5 text-xs ${p.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-bloom-50 text-muted-foreground"}`}>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${p.status === "published" ? "bg-emerald-100 text-emerald-700" : "bg-aqua-50 text-muted-foreground"}`}>
                   {p.status === "published" ? "已发布" : "草稿"}
                 </span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">更新于 {new Date(p.updated_at).toLocaleString()}</p>
               <div className="mt-4 flex flex-wrap gap-2 text-sm">
-                <button onClick={() => router.push(landingEditorPath(p.id))} className="rounded-md border border-bloom-100 px-3 py-1.5 text-foreground/80 hover:bg-bloom-50">编辑</button>
+                <button onClick={() => router.push(landingEditorPath(p.id))} className="rounded-md border border-aqua-100 px-3 py-1.5 text-foreground/80 hover:bg-aqua-50">编辑</button>
                 {p.status === "published" && (
-                  <button onClick={() => unpublish(p.id)} className="rounded-md border border-bloom-100 px-3 py-1.5 text-foreground/80 hover:bg-bloom-50">取消发布</button>
+                  <button onClick={() => unpublish(p.id)} className="rounded-md border border-aqua-100 px-3 py-1.5 text-foreground/80 hover:bg-aqua-50">取消发布</button>
                 )}
                 <button onClick={() => remove(p.id)} className="rounded-md border border-red-200 px-3 py-1.5 text-red-600 hover:bg-red-50">删除</button>
               </div>

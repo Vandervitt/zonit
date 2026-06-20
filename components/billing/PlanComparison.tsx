@@ -37,12 +37,12 @@ export function PlanComparison({
               key={planId}
               className={`rounded-2xl border p-6 flex flex-col gap-4 ${
                 plan.highlight
-                  ? "border-bloom-300 bg-bloom-50 shadow-lg shadow-bloom-100"
-                  : "border-bloom-100 bg-white"
+                  ? "border-aqua-300 bg-aqua-50 shadow-lg shadow-aqua-100"
+                  : "border-aqua-100 bg-white"
               }`}
             >
               {plan.highlight && (
-                <span className="self-start text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-bloom-600 text-white">
+                <span className="self-start text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-aqua-600 text-white">
                   最受欢迎
                 </span>
               )}
@@ -57,8 +57,8 @@ export function PlanComparison({
                 href={c.href}
                 className={`text-center text-sm font-medium py-2 rounded-xl transition-colors ${
                   plan.highlight
-                    ? "bg-bloom-600 text-white hover:bg-bloom-700"
-                    : "bg-bloom-50 text-foreground/80 hover:bg-bloom-100"
+                    ? "bg-aqua-600 text-white hover:bg-aqua-700"
+                    : "bg-aqua-50 text-foreground/80 hover:bg-aqua-100"
                 }`}
               >
                 {c.label}
@@ -69,14 +69,14 @@ export function PlanComparison({
       </div>
 
       {showTable && (
-        <div className="rounded-2xl border border-bloom-100 overflow-hidden">
+        <div className="rounded-2xl border border-aqua-100 overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-bloom-100 bg-bloom-50">
+              <tr className="border-b border-aqua-100 bg-aqua-50">
                 <th className="text-left px-6 py-4 text-muted-foreground font-medium w-1/3">功能</th>
                 {PLAN_ORDER.map((planId) => (
                   <th key={planId} className={`text-center px-4 py-4 font-semibold ${
-                    PLANS[planId].highlight ? "text-bloom-700" : "text-foreground/80"
+                    PLANS[planId].highlight ? "text-aqua-700" : "text-foreground/80"
                   }`}>
                     {PLANS[planId].label}
                   </th>
@@ -85,7 +85,7 @@ export function PlanComparison({
             </thead>
             <tbody>
               {PLAN_FEATURE_ROWS.map((row, i) => (
-                <tr key={row.label} className={i % 2 === 0 ? "bg-white" : "bg-bloom-50/50"}>
+                <tr key={row.label} className={i % 2 === 0 ? "bg-white" : "bg-aqua-50/50"}>
                   <td className="px-6 py-3 text-muted-foreground">{row.label}</td>
                   {PLAN_ORDER.map((planId) => (
                     <td key={planId} className="px-4 py-3 text-center">

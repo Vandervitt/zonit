@@ -65,37 +65,31 @@ const FEATURES = [
     icon: LayoutTemplate,
     title: "爆款行业模板库",
     desc: "15+ 套为海外获客打磨的高转化模板，覆盖咨询、预约、留资等主流场景，持续上新。",
-    glow: "from-bloom-400/30",
   },
   {
     icon: Pencil,
     title: "可视化实时编辑",
     desc: "拖拽式区块编辑，改文案、换图片即时呈现，自动保存草稿，桌面与移动端双视图预览。",
-    glow: "from-glow-rose/35",
   },
   {
     icon: Globe,
     title: "自有品牌域名发布",
     desc: "一键发布到你自己的域名，独立品牌形象，规避平台限流，对投放审核与自然搜索更友好。",
-    glow: "from-tech/25",
   },
   {
     icon: Radar,
     title: "全矩阵像素 + 转化回传",
     desc: "Meta / TikTok / Google 像素同页并行，内建 Meta CAPI 服务端转化与 UTM 全链路归因。",
-    glow: "from-bloom-500/30",
   },
   {
     icon: ShieldCheck,
     title: "反同质化风控引擎",
     desc: "智能打散页面指纹，规避投放平台查重与封号风险，让你的广告账户跑得更稳更久。",
-    glow: "from-tech-soft/35",
   },
   {
     icon: Languages,
     title: "AI 多语言翻译",
     desc: "一键生成多语言版本，快速覆盖更多市场，让一张模板触达全球客户。",
-    glow: "from-glow-violet/30",
   },
 ];
 
@@ -107,7 +101,7 @@ const FUNNEL = [
 ];
 
 /* ------------------------------------------------------------------ *
- * 装饰背景
+ * 装饰背景（克制光感 + 细网格）
  * ------------------------------------------------------------------ */
 
 function Backdrop() {
@@ -115,25 +109,19 @@ function Backdrop() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {/* 细网格 */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_oklab,var(--color-bloom-500)_9%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklab,var(--color-bloom-500)_9%,transparent)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black,transparent_75%)]" />
-      {/* 玫瑰光晕 */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_oklab,var(--color-aqua-400)_7%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklab,var(--color-aqua-400)_7%,transparent)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_55%_at_50%_0%,black,transparent_72%)]" />
+      {/* 轻光感 */}
       <motion.div
         aria-hidden
-        className={`absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 ${glowAura("glow-pink")}`}
-        animate={reduce ? undefined : { opacity: [0.5, 0.85, 0.5], scale: [1, 1.08, 1] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        className={`absolute -top-48 left-1/2 h-[460px] w-[760px] -translate-x-1/2 ${glowAura("aqua-400")}`}
+        animate={reduce ? undefined : { opacity: [0.4, 0.6, 0.4], scale: [1, 1.06, 1] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         aria-hidden
-        className={`absolute top-24 -left-32 h-[420px] w-[420px] ${glowAura("glow-violet")}`}
-        animate={reduce ? undefined : { x: [0, 60, 0], y: [0, 30, 0] }}
-        transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        aria-hidden
-        className={`absolute top-40 -right-32 h-[420px] w-[420px] ${glowAura("glow-rose")}`}
-        animate={reduce ? undefined : { x: [0, -50, 0], y: [0, 40, 0] }}
-        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className={`absolute top-32 -right-40 h-[380px] w-[380px] ${glowAura("glow-2")}`}
+        animate={reduce ? undefined : { x: [0, -40, 0], y: [0, 36, 0] }}
+        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
       />
     </div>
   );
@@ -156,14 +144,14 @@ function SiteNav({ fonts }: { fonts: Fonts }) {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         scrolled
-          ? "border-b border-bloom-100 bg-background/80 backdrop-blur-xl"
+          ? "border-b border-border bg-background/80 backdrop-blur-xl"
           : "border-b border-transparent"
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href={Routes.Home} className="group flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-bloom-500 to-tech shadow-[0_0_24px_-4px_color-mix(in_oklab,var(--color-bloom-500)_70%,transparent)]">
-            <Zap className="h-4 w-4 text-white" strokeWidth={2.6} />
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-aqua-500 to-tech text-white shadow-sm shadow-aqua-500/30">
+            <Zap className="h-4 w-4" strokeWidth={2.6} />
           </span>
           <span className={`text-base font-bold tracking-tight text-foreground ${fonts.display}`}>
             Zap Bridge
@@ -172,19 +160,19 @@ function SiteNav({ fonts }: { fonts: Fonts }) {
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
           <Link
             href={Routes.Pricing}
-            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-bloom-600"
+            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
           >
             套餐定价
           </Link>
           <Link
             href={Routes.Login}
-            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-bloom-600"
+            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
           >
             登录
           </Link>
           <Link
             href={Routes.Register}
-            className="rounded-xl bg-gradient-to-r from-bloom-500 to-tech px-4 py-2 font-medium text-white shadow-lg shadow-bloom-500/30 transition-transform hover:scale-[1.03]"
+            className="rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-4 py-2 font-medium text-white shadow-sm shadow-aqua-600/25 transition-all hover:brightness-105"
           >
             免费开始
           </Link>
@@ -214,7 +202,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
       >
         <motion.div variants={fadeUp} transition={{ duration: 0.6, ease: "easeOut" }}>
           <span className={`${pill} uppercase tracking-[0.18em] ${fonts.mono}`}>
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-bloom-500" />
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-aqua-500" />
             海外获客落地页引擎
           </span>
         </motion.div>
@@ -222,7 +210,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
         <motion.h1
           variants={fadeUp}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className={`mt-7 text-4xl font-extrabold leading-[1.08] tracking-tight text-foreground sm:text-6xl ${fonts.display}`}
+          className={`mt-7 text-4xl font-bold leading-[1.12] tracking-tight text-foreground sm:text-6xl ${fonts.display}`}
         >
           投放级落地页
           <br className="hidden sm:block" />
@@ -266,7 +254,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
   );
 }
 
-/* 悬浮的“编辑器实景”玻璃卡片 */
+/* 悬浮的“编辑器实景”玻璃卡片（明亮净白） */
 function EditorMock({ fonts }: { fonts: Fonts }) {
   const reduce = useReducedMotion();
   return (
@@ -276,63 +264,61 @@ function EditorMock({ fonts }: { fonts: Fonts }) {
       transition={{ duration: 0.9, delay: 0.4, ease: "easeOut" }}
       className="mx-auto mt-16 max-w-4xl [perspective:1200px]"
     >
-      <div className="relative rounded-2xl bg-gradient-to-b from-bloom-300/50 to-tech/20 p-px shadow-[0_40px_120px_-30px_color-mix(in_oklab,var(--color-bloom-500)_45%,transparent)]">
-        <div className="overflow-hidden rounded-2xl bg-white">
-          {/* 浏览器 chrome */}
-          <div className="flex items-center gap-3 border-b border-bloom-100 bg-bloom-50/60 px-4 py-3">
-            <div className="flex gap-1.5">
-              <span className="h-3 w-3 rounded-full bg-bloom-400" />
-              <span className="h-3 w-3 rounded-full bg-amber-300" />
-              <span className="h-3 w-3 rounded-full bg-emerald-300" />
+      <div className={`relative overflow-hidden ${glassCard}`}>
+        {/* 浏览器 chrome */}
+        <div className="flex items-center gap-3 border-b border-border bg-aqua-50/50 px-4 py-3">
+          <div className="flex gap-1.5">
+            <span className="h-3 w-3 rounded-full bg-rose-300" />
+            <span className="h-3 w-3 rounded-full bg-amber-300" />
+            <span className="h-3 w-3 rounded-full bg-emerald-300" />
+          </div>
+          <div
+            className={`mx-auto flex items-center gap-2 rounded-md bg-white px-3 py-1 text-xs text-muted-foreground shadow-sm ${fonts.mono}`}
+          >
+            <Lock className="h-3 w-3 text-emerald-500" />
+            yourbrand.com
+          </div>
+        </div>
+        {/* 模拟落地页 */}
+        <div className="grid gap-6 bg-muted p-8 sm:grid-cols-5 sm:p-10">
+          <div className="sm:col-span-3">
+            <div className="h-2.5 w-24 rounded-full bg-aqua-400" />
+            <div className="mt-4 h-7 w-4/5 rounded-lg bg-foreground/15" />
+            <div className="mt-2 h-7 w-3/5 rounded-lg bg-gradient-to-r from-aqua-400 to-tech/60" />
+            <div className="mt-5 space-y-2">
+              <div className="h-2.5 w-full rounded-full bg-aqua-100" />
+              <div className="h-2.5 w-11/12 rounded-full bg-aqua-100" />
+              <div className="h-2.5 w-3/4 rounded-full bg-aqua-100" />
             </div>
-            <div
-              className={`mx-auto flex items-center gap-2 rounded-md bg-bloom-50 px-3 py-1 text-xs text-muted-foreground ${fonts.mono}`}
-            >
-              <Lock className="h-3 w-3 text-emerald-500" />
-              yourbrand.com
+            <div className="mt-6 flex gap-3">
+              <div className="h-9 w-32 rounded-lg bg-gradient-to-r from-aqua-600 to-tech" />
+              <div className="h-9 w-24 rounded-lg border border-border bg-white" />
             </div>
           </div>
-          {/* 模拟落地页 */}
-          <div className="grid gap-6 p-8 sm:grid-cols-5 sm:p-10">
-            <div className="sm:col-span-3">
-              <div className="h-2.5 w-24 rounded-full bg-bloom-400" />
-              <div className="mt-4 h-7 w-4/5 rounded-lg bg-foreground/80" />
-              <div className="mt-2 h-7 w-3/5 rounded-lg bg-gradient-to-r from-bloom-400 to-tech/70" />
-              <div className="mt-5 space-y-2">
-                <div className="h-2.5 w-full rounded-full bg-bloom-100" />
-                <div className="h-2.5 w-11/12 rounded-full bg-bloom-100" />
-                <div className="h-2.5 w-3/4 rounded-full bg-bloom-100" />
-              </div>
-              <div className="mt-6 flex gap-3">
-                <div className="h-9 w-32 rounded-lg bg-gradient-to-r from-bloom-500 to-tech" />
-                <div className="h-9 w-24 rounded-lg border border-bloom-200" />
-              </div>
-            </div>
-            {/* 留资表单卡 */}
-            <div className="rounded-xl border border-bloom-100 bg-bloom-50/50 p-4 sm:col-span-2">
-              <div className="h-2.5 w-20 rounded-full bg-bloom-300" />
-              <div className="mt-4 space-y-2.5">
-                <div className="h-8 rounded-md bg-white shadow-sm" />
-                <div className="h-8 rounded-md bg-white shadow-sm" />
-                <div className="h-8 rounded-md bg-white shadow-sm" />
-                <div className="h-9 rounded-md bg-gradient-to-r from-bloom-500 to-tech" />
-              </div>
+          {/* 留资表单卡 */}
+          <div className="rounded-xl border border-border bg-white p-4 shadow-sm sm:col-span-2">
+            <div className="h-2.5 w-20 rounded-full bg-aqua-300" />
+            <div className="mt-4 space-y-2.5">
+              <div className="h-8 rounded-md bg-muted" />
+              <div className="h-8 rounded-md bg-muted" />
+              <div className="h-8 rounded-md bg-muted" />
+              <div className="h-9 rounded-md bg-gradient-to-r from-aqua-600 to-tech" />
             </div>
           </div>
         </div>
 
         {/* 浮动追踪徽标 */}
         <motion.div
-          className={`absolute -right-4 top-20 hidden items-center gap-2 rounded-xl border border-bloom-100 bg-white/90 px-3 py-2 text-xs text-foreground shadow-xl backdrop-blur sm:flex ${fonts.mono}`}
+          className={`absolute -right-4 top-20 hidden items-center gap-2 rounded-xl border border-border bg-white/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur sm:flex ${fonts.mono}`}
           animate={reduce ? undefined : { y: [0, -10, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
-          <Radar className="h-4 w-4 text-bloom-500" />
+          <Radar className="h-4 w-4 text-aqua-500" />
           Meta Pixel · 已触发
           <Check className="h-3.5 w-3.5 text-emerald-500" />
         </motion.div>
         <motion.div
-          className={`absolute -left-4 bottom-16 hidden items-center gap-2 rounded-xl border border-bloom-100 bg-white/90 px-3 py-2 text-xs text-foreground shadow-xl backdrop-blur sm:flex ${fonts.mono}`}
+          className={`absolute -left-4 bottom-16 hidden items-center gap-2 rounded-xl border border-border bg-white/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur sm:flex ${fonts.mono}`}
           animate={reduce ? undefined : { y: [0, 10, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -352,7 +338,7 @@ function LogoMarquee({ fonts }: { fonts: Fonts }) {
   const reduce = useReducedMotion();
   const items = [...PLATFORMS, ...PLATFORMS];
   return (
-    <section className="relative border-y border-bloom-100 py-10">
+    <section className="relative border-y border-border py-10">
       <p className={`mb-6 text-center text-xs uppercase tracking-[0.22em] text-muted-foreground ${fonts.mono}`}>
         与你的投放与分析栈无缝对接
       </p>
@@ -365,9 +351,9 @@ function LogoMarquee({ fonts }: { fonts: Fonts }) {
           {items.map((name, i) => (
             <span
               key={`${name}-${i}`}
-              className={`flex items-center gap-2 whitespace-nowrap rounded-full border border-bloom-100 bg-white/70 px-5 py-2 text-sm text-foreground/70 backdrop-blur ${fonts.mono}`}
+              className={`flex items-center gap-2 whitespace-nowrap rounded-full border border-border bg-white px-5 py-2 text-sm text-foreground/70 shadow-sm ${fonts.mono}`}
             >
-              <Radar className="h-3.5 w-3.5 text-bloom-500" />
+              <Radar className="h-3.5 w-3.5 text-aqua-500" />
               {name}
             </span>
           ))}
@@ -400,7 +386,7 @@ function SectionHead({
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="mx-auto max-w-2xl text-center"
     >
-      <span className={`text-xs uppercase tracking-[0.22em] text-bloom-600 ${fonts.mono}`}>{kicker}</span>
+      <span className={`text-xs uppercase tracking-[0.22em] text-aqua-600 ${fonts.mono}`}>{kicker}</span>
       <h2 className={`mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl ${fonts.display}`}>
         {title}
       </h2>
@@ -424,7 +410,7 @@ function Steps({ fonts }: { fonts: Fonts }) {
       />
       <div className="relative mx-auto mt-16 max-w-5xl">
         {/* 连接光束 */}
-        <div className="absolute left-0 right-0 top-10 hidden h-px bg-gradient-to-r from-transparent via-bloom-400/50 to-transparent md:block" />
+        <div className="absolute left-0 right-0 top-10 hidden h-px bg-gradient-to-r from-transparent via-aqua-300 to-transparent md:block" />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {STEPS.map(({ icon: Icon, no, title, desc }, i) => (
             <motion.div
@@ -436,10 +422,10 @@ function Steps({ fonts }: { fonts: Fonts }) {
               className={`relative p-6 ${glassCard}`}
             >
               <div className="flex items-center justify-between">
-                <span className="grid h-12 w-12 place-items-center rounded-xl border border-bloom-100 bg-gradient-to-br from-bloom-100 to-tech-soft/30 text-bloom-600">
+                <span className="grid h-12 w-12 place-items-center rounded-xl border border-aqua-100 bg-aqua-50 text-aqua-600">
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className={`text-3xl font-bold text-bloom-200 ${fonts.display}`}>{no}</span>
+                <span className={`text-3xl font-bold text-aqua-200 ${fonts.display}`}>{no}</span>
               </div>
               <h3 className={`mt-5 text-lg font-semibold text-foreground ${fonts.display}`}>{title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
@@ -465,19 +451,16 @@ function Features({ fonts }: { fonts: Fonts }) {
         fonts={fonts}
       />
       <div className="mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map(({ icon: Icon, title, desc, glow }, i) => (
+        {FEATURES.map(({ icon: Icon, title, desc }, i) => (
           <motion.div
             key={title}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: (i % 3) * 0.1, ease: "easeOut" }}
-            className={`group relative overflow-hidden p-6 transition-transform hover:-translate-y-1 ${glassCard}`}
+            className={`group relative p-6 transition-transform hover:-translate-y-1 ${glassCard}`}
           >
-            <div
-              className={`pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${glow} to-transparent opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100`}
-            />
-            <span className="grid h-11 w-11 place-items-center rounded-xl border border-bloom-100 bg-bloom-50 text-bloom-600">
+            <span className="grid h-11 w-11 place-items-center rounded-xl border border-aqua-100 bg-aqua-50 text-aqua-600 transition-colors group-hover:bg-aqua-100">
               <Icon className="h-5 w-5" />
             </span>
             <h3 className={`mt-5 text-lg font-semibold text-foreground ${fonts.display}`}>{title}</h3>
@@ -499,7 +482,7 @@ function TrackingShowcase({ fonts }: { fonts: Fonts }) {
       <div className={`mx-auto max-w-6xl p-8 sm:p-12 ${glassCard}`}>
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
-            <span className={`text-xs uppercase tracking-[0.22em] text-bloom-600 ${fonts.mono}`}>
+            <span className={`text-xs uppercase tracking-[0.22em] text-aqua-600 ${fonts.mono}`}>
               {"// 数据归因闭环"}
             </span>
             <h2 className={`mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl ${fonts.display}`}>
@@ -517,7 +500,7 @@ function TrackingShowcase({ fonts }: { fonts: Fonts }) {
                 "内建同意管理 (CMP)，合规与转化兼得",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3 text-sm text-foreground/80">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-bloom-500" />
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-aqua-600" />
                   {t}
                 </li>
               ))}
@@ -533,9 +516,9 @@ function TrackingShowcase({ fonts }: { fonts: Fonts }) {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.5, delay: i * 0.12, ease: "easeOut" }}
-                className="flex items-center gap-4 rounded-xl border border-bloom-100 bg-white/70 px-5 py-4 backdrop-blur"
+                className="flex items-center gap-4 rounded-xl border border-border bg-white px-5 py-4 shadow-sm"
               >
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-bloom-100 to-tech-soft/30 text-bloom-600">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-aqua-100 bg-aqua-50 text-aqua-600">
                   <Icon className="h-5 w-5" />
                 </span>
                 <div>
@@ -543,7 +526,7 @@ function TrackingShowcase({ fonts }: { fonts: Fonts }) {
                   <p className={`text-xs text-muted-foreground ${fonts.mono}`}>{note}</p>
                 </div>
                 {i < FUNNEL.length - 1 && (
-                  <ArrowRight className="ml-auto h-4 w-4 rotate-90 text-bloom-300" />
+                  <ArrowRight className="ml-auto h-4 w-4 rotate-90 text-aqua-300" />
                 )}
               </motion.div>
             ))}
@@ -579,46 +562,44 @@ function Pricing({ fonts }: { fonts: Fonts }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
-              className={`relative rounded-2xl p-px ${
+              className={`relative flex h-full flex-col rounded-2xl border bg-white p-6 ${
                 plan.highlight
-                  ? "bg-gradient-to-b from-bloom-400 to-tech shadow-[0_24px_70px_-25px_color-mix(in_oklab,var(--color-bloom-500)_60%,transparent)]"
-                  : "border border-bloom-100"
+                  ? "border-aqua-400 shadow-[0_22px_60px_-30px_color-mix(in_oklab,var(--color-aqua-500)_55%,transparent)]"
+                  : "border-border shadow-sm"
               }`}
             >
-              <div className="flex h-full flex-col rounded-2xl bg-white/85 p-6 backdrop-blur-xl">
-                {plan.highlight && (
-                  <span
-                    className={`mb-3 self-start rounded-full bg-gradient-to-r from-bloom-500 to-tech px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ${fonts.mono}`}
-                  >
-                    最受欢迎
-                  </span>
-                )}
-                <p className={`text-xs uppercase tracking-[0.18em] text-muted-foreground ${fonts.mono}`}>
-                  {plan.label}
-                </p>
-                <p className={`mt-2 text-4xl font-bold text-foreground ${fonts.display}`}>
-                  {price}
-                  {!isFree && <span className="text-base font-normal text-muted-foreground">/月</span>}
-                </p>
-                <Link
-                  href={isFree ? Routes.Register : Routes.Pricing}
-                  className={`mt-5 rounded-xl py-2.5 text-center text-sm font-semibold transition-transform hover:scale-[1.02] ${
-                    plan.highlight
-                      ? "bg-gradient-to-r from-bloom-500 to-tech text-white shadow-lg shadow-bloom-500/30"
-                      : "border border-bloom-200 bg-bloom-50 text-bloom-700 hover:bg-bloom-100"
-                  }`}
+              {plan.highlight && (
+                <span
+                  className={`mb-3 self-start rounded-full bg-gradient-to-r from-aqua-600 to-tech px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ${fonts.mono}`}
                 >
-                  {isFree ? "免费开始" : "选择此套餐"}
-                </Link>
-                <ul className="mt-6 space-y-2.5 border-t border-bloom-100 pt-5">
-                  {plan.highlights.map((h) => (
-                    <li key={h} className="flex items-start gap-2.5 text-sm text-foreground/80">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-bloom-500" />
-                      {h}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                  最受欢迎
+                </span>
+              )}
+              <p className={`text-xs uppercase tracking-[0.18em] text-muted-foreground ${fonts.mono}`}>
+                {plan.label}
+              </p>
+              <p className={`mt-2 text-4xl font-bold text-foreground ${fonts.display}`}>
+                {price}
+                {!isFree && <span className="text-base font-normal text-muted-foreground">/月</span>}
+              </p>
+              <Link
+                href={isFree ? Routes.Register : Routes.Pricing}
+                className={`mt-5 rounded-xl py-2.5 text-center text-sm font-semibold transition-all hover:brightness-105 ${
+                  plan.highlight
+                    ? "bg-gradient-to-r from-aqua-600 to-tech text-white shadow-sm shadow-aqua-600/25"
+                    : "bg-aqua-100 text-aqua-700 hover:bg-aqua-200"
+                }`}
+              >
+                {isFree ? "免费开始" : "选择此套餐"}
+              </Link>
+              <ul className="mt-6 space-y-2.5 border-t border-border pt-5">
+                {plan.highlights.map((h) => (
+                  <li key={h} className="flex items-start gap-2.5 text-sm text-foreground/80">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-aqua-600" />
+                    {h}
+                  </li>
+                ))}
+              </ul>
             </motion.div>
           );
         })}
@@ -626,7 +607,7 @@ function Pricing({ fonts }: { fonts: Fonts }) {
       <div className="mt-10 text-center">
         <Link
           href={Routes.Pricing}
-          className="inline-flex items-center gap-1.5 text-sm text-bloom-600 transition-colors hover:text-bloom-700"
+          className="inline-flex items-center gap-1.5 text-sm text-aqua-600 transition-colors hover:text-aqua-700"
         >
           查看完整功能对比
           <ArrowRight className="h-3.5 w-3.5" />
@@ -650,8 +631,8 @@ function FinalCTA({ fonts }: { fonts: Fonts }) {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className={`relative mx-auto max-w-4xl overflow-hidden px-8 py-16 text-center ${glassCard}`}
       >
-        <div className={`pointer-events-none absolute left-1/2 top-0 h-64 w-96 -translate-x-1/2 ${glowAura("glow-pink")}`} />
-        <Sparkles className="relative mx-auto h-8 w-8 text-bloom-500" />
+        <div className={`pointer-events-none absolute left-1/2 top-0 h-56 w-96 -translate-x-1/2 ${glowAura("aqua-400")}`} />
+        <Sparkles className="relative mx-auto h-8 w-8 text-aqua-500" />
         <h2 className={`relative mt-5 text-3xl font-bold tracking-tight text-foreground sm:text-5xl ${fonts.display}`}>
           把下一次投放，押在<br className="hidden sm:block" />
           一张真正会转化的落地页上
@@ -679,23 +660,23 @@ function FinalCTA({ fonts }: { fonts: Fonts }) {
 
 function SiteFooter({ fonts }: { fonts: Fonts }) {
   return (
-    <footer className="border-t border-bloom-100 px-6 py-10">
+    <footer className="border-t border-border px-6 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
         <div className="flex items-center gap-2">
-          <span className="grid h-6 w-6 place-items-center rounded-md bg-gradient-to-br from-bloom-500 to-tech">
-            <Zap className="h-3 w-3 text-white" strokeWidth={2.6} />
+          <span className="grid h-6 w-6 place-items-center rounded-md bg-gradient-to-br from-aqua-500 to-tech text-white">
+            <Zap className="h-3 w-3" strokeWidth={2.6} />
           </span>
           <span className={`font-semibold text-foreground ${fonts.display}`}>Zap Bridge</span>
           <span>© {new Date().getFullYear()}</span>
         </div>
         <nav className="flex items-center gap-5">
-          <Link href={Routes.Pricing} className="transition-colors hover:text-bloom-600">
+          <Link href={Routes.Pricing} className="transition-colors hover:text-aqua-700">
             套餐定价
           </Link>
-          <Link href={Routes.Login} className="transition-colors hover:text-bloom-600">
+          <Link href={Routes.Login} className="transition-colors hover:text-aqua-700">
             登录
           </Link>
-          <Link href={Routes.Register} className="transition-colors hover:text-bloom-600">
+          <Link href={Routes.Register} className="transition-colors hover:text-aqua-700">
             免费开始
           </Link>
         </nav>

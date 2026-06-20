@@ -36,7 +36,7 @@ export function SalesFunnelCard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-foreground">Sales Funnel Analytics</h3>
-        <button className="flex items-center gap-1 text-sm text-muted-foreground border border-bloom-100 rounded-lg px-3 py-1.5 hover:bg-bloom-50 transition-colors">
+        <button className="flex items-center gap-1 text-sm text-muted-foreground border border-aqua-100 rounded-lg px-3 py-1.5 hover:bg-aqua-50 transition-colors">
           This week <ChevronDown className="w-3 h-3" />
         </button>
       </div>
@@ -98,7 +98,7 @@ export function SalesFunnelCard() {
       </div>
 
       {/* Bottom metrics */}
-      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-bloom-100">
+      <div className="grid grid-cols-3 gap-2 pt-1 border-t border-aqua-100">
         {metrics.map((m) => (
           <div key={m.label} className="flex flex-col gap-1 p-2">
             <div className="flex items-center justify-between">

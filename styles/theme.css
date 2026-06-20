@@ -1,128 +1,129 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ================================================================== *
- * 玫瑰智核 · Luminous Rose Intelligence
- * 全应用统一主题：浅色为主 + 粉色科技感。
- * 这里是「全局主题的唯一来源」——改这里即可全应用换肤。
+ * 深青 · 明亮（Bright Teal）
+ * 全应用统一主题：净白冷石板中性 + 明亮薄荷青强调 + 翠绿专留转化/ROI。
+ * 这里是「全局主题的唯一来源」——改这里即可全 Tailwind 应用换肤。
  *   · :root        → shadcn 语义 token（浅色）
  *   · .dark         → 暗色变体
- *   · @theme        → 品牌/科技扩展 token（brand 粉阶 / tech 紫 / glow 光晕）
+ *   · @theme        → 品牌扩展 token（aqua 青阶 / tech 深青 / glow 光感）
  *   · @theme inline → 把语义 token 暴露为 Tailwind 工具类
- * 复用的渐变/玻璃/光晕等成套样式见 `lib/theme.ts`。
+ * 复用的渐变/玻璃/光感成套样式见 `lib/theme.ts`。
+ * 注：admin / super-admin 改用 Ant Design（主题色经 ConfigProvider 注入），不消费这里的工具类。
  * ================================================================== */
 
 :root {
   --font-size: 16px;
 
-  /* 基底：极浅粉晨光 / 深玫瑰墨字 */
-  --background: #fff6fb;
-  --foreground: #2c1622;
+  /* 基底：净白 / 冷石板墨字 */
+  --background: #ffffff;
+  --foreground: #334155;
   --card: #ffffff;
-  --card-foreground: #2c1622;
+  --card-foreground: #334155;
   --popover: #ffffff;
-  --popover-foreground: #2c1622;
+  --popover-foreground: #334155;
 
-  /* 品牌主色：玫瑰粉 */
-  --primary: #f03d83;
+  /* 品牌主色：深青（可承载白字的实心按钮，明亮气质由 aqua 浅阶承担） */
+  --primary: #0d9488;
   --primary-foreground: #ffffff;
 
-  /* 柔粉表面 */
-  --secondary: #ffe7f1;
-  --secondary-foreground: #b21e5b;
-  --muted: #fbeaf2;
-  --muted-foreground: #9b6f84;
-  --accent: #ffe0ee;
-  --accent-foreground: #b21e5b;
+  /* 柔青表面 */
+  --secondary: #effefb;
+  --secondary-foreground: #0a9e8e;
+  --muted: #f4f7fb;
+  --muted-foreground: #8995a8;
+  --accent: #d2fbf3;
+  --accent-foreground: #0a9e8e;
 
-  --destructive: #e11d48;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  --border: #f7d6e6;
+  --border: #eef3f9;
   --input: transparent;
-  --input-background: #fdeef6;
-  --switch-background: #f3c6db;
+  --input-background: #fbfdff;
+  --switch-background: #cbd5e1;
 
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #f56fa6;
+  --ring: #1ad8c6;
 
-  /* 数据图表：粉 → 紫科技色谱 */
-  --chart-1: #f03d83;
-  --chart-2: #7b5cff;
-  --chart-3: #fb6ba0;
-  --chart-4: #b21e5b;
-  --chart-5: #b9a7ff;
+  /* 数据图表：青色谱 + 翠绿（转化/ROI） */
+  --chart-1: #1ad8c6;
+  --chart-2: #0d9488;
+  --chart-3: #6ee9da;
+  --chart-4: #18c98c;
+  --chart-5: #38bdf8;
 
   --radius: 0.75rem;
 
-  /* 侧栏：近白微粉 */
-  --sidebar: #fffafc;
-  --sidebar-foreground: #2c1622;
-  --sidebar-primary: #f03d83;
+  /* 侧栏：近白微青 */
+  --sidebar: #fbfdff;
+  --sidebar-foreground: #334155;
+  --sidebar-primary: #0d9488;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ffe7f1;
-  --sidebar-accent-foreground: #b21e5b;
-  --sidebar-border: #f7d6e6;
-  --sidebar-ring: #f56fa6;
+  --sidebar-accent: #effefb;
+  --sidebar-accent-foreground: #0a9e8e;
+  --sidebar-border: #eef3f9;
+  --sidebar-ring: #1ad8c6;
 }
 
 .dark {
-  --background: #160a12;
-  --foreground: #ffe9f3;
-  --card: #1e0e18;
-  --card-foreground: #ffe9f3;
-  --popover: #1e0e18;
-  --popover-foreground: #ffe9f3;
-  --primary: #ff5da2;
-  --primary-foreground: #1a0712;
-  --secondary: #2a1320;
-  --secondary-foreground: #ffd6e7;
-  --muted: #2a1320;
-  --muted-foreground: #c79bb0;
-  --accent: #341829;
-  --accent-foreground: #ffd6e7;
-  --destructive: #ff5a78;
-  --destructive-foreground: #1a0712;
-  --border: #3a1f2e;
-  --input: #3a1f2e;
-  --ring: #ff7eb3;
+  --background: #07110f;
+  --foreground: #e6fbf6;
+  --card: #0c1816;
+  --card-foreground: #e6fbf6;
+  --popover: #0c1816;
+  --popover-foreground: #e6fbf6;
+  --primary: #1ad8c6;
+  --primary-foreground: #06201c;
+  --secondary: #102622;
+  --secondary-foreground: #b8f5ec;
+  --muted: #102622;
+  --muted-foreground: #8ab8b1;
+  --accent: #15302b;
+  --accent-foreground: #b8f5ec;
+  --destructive: #f87171;
+  --destructive-foreground: #06201c;
+  --border: #1c332e;
+  --input: #1c332e;
+  --ring: #2dd4bf;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: #ff5da2;
-  --chart-2: #a78bff;
-  --chart-3: #ff8fbb;
-  --chart-4: #ff7eb3;
-  --chart-5: #c9b6ff;
-  --sidebar: #1a0c15;
-  --sidebar-foreground: #ffe9f3;
-  --sidebar-primary: #ff5da2;
-  --sidebar-primary-foreground: #1a0712;
-  --sidebar-accent: #2a1320;
-  --sidebar-accent-foreground: #ffd6e7;
-  --sidebar-border: #3a1f2e;
-  --sidebar-ring: #ff7eb3;
+  --chart-1: #2dd4bf;
+  --chart-2: #14b8a6;
+  --chart-3: #5eead4;
+  --chart-4: #34d399;
+  --chart-5: #38bdf8;
+  --sidebar: #0a1513;
+  --sidebar-foreground: #e6fbf6;
+  --sidebar-primary: #1ad8c6;
+  --sidebar-primary-foreground: #06201c;
+  --sidebar-accent: #102622;
+  --sidebar-accent-foreground: #b8f5ec;
+  --sidebar-border: #1c332e;
+  --sidebar-ring: #2dd4bf;
 }
 
-/* 品牌 / 科技扩展 token —— 生成 bg-bloom-500 / text-tech / from-glow-pink 等工具类。
- * 命名用 `bloom`（玫瑰绽放）以避开 landing-editor 的蓝色 `brand` 命名空间。 */
+/* 品牌扩展 token —— 生成 bg-aqua-500 / text-tech / from-glow-1 等工具类。
+ * 命名用 `aqua`（薄荷青）以避开 landing-editor 的蓝色 `brand` 命名空间。 */
 @theme {
-  --color-bloom-50: #fff1f7;
-  --color-bloom-100: #ffe3ef;
-  --color-bloom-200: #ffc9de;
-  --color-bloom-300: #ff9dc1;
-  --color-bloom-400: #fb6ba0;
-  --color-bloom-500: #f03d83;
-  --color-bloom-600: #d61e69;
-  --color-bloom-700: #b21e5b;
+  --color-aqua-50: #effefb;
+  --color-aqua-100: #d2fbf3;
+  --color-aqua-200: #aef5e9;
+  --color-aqua-300: #7fe9da;
+  --color-aqua-400: #1ad8c6;
+  --color-aqua-500: #0fbcab;
+  --color-aqua-600: #0d9488;
+  --color-aqua-700: #0a7268;
 
-  /* 「智能 / AI」冷调点缀：电光紫 */
-  --color-tech: #7b5cff;
-  --color-tech-soft: #b9a7ff;
+  /* 深青副色（渐变较深的一端） */
+  --color-tech: #0ea5a4;
+  --color-tech-soft: #7fe9da;
 
-  /* 光晕（径向辉光用，配 /透明度 修饰符） */
-  --color-glow-pink: #ff6fb0;
-  --color-glow-violet: #8b6dff;
-  --color-glow-rose: #ffa6c9;
+  /* 光感（径向辉光用，配 /透明度 修饰符），克制使用 */
+  --color-glow-1: #5eead4;
+  --color-glow-2: #38bdf8;
+  --color-glow-3: #99f6e4;
 }
 
 @theme inline {

@@ -47,14 +47,14 @@ export default function MediaPage() {
       </header>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 px-6 border-b border-bloom-100">
+      <div className="flex gap-1 px-6 border-b border-aqua-100">
         {tabs.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setFilter(key)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               filter === key
-                ? "border-bloom-500 text-bloom-600"
+                ? "border-aqua-500 text-aqua-600"
                 : "border-transparent text-muted-foreground hover:text-muted-foreground"
             }`}
           >

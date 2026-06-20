@@ -52,9 +52,9 @@ function RegisterPageContent() {
   const googleLoading = googleSignIn.isMutating;
 
   return (
-    <div className="w-full max-w-sm bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl shadow-bloom-500/10 border border-bloom-100 p-8">
+    <div className="w-full max-w-sm bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl shadow-aqua-500/10 border border-aqua-100 p-8">
       <div className="flex items-center gap-2 mb-8">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-bloom-500 to-tech flex items-center justify-center shadow-sm shadow-bloom-500/30">
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-aqua-500 to-tech flex items-center justify-center shadow-sm shadow-aqua-500/30">
           <Grid2x2 className="w-4 h-4 text-white" />
         </div>
         <span className="text-foreground tracking-widest text-sm uppercase">Zap Bridge</span>
@@ -73,10 +73,10 @@ function RegisterPageContent() {
       <button
         onClick={() => void googleSignIn.trigger()}
         disabled={googleLoading || loading}
-        className="w-full flex items-center justify-center gap-3 border border-bloom-200 rounded-xl py-2.5 text-sm text-foreground/80 hover:bg-bloom-50 hover:border-bloom-300 transition-colors mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-3 border border-aqua-200 rounded-xl py-2.5 text-sm text-foreground/80 hover:bg-aqua-50 hover:border-aqua-300 transition-colors mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {googleLoading ? (
-          <div className="w-4 h-4 border-2 border-bloom-200 border-t-bloom-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-aqua-200 border-t-aqua-500 rounded-full animate-spin" />
         ) : (
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -89,9 +89,9 @@ function RegisterPageContent() {
       </button>
 
       <div className="flex items-center gap-3 mb-4">
-        <div className="flex-1 h-px bg-bloom-100" />
+        <div className="flex-1 h-px bg-aqua-100" />
         <span className="text-xs text-muted-foreground">or</span>
-        <div className="flex-1 h-px bg-bloom-100" />
+        <div className="flex-1 h-px bg-aqua-100" />
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -101,7 +101,7 @@ function RegisterPageContent() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="w-full px-4 py-2.5 rounded-xl border border-bloom-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-bloom-400 focus:ring-2 focus:ring-bloom-200 transition-colors"
+          className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
         />
         <input
           type="email"
@@ -109,7 +109,7 @@ function RegisterPageContent() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-2.5 rounded-xl border border-bloom-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-bloom-400 focus:ring-2 focus:ring-bloom-200 transition-colors"
+          className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
         />
         <input
           type="password"
@@ -118,13 +118,13 @@ function RegisterPageContent() {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={8}
-          className="w-full px-4 py-2.5 rounded-xl border border-bloom-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-bloom-400 focus:ring-2 focus:ring-bloom-200 transition-colors"
+          className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
         />
         {error && <p className="text-xs text-destructive">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-bloom-500 to-tech text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 shadow-lg shadow-bloom-500/30"
+          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-aqua-500 to-tech text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 shadow-lg shadow-aqua-500/30"
         >
           {loading ? "Creating account…" : "Create account"}
         </button>
@@ -132,7 +132,7 @@ function RegisterPageContent() {
 
       <p className="text-xs text-muted-foreground text-center mt-5">
         Already have an account?{" "}
-        <Link href={Routes.Login} className="text-bloom-600 font-medium hover:underline">
+        <Link href={Routes.Login} className="text-aqua-600 font-medium hover:underline">
           Sign in
         </Link>
       </p>

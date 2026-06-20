@@ -46,7 +46,7 @@ function RiskBars({ level }: { level: number }) {
                 : i === 2
                 ? "bg-rose-500"
                 : "bg-rose-600"
-              : "bg-bloom-100"
+              : "bg-aqua-100"
           }`}
           style={{
             width: 5,
@@ -66,8 +66,8 @@ function FeedbackStars({ count }: { count: number }) {
           key={i}
           className={`w-3.5 h-3.5 ${
             i <= count
-              ? "fill-bloom-500 text-bloom-500"
-              : "fill-bloom-100 text-bloom-100"
+              ? "fill-aqua-500 text-aqua-500"
+              : "fill-aqua-100 text-aqua-100"
           }`}
         />
       ))}
@@ -81,7 +81,7 @@ export function HighRiskCustomers() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-foreground">High-Risk Customers</h3>
-        <button className="text-sm text-bloom-600 hover:text-bloom-700 transition-colors">
+        <button className="text-sm text-aqua-600 hover:text-aqua-700 transition-colors">
           See all
         </button>
       </div>
@@ -89,7 +89,7 @@ export function HighRiskCustomers() {
       {/* Table */}
       <div className="w-full">
         {/* Table Header */}
-        <div className="grid grid-cols-[2fr_1fr_2fr_1.5fr_1.5fr_auto] gap-4 px-2 pb-2 border-b border-bloom-100">
+        <div className="grid grid-cols-[2fr_1fr_2fr_1.5fr_1.5fr_auto] gap-4 px-2 pb-2 border-b border-aqua-100">
           {["Name", "Risk", "Key factors", "Account value", "Feedback", ""].map(
             (h) => (
               <span key={h} className="text-xs text-muted-foreground">
@@ -103,7 +103,7 @@ export function HighRiskCustomers() {
         {customers.map((c) => (
           <div
             key={c.id}
-            className="grid grid-cols-[2fr_1fr_2fr_1.5fr_1.5fr_auto] gap-4 items-center px-2 py-3 border-b border-bloom-50 hover:bg-bloom-50/50 rounded-xl transition-colors"
+            className="grid grid-cols-[2fr_1fr_2fr_1.5fr_1.5fr_auto] gap-4 items-center px-2 py-3 border-b border-aqua-50 hover:bg-aqua-50/50 rounded-xl transition-colors"
           >
             {/* Name */}
             <div className="flex items-center gap-2.5">

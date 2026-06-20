@@ -23,7 +23,7 @@ async function AdminSidebar() {
   return (
     <aside className="w-64 min-h-screen bg-foreground text-white/60 flex flex-col py-6 px-4 shrink-0 shadow-xl">
       <div className="flex items-center gap-3 mb-10 px-2">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-bloom-500 to-tech flex items-center justify-center shadow-sm shadow-tech/40">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aqua-500 to-tech flex items-center justify-center shadow-sm shadow-tech/40">
           <ShieldCheck className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -77,7 +77,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-bloom-50">
+    <div className="flex min-h-screen bg-aqua-50">
       <AdminSidebar />
       <main className="flex-1 overflow-y-auto">
         <div className="p-8 max-w-7xl mx-auto">

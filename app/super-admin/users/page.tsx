@@ -40,16 +40,16 @@ export default async function AdminUsersPage() {
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder="Search users..." 
-              className="pl-9 w-64 bg-white border-bloom-100"
+              className="pl-9 w-64 bg-white border-aqua-100"
             />
           </div>
           <InviteUserDialog />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-bloom-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-aqua-100 overflow-hidden">
         <Table>
-          <TableHeader className="bg-bloom-50">
+          <TableHeader className="bg-aqua-50">
             <TableRow>
               <TableHead className="font-semibold text-foreground">User</TableHead>
               <TableHead className="font-semibold text-foreground">Plan</TableHead>
@@ -61,10 +61,10 @@ export default async function AdminUsersPage() {
           </TableHeader>
           <TableBody>
             {users.map((user) => (
-              <TableRow key={user.id} className="hover:bg-bloom-50/50 transition-colors">
+              <TableRow key={user.id} className="hover:bg-aqua-50/50 transition-colors">
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-bloom-50 flex items-center justify-center text-muted-foreground font-medium">
+                    <div className="w-9 h-9 rounded-full bg-aqua-50 flex items-center justify-center text-muted-foreground font-medium">
                       {user.name?.[0]?.toUpperCase() ?? user.email?.[0]?.toUpperCase()}
                     </div>
                     <div>
@@ -80,7 +80,7 @@ export default async function AdminUsersPage() {
                   <PlanBadge plan={user.plan as PlanId} />
                 </TableCell>
                 <TableCell className="text-center">
-                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-bloom-50 text-xs font-bold text-foreground/80 border border-bloom-100">
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-aqua-50 text-xs font-bold text-foreground/80 border border-aqua-100">
                     {user.page_count}
                   </span>
                 </TableCell>
@@ -104,7 +104,7 @@ export default async function AdminUsersPage() {
                 </TableCell>
                 <TableCell>
                   <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                    user.role === UserRole.SUPER_ADMIN ? 'bg-bloom-100 text-bloom-700' : 'bg-bloom-50 text-muted-foreground'
+                    user.role === UserRole.SUPER_ADMIN ? 'bg-aqua-100 text-aqua-700' : 'bg-aqua-50 text-muted-foreground'
                   }`}>
                     {user.role}
                   </span>

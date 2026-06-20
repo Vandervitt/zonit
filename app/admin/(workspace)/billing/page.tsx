@@ -72,7 +72,7 @@ export default function BillingPage() {
         <p className="text-sm text-muted-foreground mt-0.5">管理你的订阅套餐</p>
       </div>
 
-      <div className="rounded-2xl border border-bloom-100 bg-white p-6 mb-6">
+      <div className="rounded-2xl border border-aqua-100 bg-white p-6 mb-6">
         <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">当前套餐</p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -102,7 +102,7 @@ export default function BillingPage() {
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-bloom-100 grid grid-cols-3 gap-4 text-sm">
+        <div className="mt-4 pt-4 border-t border-aqua-100 grid grid-cols-3 gap-4 text-sm">
           <div>
             <p className="text-muted-foreground text-xs mb-1">落地页上限</p>
             <p className="text-foreground/80 font-medium">
@@ -136,7 +136,7 @@ export default function BillingPage() {
             return (
               <div
                 key={planId}
-                className="rounded-2xl border border-bloom-100 bg-white p-5 flex items-start justify-between gap-4"
+                className="rounded-2xl border border-aqua-100 bg-white p-5 flex items-start justify-between gap-4"
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">

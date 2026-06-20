@@ -48,7 +48,7 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-xl border border-bloom-100 bg-bloom-50 p-4 space-y-1 text-sm">
+        <div className="rounded-xl border border-aqua-100 bg-aqua-50 p-4 space-y-1 text-sm">
           <p className="text-muted-foreground">升级后还可获得：</p>
           {current.hasWatermark && !target.hasWatermark && (
             <p className="text-foreground/80">✓ 去除品牌水印</p>

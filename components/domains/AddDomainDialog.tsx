@@ -104,7 +104,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
             <p className="text-sm text-muted-foreground">
               域名已添加。请前往你的 DNS 服务商（Cloudflare）添加以下 CNAME 记录，Vercel 将在 DNS 生效后自动签发 SSL 证书。
             </p>
-            <div className="rounded-lg border bg-bloom-50 p-4 space-y-3">
+            <div className="rounded-lg border bg-aqua-50 p-4 space-y-3">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">类型</p>
                 <p className="text-sm font-mono">CNAME</p>
