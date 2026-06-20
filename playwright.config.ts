@@ -26,5 +26,8 @@ export default defineConfig({
     url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    // AI_FAKE=1 让 /api/landing-pages/generate 与 /api/ai/rewrite 走确定性 fake，
+    // e2e 无需真实 OPENAI_API_KEY。
+    env: { AI_FAKE: '1' },
   },
 });

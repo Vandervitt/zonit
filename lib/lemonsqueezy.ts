@@ -58,6 +58,15 @@ export async function getPortalUrl(lsCustomerId: string): Promise<string> {
   return url;
 }
 
+/** 一次性 credits 商品 variant → 充值数量。未命中返回 0（非 credits 商品，如订阅）。 */
+export function getCreditsFromVariantId(variantId: number): number {
+  const map: Record<string, number> = {
+    [process.env.LS_CREDITS_50_VARIANT_ID ?? ""]: 50,
+    [process.env.LS_CREDITS_200_VARIANT_ID ?? ""]: 200,
+  };
+  return map[String(variantId)] ?? 0;
+}
+
 export function verifyWebhookSignature(
   rawBody: string,
   signature: string,
