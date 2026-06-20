@@ -153,8 +153,9 @@ ALTER TABLE users ADD COLUMN ai_credit_balance INT NOT NULL DEFAULT 0;
 
 ### 6.3 扣减与重置（`lib/ai/usage.ts`）
 
-- **月额度**：统计当前自然月内 `ai_usage` 行数 vs `PLANS[plan].aiPageQuota` / `aiRewriteQuota`。**自然月重置**（v1 最简，不绑定订阅周期）。
+- **月额度**：统计当前自然月内 `ai_usage` 行数 vs `PLANS[plan].aiPageQuota` / `aiRewriteQuota`。**自然月重置**（v1 最简，不绑定订阅周期）。仅「月额度」重置，credits 不受此影响。
 - **整页消费顺序**：先用月额度（`source='quota'`），耗尽用 credits（`source='credit'`，并 `ai_credit_balance -= 1`）；两者皆空 → 403 `{ error, reason: 'ai_quota_exhausted', hints: { upgrade, topup } }`。
+- **credits 永不清空**：`ai_credit_balance` 为只增（加购）只减（使用）的持久余额，**不随自然月重置、不随订阅周期清零、不过期**。月度重置只作用于月额度计数（`ai_usage` 行数统计），与 credits 余额完全独立。
 - **改写**：仅用月额度，耗尽 → 引导升级（v1 不支持 credits 买改写）。
 
 ### 6.4 credits 加购
@@ -162,6 +163,7 @@ ALTER TABLE users ADD COLUMN ai_credit_balance INT NOT NULL DEFAULT 0;
 - LemonSqueezy 一次性商品（如 50 次 / 200 次两档）。
 - 复用 `app/api/webhooks/lemonsqueezy`：识别一次性订单 → `ai_credit_balance += 数量`。
 - 入口：额度耗尽提示 + billing 页。
+- **加购的 credits 永久有效**，不随月度或订阅周期清空（见 §6.3）；UI 文案应明确「额度按月重置，加购 credits 永不过期」。
 
 > 取舍记录：credits 引入「一次性支付」路径（现有仅订阅）。这是「额度+credits」决策的必然成本，已纳入范围。
 
@@ -227,4 +229,4 @@ ALTER TABLE users ADD COLUMN ai_credit_balance INT NOT NULL DEFAULT 0;
 | AI 生成交易/虚假内容 | 双层护栏（prompt + 代码禁词/结构/合规校验），失败重试且不落地 |
 | 生成质量不稳 | 槽位填充（结构固定）+ 结构化输出 + brief 结构化输入 |
 | 一次性支付带来复杂度 | 复用现有 LS webhook，credits 仅作用于整页生成 |
-| 月度重置语义 | v1 采用自然月，文档与 UI 明确标注；订阅周期对齐列为后续 |
+| 月度重置语义 | v1 采用自然月，文档与 UI 明确标注；订阅周期对齐列为后续。月度重置仅作用于月额度，加购 credits 永不过期 |
