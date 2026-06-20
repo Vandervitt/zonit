@@ -1,17 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Modal, Form, Input, Button, Typography, App } from "antd";
+import { CopyOutlined, CheckOutlined } from "@ant-design/icons";
 import { ApiRoutes } from "@/lib/constants";
 import { jsonRequest, ApiError } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
@@ -33,7 +24,8 @@ function mapDomainError(err: ApiError): string {
 }
 
 export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
-  const [domain, setDomain] = useState("");
+  const { message } = App.useApp();
+  const [form] = Form.useForm<{ domain: string }>();
   const [cname, setCname] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -50,88 +42,117 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   );
 
   function reset() {
-    setDomain("");
+    form.resetFields();
     setCname(null);
     setCopied(false);
     addMutation.reset();
   }
 
-  function handleSubmit() {
-    void addMutation.trigger({ domain });
+  function handleClose() {
+    reset();
+    onOpenChange(false);
   }
 
-  const error = addMutation.error ? mapDomainError(addMutation.error) : "";
-  const loading = addMutation.isMutating;
+  async function handleFinish(values: { domain: string }) {
+    try {
+      await addMutation.trigger({ domain: values.domain.trim().toLowerCase() });
+    } catch (err) {
+      message.error(mapDomainError(err as ApiError));
+    }
+  }
 
-  function handleCopy() {
+  function handleCopy(domainValue: string) {
     if (!cname) return;
     navigator.clipboard.writeText(cname);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
-  return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>添加自定义域名</DialogTitle>
-          <DialogDescription>
-            绑定你自己的域名，用户访问时地址栏显示你的品牌域名。
-          </DialogDescription>
-        </DialogHeader>
+  const loading = addMutation.isMutating;
+  const domainValue = Form.useWatch("domain", form) ?? "";
 
-        {!cname ? (
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>域名</Label>
+  return (
+    <Modal
+      open={open}
+      onCancel={handleClose}
+      title="添加自定义域名"
+      footer={null}
+      destroyOnHidden
+    >
+      {!cname ? (
+        <>
+          <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
+            绑定你自己的域名，用户访问时地址栏显示你的品牌域名。
+          </Typography.Paragraph>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleFinish}
+          >
+            <Form.Item
+              name="domain"
+              label="域名"
+              rules={[{ required: true, message: "请输入域名" }]}
+            >
               <Input
                 placeholder="example.com 或 www.example.com"
-                value={domain}
-                onChange={e => setDomain(e.target.value.trim().toLowerCase())}
+                onChange={(e) => {
+                  form.setFieldValue("domain", e.target.value.trim().toLowerCase());
+                }}
               />
+            </Form.Item>
+            <Form.Item style={{ marginBottom: 0 }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                disabled={!domainValue}
+                block
+              >
+                {loading ? "添加中…" : "添加域名"}
+              </Button>
+            </Form.Item>
+          </Form>
+        </>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
+            域名已添加。请前往你的 DNS 服务商（Cloudflare）添加以下 CNAME 记录，Vercel 将在 DNS 生效后自动签发 SSL 证书。
+          </Typography.Paragraph>
+          <div style={{ border: "1px solid #d9d9d9", borderRadius: 8, padding: 16, background: "#fafafa" }}>
+            <div style={{ marginBottom: 12 }}>
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>类型</Typography.Text>
+              <div><Typography.Text code>CNAME</Typography.Text></div>
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button
-              className="w-full"
-              disabled={!domain || loading}
-              onClick={handleSubmit}
-            >
-              {loading ? "添加中…" : "添加域名"}
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              域名已添加。请前往你的 DNS 服务商（Cloudflare）添加以下 CNAME 记录，Vercel 将在 DNS 生效后自动签发 SSL 证书。
-            </p>
-            <div className="rounded-lg border bg-aqua-50 p-4 space-y-3">
+            <div style={{ marginBottom: 12 }}>
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>名称</Typography.Text>
               <div>
-                <p className="text-xs text-muted-foreground mb-1">类型</p>
-                <p className="text-sm font-mono">CNAME</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">名称</p>
-                <p className="text-sm font-mono">{domain.startsWith("www.") ? "www" : domain}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">值</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-mono flex-1">{cname}</p>
-                  <button onClick={handleCopy} className="text-muted-foreground hover:text-muted-foreground">
-                    {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                </div>
+                <Typography.Text code>
+                  {domainValue.startsWith("www.") ? "www" : domainValue}
+                </Typography.Text>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              ⚠️ 如使用 Cloudflare，顶级域名（如 example.com）请将代理状态设为「仅 DNS」（灰色云朵），子域名（如 www.example.com）则无此限制。
-            </p>
-            <Button className="w-full" onClick={() => { reset(); onOpenChange(false); }}>
-              完成
-            </Button>
+            <div>
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>值</Typography.Text>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <Typography.Text code style={{ flex: 1 }}>{cname}</Typography.Text>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={copied ? <CheckOutlined style={{ color: "#52c41a" }} /> : <CopyOutlined />}
+                  onClick={() => handleCopy(domainValue)}
+                />
+              </div>
+            </div>
           </div>
-        )}
-      </DialogContent>
-    </Dialog>
+          <Typography.Paragraph type="secondary" style={{ fontSize: 12, marginBottom: 0 }}>
+            ⚠️ 如使用 Cloudflare，顶级域名（如 example.com）请将代理状态设为「仅 DNS」（灰色云朵），子域名（如 www.example.com）则无此限制。
+          </Typography.Paragraph>
+          <Button block onClick={handleClose}>
+            完成
+          </Button>
+        </div>
+      )}
+    </Modal>
   );
 }

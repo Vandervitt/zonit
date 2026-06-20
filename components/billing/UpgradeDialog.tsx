@@ -1,15 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Modal, Button, Typography } from "antd";
 import { Routes } from "@/lib/constants";
 import { PLANS } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
@@ -37,46 +29,48 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
   const target = PLANS[targetPlan];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm" aria-describedby="upgrade-desc">
-        <DialogHeader>
-          <DialogTitle>已达到落地页上限</DialogTitle>
-          <DialogDescription id="upgrade-desc">
-            {current.label} 套餐最多创建 {current.landingPagesLimit} 张落地页。升级到{" "}
-            <span className="font-medium text-foreground">{target.label}</span> 即可最多管理{" "}
-            {target.landingPagesLimit === Infinity ? "无限张" : `${target.landingPagesLimit} 张`}落地页。
-          </DialogDescription>
-        </DialogHeader>
+    <Modal
+      open={open}
+      onCancel={() => onOpenChange(false)}
+      title="已达到落地页上限"
+      footer={[
+        <Button key="cancel" onClick={() => onOpenChange(false)}>
+          稍后再说
+        </Button>,
+        <Button
+          key="upgrade"
+          type="primary"
+          onClick={() => {
+            onOpenChange(false);
+            router.push(Routes.Billing);
+          }}
+        >
+          查看 {target.label} 套餐 · {target.priceText}
+        </Button>,
+      ]}
+    >
+      <Typography.Paragraph type="secondary">
+        {current.label} 套餐最多创建 {current.landingPagesLimit} 张落地页。升级到{" "}
+        <Typography.Text strong>{target.label}</Typography.Text> 即可最多管理{" "}
+        {target.landingPagesLimit === Infinity ? "无限张" : `${target.landingPagesLimit} 张`}落地页。
+      </Typography.Paragraph>
 
-        <div className="rounded-xl border border-aqua-100 bg-aqua-50 p-4 space-y-1 text-sm">
-          <p className="text-muted-foreground">升级后还可获得：</p>
-          {current.hasWatermark && !target.hasWatermark && (
-            <p className="text-foreground/80">✓ 去除品牌水印</p>
-          )}
-          {target.domainsLimit > current.domainsLimit && (
-            <p className="text-foreground/80">
-              ✓ 绑定最多 {target.domainsLimit === Infinity ? "无限个" : target.domainsLimit} 个自定义域名
-            </p>
-          )}
-          {target.allTemplates && !current.allTemplates && (
-            <p className="text-foreground/80">✓ 解锁全部 15+ 行业模板</p>
-          )}
-        </div>
-
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            稍后再说
-          </Button>
-          <Button
-            onClick={() => {
-              onOpenChange(false);
-              router.push(Routes.Billing);
-            }}
-          >
-            查看 {target.label} 套餐 · {target.priceText}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <div style={{ border: "1px solid #e6f4ff", borderRadius: 8, background: "#f0f9ff", padding: 16 }}>
+        <Typography.Text type="secondary" style={{ display: "block", marginBottom: 4 }}>
+          升级后还可获得：
+        </Typography.Text>
+        {current.hasWatermark && !target.hasWatermark && (
+          <Typography.Text style={{ display: "block" }}>✓ 去除品牌水印</Typography.Text>
+        )}
+        {target.domainsLimit > current.domainsLimit && (
+          <Typography.Text style={{ display: "block" }}>
+            ✓ 绑定最多 {target.domainsLimit === Infinity ? "无限个" : target.domainsLimit} 个自定义域名
+          </Typography.Text>
+        )}
+        {target.allTemplates && !current.allTemplates && (
+          <Typography.Text style={{ display: "block" }}>✓ 解锁全部 15+ 行业模板</Typography.Text>
+        )}
+      </div>
+    </Modal>
   );
 }
