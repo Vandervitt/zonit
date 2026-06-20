@@ -14,8 +14,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { landingEditorPath } from "@/lib/constants";
+
+/** 生成语言选项；value 直接作为 brief.language 注入 prompt。 */
+const LANGUAGES = [
+  "English",
+  "简体中文",
+  "繁體中文",
+  "Español",
+  "Français",
+  "Deutsch",
+  "Português",
+  "日本語",
+  "العربية",
+  "Tiếng Việt",
+];
 
 export function GeneratePageDialog({
   templateId,
@@ -33,6 +54,7 @@ export function GeneratePageDialog({
     targetAudience: "",
     tone: "",
     ctaGoal: "",
+    language: "English",
     pastedIntro: "",
   });
 
@@ -122,6 +144,24 @@ export function GeneratePageDialog({
               value={form.ctaGoal}
               onChange={(e) => setForm({ ...form, ctaGoal: e.target.value })}
             />
+          </div>
+          <div>
+            <Label htmlFor="ai-language">生成语言</Label>
+            <Select
+              value={form.language}
+              onValueChange={(v) => setForm({ ...form, language: v })}
+            >
+              <SelectTrigger id="ai-language">
+                <SelectValue placeholder="选择生成语言" />
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map((lang) => (
+                  <SelectItem key={lang} value={lang}>
+                    {lang}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="ai-pasted-intro">可选：粘贴公司/产品介绍</Label>
