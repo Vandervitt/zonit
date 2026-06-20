@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -69,11 +70,15 @@ export function GeneratePageDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>用 AI 填充这套模板</DialogTitle>
+          <DialogDescription>
+            填写产品或公司信息，AI 将依据所选模板自动生成可投放的落地页文案。
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <Label>产品 / 公司名 *</Label>
+            <Label htmlFor="ai-product-name">产品 / 公司名 *</Label>
             <Input
+              id="ai-product-name"
               value={form.productName}
               onChange={(e) =>
                 setForm({ ...form, productName: e.target.value })
@@ -81,8 +86,9 @@ export function GeneratePageDialog({
             />
           </div>
           <div>
-            <Label>它做什么 / 解决什么 *</Label>
+            <Label htmlFor="ai-description">它做什么 / 解决什么 *</Label>
             <Textarea
+              id="ai-description"
               value={form.description}
               onChange={(e) =>
                 setForm({ ...form, description: e.target.value })
@@ -90,8 +96,9 @@ export function GeneratePageDialog({
             />
           </div>
           <div>
-            <Label>目标客户</Label>
+            <Label htmlFor="ai-target-audience">目标客户</Label>
             <Input
+              id="ai-target-audience"
               value={form.targetAudience}
               onChange={(e) =>
                 setForm({ ...form, targetAudience: e.target.value })
@@ -99,24 +106,27 @@ export function GeneratePageDialog({
             />
           </div>
           <div>
-            <Label>语气</Label>
+            <Label htmlFor="ai-tone">语气</Label>
             <Input
+              id="ai-tone"
               placeholder="专业 / 亲和 / 紧迫 / 高端"
               value={form.tone}
               onChange={(e) => setForm({ ...form, tone: e.target.value })}
             />
           </div>
           <div>
-            <Label>转化目标</Label>
+            <Label htmlFor="ai-cta-goal">转化目标</Label>
             <Input
+              id="ai-cta-goal"
               placeholder="咨询 / 预约 / 留资 / WhatsApp"
               value={form.ctaGoal}
               onChange={(e) => setForm({ ...form, ctaGoal: e.target.value })}
             />
           </div>
           <div>
-            <Label>可选：粘贴公司/产品介绍</Label>
+            <Label htmlFor="ai-pasted-intro">可选：粘贴公司/产品介绍</Label>
             <Textarea
+              id="ai-pasted-intro"
               value={form.pastedIntro}
               onChange={(e) =>
                 setForm({ ...form, pastedIntro: e.target.value })
