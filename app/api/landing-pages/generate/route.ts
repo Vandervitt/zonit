@@ -21,6 +21,18 @@ export async function POST(request: Request) {
   if (!body.brief?.productName || !body.brief?.description) {
     return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
   }
+  // 输入长度上限：限制送入模型的文本规模，控制 token 成本与提示注入面。
+  const b = body.brief;
+  if (
+    b.productName.length > 200 ||
+    b.description.length > 4000 ||
+    (b.pastedIntro?.length ?? 0) > 8000 ||
+    (b.targetAudience?.length ?? 0) > 500 ||
+    (b.tone?.length ?? 0) > 200 ||
+    (b.ctaGoal?.length ?? 0) > 200
+  ) {
+    return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
+  }
 
   const plan = await getUserPlan(userId);
 

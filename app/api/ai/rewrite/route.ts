@@ -19,6 +19,10 @@ export async function POST(request: Request) {
   if (!body?.field || typeof body.currentText !== "string") {
     return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
   }
+  // 输入长度上限：控制 token 成本与提示注入面。
+  if (body.currentText.length > 2000 || (body.instruction?.length ?? 0) > 500) {
+    return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
+  }
 
   const plan = await getUserPlan(userId);
   const quota = PLANS[plan].aiRewriteQuota;
