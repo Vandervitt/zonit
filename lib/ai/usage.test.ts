@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import type { DbLike } from "@/lib/ai/usage";
-import { checkAndConsume } from "@/lib/ai/usage";
+import { checkAndConsume, hasAllowance, type DbLike } from "@/lib/ai/usage";
 
 function mockDb(rows: Record<string, Record<string, unknown>[]>): DbLike {
   return {
@@ -45,5 +44,28 @@ describe("checkAndConsume page", () => {
     const db = mockDb({ count: [{ c: "9999" }] });
     const r = await checkAndConsume(db, "u1", "rewrite", Infinity);
     expect(r.ok).toBe(true);
+  });
+});
+
+describe("hasAllowance (read-only, 不写库)", () => {
+  it("额度未满 → true，且不写 ai_usage", async () => {
+    const db = mockDb({ count: [{ c: "1" }] });
+    const ok = await hasAllowance(db as unknown as DbLike, "u1", "page", 3);
+    expect(ok).toBe(true);
+    const querySpy = db.query as ReturnType<typeof vi.fn>;
+    const wrote = querySpy.mock.calls.some((c: unknown[]) => String(c[0]).startsWith("INSERT"));
+    expect(wrote).toBe(false);
+  });
+  it("page 额度满但有 credit → true", async () => {
+    const db = mockDb({ count: [{ c: "3" }], balance: [{ ai_credit_balance: 2 }] });
+    expect(await hasAllowance(db as unknown as DbLike, "u1", "page", 3)).toBe(true);
+  });
+  it("page 额度满且无 credit → false", async () => {
+    const db = mockDb({ count: [{ c: "3" }], balance: [{ ai_credit_balance: 0 }] });
+    expect(await hasAllowance(db as unknown as DbLike, "u1", "page", 3)).toBe(false);
+  });
+  it("rewrite 额度满 → false（不看 credit）", async () => {
+    const db = mockDb({ count: [{ c: "10" }] });
+    expect(await hasAllowance(db as unknown as DbLike, "u1", "rewrite", 10)).toBe(false);
   });
 });
