@@ -32,7 +32,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} theme="light"
+      <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} theme="light" width={224}
         style={{ borderInlineEnd: "1px solid #eef3f9" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 20px" }}>
           <span style={{ display: "grid", placeItems: "center", width: 30, height: 30,

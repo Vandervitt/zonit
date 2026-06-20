@@ -4,7 +4,7 @@ import { createElement } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Layout, Menu, Typography, Button, theme as antdTheme, ConfigProvider } from "antd";
+import { Layout, Menu, Typography, Button, ConfigProvider } from "antd";
 import {
   DashboardOutlined,
   TeamOutlined,

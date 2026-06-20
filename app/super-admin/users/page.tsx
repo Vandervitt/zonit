@@ -1,8 +1,5 @@
 import pool from "@/lib/db";
-import { PlanBadge } from "@/components/billing/PlanBadge";
 import type { PlanId } from "@/lib/plans";
-import { UserRole } from "@/lib/constants";
-import { Typography, Tag, Card } from "antd";
 import { SuperAdminUsersClient } from "./_client";
 
 async function getUsers() {

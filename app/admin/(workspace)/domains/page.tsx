@@ -3,7 +3,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
-import { Table, Button, Tag, Switch, Popconfirm, Typography, Empty, Space, App } from "antd";
+import { Table, Button, Tag, Switch, Popconfirm, Typography, Empty, Space } from "antd";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { AddDomainDialog } from "@/components/domains/AddDomainDialog";
 import { UpgradeDialog } from "@/components/billing/UpgradeDialog";
