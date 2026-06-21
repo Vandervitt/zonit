@@ -23,107 +23,107 @@
   --popover: #ffffff;
   --popover-foreground: #334155;
 
-  /* 品牌主色：深青（可承载白字的实心按钮，明亮气质由 aqua 浅阶承担） */
-  --primary: #0d9488;
+  /* 品牌主色：清澈蓝（实心按钮承载白字；最亮的 #28b6f8 由 aqua-500 承担品牌识别） */
+  --primary: #0e9fe4;
   --primary-foreground: #ffffff;
 
-  /* 柔青表面 */
-  --secondary: #effefb;
-  --secondary-foreground: #0a9e8e;
-  --muted: #f4f7fb;
-  --muted-foreground: #8995a8;
-  --accent: #d2fbf3;
-  --accent-foreground: #0a9e8e;
+  /* 柔蓝表面 */
+  --secondary: #ecf8ff;
+  --secondary-foreground: #0e79c4;
+  --muted: #f3f8fd;
+  --muted-foreground: #75839c;
+  --accent: #d6effd;
+  --accent-foreground: #0e79c4;
 
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  --border: #eef3f9;
+  --border: #e8f0f9;
   --input: transparent;
-  --input-background: #fbfdff;
+  --input-background: #f8fcff;
   --switch-background: #cbd5e1;
 
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #1ad8c6;
+  --ring: #45c2fa;
 
-  /* 数据图表：青色谱 + 翠绿（转化/ROI） */
-  --chart-1: #1ad8c6;
-  --chart-2: #0d9488;
-  --chart-3: #6ee9da;
-  --chart-4: #18c98c;
-  --chart-5: #38bdf8;
+  /* 数据图表：蓝色谱 + 翠绿（转化/ROI） */
+  --chart-1: #28b6f8;
+  --chart-2: #0e9fe4;
+  --chart-3: #6fd0fc;
+  --chart-4: #16a34a;
+  --chart-5: #2e90fa;
 
   --radius: 0.75rem;
 
-  /* 侧栏：近白微青 */
-  --sidebar: #fbfdff;
+  /* 侧栏：近白微蓝 */
+  --sidebar: #f8fcff;
   --sidebar-foreground: #334155;
-  --sidebar-primary: #0d9488;
+  --sidebar-primary: #0e9fe4;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #effefb;
-  --sidebar-accent-foreground: #0a9e8e;
-  --sidebar-border: #eef3f9;
-  --sidebar-ring: #1ad8c6;
+  --sidebar-accent: #ecf8ff;
+  --sidebar-accent-foreground: #0e79c4;
+  --sidebar-border: #e8f0f9;
+  --sidebar-ring: #45c2fa;
 }
 
 .dark {
-  --background: #07110f;
-  --foreground: #e6fbf6;
-  --card: #0c1816;
-  --card-foreground: #e6fbf6;
-  --popover: #0c1816;
-  --popover-foreground: #e6fbf6;
-  --primary: #1ad8c6;
-  --primary-foreground: #06201c;
-  --secondary: #102622;
-  --secondary-foreground: #b8f5ec;
-  --muted: #102622;
-  --muted-foreground: #8ab8b1;
-  --accent: #15302b;
-  --accent-foreground: #b8f5ec;
+  --background: #07121d;
+  --foreground: #e8f6ff;
+  --card: #0c1a28;
+  --card-foreground: #e8f6ff;
+  --popover: #0c1a28;
+  --popover-foreground: #e8f6ff;
+  --primary: #28b6f8;
+  --primary-foreground: #04141f;
+  --secondary: #102536;
+  --secondary-foreground: #bfe8fe;
+  --muted: #102536;
+  --muted-foreground: #8aa6c0;
+  --accent: #142c40;
+  --accent-foreground: #bfe8fe;
   --destructive: #f87171;
-  --destructive-foreground: #06201c;
-  --border: #1c332e;
-  --input: #1c332e;
-  --ring: #2dd4bf;
+  --destructive-foreground: #04141f;
+  --border: #1c3147;
+  --input: #1c3147;
+  --ring: #45c2fa;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: #2dd4bf;
-  --chart-2: #14b8a6;
-  --chart-3: #5eead4;
+  --chart-1: #45c2fa;
+  --chart-2: #28b6f8;
+  --chart-3: #9fe6fd;
   --chart-4: #34d399;
-  --chart-5: #38bdf8;
-  --sidebar: #0a1513;
-  --sidebar-foreground: #e6fbf6;
-  --sidebar-primary: #1ad8c6;
-  --sidebar-primary-foreground: #06201c;
-  --sidebar-accent: #102622;
-  --sidebar-accent-foreground: #b8f5ec;
-  --sidebar-border: #1c332e;
-  --sidebar-ring: #2dd4bf;
+  --chart-5: #5eaaff;
+  --sidebar: #0a1622;
+  --sidebar-foreground: #e8f6ff;
+  --sidebar-primary: #28b6f8;
+  --sidebar-primary-foreground: #04141f;
+  --sidebar-accent: #102536;
+  --sidebar-accent-foreground: #bfe8fe;
+  --sidebar-border: #1c3147;
+  --sidebar-ring: #45c2fa;
 }
 
 /* 品牌扩展 token —— 生成 bg-aqua-500 / text-tech / from-glow-1 等工具类。
- * 命名用 `aqua`（薄荷青）以避开 landing-editor 的蓝色 `brand` 命名空间。 */
+ * 命名沿用 `aqua`（避开 landing-editor 的 `brand` 命名空间）；色值为清澈透亮蓝。 */
 @theme {
-  --color-aqua-50: #effefb;
-  --color-aqua-100: #d2fbf3;
-  --color-aqua-200: #aef5e9;
-  --color-aqua-300: #7fe9da;
-  --color-aqua-400: #1ad8c6;
-  --color-aqua-500: #0fbcab;
-  --color-aqua-600: #0d9488;
-  --color-aqua-700: #0a7268;
+  --color-aqua-50: #edfbff;
+  --color-aqua-100: #ccf2fe;
+  --color-aqua-200: #9fe6fd;
+  --color-aqua-300: #6fd0fc;
+  --color-aqua-400: #45c2fa;
+  --color-aqua-500: #28b6f8;
+  --color-aqua-600: #0e9fe4;
+  --color-aqua-700: #0c83bf;
 
-  /* 深青副色（渐变较深的一端） */
-  --color-tech: #0ea5a4;
-  --color-tech-soft: #7fe9da;
+  /* 副色（渐变较亮的一端 / 品牌识别亮蓝） */
+  --color-tech: #28b6f8;
+  --color-tech-soft: #9fe6fd;
 
-  /* 光感（径向辉光用，配 /透明度 修饰符），克制使用 */
-  --color-glow-1: #5eead4;
-  --color-glow-2: #38bdf8;
-  --color-glow-3: #99f6e4;
+  /* 光感（径向辉光用，配 /透明度 修饰符），清亮通透 */
+  --color-glow-1: #6fd0fc;
+  --color-glow-2: #45c2fa;
+  --color-glow-3: #9fe6fd;
 }
 
 @theme inline {

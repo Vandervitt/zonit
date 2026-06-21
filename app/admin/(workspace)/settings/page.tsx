@@ -19,7 +19,7 @@ export default function SettingsPage() {
         </Descriptions>
       </Card>
       <Card title="账户" extra={<Link href={Routes.Billing}><Button type="link">管理</Button></Link>}>
-        <Space><span>当前套餐</span><Tag color={plan === "free" ? "default" : "cyan"}>{PLANS[plan].label}</Tag></Space>
+        <Space><span>当前套餐</span><Tag color={plan === "free" ? "default" : "blue"}>{PLANS[plan].label}</Tag></Space>
       </Card>
     </Space>
   );

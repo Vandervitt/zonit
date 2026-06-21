@@ -1,10 +1,10 @@
 // lib/theme/antd-theme.ts
-// admin / super-admin 的 antd 主题（深青·明亮），与官网 --primary (#0d9488) 对齐。
+// admin / super-admin 的 antd 主题（清澈透亮蓝），与官网 --primary (#0e9fe4) 对齐。
 // 单一来源：改这里即可全后台换肤。
 import type { ThemeConfig } from "antd";
 import { theme as antdTheme } from "antd";
 
-const BRAND = "#0d9488"; // 深青，与官网 styles/theme.css 的 --primary 一致
+const BRAND = "#0e9fe4"; // 清澈蓝，与官网 styles/theme.css 的 --primary 一致
 
 export const adminTheme: ThemeConfig = {
   cssVar: true,
@@ -12,7 +12,7 @@ export const adminTheme: ThemeConfig = {
   token: {
     colorPrimary: BRAND,
     colorInfo: BRAND,
-    colorSuccess: "#18c98c",
+    colorSuccess: "#16a34a",
     colorWarning: "#f59e0b",
     colorError: "#ef4444",
     borderRadius: 10,
@@ -28,7 +28,7 @@ export const adminTheme: ThemeConfig = {
       bodyBg: "#f6fafb",
     },
     Menu: {
-      itemSelectedBg: "#effefb",
+      itemSelectedBg: "#ecf8ff",
       itemSelectedColor: BRAND,
       itemBorderRadius: 10,
     },

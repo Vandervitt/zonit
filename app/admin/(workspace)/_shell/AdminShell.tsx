@@ -26,7 +26,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     icon: createElement(i.icon),
     disabled: i.disabled,
     label: i.disabled
-      ? <span>{i.label} <Tag color="cyan" style={{ marginInlineStart: 6 }}>{i.badge}</Tag></span>
+      ? <span>{i.label} <Tag color="blue" style={{ marginInlineStart: 6 }}>{i.badge}</Tag></span>
       : <Link href={i.href!}>{i.label}</Link>,
   }));
 
@@ -36,7 +36,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         style={{ borderInlineEnd: "1px solid #eef3f9" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 20px" }}>
           <span style={{ display: "grid", placeItems: "center", width: 30, height: 30,
-            borderRadius: 8, background: "#0d9488", color: "#fff" }}>
+            borderRadius: 8, background: "#0e9fe4", color: "#fff" }}>
             <ThunderboltFilled />
           </span>
           {!collapsed && <Typography.Text strong>Zap Bridge</Typography.Text>}
@@ -46,12 +46,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <Layout>
         <Header style={{ display: "flex", alignItems: "center", justifyContent: "flex-end",
           gap: 12, paddingInline: 20, borderBlockEnd: "1px solid #eef3f9" }}>
-          <Tag color={plan === "free" ? "default" : "cyan"}>{PLANS[plan].label}</Tag>
+          <Tag color={plan === "free" ? "default" : "blue"}>{PLANS[plan].label}</Tag>
           <Dropdown menu={{ items: [
             { key: "out", icon: <LogoutOutlined />, label: "退出登录",
               onClick: () => signOut({ callbackUrl: "/login" }) },
           ]}}>
-            <Avatar src={session?.user?.image ?? undefined} style={{ background: "#0d9488", cursor: "pointer" }}>
+            <Avatar src={session?.user?.image ?? undefined} style={{ background: "#0e9fe4", cursor: "pointer" }}>
               {session?.user?.name?.[0]?.toUpperCase() ?? "?"}
             </Avatar>
           </Dropdown>

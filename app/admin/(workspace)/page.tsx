@@ -86,7 +86,7 @@ export default function OverviewPage() {
                 <Link href={Routes.Pricing}><Button block type="text">查看套餐</Button></Link>
               </Space>
             </Card>
-            <Card><Space align="center"><Tag color="cyan">即将上线</Tag>
+            <Card><Space align="center"><Tag color="blue">即将上线</Tag>
               <Typography.Text type="secondary">投放分析（访问量 / CTA 点击 / 来源归因）正在路上。</Typography.Text></Space></Card>
           </Space>
         </Col>
