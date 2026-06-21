@@ -4,20 +4,21 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import Script from "next/script";
 import type { PageTracking } from "@/types/schema.draft";
 import { parseUtm, mergeUtmIntoUrl } from "./utm";
-import { PixelSink, type EventSink } from "./sinks";
+import { PixelSink, BeaconSink, type EventSink } from "./sinks";
 import { inferChannel } from "./events";
 import { ConsentBar } from "./ConsentBar";
 
 const CONSENT_KEY = "lp_consent";
 const UTM_KEY = "lp_utm";
 
-export function TrackingProvider({ tracking, children }: { tracking?: PageTracking; children: ReactNode }) {
+export function TrackingProvider({ tracking, pageId, children }: { tracking?: PageTracking; pageId: string; children: ReactNode }) {
   const consentEnabled = tracking?.consent?.enabled ?? true;
   // SSR 与首帧统一为「未同意/未拒绝」，再由 effect 读 localStorage 校正，避免水合不一致与 SSR 访问 localStorage。
   const [consented, setConsented] = useState<boolean>(false);
   const [declined, setDeclined] = useState<boolean>(false);
   const utmRef = useRef<Record<string, string>>({});
   const sinksRef = useRef<EventSink[]>([]);
+  const beaconRef = useRef<BeaconSink | null>(null);
 
   const enabledPixels = (tracking?.pixels ?? []).filter((p) => p.enabled && p.id.trim());
 
@@ -26,6 +27,14 @@ export function TrackingProvider({ tracking, children }: { tracking?: PageTracki
     const utm = parseUtm(window.location.search);
     if (Object.keys(utm).length) sessionStorage.setItem(UTM_KEY, JSON.stringify(utm));
     try { utmRef.current = JSON.parse(sessionStorage.getItem(UTM_KEY) ?? "{}"); } catch { utmRef.current = {}; }
+  }, []);
+
+  // first-party beacon：独立于同意条，mount 即发 page_view（始终采集，匿名无 cookie）。
+  useEffect(() => {
+    if (beaconRef.current) return;
+    beaconRef.current = new BeaconSink(pageId);
+    beaconRef.current.track("page_view", { ...utmRef.current });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 读已存同意（仅客户端）：未启用同意条则视为已同意；否则按 localStorage 校正。
@@ -64,6 +73,7 @@ export function TrackingProvider({ tracking, children }: { tracking?: PageTracki
     if (!target) return;
     const channel = target.getAttribute("data-cta") ?? "external";
     sinksRef.current.forEach((s) => s.track("cta_click", { channel, ...utmRef.current }));
+    beaconRef.current?.track("cta_click", { channel, ...utmRef.current });
     if (tracking?.utmPassthrough && inferChannel(target.href) === "external") {
       const merged = mergeUtmIntoUrl(target.href, utmRef.current);
       if (merged !== target.href) { e.preventDefault(); window.location.href = merged; }

@@ -71,7 +71,7 @@ export default async function PublicLandingPage({
   if (!page) notFound();
 
   return (
-    <TrackingProvider tracking={page.data.tracking}>
+    <TrackingProvider tracking={page.data.tracking} pageId={page.id}>
       <LandingPage page={page.data} />
     </TrackingProvider>
   );
