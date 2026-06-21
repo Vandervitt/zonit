@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { findBannedTerms, filterCandidates, checkDraftCompliance } from "@/lib/ai/guardrails";
-import { TEMPLATES } from "@/landing-editor/samples/registry";
+import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 
 describe("findBannedTerms", () => {
   it("命中英文交易词", () => {
@@ -24,12 +24,12 @@ describe("filterCandidates", () => {
 });
 
 describe("checkDraftCompliance", () => {
-  it("合法模板通过", () => {
-    const r = checkDraftCompliance(TEMPLATES[0].draft);
+  it("合法模板通过", async () => {
+    const r = checkDraftCompliance(await loadTemplateDraft());
     expect(r.ok).toBe(true);
   });
-  it("含交易词的 draft 被拒", () => {
-    const bad = structuredClone(TEMPLATES[0].draft);
+  it("含交易词的 draft 被拒", async () => {
+    const bad = structuredClone(await loadTemplateDraft());
     bad.hero.title = "立即购买 buy now";
     const r = checkDraftCompliance(bad);
     expect(r.ok).toBe(false);

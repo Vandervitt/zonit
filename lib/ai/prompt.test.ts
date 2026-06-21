@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildSystemPrompt, buildFillUserPrompt, slotFillJsonSchema } from "@/lib/ai/prompt";
 import { deriveSlots } from "@/lib/ai/slots";
-import { TEMPLATES } from "@/landing-editor/samples/registry";
+import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 
 describe("prompt 构造", () => {
   it("system prompt 含非交易护栏与不编造证据要求", () => {
@@ -10,8 +10,8 @@ describe("prompt 构造", () => {
     expect(sys).toMatch(/不得|禁止|must not/i);
   });
 
-  it("user prompt 含 brief 与槽位 id", () => {
-    const slots = deriveSlots(TEMPLATES[0].draft);
+  it("user prompt 含 brief 与槽位 id", async () => {
+    const slots = deriveSlots(await loadTemplateDraft());
     const prompt = buildFillUserPrompt(
       { productName: "Acme", description: "B2B 咨询" },
       slots,

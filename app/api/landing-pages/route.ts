@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { getTemplate } from "@/landing-editor/samples/registry";
+import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 import { createLandingPage, listLandingPages } from "@/lib/landing-pages/store";
 import { getUserPlan } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
 
   const { templateId } = await request.json();
   const template = getTemplate(templateId); // 未命中回退默认模板
-  const row = await createLandingPage(session.user.id, template.name, template.draft);
+  const draft = await loadTemplateDraft(templateId); // 草稿体按需加载
+  const row = await createLandingPage(session.user.id, template.name, draft);
   return NextResponse.json(row, { status: 201 });
 }
