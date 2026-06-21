@@ -50,18 +50,18 @@ export default function AnalyticsPage() {
             <AreaChart data={a!.series} margin={{ left: -16, right: 8, top: 8 }}>
               <defs>
                 <linearGradient id="gv" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0d9488" stopOpacity={0.25} /><stop offset="100%" stopColor="#0d9488" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#28b6f8" stopOpacity={0.25} /><stop offset="100%" stopColor="#28b6f8" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gc" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#14b8a6" stopOpacity={0.25} /><stop offset="100%" stopColor="#14b8a6" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#6fd0fc" stopOpacity={0.25} /><stop offset="100%" stopColor="#6fd0fc" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#eef3f9" />
               <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} minTickGap={24} />
               <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} allowDecimals={false} />
               <Tooltip />
-              <Area type="monotone" dataKey="views" name="访问量" stroke="#0d9488" fill="url(#gv)" strokeWidth={2} />
-              <Area type="monotone" dataKey="clicks" name="CTA 点击" stroke="#14b8a6" fill="url(#gc)" strokeWidth={2} />
+              <Area type="monotone" dataKey="views" name="访问量" stroke="#28b6f8" fill="url(#gv)" strokeWidth={2} />
+              <Area type="monotone" dataKey="clicks" name="CTA 点击" stroke="#6fd0fc" fill="url(#gc)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         )}

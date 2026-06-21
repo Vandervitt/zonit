@@ -1,21 +1,21 @@
 /* landing-editor/editor-theme.css
    落地页编辑器（/admin/editor）专用主题 token（Tailwind v4 @theme）。
-   与全站「深青·明亮」统一：brand 色阶为深青，中性为干净石板，与 admin（antd #0d9488）呼应。
+   与全站「清澈透亮蓝·明亮」统一：brand 色阶为清澈蓝，中性为干净石板，与 admin（antd #0e9fe4）呼应。
    这些 token 仅 landing-editor 组件使用（bg-brand-600、bg-canvas 等），不影响其他页面。
    经 app/globals.css 引入参与 Tailwind 构建。
 */
 @theme {
-  /* 品牌色阶：深青（与 admin / 官网 primary #0d9488 同族） */
-  --color-brand-50: #effefb;
-  --color-brand-100: #d2fbf3;
-  --color-brand-200: #aef5e9;
-  --color-brand-300: #7fe9da;
-  --color-brand-400: #2dd4bf;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
-  --color-brand-900: #134e4a;
+  /* 品牌色阶：清澈透亮蓝（与 admin / 官网 primary #0e9fe4 同族） */
+  --color-brand-50: #edfbff;
+  --color-brand-100: #ccf2fe;
+  --color-brand-200: #9fe6fd;
+  --color-brand-300: #6fd0fc;
+  --color-brand-400: #45c2fa;
+  --color-brand-500: #28b6f8;
+  --color-brand-600: #0e9fe4;
+  --color-brand-700: #0c83bf;
+  --color-brand-800: #0a6c9e;
+  --color-brand-900: #08577f;
 
   /* 中性面（干净石板，与 admin 中性一致） */
   --color-canvas: #f6fafb; /* 整页背景 */
@@ -28,9 +28,9 @@
   --color-ink-soft: #475569; /* 次文字 / 标签 */
   --color-ink-muted: #94a3b8; /* 占位 / 弱化 */
 
-  /* 代码面板（深色，略带青绿） */
-  --color-code-bg: #0a1c1a;
-  --color-code-edge: #14302c;
-  --color-code-fg: #cdeae3;
-  --color-code-muted: #5e8980;
+  /* 代码面板（深色，略带蓝） */
+  --color-code-bg: #0a1622;
+  --color-code-edge: #142c40;
+  --color-code-fg: #cde7f5;
+  --color-code-muted: #5e7e98;
 }

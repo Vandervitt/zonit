@@ -38,7 +38,7 @@ const columns: ColumnsType<UserRow> = [
     dataIndex: "role",
     key: "role",
     render: (role: string) => (
-      <Tag color={role === UserRole.SUPER_ADMIN ? "cyan" : "default"}>
+      <Tag color={role === UserRole.SUPER_ADMIN ? "blue" : "default"}>
         {role === UserRole.SUPER_ADMIN ? "超管" : role}
       </Tag>
     ),

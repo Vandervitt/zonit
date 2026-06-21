@@ -7,7 +7,7 @@ import type { PlanId } from "@/lib/plans";
 const COLOR_MAP: Record<PlanId, string> = {
   free: "default",
   starter: "blue",
-  pro: "cyan",
+  pro: "blue",
   agency: "gold",
 };
 

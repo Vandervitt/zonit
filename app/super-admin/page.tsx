@@ -45,7 +45,7 @@ export default async function AdminDashboard() {
     {
       title: "总用户数",
       value: stats.totalUsers,
-      prefix: <UserOutlined style={{ color: "#0d9488" }} />,
+      prefix: <UserOutlined style={{ color: "#0e9fe4" }} />,
       suffix: undefined as string | undefined,
     },
     {
@@ -57,7 +57,7 @@ export default async function AdminDashboard() {
     {
       title: "付费订阅",
       value: stats.activeSubs,
-      prefix: <CreditCardOutlined style={{ color: "#0d9488" }} />,
+      prefix: <CreditCardOutlined style={{ color: "#0e9fe4" }} />,
       suffix: undefined as string | undefined,
     },
     {
@@ -150,7 +150,7 @@ export default async function AdminDashboard() {
         <Col xs={24} md={10}>
           <Card
             style={{
-              background: "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
+              background: "linear-gradient(135deg, #0e9fe4 0%, #0c83bf 100%)",
               border: "none",
               height: "100%",
               display: "flex",
