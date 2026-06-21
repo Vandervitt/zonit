@@ -18,6 +18,7 @@ export enum ApiRoutes {
   Media = '/api/media',
   LandingPages = '/api/landing-pages',
   AiUsage = '/api/ai/usage',
+  Analytics = '/api/analytics',
   Templates = '/api/templates',
   Register = '/api/register',
   BillingCheckout = '/api/billing/checkout',
