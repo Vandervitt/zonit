@@ -57,8 +57,33 @@ export class PixelSink implements EventSink {
   }
 }
 
-// 后续刀扩展点：first-party 采集（不在本刀实现）
-// export class BeaconSink implements EventSink {
-//   init() {}
-//   track(event, params) { navigator.sendBeacon("/api/track", JSON.stringify({ event, ...params })); }
-// }
+/** first-party 采集 sink：匿名事件回传 Zonit，独立于第三方像素与同意条。 */
+export class BeaconSink implements EventSink {
+  private readonly url: string;
+  constructor(private readonly pageId: string) {
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    this.url = `${base}/api/track`;
+  }
+  ready(): boolean { return true; }
+  init(): void {}
+  track(event: InternalEvent, params: EventParams): void {
+    const payload = JSON.stringify({
+      pageId: this.pageId,
+      event,
+      channel: params.channel,
+      utm_source: params.utm_source,
+      utm_medium: params.utm_medium,
+      utm_campaign: params.utm_campaign,
+    });
+    try {
+      const blob = new Blob([payload], { type: "text/plain" });
+      if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+        navigator.sendBeacon(this.url, blob);
+      } else {
+        void fetch(this.url, { method: "POST", body: payload, keepalive: true, headers: { "Content-Type": "text/plain" } });
+      }
+    } catch {
+      /* best-effort：采集失败不影响落地页 */
+    }
+  }
+}
