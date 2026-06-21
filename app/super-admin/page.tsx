@@ -1,13 +1,12 @@
 import pool from "@/lib/db";
-import { 
-  Users, 
-  Globe, 
-  CreditCard, 
-  ArrowUpRight, 
-  Activity,
-  Plus
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Row, Col, Card, Statistic, Button, Tag, Typography, Space } from "antd";
+import {
+  UserOutlined,
+  GlobalOutlined,
+  CreditCardOutlined,
+  RiseOutlined,
+  FileTextOutlined,
+} from "@ant-design/icons";
 
 interface LatestPageRow {
   id: string;
@@ -40,115 +39,138 @@ async function getStats() {
 export default async function AdminDashboard() {
   const stats = await getStats();
 
-  const cards = [
+  const conversionRate = ((stats.activeSubs / (stats.totalUsers || 1)) * 100).toFixed(1);
+
+  const statCards = [
     {
-      title: "Total Users",
+      title: "总用户数",
       value: stats.totalUsers,
-      icon: Users,
-      description: "Registered accounts",
-      color: "text-blue-600",
-      bg: "bg-blue-50"
+      prefix: <UserOutlined style={{ color: "#0d9488" }} />,
+      suffix: undefined as string | undefined,
     },
     {
-      title: "Total Pages",
+      title: "落地页总数",
       value: stats.totalPages,
-      icon: Globe,
-      description: "Created by users",
-      color: "text-emerald-600",
-      bg: "bg-emerald-50"
+      prefix: <GlobalOutlined style={{ color: "#10b981" }} />,
+      suffix: undefined as string | undefined,
     },
     {
-      title: "Active Subscriptions",
+      title: "付费订阅",
       value: stats.activeSubs,
-      icon: CreditCard,
-      description: "Paid plans",
-      color: "text-violet-600",
-      bg: "bg-violet-50"
+      prefix: <CreditCardOutlined style={{ color: "#0d9488" }} />,
+      suffix: undefined as string | undefined,
     },
     {
-      title: "Conversion Rate",
-      value: `${((stats.activeSubs / (stats.totalUsers || 1)) * 100).toFixed(1)}%`,
-      icon: Activity,
-      description: "Free to Paid",
-      color: "text-amber-600",
-      bg: "bg-amber-50"
-    }
+      title: "转化率",
+      value: parseFloat(conversionRate),
+      prefix: <RiseOutlined style={{ color: "#f59e0b" }} />,
+      suffix: "%",
+    },
   ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Platform Overview</h1>
-        <p className="text-slate-500 mt-2">Real-time performance metrics and recent activities.</p>
+    <div>
+      <div style={{ marginBottom: 24 }}>
+        <Typography.Title level={2} style={{ margin: 0 }}>
+          平台概览
+        </Typography.Title>
+        <Typography.Text type="secondary">实时平台运营指标与最新动态</Typography.Text>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card) => (
-          <Card key={card.title} className="border-none shadow-sm overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-medium text-slate-500">
-                {card.title}
-              </CardTitle>
-              <div className={`${card.bg} p-2 rounded-lg`}>
-                <card.icon className={`w-4 h-4 ${card.color}`} />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-slate-900">{card.value}</div>
-              <p className="text-xs text-slate-400 mt-1">{card.description}</p>
-            </CardContent>
-          </Card>
+      {/* 统计卡片 */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        {statCards.map((card) => (
+          <Col key={card.title} xs={24} sm={12} lg={6}>
+            <Card>
+              <Statistic
+                title={card.title}
+                value={card.value}
+                prefix={card.prefix}
+                suffix={card.suffix}
+              />
+            </Card>
+          </Col>
         ))}
-      </div>
+      </Row>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="border-none shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Recently Created Pages</CardTitle>
-            <ArrowUpRight className="w-4 h-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {stats.latestPages.map((site) => (
-                <div key={site.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center border border-slate-200 text-lg">
-                      🎨
-                    </div>
+      {/* 下半区：最新落地页 + CTA */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} md={14}>
+          <Card
+            title={
+              <Space>
+                <FileTextOutlined />
+                最新创建的落地页
+              </Space>
+            }
+          >
+            {stats.latestPages.length === 0 ? (
+              <Typography.Text type="secondary">暂无数据</Typography.Text>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {stats.latestPages.map((site) => (
+                  <div
+                    key={site.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "10px 12px",
+                      borderRadius: 8,
+                      background: "#f6fafb",
+                      border: "1px solid #e6f7f5",
+                    }}
+                  >
                     <div>
-                      <p className="text-sm font-medium text-slate-900">{site.name}</p>
-                      <p className="text-xs text-slate-500">{site.user_email}</p>
+                      <Typography.Text strong style={{ display: "block", fontSize: 13 }}>
+                        {site.name}
+                      </Typography.Text>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        {site.user_email}
+                      </Typography.Text>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <Tag color={site.status === "published" ? "success" : "default"}>
+                        {site.status}
+                      </Tag>
+                      <Typography.Text
+                        type="secondary"
+                        style={{ display: "block", fontSize: 11, marginTop: 4 }}
+                      >
+                        {new Date(site.created_at).toLocaleDateString("zh-CN")}
+                      </Typography.Text>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium uppercase ${
-                      site.status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
-                    }`}>
-                      {site.status}
-                    </span>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {new Date(site.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            )}
+          </Card>
+        </Col>
 
-        <Card className="border-none shadow-sm flex flex-col justify-center items-center p-8 text-center bg-indigo-600 text-white">
-          <div className="w-16 h-16 rounded-full bg-indigo-500/50 flex items-center justify-center mb-4">
-            <Plus className="w-8 h-8" />
-          </div>
-          <h3 className="text-xl font-bold">New Platform feature?</h3>
-          <p className="text-indigo-100 mt-2 mb-6 max-w-[280px]">
-            You can extend the admin panel to manage templates, blocks, or global system settings.
-          </p>
-          <button className="px-6 py-2.5 bg-white text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors">
-            Read Docs
-          </button>
-        </Card>
-      </div>
+        <Col xs={24} md={10}>
+          <Card
+            style={{
+              background: "linear-gradient(135deg, #0d9488 0%, #0f766e 100%)",
+              border: "none",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            styles={{ body: { textAlign: "center", width: "100%" } }}
+          >
+            <Typography.Title level={4} style={{ color: "#fff", margin: "0 0 8px" }}>
+              需要新的平台功能？
+            </Typography.Title>
+            <Typography.Paragraph style={{ color: "rgba(255,255,255,0.8)", marginBottom: 20 }}>
+              可在此扩展管理模板、区块或全局系统设置。
+            </Typography.Paragraph>
+            <Button type="primary" ghost>
+              查看文档
+            </Button>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 }

@@ -13,6 +13,7 @@ export const PUBLIC_PATHS = [
   "/api/auth",
   "/api/register",
   "/api/templates",
+  "/api/track", // 公开采集端点：访客在租户域名匿名回传，无需登录
 ];
 
 type ProxyAuth = {

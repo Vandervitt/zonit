@@ -43,13 +43,13 @@ export function Sidebar() {
   const { data: session } = useSession();
 
   return (
-    <aside className="w-52 min-h-screen bg-white/80 backdrop-blur-sm flex flex-col py-6 px-4 shrink-0 shadow-sm">
+    <aside className="w-52 min-h-screen bg-white/70 backdrop-blur-sm flex flex-col py-6 px-4 shrink-0 border-r border-aqua-100">
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8 px-2">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-400 to-pink-600 flex items-center justify-center">
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-aqua-500 to-tech flex items-center justify-center shadow-sm shadow-aqua-500/30">
           <Grid2x2 className="w-4 h-4 text-white" />
         </div>
-        <span className="text-slate-800 tracking-widest text-sm uppercase">
+        <span className="text-foreground tracking-widest text-sm uppercase">
           Zap Bridge
         </span>
       </div>
@@ -64,12 +64,12 @@ export function Sidebar() {
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                 active
-                  ? "bg-slate-100 text-slate-800"
-                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                  ? "bg-aqua-50 text-aqua-700 ring-1 ring-aqua-100"
+                  : "text-muted-foreground hover:bg-aqua-50/60 hover:text-aqua-600"
               }`}
             >
               <Icon
-                className={`w-4 h-4 ${active ? "text-slate-700" : "text-slate-400"}`}
+                className={`w-4 h-4 ${active ? "text-aqua-600" : "text-muted-foreground"}`}
               />
               <span>{label}</span>
             </Link>
@@ -79,7 +79,7 @@ export function Sidebar() {
 
       {/* Other */}
       <div className="mt-6">
-        <p className="text-xs text-slate-400 px-3 mb-2 uppercase tracking-wider">
+        <p className="text-xs text-muted-foreground px-3 mb-2 uppercase tracking-wider">
           Other
         </p>
         <div className="flex flex-col gap-1">
@@ -91,11 +91,11 @@ export function Sidebar() {
                 href={href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                   active
-                    ? "bg-slate-100 text-slate-800"
-                    : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                    ? "bg-aqua-50 text-aqua-700 ring-1 ring-aqua-100"
+                    : "text-muted-foreground hover:bg-aqua-50/60 hover:text-aqua-600"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${active ? "text-slate-700" : "text-slate-400"}`} />
+                <Icon className={`w-4 h-4 ${active ? "text-aqua-600" : "text-muted-foreground"}`} />
                 <span>{label}</span>
               </Link>
             );
@@ -115,22 +115,22 @@ export function Sidebar() {
             className="w-9 h-9 rounded-full object-cover shrink-0"
           />
         ) : (
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 to-pink-600 flex items-center justify-center shrink-0 text-white text-sm font-medium">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-aqua-500 to-tech flex items-center justify-center shrink-0 text-white text-sm font-medium">
             {session?.user?.name?.[0]?.toUpperCase() ?? "?"}
           </div>
         )}
         <div className="overflow-hidden flex-1">
           <div className="flex items-center gap-1.5">
-            <p className="text-sm text-slate-800 truncate">{session?.user?.name ?? ""}</p>
+            <p className="text-sm text-foreground truncate">{session?.user?.name ?? ""}</p>
             {session?.user?.plan && (
               <PlanBadge plan={(session.user.plan) as PlanId} />
             )}
           </div>
-          <p className="text-xs text-slate-400 truncate">{session?.user?.email ?? ""}</p>
+          <p className="text-xs text-muted-foreground truncate">{session?.user?.email ?? ""}</p>
         </div>
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="text-slate-400 hover:text-slate-600 transition-colors shrink-0"
+          className="text-muted-foreground hover:text-aqua-600 transition-colors shrink-0"
           title="Sign out"
         >
           <LogOut className="w-4 h-4" />

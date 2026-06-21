@@ -3,10 +3,8 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
-import { Plus, Globe, Trash2, ToggleLeft, ToggleRight, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { QueryState } from "@/components/ui/QueryState";
+import { Table, Button, Tag, Switch, Popconfirm, Typography, Empty, Space } from "antd";
+import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { AddDomainDialog } from "@/components/domains/AddDomainDialog";
 import { UpgradeDialog } from "@/components/billing/UpgradeDialog";
 import { ApiRoutes, apiDomainPath, apiDomainStatusPath } from "@/lib/constants";
@@ -14,6 +12,7 @@ import { jsonRequest, fetcher } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 import { PLANS } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
+import type { TableColumnsType } from "antd";
 
 interface Domain {
   id: string;
@@ -84,85 +83,97 @@ export default function DomainsPage() {
     setPendingCheckId(null);
   }
 
-  return (
-    <main className="flex flex-col w-full">
-      <header className="flex items-center justify-between px-6 py-4">
+  const columns: TableColumnsType<Domain> = [
+    {
+      title: "域名",
+      dataIndex: "domain",
+      key: "domain",
+      render: (_: unknown, record: Domain) => (
         <div>
-          <h1 className="text-slate-800 text-2xl">域名</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            已启用 {enabledCount}{domainsLimit === Infinity ? "" : `/${domainsLimit}`} 个域名
-          </p>
+          <Typography.Text>{record.domain}</Typography.Text>
+          <br />
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            {record.landing_page_name ?? "未绑定落地页"}
+          </Typography.Text>
         </div>
-        <Button size="sm" onClick={() => setAddOpen(true)} className="rounded-full gap-1.5">
-          <Plus className="w-4 h-4" />
+      ),
+    },
+    {
+      title: "验证状态",
+      key: "verified",
+      width: 160,
+      render: (_: unknown, record: Domain) =>
+        record.verified ? (
+          <Tag color="green">已验证</Tag>
+        ) : (
+          <Space size={4}>
+            <Tag>待验证</Tag>
+            <Button
+              type="text"
+              size="small"
+              icon={<ReloadOutlined spin={pendingCheckId === record.id} />}
+              title="刷新验证状态"
+              onClick={() => handleCheckStatus(record)}
+            />
+          </Space>
+        ),
+    },
+    {
+      title: "启用",
+      key: "enabled",
+      width: 80,
+      render: (_: unknown, record: Domain) => (
+        <Switch
+          checked={record.enabled}
+          onChange={() => handleToggle(record)}
+          loading={toggleMutation.isMutating}
+        />
+      ),
+    },
+    {
+      title: "操作",
+      key: "action",
+      width: 80,
+      render: (_: unknown, record: Domain) => (
+        <Popconfirm
+          title="确认删除该域名？"
+          okText="删除"
+          cancelText="取消"
+          okButtonProps={{ danger: true }}
+          onConfirm={() => deleteMutation.trigger(record)}
+        >
+          <a style={{ color: "#ef4444" }}>删除</a>
+        </Popconfirm>
+      ),
+    },
+  ];
+
+  return (
+    <Space direction="vertical" size={16} style={{ width: "100%", padding: "16px 24px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <Typography.Title level={3} style={{ margin: 0 }}>域名</Typography.Title>
+          <Typography.Text type="secondary">
+            已启用 {enabledCount}{domainsLimit === Infinity ? "" : `/${domainsLimit}`} 个域名
+          </Typography.Text>
+        </div>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddOpen(true)}>
           添加域名
         </Button>
-      </header>
-
-      <div className="px-6 pb-6">
-        <QueryState
-          query={domainsQuery}
-          isEmpty={(d) => d.length === 0}
-          empty={
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <Globe className="w-10 h-10 text-slate-300 mb-3" />
-              <p className="text-slate-500">还没有绑定任何域名</p>
-              <p className="text-sm text-muted-foreground mt-1">点击「添加域名」开始绑定你的品牌域名</p>
-            </div>
-          }
-        >
-          {(list) => (
-            <div className="rounded-xl border bg-white/80 divide-y">
-              {list.map(domain => (
-                <div key={domain.id} className="flex items-center gap-4 px-4 py-3">
-                  <Globe className="w-4 h-4 text-slate-400 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-800 truncate">{domain.domain}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {domain.landing_page_name ?? "未绑定落地页"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {domain.verified ? (
-                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">已验证</Badge>
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        <Badge variant="secondary" className="text-xs">待验证</Badge>
-                        <button
-                          onClick={() => handleCheckStatus(domain)}
-                          className="text-slate-400 hover:text-slate-600"
-                          title="刷新验证状态"
-                        >
-                          <RefreshCw className={`w-3.5 h-3.5 ${pendingCheckId === domain.id ? "animate-spin" : ""}`} />
-                        </button>
-                      </div>
-                    )}
-                    <button
-                      onClick={() => handleToggle(domain)}
-                      disabled={toggleMutation.isMutating}
-                      className="text-slate-400 hover:text-slate-600 disabled:opacity-50"
-                      title={domain.enabled ? "停用" : "启用"}
-                    >
-                      {domain.enabled
-                        ? <ToggleRight className="w-5 h-5 text-emerald-500" />
-                        : <ToggleLeft className="w-5 h-5" />
-                      }
-                    </button>
-                    <button
-                      onClick={() => deleteMutation.trigger(domain)}
-                      disabled={deleteMutation.isMutating}
-                      className="text-slate-400 hover:text-destructive disabled:opacity-50"
-                      title="删除"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </QueryState>
       </div>
+
+      <Table<Domain>
+        rowKey="id"
+        dataSource={domains}
+        columns={columns}
+        loading={domainsQuery.isLoading}
+        pagination={false}
+        locale={{
+          emptyText: (
+            <Empty description="还没有绑定任何域名" style={{ margin: "48px 0" }} />
+          ),
+        }}
+      />
 
       <AddDomainDialog
         open={addOpen}
@@ -174,6 +185,6 @@ export default function DomainsPage() {
         onOpenChange={setUpgradeOpen}
         currentPlan={currentPlan}
       />
-    </main>
+    </Space>
   );
 }
