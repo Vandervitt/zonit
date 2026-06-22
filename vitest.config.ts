@@ -9,7 +9,11 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["lib/**/*.test.ts", "lib/**/__tests__/**/*.test.ts"],
+    include: [
+      "lib/**/*.test.ts",
+      "lib/**/__tests__/**/*.test.ts",
+      "landing-editor/**/*.test.ts",
+    ],
     exclude: ["e2e/**", "node_modules/**"],
   },
 });
