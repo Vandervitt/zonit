@@ -128,3 +128,23 @@ export async function getPublishedBySlug(slug: string): Promise<LandingPageRow |
   );
   return result.rows[0] ?? null;
 }
+
+/** 复制为新草稿：name 加「副本」，status/slug 走默认（draft / null），data 整体拷贝。 */
+export async function duplicateLandingPage(id: string, userId: string): Promise<LandingPageRow | null> {
+  const src = await getLandingPage(id, userId);
+  if (!src) return null;
+  const result = await pool.query(
+    `INSERT INTO landing_pages (user_id, name, data) VALUES ($1, $2, $3) RETURNING *`,
+    [userId, `${src.name} 副本`, JSON.stringify(src.data)],
+  );
+  return result.rows[0];
+}
+
+/** 仅改名（不触碰 data）。 */
+export async function renameLandingPage(id: string, userId: string, name: string): Promise<LandingPageRow | null> {
+  const result = await pool.query(
+    `UPDATE landing_pages SET name = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3 RETURNING *`,
+    [name, id, userId],
+  );
+  return result.rows[0] ?? null;
+}
