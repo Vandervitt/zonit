@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import pool from "@/lib/db";
 import { ApiErrors } from "@/lib/constants";
 import { getTemplate } from "@/landing-editor/samples/registry";
+import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 import { createLandingPage, listLandingPages } from "@/lib/landing-pages/store";
 import { getUserPlan } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
@@ -56,7 +57,8 @@ export async function POST(request: Request) {
 
   // 生成（失败不扣额度）
   const template = getTemplate(body.templateId);
-  const result = await generateDraftFromBrief(template.draft, body.brief);
+  const baseDraft = await loadTemplateDraft(body.templateId); // 草稿体按需加载
+  const result = await generateDraftFromBrief(baseDraft, body.brief);
   if (!result.ok) {
     return NextResponse.json(
       { error: ApiErrors.AI_GENERATION_FAILED, reason: result.reason },

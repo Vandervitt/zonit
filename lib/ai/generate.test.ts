@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { generateDraftFromBrief, rewriteText } from "@/lib/ai/generate";
 import { setAiClient, resetAiClient } from "@/lib/ai/client";
-import { TEMPLATES } from "@/landing-editor/samples/registry";
+import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 
 afterEach(() => resetAiClient());
 
@@ -12,7 +12,7 @@ describe("generateDraftFromBrief", () => {
         return { slots: [] } as unknown as T; // 空回填即沿用原文，结构仍合法
       },
     });
-    const r = await generateDraftFromBrief(TEMPLATES[0].draft, { productName: "A", description: "B" });
+    const r = await generateDraftFromBrief(await loadTemplateDraft(), { productName: "A", description: "B" });
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.draft.hero.title).toBeTruthy();
   });
@@ -25,7 +25,7 @@ describe("generateDraftFromBrief", () => {
         return { slots: [{ id: "hero.title", text: "立即购买 buy now" }] } as unknown as T;
       },
     });
-    const r = await generateDraftFromBrief(TEMPLATES[0].draft, { productName: "A", description: "B" });
+    const r = await generateDraftFromBrief(await loadTemplateDraft(), { productName: "A", description: "B" });
     expect(r.ok).toBe(false);
     expect(calls).toBe(2); // 首次 + 重试 1 次
   });
