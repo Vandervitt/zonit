@@ -53,7 +53,11 @@ export function ImageRefField({
     <div className="space-y-2 rounded-lg border border-dashed border-edge p-2.5">
       <div className="text-xs font-medium text-ink-soft">{label}</div>
       <Field label="图片资源" error={validateMediaUrl(value.src)}>
-        <MediaPicker value={value.src} onChange={(src) => onChange({ ...value, src })} accept="image" />
+        <MediaPicker
+          value={value.src}
+          accept="image"
+          onChange={(src, alt) => onChange({ ...value, src, ...(alt !== undefined ? { alt } : {}) })}
+        />
       </Field>
       <Field label="Alt 文本">
         <TextInput
@@ -116,7 +120,11 @@ export function MediaField({ value, onChange }: { value: Media; onChange: (v: Me
         </Select>
       </Field>
       <Field label="资源" error={validateMediaUrl(value.src)}>
-        <MediaPicker value={value.src} onChange={(src) => onChange({ ...value, src })} accept={value.type} />
+        <MediaPicker
+          value={value.src}
+          accept={value.type}
+          onChange={(src, alt) => onChange({ ...value, src, ...(alt !== undefined ? { alt } : {}) })}
+        />
       </Field>
       {value.type === "image" ? (
         <Field label="Alt 文本">
