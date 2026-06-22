@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Button, App } from "antd";
 import { UploadOutlined, LoadingOutlined } from "@ant-design/icons";
-import { ApiRoutes } from "@/lib/constants";
+import { uploadMedia } from "@/lib/media-upload";
 import type { MediaItem } from "@/lib/media-db";
 
 interface UploadZoneProps {
@@ -23,18 +23,10 @@ export function UploadZone({ onUploaded, compact = false, accept = "all" }: Uplo
   const upload = async (file: File) => {
     setUploading(true);
     try {
-      const form = new FormData();
-      form.append("file", file);
-      const res = await fetch(ApiRoutes.Media, { method: "POST", body: form });
-      if (!res.ok) {
-        const data = await res.json();
-        void message.error(data.error ?? "上传失败");
-        return;
-      }
-      const item: MediaItem = await res.json();
+      const item = await uploadMedia(file);
       onUploaded(item);
-    } catch {
-      void message.error("上传失败，请重试");
+    } catch (e) {
+      void message.error(e instanceof Error ? e.message : "上传失败，请重试");
     } finally {
       setUploading(false);
     }
