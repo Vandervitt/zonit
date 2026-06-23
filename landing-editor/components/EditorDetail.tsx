@@ -3,10 +3,11 @@
 // 右栏：渲染当前选中节点的表单。
 import type { ReactNode } from "react";
 import { SECTION_REGISTRY } from "@/types/schema.draft";
-import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID } from "../store/editorStore";
+import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID } from "../store/editorStore";
 import { HeroForm } from "../forms/HeroForm";
 import { FooterForm } from "../forms/FooterForm";
 import { FloatingButtonForm } from "../forms/FloatingButtonForm";
+import { LeadFormForm } from "../forms/LeadFormForm";
 import { renderSectionForm } from "../registry/sectionForms";
 
 export function EditorDetail() {
@@ -27,6 +28,11 @@ export function EditorDetail() {
     title = "悬浮按钮";
     body = (
       <FloatingButtonForm value={state.floatingButton} onChange={(v) => dispatch({ kind: "updateFloating", value: v })} />
+    );
+  } else if (id === LEADFORM_ID && state.leadForm) {
+    title = "留资表单";
+    body = (
+      <LeadFormForm value={state.leadForm} onChange={(v) => dispatch({ kind: "updateLeadForm", value: v })} />
     );
   } else {
     const section = state.sections.find((s) => s._key === id);

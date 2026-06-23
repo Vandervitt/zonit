@@ -1,7 +1,7 @@
 "use client";
 // landing-editor/components/BlockList.tsx
 // 左栏：Hero 置顶、sections 可排序、Footer 置底、悬浮按钮开关。
-import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID } from "../store/editorStore";
+import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID } from "../store/editorStore";
 import { SectionRow } from "./BlockListItem";
 import { AddSectionMenu } from "./AddSectionMenu";
 
@@ -93,6 +93,31 @@ export function BlockList() {
               }`}
             >
               编辑悬浮按钮
+            </button>
+          ) : null}
+        </div>
+
+        <div className="rounded-lg border border-edge bg-panel p-2.5">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-ink-soft">
+            <input
+              type="checkbox"
+              checked={state.leadForm !== null}
+              onChange={(e) => dispatch({ kind: "toggleLeadForm", on: e.target.checked })}
+              className="h-3.5 w-3.5 rounded border-edge-strong text-brand-600 focus:ring-brand-500/30"
+            />
+            留资表单
+          </label>
+          {state.leadForm !== null ? (
+            <button
+              type="button"
+              onClick={() => dispatch({ kind: "select", id: LEADFORM_ID })}
+              className={`mt-2 w-full rounded-md border px-2 py-1.5 text-left text-xs transition-colors ${
+                state.selectedId === LEADFORM_ID
+                  ? "border-brand-500 bg-brand-50 text-ink"
+                  : "border-edge text-ink-soft hover:border-edge-strong"
+              }`}
+            >
+              编辑留资表单
             </button>
           ) : null}
         </div>
