@@ -1,6 +1,7 @@
 import {
   AppstoreOutlined, FileTextOutlined, GlobalOutlined, PictureOutlined,
   LineChartOutlined, CreditCardOutlined, SettingOutlined, QuestionCircleOutlined,
+  InboxOutlined,
 } from "@ant-design/icons";
 import { Routes } from "@/lib/constants";
 
@@ -16,6 +17,7 @@ export interface AdminNavItem {
 export const ADMIN_NAV: AdminNavItem[] = [
   { key: "overview", label: "概览", icon: AppstoreOutlined, href: Routes.Dashboard },
   { key: "pages", label: "落地页", icon: FileTextOutlined, href: Routes.LandingPages },
+  { key: "leads", label: "线索", icon: InboxOutlined, href: Routes.Leads },
   { key: "domains", label: "域名", icon: GlobalOutlined, href: Routes.Domains },
   { key: "media", label: "素材库", icon: PictureOutlined, href: Routes.Media },
   { key: "analytics", label: "投放分析", icon: LineChartOutlined, href: "/admin/analytics" },
