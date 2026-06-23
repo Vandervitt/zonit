@@ -13,6 +13,7 @@ export default defineConfig({
       "lib/**/*.test.ts",
       "lib/**/__tests__/**/*.test.ts",
       "landing-editor/**/*.test.ts",
+      "landing-renderer/**/*.test.ts",
     ],
     exclude: ["e2e/**", "node_modules/**"],
   },
