@@ -8,6 +8,7 @@ export enum Routes {
   Billing = '/admin/billing',
   Pricing = '/pricing',
   LandingPages = '/admin/landing-pages',
+  Leads = '/admin/leads',
   Settings = '/admin/settings',
   Help = '/admin/help',
   SuperAdmin = '/super-admin',
@@ -17,6 +18,7 @@ export enum ApiRoutes {
   Domains = '/api/domains',
   Media = '/api/media',
   LandingPages = '/api/landing-pages',
+  Leads = '/api/leads',
   AiUsage = '/api/ai/usage',
   Analytics = '/api/analytics',
   Templates = '/api/templates',
@@ -40,3 +42,6 @@ export const apiLandingPagePath = (id: string) => `/api/landing-pages/${id}`;
 export const apiLandingPublishPath = (id: string) => `/api/landing-pages/${id}/publish`;
 export const apiLandingUnpublishPath = (id: string) => `/api/landing-pages/${id}/unpublish`;
 export const apiLandingDuplicatePath = (id: string) => `/api/landing-pages/${id}/duplicate`;
+
+export const apiLeadPath = (id: string) => `/api/leads/${id}`;
+export const apiLeadsExportPath = () => `/api/leads/export`;
