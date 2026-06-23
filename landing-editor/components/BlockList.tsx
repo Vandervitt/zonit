@@ -1,7 +1,7 @@
 "use client";
 // landing-editor/components/BlockList.tsx
 // 左栏：Hero 置顶、sections 可排序、Footer 置底、悬浮按钮开关。
-import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID } from "../store/editorStore";
+import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID, BRANDING_ID } from "../store/editorStore";
 import { SectionRow } from "./BlockListItem";
 import { AddSectionMenu } from "./AddSectionMenu";
 
@@ -70,6 +70,13 @@ export function BlockList() {
           hint="固定置底"
           selected={state.selectedId === FOOTER_ID}
           onSelect={() => dispatch({ kind: "select", id: FOOTER_ID })}
+        />
+
+        <FixedRow
+          label="品牌主题"
+          hint="配色 / Logo"
+          selected={state.selectedId === BRANDING_ID}
+          onSelect={() => dispatch({ kind: "select", id: BRANDING_ID })}
         />
 
         <div className="rounded-lg border border-edge bg-panel p-2.5">
