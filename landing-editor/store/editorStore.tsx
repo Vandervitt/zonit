@@ -13,23 +13,26 @@ import type {
   HeroSection,
   FooterSection,
   FloatingButton,
+  LeadForm,
   LandingSection,
   LandingSectionType,
   LandingPageDraft,
   PageTracking,
 } from "@/types/schema.draft";
-import { createSection, createFloatingButton } from "./defaults";
+import { createSection, createFloatingButton, createLeadForm } from "./defaults";
 
 export type EditorSection = LandingSection & { _key: string };
 
 export const HERO_ID = "hero";
 export const FOOTER_ID = "footer";
 export const FLOATING_ID = "floatingButton";
+export const LEADFORM_ID = "leadForm";
 
 export interface EditorState {
   hero: HeroSection;
   footer: FooterSection;
   floatingButton: FloatingButton | null;
+  leadForm: LeadForm | null;
   sections: EditorSection[];
   selectedId: string;
   tracking: PageTracking;
@@ -41,6 +44,8 @@ export type EditorAction =
   | { kind: "updateFooter"; value: FooterSection }
   | { kind: "updateFloating"; value: FloatingButton }
   | { kind: "toggleFloating"; on: boolean }
+  | { kind: "toggleLeadForm"; on: boolean }
+  | { kind: "updateLeadForm"; value: LeadForm }
   | { kind: "updateTracking"; value: PageTracking }
   | { kind: "updateSection"; key: string; data: LandingSection["data"] }
   | { kind: "addSection"; sectionType: LandingSectionType }
@@ -79,6 +84,20 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
         selectedId: action.on
           ? FLOATING_ID
           : state.selectedId === FLOATING_ID
+            ? HERO_ID
+            : state.selectedId,
+      };
+
+    case "updateLeadForm":
+      return { ...state, leadForm: action.value };
+
+    case "toggleLeadForm":
+      return {
+        ...state,
+        leadForm: action.on ? (state.leadForm ?? createLeadForm()) : null,
+        selectedId: action.on
+          ? LEADFORM_ID
+          : state.selectedId === LEADFORM_ID
             ? HERO_ID
             : state.selectedId,
       };
@@ -165,6 +184,7 @@ export function toDraft(state: EditorState): LandingPageDraft {
     footer: state.footer,
   };
   if (state.floatingButton) draft.floatingButton = state.floatingButton;
+  if (state.leadForm) draft.leadForm = state.leadForm;
   draft.tracking = state.tracking;
   return draft;
 }

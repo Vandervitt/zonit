@@ -5,6 +5,7 @@ import type {
   HeroSection,
   FooterSection,
   FloatingButton,
+  LeadForm,
   LandingSection,
   LandingSectionType,
   StatItem,
@@ -37,6 +38,22 @@ export const createFooter = (): FooterSection => ({
 export const createFloatingButton = (): FloatingButton => ({
   text: "立即咨询",
   link: "",
+});
+
+export const createLeadForm = (): LeadForm => ({
+  enabled: true,
+  title: "留下联系方式，我们尽快回复",
+  description: "",
+  submitText: "提交",
+  successMessage: "已收到，我们会尽快联系你！",
+  fields: {
+    name:     { enabled: true,  required: false },
+    email:    { enabled: true,  required: false },
+    phone:    { enabled: false, required: false },
+    whatsapp: { enabled: true,  required: false },
+    telegram: { enabled: false, required: false },
+    message:  { enabled: true,  required: false },
+  },
 });
 
 export const createTracking = (): PageTracking => ({
