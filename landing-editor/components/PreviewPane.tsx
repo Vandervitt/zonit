@@ -32,7 +32,7 @@ export function PreviewPane() {
 
   const preview = (
     <PreviewFrame virtualWidth={DEVICE_WIDTH[device]}>
-      <LandingPage page={draft} />
+      <LandingPage page={draft} pageId="preview" />
     </PreviewFrame>
   );
 

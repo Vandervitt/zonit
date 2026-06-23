@@ -13,6 +13,7 @@ export function fromDraft(draft: LandingPageDraft): EditorState {
     hero: draft.hero,
     footer: draft.footer,
     floatingButton: draft.floatingButton ?? null,
+    leadForm: draft.leadForm ?? null,
     sections: withKeys(draft.sections),
     selectedId: HERO_ID,
     tracking: draft.tracking ?? createTracking(),

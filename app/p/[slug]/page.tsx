@@ -72,7 +72,7 @@ export default async function PublicLandingPage({
 
   return (
     <TrackingProvider tracking={page.data.tracking} pageId={page.id}>
-      <LandingPage page={page.data} />
+      <LandingPage page={page.data} pageId={page.id} />
     </TrackingProvider>
   );
 }
