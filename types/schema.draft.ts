@@ -312,6 +312,16 @@ export interface LeadForm {
 export type LeadContactField = "email" | "phone" | "whatsapp" | "telegram";
 export const LEAD_CONTACT_FIELDS: LeadContactField[] = ["email", "phone", "whatsapp", "telegram"];
 
+/** 预设品牌主题 id（单一真源，渲染器 theme.ts 引用本类型）。 */
+export type ThemeId = "teal" | "blue" | "rose" | "amber" | "violet" | "slate";
+
+/** 页面品牌化：主题 + Logo + favicon（页面级，缺省 teal、无标识）。 */
+export interface Branding {
+  theme: ThemeId;
+  logo?: string;
+  favicon?: string;
+}
+
 // 方案 A：首屏 / 页脚为顶层必填字段（编译期保证），且不在 sections[] 中 → 天然固定、不可排序。
 export interface LandingPageDraft {
   hero: HeroSection;               // 必填，固定首屏
@@ -320,6 +330,7 @@ export interface LandingPageDraft {
   floatingButton?: FloatingButton; // 悬浮按钮（可选）
   leadForm?: LeadForm;             // 兜底留资表单（可选）
   tracking?: PageTracking;         // 页面级追踪配置（缺省视为无 pixel）
+  branding?: Branding;             // 页面品牌化（主题 / Logo / favicon）
 }
 
 // ============ 方案 C：模块注册表（必须性 / 唯一性元数据） ============
