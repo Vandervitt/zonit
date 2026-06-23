@@ -34,6 +34,12 @@ export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   if (isPublic) return null;
 
+  // 线索公开提交：访客在落地页留资，POST /api/leads 无需登录（含预检 OPTIONS）；
+  // 其余方法（GET 列表）及 /api/leads/[id]、/api/leads/export 仍走下方鉴权。
+  if (pathname === "/api/leads" && (req.method === "POST" || req.method === "OPTIONS")) {
+    return null;
+  }
+
   // 平台后台：需 SUPER_ADMIN
   if (pathname.startsWith("/super-admin")) {
     if (!isLoggedIn) {
