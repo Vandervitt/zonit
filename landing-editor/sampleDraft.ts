@@ -5,7 +5,7 @@
 import type { LandingPageDraft } from "@/types/schema.draft";
 import type { EditorState } from "./store/editorStore";
 import { withKeys, HERO_ID } from "./store/editorStore";
-import { createTracking } from "./store/defaults";
+import { createTracking, createBranding } from "./store/defaults";
 
 /** 把干净的 LandingPageDraft 适配为编辑器状态（为可排序区块补 _key）。 */
 export function fromDraft(draft: LandingPageDraft): EditorState {
@@ -17,5 +17,6 @@ export function fromDraft(draft: LandingPageDraft): EditorState {
     sections: withKeys(draft.sections),
     selectedId: HERO_ID,
     tracking: draft.tracking ?? createTracking(),
+    branding: draft.branding ?? createBranding(),
   };
 }
