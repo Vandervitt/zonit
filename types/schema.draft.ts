@@ -285,12 +285,40 @@ export type LandingSection =
 
 export type LandingSectionType = LandingSection['type'];
 
+/** 留资表单单字段配置（预设字段，只能开关 + 必填）。 */
+export interface LeadFormFieldConfig {
+  enabled: boolean;
+  required: boolean;
+}
+
+/** 兜底留资表单（页面级可选件，默认关；转化优先走深链）。 */
+export interface LeadForm {
+  enabled: boolean;
+  title: string;
+  description?: string;
+  submitText: string;
+  successMessage: string;
+  fields: {
+    name: LeadFormFieldConfig;
+    email: LeadFormFieldConfig;
+    phone: LeadFormFieldConfig;
+    whatsapp: LeadFormFieldConfig;
+    telegram: LeadFormFieldConfig;
+    message: LeadFormFieldConfig;
+  };
+}
+
+/** 联系方式字段键（用于「至少一个联系方式」校验）。 */
+export type LeadContactField = "email" | "phone" | "whatsapp" | "telegram";
+export const LEAD_CONTACT_FIELDS: LeadContactField[] = ["email", "phone", "whatsapp", "telegram"];
+
 // 方案 A：首屏 / 页脚为顶层必填字段（编译期保证），且不在 sections[] 中 → 天然固定、不可排序。
 export interface LandingPageDraft {
   hero: HeroSection;               // 必填，固定首屏
   sections: LandingSection[];      // 中部模块，可自由排序；必须性由下方注册表 + 校验保证
   footer: FooterSection;           // 必填，固定页脚
   floatingButton?: FloatingButton; // 悬浮按钮（可选）
+  leadForm?: LeadForm;             // 兜底留资表单（可选）
   tracking?: PageTracking;         // 页面级追踪配置（缺省视为无 pixel）
 }
 
