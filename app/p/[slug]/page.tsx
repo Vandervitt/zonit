@@ -41,6 +41,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical },
+    icons: page.data.branding?.favicon ? { icon: page.data.branding.favicon } : undefined,
     openGraph: {
       type: "website",
       url: canonical,
