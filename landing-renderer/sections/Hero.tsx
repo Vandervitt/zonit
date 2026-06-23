@@ -6,13 +6,17 @@ import { Media } from "../primitives/Media";
 import { Badge } from "../primitives/Badge";
 import { Cta } from "../primitives/Cta";
 
-export function Hero({ data, theme }: { data: HeroSection; theme: RendererTheme }) {
+export function Hero({ data, theme, logo }: { data: HeroSection; theme: RendererTheme; logo?: string }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white">
       {data.backgroundImage && (
         <Img image={data.backgroundImage} className="absolute inset-0 h-full w-full object-cover opacity-15" />
       )}
       <div className="relative mx-auto max-w-6xl px-5 py-20 sm:px-6">
+        {logo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logo} alt="" className="mb-5 h-10 w-auto" />
+        ) : null}
         {data.badge && <Badge badge={data.badge} theme={theme} />}
         <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl">
           {data.title}
