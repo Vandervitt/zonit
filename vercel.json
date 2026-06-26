@@ -6,5 +6,8 @@
       "main": true,
       "preview": true
     }
-  }
+  },
+  "crons": [
+    { "path": "/api/cron/capi-flush", "schedule": "*/10 * * * *" }
+  ]
 }
