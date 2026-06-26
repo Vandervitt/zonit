@@ -19,6 +19,7 @@ import type {
   FaqItem,
   GuaranteeItem,
   PageTracking,
+  Branding,
 } from "@/types/schema.draft";
 
 export const createHero = (): HeroSection => ({
@@ -61,6 +62,8 @@ export const createTracking = (): PageTracking => ({
   utmPassthrough: true,
   consent: { enabled: true },
 });
+
+export const createBranding = (): Branding => ({ theme: "teal" });
 
 export function createSection(type: LandingSectionType): LandingSection {
   switch (type) {

@@ -3,8 +3,9 @@
 // 右栏：渲染当前选中节点的表单。
 import type { ReactNode } from "react";
 import { SECTION_REGISTRY } from "@/types/schema.draft";
-import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID } from "../store/editorStore";
+import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID, BRANDING_ID } from "../store/editorStore";
 import { HeroForm } from "../forms/HeroForm";
+import { BrandingForm } from "../forms/BrandingForm";
 import { FooterForm } from "../forms/FooterForm";
 import { FloatingButtonForm } from "../forms/FloatingButtonForm";
 import { LeadFormForm } from "../forms/LeadFormForm";
@@ -34,6 +35,9 @@ export function EditorDetail() {
     body = (
       <LeadFormForm value={state.leadForm} onChange={(v) => dispatch({ kind: "updateLeadForm", value: v })} />
     );
+  } else if (id === BRANDING_ID) {
+    title = "品牌主题";
+    body = <BrandingForm value={state.branding} onChange={(v) => dispatch({ kind: "updateBranding", value: v })} />;
   } else {
     const section = state.sections.find((s) => s._key === id);
     if (section) {

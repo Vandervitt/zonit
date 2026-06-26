@@ -18,6 +18,7 @@ import type {
   LandingSectionType,
   LandingPageDraft,
   PageTracking,
+  Branding,
 } from "@/types/schema.draft";
 import { createSection, createFloatingButton, createLeadForm } from "./defaults";
 
@@ -27,6 +28,7 @@ export const HERO_ID = "hero";
 export const FOOTER_ID = "footer";
 export const FLOATING_ID = "floatingButton";
 export const LEADFORM_ID = "leadForm";
+export const BRANDING_ID = "branding";
 
 export interface EditorState {
   hero: HeroSection;
@@ -36,6 +38,7 @@ export interface EditorState {
   sections: EditorSection[];
   selectedId: string;
   tracking: PageTracking;
+  branding: Branding;
 }
 
 export type EditorAction =
@@ -47,6 +50,7 @@ export type EditorAction =
   | { kind: "toggleLeadForm"; on: boolean }
   | { kind: "updateLeadForm"; value: LeadForm }
   | { kind: "updateTracking"; value: PageTracking }
+  | { kind: "updateBranding"; value: Branding }
   | { kind: "updateSection"; key: string; data: LandingSection["data"] }
   | { kind: "addSection"; sectionType: LandingSectionType }
   | { kind: "removeSection"; key: string }
@@ -76,6 +80,9 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
 
     case "updateTracking":
       return { ...state, tracking: action.value };
+
+    case "updateBranding":
+      return { ...state, branding: action.value };
 
     case "toggleFloating":
       return {
@@ -186,5 +193,6 @@ export function toDraft(state: EditorState): LandingPageDraft {
   if (state.floatingButton) draft.floatingButton = state.floatingButton;
   if (state.leadForm) draft.leadForm = state.leadForm;
   draft.tracking = state.tracking;
+  draft.branding = state.branding;
   return draft;
 }
