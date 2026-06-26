@@ -2,7 +2,8 @@ services:
   postgres:
     image: postgres:16-alpine
     ports:
-      - "5432:5432"
+      # 宿主 5432 常被其它本地 Postgres 占用，这里发布到 5433（与 .env.local 的 DATABASE_URL 一致）
+      - "5433:5432"
     environment:
       POSTGRES_DB: zonit
       POSTGRES_USER: postgres
