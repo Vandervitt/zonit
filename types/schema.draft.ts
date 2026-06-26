@@ -323,6 +323,14 @@ export interface Branding {
   favicon?: string;
 }
 
+/** 页面 SEO 覆盖（留空回退首屏派生）。 */
+export interface PageSeo {
+  metaTitle?: string;
+  metaDescription?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
 // 方案 A：首屏 / 页脚为顶层必填字段（编译期保证），且不在 sections[] 中 → 天然固定、不可排序。
 export interface LandingPageDraft {
   hero: HeroSection;               // 必填，固定首屏
@@ -332,6 +340,7 @@ export interface LandingPageDraft {
   leadForm?: LeadForm;             // 兜底留资表单（可选）
   tracking?: PageTracking;         // 页面级追踪配置（缺省视为无 pixel）
   branding?: Branding;             // 页面品牌化（主题 / Logo / favicon）
+  seo?: PageSeo;                   // SEO 覆盖（留空回退首屏派生）
 }
 
 // ============ 方案 C：模块注册表（必须性 / 唯一性元数据） ============
