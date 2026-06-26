@@ -27,7 +27,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     // AI_FAKE=1 让 /api/landing-pages/generate 与 /api/ai/rewrite 走确定性 fake，
-    // e2e 无需真实 OPENAI_API_KEY。
-    env: { AI_FAKE: '1' },
+    // e2e 无需真实 OPENAI_API_KEY。CAPI_FAKE=1 让 CAPI provider.send 走确定性 fake，不打真实平台。
+    env: { AI_FAKE: '1', CAPI_FAKE: '1' },
   },
 });
