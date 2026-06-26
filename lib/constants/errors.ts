@@ -1,5 +1,6 @@
 export const ApiErrors = {
   UNAUTHORIZED: 'Unauthorized',
+  SESSION_STALE: 'session_stale',
   NOT_FOUND: 'Not found',
   SLUG_TAKEN: 'slug_taken',
   SITE_NAME_EXISTS: 'Site name already exists.',

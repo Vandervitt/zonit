@@ -4,7 +4,7 @@ import { ApiErrors } from "@/lib/constants";
 import { getTemplate } from "@/landing-editor/samples/registry";
 import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 import { createLandingPage, listLandingPages } from "@/lib/landing-pages/store";
-import { getUserPlan } from "@/lib/plans-db";
+import { getUserPlanOrNull } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
 
 export async function GET() {
@@ -22,8 +22,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: ApiErrors.UNAUTHORIZED }, { status: 401 });
   }
 
+  // 会话有效但用户已不在库（如本地库重置 / 重建后旧 JWT 仍指向已消失的 user.id）：
+  // 直接 INSERT 会触发外键 23503 报 500，这里提前返回 401 引导重新登录。
+  const plan = await getUserPlanOrNull(session.user.id);
+  if (plan === null) {
+    return NextResponse.json({ error: ApiErrors.SESSION_STALE }, { status: 401 });
+  }
+
   // 套餐落地页数量上限：达到后拦截新建，引导升级
-  const plan = await getUserPlan(session.user.id);
   const limit = PLANS[plan].landingPagesLimit;
   if (limit !== Infinity) {
     const existing = await listLandingPages(session.user.id);
