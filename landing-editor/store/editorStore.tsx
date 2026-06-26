@@ -19,6 +19,7 @@ import type {
   LandingPageDraft,
   PageTracking,
   Branding,
+  PageSeo,
 } from "@/types/schema.draft";
 import { createSection, createFloatingButton, createLeadForm } from "./defaults";
 
@@ -29,6 +30,7 @@ export const FOOTER_ID = "footer";
 export const FLOATING_ID = "floatingButton";
 export const LEADFORM_ID = "leadForm";
 export const BRANDING_ID = "branding";
+export const SEO_ID = "seo";
 
 export interface EditorState {
   hero: HeroSection;
@@ -39,6 +41,7 @@ export interface EditorState {
   selectedId: string;
   tracking: PageTracking;
   branding: Branding;
+  seo: PageSeo;
 }
 
 export type EditorAction =
@@ -51,6 +54,7 @@ export type EditorAction =
   | { kind: "updateLeadForm"; value: LeadForm }
   | { kind: "updateTracking"; value: PageTracking }
   | { kind: "updateBranding"; value: Branding }
+  | { kind: "updateSeo"; value: PageSeo }
   | { kind: "updateSection"; key: string; data: LandingSection["data"] }
   | { kind: "addSection"; sectionType: LandingSectionType }
   | { kind: "removeSection"; key: string }
@@ -83,6 +87,9 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
 
     case "updateBranding":
       return { ...state, branding: action.value };
+
+    case "updateSeo":
+      return { ...state, seo: action.value };
 
     case "toggleFloating":
       return {
@@ -194,5 +201,6 @@ export function toDraft(state: EditorState): LandingPageDraft {
   if (state.leadForm) draft.leadForm = state.leadForm;
   draft.tracking = state.tracking;
   draft.branding = state.branding;
+  draft.seo = state.seo;
   return draft;
 }

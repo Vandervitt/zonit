@@ -20,6 +20,7 @@ import type {
   GuaranteeItem,
   PageTracking,
   Branding,
+  PageSeo,
 } from "@/types/schema.draft";
 
 export const createHero = (): HeroSection => ({
@@ -64,6 +65,8 @@ export const createTracking = (): PageTracking => ({
 });
 
 export const createBranding = (): Branding => ({ theme: "teal" });
+
+export const createSeo = (): PageSeo => ({});
 
 export function createSection(type: LandingSectionType): LandingSection {
   switch (type) {
