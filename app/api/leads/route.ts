@@ -5,6 +5,7 @@ import { ApiErrors } from "@/lib/constants";
 import { validateLeadSubmission } from "@/lib/leads/validate";
 import { leadRateLimiter } from "@/lib/leads/rate-limit";
 import { insertLead, listLeads } from "@/lib/leads/store";
+import { enqueueCapiEvents } from "@/lib/capi/dispatch";
 
 const cap = (v: unknown, n: number): string | null =>
   typeof v === "string" && v.length > 0 ? v.slice(0, n) : null;
@@ -50,6 +51,26 @@ export async function POST(request: NextRequest) {
   } catch {
     // 坏 page_id 等 FK 错误：best-effort 忽略
   }
+
+  // CAPI：表单转化服务端回传（失败不影响 lead 提交）
+  try {
+    await enqueueCapiEvents(pageId, {
+      email: typeof result.payload.email === "string" ? result.payload.email : undefined,
+      phone: typeof result.payload.phone === "string" ? result.payload.phone : undefined,
+      eventId: cap(body.event_id, 64) ?? "",
+      fbp: cap(body.fbp, 256) ?? undefined,
+      fbc: cap(body.fbc, 256) ?? undefined,
+      ttp: cap(body.ttp, 256) ?? undefined,
+      ttclid: cap(body.ttclid, 256) ?? undefined,
+      clientIp: ip !== "unknown" ? ip : undefined,
+      userAgent: request.headers.get("user-agent") ?? undefined,
+      sourceUrl: cap(body.source_url, 512) ?? undefined,
+      consent: body.consent !== false, // 默认允许；客户端显式 false 才跳过
+    });
+  } catch {
+    // CAPI 入队失败：best-effort 忽略，不影响线索提交
+  }
+
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
