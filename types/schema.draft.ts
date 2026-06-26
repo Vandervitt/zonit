@@ -253,6 +253,7 @@ export interface PixelConfig {
   provider: PixelProvider;
   id: string;        // Pixel / Measurement / Conversion ID
   enabled: boolean;  // 关闭则不注入（保留已填 ID）
+  serverSide?: boolean;  // 是否对该 provider 启用服务端 CAPI（仅 meta/tiktok），非敏感，可进 draft
 }
 
 /** 页面级追踪配置。 */
