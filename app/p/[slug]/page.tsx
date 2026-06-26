@@ -5,18 +5,10 @@ import { LandingPage } from "@/landing-renderer/LandingPage";
 import { getPublishedBySlug } from "@/lib/landing-pages/store";
 import { TrackingProvider } from "@/landing-renderer/tracking/TrackingProvider";
 import { hostnameOf, isAppHost } from "@/lib/host";
-import type { HeroSection } from "@/types/schema.draft";
+import { resolvePageMeta } from "@/lib/seo/resolve";
 
 async function isAppHostDirect(): Promise<boolean> {
   return isAppHost(hostnameOf((await headers()).get("host")));
-}
-
-/** 从首屏派生 OG 预览图：优先背景图，其次展示图（视频取封面）。 */
-function heroOgImage(hero: HeroSection): string | undefined {
-  if (hero.backgroundImage?.src) return hero.backgroundImage.src;
-  if (hero.showcase?.type === "image") return hero.showcase.src;
-  if (hero.showcase?.type === "video") return hero.showcase.poster;
-  return undefined;
 }
 
 export async function generateMetadata({
@@ -28,20 +20,19 @@ export async function generateMetadata({
   const page = await getPublishedBySlug(slug);
   if (!page) return {};
 
-  const { hero, footer } = page.data;
-  const title = hero.title.replace(/\n/g, " ");
-  const description = hero.subtitle;
+  const { footer } = page.data;
+  const { title, description, ogImage, noindex } = resolvePageMeta(page.data);
 
   // 已发布页只在租户自有域名根路径可达 → canonical 指向该域名根路径。
   const host = hostnameOf((await headers()).get("host"));
   const canonical = `https://${host}/`;
-  const ogImage = heroOgImage(hero);
 
   return {
     title,
     description,
     alternates: { canonical },
     icons: page.data.branding?.favicon ? { icon: page.data.branding.favicon } : undefined,
+    robots: noindex ? { index: false, follow: false } : undefined,
     openGraph: {
       type: "website",
       url: canonical,
