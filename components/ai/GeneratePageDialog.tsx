@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { landingEditorPath } from "@/lib/constants";
+import { handleSessionExpired } from "@/lib/auth-client";
 
 /** 生成语言选项；value 直接作为 brief.language 注入 prompt。 */
 const LANGUAGES = [
@@ -70,6 +71,7 @@ export function GeneratePageDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ templateId, brief: form }),
       });
+      if (handleSessionExpired(res, router)) return;
       const data = await res.json();
       if (!res.ok) {
         if (data.error === "ai_quota_exhausted")

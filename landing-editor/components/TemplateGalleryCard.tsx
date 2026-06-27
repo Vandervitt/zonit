@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { landingEditorPath, Routes } from "@/lib/constants";
+import { handleSessionExpired } from "@/lib/auth-client";
 import { glassCard } from "@/lib/theme";
 import type { TemplateMeta } from "../samples/registry";
 import { GeneratePageDialog } from "@/components/ai/GeneratePageDialog";
@@ -25,6 +26,7 @@ export function TemplateGalleryCard({ template }: { template: TemplateMeta }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ templateId: template.id }),
       });
+      if (handleSessionExpired(res, router)) return;
       if (res.status === 403) {
         toast.error("已达当前套餐的落地页上限，请升级后再创建");
         router.push(Routes.Billing);
