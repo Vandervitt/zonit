@@ -85,10 +85,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             credentials: {},
             async authorize() {
               const email = process.env.DEV_USER_EMAIL!;
+              // 本地联调需要付费功能，dev 一键登录账号固定为 pro 套餐
               const result = await pool.query(
-                `INSERT INTO users (email, name)
-                 VALUES ($1, 'Dev User')
-                 ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
+                `INSERT INTO users (email, name, plan)
+                 VALUES ($1, 'Dev User', 'pro')
+                 ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email, plan = 'pro'
                  RETURNING id, email, name, image`,
                 [email],
               );

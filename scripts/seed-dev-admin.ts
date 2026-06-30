@@ -26,17 +26,19 @@ async function main() {
   const isLocal = url.includes("localhost") || url.includes("127.0.0.1");
   const pool = new Pool({ connectionString: url, ssl: isLocal ? false : { rejectUnauthorized: false } });
 
-  // 1) admin 用户（幂等 upsert，返回 id）
+  // 1) admin 用户（幂等 upsert，返回 id）。本地联调需要付费功能（多页/多域名/全模板/CAPI 等），
+  //    故测试账号固定为 pro 套餐。
   const hash = await bcrypt.hash(PASSWORD, 12);
   const userRes = await pool.query(
-    `INSERT INTO users (name, email, password_hash)
-     VALUES ($1, $2, $3)
-     ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, name = EXCLUDED.name
+    `INSERT INTO users (name, email, password_hash, plan)
+     VALUES ($1, $2, $3, 'pro')
+     ON CONFLICT (email) DO UPDATE
+       SET password_hash = EXCLUDED.password_hash, name = EXCLUDED.name, plan = 'pro'
      RETURNING id`,
     [NAME, EMAIL, hash],
   );
   const userId: string = userRes.rows[0].id;
-  console.log(`✓ dev admin: ${EMAIL} / ${PASSWORD}  (id=${userId})`);
+  console.log(`✓ dev admin: ${EMAIL} / ${PASSWORD}  (plan=pro, id=${userId})`);
 
   // 2) 已验证启用的自有域名（幂等：按 domain 唯一约束 upsert，重置为本用户的 verified+enabled，并解绑旧页）
   for (const domain of DEV_DOMAINS) {
