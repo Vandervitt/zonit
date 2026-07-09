@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-interface UnsplashRawPhoto {
-  id: string;
-  urls: { small: string; regular: string };
-  alt_description: string | null;
-  user: { name: string; username: string };
-}
+import { mapUnsplashPhoto, type UnsplashRaw } from "@/lib/unsplash";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -38,12 +32,7 @@ export async function GET(req: NextRequest) {
 
   const data = await res.json();
   return NextResponse.json({
-    results: data.results.map((p: UnsplashRawPhoto) => ({
-      id: p.id,
-      urls: { small: p.urls.small, regular: p.urls.regular },
-      alt_description: p.alt_description,
-      user: { name: p.user.name, username: p.user.username },
-    })),
+    results: (data.results as UnsplashRaw[]).map(mapUnsplashPhoto),
     total: data.total,
   });
 }

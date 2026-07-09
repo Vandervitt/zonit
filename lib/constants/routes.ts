@@ -18,6 +18,8 @@ export enum Routes {
 export enum ApiRoutes {
   Domains = '/api/domains',
   Media = '/api/media',
+  MediaUnsplash = '/api/media/unsplash',
+  UnsplashSearch = '/api/unsplash/search',
   LandingPages = '/api/landing-pages',
   Leads = '/api/leads',
   AiUsage = '/api/ai/usage',
