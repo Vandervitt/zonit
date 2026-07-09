@@ -86,8 +86,12 @@ export default function OverviewPage() {
                 <Link href={Routes.Pricing}><Button block type="text">查看套餐</Button></Link>
               </Space>
             </Card>
-            <Card><Space align="center"><Tag color="blue">即将上线</Tag>
-              <Typography.Text type="secondary">投放分析（访问量 / CTA 点击 / 来源归因）正在路上。</Typography.Text></Space></Card>
+            <Card title="投放分析">
+              <Space direction="vertical" style={{ width: "100%" }}>
+                <Typography.Text type="secondary">访问量 / CTA 点击 / 来源归因，实时查看落地页表现。</Typography.Text>
+                <Link href={Routes.Analytics}><Button block icon={<ArrowRightOutlined />}>查看投放分析</Button></Link>
+              </Space>
+            </Card>
           </Space>
         </Col>
       </Row>

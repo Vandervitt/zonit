@@ -20,7 +20,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { key: "leads", label: "线索", icon: InboxOutlined, href: Routes.Leads },
   { key: "domains", label: "域名", icon: GlobalOutlined, href: Routes.Domains },
   { key: "media", label: "素材库", icon: PictureOutlined, href: Routes.Media },
-  { key: "analytics", label: "投放分析", icon: LineChartOutlined, href: "/admin/analytics" },
+  { key: "analytics", label: "投放分析", icon: LineChartOutlined, href: Routes.Analytics },
   { key: "billing", label: "账户与计费", icon: CreditCardOutlined, href: Routes.Billing },
   { key: "settings", label: "设置", icon: SettingOutlined, href: Routes.Settings },
   { key: "help", label: "帮助", icon: QuestionCircleOutlined, href: Routes.Help },

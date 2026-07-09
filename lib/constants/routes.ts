@@ -5,6 +5,7 @@ export enum Routes {
   Dashboard = '/admin',             // 租户后台首页
   Domains = '/admin/domains',
   Media = '/admin/media',
+  Analytics = '/admin/analytics',
   Billing = '/admin/billing',
   Pricing = '/pricing',
   LandingPages = '/admin/landing-pages',
