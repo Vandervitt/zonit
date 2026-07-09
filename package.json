@@ -18,7 +18,9 @@
     "db:start": "docker compose up -d postgres",
     "db:stop": "docker compose stop postgres",
     "db:reset": "docker compose down -v && docker compose up -d postgres",
-    "db:seed-dev": "tsx scripts/seed-dev-admin.ts"
+    "db:seed-dev": "tsx scripts/seed-dev-admin.ts",
+    "check:env": "node scripts/check-env.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
