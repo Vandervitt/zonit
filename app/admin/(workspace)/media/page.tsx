@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Typography, Segmented, Empty, Spin } from "antd";
+import { Typography, Segmented, Empty, Spin, Button, Space } from "antd";
+import { PictureOutlined } from "@ant-design/icons";
 import useSWR from "swr";
 import { ApiRoutes } from "@/lib/constants";
 import { MediaGrid } from "@/components/media/MediaGrid";
 import { UploadZone } from "@/components/media/UploadZone";
+import { UnsplashModal } from "@/components/media/UnsplashModal";
 import type { MediaItem } from "@/lib/media-db";
 
 type FilterTab = "all" | "image" | "video";
@@ -14,6 +16,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function MediaPage() {
   const [filter, setFilter] = useState<FilterTab>("all");
+  const [unsplashOpen, setUnsplashOpen] = useState(false);
 
   const apiUrl =
     filter === "all" ? ApiRoutes.Media : `${ApiRoutes.Media}?type=${filter}`;
@@ -54,7 +57,12 @@ export default function MediaPage() {
             {items.length} 个素材
           </Typography.Text>
         </div>
-        <UploadZone onUploaded={handleUploaded} />
+        <Space>
+          <Button icon={<PictureOutlined />} onClick={() => setUnsplashOpen(true)} aria-label="从 Unsplash 添加">
+            从 Unsplash 添加
+          </Button>
+          <UploadZone onUploaded={handleUploaded} />
+        </Space>
       </header>
 
       {/* Filter */}
@@ -78,6 +86,8 @@ export default function MediaPage() {
           <MediaGrid items={items} onDeleted={handleDeleted} />
         )}
       </div>
+
+      <UnsplashModal open={unsplashOpen} onClose={() => setUnsplashOpen(false)} onImported={handleUploaded} />
     </main>
   );
 }
