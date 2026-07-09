@@ -7,6 +7,9 @@ export interface MediaItem {
   filename: string;
   type: "image" | "video";
   size: number;
+  source: "upload" | "unsplash";
+  creditName: string | null;
+  creditUrl: string | null;
   createdAt: string;
 }
 
@@ -17,6 +20,9 @@ interface Row {
   filename: string;
   type: "image" | "video";
   size: number;
+  source: "upload" | "unsplash";
+  credit_name: string | null;
+  credit_url: string | null;
   created_at: string;
 }
 
@@ -28,8 +34,17 @@ function rowToMediaItem(row: Row): MediaItem {
     filename: row.filename,
     type: row.type,
     size: row.size,
+    source: row.source,
+    creditName: row.credit_name,
+    creditUrl: row.credit_url,
     createdAt: row.created_at,
   };
+}
+
+export interface MediaAttribution {
+  source: "upload" | "unsplash";
+  creditName?: string | null;
+  creditUrl?: string | null;
 }
 
 export async function listMedia(
@@ -54,12 +69,16 @@ export async function insertMedia(
   filename: string,
   type: "image" | "video",
   size: number,
+  attribution?: MediaAttribution,
 ): Promise<MediaItem> {
+  const source = attribution?.source ?? "upload";
+  const creditName = attribution?.creditName ?? null;
+  const creditUrl = attribution?.creditUrl ?? null;
   const result = await pool.query<Row>(
-    `INSERT INTO media (user_id, url, filename, type, size)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO media (user_id, url, filename, type, size, source, credit_name, credit_url)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING *`,
-    [userId, url, filename, type, size],
+    [userId, url, filename, type, size, source, creditName, creditUrl],
   );
   return rowToMediaItem(result.rows[0]);
 }
