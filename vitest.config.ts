@@ -14,6 +14,7 @@ export default defineConfig({
       "lib/**/__tests__/**/*.test.ts",
       "landing-editor/**/*.test.ts",
       "landing-renderer/**/*.test.ts",
+      "app/**/*.test.ts",
     ],
     exclude: ["e2e/**", "node_modules/**"],
   },
