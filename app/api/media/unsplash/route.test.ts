@@ -61,6 +61,19 @@ describe("POST /api/media/unsplash", () => {
     expect(insertMedia).not.toHaveBeenCalled();
   });
 
+  it("恶意 creditUrl（非 https unsplash.com）落库时被清成 null", async () => {
+    const res = await POST(reqOf({ ...OK_BODY, creditUrl: "javascript:alert(1)" }));
+    expect(res.status).toBe(201);
+    expect(insertMedia).toHaveBeenCalledWith(
+      "u1",
+      "https://blob.example/img-xyz.jpg",
+      expect.any(String),
+      "image",
+      3,
+      { source: "unsplash", creditName: "Jane Doe", creditUrl: null },
+    );
+  });
+
   it("未登录返回 401", async () => {
     const { auth } = await import("@/auth");
     (auth as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);

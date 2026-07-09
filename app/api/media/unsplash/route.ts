@@ -19,6 +19,16 @@ function isUnsplashImage(u: string): boolean {
     return false;
   }
 }
+// 署名链接只接受 https 的 Unsplash 主页，杜绝 javascript: 等恶意 scheme 入库
+function safeCreditUrl(u: string | null): string | null {
+  if (!u) return null;
+  try {
+    const parsed = new URL(u);
+    return parsed.protocol === "https:" && parsed.hostname === "unsplash.com" ? u : null;
+  } catch {
+    return null;
+  }
+}
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -67,7 +77,7 @@ export async function POST(req: Request) {
   const item = await insertMedia(session.user.id, blob.url, filename, "image", buf.byteLength, {
     source: "unsplash",
     creditName,
-    creditUrl,
+    creditUrl: safeCreditUrl(creditUrl),
   });
 
   return NextResponse.json(item, { status: 201 });
