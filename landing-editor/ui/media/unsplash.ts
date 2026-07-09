@@ -1,18 +1,22 @@
 // landing-editor/ui/media/unsplash.ts
-// Unsplash 搜索结果类型 + 映射为编辑器选图所需的 {src, alt}。
+// Unsplash 搜索结果类型（与 /api/unsplash/search 返回对齐）+ 映射为 import 入参。
+import type { UnsplashImportInput } from "@/lib/media-upload";
+
 export interface UnsplashPhoto {
   id: string;
   urls: { small: string; regular: string };
   alt_description: string | null;
-  user: { name: string; username: string };
+  downloadLocation: string;
+  user: { name: string; username: string; profileUrl: string };
 }
 
-export interface PickedImage {
-  src: string;
-  alt: string;
-}
-
-/** 选中 Unsplash 图：用 regular 作 src，alt_description 作 alt（缺省空串）。 */
-export function pickUnsplash(p: UnsplashPhoto): PickedImage {
-  return { src: p.urls.regular, alt: p.alt_description ?? "" };
+/** 选中 Unsplash 图 → import 端点入参（下载 regular 落库）。 */
+export function toImportInput(p: UnsplashPhoto): UnsplashImportInput {
+  return {
+    downloadLocation: p.downloadLocation,
+    imageUrl: p.urls.regular,
+    creditName: p.user.name,
+    creditUrl: p.user.profileUrl,
+    alt: p.alt_description ?? "",
+  };
 }
