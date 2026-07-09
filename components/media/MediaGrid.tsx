@@ -166,6 +166,13 @@ export function MediaGrid({
             <div style={{ padding: "4px 8px", fontSize: 11, color: "#8c8c8c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {item.filename}
             </div>
+            {item.source === "unsplash" && item.creditName ? (
+              <div style={{ padding: "0 8px 4px", fontSize: 10, color: "#aaa", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                © {item.creditUrl ? (
+                  <a href={item.creditUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>{item.creditName}</a>
+                ) : item.creditName} · Unsplash
+              </div>
+            ) : null}
           </Card>
           <Popconfirm
             title={`确认删除"${item.filename}"？`}
