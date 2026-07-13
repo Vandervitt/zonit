@@ -13,6 +13,7 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import { superAdminSiderTheme } from "@/lib/theme/antd-theme";
+import { BRAND } from "@/lib/theme/brand";
 
 const { Sider, Header, Content } = Layout;
 
@@ -62,7 +63,7 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
                 width: 32,
                 height: 32,
                 borderRadius: 8,
-                background: "#0e9fe4",
+                background: BRAND,
                 color: "#fff",
                 fontSize: 16,
               }}
@@ -78,7 +79,7 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
               </Typography.Text>
               <Typography.Text
                 style={{
-                  color: "#0e9fe4",
+                  color: BRAND,
                   fontSize: 10,
                   letterSpacing: "0.1em",
                   textTransform: "uppercase",

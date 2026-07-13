@@ -3,8 +3,7 @@
 // 单一来源：改这里即可全后台换肤。
 import type { ThemeConfig } from "antd";
 import { theme as antdTheme } from "antd";
-
-const BRAND = "#0e9fe4"; // 清澈蓝，与官网 styles/theme.css 的 --primary 一致
+import { BRAND } from "./brand"; // 单一来源，与 styles/theme.css 的 :root --primary 由单测断言一致
 
 export const adminTheme: ThemeConfig = {
   cssVar: true,

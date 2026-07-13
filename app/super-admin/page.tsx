@@ -1,5 +1,6 @@
 import pool from "@/lib/db";
 import { Row, Col, Card, Statistic, Button, Tag, Typography, Space } from "antd";
+import { BRAND } from "@/lib/theme/brand";
 import {
   UserOutlined,
   GlobalOutlined,
@@ -45,7 +46,7 @@ export default async function AdminDashboard() {
     {
       title: "总用户数",
       value: stats.totalUsers,
-      prefix: <UserOutlined style={{ color: "#0e9fe4" }} />,
+      prefix: <UserOutlined style={{ color: BRAND }} />,
       suffix: undefined as string | undefined,
     },
     {
@@ -57,7 +58,7 @@ export default async function AdminDashboard() {
     {
       title: "付费订阅",
       value: stats.activeSubs,
-      prefix: <CreditCardOutlined style={{ color: "#0e9fe4" }} />,
+      prefix: <CreditCardOutlined style={{ color: BRAND }} />,
       suffix: undefined as string | undefined,
     },
     {
@@ -150,7 +151,7 @@ export default async function AdminDashboard() {
         <Col xs={24} md={10}>
           <Card
             style={{
-              background: "linear-gradient(135deg, #0e9fe4 0%, #0c83bf 100%)",
+              background: `linear-gradient(135deg, ${BRAND} 0%, #0c83bf 100%)`,
               border: "none",
               height: "100%",
               display: "flex",
