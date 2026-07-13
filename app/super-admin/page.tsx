@@ -1,6 +1,7 @@
 import pool from "@/lib/db";
 import { Row, Col, Card, Statistic, Button, Tag, Typography, Space } from "antd";
 import { BRAND } from "@/lib/theme/brand";
+import { SEMANTIC } from "@/lib/theme/antd-theme";
 import {
   UserOutlined,
   GlobalOutlined,
@@ -52,7 +53,7 @@ export default async function AdminDashboard() {
     {
       title: "落地页总数",
       value: stats.totalPages,
-      prefix: <GlobalOutlined style={{ color: "#10b981" }} />,
+      prefix: <GlobalOutlined style={{ color: SEMANTIC.success }} />,
       suffix: undefined as string | undefined,
     },
     {
@@ -64,7 +65,7 @@ export default async function AdminDashboard() {
     {
       title: "转化率",
       value: parseFloat(conversionRate),
-      prefix: <RiseOutlined style={{ color: "#f59e0b" }} />,
+      prefix: <RiseOutlined style={{ color: SEMANTIC.warning }} />,
       suffix: "%",
     },
   ];

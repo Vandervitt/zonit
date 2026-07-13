@@ -10,6 +10,7 @@ import { UpgradeDialog } from "@/components/billing/UpgradeDialog";
 import { ApiRoutes, apiDomainPath, apiDomainStatusPath } from "@/lib/constants";
 import { jsonRequest, fetcher } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
+import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { PLANS } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 import type { TableColumnsType } from "antd";
@@ -142,7 +143,7 @@ export default function DomainsPage() {
           okButtonProps={{ danger: true }}
           onConfirm={() => deleteMutation.trigger(record)}
         >
-          <a style={{ color: "#ef4444" }}>删除</a>
+          <a style={{ color: SEMANTIC.error }}>删除</a>
         </Popconfirm>
       ),
     },

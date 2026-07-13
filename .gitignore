@@ -49,3 +49,6 @@ next-env.d.ts
 /templates
 # 工具产物，不入库
 .superpowers/
+
+# 本项目使用 pnpm，禁止 npm lockfile 混入
+package-lock.json

@@ -5,15 +5,23 @@ import type { ThemeConfig } from "antd";
 import { theme as antdTheme } from "antd";
 import { BRAND } from "./brand"; // 单一来源，与 styles/theme.css 的 :root --primary 由单测断言一致
 
+// 后台语义状态色单一来源：adminTheme token 与页面内联（删除红/成功绿/预警橙）共用。
+// 组件勿再硬编码这些十六进制，统一从此处导入。
+export const SEMANTIC = {
+  success: "#16a34a",
+  warning: "#f59e0b",
+  error: "#ef4444",
+} as const;
+
 export const adminTheme: ThemeConfig = {
   cssVar: true,
   hashed: false,
   token: {
     colorPrimary: BRAND,
     colorInfo: BRAND,
-    colorSuccess: "#16a34a",
-    colorWarning: "#f59e0b",
-    colorError: "#ef4444",
+    colorSuccess: SEMANTIC.success,
+    colorWarning: SEMANTIC.warning,
+    colorError: SEMANTIC.error,
     borderRadius: 10,
     fontFamily:
       'var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
