@@ -3,6 +3,7 @@
 import useSWR from "swr";
 import { Table, Typography, Tag, Space, Button, Popconfirm, App } from "antd";
 import { ApiRoutes, apiLeadPath, apiLeadsExportPath } from "@/lib/constants";
+import { SEMANTIC } from "@/lib/theme/antd-theme";
 
 interface LeadRow {
   id: string;
@@ -61,7 +62,7 @@ export default function LeadsPage() {
             <Space size="middle">
               <a onClick={() => setRead(r.id, !r.is_read)}>{r.is_read ? "标未读" : "标已读"}</a>
               <Popconfirm title="确定删除该线索？" okText="删除" okButtonProps={{ danger: true }} onConfirm={() => remove(r.id)}>
-                <a style={{ color: "#ef4444" }}>删除</a>
+                <a style={{ color: SEMANTIC.error }}>删除</a>
               </Popconfirm>
             </Space>
           ) },

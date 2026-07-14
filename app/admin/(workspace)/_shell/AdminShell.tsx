@@ -8,6 +8,7 @@ import { Layout, Menu, Tag, Dropdown, Avatar, Typography } from "antd";
 import { ThunderboltFilled, LogoutOutlined } from "@ant-design/icons";
 import { ADMIN_NAV } from "./nav";
 import { PLANS } from "@/lib/plans";
+import { BRAND } from "@/lib/theme/brand";
 
 const { Sider, Header, Content } = Layout;
 
@@ -36,7 +37,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         style={{ borderInlineEnd: "1px solid #eef3f9" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 20px" }}>
           <span style={{ display: "grid", placeItems: "center", width: 30, height: 30,
-            borderRadius: 8, background: "#0e9fe4", color: "#fff" }}>
+            borderRadius: 8, background: BRAND, color: "#fff" }}>
             <ThunderboltFilled />
           </span>
           {!collapsed && <Typography.Text strong>Zap Bridge</Typography.Text>}
@@ -51,7 +52,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             { key: "out", icon: <LogoutOutlined />, label: "退出登录",
               onClick: () => signOut({ callbackUrl: "/login" }) },
           ]}}>
-            <Avatar src={session?.user?.image ?? undefined} style={{ background: "#0e9fe4", cursor: "pointer" }}>
+            <Avatar src={session?.user?.image ?? undefined} style={{ background: BRAND, cursor: "pointer" }}>
               {session?.user?.name?.[0]?.toUpperCase() ?? "?"}
             </Avatar>
           </Dropdown>

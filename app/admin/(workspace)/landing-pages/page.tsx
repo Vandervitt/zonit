@@ -4,6 +4,7 @@ import useSWR from "swr";
 import Link from "next/link";
 import { Table, Button, Tag, Space, Popconfirm, Typography, App } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
+import { SEMANTIC } from "@/lib/theme/antd-theme";
 import {
   landingEditorPath,
   apiLandingUnpublishPath,
@@ -78,7 +79,7 @@ export default function LandingPagesPage() {
               {r.status === "published" && r.slug && <a href={`/p/${r.slug}`} target="_blank" rel="noreferrer">预览</a>}
               {r.status === "published" && <a onClick={() => unpublish(r.id)}>取消发布</a>}
               <Popconfirm title="确定删除该落地页？" okText="删除" okButtonProps={{ danger: true }} onConfirm={() => remove(r.id)}>
-                <a style={{ color: "#ef4444" }}>删除</a>
+                <a style={{ color: SEMANTIC.error }}>删除</a>
               </Popconfirm>
             </Space>
           ) },

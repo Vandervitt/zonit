@@ -1,5 +1,7 @@
 import pool from "@/lib/db";
 import { Row, Col, Card, Statistic, Button, Tag, Typography, Space } from "antd";
+import { BRAND } from "@/lib/theme/brand";
+import { SEMANTIC } from "@/lib/theme/antd-theme";
 import {
   UserOutlined,
   GlobalOutlined,
@@ -45,25 +47,25 @@ export default async function AdminDashboard() {
     {
       title: "总用户数",
       value: stats.totalUsers,
-      prefix: <UserOutlined style={{ color: "#0e9fe4" }} />,
+      prefix: <UserOutlined style={{ color: BRAND }} />,
       suffix: undefined as string | undefined,
     },
     {
       title: "落地页总数",
       value: stats.totalPages,
-      prefix: <GlobalOutlined style={{ color: "#10b981" }} />,
+      prefix: <GlobalOutlined style={{ color: SEMANTIC.success }} />,
       suffix: undefined as string | undefined,
     },
     {
       title: "付费订阅",
       value: stats.activeSubs,
-      prefix: <CreditCardOutlined style={{ color: "#0e9fe4" }} />,
+      prefix: <CreditCardOutlined style={{ color: BRAND }} />,
       suffix: undefined as string | undefined,
     },
     {
       title: "转化率",
       value: parseFloat(conversionRate),
-      prefix: <RiseOutlined style={{ color: "#f59e0b" }} />,
+      prefix: <RiseOutlined style={{ color: SEMANTIC.warning }} />,
       suffix: "%",
     },
   ];
@@ -150,7 +152,7 @@ export default async function AdminDashboard() {
         <Col xs={24} md={10}>
           <Card
             style={{
-              background: "linear-gradient(135deg, #0e9fe4 0%, #0c83bf 100%)",
+              background: `linear-gradient(135deg, ${BRAND} 0%, #0c83bf 100%)`,
               border: "none",
               height: "100%",
               display: "flex",

@@ -10,6 +10,7 @@ import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PLANS, PLAN_ORDER } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 import { Routes, ApiRoutes } from "@/lib/constants";
+import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { fetcher, jsonRequest } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 
@@ -157,7 +158,7 @@ export default function BillingPage() {
                       <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                         {plan.highlights.map((h) => (
                           <li key={h} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                            <CheckOutlined style={{ color: "#10b981", fontSize: 12, flexShrink: 0 }} />
+                            <CheckOutlined style={{ color: SEMANTIC.success, fontSize: 12, flexShrink: 0 }} />
                             <Text type="secondary" style={{ fontSize: 12 }}>
                               {h}
                             </Text>
