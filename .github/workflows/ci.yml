@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# 同一分支/PR 有新 push 时取消仍在跑的旧运行，省额度、快反馈。
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Unit tests
+        run: pnpm test
+
+      # 快速门禁的构建校验：不连库、无静态构建期 DB 访问，仅注入导入期会被读取的假 env。
+      # 这些占位值绝不用于运行时，真实密钥只在 Vercel 环境配置。
+      - name: Build
+        run: pnpm build
+        env:
+          AUTH_SECRET: ci-dummy-secret-0123456789abcdef0123456789
+          NEXTAUTH_URL: http://localhost:3001
+          NEXT_PUBLIC_APP_URL: http://localhost:3001
+          AUTH_GOOGLE_ID: ci-dummy
+          AUTH_GOOGLE_SECRET: ci-dummy
