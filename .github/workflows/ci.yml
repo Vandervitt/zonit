@@ -36,6 +36,11 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # Next 16 的路由类型（如 RouteContext）由此生成到 .next/types，tsconfig 已 include。
+      # 全新检出无 .next，必须先生成，否则 tsc 报 TS2304 Cannot find name 'RouteContext'。
+      - name: Generate route types
+        run: pnpm exec next typegen
+
       - name: Typecheck
         run: pnpm exec tsc --noEmit
 
