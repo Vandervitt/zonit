@@ -70,7 +70,9 @@
 | `CRON_SECRET` 🔴 | 守护 `/api/cron/capi-flush`（CAPI 兜底重发）| 随机串；Vercel Cron 命中时自动带 `Authorization: Bearer` |
 | `CAPI_FAKE` ⛔ | 测试不打真实平台 | **禁止进生产** |
 
-`vercel.json` 已配 cron：`*/10 * * * *` 调 `/api/cron/capi-flush`。
+`vercel.json` 已配 cron：`0 0 * * *`（每天 00:00 UTC）调 `/api/cron/capi-flush`。
+
+> **cron 频率与 Vercel 套餐（2026-07-15 记录）**：该 cron 是失败 CAPI 事件的兜底重发（非核心页面功能，落地页展示/留资不依赖它）。原为 `*/10 * * * *`（每 10 分钟），但 Vercel **Hobby 套餐 cron 只允许每天一次**，`*/10` 会导致**部署直接失败**（部署 check 链接指向 cron usage-and-pricing）。故降频为 `0 0 * * *`：失败事件最长 24h 内补发，平台归因窗口内一般仍有效。若后续投放上量、需要更及时的转化回传，**升级 Vercel Pro 后可恢复 `*/10 * * * *`**（Pro 无 cron 频率限制）。
 
 ### AI 生成 🟡
 
