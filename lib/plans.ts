@@ -18,7 +18,8 @@ export interface PlanConfig {
   // AI 用量（月额度；Infinity = 不限）
   aiPageQuota: number;
   aiRewriteQuota: number;
-  // 升级卡片要点（billing 用）
+  // 相对下一档的「增量」权益要点（首页/billing 递进式卡片用；free 为基础项）。
+  // 展示侧会自动在非 free 档前加「包含<上一档>全部权益」，故此处只列本档新增。
   highlights: string[];
 }
 
@@ -35,21 +36,21 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     landingPagesLimit: 3, domainsLimit: 1,
     hasWatermark: true, allTemplates: true, advancedTracking: false, antiBan: false, aiTranslation: false,
     aiPageQuota: 15, aiRewriteQuota: 100,
-    highlights: ["3 张落地页 + 1 个自定义域名", "全量全行业爆款营销模板", "1× Meta Pixel 追踪"],
+    highlights: ["3 张落地页 + 1 个自定义域名", "1× Meta Pixel 追踪"],
   },
   pro: {
     id: "pro", label: "Pro", priceText: "$79/mo", color: "violet", highlight: true,
     landingPagesLimit: 20, domainsLimit: 5,
     hasWatermark: false, allTemplates: true, advancedTracking: true, antiBan: true, aiTranslation: false,
     aiPageQuota: 80, aiRewriteQuota: Infinity,
-    highlights: ["20 张落地页 + 5 个域名", "全量全行业爆款营销模板", "去除品牌水印", "全矩阵像素 + Meta CAPI", "反同质化风控引擎"],
+    highlights: ["20 张落地页 + 5 个域名", "去除品牌水印", "全矩阵像素 + Meta CAPI", "反同质化风控引擎"],
   },
   agency: {
     id: "agency", label: "Agency", priceText: "$199/mo", color: "amber",
     landingPagesLimit: Infinity, domainsLimit: Infinity,
     hasWatermark: false, allTemplates: true, advancedTracking: true, antiBan: true, aiTranslation: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,
-    highlights: ["无限落地页 + 无限域名", "全量全行业爆款营销模板", "AI 自动多语言翻译", "一切 Pro 功能"],
+    highlights: ["无限落地页 + 无限域名", "AI 自动多语言翻译"],
   },
 };
 

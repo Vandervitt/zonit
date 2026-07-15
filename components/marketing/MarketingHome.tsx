@@ -592,14 +592,21 @@ function Pricing({ fonts }: { fonts: Fonts }) {
               >
                 {isFree ? "免费开始" : "选择此套餐"}
               </Link>
-              <ul className="mt-6 space-y-2.5 border-t border-border pt-5">
-                {plan.highlights.map((h) => (
-                  <li key={h} className="flex items-start gap-2.5 text-sm text-foreground/80">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-aqua-600" />
-                    {h}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-6 border-t border-border pt-5">
+                {i > 0 && (
+                  <p className="mb-3 text-sm font-medium text-foreground/70">
+                    包含 {PLANS[PLAN_ORDER[i - 1]].label} 全部权益
+                  </p>
+                )}
+                <ul className="space-y-2.5">
+                  {plan.highlights.map((h) => (
+                    <li key={h} className="flex items-start gap-2.5 text-sm text-foreground/80">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-aqua-600" />
+                      {h}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </motion.div>
           );
         })}
