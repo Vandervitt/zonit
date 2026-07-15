@@ -3,6 +3,11 @@
 // 纯函数、无副作用、SSR 可复现；恒等变体输出与改造前逐字节一致。
 // 约束：所有候选类名字面量写死（Tailwind JIT 可扫），运行期只挑选不拼接。
 
+/** Hero 首屏布局变体（background = 改造前原布局，守零回归）。 */
+export type HeroLayout = "background" | "split-right" | "split-left" | "centered";
+
+const HERO_LAYOUTS: HeroLayout[] = ["background", "split-right", "split-left", "centered"];
+
 export interface PageVariant {
   /** true = 恒等变体（Free/Starter 或无 antiBan）：输出与改造前完全一致。 */
   identity: boolean;
@@ -10,9 +15,16 @@ export interface PageVariant {
   seedHash: number;
   /** <meta name="generator"> 令牌（identity 时为空串 → 不覆盖）。 */
   metaToken: string;
+  /** Hero 首屏布局（identity 恒为 background）。 */
+  heroLayout: HeroLayout;
 }
 
-export const IDENTITY_VARIANT: PageVariant = { identity: true, seedHash: 0, metaToken: "" };
+export const IDENTITY_VARIANT: PageVariant = {
+  identity: true,
+  seedHash: 0,
+  metaToken: "",
+  heroLayout: "background",
+};
 
 /** FNV-1a 32bit：字符串 → 无符号 32 位哈希。 */
 export function fnv1a(str: string): number {
@@ -43,7 +55,8 @@ export function newVariantSeed(): string {
 export function deriveVariant(seed: string): PageVariant {
   const seedHash = fnv1a(seed);
   const metaToken = META_TOKENS[Math.floor(mulberry32(seedHash) * META_TOKENS.length)];
-  return { identity: false, seedHash, metaToken };
+  const heroLayout = HERO_LAYOUTS[Math.floor(mulberry32((seedHash ^ 0x51ed270b) >>> 0) * HERO_LAYOUTS.length)];
+  return { identity: false, seedHash, metaToken, heroLayout };
 }
 
 /** 单个 section 的包裹策略（纯函数，按 seedHash + index 确定）。 */

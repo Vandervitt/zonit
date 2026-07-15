@@ -24,7 +24,7 @@ export function LandingPage({
   const logo = page.branding?.logo;
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
-      <Hero data={page.hero} theme={resolved} logo={logo} />
+      <Hero data={page.hero} theme={resolved} logo={logo} layout={variant.heroLayout} />
       {page.sections.map((section, i) => renderSection(section, resolved, i, variant))}
       {page.leadForm?.enabled ? <LeadForm data={page.leadForm} pageId={pageId} theme={resolved} /> : null}
       <Footer data={page.footer} theme={resolved} logo={logo} />

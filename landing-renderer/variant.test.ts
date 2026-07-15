@@ -42,6 +42,21 @@ describe("IDENTITY_VARIANT", () => {
     expect(IDENTITY_VARIANT.seedHash).toBe(0);
     expect(IDENTITY_VARIANT.metaToken).toBe("");
   });
+  it("恒等 heroLayout 必为 background（守零回归）", () => {
+    expect(IDENTITY_VARIANT.heroLayout).toBe("background");
+  });
+});
+
+describe("deriveVariant heroLayout", () => {
+  it("落在允许集内", () => {
+    const allowed = ["background", "split-right", "split-left", "centered"];
+    for (const s of ["a", "b", "c", "d", "e", "f", "g", "h"]) {
+      expect(allowed).toContain(deriveVariant(s).heroLayout);
+    }
+  });
+  it("确定性：同种子同布局", () => {
+    expect(deriveVariant("page-1").heroLayout).toBe(deriveVariant("page-1").heroLayout);
+  });
 });
 
 describe("newVariantSeed", () => {
