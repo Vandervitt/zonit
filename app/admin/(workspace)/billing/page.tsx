@@ -155,6 +155,9 @@ export default function BillingPage() {
                         <PlanBadge plan={planId} />
                         <Text strong>{plan.priceText}</Text>
                       </Space>
+                      <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
+                        包含 {PLANS[PLAN_ORDER[PLAN_ORDER.indexOf(planId) - 1]].label} 全部权益
+                      </Text>
                       <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                         {plan.highlights.map((h) => (
                           <li key={h} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
