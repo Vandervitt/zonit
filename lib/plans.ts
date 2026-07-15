@@ -26,16 +26,16 @@ export const PLANS: Record<PlanId, PlanConfig> = {
   free: {
     id: "free", label: "Free", priceText: "$0", color: "slate",
     landingPagesLimit: 1, domainsLimit: 0,
-    hasWatermark: true, allTemplates: false, advancedTracking: false, antiBan: false, aiTranslation: false,
+    hasWatermark: true, allTemplates: true, advancedTracking: false, antiBan: false, aiTranslation: false,
     aiPageQuota: 3, aiRewriteQuota: 10,
     highlights: ["1 张落地页", "可视化编辑器", "在线预览（发布需升级绑定域名）"],
   },
   starter: {
     id: "starter", label: "Starter", priceText: "$29/mo", color: "blue",
     landingPagesLimit: 3, domainsLimit: 1,
-    hasWatermark: true, allTemplates: false, advancedTracking: false, antiBan: false, aiTranslation: false,
+    hasWatermark: true, allTemplates: true, advancedTracking: false, antiBan: false, aiTranslation: false,
     aiPageQuota: 15, aiRewriteQuota: 100,
-    highlights: ["3 张落地页 + 1 个自定义域名", "5 款王牌爆款模板", "1× Meta Pixel 追踪"],
+    highlights: ["3 张落地页 + 1 个自定义域名", "全量全行业爆款营销模板", "1× Meta Pixel 追踪"],
   },
   pro: {
     id: "pro", label: "Pro", priceText: "$79/mo", color: "violet", highlight: true,
