@@ -7,22 +7,25 @@ import { Footer } from "./sections/Footer";
 import { FloatingButton } from "./sections/FloatingButton";
 import { LeadForm } from "./sections/LeadForm";
 import { renderSection } from "./sections";
+import { IDENTITY_VARIANT, type PageVariant } from "./variant";
 
 export function LandingPage({
   page,
   theme,
   pageId = "",
+  variant = IDENTITY_VARIANT,
 }: {
   page: LandingPageDraft;
   theme?: RendererTheme; // 显式覆盖；默认按 branding 派生
   pageId?: string;
+  variant?: PageVariant; // 反同质化变体；缺省恒等（输出不变）
 }) {
   const resolved = theme ?? resolveTheme(page.branding?.theme);
   const logo = page.branding?.logo;
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
-      <Hero data={page.hero} theme={resolved} logo={logo} />
-      {page.sections.map((section, i) => renderSection(section, resolved, i))}
+      <Hero data={page.hero} theme={resolved} logo={logo} layout={variant.heroLayout} />
+      {page.sections.map((section, i) => renderSection(section, resolved, i, variant))}
       {page.leadForm?.enabled ? <LeadForm data={page.leadForm} pageId={pageId} theme={resolved} /> : null}
       <Footer data={page.footer} theme={resolved} logo={logo} />
       {page.floatingButton && <FloatingButton data={page.floatingButton} theme={resolved} />}

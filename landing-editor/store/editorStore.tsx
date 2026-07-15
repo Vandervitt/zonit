@@ -42,6 +42,7 @@ export interface EditorState {
   tracking: PageTracking;
   branding: Branding;
   seo: PageSeo;
+  variantSeed?: string; // 反同质化种子（Pro/Agency 生效；缺省渲染端回退 page.id）
 }
 
 export type EditorAction =
@@ -55,6 +56,7 @@ export type EditorAction =
   | { kind: "updateTracking"; value: PageTracking }
   | { kind: "updateBranding"; value: Branding }
   | { kind: "updateSeo"; value: PageSeo }
+  | { kind: "setVariantSeed"; value: string }
   | { kind: "updateSection"; key: string; data: LandingSection["data"] }
   | { kind: "addSection"; sectionType: LandingSectionType }
   | { kind: "removeSection"; key: string }
@@ -90,6 +92,9 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
 
     case "updateSeo":
       return { ...state, seo: action.value };
+
+    case "setVariantSeed":
+      return { ...state, variantSeed: action.value };
 
     case "toggleFloating":
       return {
@@ -202,5 +207,6 @@ export function toDraft(state: EditorState): LandingPageDraft {
   draft.tracking = state.tracking;
   draft.branding = state.branding;
   draft.seo = state.seo;
+  if (state.variantSeed) draft.variantSeed = state.variantSeed;
   return draft;
 }

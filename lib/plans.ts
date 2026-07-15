@@ -84,6 +84,9 @@ export function getLandingPagesLimit(plan: PlanId): number {
 export function hasWatermark(plan: PlanId): boolean {
   return PLANS[plan].hasWatermark;
 }
+export function hasAntiBan(plan: PlanId): boolean {
+  return PLANS[plan].antiBan;
+}
 export function canBindDomain(plan: PlanId): boolean {
   return PLANS[plan].domainsLimit > 0;
 }

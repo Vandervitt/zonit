@@ -15,13 +15,14 @@ import { Story } from "./Story";
 import { CountdownBanner } from "./CountdownBanner";
 import { Faq } from "./Faq";
 import { Guarantee } from "./Guarantee";
+import { sectionWrap, IDENTITY_VARIANT, type PageVariant } from "../variant";
 
 function assertNever(x: never): null {
   void x;
   return null;
 }
 
-export function renderSection(section: LandingSection, theme: RendererTheme, key: number) {
+function renderInner(section: LandingSection, theme: RendererTheme, key: number) {
   switch (section.type) {
     case "stats":       return <Stats key={key} data={section.data} theme={theme} />;
     case "plans":       return <Plans key={key} data={section.data} theme={theme} />;
@@ -37,4 +38,22 @@ export function renderSection(section: LandingSection, theme: RendererTheme, key
     case "guarantee":   return <Guarantee key={key} data={section.data} />;
     default:            return assertNever(section);
   }
+}
+
+export function renderSection(
+  section: LandingSection,
+  theme: RendererTheme,
+  key: number,
+  variant: PageVariant = IDENTITY_VARIANT,
+) {
+  const el = renderInner(section, theme, key);
+  const w = sectionWrap(variant, key);
+  if (w.tag === "none") return el;
+  const attrs: Record<string, string> = {};
+  if (w.attr) attrs[w.attr] = w.attrValue;
+  return (
+    <div key={key} className={w.className} {...attrs}>
+      {el}
+    </div>
+  );
 }

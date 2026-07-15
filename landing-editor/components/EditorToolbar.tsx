@@ -7,6 +7,7 @@ import { collectPublishIssues } from "../lib/publishIssues";
 import { ValidationBar } from "./ValidationBar";
 import { PublishDialog } from "./PublishDialog";
 import { TrackingPanel } from "./TrackingPanel";
+import { AntiBanPanel } from "./AntiBanPanel";
 import { landingPreviewPath, Routes } from "@/lib/constants";
 
 const SAVE_LABEL: Record<string, string> = {
@@ -19,6 +20,7 @@ export function EditorToolbar() {
   const [publishOpen, setPublishOpen] = useState(false);
   const [blockers, setBlockers] = useState<string[]>([]);
   const [trackingOpen, setTrackingOpen] = useState(false);
+  const [antiBanOpen, setAntiBanOpen] = useState(false);
 
   function handlePublish() {
     const issues = collectPublishIssues(toDraft(state));
@@ -49,6 +51,12 @@ export function EditorToolbar() {
         className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
       >
         追踪
+      </button>
+      <button
+        onClick={() => setAntiBanOpen(true)}
+        className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
+      >
+        反同质化
       </button>
       <Link
         href={landingPreviewPath(pageId)}
@@ -83,6 +91,7 @@ export function EditorToolbar() {
       </div>
       {publishOpen && <PublishDialog onClose={() => setPublishOpen(false)} />}
       {trackingOpen && <TrackingPanel onClose={() => setTrackingOpen(false)} />}
+      {antiBanOpen && <AntiBanPanel onClose={() => setAntiBanOpen(false)} />}
     </header>
   );
 }
