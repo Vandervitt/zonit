@@ -94,6 +94,18 @@
 | `UNSPLASH_ACCESS_KEY` | 编辑器配图搜索 |
 | `NEXT_PUBLIC_APP_URL` 🔴 | 客户端可见的应用地址 |
 
+### 监控 / 可观测性 🟡
+
+| 变量 | 用途 / 代码位置 | 获取 |
+|---|---|---|
+| `NEXT_PUBLIC_SENTRY_DSN` | 启用 Sentry 错误上报（客户端 `instrumentation-client.ts` + 服务端兜底）| sentry.io 建项目后的 DSN；**缺则 Sentry 整体 no-op**，不影响其他功能 |
+| `SENTRY_DSN` | 服务端专用 DSN（`sentry.server/edge.config.ts`），未配则回退用 `NEXT_PUBLIC_SENTRY_DSN` | 通常与上同一个 DSN |
+| `SENTRY_ORG` + `SENTRY_PROJECT` + `SENTRY_AUTH_TOKEN` | **构建期**上传 source map（`next.config.ts` 三者齐备才套 `withSentryConfig`）| sentry.io org/project slug 与 Auth Token |
+
+> - **只想要错误捕获**：配 `NEXT_PUBLIC_SENTRY_DSN` 即可，运行时立即生效，无需改构建。
+> - **想要可读堆栈（source map）**：再配 `SENTRY_ORG/PROJECT/AUTH_TOKEN`，且需允许 `@sentry/cli` 的 build 脚本——把 `pnpm-workspace.yaml` 里 `allowBuilds['@sentry/cli']` 改为 `true`（或 `pnpm approve-builds`）后重装。CI 无这些密钥时走不套包装的干净路径，构建不受影响。
+> - **Speed Insights / Web Analytics 无需 env**：部署到 Vercel 自动采集（`<SpeedInsights/>` + `<Analytics/>` 已挂在 `app/layout.tsx`）；三端全部页面覆盖。
+
 ### ⛔ 绝不可进生产
 
 `AI_FAKE` · `CAPI_FAKE` · `DEV_USER_EMAIL`（dev 免密登录开关）· `DEBUG` · `HTTP_PROXY`/`HTTPS_PROXY`（本地代理）。
@@ -133,6 +145,7 @@ node --env-file=.env.production.local scripts/check-env.mjs --prod
 
 `pnpm smoke <域名>` 过了之后，用真实账号 + 真实域名走一遍：
 
+- [ ] `curl -sS https://<域名>/api/health` → 返回 `{"status":"ok","db":"up",...}` 且 HTTP 200（DB 断则 503，可接 uptime 探针）
 - [ ] 注册 / Google 登录 → 进后台
 - [ ] 新建落地页 → 编辑 → **上传一张图**（验证 Blob）
 - [ ] 绑定 + 验证一个自有域名（验证 `VERCEL_*`）
