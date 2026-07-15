@@ -4,6 +4,7 @@ import { useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import type { LandingPageDraft } from "@/types/schema.draft";
+import type { PlanId } from "@/lib/plans";
 import { EditorProvider } from "./store/editorStore";
 import { fromDraft } from "./sampleDraft";
 import { MetaProvider } from "./MetaContext";
@@ -14,16 +15,18 @@ export function Editor({
   pageId,
   initialName,
   initialDraft,
+  plan,
 }: {
   pageId: string;
   initialName: string;
   initialDraft: LandingPageDraft;
+  plan: PlanId;
 }) {
   const [initial] = useState(() => fromDraft(initialDraft));
   return (
     <DndProvider backend={HTML5Backend}>
       <EditorProvider initial={initial}>
-        <MetaProvider pageId={pageId} initialName={initialName}>
+        <MetaProvider pageId={pageId} initialName={initialName} plan={plan}>
           <AutoSave />
           <EditorLayout />
         </MetaProvider>

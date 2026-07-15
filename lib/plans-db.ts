@@ -14,3 +14,12 @@ export async function getUserPlanOrNull(userId: string): Promise<PlanId | null> 
 export async function getUserPlan(userId: string): Promise<PlanId> {
   return (await getUserPlanOrNull(userId)) ?? "free";
 }
+
+/** 取某落地页 owner 的套餐（发布页/CAPI 派发按套餐门控用）。缺失回退 free。 */
+export async function getPlanByPageId(pageId: string): Promise<PlanId> {
+  const result = await pool.query(
+    `SELECT u.plan FROM landing_pages lp JOIN users u ON u.id = lp.user_id WHERE lp.id = $1`,
+    [pageId],
+  );
+  return (result.rows[0]?.plan ?? "free") as PlanId;
+}

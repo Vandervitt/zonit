@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Editor } from "@/landing-editor/Editor";
 import { getLandingPage } from "@/lib/landing-pages/store";
+import { getUserPlan } from "@/lib/plans-db";
 
 export default async function EditorByIdPage({
   params,
@@ -15,5 +16,7 @@ export default async function EditorByIdPage({
   const page = await getLandingPage(id, session.user.id);
   if (!page) notFound();
 
-  return <Editor pageId={page.id} initialName={page.name} initialDraft={page.data} />;
+  const plan = await getUserPlan(session.user.id);
+
+  return <Editor pageId={page.id} initialName={page.name} initialDraft={page.data} plan={plan} />;
 }
