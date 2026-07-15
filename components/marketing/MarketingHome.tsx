@@ -10,7 +10,6 @@ import {
   Globe,
   Radar,
   ShieldCheck,
-  Languages,
   MousePointerClick,
   BarChart3,
   Sparkles,
@@ -87,9 +86,9 @@ const FEATURES = [
     desc: "智能打散页面指纹，规避投放平台查重与封号风险，让你的广告账户跑得更稳更久。",
   },
   {
-    icon: Languages,
-    title: "AI 多语言翻译",
-    desc: "一键生成多语言版本，快速覆盖更多市场，让一张模板触达全球客户。",
+    icon: Sparkles,
+    title: "AI 一键生成 & 智能改写",
+    desc: "输入行业与卖点，AI 直接产出整页高转化文案；逐段智能改写打磨措辞，几分钟上线一版落地页。",
   },
 ];
 
