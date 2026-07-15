@@ -28,7 +28,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     landingPagesLimit: 1, domainsLimit: 0,
     hasWatermark: true, allTemplates: true, advancedTracking: false, antiBan: false, aiTranslation: false,
     aiPageQuota: 3, aiRewriteQuota: 10,
-    highlights: ["1 张落地页", "可视化编辑器", "在线预览（发布需升级绑定域名）"],
+    highlights: ["1 张落地页", "全量全行业爆款营销模板", "可视化编辑器", "在线预览（发布需升级绑定域名）"],
   },
   starter: {
     id: "starter", label: "Starter", priceText: "$29/mo", color: "blue",
@@ -42,14 +42,14 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     landingPagesLimit: 20, domainsLimit: 5,
     hasWatermark: false, allTemplates: true, advancedTracking: true, antiBan: true, aiTranslation: false,
     aiPageQuota: 80, aiRewriteQuota: Infinity,
-    highlights: ["20 张落地页 + 5 个域名", "全库 15+ 行业模板", "去除品牌水印", "全矩阵像素 + Meta CAPI", "反同质化风控引擎"],
+    highlights: ["20 张落地页 + 5 个域名", "全量全行业爆款营销模板", "去除品牌水印", "全矩阵像素 + Meta CAPI", "反同质化风控引擎"],
   },
   agency: {
     id: "agency", label: "Agency", priceText: "$199/mo", color: "amber",
     landingPagesLimit: Infinity, domainsLimit: Infinity,
     hasWatermark: false, allTemplates: true, advancedTracking: true, antiBan: true, aiTranslation: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,
-    highlights: ["无限落地页 + 无限域名", "含高转化行业模板", "AI 自动多语言翻译", "一切 Pro 功能"],
+    highlights: ["无限落地页 + 无限域名", "全量全行业爆款营销模板", "AI 自动多语言翻译", "一切 Pro 功能"],
   },
 };
 
