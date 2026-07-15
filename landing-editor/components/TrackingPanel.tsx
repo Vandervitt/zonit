@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useEditorState, useEditorDispatch } from "../store/editorStore";
 import { useMeta } from "../MetaContext";
 import type { PixelProvider } from "@/types/schema.draft";
+import { PLANS } from "@/lib/plans";
 import { apiCapiCredentialsPath } from "@/lib/constants";
 import { Field } from "../ui/Field";
 import { TextInput } from "../ui/TextInput";
@@ -75,7 +76,9 @@ const PROVIDERS: { provider: PixelProvider; label: string; placeholder: string }
 export function TrackingPanel({ onClose }: { onClose: () => void }) {
   const state = useEditorState();
   const dispatch = useEditorDispatch();
-  const { pageId } = useMeta();
+  const { pageId, plan } = useMeta();
+  // free/starter 仅「基础数据追踪 (1× Meta Pixel)」；TikTok/GA4/GoogleAds 与服务端 CAPI 属高级追踪。
+  const advanced = PLANS[plan].advancedTracking;
   const t = state.tracking;
 
   const setPixel = (provider: PixelProvider, id: string) => {
@@ -93,17 +96,29 @@ export function TrackingPanel({ onClose }: { onClose: () => void }) {
         <p className="mt-1 text-xs text-ink-muted">填入各平台 Pixel ID（留空即不启用）。事件按系统内置规则上报，仅咨询/留资，无交易语义。</p>
 
         <div className="mt-4 space-y-3">
-          {PROVIDERS.map(({ provider, label, placeholder }) => (
-            <Field key={provider} label={label}>
-              <TextInput value={idOf(provider)} onChange={(e) => setPixel(provider, e.target.value)} placeholder={placeholder} />
-            </Field>
-          ))}
+          {PROVIDERS.map(({ provider, label, placeholder }) => {
+            const locked = !advanced && provider !== "meta";
+            return (
+              <Field key={provider} label={locked ? `${label}（Pro 解锁全矩阵像素）` : label}>
+                <TextInput
+                  value={locked ? "" : idOf(provider)}
+                  onChange={(e) => setPixel(provider, e.target.value)}
+                  placeholder={locked ? "升级 Pro 解锁 TikTok / GA4 / Google Ads" : placeholder}
+                  disabled={locked}
+                />
+              </Field>
+            );
+          })}
 
-          {pageId ? (
+          {advanced && pageId ? (
             <div className="space-y-2 border-t border-edge pt-3">
               <p className="text-xs font-medium text-ink-soft">服务端转化回传（CAPI）</p>
               <CapiRow pageId={pageId} provider="meta" label="Meta" />
               <CapiRow pageId={pageId} provider="tiktok" label="TikTok" />
+            </div>
+          ) : !advanced ? (
+            <div className="border-t border-edge pt-3">
+              <p className="text-xs text-ink-muted">服务端转化回传（CAPI · Meta / TikTok）为 Pro 及以上套餐权益，升级后解锁。</p>
             </div>
           ) : null}
 

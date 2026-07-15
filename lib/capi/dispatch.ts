@@ -7,6 +7,8 @@ import { hashEmail, hashPhone } from "./hash";
 import * as store from "./events-store";
 import type { CapiEventRow } from "./events-store";
 import { getCredentials } from "./credentials";
+import { getPlanByPageId } from "@/lib/plans-db";
+import { PLANS } from "@/lib/plans";
 
 /** flushOne 的可注入依赖（便于单测）。 */
 export interface FlushDeps {
@@ -58,6 +60,8 @@ export interface LeadContext {
  */
 export async function enqueueCapiEvents(pageId: string, ctx: LeadContext): Promise<void> {
   if (!ctx.consent) return;
+  // 套餐门控：服务端 CAPI 属高级追踪，free/starter 不派发。
+  if (!PLANS[await getPlanByPageId(pageId)].advancedTracking) return;
   const creds = await getCredentials(pageId);
   if (creds.length === 0) return;
 

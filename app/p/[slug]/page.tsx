@@ -4,8 +4,12 @@ import { notFound } from "next/navigation";
 import { LandingPage } from "@/landing-renderer/LandingPage";
 import { getPublishedBySlug } from "@/lib/landing-pages/store";
 import { TrackingProvider } from "@/landing-renderer/tracking/TrackingProvider";
+import { Watermark } from "@/landing-renderer/Watermark";
 import { hostnameOf, isAppHost } from "@/lib/host";
 import { resolvePageMeta } from "@/lib/seo/resolve";
+import { getUserPlan } from "@/lib/plans-db";
+import { hasWatermark } from "@/lib/plans";
+import { gateTrackingByPlan } from "@/lib/tracking/gate";
 
 async function isAppHostDirect(): Promise<boolean> {
   return isAppHost(hostnameOf((await headers()).get("host")));
@@ -62,9 +66,14 @@ export default async function PublicLandingPage({
   const page = await getPublishedBySlug(slug);
   if (!page) notFound();
 
+  // 按 owner 套餐门控：free/starter 只放行 Meta 客户端 pixel，并挂水印。
+  const plan = await getUserPlan(page.user_id);
+  const tracking = gateTrackingByPlan(page.data.tracking, plan);
+
   return (
-    <TrackingProvider tracking={page.data.tracking} pageId={page.id}>
+    <TrackingProvider tracking={tracking} pageId={page.id}>
       <LandingPage page={page.data} pageId={page.id} />
+      {hasWatermark(plan) && <Watermark />}
     </TrackingProvider>
   );
 }
