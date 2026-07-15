@@ -19,5 +19,6 @@ export function fromDraft(draft: LandingPageDraft): EditorState {
     tracking: draft.tracking ?? createTracking(),
     branding: draft.branding ?? createBranding(),
     seo: draft.seo ?? createSeo(),
+    variantSeed: draft.variantSeed,
   };
 }

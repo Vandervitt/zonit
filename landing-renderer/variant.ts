@@ -35,6 +35,11 @@ function mulberry32(seed: number): number {
 /** generator meta 候选（全字面量，语义等价品牌串）。 */
 const META_TOKENS = ["Zap Bridge", "Zap Bridge Sites", "Zap Bridge Pages", "Zap Bridge Studio"];
 
+/** 生成一枚全新种子（供编辑器「重新打散指纹」用；随机 + 时间戳，冲突概率极低）。 */
+export function newVariantSeed(): string {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
 export function deriveVariant(seed: string): PageVariant {
   const seedHash = fnv1a(seed);
   const metaToken = META_TOKENS[Math.floor(mulberry32(seedHash) * META_TOKENS.length)];

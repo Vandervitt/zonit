@@ -4,6 +4,7 @@ import {
   deriveVariant,
   IDENTITY_VARIANT,
   sectionWrap,
+  newVariantSeed,
 } from "./variant";
 
 describe("fnv1a", () => {
@@ -40,6 +41,18 @@ describe("IDENTITY_VARIANT", () => {
     expect(IDENTITY_VARIANT.identity).toBe(true);
     expect(IDENTITY_VARIANT.seedHash).toBe(0);
     expect(IDENTITY_VARIANT.metaToken).toBe("");
+  });
+});
+
+describe("newVariantSeed", () => {
+  it("返回非空字符串", () => {
+    expect(newVariantSeed().length).toBeGreaterThan(0);
+  });
+  it("连续两次高概率不同（重洗有效）", () => {
+    expect(newVariantSeed()).not.toBe(newVariantSeed());
+  });
+  it("产出的种子经 deriveVariant 得非恒等变体", () => {
+    expect(deriveVariant(newVariantSeed()).identity).toBe(false);
   });
 });
 
