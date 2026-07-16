@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useMeta } from "../MetaContext";
-import { apiLandingPublishPath } from "@/lib/constants";
+import { apiLandingPublishPath, Routes } from "@/lib/constants";
 
 interface DomainRow {
   id: string;
@@ -69,7 +69,7 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
         ) : domains.length === 0 ? (
           <div className="mt-4 space-y-3 text-sm text-ink-soft">
             <p>你还没有已验证的自有域名。请先到「Domains」绑定并验证一个域名，再回来发布。</p>
-            <a href="/domains" className="inline-block rounded-md border border-edge px-3 py-1.5 text-ink hover:bg-canvas">去绑定域名</a>
+            <a href={Routes.Domains} className="inline-block rounded-md border border-edge px-3 py-1.5 text-ink hover:bg-canvas">去绑定域名</a>
           </div>
         ) : (
           <div className="mt-4 space-y-3">
