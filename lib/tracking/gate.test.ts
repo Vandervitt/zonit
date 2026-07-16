@@ -14,13 +14,12 @@ const base: PageTracking = {
 };
 
 describe("gateTrackingByPlan", () => {
-  it("free：只留 Meta 且剥离 serverSide", () => {
+  it("free：剥离全部像素（免费版无任何追踪）", () => {
     const r = gateTrackingByPlan(base, "free")!;
-    expect(r.pixels.map((p) => p.provider)).toEqual(["meta"]);
-    expect(r.pixels[0].serverSide).toBe(false);
+    expect(r.pixels).toEqual([]);
   });
 
-  it("starter：同样只留 Meta（CAPI 关闭）", () => {
+  it("starter：只留 Meta 客户端 pixel（CAPI 关闭）", () => {
     const r = gateTrackingByPlan(base, "starter")!;
     expect(r.pixels.map((p) => p.provider)).toEqual(["meta"]);
     expect(r.pixels[0].serverSide).toBe(false);

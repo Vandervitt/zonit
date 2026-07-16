@@ -14,11 +14,12 @@ import {
   BarChart3,
   Sparkles,
   Check,
+  X,
   ArrowRight,
   Lock,
 } from "lucide-react";
 import { Routes } from "@/lib/constants";
-import { PLANS, PLAN_ORDER } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, PLAN_FEATURE_ROWS } from "@/lib/plans";
 import { ctaPrimary, ctaGhost, gradientText, glassCard, pill, glowAura } from "@/lib/theme";
 
 type Fonts = { display: string; body: string; mono: string };
@@ -158,7 +159,7 @@ function SiteNav({ fonts }: { fonts: Fonts }) {
         </Link>
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
           <Link
-            href={Routes.Pricing}
+            href="#pricing"
             className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
           >
             套餐定价
@@ -234,7 +235,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
             免费开始
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-          <Link href={Routes.Pricing} className={ctaGhost}>
+          <Link href="#pricing" className={ctaGhost}>
             查看套餐
           </Link>
         </motion.div>
@@ -540,9 +541,18 @@ function TrackingShowcase({ fonts }: { fonts: Fonts }) {
  * 定价（复用 PLANS 单一数据源）
  * ------------------------------------------------------------------ */
 
+function FeatureCell({ value }: { value: string | boolean }) {
+  if (typeof value === "boolean") {
+    return value
+      ? <Check className="mx-auto h-4 w-4 text-aqua-600" />
+      : <X className="mx-auto h-4 w-4 text-muted-foreground/40" />;
+  }
+  return <span className="text-sm text-foreground/80">{value}</span>;
+}
+
 function Pricing({ fonts }: { fonts: Fonts }) {
   return (
-    <section className="relative px-6 py-24">
+    <section id="pricing" className="relative scroll-mt-24 px-6 py-24">
       <SectionHead
         kicker="// 简单透明的定价"
         title="先免费起步，跑出 ROI 再升级"
@@ -610,14 +620,39 @@ function Pricing({ fonts }: { fonts: Fonts }) {
           );
         })}
       </div>
-      <div className="mt-10 text-center">
-        <Link
-          href={Routes.Pricing}
-          className="inline-flex items-center gap-1.5 text-sm text-aqua-600 transition-colors hover:text-aqua-700"
-        >
-          查看完整功能对比
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+      <div className="mx-auto mt-14 max-w-6xl">
+        <p className="mb-5 text-center text-sm font-medium text-muted-foreground">完整功能对比</p>
+        <div className="overflow-x-auto rounded-2xl border border-border">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr className="border-b border-border bg-aqua-50/70">
+                <th className="w-1/3 px-6 py-4 text-left font-medium text-muted-foreground">功能</th>
+                {PLAN_ORDER.map((planId) => (
+                  <th
+                    key={planId}
+                    className={`px-4 py-4 text-center font-semibold ${
+                      PLANS[planId].highlight ? "text-aqua-700" : "text-foreground/80"
+                    }`}
+                  >
+                    {PLANS[planId].label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {PLAN_FEATURE_ROWS.map((row, i) => (
+                <tr key={row.label} className={i % 2 === 0 ? "bg-white" : "bg-aqua-50/40"}>
+                  <td className="px-6 py-3 text-muted-foreground">{row.label}</td>
+                  {PLAN_ORDER.map((planId) => (
+                    <td key={planId} className="px-4 py-3 text-center">
+                      <FeatureCell value={row.valueFor(PLANS[planId])} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );
@@ -676,7 +711,7 @@ function SiteFooter({ fonts }: { fonts: Fonts }) {
           <span>© {new Date().getFullYear()}</span>
         </div>
         <nav className="flex items-center gap-5">
-          <Link href={Routes.Pricing} className="transition-colors hover:text-aqua-700">
+          <Link href="#pricing" className="transition-colors hover:text-aqua-700">
             套餐定价
           </Link>
           <Link href={Routes.Login} className="transition-colors hover:text-aqua-700">
