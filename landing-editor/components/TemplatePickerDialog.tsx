@@ -21,7 +21,6 @@ import { cn } from "@/components/ui/utils";
 import { glassCard, gradientText, gridBackdrop, glowAura, pill } from "@/lib/theme";
 import { landingEditorPath, Routes } from "@/lib/constants";
 import { handleSessionExpired } from "@/lib/auth-client";
-import { GeneratePageDialog } from "@/components/ai/GeneratePageDialog";
 import { TEMPLATES, type TemplateMeta } from "../samples/registry";
 import { CATEGORY_LABELS, filterTemplates } from "../samples/templateFilter";
 
@@ -179,7 +178,8 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  async function startBlank() {
+  // 两个按钮都先建库并进编辑器；AI 走 ?ai=1，编辑器内默认弹出「AI 一键成页」资料表单。
+  async function create(withAi: boolean) {
     if (loading) return;
     setLoading(true);
     try {
@@ -196,7 +196,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const page = await res.json();
-      router.push(landingEditorPath(page.id));
+      router.push(withAi ? `${landingEditorPath(page.id)}?ai=1` : landingEditorPath(page.id));
     } catch {
       setLoading(false);
     }
@@ -235,22 +235,22 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
         <div className={cn("absolute inset-x-3 bottom-3 flex items-center gap-2", revealCls)}>
           <button
             type="button"
-            onClick={startBlank}
+            onClick={() => create(false)}
             disabled={loading}
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/40 bg-white/85 px-3 py-2 text-sm font-medium text-foreground/80 backdrop-blur transition-colors hover:bg-white disabled:opacity-60"
           >
             <PenLine className="h-3.5 w-3.5" />
             {loading ? "创建中…" : "直接编辑"}
           </button>
-          <GeneratePageDialog templateId={template.id}>
-            <button
-              type="button"
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-aqua-600/30 transition-all hover:brightness-105"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              AI 一键成页
-            </button>
-          </GeneratePageDialog>
+          <button
+            type="button"
+            onClick={() => create(true)}
+            disabled={loading}
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-aqua-600/30 transition-all hover:brightness-105 disabled:opacity-60"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            AI 一键成页
+          </button>
         </div>
       </div>
 

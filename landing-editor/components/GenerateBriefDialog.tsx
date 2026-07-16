@@ -1,14 +1,18 @@
 "use client";
-
+// landing-editor/components/GenerateBriefDialog.tsx
+//
+// 编辑器内「AI 一键成页」表单：进入编辑器后（?ai=1）默认弹出，填写产品资料后调用
+// /api/landing-pages/generate（带 pageId）为当前空白页原地生成文案，成功即把生成的
+// LandingPageDraft 灌入编辑器 store（autosave 兜底落库），并清掉 URL 上的 ?ai 标记。
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,9 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import { landingEditorPath } from "@/lib/constants";
 import { handleSessionExpired } from "@/lib/auth-client";
+import { landingEditorPath } from "@/lib/constants";
+import type { LandingPageDraft } from "@/types/schema.draft";
+import { useEditorDispatch } from "../store/editorStore";
+import { useMeta } from "../MetaContext";
 
 /** 生成语言选项；value 直接作为 brief.language 注入 prompt。 */
 const LANGUAGES = [
@@ -39,15 +45,11 @@ const LANGUAGES = [
   "Tiếng Việt",
 ];
 
-export function GeneratePageDialog({
-  templateId,
-  children,
-}: {
-  templateId: string;
-  children: React.ReactNode;
-}) {
+export function GenerateBriefDialog({ defaultOpen = false }: { defaultOpen?: boolean }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const dispatch = useEditorDispatch();
+  const { pageId } = useMeta();
+  const [open, setOpen] = useState(defaultOpen);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     productName: "",
@@ -59,6 +61,12 @@ export function GeneratePageDialog({
     pastedIntro: "",
   });
 
+  /** 关闭并清掉 ?ai 标记，避免刷新再次自动弹出。 */
+  function close() {
+    setOpen(false);
+    router.replace(landingEditorPath(pageId));
+  }
+
   const submit = async () => {
     if (!form.productName || !form.description) {
       toast.error("请填写产品名与介绍");
@@ -69,7 +77,7 @@ export function GeneratePageDialog({
       const res = await fetch("/api/landing-pages/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ templateId, brief: form }),
+        body: JSON.stringify({ pageId, brief: form }),
       });
       if (handleSessionExpired(res, router)) return;
       const data = await res.json();
@@ -81,32 +89,30 @@ export function GeneratePageDialog({
         else toast.error("生成失败，请重试");
         return;
       }
-      toast.success("已生成，正在打开编辑器");
-      router.push(landingEditorPath(data.id));
+      dispatch({ kind: "replaceDraft", draft: data.draft as LandingPageDraft });
+      toast.success("已按你的资料生成文案，可继续在编辑器中调整");
+      close();
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : close())}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>用 AI 填充这套模板</DialogTitle>
+          <DialogTitle>AI 一键成页</DialogTitle>
           <DialogDescription>
-            填写产品或公司信息，AI 将依据所选模板自动生成可投放的落地页文案。
+            填写产品或公司信息，AI 将依据当前模板为这张落地页自动生成可投放文案。也可直接关闭，手动编辑。
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <div>
+          <div className="dis">
             <Label htmlFor="ai-product-name">产品 / 公司名 *</Label>
             <Input
               id="ai-product-name"
               value={form.productName}
-              onChange={(e) =>
-                setForm({ ...form, productName: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, productName: e.target.value })}
             />
           </div>
           <div>
@@ -114,9 +120,7 @@ export function GeneratePageDialog({
             <Textarea
               id="ai-description"
               value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
           <div>
@@ -124,9 +128,7 @@ export function GeneratePageDialog({
             <Input
               id="ai-target-audience"
               value={form.targetAudience}
-              onChange={(e) =>
-                setForm({ ...form, targetAudience: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, targetAudience: e.target.value })}
             />
           </div>
           <div>
@@ -149,10 +151,7 @@ export function GeneratePageDialog({
           </div>
           <div>
             <Label htmlFor="ai-language">生成语言</Label>
-            <Select
-              value={form.language}
-              onValueChange={(v) => setForm({ ...form, language: v })}
-            >
+            <Select value={form.language} onValueChange={(v) => setForm({ ...form, language: v })}>
               <SelectTrigger id="ai-language">
                 <SelectValue placeholder="选择生成语言" />
               </SelectTrigger>
@@ -170,17 +169,11 @@ export function GeneratePageDialog({
             <Textarea
               id="ai-pasted-intro"
               value={form.pastedIntro}
-              onChange={(e) =>
-                setForm({ ...form, pastedIntro: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, pastedIntro: e.target.value })}
             />
           </div>
-          <Button
-            className="w-full"
-            disabled={loading}
-            onClick={submit}
-          >
-            {loading ? "AI 生成中…" : "生成落地页"}
+          <Button className="w-full" disabled={loading} onClick={submit}>
+            {loading ? "AI 生成中…" : "生成文案"}
           </Button>
         </div>
       </DialogContent>

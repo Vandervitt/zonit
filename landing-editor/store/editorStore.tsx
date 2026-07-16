@@ -21,7 +21,14 @@ import type {
   Branding,
   PageSeo,
 } from "@/types/schema.draft";
-import { createSection, createFloatingButton, createLeadForm } from "./defaults";
+import {
+  createSection,
+  createFloatingButton,
+  createLeadForm,
+  createTracking,
+  createBranding,
+  createSeo,
+} from "./defaults";
 
 export type EditorSection = LandingSection & { _key: string };
 
@@ -61,7 +68,8 @@ export type EditorAction =
   | { kind: "addSection"; sectionType: LandingSectionType }
   | { kind: "removeSection"; key: string }
   | { kind: "moveSection"; key: string; dir: -1 | 1 }
-  | { kind: "reorderSection"; fromIndex: number; toIndex: number };
+  | { kind: "reorderSection"; fromIndex: number; toIndex: number }
+  | { kind: "replaceDraft"; draft: LandingPageDraft };
 
 let keySeq = 0;
 export const nextSectionKey = () => `s${++keySeq}`;
@@ -70,7 +78,7 @@ export function withKeys(sections: LandingSection[]): EditorSection[] {
   return sections.map((s) => ({ ...s, _key: nextSectionKey() }) as EditorSection);
 }
 
-function reducer(state: EditorState, action: EditorAction): EditorState {
+export function reducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.kind) {
     case "select":
       return { ...state, selectedId: action.id };
@@ -161,6 +169,24 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       const [moved] = sections.splice(fromIndex, 1);
       sections.splice(toIndex, 0, moved);
       return { ...state, sections };
+    }
+
+    // 整页替换：AI 一键成页把生成的 LandingPageDraft 灌入编辑器（区块补 _key、选中回到 Hero）。
+    // 逻辑与 sampleDraft.fromDraft 一致，此处内联以避免 editorStore ↔ sampleDraft 循环依赖。
+    case "replaceDraft": {
+      const d = action.draft;
+      return {
+        hero: d.hero,
+        footer: d.footer,
+        floatingButton: d.floatingButton ?? null,
+        leadForm: d.leadForm ?? null,
+        sections: withKeys(d.sections),
+        selectedId: HERO_ID,
+        tracking: d.tracking ?? createTracking(),
+        branding: d.branding ?? createBranding(),
+        seo: d.seo ?? createSeo(),
+        variantSeed: d.variantSeed,
+      };
     }
   }
 }

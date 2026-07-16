@@ -52,23 +52,27 @@ test.describe('AI 一键成页', () => {
     await pool.end();
   });
 
-  test('填 brief → AI 生成 → 跳转编辑器且文案已填充', async ({ page }) => {
+  test('模板弹窗「AI 一键成页」→ 进编辑器 → 表单默认弹出 → 生成后原地填充', async ({ page }) => {
     // 1) Dev Login 建立会话
     await page.goto('/login');
     await page.getByRole('button', { name: /Dev Login/i }).click();
     await page.waitForURL('**/admin', { timeout: 30_000 });
 
-    // 2) 进入模板库，打开某张模板的「用 AI 填充」弹窗
-    await page.goto('/admin/editor');
-    await page.getByRole('button', { name: /用 AI 填充/ }).first().click();
+    // 2) 概览页打开模板选择弹窗，点某张模板的「AI 一键成页」
+    await page.getByRole('button', { name: /新建落地页/ }).click();
+    await page.getByRole('button', { name: 'AI 一键成页' }).first().click();
 
-    // 3) 填写引导表单并提交
+    // 3) 先建库并进入编辑器，URL 带 ?ai=1
+    await page.waitForURL(/\/admin\/editor\/[^/?]+\?ai=1$/, { timeout: 30_000 });
+
+    // 4) 编辑器内资料表单默认弹出：填写并提交
     await page.getByLabel('产品 / 公司名 *').fill('Acme 出海咨询');
     await page.getByLabel('它做什么 / 解决什么 *').fill('为出海企业提供本地化获客与合规咨询');
-    await page.getByRole('button', { name: '生成落地页' }).click();
+    await page.getByRole('button', { name: '生成文案' }).click();
 
-    // 4) fake 生成成功后跳转到编辑器详情页
-    await page.waitForURL(/\/admin\/editor\/[^/]+$/, { timeout: 30_000 });
-    await expect(page).toHaveURL(/\/admin\/editor\/[^/]+$/);
+    // 5) 生成成功：表单关闭、URL 去掉 ?ai，仍停在同一张落地页编辑器
+    await page.waitForURL(/\/admin\/editor\/[^/?]+$/, { timeout: 30_000 });
+    await expect(page.getByRole('button', { name: '生成文案' })).toHaveCount(0);
+    await expect(page).toHaveURL(/\/admin\/editor\/[^/?]+$/);
   });
 });
