@@ -3,6 +3,9 @@
 # 这四个原生包的二进制由各自平台的预编译 optional 依赖提供，无需运行 build 脚本，故置 false：
 # 承认忽略、保持与本地/线上一致的不构建行为，同时消除全新安装的报错。
 allowBuilds:
+  # @sentry/cli 的 build 脚本仅用于下载上传 source map 的二进制；本项目把 source map
+  # 上传门控在 SENTRY_AUTH_TOKEN 之后（CI 不配置），运行时错误捕获不依赖此二进制，故置 false。
+  '@sentry/cli': false
   '@tailwindcss/oxide': false
   esbuild: false
   sharp: false
