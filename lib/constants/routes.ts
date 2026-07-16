@@ -18,6 +18,7 @@ export enum Routes {
 export enum ApiRoutes {
   Domains = '/api/domains',
   Media = '/api/media',
+  MediaBlobToken = '/api/media/blob-token',
   MediaUnsplash = '/api/media/unsplash',
   UnsplashSearch = '/api/unsplash/search',
   LandingPages = '/api/landing-pages',
