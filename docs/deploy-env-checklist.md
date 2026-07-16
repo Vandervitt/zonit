@@ -51,9 +51,9 @@
 |---|---|---|
 | `VERCEL_API_TOKEN` | 加/验证自有域名，`lib/vercel.ts` | vercel.com → Account Settings → Tokens |
 | `VERCEL_PROJECT_ID` | 同上 | 项目 Settings → General |
-| `VERCEL_TEAM_ID` | 同上 | 团队 Settings |
+| `VERCEL_TEAM_ID` 🟡 | 同上，仅 **Team 账号**需要；个人账号可不配（`lib/vercel.ts` 缺失则省略 `teamId` 参数）| 团队 Settings |
 
-> 缺任意一个 → 用户「发布到自有域名」必失败，整个价值主张断在最后一步。
+> `VERCEL_API_TOKEN` / `VERCEL_PROJECT_ID` 缺任意一个 → 用户「发布到自有域名」必失败，整个价值主张断在最后一步。
 
 ### 媒体上传 🔴
 

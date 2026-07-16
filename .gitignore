@@ -37,6 +37,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# downloaded credential files (OAuth client secrets, service accounts) — never commit
+client_secret*.json
+*service-account*.json
+
 # vercel
 .vercel
 

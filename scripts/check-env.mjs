@@ -25,13 +25,13 @@ const required = [
   ["AUTH_GOOGLE_SECRET", "认证", "Google OAuth 密钥，须已轮换"],
   ["VERCEL_API_TOKEN", "域名发布", "缺失则用户无法发布到自有域名（lib/vercel.ts）"],
   ["VERCEL_PROJECT_ID", "域名发布", "Vercel 项目 ID"],
-  ["VERCEL_TEAM_ID", "域名发布", "Vercel 团队 ID"],
   ["BLOB_READ_WRITE_TOKEN", "媒体上传", "缺失则编辑器只能贴外链图（@vercel/blob）"],
   ["NEXT_PUBLIC_APP_URL", "应用", "对外应用地址", (v) => v.startsWith("http")],
   ["CRON_SECRET", "转化追踪", "守护 /api/cron/capi-flush"],
 ];
 
 const recommended = [
+  ["VERCEL_TEAM_ID", "域名发布", "仅当项目属于 Team 账号时需要；个人账号可不配（lib/vercel.ts 容错）"],
   ["RESEND_API_KEY", "邮件", "缺失则邀请邮件不发送（仅记录错误）"],
   ["EMAIL_FROM", "邮件", "发件人地址"],
   ["UNSPLASH_ACCESS_KEY", "媒体", "编辑器配图搜索"],
