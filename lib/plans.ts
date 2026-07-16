@@ -56,25 +56,26 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 
 export const PLAN_ORDER: PlanId[] = ["free", "starter", "pro", "agency"];
 
-// 对比表行定义：valueFor 返回字符串（额度）或布尔（有无）
+// 对比表行定义：valueFor 返回字符串（额度）或布尔（有无）；desc 为该权益的作用说明。
 export interface PlanFeatureRow {
   label: string;
+  desc: string;
   valueFor: (plan: PlanConfig) => string | boolean;
 }
 
 const fmtLimit = (n: number, unit: string) => (n === Infinity ? "无限" : n === 0 ? "—" : `${n} ${unit}`);
 
 export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
-  { label: "落地页数量", valueFor: (p) => fmtLimit(p.landingPagesLimit, "张") },
-  { label: "自定义域名", valueFor: (p) => fmtLimit(p.domainsLimit, "个") },
-  { label: "精美模板", valueFor: () => true },
-  { label: "完整视觉编辑器", valueFor: () => true },
-  { label: "基础数据追踪 (1× Meta Pixel)", valueFor: (p) => p.basicPixel },
-  { label: "去除品牌水印", valueFor: (p) => !p.hasWatermark },
-  { label: "全矩阵像素追踪 (TikTok / CAPI)", valueFor: (p) => p.advancedTracking },
-  { label: "反同质化风控引擎", valueFor: (p) => p.antiBan },
-  { label: "AI 整页生成", valueFor: (p) => fmtLimit(p.aiPageQuota, "次/月") },
-  { label: "AI 智能改写", valueFor: (p) => fmtLimit(p.aiRewriteQuota, "次/月") },
+  { label: "落地页数量", desc: "可创建并保存的落地页总数", valueFor: (p) => fmtLimit(p.landingPagesLimit, "张") },
+  { label: "自定义域名", desc: "把页面发布到你自己的品牌域名", valueFor: (p) => fmtLimit(p.domainsLimit, "个") },
+  { label: "精美模板", desc: "全行业高转化营销模板库，开箱即用", valueFor: () => true },
+  { label: "完整视觉编辑器", desc: "拖拽式实时编辑，所见即所得", valueFor: () => true },
+  { label: "基础数据追踪 (1× Meta Pixel)", desc: "接入 1 个 Meta Pixel，追踪落地页转化", valueFor: (p) => p.basicPixel },
+  { label: "去除品牌水印", desc: "移除页面底部平台水印，纯你的品牌", valueFor: (p) => !p.hasWatermark },
+  { label: "全矩阵像素追踪 (TikTok / CAPI)", desc: "多平台像素并行 + Meta 服务端 CAPI 回传", valueFor: (p) => p.advancedTracking },
+  { label: "反同质化风控引擎", desc: "打散页面指纹，降低投放查重与封号风险", valueFor: (p) => p.antiBan },
+  { label: "AI 整页生成", desc: "输入行业卖点，AI 一键生成整页文案", valueFor: (p) => fmtLimit(p.aiPageQuota, "次/月") },
+  { label: "AI 智能改写", desc: "逐段润色改写文案，快速产出多个版本", valueFor: (p) => fmtLimit(p.aiRewriteQuota, "次/月") },
 ];
 
 export function getLandingPagesLimit(plan: PlanId): number {
