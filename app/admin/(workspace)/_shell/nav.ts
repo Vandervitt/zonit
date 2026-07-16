@@ -25,3 +25,17 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { key: "settings", label: "设置", icon: SettingOutlined, href: Routes.Settings },
   { key: "help", label: "帮助", icon: QuestionCircleOutlined, href: Routes.Help },
 ];
+
+// 当前页高亮判定：取「最长匹配」的 href，最具体者胜。
+// 概览的 href 是 /admin，会被所有 /admin/* 子路由前缀命中，故不能用「首个匹配」，
+// 否则每个子页面都会错误高亮概览。最长匹配下：
+//   /admin        → overview（仅精确命中概览）
+//   /admin/media  → media（同时命中 /admin 前缀与 /admin/media 精确，取更长者）
+export function resolveActiveNavKey(pathname: string): string {
+  const match = ADMIN_NAV
+    .filter((i): i is AdminNavItem & { href: string } =>
+      Boolean(i.href) && (pathname === i.href || pathname.startsWith(i.href + "/")),
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0];
+  return match?.key ?? "overview";
+}

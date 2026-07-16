@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Layout, Menu, Tag, Dropdown, Avatar, Typography } from "antd";
 import { ThunderboltFilled, LogoutOutlined } from "@ant-design/icons";
-import { ADMIN_NAV } from "./nav";
+import { ADMIN_NAV, resolveActiveNavKey } from "./nav";
 import { PLANS } from "@/lib/plans";
 import { BRAND } from "@/lib/theme/brand";
 
@@ -18,9 +18,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const plan = session?.user?.plan ?? "free";
 
-  const selectedKey =
-    ADMIN_NAV.find((i) => i.href && (pathname === i.href || pathname.startsWith(i.href + "/")))?.key
-    ?? "overview";
+  const selectedKey = resolveActiveNavKey(pathname);
 
   const menuItems = ADMIN_NAV.map((i) => ({
     key: i.key,

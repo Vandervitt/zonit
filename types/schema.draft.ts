@@ -341,6 +341,7 @@ export interface LandingPageDraft {
   tracking?: PageTracking;         // 页面级追踪配置（缺省视为无 pixel）
   branding?: Branding;             // 页面品牌化（主题 / Logo / favicon）
   seo?: PageSeo;                   // SEO 覆盖（留空回退首屏派生）
+  variantSeed?: string;            // 反同质化种子（缺省渲染端回退 page.id；Pro/Agency 生效）
 }
 
 // ============ 方案 C：模块注册表（必须性 / 唯一性元数据） ============

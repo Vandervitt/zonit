@@ -10,7 +10,6 @@ import {
   Globe,
   Radar,
   ShieldCheck,
-  Languages,
   MousePointerClick,
   BarChart3,
   Sparkles,
@@ -19,7 +18,7 @@ import {
   Lock,
 } from "lucide-react";
 import { Routes } from "@/lib/constants";
-import { PLANS, PLAN_ORDER } from "@/lib/plans";
+import { PlanComparison } from "@/components/billing/PlanComparison";
 import { ctaPrimary, ctaGhost, gradientText, glassCard, pill, glowAura } from "@/lib/theme";
 
 type Fonts = { display: string; body: string; mono: string };
@@ -87,9 +86,9 @@ const FEATURES = [
     desc: "智能打散页面指纹，规避投放平台查重与封号风险，让你的广告账户跑得更稳更久。",
   },
   {
-    icon: Languages,
-    title: "AI 多语言翻译",
-    desc: "一键生成多语言版本，快速覆盖更多市场，让一张模板触达全球客户。",
+    icon: Sparkles,
+    title: "AI 一键生成 & 智能改写",
+    desc: "输入行业与卖点，AI 直接产出整页高转化文案；逐段智能改写打磨措辞，几分钟上线一版落地页。",
   },
 ];
 
@@ -159,7 +158,7 @@ function SiteNav({ fonts }: { fonts: Fonts }) {
         </Link>
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
           <Link
-            href={Routes.Pricing}
+            href="#pricing"
             className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
           >
             套餐定价
@@ -235,7 +234,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
             免费开始
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-          <Link href={Routes.Pricing} className={ctaGhost}>
+          <Link href="#pricing" className={ctaGhost}>
             查看套餐
           </Link>
         </motion.div>
@@ -538,87 +537,26 @@ function TrackingShowcase({ fonts }: { fonts: Fonts }) {
 }
 
 /* ------------------------------------------------------------------ *
- * 定价（复用 PLANS 单一数据源）
+ * 定价（融合对比表，复用 PlanComparison 单一数据源）
  * ------------------------------------------------------------------ */
 
 function Pricing({ fonts }: { fonts: Fonts }) {
   return (
-    <section className="relative px-6 py-24">
+    <section id="pricing" className="relative scroll-mt-24 px-6 py-24">
       <SectionHead
         kicker="// 简单透明的定价"
         title="先免费起步，跑出 ROI 再升级"
         desc="按落地页数量与追踪能力分级，随业务增长平滑升级，随时可退。"
         fonts={fonts}
       />
-      <div className="mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {PLAN_ORDER.map((planId, i) => {
-          const plan = PLANS[planId];
-          const isFree = planId === "free";
-          const price = plan.priceText === "$0" ? "免费" : plan.priceText.split("/")[0];
-          return (
-            <motion.div
-              key={planId}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
-              className={`relative flex h-full flex-col rounded-2xl border bg-white p-6 ${
-                plan.highlight
-                  ? "border-aqua-400 shadow-[0_22px_60px_-30px_color-mix(in_oklab,var(--color-aqua-500)_55%,transparent)]"
-                  : "border-border shadow-sm"
-              }`}
-            >
-              {plan.highlight && (
-                <span
-                  className={`mb-3 self-start rounded-full bg-gradient-to-r from-aqua-600 to-tech px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ${fonts.mono}`}
-                >
-                  最受欢迎
-                </span>
-              )}
-              <p className={`text-xs uppercase tracking-[0.18em] text-muted-foreground ${fonts.mono}`}>
-                {plan.label}
-              </p>
-              <p className={`mt-2 text-4xl font-bold text-foreground ${fonts.display}`}>
-                {price}
-                {!isFree && <span className="text-base font-normal text-muted-foreground">/月</span>}
-              </p>
-              <Link
-                href={isFree ? Routes.Register : Routes.Pricing}
-                className={`mt-5 rounded-xl py-2.5 text-center text-sm font-semibold transition-all hover:brightness-105 ${
-                  plan.highlight
-                    ? "bg-gradient-to-r from-aqua-600 to-tech text-white shadow-sm shadow-aqua-600/25"
-                    : "bg-aqua-100 text-aqua-700 hover:bg-aqua-200"
-                }`}
-              >
-                {isFree ? "免费开始" : "选择此套餐"}
-              </Link>
-              <div className="mt-6 border-t border-border pt-5">
-                {i > 0 && (
-                  <p className="mb-3 text-sm font-medium text-foreground/70">
-                    包含 {PLANS[PLAN_ORDER[i - 1]].label} 全部权益
-                  </p>
-                )}
-                <ul className="space-y-2.5">
-                  {plan.highlights.map((h) => (
-                    <li key={h} className="flex items-start gap-2.5 text-sm text-foreground/80">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-aqua-600" />
-                      {h}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-      <div className="mt-10 text-center">
-        <Link
-          href={Routes.Pricing}
-          className="inline-flex items-center gap-1.5 text-sm text-aqua-600 transition-colors hover:text-aqua-700"
-        >
-          查看完整功能对比
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+      <div className="mx-auto mt-16 max-w-6xl">
+        <PlanComparison
+          ctaFor={(planId) =>
+            planId === "free"
+              ? { href: Routes.Register, label: "免费开始" }
+              : { href: Routes.Register, label: "选择此套餐" }
+          }
+        />
       </div>
     </section>
   );
@@ -677,7 +615,7 @@ function SiteFooter({ fonts }: { fonts: Fonts }) {
           <span>© {new Date().getFullYear()}</span>
         </div>
         <nav className="flex items-center gap-5">
-          <Link href={Routes.Pricing} className="transition-colors hover:text-aqua-700">
+          <Link href="#pricing" className="transition-colors hover:text-aqua-700">
             套餐定价
           </Link>
           <Link href={Routes.Login} className="transition-colors hover:text-aqua-700">
