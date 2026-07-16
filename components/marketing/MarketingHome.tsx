@@ -14,12 +14,11 @@ import {
   BarChart3,
   Sparkles,
   Check,
-  X,
   ArrowRight,
   Lock,
 } from "lucide-react";
 import { Routes } from "@/lib/constants";
-import { PLANS, PLAN_ORDER, PLAN_FEATURE_ROWS } from "@/lib/plans";
+import { PlanComparison } from "@/components/billing/PlanComparison";
 import { ctaPrimary, ctaGhost, gradientText, glassCard, pill, glowAura } from "@/lib/theme";
 
 type Fonts = { display: string; body: string; mono: string };
@@ -538,17 +537,8 @@ function TrackingShowcase({ fonts }: { fonts: Fonts }) {
 }
 
 /* ------------------------------------------------------------------ *
- * 定价（复用 PLANS 单一数据源）
+ * 定价（融合对比表，复用 PlanComparison 单一数据源）
  * ------------------------------------------------------------------ */
-
-function FeatureCell({ value }: { value: string | boolean }) {
-  if (typeof value === "boolean") {
-    return value
-      ? <Check className="mx-auto h-4 w-4 text-aqua-600" />
-      : <X className="mx-auto h-4 w-4 text-muted-foreground/40" />;
-  }
-  return <span className="text-sm text-foreground/80">{value}</span>;
-}
 
 function Pricing({ fonts }: { fonts: Fonts }) {
   return (
@@ -559,100 +549,14 @@ function Pricing({ fonts }: { fonts: Fonts }) {
         desc="按落地页数量与追踪能力分级，随业务增长平滑升级，随时可退。"
         fonts={fonts}
       />
-      <div className="mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {PLAN_ORDER.map((planId, i) => {
-          const plan = PLANS[planId];
-          const isFree = planId === "free";
-          const price = plan.priceText === "$0" ? "免费" : plan.priceText.split("/")[0];
-          return (
-            <motion.div
-              key={planId}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.08, ease: "easeOut" }}
-              className={`relative flex h-full flex-col rounded-2xl border bg-white p-6 ${
-                plan.highlight
-                  ? "border-aqua-400 shadow-[0_22px_60px_-30px_color-mix(in_oklab,var(--color-aqua-500)_55%,transparent)]"
-                  : "border-border shadow-sm"
-              }`}
-            >
-              {plan.highlight && (
-                <span
-                  className={`mb-3 self-start rounded-full bg-gradient-to-r from-aqua-600 to-tech px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ${fonts.mono}`}
-                >
-                  最受欢迎
-                </span>
-              )}
-              <p className={`text-xs uppercase tracking-[0.18em] text-muted-foreground ${fonts.mono}`}>
-                {plan.label}
-              </p>
-              <p className={`mt-2 text-4xl font-bold text-foreground ${fonts.display}`}>
-                {price}
-                {!isFree && <span className="text-base font-normal text-muted-foreground">/月</span>}
-              </p>
-              <Link
-                href={isFree ? Routes.Register : Routes.Pricing}
-                className={`mt-5 rounded-xl py-2.5 text-center text-sm font-semibold transition-all hover:brightness-105 ${
-                  plan.highlight
-                    ? "bg-gradient-to-r from-aqua-600 to-tech text-white shadow-sm shadow-aqua-600/25"
-                    : "bg-aqua-100 text-aqua-700 hover:bg-aqua-200"
-                }`}
-              >
-                {isFree ? "免费开始" : "选择此套餐"}
-              </Link>
-              <div className="mt-6 border-t border-border pt-5">
-                {i > 0 && (
-                  <p className="mb-3 text-sm font-medium text-foreground/70">
-                    包含 {PLANS[PLAN_ORDER[i - 1]].label} 全部权益
-                  </p>
-                )}
-                <ul className="space-y-2.5">
-                  {plan.highlights.map((h) => (
-                    <li key={h} className="flex items-start gap-2.5 text-sm text-foreground/80">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-aqua-600" />
-                      {h}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-      <div className="mx-auto mt-14 max-w-6xl">
-        <p className="mb-5 text-center text-sm font-medium text-muted-foreground">完整功能对比</p>
-        <div className="overflow-x-auto rounded-2xl border border-border">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead>
-              <tr className="border-b border-border bg-aqua-50/70">
-                <th className="w-1/3 px-6 py-4 text-left font-medium text-muted-foreground">功能</th>
-                {PLAN_ORDER.map((planId) => (
-                  <th
-                    key={planId}
-                    className={`px-4 py-4 text-center font-semibold ${
-                      PLANS[planId].highlight ? "text-aqua-700" : "text-foreground/80"
-                    }`}
-                  >
-                    {PLANS[planId].label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {PLAN_FEATURE_ROWS.map((row, i) => (
-                <tr key={row.label} className={i % 2 === 0 ? "bg-white" : "bg-aqua-50/40"}>
-                  <td className="px-6 py-3 text-muted-foreground">{row.label}</td>
-                  {PLAN_ORDER.map((planId) => (
-                    <td key={planId} className="px-4 py-3 text-center">
-                      <FeatureCell value={row.valueFor(PLANS[planId])} />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="mx-auto mt-16 max-w-6xl">
+        <PlanComparison
+          ctaFor={(planId) =>
+            planId === "free"
+              ? { href: Routes.Register, label: "免费开始" }
+              : { href: Routes.Register, label: "选择此套餐" }
+          }
+        />
       </div>
     </section>
   );
