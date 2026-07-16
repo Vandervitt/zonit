@@ -7,6 +7,7 @@ import { Row, Col, Card, Statistic, Progress, Table, Button, Tag, Space, Typogra
 import { FileTextOutlined, GlobalOutlined, RobotOutlined, CrownOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { Routes, ApiRoutes, landingEditorPath } from "@/lib/constants";
 import { PLANS, type PlanId } from "@/lib/plans";
+import { TemplatePickerDialog } from "@/landing-editor/components/TemplatePickerDialog";
 import type { UsageSummary } from "@/lib/ai/usage-summary";
 
 interface PageRow { id: string; name: string; slug: string | null; status: "draft" | "published"; updated_at: string; }
@@ -81,7 +82,7 @@ export default function OverviewPage() {
           <Space direction="vertical" size={16} style={{ width: "100%" }}>
             <Card title="快捷操作">
               <Space direction="vertical" style={{ width: "100%" }}>
-                <Link href="/admin/editor"><Button type="primary" block icon={<ArrowRightOutlined />}>新建落地页</Button></Link>
+                <TemplatePickerDialog><Button type="primary" block icon={<ArrowRightOutlined />}>新建落地页</Button></TemplatePickerDialog>
                 <Link href={Routes.Domains}><Button block>绑定域名</Button></Link>
                 <Link href={Routes.Pricing}><Button block type="text">查看套餐</Button></Link>
               </Space>
