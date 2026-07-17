@@ -18,7 +18,8 @@ export const proxy = auth(async (req) => {
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // 排除静态与约定式图标资源，避免匿名访客请求 favicon/品牌图标时被鉴权兜底重定向到 /login
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg).*)"],
 };
 
 export default proxy;
