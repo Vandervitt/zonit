@@ -86,6 +86,20 @@ export async function isSlugTaken(slug: string, exceptId: string): Promise<boole
   return result.rows.length > 0;
 }
 
+/** 生成同一用户下不重名的落地页名称（撞 idx_landing_pages_user_name 时追加「 2」「 3」…）。 */
+export async function ensureUniqueName(userId: string, desired: string): Promise<string> {
+  const base = desired.trim() || "未命名落地页";
+  for (let n = 1; n < 200; n++) {
+    const candidate = n === 1 ? base : `${base} ${n}`;
+    const res = await pool.query(
+      `SELECT 1 FROM landing_pages WHERE user_id = $1 AND name = $2`,
+      [userId, candidate],
+    );
+    if (res.rows.length === 0) return candidate;
+  }
+  return `${base} ${Date.now().toString(36)}`;
+}
+
 /** 生成不与他人冲突的唯一 slug（必要时追加短后缀）。 */
 export async function ensureUniqueSlug(desired: string, exceptId: string): Promise<string> {
   const base = slugify(desired);

@@ -51,6 +51,14 @@ export function mergeSlots(
     const path = "path" in f ? f.path : byId.get(f.id);
     if (!path) continue;
 
+    // 取回填文案：正常在 f.text。但 json_object 模式的模型偶发把值放到「字段 label」键
+    // （如 {id:"hero.title", title:"..."}）而非 schema 约定的 text 键；此时 f.text 为
+    // undefined，若直写会把必填字段置空（JSON 序列化丢键）→ 渲染崩溃。故做两点防御：
+    //   1) text 缺失时，从该对象其余字符串键回收值（跳过 id/path）；
+    //   2) 仍取不到字符串时跳过本槽，保留原文，绝不写入 undefined。
+    const text = resolveFilledText(f);
+    if (typeof text !== "string") continue;
+
     let cur: Record<string, unknown> | unknown[] = clone as unknown as Record<string, unknown>;
     for (let i = 0; i < path.length - 1; i++) {
       const segment = path[i];
@@ -65,11 +73,25 @@ export function mergeSlots(
     if (cur !== null && typeof cur === "object") {
       const lastKey = path[path.length - 1];
       if (Array.isArray(cur)) {
-        (cur as unknown[])[lastKey as number] = f.text;
+        (cur as unknown[])[lastKey as number] = text;
       } else {
-        (cur as Record<string, unknown>)[lastKey as string] = f.text;
+        (cur as Record<string, unknown>)[lastKey as string] = text;
       }
     }
   }
   return clone;
+}
+
+/**
+ * 从回填对象取文案：优先 text；缺失时回收其余字符串键的值（跳过 id/path），
+ * 容忍模型把值错放到字段 label 键的情况。取不到字符串则返回 undefined（调用方跳过该槽）。
+ */
+function resolveFilledText(f: Slot | FilledSlot): string | undefined {
+  const rec = f as unknown as Record<string, unknown>;
+  if (typeof rec.text === "string") return rec.text;
+  for (const [k, v] of Object.entries(rec)) {
+    if (k === "id" || k === "path" || k === "text") continue;
+    if (typeof v === "string") return v;
+  }
+  return undefined;
 }

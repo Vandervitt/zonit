@@ -6,8 +6,10 @@ import { getUserPlan } from "@/lib/plans-db";
 
 export default async function EditorByIdPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ ai?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
@@ -17,6 +19,15 @@ export default async function EditorByIdPage({
   if (!page) notFound();
 
   const plan = await getUserPlan(session.user.id);
+  const { ai } = await searchParams;
 
-  return <Editor pageId={page.id} initialName={page.name} initialDraft={page.data} plan={plan} />;
+  return (
+    <Editor
+      pageId={page.id}
+      initialName={page.name}
+      initialDraft={page.data}
+      plan={plan}
+      autoGenerate={ai === "1"}
+    />
+  );
 }

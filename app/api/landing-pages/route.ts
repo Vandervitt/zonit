@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { getTemplate } from "@/landing-editor/samples/registry";
 import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
-import { createLandingPage, listLandingPages } from "@/lib/landing-pages/store";
+import { createLandingPage, listLandingPages, ensureUniqueName } from "@/lib/landing-pages/store";
 import { getUserPlanOrNull } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
 
@@ -41,6 +41,8 @@ export async function POST(request: Request) {
   const { templateId } = await request.json();
   const template = getTemplate(templateId); // 未命中回退默认模板
   const draft = await loadTemplateDraft(templateId); // 草稿体按需加载
-  const row = await createLandingPage(session.user.id, template.name, draft);
+  // 同模板可重复创建：撞 (user_id, name) 唯一约束时自动追加「 2」「 3」…，避免 500。
+  const name = await ensureUniqueName(session.user.id, template.name);
+  const row = await createLandingPage(session.user.id, name, draft);
   return NextResponse.json(row, { status: 201 });
 }

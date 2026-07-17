@@ -13,6 +13,7 @@ import {
   ApiRoutes,
   Routes,
 } from "@/lib/constants";
+import { TemplatePickerDialog } from "@/landing-editor/components/TemplatePickerDialog";
 
 interface PageRow { id: string; name: string; slug: string | null; status: "draft" | "published"; updated_at: string; }
 
@@ -58,7 +59,7 @@ export default function LandingPagesPage() {
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography.Title level={3} style={{ margin: 0 }}>落地页</Typography.Title>
-        <Link href="/admin/editor"><Button type="primary" icon={<PlusOutlined />}>新建</Button></Link>
+        <TemplatePickerDialog><Button type="primary" icon={<PlusOutlined />}>新建</Button></TemplatePickerDialog>
       </div>
       <Table<PageRow> rowKey="id" loading={isLoading} dataSource={data ?? []}
         locale={{ emptyText: "还没有落地页，点「新建」从模板开始" }}
