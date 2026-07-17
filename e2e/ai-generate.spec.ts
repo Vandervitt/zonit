@@ -68,11 +68,11 @@ test.describe('AI 一键成页', () => {
     // 4) 编辑器内资料表单默认弹出：填写并提交
     await page.getByLabel('产品 / 公司名').fill('Acme 出海咨询');
     await page.getByLabel('它做什么 / 解决什么').fill('为出海企业提供本地化获客与合规咨询');
-    await page.getByRole('button', { name: '生成文案' }).click();
+    await page.getByRole('button', { name: '一键成页' }).click();
 
     // 5) 生成成功：表单关闭、URL 去掉 ?ai，仍停在同一张落地页编辑器
     await page.waitForURL(/\/admin\/editor\/[^/?]+$/, { timeout: 30_000 });
-    await expect(page.getByRole('button', { name: '生成文案' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '一键成页' })).toHaveCount(0);
     await expect(page).toHaveURL(/\/admin\/editor\/[^/?]+$/);
   });
 });

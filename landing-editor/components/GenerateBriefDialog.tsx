@@ -109,7 +109,7 @@ function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
       open={open}
       onOk={handleOk}
       onCancel={close}
-      okText="生成文案"
+      okText="一键成页"
       cancelText="手动编辑"
       confirmLoading={loading}
       maskClosable={false}
