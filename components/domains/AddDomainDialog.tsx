@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal, Form, Input, Button, Typography, App } from "antd";
 import { CopyOutlined, CheckOutlined } from "@ant-design/icons";
 import { ApiRoutes } from "@/lib/constants";
+import { normalizeDomain } from "@/lib/domain";
 import { jsonRequest, ApiError } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 
@@ -54,8 +55,12 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   }
 
   async function handleFinish(values: { domain: string }) {
+    // Field validator已保证可归一化为合法主机名
+    const domain = normalizeDomain(values.domain);
+    if (!domain) return;
+    form.setFieldValue("domain", domain);
     try {
-      await addMutation.trigger({ domain: values.domain.trim().toLowerCase() });
+      await addMutation.trigger({ domain });
     } catch (err) {
       message.error(mapDomainError(err as ApiError));
     }
@@ -92,7 +97,15 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
             <Form.Item
               name="domain"
               label="域名"
-              rules={[{ required: true, message: "请输入域名" }]}
+              rules={[
+                { required: true, message: "请输入域名" },
+                {
+                  validator: (_, value) =>
+                    !value || normalizeDomain(value)
+                      ? Promise.resolve()
+                      : Promise.reject(new Error(DOMAIN_ERROR_MAP.invalid_domain)),
+                },
+              ]}
             >
               <Input
                 placeholder="example.com 或 www.example.com"

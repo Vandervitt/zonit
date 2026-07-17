@@ -12,8 +12,7 @@ import {
   bindDomainToLandingPage,
 } from "@/lib/domains-db";
 import { addDomainToProject } from "@/lib/vercel";
-
-const DOMAIN_RE = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
+import { normalizeDomain } from "@/lib/domain";
 
 export async function GET() {
   const session = await auth();
@@ -30,9 +29,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: ApiErrors.UNAUTHORIZED }, { status: 401 });
   }
 
-  const { domain, landingPageId } = await request.json();
+  const { domain: rawDomain, landingPageId } = await request.json();
 
-  if (!domain || !DOMAIN_RE.test(domain)) {
+  const domain = typeof rawDomain === "string" ? normalizeDomain(rawDomain) : null;
+  if (!domain) {
     return NextResponse.json({ error: ApiErrors.INVALID_DOMAIN }, { status: 400 });
   }
 
