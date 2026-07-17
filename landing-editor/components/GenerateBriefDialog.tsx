@@ -48,6 +48,7 @@ interface BriefForm {
 /** 生成后需人工核对的要点：轮播高亮，提醒用户别把 AI 产出直接当成品。 */
 const REVIEW_TIPS = [
   "核对文案与描述：是否准确表达你的产品价值，措辞合规、无夸大或不实承诺。",
+  "务必替换配图：评价头像、前后对比图均为图库素材（非真实客户 / 真实案例），直接投放可能构成虚假宣传，请换成你的真实素材。",
   "核对数据类内容：统计数字、评价、案例多为占位示例，请替换为真实素材。",
   "核对区块取舍：逐个区块看是否都需要，可增删、排序或隐藏不适用的模块。",
 ];
@@ -214,7 +215,11 @@ function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
         <Form.Item label="可选：粘贴公司 / 产品介绍" name="pastedIntro">
           <Input.TextArea rows={3} placeholder="有现成介绍可粘贴，AI 会据此提炼文案" maxLength={8000} showCount />
         </Form.Item>
-        <Form.Item name="autoImages" valuePropName="checked" extra="据你的资料自动为图片位换 Unsplash 配图并生成 alt；会稍增生成耗时，可生成后再手动替换。">
+        <Form.Item
+          name="autoImages"
+          valuePropName="checked"
+          extra="据你的资料自动为图片位换 Unsplash 配图并生成 alt（含评价头像、前后对比图）；会稍增生成耗时。注意：这些均为图库素材、非真实客户 / 案例，投放前务必替换为你的真实素材。"
+        >
           <Checkbox>自动配图（Unsplash）</Checkbox>
         </Form.Item>
       </Form>

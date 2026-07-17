@@ -16,19 +16,19 @@ describe("deriveImageSlots / mergeImages", () => {
     solar = await loadTemplateDraft("solar");
   });
 
-  it("枚举 hero 与 section 背景/展示/流程图，排除头像与前后对比对", () => {
+  it("枚举 hero 与 section 背景/展示/流程图，均标 kind=generic", () => {
     const slots = deriveImageSlots(solar);
     const ids = slots.map((s) => s.id);
     // hero 背景图应在内
     expect(ids).toContain("hero.backgroundImage");
-    // 前后对比、评价头像不应出现
-    expect(ids.some((id) => id.includes("beforeImage") || id.includes("afterImage"))).toBe(false);
-    expect(ids.some((id) => id.endsWith(".avatar"))).toBe(false);
-    // 每个槽都带 role 与 path
+    // 每个槽都带 role / path / kind
     for (const s of slots) {
       expect(s.role).toBeTruthy();
       expect(Array.isArray(s.path)).toBe(true);
+      expect(s.kind).toBeTruthy();
     }
+    // 普通背景/展示图 kind=generic
+    expect(slots.find((s) => s.id === "hero.backgroundImage")!.kind).toBe("generic");
   });
 
   it("limit 截断数量", () => {
@@ -73,10 +73,10 @@ describe("deriveImageSlots / mergeImages", () => {
 
   it("buildImageReplacements：同词去重、alt 回退、无结果跳过", async () => {
     const slots: ImageSlot[] = [
-      { id: "a", path: ["hero", "backgroundImage"], role: "hero.backgroundImage", context: "" },
-      { id: "b", path: ["hero", "showcase"], role: "hero.showcase", context: "" },
-      { id: "c", path: ["sections", 0, "data", "backgroundImage"], role: "stats.backgroundImage", context: "" },
-      { id: "d", path: ["sections", 1, "data", "backgroundImage"], role: "story.backgroundImage", context: "" },
+      { id: "a", path: ["hero", "backgroundImage"], role: "hero.backgroundImage", context: "", kind: "generic" },
+      { id: "b", path: ["hero", "showcase"], role: "hero.showcase", context: "", kind: "generic" },
+      { id: "c", path: ["sections", 0, "data", "backgroundImage"], role: "stats.backgroundImage", context: "", kind: "generic" },
+      { id: "d", path: ["sections", 1, "data", "backgroundImage"], role: "story.backgroundImage", context: "", kind: "generic" },
     ];
     const plan: FilledImage[] = [
       { id: "a", query: "clean home", alt: "模型 alt A" }, // 有模型 alt
@@ -110,5 +110,101 @@ describe("deriveImageSlots / mergeImages", () => {
     );
     for (const s of slots) expect(prompt).toContain(s.id);
     expect(prompt).toContain("必须覆盖全部 id");
+  });
+});
+
+describe("对比图与评价头像（before/after + avatar）", () => {
+  let dental: LandingPageDraft;
+  beforeAll(async () => {
+    dental = await loadTemplateDraft("dental");
+  });
+
+  it("枚举含 before/after（成对、带 pairId）与 avatar，排除 content.image", () => {
+    const slots = deriveImageSlots(dental);
+    const before = slots.filter((s) => s.kind === "before");
+    const after = slots.filter((s) => s.kind === "after");
+    const avatars = slots.filter((s) => s.kind === "avatar");
+
+    // dental 模板：2 组对比 + 3 个头像
+    expect(before.length).toBe(2);
+    expect(after.length).toBe(2);
+    expect(avatars.length).toBe(3);
+
+    // before/after id 指向真实字段
+    expect(before.every((s) => s.id.endsWith(".beforeImage"))).toBe(true);
+    expect(after.every((s) => s.id.endsWith(".afterImage"))).toBe(true);
+    expect(avatars.every((s) => s.id.endsWith(".avatar"))).toBe(true);
+
+    // 同一 item 的 before 与 after 共享 pairId；不同 item 的 pairId 不同
+    for (const b of before) {
+      const a = after.find((x) => x.pairId === b.pairId);
+      expect(a).toBeTruthy();
+      expect(b.pairId).toBeTruthy();
+    }
+    expect(new Set(before.map((s) => s.pairId)).size).toBe(2);
+
+    // 评价内容配图 content.image 不纳入
+    expect(slots.some((s) => s.id.endsWith(".content.image"))).toBe(false);
+  });
+
+  it("成对安全截断：任意 limit 下 before/after 对要么整对进、要么都不进", () => {
+    const full = deriveImageSlots(dental);
+    const pairIds = [...new Set(full.filter((s) => s.pairId).map((s) => s.pairId!))];
+    for (let limit = 1; limit <= full.length + 1; limit++) {
+      const capped = deriveImageSlots(dental, limit);
+      expect(capped.length).toBeLessThanOrEqual(limit);
+      for (const pid of pairIds) {
+        const fullCount = full.filter((s) => s.pairId === pid).length;
+        const cappedCount = capped.filter((s) => s.pairId === pid).length;
+        expect(cappedCount === 0 || cappedCount === fullCount).toBe(true);
+      }
+    }
+  });
+
+  it("buildImageReplacements：avatar 不进去重缓存，相同检索词也逐个解析", async () => {
+    const slots: ImageSlot[] = [
+      { id: "av0", path: ["sections", 0, "data", "items", 0, "avatar"], role: "reviews.avatar", context: "", kind: "avatar" },
+      { id: "av1", path: ["sections", 0, "data", "items", 1, "avatar"], role: "reviews.avatar", context: "", kind: "avatar" },
+    ];
+    const plan: FilledImage[] = [
+      { id: "av0", query: "portrait person", alt: "客户 A 肖像" },
+      { id: "av1", query: "portrait person", alt: "客户 B 肖像" }, // 同词
+    ];
+    const calls: { q: string; kind?: string }[] = [];
+    const resolve = async (q: string, slot?: ImageSlot) => {
+      calls.push({ q, kind: slot?.kind });
+      // 用调用次序模拟结果池不同结果，保证不撞脸
+      return { src: `blob://${q}#${calls.length}`, alt: `resolve ${q}` };
+    };
+
+    const repl = await buildImageReplacements(slots, plan, resolve);
+
+    // 头像不去重：同词 "portrait person" 解析两次
+    expect(calls.filter((c) => c.q === "portrait person")).toHaveLength(2);
+    // resolve 收到 slot（可据 kind 分流）
+    expect(calls.every((c) => c.kind === "avatar")).toBe(true);
+    // 两个头像拿到不同 src（不撞脸）
+    expect(repl.map((r) => r.src)).toEqual(["blob://portrait person#1", "blob://portrait person#2"]);
+    expect(repl.map((r) => r.alt)).toEqual(["客户 A 肖像", "客户 B 肖像"]);
+  });
+
+  it("buildImageQueryPrompt：含成对约束与人像约束、标注对比组", () => {
+    const slots: ImageSlot[] = [
+      { id: "sections.0.data.items.0.beforeImage", path: [], role: "beforeAfter.beforeImage", context: "牙齿矫正案例", kind: "before", pairId: "sections.0.data.items.0" },
+      { id: "sections.0.data.items.0.afterImage", path: [], role: "beforeAfter.afterImage", context: "牙齿矫正案例", kind: "after", pairId: "sections.0.data.items.0" },
+      { id: "sections.1.data.items.0.avatar", path: [], role: "reviews.avatar", context: "Camila · Portugal", kind: "avatar" },
+    ];
+    const prompt = buildImageQueryPrompt(
+      { productName: "Bright Dental", description: "Cosmetic dentistry", language: "English" },
+      slots,
+    );
+    // 成对：同一主体/场景，只在问题态→结果态上不同
+    expect(prompt).toContain("同一主体");
+    // 人像：每个头像不同的人
+    expect(prompt).toContain("头像");
+    expect(prompt).toContain("不同的人");
+    // 标注对比组，供模型识别成对关系
+    expect(prompt).toContain("对比组");
+    expect(prompt).toContain("sections.0.data.items.0");
   });
 });
