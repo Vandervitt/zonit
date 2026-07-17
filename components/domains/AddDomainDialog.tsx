@@ -28,6 +28,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   const { message } = App.useApp();
   const [form] = Form.useForm<{ domain: string }>();
   const [cname, setCname] = useState<string | null>(null);
+  const [submittedDomain, setSubmittedDomain] = useState("");
   const [copied, setCopied] = useState(false);
 
   const addMutation = useMutation(
@@ -45,6 +46,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   function reset() {
     form.resetFields();
     setCname(null);
+    setSubmittedDomain("");
     setCopied(false);
     addMutation.reset();
   }
@@ -58,7 +60,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
     // Field validator已保证可归一化为合法主机名
     const domain = normalizeDomain(values.domain);
     if (!domain) return;
-    form.setFieldValue("domain", domain);
+    setSubmittedDomain(domain);
     try {
       await addMutation.trigger({ domain });
     } catch (err) {
@@ -66,7 +68,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
     }
   }
 
-  function handleCopy(domainValue: string) {
+  function handleCopy() {
     if (!cname) return;
     navigator.clipboard.writeText(cname);
     setCopied(true);
@@ -140,9 +142,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
             <div style={{ marginBottom: 12 }}>
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>名称</Typography.Text>
               <div>
-                <Typography.Text code>
-                  {domainValue.startsWith("www.") ? "www" : domainValue}
-                </Typography.Text>
+                <Typography.Text code>{submittedDomain}</Typography.Text>
               </div>
             </div>
             <div>
@@ -153,7 +153,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
                   type="text"
                   size="small"
                   icon={copied ? <CheckOutlined style={{ color: "#52c41a" }} /> : <CopyOutlined />}
-                  onClick={() => handleCopy(domainValue)}
+                  onClick={handleCopy}
                 />
               </div>
             </div>
