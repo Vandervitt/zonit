@@ -9,9 +9,9 @@
 // 不在 (workspace) 布局下、拿不到全局 antd Provider，故本组件自带 ConfigProvider + App，
 // 复用 adminTheme，使弹窗风格与后台其余表单统一。
 import "@ant-design/v5-patch-for-react-19";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { App, ConfigProvider, Modal, Form, Input, Select, Typography } from "antd";
+import { App, ConfigProvider, Modal, Form, Input, Select, Spin, Typography } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import { adminTheme } from "@/lib/theme/antd-theme";
 import { handleSessionExpired } from "@/lib/auth-client";
@@ -44,6 +44,46 @@ interface BriefForm {
   pastedIntro?: string;
 }
 
+/** 生成后需人工核对的要点：轮播高亮，提醒用户别把 AI 产出直接当成品。 */
+const REVIEW_TIPS = [
+  "核对文案与描述：是否准确表达你的产品价值，措辞合规、无夸大或不实承诺。",
+  "核对数据类内容：统计数字、评价、案例多为占位示例，请替换为真实素材。",
+  "核对区块取舍：逐个区块看是否都需要，可增删、排序或隐藏不适用的模块。",
+];
+
+/** 生成中的加载态：整块替换表单，展示不断递增的耗时与需核对的提示。 */
+function GeneratingState({ elapsedMs }: { elapsedMs: number }) {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setActive((a) => (a + 1) % REVIEW_TIPS.length), 2600);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center gap-4 py-6 text-center">
+      <Spin size="large" />
+      <div className="text-3xl font-semibold tabular-nums text-ink">{(elapsedMs / 1000).toFixed(1)}s</div>
+      <Typography.Text type="secondary">
+        AI 正在依据你的资料重写整页文案，通常约需 30–70 秒，请稍候，勿关闭页面…
+      </Typography.Text>
+      <div className="mt-1 w-full rounded-lg bg-canvas p-4 text-left">
+        <div className="mb-2 text-sm font-medium text-ink">生成后请重点核对：</div>
+        <ul className="space-y-2">
+          {REVIEW_TIPS.map((tip, i) => (
+            <li
+              key={i}
+              className={`flex gap-2 text-sm transition-colors ${i === active ? "text-ink" : "text-ink-soft"}`}
+            >
+              <span aria-hidden>{i === active ? "👉" : "•"}</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 export function GenerateBriefDialog({ defaultOpen = false }: { defaultOpen?: boolean }) {
   // 自带 antd 上下文：编辑器路由缺全局 Provider，component={false} 不额外产生 DOM 包裹。
   return (
@@ -63,6 +103,16 @@ function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
   const [form] = Form.useForm<BriefForm>();
   const [open, setOpen] = useState(defaultOpen);
   const [loading, setLoading] = useState(false);
+  const [elapsedMs, setElapsedMs] = useState(0);
+
+  // 生成中：从 0 起每 100ms 累加耗时，供加载态展示「不断递增」的秒数。
+  useEffect(() => {
+    if (!loading) return;
+    setElapsedMs(0);
+    const start = Date.now();
+    const id = setInterval(() => setElapsedMs(Date.now() - start), 100);
+    return () => clearInterval(id);
+  }, [loading]);
 
   /** 关闭并清掉 ?ai 标记，避免刷新再次自动弹出。 */
   function close() {
@@ -105,19 +155,26 @@ function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
 
   return (
     <Modal
-      title="AI 一键成页"
+      title={loading ? "AI 正在生成…" : "AI 一键成页"}
       open={open}
       onOk={handleOk}
       onCancel={close}
       okText="一键成页"
       cancelText="手动编辑"
-      confirmLoading={loading}
+      // 生成中：整块换成加载态，隐藏底部按钮并禁用关闭，避免中途取消或重复提交。
+      footer={loading ? null : undefined}
+      closable={!loading}
+      keyboard={!loading}
       maskClosable={false}
       destroyOnHidden
       centered
       // 限制整体高度、让表单区自身滚动，避免长表单把弹窗顶出视口上下缘。
       styles={{ body: { maxHeight: "calc(100vh - 220px)", overflowY: "auto" } }}
     >
+      {loading ? (
+        <GeneratingState elapsedMs={elapsedMs} />
+      ) : (
+        <>
       <Typography.Paragraph type="secondary">
         填写产品或公司信息，AI 将依据当前模板为这张落地页自动生成可投放文案。也可点「手动编辑」直接关闭。
       </Typography.Paragraph>
@@ -152,6 +209,8 @@ function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
           <Input.TextArea rows={3} placeholder="有现成介绍可粘贴，AI 会据此提炼文案" maxLength={8000} showCount />
         </Form.Item>
       </Form>
+        </>
+      )}
     </Modal>
   );
 }

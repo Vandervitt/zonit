@@ -26,7 +26,10 @@ export function PreviewFrame({ virtualWidth, children }: { virtualWidth: number;
   const outerRef = useRef<HTMLDivElement>(null);
   const [body, setBody] = useState<HTMLElement | null>(null);
   const [scale, setScale] = useState(1);
-  const [contentHeight, setContentHeight] = useState(0);
+  // 外层容器尺寸：iframe 以「真实设备宽度」渲染后等比缩入，高度按缩放反推填满外层，
+  // 让落地页在 iframe 内部自身滚动——position:fixed 才会吸附到可视区，且页尾 min-h-screen
+  // 不会撑出多余留白（旧实现把 iframe 高设为整页内容高 + 外层滚动，导致底部白块与悬浮按钮错位）。
+  const [outerSize, setOuterSize] = useState({ width: virtualWidth, height: 0 });
 
   // iframe onLoad：注入样式 + 暴露 body 作为 portal 容器
   const handleLoad = () => {
@@ -58,45 +61,37 @@ export function PreviewFrame({ virtualWidth, children }: { virtualWidth: number;
     return () => mo.disconnect();
   }, []);
 
-  // 外层宽度变化 → 计算缩放比
+  // 外层尺寸变化 → 记录宽高并计算缩放比（scale = 外层宽 / 虚拟设备宽）
   useEffect(() => {
     const el = outerRef.current;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
-      const w = entries[0].contentRect.width;
-      setScale(w / virtualWidth);
+      const { width, height } = entries[0].contentRect;
+      setScale(width / virtualWidth);
+      setOuterSize({ width, height });
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, [virtualWidth]);
 
-  // iframe 内容高度变化 → 调整占位高
-  useEffect(() => {
-    if (!body) return;
-    const measure = () => setContentHeight(body.scrollHeight);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(body);
-    return () => ro.disconnect();
-  }, [body]);
+  // iframe 以虚拟宽渲染、按 scale 缩放；高度反推为 外层高/scale，缩放后正好填满外层。
+  // 落地页在 iframe 内部滚动，position:fixed 吸附可视区，页尾无多余留白。
+  const iframeHeight = scale > 0 ? outerSize.height / scale : outerSize.height;
 
   return (
-    <div ref={outerRef} className="h-full w-full overflow-auto bg-canvas">
-      {/* 占位容器：高度 = 缩放后的内容高度，避免截断/留白（动态值 → 行内样式豁免） */}
-      <div style={{ height: contentHeight * scale }}>
-        <iframe
-          ref={iframeRef}
-          onLoad={handleLoad}
-          title="落地页实时预览"
-          className="border-0 bg-white"
-          style={{
-            width: virtualWidth,
-            height: contentHeight || "100%",
-            transform: `scale(${scale})`,
-            transformOrigin: "top left",
-          }}
-        />
-      </div>
+    <div ref={outerRef} className="h-full w-full overflow-hidden bg-canvas">
+      <iframe
+        ref={iframeRef}
+        onLoad={handleLoad}
+        title="落地页实时预览"
+        className="border-0 bg-white"
+        style={{
+          width: virtualWidth,
+          height: iframeHeight || "100%",
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+        }}
+      />
       {body && createPortal(children, body)}
     </div>
   );
