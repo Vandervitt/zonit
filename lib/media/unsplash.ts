@@ -42,14 +42,22 @@ export interface SearchPhotosResult {
   demo?: boolean;
 }
 
+/** Unsplash 检索取向：普通配图用 landscape，评价头像用 squarish（更贴近头像裁切）。 */
+export type UnsplashOrientation = "landscape" | "portrait" | "squarish";
+
 /** 检索照片（分页）。未配置 key 时返回 demo 空结果。 */
-export async function searchPhotos(q: string, page = 1, perPage = 8): Promise<SearchPhotosResult> {
+export async function searchPhotos(
+  q: string,
+  page = 1,
+  perPage = 8,
+  orientation: UnsplashOrientation = "landscape",
+): Promise<SearchPhotosResult> {
   if (!q.trim()) return { results: [], total: 0 };
   const key = accessKey();
   if (!key) return { results: [], total: 0, demo: true };
 
   const res = await fetch(
-    `https://api.unsplash.com/search/photos?query=${encodeURIComponent(q)}&page=${page}&per_page=${perPage}&orientation=landscape`,
+    `https://api.unsplash.com/search/photos?query=${encodeURIComponent(q)}&page=${page}&per_page=${perPage}&orientation=${orientation}`,
     { headers: { Authorization: `Client-ID ${key}` } },
   );
   if (!res.ok) {
@@ -62,10 +70,32 @@ export async function searchPhotos(q: string, page = 1, perPage = 8): Promise<Se
 }
 
 /** 取某检索词的首张结果；无配置 / 无结果 / 出错都返回 null（供尽力而为的自动配图使用）。 */
-export async function searchTopPhoto(query: string): Promise<UnsplashResult | null> {
+export async function searchTopPhoto(
+  query: string,
+  orientation: UnsplashOrientation = "landscape",
+): Promise<UnsplashResult | null> {
   try {
-    const { results } = await searchPhotos(query, 1, 1);
+    const { results } = await searchPhotos(query, 1, 1, orientation);
     return results[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 从检索结果池里按序号取一张（供评价头像避免撞脸）：同一检索词下，用递增 index 取不同结果，
+ * index 超出池大小则回绕。无配置 / 无结果 / 出错都返回 null。
+ */
+export async function searchPhotoAt(
+  query: string,
+  index: number,
+  orientation: UnsplashOrientation = "squarish",
+  poolSize = 10,
+): Promise<UnsplashResult | null> {
+  try {
+    const { results } = await searchPhotos(query, 1, poolSize, orientation);
+    if (results.length === 0) return null;
+    return results[index % results.length];
   } catch {
     return null;
   }

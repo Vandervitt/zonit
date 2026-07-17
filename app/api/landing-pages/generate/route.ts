@@ -15,7 +15,7 @@ import { getUserPlan } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
 import { generateDraftFromBrief, generateImageQueries } from "@/lib/ai/generate";
 import { deriveImageSlots, mergeImages, buildImageReplacements, MAX_AUTO_IMAGES } from "@/lib/ai/images";
-import { searchTopPhoto, persistUnsplashPhoto } from "@/lib/media/unsplash";
+import { searchTopPhoto, searchPhotoAt, persistUnsplashPhoto } from "@/lib/media/unsplash";
 import { checkAndConsume, hasAllowance } from "@/lib/ai/usage";
 import type { GenerationBrief } from "@/lib/ai/types";
 import type { LandingPageDraft } from "@/types/schema.draft";
@@ -139,9 +139,14 @@ async function applyAutoImages(
     if (slots.length === 0) return draft;
 
     const plan = await generateImageQueries(brief, slots);
-    // 单词解析：Unsplash 取首图 → 存 Blob；无结果 / 失败返回 null（该图保留原图）。
-    const replacements = await buildImageReplacements(slots, plan, async (query) => {
-      const photo = await searchTopPhoto(query);
+    // 头像逐个换脸：用递增计数从结果池取不同图，即使模型给了相同检索词也不撞脸。
+    let avatarSeq = 0;
+    // 单图解析：Unsplash 取图 → 存 Blob；无结果 / 失败返回 null（该图保留原图）。
+    const replacements = await buildImageReplacements(slots, plan, async (query, slot) => {
+      const photo =
+        slot.kind === "avatar"
+          ? await searchPhotoAt(query, avatarSeq++, "squarish") // 人像取向、逐个取不同结果
+          : await searchTopPhoto(query); // 普通/对比图：landscape 首图
       if (!photo) return null;
       try {
         const saved = await persistUnsplashPhoto(userId, {
