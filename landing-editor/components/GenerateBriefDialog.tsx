@@ -11,7 +11,7 @@
 import "@ant-design/v5-patch-for-react-19";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { App, ConfigProvider, Modal, Form, Input, Select, Spin, Typography } from "antd";
+import { App, Checkbox, ConfigProvider, Modal, Form, Input, Select, Spin, Typography } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import { adminTheme } from "@/lib/theme/antd-theme";
 import { handleSessionExpired } from "@/lib/auth-client";
@@ -42,6 +42,7 @@ interface BriefForm {
   ctaGoal?: string;
   language: string;
   pastedIntro?: string;
+  autoImages: boolean;
 }
 
 /** 生成后需人工核对的要点：轮播高亮，提醒用户别把 AI 产出直接当成品。 */
@@ -64,7 +65,7 @@ function GeneratingState({ elapsedMs }: { elapsedMs: number }) {
       <Spin size="large" />
       <div className="text-3xl font-semibold tabular-nums text-ink">{(elapsedMs / 1000).toFixed(1)}s</div>
       <Typography.Text type="secondary">
-        AI 正在依据你的资料重写整页文案，通常约需 30–70 秒，请稍候，勿关闭页面…
+        AI 正在依据你的资料重写整页文案并自动配图，通常约需 30–90 秒，请稍候，勿关闭页面…
       </Typography.Text>
       <div className="mt-1 w-full rounded-lg bg-canvas p-4 text-left">
         <div className="mb-2 text-sm font-medium text-ink">生成后请重点核对：</div>
@@ -178,7 +179,12 @@ function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
       <Typography.Paragraph type="secondary">
         填写产品或公司信息，AI 将依据当前模板为这张落地页自动生成可投放文案。也可点「手动编辑」直接关闭。
       </Typography.Paragraph>
-      <Form form={form} layout="vertical" initialValues={{ language: "English" }} requiredMark="optional">
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ language: "English", autoImages: true }}
+        requiredMark="optional"
+      >
         <Form.Item
           label="产品 / 公司名"
           name="productName"
@@ -207,6 +213,9 @@ function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
         </Form.Item>
         <Form.Item label="可选：粘贴公司 / 产品介绍" name="pastedIntro">
           <Input.TextArea rows={3} placeholder="有现成介绍可粘贴，AI 会据此提炼文案" maxLength={8000} showCount />
+        </Form.Item>
+        <Form.Item name="autoImages" valuePropName="checked" extra="据你的资料自动为图片位换 Unsplash 配图并生成 alt；会稍增生成耗时，可生成后再手动替换。">
+          <Checkbox>自动配图（Unsplash）</Checkbox>
         </Form.Item>
       </Form>
         </>

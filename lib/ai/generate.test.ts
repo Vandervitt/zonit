@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { generateDraftFromBrief, rewriteText } from "@/lib/ai/generate";
+import { generateDraftFromBrief, generateImageQueries, rewriteText } from "@/lib/ai/generate";
 import { setAiClient, resetAiClient } from "@/lib/ai/client";
+import { deriveImageSlots } from "@/lib/ai/images";
 import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 
 afterEach(() => resetAiClient());
@@ -21,7 +22,7 @@ describe("generateDraftFromBrief", () => {
     const template = await loadTemplateDraft("solar");
     // 复刻线上 Qwen(json_object) 偶发产物：整份回填都用「字段 label」当键，text 缺失。
     setAiClient({
-      async completeJson<T>(_args: unknown): Promise<T> {
+      async completeJson<T>(): Promise<T> {
         const { deriveSlots } = await import("@/lib/ai/slots");
         const slots = deriveSlots(template).map((s) => {
           const key = String(s.path[s.path.length - 1]); // 末段字段名，如 title/subtitle/text
@@ -54,6 +55,24 @@ describe("generateDraftFromBrief", () => {
     const r = await generateDraftFromBrief(await loadTemplateDraft(), { productName: "A", description: "B" });
     expect(r.ok).toBe(false);
     expect(calls).toBe(2); // 首次 + 重试 1 次
+  });
+});
+
+describe("generateImageQueries", () => {
+  it("为图片槽返回模型产出的检索词 + alt", async () => {
+    const draft = await loadTemplateDraft("solar");
+    const slots = deriveImageSlots(draft, 3);
+    setAiClient({
+      async completeJson<T>(): Promise<T> {
+        return {
+          images: slots.map((s) => ({ id: s.id, query: "home cleaning", alt: `图：${s.role}` })),
+        } as unknown as T;
+      },
+    });
+    const out = await generateImageQueries({ productName: "A", description: "B" }, slots);
+    expect(out).toHaveLength(slots.length);
+    expect(out[0].query).toBe("home cleaning");
+    expect(out[0].alt).toMatch(/^图：/);
   });
 });
 

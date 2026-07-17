@@ -24,6 +24,7 @@ export interface GenerationBrief {
   ctaGoal?: string;
   language?: string;
   pastedIntro?: string;
+  autoImages?: boolean; // 自动配图（Unsplash）；缺省视为开启
 }
 
 /** 区块改写请求。 */
