@@ -25,9 +25,14 @@ export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
 
-  // 营销首页：公开；已登录则进租户后台
+  // 营销首页：始终公开，已登录用户也正常展示，不再自动跳转租户后台
   if (pathname === "/") {
-    return isLoggedIn ? NextResponse.redirect(new URL("/admin", req.url)) : null;
+    return null;
+  }
+
+  // 已登录用户点登录/注册：直接进租户后台（仅此入口触发跳转）
+  if (isLoggedIn && (pathname === "/login" || pathname === "/register")) {
+    return NextResponse.redirect(new URL("/admin", req.url));
   }
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));

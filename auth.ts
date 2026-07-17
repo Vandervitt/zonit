@@ -1,26 +1,12 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import Apple from "next-auth/providers/apple";
-import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import Credentials from "next-auth/providers/credentials";
 // import PostgresAdapter from "@auth/pg-adapter";
 import bcrypt from "bcryptjs";
 import pool from "@/lib/db";
 import { Routes, UserRole } from "@/lib/constants";
+import { isTrustedEmail } from "@/lib/auth/trusted-email";
 import type { PlanId } from "@/lib/plans";
-
-const TRUSTED_DOMAINS = [
-  "zapbridge.com",
-  "gmail.com", "googlemail.com",
-  "outlook.com", "hotmail.com", "live.com", "msn.com",
-  "icloud.com", "me.com", "mac.com"
-];
-
-const isTrustedEmail = (email?: string | null) => {
-  if (!email) return false;
-  const domain = email.toLowerCase().split("@")[1];
-  return TRUSTED_DOMAINS.includes(domain);
-};
 
 // Debug configuration
 if (!process.env.AUTH_SECRET) {
@@ -39,15 +25,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
-    Apple({
-      clientId: process.env.AUTH_APPLE_ID,
-      clientSecret: process.env.AUTH_APPLE_SECRET,
-    }),
-    MicrosoftEntraID({
-      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
-      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
-      issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
     }),
     Credentials({
       credentials: {

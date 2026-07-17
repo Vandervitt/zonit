@@ -5,6 +5,7 @@ export const ApiErrors = {
   SLUG_TAKEN: 'slug_taken',
   SITE_NAME_EXISTS: 'Site name already exists.',
   EMAIL_IN_USE: 'Email already in use.',
+  EMAIL_NOT_SUPPORTED: 'Only Gmail addresses are supported.',
   FIELDS_REQUIRED: 'All fields are required.',
   QUOTA_EXCEEDED: 'quota_exceeded',
   LIMIT_EXCEEDED: 'limit_exceeded',
