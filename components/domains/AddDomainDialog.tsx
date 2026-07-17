@@ -55,11 +55,9 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   }
 
   async function handleFinish(values: { domain: string }) {
+    // Field validator已保证可归一化为合法主机名
     const domain = normalizeDomain(values.domain);
-    if (!domain) {
-      message.error(DOMAIN_ERROR_MAP.invalid_domain);
-      return;
-    }
+    if (!domain) return;
     form.setFieldValue("domain", domain);
     try {
       await addMutation.trigger({ domain });
@@ -99,7 +97,15 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
             <Form.Item
               name="domain"
               label="域名"
-              rules={[{ required: true, message: "请输入域名" }]}
+              rules={[
+                { required: true, message: "请输入域名" },
+                {
+                  validator: (_, value) =>
+                    !value || normalizeDomain(value)
+                      ? Promise.resolve()
+                      : Promise.reject(new Error(DOMAIN_ERROR_MAP.invalid_domain)),
+                },
+              ]}
             >
               <Input
                 placeholder="example.com 或 www.example.com"
