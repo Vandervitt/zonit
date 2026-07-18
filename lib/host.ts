@@ -5,6 +5,14 @@ export const appHostname = process.env.NEXT_PUBLIC_APP_URL
   ? new URL(process.env.NEXT_PUBLIC_APP_URL).hostname
   : null;
 
+/**
+ * 以 app 主域为 base 拼接绝对 URL。base 尾部斜杠一律剥掉，
+ * 避免环境变量带尾斜杠时产生 `//path`（Next 会 308 重定向，beacon 场景有丢数据风险）。
+ */
+export function appUrl(path: string, base: string = process.env.NEXT_PUBLIC_APP_URL ?? ""): string {
+  return `${base.replace(/\/+$/, "")}${path}`;
+}
+
 // 中间件改写租户请求到 /p/{slug} 时，把原始客户域名盖进这个请求头。
 // 因为改写后下游读到的 `host` 会变成 app 主域，无法再据此判定租户，故显式透传。
 export const TENANT_HOST_HEADER = "x-tenant-host";
