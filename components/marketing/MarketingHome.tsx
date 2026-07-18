@@ -33,70 +33,68 @@ const PLATFORMS = [
   "Google Ads",
   "Google Analytics 4",
   "TikTok Pixel",
-  "Snapchat",
-  "Pinterest Tag",
-  "Microsoft UET",
+  "TikTok Events API",
 ];
 
 const STEPS = [
   {
     icon: LayoutTemplate,
     no: "01",
-    title: "选一套爆款模板",
-    desc: "从 15+ 行业高转化模板里挑一套，结构、文案、视觉都已为投放调校好，开箱即用。",
+    title: "选一套获客模板",
+    desc: "从 30+ 海外获客模板中选择适合的行业与咨询场景，快速搭好页面结构和内容起点。",
   },
   {
     icon: Pencil,
     no: "02",
-    title: "可视化改内容",
-    desc: "点哪改哪，文案与图片实时预览、自动保存——所见即所得，不写一行代码。",
+    title: "可视化编辑内容",
+    desc: "选择区块后修改文案与图片，支持区块拖拽排序、自动保存，以及移动端和桌面端实时预览。",
   },
   {
     icon: Globe,
     no: "03",
-    title: "发布到自有域名",
-    desc: "绑定你的品牌域名，一键上线。独立域名更利于投放过审与 SEO 收录。",
+    title: "升级后发布到自有域名",
+    desc: "准备投放时升级套餐，绑定并完成品牌域名的 DNS 验证，即可发布页面并配置 SEO 信息。",
   },
 ];
 
 const FEATURES = [
   {
     icon: LayoutTemplate,
-    title: "爆款行业模板库",
-    desc: "15+ 套为海外获客打磨的高转化模板，覆盖咨询、预约、留资等主流场景，持续上新。",
+    title: "海外获客模板库",
+    desc: "30+ 套咨询与留资模板，覆盖美妆、服饰、家居、数码、本地服务等行业，可直接作为编辑起点。",
   },
   {
     icon: Pencil,
-    title: "可视化实时编辑",
-    desc: "拖拽式区块编辑，改文案、换图片即时呈现，自动保存草稿，桌面与移动端双视图预览。",
+    title: "可视化内容编辑",
+    desc: "通过区块表单修改文案与图片，拖拽调整区块顺序，自动保存草稿，并实时切换桌面与移动端预览。",
   },
   {
     icon: Globe,
     title: "自有品牌域名发布",
-    desc: "一键发布到你自己的域名，独立品牌形象，规避平台限流，对投放审核与自然搜索更友好。",
+    desc: "付费套餐可绑定自有品牌域名；完成 DNS 验证后发布页面，并支持独立 SEO 标题、描述与分享图。",
   },
   {
     icon: Radar,
-    title: "全矩阵像素 + 转化回传",
-    desc: "Meta / TikTok / Google 像素同页并行，内建 Meta CAPI 服务端转化与 UTM 全链路归因。",
+    title: "多平台追踪 + 转化回传",
+    desc: "按套餐配置 Meta、TikTok、GA4 与 Google Ads；Pro 及以上支持 Meta / TikTok 服务端转化回传和 UTM 来源记录。",
   },
   {
     icon: ShieldCheck,
-    title: "反同质化风控引擎",
-    desc: "智能打散页面指纹，规避投放平台查重与封号风险，让你的广告账户跑得更稳更久。",
+    title: "页面结构变体",
+    desc: "Agency 套餐可更换页面变体种子，在内容一致的前提下调整 Hero 布局、包裹结构与 meta 标识，降低同模板页面完全一致的概率。",
   },
   {
     icon: Sparkles,
     title: "AI 一键生成 & 智能改写",
-    desc: "输入行业与卖点，AI 直接产出整页高转化文案；逐段智能改写打磨措辞，几分钟上线一版落地页。",
+    desc: "输入业务资料后，AI 可按当前模板生成整页营销文案和图库配图，也可逐段改写；发布前仍需核对事实、案例与素材。",
   },
 ];
 
 const FUNNEL = [
-  { icon: Lock, label: "同意管理 (CMP)", note: "按地区合规门控加载" },
-  { icon: Radar, label: "像素同步触发", note: "Meta / TikTok / GA4" },
-  { icon: MousePointerClick, label: "CTA 行为采集", note: "点击 / 留资事件委托" },
-  { icon: BarChart3, label: "转化回传 + 看板", note: "CAPI 服务端 + 数据分析" },
+  { icon: Lock, label: "Cookie 同意门控", note: "可选开启，同意后加载第三方像素" },
+  { icon: Radar, label: "多平台像素", note: "Meta / TikTok / GA4 / Google Ads" },
+  { icon: MousePointerClick, label: "获客行为采集", note: "CTA 点击 + 表单提交" },
+  { icon: BarChart3, label: "转化回传 + 基础看板", note: "Meta / TikTok CAPI + PV / CTA / UTM 来源" },
 ];
 
 /* ------------------------------------------------------------------ *
@@ -213,7 +211,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
         >
           投放级落地页
           <br className="hidden sm:block" />
-          <span className={gradientText}>几分钟上线，跑在你的域名</span>
+          <span className={gradientText}>免费创建与预览，准备投放再发布</span>
         </motion.h1>
 
         <motion.p
@@ -221,8 +219,8 @@ function Hero({ fonts }: { fonts: Fonts }) {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
         >
-          为做海外获客的创业者与小团队打造的智能落地页引擎：选模板 → 改文案 → 一键发布，
-          页面跑在你的品牌域名上，内建全矩阵像素与转化追踪——让每一分广告预算都被看见。
+          为做海外获客的创业者与小团队打造：从 30+ 模板开始，编辑内容、AI 生成文案并实时预览；
+          准备投放时升级发布到品牌域名，再按套餐配置像素、UTM 与服务端转化回传。
         </motion.p>
 
         <motion.div
@@ -244,7 +242,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className={`mt-5 text-xs tracking-wide text-muted-foreground/80 ${fonts.mono}`}
         >
-          免费起步 · 无需信用卡 · 无需写一行代码
+          免费创建与预览 · 无需信用卡 · 无需写一行代码
         </motion.p>
       </motion.div>
 
@@ -339,7 +337,7 @@ function LogoMarquee({ fonts }: { fonts: Fonts }) {
   return (
     <section className="relative border-y border-border py-10">
       <p className={`mb-6 text-center text-xs uppercase tracking-[0.22em] text-muted-foreground ${fonts.mono}`}>
-        与你的投放与分析栈无缝对接
+        支持接入这些投放与分析工具
       </p>
       <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
         <motion.div
@@ -403,8 +401,8 @@ function Steps({ fonts }: { fonts: Fonts }) {
     <section className="relative px-6 py-24">
       <SectionHead
         kicker="// 三步上线"
-        title="从想法到上线，不超过一杯咖啡的时间"
-        desc="没有繁琐的搭建流程，没有等待开发排期。你只需要专注于打动客户的内容。"
+        title="先免费完成页面，准备投放时再发布"
+        desc="创建、编辑与预览无需付费；需要公开投放时，升级套餐并完成自有域名验证即可发布。"
         fonts={fonts}
       />
       <div className="relative mx-auto mt-16 max-w-5xl">
@@ -445,8 +443,8 @@ function Features({ fonts }: { fonts: Fonts }) {
     <section className="relative px-6 py-24">
       <SectionHead
         kicker="// 为转化而生"
-        title="一套引擎，包办从制作到归因的每一步"
-        desc="不只是把页面做得好看——更要让它能投、能跑、能被精准衡量。"
+        title="从页面制作，到发布与获客数据采集"
+        desc="先把咨询与留资页面做好，再按投放需要启用自有域名、像素、UTM 和服务端回传。"
         fonts={fonts}
       />
       <div className="mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -482,21 +480,21 @@ function TrackingShowcase({ fonts }: { fonts: Fonts }) {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <span className={`text-xs uppercase tracking-[0.22em] text-aqua-600 ${fonts.mono}`}>
-              {"// 数据归因闭环"}
+              {"// 获客数据追踪"}
             </span>
             <h2 className={`mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl ${fonts.display}`}>
-              每一次点击，都能回到你的广告后台
+              CTA 与来源数据，集中回到你的看板
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-              从用户授权、像素触发、行为采集到服务端转化回传，全链路自动打通。配合平台数据分析面板，
-              真正知道哪条广告、哪个素材、哪张落地页在赚钱。
+              配置追踪后，第三方像素可上报页面访问与 CTA 行为；平台看板同时汇总 PV、CTA 点击、
+              渠道与 UTM 来源。Pro 及以上还可配置 Meta / TikTok 服务端转化回传。
             </p>
             <ul className="mt-6 space-y-3">
               {[
-                "多平台像素同页并行，零冲突触发",
-                "Meta CAPI 服务端转化，绕过浏览器拦截更准",
-                "UTM 全链路归因，定位高 ROI 渠道",
-                "内建同意管理 (CMP)，合规与转化兼得",
+                "Pro 及以上支持 Meta、TikTok、GA4 与 Google Ads",
+                "Meta / TikTok 服务端转化回传，与表单事件配合去重",
+                "记录 UTM 来源并按落地页查看基础访问与 CTA 数据",
+                "可选 Cookie 同意条，同意后再加载第三方像素",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3 text-sm text-foreground/80">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-aqua-600" />
@@ -545,8 +543,8 @@ function Pricing({ fonts }: { fonts: Fonts }) {
     <section id="pricing" className="relative scroll-mt-24 px-6 py-24">
       <SectionHead
         kicker="// 简单透明的定价"
-        title="先免费起步，跑出 ROI 再升级"
-        desc="按落地页数量与追踪能力分级，随业务增长平滑升级，随时可退。"
+        title="先免费完成第一版，准备投放时再升级"
+        desc="Free 可创建、保存和在线预览；升级后绑定自有域名，并按套餐解锁更多页面、追踪与 AI 额度。"
         fonts={fonts}
       />
       <div className="mx-auto mt-16 max-w-6xl">
@@ -554,7 +552,7 @@ function Pricing({ fonts }: { fonts: Fonts }) {
           ctaFor={(planId) =>
             planId === "free"
               ? { href: Routes.Register, label: "免费开始" }
-              : { href: Routes.Register, label: "选择此套餐" }
+              : { href: Routes.Register, label: "注册后升级" }
           }
         />
       </div>
@@ -579,11 +577,11 @@ function FinalCTA({ fonts }: { fonts: Fonts }) {
         <div className={`pointer-events-none absolute left-1/2 top-0 h-56 w-96 -translate-x-1/2 ${glowAura("aqua-400")}`} />
         <Sparkles className="relative mx-auto h-8 w-8 text-aqua-500" />
         <h2 className={`relative mt-5 text-3xl font-bold tracking-tight text-foreground sm:text-5xl ${fonts.display}`}>
-          把下一次投放，押在<br className="hidden sm:block" />
-          一张真正会转化的落地页上
+          先免费做好第一版<br className="hidden sm:block" />
+          海外获客落地页
         </h2>
         <p className="relative mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          现在免费创建你的第一张落地页，几分钟后就能跑在你自己的品牌域名上。
+          无需信用卡即可创建、编辑并预览；准备投放时再升级，绑定自己的品牌域名发布。
         </p>
         <div className="relative mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link href={Routes.Register} className={ctaPrimary}>

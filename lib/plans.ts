@@ -29,7 +29,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     landingPagesLimit: 1, domainsLimit: 0,
     hasWatermark: true, allTemplates: true, basicPixel: false, advancedTracking: false, antiBan: false,
     aiPageQuota: 3, aiRewriteQuota: 10,
-    highlights: ["1 张落地页", "全量全行业爆款营销模板", "可视化编辑器", "在线预览（发布需升级绑定域名）"],
+    highlights: ["1 张落地页", "全量 30+ 海外获客模板", "可视化内容编辑器", "在线预览（发布需升级绑定域名）"],
   },
   starter: {
     id: "starter", label: "Starter", priceText: "$29/mo", color: "blue",
@@ -43,14 +43,14 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     landingPagesLimit: 20, domainsLimit: 5,
     hasWatermark: false, allTemplates: true, basicPixel: true, advancedTracking: true, antiBan: false,
     aiPageQuota: 80, aiRewriteQuota: Infinity,
-    highlights: ["20 张落地页 + 5 个域名", "去除品牌水印", "全矩阵像素 + Meta CAPI"],
+    highlights: ["20 张落地页 + 5 个域名", "去除品牌水印", "Meta / TikTok / Google 追踪 + Meta / TikTok CAPI"],
   },
   agency: {
     id: "agency", label: "Agency", priceText: "$199/mo", color: "amber",
     landingPagesLimit: Infinity, domainsLimit: Infinity,
     hasWatermark: false, allTemplates: true, basicPixel: true, advancedTracking: true, antiBan: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,
-    highlights: ["无限落地页 + 无限域名", "反同质化风控引擎", "AI 生成额度提升至 300 次/月"],
+    highlights: ["无限落地页 + 无限域名", "页面结构变体", "AI 生成额度提升至 300 次/月"],
   },
 };
 
@@ -68,13 +68,13 @@ const fmtLimit = (n: number, unit: string) => (n === Infinity ? "无限" : n ===
 export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
   { label: "落地页数量", desc: "可创建并保存的落地页总数", valueFor: (p) => fmtLimit(p.landingPagesLimit, "张") },
   { label: "自定义域名", desc: "把页面发布到你自己的品牌域名", valueFor: (p) => fmtLimit(p.domainsLimit, "个") },
-  { label: "精美模板", desc: "全行业高转化营销模板库，开箱即用", valueFor: () => true },
-  { label: "完整视觉编辑器", desc: "拖拽式实时编辑，所见即所得", valueFor: () => true },
+  { label: "海外获客模板", desc: "30+ 咨询与留资模板，可直接作为编辑起点", valueFor: () => true },
+  { label: "可视化内容编辑器", desc: "表单编辑文案与图片，支持区块排序和实时预览", valueFor: () => true },
   { label: "基础数据追踪 (1× Meta Pixel)", desc: "接入 1 个 Meta Pixel，追踪落地页转化", valueFor: (p) => p.basicPixel },
   { label: "去除品牌水印", desc: "移除页面底部平台水印，纯你的品牌", valueFor: (p) => !p.hasWatermark },
-  { label: "全矩阵像素追踪 (TikTok / CAPI)", desc: "多平台像素并行 + Meta 服务端 CAPI 回传", valueFor: (p) => p.advancedTracking },
-  { label: "反同质化风控引擎", desc: "打散页面指纹，降低投放查重与封号风险", valueFor: (p) => p.antiBan },
-  { label: "AI 整页生成", desc: "输入行业卖点，AI 一键生成整页文案", valueFor: (p) => fmtLimit(p.aiPageQuota, "次/月") },
+  { label: "多平台追踪与 CAPI", desc: "Meta / TikTok / Google 追踪 + Meta / TikTok 服务端回传", valueFor: (p) => p.advancedTracking },
+  { label: "页面结构变体", desc: "调整 Hero 布局、包裹结构与 meta 标识，降低页面完全一致的概率", valueFor: (p) => p.antiBan },
+  { label: "AI 整页生成", desc: "输入业务资料，AI 按当前模板生成整页营销文案", valueFor: (p) => fmtLimit(p.aiPageQuota, "次/月") },
   { label: "AI 智能改写", desc: "逐段润色改写文案，快速产出多个版本", valueFor: (p) => fmtLimit(p.aiRewriteQuota, "次/月") },
 ];
 
