@@ -24,16 +24,19 @@ export async function PUT(request: NextRequest) {
   if (url && !/^https?:\/\//i.test(url)) {
     return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
   }
+  // 记录 upsert 前是否已有密钥，用于仅在「本次刚生成」时回传明文（与前端「仅显示一次」一致）。
+  const before = await getLeadNotifySettings(session.user.id);
   const s = await upsertLeadNotifySettings(session.user.id, {
     email_enabled: body.email_enabled !== false,
     webhook_enabled: body.webhook_enabled === true,
     webhook_url: url,
   });
+  const justGenerated = !before.webhook_secret && !!s.webhook_secret;
   return NextResponse.json({
     email_enabled: s.email_enabled,
     webhook_enabled: s.webhook_enabled,
     webhook_url: s.webhook_url,
     hasSecret: !!s.webhook_secret,
-    secret: s.webhook_secret,
+    ...(justGenerated ? { secret: s.webhook_secret } : {}),
   });
 }
