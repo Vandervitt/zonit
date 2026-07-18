@@ -43,4 +43,35 @@ describe("deliverOne", () => {
     expect(d.markFailure).toHaveBeenCalledWith("d1", 0, "http_500");
     expect(d.markSent).not.toHaveBeenCalled();
   });
+
+  it("即时短退避重试：前两次失败、第三次成功 → markSent，不记失败", async () => {
+    let n = 0;
+    const post = vi.fn(async () => (++n < 3 ? { ok: false, error: "http_502" } : { ok: true }));
+    const sleep = vi.fn(async () => {});
+    const d = deps({ post, sleep });
+    await deliverOne(row, d, { retries: 2 });
+    expect(post).toHaveBeenCalledTimes(3);
+    expect(d.markSent).toHaveBeenCalledWith("d1");
+    expect(d.markFailure).not.toHaveBeenCalled();
+    expect(sleep).toHaveBeenCalledTimes(2);
+  });
+
+  it("即时重试全失败 → 只记一次 markFailure（attempts 不因内部重试累加）", async () => {
+    const post = vi.fn(async () => ({ ok: false, error: "http_500" }));
+    const sleep = vi.fn(async () => {});
+    const d = deps({ post, sleep });
+    await deliverOne(row, d, { retries: 2 });
+    expect(post).toHaveBeenCalledTimes(3);
+    expect(d.markFailure).toHaveBeenCalledTimes(1);
+    expect(d.markFailure).toHaveBeenCalledWith("d1", 0, "http_500");
+    expect(sleep).toHaveBeenCalledTimes(2);
+  });
+
+  it("no_target 不重试（配置问题重试无意义）", async () => {
+    const post = vi.fn(async () => ({ ok: true }));
+    const d = deps({ getTarget: async () => null, post });
+    await deliverOne(row, d, { retries: 2 });
+    expect(post).not.toHaveBeenCalled();
+    expect(d.markFailure).toHaveBeenCalledWith("d1", 0, "no_target");
+  });
 });
