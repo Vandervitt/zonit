@@ -11,9 +11,8 @@ import {
   getEnabledDomainCount,
   bindDomainToLandingPage,
 } from "@/lib/domains-db";
-import { addDomainToProject } from "@/lib/vercel";
-
-const DOMAIN_RE = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
+import { addDomainToProject, type DnsRecord } from "@/lib/vercel";
+import { normalizeDomain } from "@/lib/domain";
 
 export async function GET() {
   const session = await auth();
@@ -30,9 +29,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: ApiErrors.UNAUTHORIZED }, { status: 401 });
   }
 
-  const { domain, landingPageId } = await request.json();
+  const { domain: rawDomain, landingPageId } = await request.json();
 
-  if (!domain || !DOMAIN_RE.test(domain)) {
+  const domain = typeof rawDomain === "string" ? normalizeDomain(rawDomain) : null;
+  if (!domain) {
     return NextResponse.json({ error: ApiErrors.INVALID_DOMAIN }, { status: 400 });
   }
 
@@ -53,8 +53,9 @@ export async function POST(request: Request) {
     }
     
     // Belongs to the same user: re-enable and re-add to Vercel (idempotent)
+    let records: DnsRecord[] = [];
     try {
-      await addDomainToProject(domain);
+      records = (await addDomainToProject(domain)).records;
     } catch (err) {
       console.error("Vercel API error (ignoring if already exists):", err);
     }
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     if (landingPageId) {
       await bindDomainToLandingPage(existing.id, session.user.id, landingPageId);
     }
-    return NextResponse.json(updated, { status: 200 });
+    return NextResponse.json({ ...updated, records }, { status: 200 });
   }
 
   // New domain, check limit
@@ -90,5 +91,5 @@ export async function POST(request: Request) {
     row.verified = true;
   }
 
-  return NextResponse.json({ ...row, cname: vercelConfig.cname }, { status: 201 });
+  return NextResponse.json({ ...row, records: vercelConfig.records }, { status: 201 });
 }

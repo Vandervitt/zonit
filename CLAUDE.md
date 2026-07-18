@@ -18,6 +18,7 @@ Read these constraint files before making related changes:
 - Local review workflow: `docs/constraints/local-review-workflow.md`
 - Commit rules: `docs/constraints/commit-guidelines.md`
 - Development database migrations: `docs/dev-database-migration-workflow.md`
+- Custom domain publishing (architecture, tenancy rewrite, DNS records, gotchas): `docs/custom-domain-publishing.md`
 
 Hard rules:
 

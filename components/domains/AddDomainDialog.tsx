@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Modal, Form, Input, Button, Typography, App } from "antd";
 import { CopyOutlined, CheckOutlined } from "@ant-design/icons";
 import { ApiRoutes } from "@/lib/constants";
+import { normalizeDomain } from "@/lib/domain";
+import type { DnsRecord } from "@/lib/vercel";
 import { jsonRequest, ApiError } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 
@@ -26,16 +28,16 @@ function mapDomainError(err: ApiError): string {
 export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   const { message } = App.useApp();
   const [form] = Form.useForm<{ domain: string }>();
-  const [cname, setCname] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [records, setRecords] = useState<DnsRecord[] | null>(null);
+  const [copiedValue, setCopiedValue] = useState<string | null>(null);
 
   const addMutation = useMutation(
     (payload: { domain: string }) =>
-      jsonRequest<{ cname: string }>(ApiRoutes.Domains, "POST", payload),
+      jsonRequest<{ records: DnsRecord[] }>(ApiRoutes.Domains, "POST", payload),
     {
       errorToast: false,
-      onSuccess: ({ cname: newCname }) => {
-        setCname(newCname);
+      onSuccess: ({ records: newRecords }) => {
+        setRecords(newRecords ?? []);
         onAdded();
       },
     },
@@ -43,8 +45,8 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
 
   function reset() {
     form.resetFields();
-    setCname(null);
-    setCopied(false);
+    setRecords(null);
+    setCopiedValue(null);
     addMutation.reset();
   }
 
@@ -54,18 +56,20 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   }
 
   async function handleFinish(values: { domain: string }) {
+    // Field validator已保证可归一化为合法主机名
+    const domain = normalizeDomain(values.domain);
+    if (!domain) return;
     try {
-      await addMutation.trigger({ domain: values.domain.trim().toLowerCase() });
+      await addMutation.trigger({ domain });
     } catch (err) {
       message.error(mapDomainError(err as ApiError));
     }
   }
 
-  function handleCopy(domainValue: string) {
-    if (!cname) return;
-    navigator.clipboard.writeText(cname);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  function handleCopy(value: string) {
+    navigator.clipboard.writeText(value);
+    setCopiedValue(value);
+    setTimeout(() => setCopiedValue(null), 2000);
   }
 
   const loading = addMutation.isMutating;
@@ -79,7 +83,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
       footer={null}
       destroyOnHidden
     >
-      {!cname ? (
+      {!records ? (
         <>
           <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
             绑定你自己的域名，用户访问时地址栏显示你的品牌域名。
@@ -92,7 +96,15 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
             <Form.Item
               name="domain"
               label="域名"
-              rules={[{ required: true, message: "请输入域名" }]}
+              rules={[
+                { required: true, message: "请输入域名" },
+                {
+                  validator: (_, value) =>
+                    !value || normalizeDomain(value)
+                      ? Promise.resolve()
+                      : Promise.reject(new Error(DOMAIN_ERROR_MAP.invalid_domain)),
+                },
+              ]}
             >
               <Input
                 placeholder="example.com 或 www.example.com"
@@ -117,36 +129,37 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
-            域名已添加。请前往你的 DNS 服务商（Cloudflare）添加以下 CNAME 记录，Vercel 将在 DNS 生效后自动签发 SSL 证书。
+            域名已添加。请前往你的 DNS 服务商（Cloudflare / AWS Route53 / Namecheap 等）添加以下记录，Vercel 将在 DNS 生效后自动签发 SSL 证书。
           </Typography.Paragraph>
-          <div style={{ border: "1px solid #d9d9d9", borderRadius: 8, padding: 16, background: "#fafafa" }}>
-            <div style={{ marginBottom: 12 }}>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>类型</Typography.Text>
-              <div><Typography.Text code>CNAME</Typography.Text></div>
-            </div>
-            <div style={{ marginBottom: 12 }}>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>名称</Typography.Text>
+          {records.map((record, i) => (
+            <div
+              key={`${record.type}-${record.name}-${i}`}
+              style={{ border: "1px solid #d9d9d9", borderRadius: 8, padding: 16, background: "#fafafa" }}
+            >
+              <div style={{ marginBottom: 12 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>类型</Typography.Text>
+                <div><Typography.Text code>{record.type}</Typography.Text></div>
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>名称</Typography.Text>
+                <div><Typography.Text code>{record.name}</Typography.Text></div>
+              </div>
               <div>
-                <Typography.Text code>
-                  {domainValue.startsWith("www.") ? "www" : domainValue}
-                </Typography.Text>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>值</Typography.Text>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Typography.Text code style={{ flex: 1, wordBreak: "break-all" }}>{record.value}</Typography.Text>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={copiedValue === record.value ? <CheckOutlined style={{ color: "#52c41a" }} /> : <CopyOutlined />}
+                    onClick={() => handleCopy(record.value)}
+                  />
+                </div>
               </div>
             </div>
-            <div>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>值</Typography.Text>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Typography.Text code style={{ flex: 1 }}>{cname}</Typography.Text>
-                <Button
-                  type="text"
-                  size="small"
-                  icon={copied ? <CheckOutlined style={{ color: "#52c41a" }} /> : <CopyOutlined />}
-                  onClick={() => handleCopy(domainValue)}
-                />
-              </div>
-            </div>
-          </div>
+          ))}
           <Typography.Paragraph type="secondary" style={{ fontSize: 12, marginBottom: 0 }}>
-            ⚠️ 如使用 Cloudflare，顶级域名（如 example.com）请将代理状态设为「仅 DNS」（灰色云朵），子域名（如 www.example.com）则无此限制。
+            ⚠️ 顶级域名（如 example.com）用 A 记录，子域名（如 www.example.com）用 CNAME。如使用 Cloudflare，请将代理状态设为「仅 DNS」（灰色云朵），否则会阻断证书签发。
           </Typography.Paragraph>
           <Button block onClick={handleClose}>
             完成

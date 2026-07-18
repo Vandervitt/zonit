@@ -3,6 +3,7 @@ import type { GenerationBrief, RewriteRequest, RewriteResult, FilledSlot } from 
 import { deriveSlots, mergeSlots } from "./slots";
 import { buildSystemPrompt, buildFillUserPrompt, buildRewriteUserPrompt, slotFillJsonSchema, rewriteJsonSchema } from "./prompt";
 import { checkDraftCompliance, filterCandidates, type ComplianceReason } from "./guardrails";
+import { buildImageQueryPrompt, imageQueryJsonSchema, type ImageSlot, type FilledImage } from "./images";
 import { getAiClient } from "./client";
 
 export type GenerateResult =
@@ -40,6 +41,17 @@ export async function generateDraftFromBrief(
     last = { ok: false, reason: compliance.reason ?? "invalid_structure", detail: compliance.detail };
   }
   return last;
+}
+
+/** 自动配图：为给定图片槽产出 Unsplash 检索词 + alt（网络换图在路由层完成）。 */
+export async function generateImageQueries(brief: GenerationBrief, slots: ImageSlot[]): Promise<FilledImage[]> {
+  const out = await getAiClient().completeJson<{ images: FilledImage[] }>({
+    system: buildSystemPrompt(),
+    user: buildImageQueryPrompt(brief, slots),
+    schema: imageQueryJsonSchema(),
+    schemaName: "image_queries",
+  });
+  return out.images ?? [];
 }
 
 /** 区块改写：产出候选并剔除禁词。 */

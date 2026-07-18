@@ -13,7 +13,9 @@ import {
 } from "@/lib/landing-pages/store";
 import { getUserPlan } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
-import { generateDraftFromBrief } from "@/lib/ai/generate";
+import { generateDraftFromBrief, generateImageQueries } from "@/lib/ai/generate";
+import { deriveImageSlots, mergeImages, buildImageReplacements, MAX_AUTO_IMAGES } from "@/lib/ai/images";
+import { searchTopPhoto, searchPhotoAt, persistUnsplashPhoto } from "@/lib/media/unsplash";
 import { checkAndConsume, hasAllowance } from "@/lib/ai/usage";
 import type { GenerationBrief } from "@/lib/ai/types";
 import type { LandingPageDraft } from "@/types/schema.draft";
@@ -104,14 +106,64 @@ export async function POST(request: Request) {
     );
   }
 
+  // 自动配图（尽力而为）：据 brief 为图片位换 Unsplash 图并写 alt；任何失败都回退文本版 draft。
+  const finalDraft = await applyAutoImages(result.draft, body.brief, userId);
+
   if (inEditor) {
     // 原地落库；同时回传 draft 供编辑器灌入 store（若前端未及时 autosave，DB 已是新内容）。
-    await updateLandingPageDraft(body.pageId!, userId, { data: result.draft });
-    return NextResponse.json({ id: body.pageId, draft: result.draft }, { status: 200 });
+    await updateLandingPageDraft(body.pageId!, userId, { data: finalDraft });
+    return NextResponse.json({ id: body.pageId, draft: finalDraft }, { status: 200 });
   }
 
   const template = getTemplate(body.templateId);
   const name = await ensureUniqueName(userId, `${template.name} (AI)`);
-  const row = await createLandingPage(userId, name, result.draft);
+  const row = await createLandingPage(userId, name, finalDraft);
   return NextResponse.json(row, { status: 201 });
+}
+
+/**
+ * 自动配图：AI 出检索词 → Unsplash 取首图 → 存 Blob → 写回 src/alt。
+ * 全程尽力而为——未开启、无 Unsplash key、任一步失败，都返回原（文本版）draft，绝不阻断生成。
+ * 同一检索词只下载一次（去重），并受 MAX_AUTO_IMAGES 数量上限约束。
+ */
+async function applyAutoImages(
+  draft: LandingPageDraft,
+  brief: GenerationBrief,
+  userId: string,
+): Promise<LandingPageDraft> {
+  if (brief.autoImages === false) return draft;
+  if (!process.env.UNSPLASH_ACCESS_KEY || process.env.UNSPLASH_ACCESS_KEY === "your_access_key_here") return draft;
+
+  try {
+    const slots = deriveImageSlots(draft, MAX_AUTO_IMAGES);
+    if (slots.length === 0) return draft;
+
+    const plan = await generateImageQueries(brief, slots);
+    // 头像逐个换脸：用递增计数从结果池取不同图，即使模型给了相同检索词也不撞脸。
+    let avatarSeq = 0;
+    // 单图解析：Unsplash 取图 → 存 Blob；无结果 / 失败返回 null（该图保留原图）。
+    const replacements = await buildImageReplacements(slots, plan, async (query, slot) => {
+      const photo =
+        slot.kind === "avatar"
+          ? await searchPhotoAt(query, avatarSeq++, "squarish") // 人像取向、逐个取不同结果
+          : await searchTopPhoto(query); // 普通/对比图：landscape 首图
+      if (!photo) return null;
+      try {
+        const saved = await persistUnsplashPhoto(userId, {
+          downloadLocation: photo.downloadLocation,
+          imageUrl: photo.urls.regular,
+          creditName: photo.user.name,
+          creditUrl: photo.user.profileUrl,
+        });
+        if (!saved || "error" in saved) return null;
+        return { src: saved.item.url, alt: photo.alt_description ?? undefined };
+      } catch {
+        return null;
+      }
+    });
+
+    return replacements.length ? mergeImages(draft, replacements) : draft;
+  } catch {
+    return draft; // 出错整段回退，保证「有文案结果」优先
+  }
 }

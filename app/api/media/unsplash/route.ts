@@ -1,34 +1,7 @@
 import { NextResponse } from "next/server";
-import { put } from "@vercel/blob";
 import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
-import { insertMedia } from "@/lib/media-db";
-
-// 仅允许从 Unsplash 官方域拉取，避免该端点被当作任意 URL 代理（SSRF）
-function isUnsplashApi(u: string): boolean {
-  try {
-    return new URL(u).hostname === "api.unsplash.com";
-  } catch {
-    return false;
-  }
-}
-function isUnsplashImage(u: string): boolean {
-  try {
-    return new URL(u).hostname === "images.unsplash.com";
-  } catch {
-    return false;
-  }
-}
-// 署名链接只接受 https 的 Unsplash 主页，杜绝 javascript: 等恶意 scheme 入库
-function safeCreditUrl(u: string | null): string | null {
-  if (!u) return null;
-  try {
-    const parsed = new URL(u);
-    return parsed.protocol === "https:" && parsed.hostname === "unsplash.com" ? u : null;
-  } catch {
-    return null;
-  }
-}
+import { persistUnsplashPhoto } from "@/lib/media/unsplash";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -37,48 +10,20 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json().catch(() => null);
-  const downloadLocation: string = body?.downloadLocation ?? "";
-  const imageUrl: string = body?.imageUrl ?? "";
-  const creditName: string | null = body?.creditName ?? null;
-  const creditUrl: string | null = body?.creditUrl ?? null;
-
-  if (!isUnsplashApi(downloadLocation) || !isUnsplashImage(imageUrl)) {
-    return NextResponse.json({ error: "非法的 Unsplash 链接" }, { status: 400 });
-  }
-
-  const key = process.env.UNSPLASH_ACCESS_KEY;
-  if (!key || key === "your_access_key_here") {
-    return NextResponse.json({ error: "未配置 Unsplash" }, { status: 400 });
-  }
-
-  // ① Unsplash 条款要求：选用时触发下载计数。失败不阻断落库。
   try {
-    await fetch(downloadLocation, { headers: { Authorization: `Client-ID ${key}` } });
+    const out = await persistUnsplashPhoto(session.user.id, {
+      downloadLocation: body?.downloadLocation ?? "",
+      imageUrl: body?.imageUrl ?? "",
+      creditName: body?.creditName ?? null,
+      creditUrl: body?.creditUrl ?? null,
+    });
+    // 校验失败（非法链接 / 未配置）→ 400，沿用原状态码与文案。
+    if ("error" in out) {
+      return NextResponse.json({ error: out.error }, { status: 400 });
+    }
+    return NextResponse.json(out.item, { status: 201 });
   } catch {
-    console.warn("[unsplash] download trigger failed");
-  }
-
-  // ② 拉取图片字节
-  let imgRes: Response;
-  try {
-    imgRes = await fetch(imageUrl);
-  } catch {
+    // 下载 / Blob 失败 → 502，沿用原文案。
     return NextResponse.json({ error: "下载 Unsplash 图片失败" }, { status: 502 });
   }
-  if (!imgRes.ok) {
-    return NextResponse.json({ error: "下载 Unsplash 图片失败" }, { status: 502 });
-  }
-  const buf = Buffer.from(await imgRes.arrayBuffer());
-  const contentType = imgRes.headers.get("content-type") ?? "image/jpeg";
-
-  // ③ 落 Blob → 入库
-  const filename = `unsplash-${Date.now()}.jpg`;
-  const blob = await put(filename, buf, { access: "public", addRandomSuffix: true, contentType });
-  const item = await insertMedia(session.user.id, blob.url, filename, "image", buf.byteLength, {
-    source: "unsplash",
-    creditName,
-    creditUrl: safeCreditUrl(creditUrl),
-  });
-
-  return NextResponse.json(item, { status: 201 });
 }

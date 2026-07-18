@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import pool from "@/lib/db";
 import { ApiErrors } from "@/lib/constants";
+import { isTrustedEmail } from "@/lib/auth/trusted-email";
 import { withLogger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
@@ -10,6 +11,12 @@ export async function POST(request: NextRequest) {
 
   if (!name || !email || !password) {
     return NextResponse.json({ error: ApiErrors.FIELDS_REQUIRED }, { status: 400 });
+  }
+
+  // 仅支持 Google（Gmail）邮箱：与 auth.ts 登录校验保持一致，
+  // 避免非 Gmail 建号成功却因登录校验失败而永远登不进的缺口。
+  if (!isTrustedEmail(email)) {
+    return NextResponse.json({ error: ApiErrors.EMAIL_NOT_SUPPORTED }, { status: 400 });
   }
 
   const client = await pool.connect();

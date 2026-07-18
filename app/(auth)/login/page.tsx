@@ -89,40 +89,6 @@ export default function LoginPage() {
           )}
           {oauthLoading === AuthProvider.Google ? "Connecting..." : "Google"}
         </button>
-
-        <button
-          onClick={() => handleOAuthSignIn(AuthProvider.Microsoft)}
-          disabled={!!oauthLoading || loading}
-          className="w-full flex items-center justify-center gap-3 border border-aqua-200 rounded-xl py-2.5 text-sm text-foreground/80 hover:bg-aqua-50 hover:border-aqua-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {oauthLoading === AuthProvider.Microsoft ? (
-            <div className="w-4 h-4 border-2 border-aqua-200 border-t-aqua-500 rounded-full animate-spin" />
-          ) : (
-            <svg className="w-4 h-4" viewBox="0 0 23 23">
-              <path fill="#f3f3f3" d="M0 0h23v23H0z"/>
-              <path fill="#f35325" d="M1 1h10v10H1z"/>
-              <path fill="#81bc06" d="M12 1h10v10H12z"/>
-              <path fill="#05a6f0" d="M1 12h10v10H1z"/>
-              <path fill="#ffba08" d="M12 12h10v10H12z"/>
-            </svg>
-          )}
-          {oauthLoading === AuthProvider.Microsoft ? "Connecting..." : "Microsoft"}
-        </button>
-
-        <button
-          onClick={() => handleOAuthSignIn(AuthProvider.Apple)}
-          disabled={!!oauthLoading || loading}
-          className="w-full flex items-center justify-center gap-3 border border-aqua-200 rounded-xl py-2.5 text-sm text-foreground/80 hover:bg-aqua-50 hover:border-aqua-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {oauthLoading === AuthProvider.Apple ? (
-            <div className="w-4 h-4 border-2 border-aqua-200 border-t-aqua-500 rounded-full animate-spin" />
-          ) : (
-            <svg className="w-4 h-4" viewBox="0 0 384 512">
-              <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
-            </svg>
-          )}
-          {oauthLoading === AuthProvider.Apple ? "Connecting..." : "Apple"}
-        </button>
       </div>
 
       <div className="flex items-center gap-3 mb-6">
@@ -142,7 +108,7 @@ export default function LoginPage() {
             className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
           />
           <p className="mt-1.5 text-[10px] text-muted-foreground px-1">
-            * Only Gmail, Outlook, or iCloud supported
+            * Only Gmail addresses supported
           </p>
         </div>
         <input
