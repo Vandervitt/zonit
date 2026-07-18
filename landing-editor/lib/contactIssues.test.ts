@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { collectContactIssues, blankPlaceholderContacts } from "./contactIssues";
+import { collectContactIssues, blankPrimaryCtaLinks } from "./contactIssues";
 import type { LandingPageDraft } from "@/types/schema.draft";
 
 const draft = (heroLink: string, extra: Record<string, unknown> = {}) =>
@@ -36,34 +36,39 @@ describe("collectContactIssues", () => {
   });
 });
 
-describe("blankPlaceholderContacts", () => {
-  it("含占位号的 link 置空，真实链接与非 link 字段不动", () => {
+describe("blankPrimaryCtaLinks", () => {
+  it("置空首屏主 CTA 与悬浮按钮（渠道无关，不看具体值）；二级/社交/文案不动", () => {
     const d = {
       hero: { cta: { text: "Chat", link: "https://wa.me/15551234567?text=Hi" }, secondaryCta: { link: "https://instagram.com/brand" } },
-      floatingButton: { link: "https://wa.me/15553219876" },
+      floatingButton: { link: "https://t.me/somebrand" },
       footer: { contactEmail: "a@b.com" },
       sections: [],
     } as unknown as LandingPageDraft;
-    const out = blankPlaceholderContacts(d) as unknown as {
+    const out = blankPrimaryCtaLinks(d) as unknown as {
       hero: { cta: { text: string; link: string }; secondaryCta: { link: string } };
       floatingButton: { link: string };
       footer: { contactEmail: string };
     };
     expect(out.hero.cta.link).toBe("");
-    expect(out.floatingButton.link).toBe("");
+    expect(out.floatingButton.link).toBe(""); // Telegram 也照样置空——渠道无关
     expect(out.hero.secondaryCta.link).toBe("https://instagram.com/brand");
     expect(out.hero.cta.text).toBe("Chat");
     expect(out.footer.contactEmail).toBe("a@b.com");
   });
 
+  it("即便主 CTA 是真实链接，模板实例化时也置空（模板默认非用户联系方式）", () => {
+    const d = { hero: { cta: { link: "https://wa.me/8613800138000" } }, sections: [] } as unknown as LandingPageDraft;
+    expect((blankPrimaryCtaLinks(d) as unknown as { hero: { cta: { link: string } } }).hero.cta.link).toBe("");
+  });
+
   it("不改动原对象（深拷贝）", () => {
     const d = { hero: { cta: { link: "https://wa.me/15551234567" } }, sections: [] } as unknown as LandingPageDraft;
-    blankPlaceholderContacts(d);
+    blankPrimaryCtaLinks(d);
     expect((d as unknown as { hero: { cta: { link: string } } }).hero.cta.link).toBe("https://wa.me/15551234567");
   });
 
-  it("无占位号的草稿原样返回（内容相等）", () => {
-    const d = { hero: { cta: { link: "https://wa.me/8613800138000" } }, sections: [] } as unknown as LandingPageDraft;
-    expect(blankPlaceholderContacts(d)).toEqual(d);
+  it("无 floatingButton 时不报错", () => {
+    const d = { hero: { cta: { link: "x" } }, sections: [] } as unknown as LandingPageDraft;
+    expect(() => blankPrimaryCtaLinks(d)).not.toThrow();
   });
 });
