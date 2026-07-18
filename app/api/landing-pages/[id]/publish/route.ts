@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { isLandingPageStructureValid } from "@/types/schema.draft";
 import { collectFieldIssues } from "@/landing-editor/lib/validate";
-import { collectPlaceholderIssues } from "@/landing-editor/lib/placeholderIssues";
+import { collectContactIssues } from "@/landing-editor/lib/contactIssues";
 import { getLandingPage, ensureUniqueSlug, publishLandingPage } from "@/lib/landing-pages/store";
 import { getDomainById, bindDomainToLandingPage } from "@/lib/domains-db";
 import { addDomainToProject } from "@/lib/vercel";
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/landing
   if (
     !isLandingPageStructureValid(page.data) ||
     collectFieldIssues(page.data).length > 0 ||
-    collectPlaceholderIssues(page.data).length > 0
+    collectContactIssues(page.data).length > 0
   ) {
     return NextResponse.json({ error: ApiErrors.VALIDATION_FAILED }, { status: 422 });
   }

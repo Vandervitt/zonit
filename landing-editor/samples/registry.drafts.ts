@@ -7,6 +7,7 @@
 // 新增模板：在下方 loaders 追加同 id 的加载器，并在 registry.ts 追加对应 TemplateMeta。
 import type { LandingPageDraft } from "@/types/schema.draft";
 import { DEFAULT_TEMPLATE_ID } from "./registry";
+import { blankPlaceholderContacts } from "../lib/contactIssues";
 
 type DraftLoader = () => Promise<LandingPageDraft>;
 
@@ -52,8 +53,9 @@ const loaders: Record<string, DraftLoader> = {
   "outdoor-toy": () => import("./outdoorToyDraft").then((m) => m.outdoorToyDraft),
 };
 
-/** 按 id 异步加载模板草稿体；缺省或未命中时回退默认模板。 */
+/** 按 id 异步加载模板草稿体；缺省或未命中时回退默认模板。
+ *  实例化时把模板占位联系链接置空，让新建 / AI 生成页开局即被迫填真实联系方式。 */
 export function loadTemplateDraft(id?: string | null): Promise<LandingPageDraft> {
   const loader = (id && loaders[id]) || loaders[DEFAULT_TEMPLATE_ID];
-  return loader();
+  return loader().then(blankPlaceholderContacts);
 }

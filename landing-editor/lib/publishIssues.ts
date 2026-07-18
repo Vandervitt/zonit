@@ -10,7 +10,7 @@ import {
 } from "@/types/schema.draft";
 import { collectFieldIssues } from "./validate";
 import { collectTrackingIssues } from "./trackingIssues";
-import { collectPlaceholderIssues } from "./placeholderIssues";
+import { collectContactIssues } from "./contactIssues";
 
 const groupLabels: Record<RequiredGroup, string> = {
   "core-value": "套餐 或 特性",
@@ -32,6 +32,6 @@ export function collectPublishIssues(draft: LandingPageDraft): string[] {
     ...collectStructureIssues(draft),
     ...collectFieldIssues(draft),
     ...collectTrackingIssues(draft),
-    ...collectPlaceholderIssues(draft),
+    ...collectContactIssues(draft),
   ];
 }
