@@ -64,3 +64,30 @@ describe("handleAuth 既有守卫不回归", () => {
     ).toBeNull();
   });
 });
+
+describe("handleAuth 公开路径按段边界匹配", () => {
+  it("公开条目本身命中：/preview 放行", () => {
+    expect(handleAuth(makeReq("/preview"))).toBeNull();
+  });
+
+  it("公开条目子路径命中：/preview/<token> 放行", () => {
+    expect(handleAuth(makeReq("/preview/abc.123.def"))).toBeNull();
+  });
+
+  it("公开条目子路径命中：/p/<slug> 放行", () => {
+    expect(handleAuth(makeReq("/p/my-slug"))).toBeNull();
+  });
+
+  it("/pricing 经自身条目放行（不再依赖 /p 前缀误伤）", () => {
+    expect(handleAuth(makeReq("/pricing"))).toBeNull();
+  });
+
+  it("/api/auth 子路径放行：/api/auth/callback/google", () => {
+    expect(handleAuth(makeReq("/api/auth/callback/google"))).toBeNull();
+  });
+
+  it("同前缀但非段边界的未登记路由不再被误放行：未登录 /premium → 跳 /login", () => {
+    const res = handleAuth(makeReq("/premium"));
+    expect(locationOf(res)).toBe("https://app.example.com/login");
+  });
+});

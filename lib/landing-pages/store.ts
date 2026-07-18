@@ -15,6 +15,16 @@ export interface LandingPageRow {
   preview_secret: string | null;
 }
 
+/** 客户端可见的落地页行：剔除 preview_secret（预览分享的撤销密钥不应下发到浏览器）。 */
+export type ClientLandingPageRow = Omit<LandingPageRow, "preview_secret">;
+
+/** 从 DB 行剥离 preview_secret，用于任何要经 API 返回给客户端的落地页数据。 */
+function toClient(row: LandingPageRow): ClientLandingPageRow {
+  const rest = { ...row };
+  delete (rest as Partial<LandingPageRow>).preview_secret;
+  return rest;
+}
+
 /** 把任意页面名转为 url-safe slug。 */
 export function slugify(input: string): string {
   const base = input
@@ -29,35 +39,35 @@ export async function createLandingPage(
   userId: string,
   name: string,
   data: LandingPageDraft,
-): Promise<LandingPageRow> {
+): Promise<ClientLandingPageRow> {
   const result = await pool.query(
     `INSERT INTO landing_pages (user_id, name, data) VALUES ($1, $2, $3) RETURNING *`,
     [userId, name, JSON.stringify(data)],
   );
-  return result.rows[0];
+  return toClient(result.rows[0]);
 }
 
-export async function listLandingPages(userId: string): Promise<LandingPageRow[]> {
+export async function listLandingPages(userId: string): Promise<ClientLandingPageRow[]> {
   const result = await pool.query(
     `SELECT * FROM landing_pages WHERE user_id = $1 ORDER BY updated_at DESC`,
     [userId],
   );
-  return result.rows;
+  return result.rows.map(toClient);
 }
 
-export async function getLandingPage(id: string, userId: string): Promise<LandingPageRow | null> {
+export async function getLandingPage(id: string, userId: string): Promise<ClientLandingPageRow | null> {
   const result = await pool.query(
     `SELECT * FROM landing_pages WHERE id = $1 AND user_id = $2`,
     [id, userId],
   );
-  return result.rows[0] ?? null;
+  return result.rows[0] ? toClient(result.rows[0]) : null;
 }
 
 export async function updateLandingPageDraft(
   id: string,
   userId: string,
   fields: { name?: string; data?: LandingPageDraft },
-): Promise<LandingPageRow | null> {
+): Promise<ClientLandingPageRow | null> {
   const set: string[] = ["updated_at = NOW()"];
   const values: unknown[] = [];
   let i = 1;
@@ -68,7 +78,7 @@ export async function updateLandingPageDraft(
     `UPDATE landing_pages SET ${set.join(", ")} WHERE id = $${i++} AND user_id = $${i} RETURNING *`,
     values,
   );
-  return result.rows[0] ?? null;
+  return result.rows[0] ? toClient(result.rows[0]) : null;
 }
 
 export async function deleteLandingPage(id: string, userId: string): Promise<boolean> {
@@ -117,23 +127,23 @@ export async function publishLandingPage(
   id: string,
   userId: string,
   slug: string,
-): Promise<LandingPageRow | null> {
+): Promise<ClientLandingPageRow | null> {
   const result = await pool.query(
     `UPDATE landing_pages
        SET status = 'published', slug = $1, published_at = COALESCE(published_at, NOW()), updated_at = NOW()
      WHERE id = $2 AND user_id = $3 RETURNING *`,
     [slug, id, userId],
   );
-  return result.rows[0] ?? null;
+  return result.rows[0] ? toClient(result.rows[0]) : null;
 }
 
-export async function unpublishLandingPage(id: string, userId: string): Promise<LandingPageRow | null> {
+export async function unpublishLandingPage(id: string, userId: string): Promise<ClientLandingPageRow | null> {
   const result = await pool.query(
     `UPDATE landing_pages SET status = 'draft', updated_at = NOW()
      WHERE id = $1 AND user_id = $2 RETURNING *`,
     [id, userId],
   );
-  return result.rows[0] ?? null;
+  return result.rows[0] ? toClient(result.rows[0]) : null;
 }
 
 /** 公开渲染用：按 slug 取已发布页面。 */
@@ -146,23 +156,23 @@ export async function getPublishedBySlug(slug: string): Promise<LandingPageRow |
 }
 
 /** 复制为新草稿：name 加「副本」，status/slug 走默认（draft / null），data 整体拷贝。 */
-export async function duplicateLandingPage(id: string, userId: string): Promise<LandingPageRow | null> {
+export async function duplicateLandingPage(id: string, userId: string): Promise<ClientLandingPageRow | null> {
   const src = await getLandingPage(id, userId);
   if (!src) return null;
   const result = await pool.query(
     `INSERT INTO landing_pages (user_id, name, data) VALUES ($1, $2, $3) RETURNING *`,
     [userId, `${src.name} 副本`, JSON.stringify(src.data)],
   );
-  return result.rows[0];
+  return toClient(result.rows[0]);
 }
 
 /** 仅改名（不触碰 data）。 */
-export async function renameLandingPage(id: string, userId: string, name: string): Promise<LandingPageRow | null> {
+export async function renameLandingPage(id: string, userId: string, name: string): Promise<ClientLandingPageRow | null> {
   const result = await pool.query(
     `UPDATE landing_pages SET name = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3 RETURNING *`,
     [name, id, userId],
   );
-  return result.rows[0] ?? null;
+  return result.rows[0] ? toClient(result.rows[0]) : null;
 }
 
 /** 预览渲染用：按 id 取页面（不按 owner、不按 status 过滤——草稿也可预览）。 */
