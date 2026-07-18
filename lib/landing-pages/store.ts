@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import pool from "@/lib/db";
 import type { LandingPageDraft } from "@/types/schema.draft";
 
@@ -11,6 +12,7 @@ export interface LandingPageRow {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  preview_secret: string | null;
 }
 
 /** 把任意页面名转为 url-safe slug。 */
@@ -161,4 +163,33 @@ export async function renameLandingPage(id: string, userId: string, name: string
     [name, id, userId],
   );
   return result.rows[0] ?? null;
+}
+
+/** 预览渲染用：按 id 取页面（不按 owner、不按 status 过滤——草稿也可预览）。 */
+export async function getPageForPreview(id: string): Promise<LandingPageRow | null> {
+  const result = await pool.query(`SELECT * FROM landing_pages WHERE id = $1`, [id]);
+  return result.rows[0] ?? null;
+}
+
+/** 确保该页有 preview_secret：无则惰性生成并持久化，返回最终值。按 owner 隔离。 */
+export async function ensurePreviewSecret(id: string, userId: string): Promise<string | null> {
+  const secret = randomBytes(16).toString("hex");
+  const result = await pool.query(
+    `UPDATE landing_pages
+       SET preview_secret = COALESCE(preview_secret, $1)
+     WHERE id = $2 AND user_id = $3
+     RETURNING preview_secret`,
+    [secret, id, userId],
+  );
+  return result.rows[0]?.preview_secret ?? null;
+}
+
+/** 轮换 preview_secret（撤销所有旧链接）。按 owner 隔离，返回新值。 */
+export async function rotatePreviewSecret(id: string, userId: string): Promise<string | null> {
+  const secret = randomBytes(16).toString("hex");
+  const result = await pool.query(
+    `UPDATE landing_pages SET preview_secret = $1 WHERE id = $2 AND user_id = $3 RETURNING preview_secret`,
+    [secret, id, userId],
+  );
+  return result.rows[0]?.preview_secret ?? null;
 }
