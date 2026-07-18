@@ -8,6 +8,7 @@ import { ValidationBar } from "./ValidationBar";
 import { PublishDialog } from "./PublishDialog";
 import { TrackingPanel } from "./TrackingPanel";
 import { AntiBanPanel } from "./AntiBanPanel";
+import { SharePreviewPanel } from "./SharePreviewPanel";
 import { landingPreviewPath, Routes } from "@/lib/constants";
 
 const SAVE_LABEL: Record<string, string> = {
@@ -21,6 +22,7 @@ export function EditorToolbar() {
   const [blockers, setBlockers] = useState<string[]>([]);
   const [trackingOpen, setTrackingOpen] = useState(false);
   const [antiBanOpen, setAntiBanOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   function handlePublish() {
     const issues = collectPublishIssues(toDraft(state));
@@ -65,6 +67,12 @@ export function EditorToolbar() {
       >
         预览
       </Link>
+      <button
+        onClick={() => setShareOpen(true)}
+        className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
+      >
+        分享预览
+      </button>
       <div className="relative">
         <button
           onClick={handlePublish}
@@ -92,6 +100,7 @@ export function EditorToolbar() {
       {publishOpen && <PublishDialog onClose={() => setPublishOpen(false)} />}
       {trackingOpen && <TrackingPanel onClose={() => setTrackingOpen(false)} />}
       {antiBanOpen && <AntiBanPanel onClose={() => setAntiBanOpen(false)} />}
+      {shareOpen && <SharePreviewPanel onClose={() => setShareOpen(false)} />}
     </header>
   );
 }

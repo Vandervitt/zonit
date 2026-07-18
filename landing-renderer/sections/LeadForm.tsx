@@ -32,7 +32,7 @@ function fireClientPixels(eventId: string): boolean {
   return fired;
 }
 
-export function LeadForm({ data, pageId, theme }: { data: LeadFormData; pageId: string; theme: RendererTheme }) {
+export function LeadForm({ data, pageId, theme, preview = false }: { data: LeadFormData; pageId: string; theme: RendererTheme; preview?: boolean }) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [honey, setHoney] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
@@ -41,6 +41,7 @@ export function LeadForm({ data, pageId, theme }: { data: LeadFormData; pageId: 
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (preview) return; // 预览模式：不写入真实线索
     setStatus("sending");
     try {
       const utm = typeof window !== "undefined" ? parseUtm(window.location.search) : {};
@@ -119,11 +120,12 @@ export function LeadForm({ data, pageId, theme }: { data: LeadFormData; pageId: 
           />
           <button
             type="submit"
-            disabled={status === "sending"}
+            disabled={status === "sending" || preview}
             className={`w-full rounded-xl px-4 py-2.5 text-sm font-bold text-white transition disabled:opacity-60 ${theme.accentGradient} ${theme.accentGradientHover} ${theme.accentShadow}`}
           >
-            {status === "sending" ? "提交中…" : data.submitText}
+            {preview ? "预览模式不可提交" : status === "sending" ? "提交中…" : data.submitText}
           </button>
+          {preview ? <p className="text-center text-xs text-slate-500">预览模式：留资表单已停用，正式发布后可正常收集线索</p> : null}
           {status === "error" ? <p className="text-center text-sm text-red-600">提交失败，请检查后重试</p> : null}
         </form>
       </div>

@@ -51,3 +51,6 @@ export const apiLeadPath = (id: string) => `/api/leads/${id}`;
 export const apiLeadsExportPath = () => `/api/leads/export`;
 
 export const apiCapiCredentialsPath = (pageId: string) => `/api/capi-credentials?pageId=${encodeURIComponent(pageId)}`;
+
+export const previewSharePath = (token: string) => `/preview/${token}`;
+export const apiLandingPreviewLinkPath = (id: string) => `/api/landing-pages/${id}/preview-link`;
