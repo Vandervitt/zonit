@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
       { hostname: "*.public.blob.vercel-storage.com" },
     ],
   },
+  async headers() {
+    return [
+      { source: "/preview/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+    ];
+  },
 };
 
 // 仅当配置了上传凭据时才套 Sentry 构建包装（上传 source map、注入 release）。

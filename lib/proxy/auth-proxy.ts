@@ -7,6 +7,7 @@ export const PUBLIC_PATHS = [
   "/register",
   "/pricing",
   "/p",
+  "/preview", // 草稿分享预览：凭签名 token 公开访问，无需登录
   "/robots.txt",
   "/sitemap.xml",
   "/api/auth",
