@@ -11,7 +11,7 @@ import {
   getEnabledDomainCount,
   bindDomainToLandingPage,
 } from "@/lib/domains-db";
-import { addDomainToProject } from "@/lib/vercel";
+import { addDomainToProject, type DnsRecord } from "@/lib/vercel";
 import { normalizeDomain } from "@/lib/domain";
 
 export async function GET() {
@@ -53,8 +53,9 @@ export async function POST(request: Request) {
     }
     
     // Belongs to the same user: re-enable and re-add to Vercel (idempotent)
+    let records: DnsRecord[] = [];
     try {
-      await addDomainToProject(domain);
+      records = (await addDomainToProject(domain)).records;
     } catch (err) {
       console.error("Vercel API error (ignoring if already exists):", err);
     }
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     if (landingPageId) {
       await bindDomainToLandingPage(existing.id, session.user.id, landingPageId);
     }
-    return NextResponse.json(updated, { status: 200 });
+    return NextResponse.json({ ...updated, records }, { status: 200 });
   }
 
   // New domain, check limit
@@ -90,5 +91,5 @@ export async function POST(request: Request) {
     row.verified = true;
   }
 
-  return NextResponse.json({ ...row, cname: vercelConfig.cname }, { status: 201 });
+  return NextResponse.json({ ...row, records: vercelConfig.records }, { status: 201 });
 }
