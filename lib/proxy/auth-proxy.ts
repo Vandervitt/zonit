@@ -36,7 +36,10 @@ export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
     return NextResponse.redirect(new URL("/admin", req.url));
   }
 
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  // 按路径段边界匹配（精确命中或其子路径），避免裸前缀误伤：
+  // 例如 "/p" 不再顺带放行 "/pricing"/"/preview"（各有自己的公开条目），
+  // 也避免将来出现 "/profile" 等同前缀受保护路由被意外公开。
+  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   if (isPublic) return null;
 
   // 线索公开提交：访客在落地页留资，POST /api/leads 无需登录（含预检 OPTIONS）；
