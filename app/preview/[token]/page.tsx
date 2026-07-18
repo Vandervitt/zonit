@@ -44,7 +44,7 @@ export default async function PreviewByToken({ params }: { params: Promise<{ tok
 
   return (
     <>
-      <LandingPage page={page.data} pageId={page.id} variant={variant} />
+      <LandingPage page={page.data} pageId={page.id} variant={variant} preview />
       <Watermark />
     </>
   );

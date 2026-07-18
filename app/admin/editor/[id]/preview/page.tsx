@@ -22,5 +22,5 @@ export default async function PreviewPage({
   const plan = await getUserPlan(page.user_id);
   const variant = hasAntiBan(plan) ? deriveVariant(page.data.variantSeed ?? page.id) : IDENTITY_VARIANT;
 
-  return <LandingPage page={page.data} variant={variant} />;
+  return <LandingPage page={page.data} variant={variant} preview />;
 }
