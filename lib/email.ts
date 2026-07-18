@@ -52,3 +52,37 @@ export async function sendInvitationEmail({
     return { error };
   }
 }
+
+export async function sendLeadNotificationEmail({
+  to, pageName, fields, dashboardUrl,
+}: {
+  to: string;
+  pageName: string;
+  fields: Record<string, unknown>;
+  dashboardUrl: string;
+}) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const rows = Object.entries(fields)
+    .filter(([, v]) => typeof v === "string" && v)
+    .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666;">${k}</td><td style="padding:4px 0;color:#111;">${String(v)}</td></tr>`)
+    .join("");
+  try {
+    const data = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `🎯 新线索 · ${pageName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 4px;">收到一条新线索</h2>
+          <p style="color:#666;margin:0 0 16px;">来自落地页：<strong>${pageName}</strong></p>
+          <table style="border-collapse:collapse;font-size:14px;">${rows || '<tr><td style="color:#999;">（无字段）</td></tr>'}</table>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:#0070f3;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在后台查看</a></p>
+          <p style="font-size:12px;color:#999;margin-top:24px;">你可在「设置 → 线索通知」关闭此邮件。</p>
+        </div>`,
+    });
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send lead notification email:", error);
+    return { error };
+  }
+}
