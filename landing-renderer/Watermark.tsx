@@ -1,4 +1,4 @@
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
+import { appUrl } from "@/lib/host";
 
 /**
  * 免费 / 入门套餐发布页右下角「Made with Zap Bridge」角标。
@@ -6,7 +6,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
  * Tailwind only：中性 slate 配色，避免与租户品牌主题冲突。
  */
 export function Watermark() {
-  const href = `${APP_URL}/register?utm_source=watermark&utm_medium=powered_by`;
+  const href = appUrl("/register?utm_source=watermark&utm_medium=powered_by");
   return (
     <a
       href={href}

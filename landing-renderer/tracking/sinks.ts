@@ -2,6 +2,7 @@
 // 事件 sink 抽象：统一 init/track 接口，TrackingProvider 广播事件给所有 sink。
 // 首刀只实现 PixelSink；first-party 采集 sink 留作后续刀（见文件尾）。
 import type { PixelConfig } from "@/types/schema.draft";
+import { appUrl } from "@/lib/host";
 import { EVENT_MAP, type InternalEvent } from "./events";
 
 export type EventParams = Record<string, string>;
@@ -61,8 +62,7 @@ export class PixelSink implements EventSink {
 export class BeaconSink implements EventSink {
   private readonly url: string;
   constructor(private readonly pageId: string) {
-    const base = process.env.NEXT_PUBLIC_APP_URL ?? "";
-    this.url = `${base}/api/track`;
+    this.url = appUrl("/api/track");
   }
   ready(): boolean { return true; }
   init(): void {}
