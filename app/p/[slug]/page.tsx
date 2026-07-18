@@ -5,7 +5,7 @@ import { LandingPage } from "@/landing-renderer/LandingPage";
 import { getPublishedBySlug } from "@/lib/landing-pages/store";
 import { TrackingProvider } from "@/landing-renderer/tracking/TrackingProvider";
 import { Watermark } from "@/landing-renderer/Watermark";
-import { hostnameOf, isAppHost } from "@/lib/host";
+import { isAppHost, resolveTenantHostname } from "@/lib/host";
 import { resolvePageMeta } from "@/lib/seo/resolve";
 import { getUserPlan } from "@/lib/plans-db";
 import { hasWatermark, hasAntiBan } from "@/lib/plans";
@@ -13,7 +13,7 @@ import { gateTrackingByPlan } from "@/lib/tracking/gate";
 import { deriveVariant, IDENTITY_VARIANT } from "@/landing-renderer/variant";
 
 async function isAppHostDirect(): Promise<boolean> {
-  return isAppHost(hostnameOf((await headers()).get("host")));
+  return isAppHost(resolveTenantHostname(await headers()));
 }
 
 export async function generateMetadata({
@@ -32,7 +32,7 @@ export async function generateMetadata({
   const { title, description, ogImage, noindex } = resolvePageMeta(page.data);
 
   // 已发布页只在租户自有域名根路径可达 → canonical 指向该域名根路径。
-  const host = hostnameOf((await headers()).get("host"));
+  const host = resolveTenantHostname(await headers());
   const canonical = `https://${host}/`;
 
   return {
