@@ -14,9 +14,10 @@ const base: PageTracking = {
 };
 
 describe("gateTrackingByPlan", () => {
-  it("free：剥离全部像素（免费版无任何追踪）", () => {
+  it("free：只留 Meta 客户端 pixel（基础追踪，CAPI 关闭）", () => {
     const r = gateTrackingByPlan(base, "free")!;
-    expect(r.pixels).toEqual([]);
+    expect(r.pixels.map((p) => p.provider)).toEqual(["meta"]);
+    expect(r.pixels[0].serverSide).toBe(false);
   });
 
   it("starter：只留 Meta 客户端 pixel（CAPI 关闭）", () => {

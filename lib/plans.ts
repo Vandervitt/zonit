@@ -28,7 +28,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
   free: {
     id: "free", label: "Free", priceText: "$0", color: "slate",
     landingPagesLimit: 1, domainsLimit: 0,
-    hasWatermark: true, allTemplates: true, basicPixel: false, advancedTracking: false, antiBan: false, leadWebhook: false,
+    hasWatermark: true, allTemplates: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 3, aiRewriteQuota: 10,
     highlights: ["1 张落地页", "全量 30+ 海外获客模板", "可视化内容编辑器", "在线预览（发布需升级绑定域名）"],
   },
