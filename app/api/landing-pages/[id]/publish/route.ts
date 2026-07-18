@@ -6,6 +6,7 @@ import { isLandingPageStructureValid } from "@/types/schema.draft";
 import { collectFieldIssues } from "@/landing-editor/lib/validate";
 import { getLandingPage, ensureUniqueSlug, publishLandingPage } from "@/lib/landing-pages/store";
 import { getDomainById, bindDomainToLandingPage } from "@/lib/domains-db";
+import { addDomainToProject } from "@/lib/vercel";
 
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/landing-pages/[id]/publish">) {
   const session = await auth();
@@ -27,6 +28,15 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/landing
   const domain = await getDomainById(domainId, session.user.id);
   if (!domain || !domain.enabled || !domain.verified) {
     return NextResponse.json({ error: ApiErrors.DOMAIN_NOT_VERIFIED }, { status: 422 });
+  }
+
+  // 幂等兜底：应用 DB 与 Vercel 项目域名是两套独立登记，若域名曾在 Vercel 后台被
+  // 手工移除会与 DB 脱节，导致已发布页 DEPLOYMENT_NOT_FOUND。发布前重新挂载一次
+  // （addDomainToProject 本身幂等），消除脱节盲区；Vercel 侧异常不阻断发布。
+  try {
+    await addDomainToProject(domain.domain);
+  } catch (err) {
+    console.error("发布时确保 Vercel 域名挂载失败（忽略）:", err);
   }
 
   const finalSlug = await ensureUniqueSlug(slug || page.slug || page.name, id);
