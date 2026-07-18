@@ -15,6 +15,7 @@ export interface PlanConfig {
   basicPixel: boolean;      // 基础 Meta 客户端 pixel（free 不含）
   advancedTracking: boolean;
   antiBan: boolean;
+  leadWebhook: boolean;     // 线索 webhook 出站（CRM 集成，Pro/Agency）
   // AI 用量（月额度；Infinity = 不限）
   aiPageQuota: number;
   aiRewriteQuota: number;
@@ -27,28 +28,28 @@ export const PLANS: Record<PlanId, PlanConfig> = {
   free: {
     id: "free", label: "Free", priceText: "$0", color: "slate",
     landingPagesLimit: 1, domainsLimit: 0,
-    hasWatermark: true, allTemplates: true, basicPixel: false, advancedTracking: false, antiBan: false,
+    hasWatermark: true, allTemplates: true, basicPixel: false, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 3, aiRewriteQuota: 10,
     highlights: ["1 张落地页", "全量 30+ 海外获客模板", "可视化内容编辑器", "在线预览（发布需升级绑定域名）"],
   },
   starter: {
     id: "starter", label: "Starter", priceText: "$29/mo", color: "blue",
     landingPagesLimit: 3, domainsLimit: 1,
-    hasWatermark: true, allTemplates: true, basicPixel: true, advancedTracking: false, antiBan: false,
+    hasWatermark: true, allTemplates: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 15, aiRewriteQuota: 100,
     highlights: ["3 张落地页 + 1 个自定义域名", "1× Meta Pixel 追踪"],
   },
   pro: {
     id: "pro", label: "Pro", priceText: "$79/mo", color: "violet", highlight: true,
     landingPagesLimit: 20, domainsLimit: 5,
-    hasWatermark: false, allTemplates: true, basicPixel: true, advancedTracking: true, antiBan: false,
+    hasWatermark: false, allTemplates: true, basicPixel: true, advancedTracking: true, antiBan: false, leadWebhook: true,
     aiPageQuota: 80, aiRewriteQuota: Infinity,
     highlights: ["20 张落地页 + 5 个域名", "去除品牌水印", "Meta / TikTok / Google 追踪 + Meta / TikTok CAPI"],
   },
   agency: {
     id: "agency", label: "Agency", priceText: "$199/mo", color: "amber",
     landingPagesLimit: Infinity, domainsLimit: Infinity,
-    hasWatermark: false, allTemplates: true, basicPixel: true, advancedTracking: true, antiBan: true,
+    hasWatermark: false, allTemplates: true, basicPixel: true, advancedTracking: true, antiBan: true, leadWebhook: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,
     highlights: ["无限落地页 + 无限域名", "页面结构变体", "AI 生成额度提升至 300 次/月"],
   },
@@ -74,6 +75,7 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
   { label: "去除品牌水印", desc: "移除页面底部平台水印，纯你的品牌", valueFor: (p) => !p.hasWatermark },
   { label: "多平台追踪与 CAPI", desc: "Meta / TikTok / Google 追踪 + Meta / TikTok 服务端回传", valueFor: (p) => p.advancedTracking },
   { label: "页面结构变体", desc: "调整 Hero 布局、包裹结构与 meta 标识，降低页面完全一致的概率", valueFor: (p) => p.antiBan },
+  { label: "线索 Webhook 推送", desc: "新线索实时 POST 到你的 CRM / Zapier（含签名）", valueFor: (p) => p.leadWebhook },
   { label: "AI 整页生成", desc: "输入业务资料，AI 按当前模板生成整页营销文案", valueFor: (p) => fmtLimit(p.aiPageQuota, "次/月") },
   { label: "AI 智能改写", desc: "逐段润色改写文案，快速产出多个版本", valueFor: (p) => fmtLimit(p.aiRewriteQuota, "次/月") },
 ];
@@ -86,6 +88,9 @@ export function hasWatermark(plan: PlanId): boolean {
 }
 export function hasAntiBan(plan: PlanId): boolean {
   return PLANS[plan].antiBan;
+}
+export function hasLeadWebhook(plan: PlanId): boolean {
+  return PLANS[plan].leadWebhook;
 }
 export function canBindDomain(plan: PlanId): boolean {
   return PLANS[plan].domainsLimit > 0;

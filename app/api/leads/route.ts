@@ -6,6 +6,7 @@ import { validateLeadSubmission } from "@/lib/leads/validate";
 import { leadRateLimiter } from "@/lib/leads/rate-limit";
 import { insertLead, listLeads } from "@/lib/leads/store";
 import { enqueueCapiEvents } from "@/lib/capi/dispatch";
+import { notifyNewLead } from "@/lib/leads/notify";
 
 const cap = (v: unknown, n: number): string | null =>
   typeof v === "string" && v.length > 0 ? v.slice(0, n) : null;
@@ -69,6 +70,21 @@ export async function POST(request: NextRequest) {
     });
   } catch {
     // CAPI 入队失败：best-effort 忽略，不影响线索提交
+  }
+
+  // 线索通知（邮件 + webhook）：best-effort，失败不影响线索提交
+  try {
+    const origin = new URL(request.url).origin;
+    await notifyNewLead({
+      pageId,
+      fields: result.payload as unknown as Record<string, unknown>,
+      channel: cap(body.channel, 32) ?? "form",
+      utm: { utm_source: cap(utm.utm_source, 128), utm_medium: cap(utm.utm_medium, 128), utm_campaign: cap(utm.utm_campaign, 128) },
+      createdAt: new Date().toISOString(),
+      dashboardUrl: `${origin}/admin/leads`,
+    });
+  } catch {
+    // 通知失败：忽略，不阻塞 204
   }
 
   return new NextResponse(null, { status: 204, headers: CORS });
