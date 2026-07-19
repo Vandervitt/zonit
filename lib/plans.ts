@@ -94,3 +94,9 @@ export function hasLeadWebhook(plan: PlanId): boolean {
 export function canBindDomain(plan: PlanId): boolean {
   return PLANS[plan].domainsLimit > 0;
 }
+
+/** 生效套餐 = max(付费 plan, 超管赠送 comp_plan)；赠送为空时即付费档。 */
+export function effectivePlan(plan: PlanId, compPlan: PlanId | null | undefined): PlanId {
+  if (!compPlan) return plan;
+  return PLAN_ORDER.indexOf(compPlan) > PLAN_ORDER.indexOf(plan) ? compPlan : plan;
+}
