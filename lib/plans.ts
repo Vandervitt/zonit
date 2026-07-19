@@ -11,8 +11,7 @@ export interface PlanConfig {
   domainsLimit: number;
   // 特性标记
   hasWatermark: boolean;
-  allTemplates: boolean;
-  basicPixel: boolean;      // 基础 Meta 客户端 pixel（free 不含）
+  basicPixel: boolean;      // 基础 Meta 客户端 pixel（当前四档全含，作为体验漏斗）
   advancedTracking: boolean;
   antiBan: boolean;
   leadWebhook: boolean;     // 线索 webhook 出站（CRM 集成，Pro/Agency）
@@ -28,28 +27,28 @@ export const PLANS: Record<PlanId, PlanConfig> = {
   free: {
     id: "free", label: "Free", priceText: "$0", color: "slate",
     landingPagesLimit: 1, domainsLimit: 0,
-    hasWatermark: true, allTemplates: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
+    hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 3, aiRewriteQuota: 10,
     highlights: ["1 张落地页", "全量 30+ 海外获客模板", "可视化内容编辑器", "在线预览（发布需升级绑定域名）"],
   },
   starter: {
     id: "starter", label: "Starter", priceText: "$29/mo", color: "blue",
     landingPagesLimit: 3, domainsLimit: 1,
-    hasWatermark: true, allTemplates: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
+    hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 15, aiRewriteQuota: 100,
     highlights: ["3 张落地页 + 1 个自定义域名", "1× Meta Pixel 追踪"],
   },
   pro: {
     id: "pro", label: "Pro", priceText: "$79/mo", color: "violet", highlight: true,
     landingPagesLimit: 20, domainsLimit: 5,
-    hasWatermark: false, allTemplates: true, basicPixel: true, advancedTracking: true, antiBan: false, leadWebhook: true,
+    hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: false, leadWebhook: true,
     aiPageQuota: 80, aiRewriteQuota: Infinity,
     highlights: ["20 张落地页 + 5 个域名", "去除品牌水印", "Meta / TikTok / Google 追踪 + Meta / TikTok CAPI"],
   },
   agency: {
     id: "agency", label: "Agency", priceText: "$199/mo", color: "amber",
     landingPagesLimit: Infinity, domainsLimit: Infinity,
-    hasWatermark: false, allTemplates: true, basicPixel: true, advancedTracking: true, antiBan: true, leadWebhook: true,
+    hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: true, leadWebhook: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,
     highlights: ["无限落地页 + 无限域名", "反同质化", "AI 生成额度提升至 300 次/月"],
   },

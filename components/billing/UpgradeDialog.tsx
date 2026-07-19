@@ -67,9 +67,6 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
             ✓ 绑定最多 {target.domainsLimit === Infinity ? "无限个" : target.domainsLimit} 个自定义域名
           </Typography.Text>
         )}
-        {target.allTemplates && !current.allTemplates && (
-          <Typography.Text style={{ display: "block" }}>✓ 解锁全部 15+ 行业模板</Typography.Text>
-        )}
       </div>
     </Modal>
   );
