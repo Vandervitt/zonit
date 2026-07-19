@@ -3,6 +3,7 @@ export const ApiErrors = {
   SESSION_STALE: 'session_stale',
   NOT_FOUND: 'Not found',
   SLUG_TAKEN: 'slug_taken',
+  NAME_TAKEN: 'name_taken',
   SITE_NAME_EXISTS: 'Site name already exists.',
   EMAIL_IN_USE: 'Email already in use.',
   EMAIL_NOT_SUPPORTED: 'Only Gmail addresses are supported.',

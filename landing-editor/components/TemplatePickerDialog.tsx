@@ -198,6 +198,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
       const page = await res.json();
       router.push(withAi ? `${landingEditorPath(page.id)}?ai=1` : landingEditorPath(page.id));
     } catch {
+      toast.error("创建失败，请检查网络后重试");
       setLoading(false);
     }
   }

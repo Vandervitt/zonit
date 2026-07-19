@@ -21,12 +21,19 @@ export default async function EditorByIdPage({
   const plan = await getUserPlan(session.user.id);
   const { ai } = await searchParams;
 
+  const publishedDirty =
+    page.status === "published" &&
+    page.published_at !== null &&
+    new Date(page.updated_at) > new Date(page.published_at);
+
   return (
     <Editor
       pageId={page.id}
       initialName={page.name}
       initialDraft={page.data}
       plan={plan}
+      initialStatus={page.status}
+      initialPublishedDirty={publishedDirty}
       autoGenerate={ai === "1"}
     />
   );
