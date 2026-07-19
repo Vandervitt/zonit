@@ -35,7 +35,7 @@ export const domainsPublishing: HelpChapterData = {
         {
           t: "steps",
           items: [
-            { title: "添加域名", desc: "进入「域名」→ 输入你的域名（如 example.com 或 www.example.com）并添加。" },
+            { title: "添加域名", desc: "进入「域名」→ 输入你的域名（如 example.com 或 www.example.com）并添加。暂不支持中国大陆管辖域名（.cn / .com.cn / .中国 等），其解析受备案与注册局政策影响，请使用 .com / .net 等国际域名。" },
             { title: "到注册商配置 DNS 记录", desc: "登录你买域名的平台（Namecheap / GoDaddy / Cloudflare 等），进入 DNS 管理，按下表添加记录。" },
             { title: "等待验证", desc: "系统每 5 秒自动检测验证状态，通过后域名显示「已验证」，即可用于发布。" },
           ],

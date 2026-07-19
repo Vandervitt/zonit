@@ -16,3 +16,17 @@ export function normalizeDomain(input: string): string | null {
 
   return DOMAIN_RE.test(host) ? host : null;
 }
+
+// Mainland-administered IDN TLDs (punycode): 中国 / 中國 / 公司 / 网络
+const MAINLAND_IDN_TLDS = new Set(["xn--fiqs8s", "xn--fiqz9s", "xn--55qx5d", "xn--io0a7i"]);
+
+/**
+ * Whether a hostname falls under a mainland-China-administered TLD
+ * (.cn and its registry zones, or mainland IDN TLDs). Such domains are
+ * subject to ICP-filing / registry suspension risk and cannot be used
+ * for publishing landing pages.
+ */
+export function isMainlandChinaDomain(host: string): boolean {
+  const tld = host.toLowerCase().split(".").pop() ?? "";
+  return tld === "cn" || MAINLAND_IDN_TLDS.has(tld);
+}
