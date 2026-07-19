@@ -21,8 +21,9 @@ Zap Bridge 是面向出海线索获取的落地页 SaaS。当前 super-admin 端
 
 - `comp_plan TEXT NULL CHECK (comp_plan IN ('starter','pro','agency'))` — 赠送套餐；仅超管通过管理接口写入；Lemon Squeezy webhook、billing 流程永不触碰此列。
 - `disabled_at TIMESTAMPTZ NULL` — 禁用时间；NULL 即正常。
+- `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()` — 注册时间。users 表此前无该列（`invited_at` 可空不可用作趋势口径）；存量行回填为迁移时刻，趋势对存量用户不精确，可接受。
 
-down 迁移删除两列。
+down 迁移删除三列。
 
 ## 2. 生效套餐 = max(plan, comp_plan)
 
