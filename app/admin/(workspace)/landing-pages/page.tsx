@@ -14,6 +14,7 @@ import {
   Routes,
 } from "@/lib/constants";
 import { TemplatePickerDialog } from "@/landing-editor/components/TemplatePickerDialog";
+import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
 
 interface PageRow {
   id: string;
@@ -32,7 +33,7 @@ function hasUnpublishedChanges(r: PageRow): boolean {
 
 export default function LandingPagesPage() {
   const { message } = App.useApp();
-  const { data, mutate, isLoading } = useSWR<PageRow[]>(ApiRoutes.LandingPages);
+  const { data, error, mutate, isLoading } = useSWR<PageRow[]>(ApiRoutes.LandingPages);
 
   async function unpublish(id: string) {
     const res = await fetch(apiLandingUnpublishPath(id), { method: "POST" });
@@ -77,6 +78,7 @@ export default function LandingPagesPage() {
         <Typography.Title level={3} style={{ margin: 0 }}>落地页</Typography.Title>
         <TemplatePickerDialog><Button type="primary" icon={<PlusOutlined />}>新建</Button></TemplatePickerDialog>
       </div>
+      <LoadErrorAlert error={error} onRetry={() => void mutate()} label="落地页列表" />
       <Table<PageRow> rowKey="id" loading={isLoading} dataSource={data ?? []}
         locale={{ emptyText: "还没有落地页，点「新建」从模板开始" }}
         columns={[

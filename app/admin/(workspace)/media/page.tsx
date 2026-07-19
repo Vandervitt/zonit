@@ -9,10 +9,9 @@ import { MediaGrid } from "@/components/media/MediaGrid";
 import { UploadZone } from "@/components/media/UploadZone";
 import { UnsplashModal } from "@/components/media/UnsplashModal";
 import type { MediaItem } from "@/lib/media-db";
+import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
 
 type FilterTab = "all" | "image" | "video";
-
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function MediaPage() {
   const [filter, setFilter] = useState<FilterTab>("all");
@@ -21,7 +20,7 @@ export default function MediaPage() {
   const apiUrl =
     filter === "all" ? ApiRoutes.Media : `${ApiRoutes.Media}?type=${filter}`;
 
-  const { data, mutate } = useSWR<MediaItem[]>(apiUrl, fetcher);
+  const { data, error, mutate } = useSWR<MediaItem[]>(apiUrl);
   const items = data ?? [];
 
   const handleUploaded = (item: MediaItem) => {
@@ -76,7 +75,8 @@ export default function MediaPage() {
 
       {/* Grid */}
       <div style={{ flex: 1, padding: "0 24px 20px", overflow: "auto" }}>
-        {!data ? (
+        <LoadErrorAlert error={error} onRetry={() => void mutate()} label="素材库" />
+        {error ? null : !data ? (
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 80 }}>
             <Spin size="large" />
           </div>
