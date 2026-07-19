@@ -3,7 +3,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { Row, Col, Card, Statistic, Segmented, Select, Table, Typography, Space, Empty, Spin } from "antd";
-import { EyeOutlined, AimOutlined, PercentageOutlined } from "@ant-design/icons";
+import { EyeOutlined, AimOutlined, PercentageOutlined, ContactsOutlined } from "@ant-design/icons";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ApiRoutes } from "@/lib/constants";
 import type { AnalyticsResult } from "@/lib/analytics/queries";
@@ -23,7 +23,8 @@ export default function AnalyticsPage() {
     ...(pages.data ?? []).map((p) => ({ value: p.id, label: p.name })),
   ];
 
-  const hasData = a && (a.totals.views > 0 || a.totals.clicks > 0);
+  const hasData = a && (a.totals.views > 0 || a.totals.clicks > 0 || a.totals.leads > 0);
+  const pctText = (n: number) => `${(n * 100).toFixed(1)}%`;
 
   return (
     <Space direction="vertical" size={20} style={{ width: "100%" }}>
@@ -37,10 +38,37 @@ export default function AnalyticsPage() {
       </div>
 
       <Row gutter={16}>
-        <Col xs={24} sm={8}><Card><Statistic title="访问量 (PV)" value={a?.totals.views ?? 0} prefix={<EyeOutlined />} /></Card></Col>
-        <Col xs={24} sm={8}><Card><Statistic title="CTA 点击" value={a?.totals.clicks ?? 0} prefix={<AimOutlined />} /></Card></Col>
-        <Col xs={24} sm={8}><Card><Statistic title="点击率" value={((a?.totals.ctr ?? 0) * 100)} precision={2} suffix="%" prefix={<PercentageOutlined />} /></Card></Col>
+        <Col xs={12} sm={6}><Card><Statistic title="访问量 (PV)" value={a?.totals.views ?? 0} prefix={<EyeOutlined />} /></Card></Col>
+        <Col xs={12} sm={6}><Card><Statistic title="CTA 点击" value={a?.totals.clicks ?? 0} prefix={<AimOutlined />} /></Card></Col>
+        <Col xs={12} sm={6}><Card><Statistic title="线索" value={a?.totals.leads ?? 0} prefix={<ContactsOutlined />} /></Card></Col>
+        <Col xs={12} sm={6}><Card><Statistic title="点击率" value={((a?.totals.ctr ?? 0) * 100)} precision={2} suffix="%" prefix={<PercentageOutlined />} /></Card></Col>
       </Row>
+
+      <Card title="转化漏斗">
+        {data.isLoading ? <div style={{ height: 180, display: "grid", placeItems: "center" }}><Spin /></div>
+          : !hasData ? <Empty description="该区间还没有数据" />
+          : (
+          <Space direction="vertical" size={14} style={{ width: "100%" }}>
+            {(a?.funnel ?? []).map((step) => (
+              <div key={step.key}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 13 }}>
+                  <span style={{ color: "#475569" }}>{step.label}</span>
+                  <span style={{ color: "#0f172a" }}>
+                    <strong>{step.count.toLocaleString()}</strong>
+                    {step.key !== "views" && <span style={{ color: "#94a3b8", marginLeft: 8 }}>较上一步 {pctText(step.rate)}</span>}
+                  </span>
+                </div>
+                <div style={{ height: 12, borderRadius: 6, background: "#eef3f9", overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${Math.max(step.pct * 100, step.count > 0 ? 2 : 0)}%`, background: "linear-gradient(90deg,#28b6f8,#6fd0fc)", borderRadius: 6 }} />
+                </div>
+              </div>
+            ))}
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              线索转化率（线索 / 曝光）：{pctText(a?.totals.cvr ?? 0)}
+            </Typography.Text>
+          </Space>
+        )}
+      </Card>
 
       <Card title="趋势">
         {data.isLoading ? <div style={{ height: 260, display: "grid", placeItems: "center" }}><Spin /></div>
