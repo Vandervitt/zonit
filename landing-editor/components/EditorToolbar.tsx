@@ -27,15 +27,28 @@ export function EditorToolbar() {
   const [shareOpen, setShareOpen] = useState(false);
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [restoreError, setRestoreError] = useState("");
 
   async function handleRestoreLive() {
     setRestoring(true);
+    setRestoreError("");
     try {
+      // 先落库防抖窗口/在途的草稿，避免旧草稿 PUT 在 restore-live 之后 resolve 覆盖恢复结果（同 PublishDialog）
+      const flushed = await flushSaveRef.current?.();
+      if (flushed === false) {
+        setRestoreError("草稿保存失败，请检查网络后重试");
+        return;
+      }
       const res = await fetch(`/api/landing-pages/${pageId}/restore-live`, { method: "POST" });
-      if (!res.ok) return; // 失败保持弹层，用户可重试或关闭
+      if (!res.ok) {
+        setRestoreError("恢复失败，请重试");
+        return;
+      }
       const { page } = await res.json();
       dispatch({ kind: "replaceDraft", draft: page.data }); // 入 undo 历史，可一步撤销
       setRestoreOpen(false);
+    } catch {
+      setRestoreError("恢复失败，请检查网络后重试");
     } finally {
       setRestoring(false);
     }
@@ -123,8 +136,9 @@ export function EditorToolbar() {
             <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-lg border border-edge bg-panel p-3 shadow-xl">
               <p className="text-sm text-ink">将当前草稿恢复为线上正在展示的版本？</p>
               <p className="mt-1 text-xs text-ink-muted">当前未发布的修改会被覆盖，可用撤销（⌘Z）找回。</p>
+              {restoreError && <p className="mt-2 text-xs text-red-500">{restoreError}</p>}
               <div className="mt-3 flex justify-end gap-2">
-                <button onClick={() => setRestoreOpen(false)} className="rounded-md px-2.5 py-1 text-xs text-ink-soft hover:bg-canvas">取消</button>
+                <button onClick={() => { setRestoreOpen(false); setRestoreError(""); }} className="rounded-md px-2.5 py-1 text-xs text-ink-soft hover:bg-canvas">取消</button>
                 <button
                   onClick={() => void handleRestoreLive()}
                   disabled={restoring}
