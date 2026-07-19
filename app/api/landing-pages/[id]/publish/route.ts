@@ -3,8 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { isLandingPageStructureValid } from "@/types/schema.draft";
-import { collectFieldIssues } from "@/landing-editor/lib/validate";
-import { collectContactIssues } from "@/landing-editor/lib/contactIssues";
+import { collectPublishIssues } from "@/landing-editor/lib/publishIssues";
 import { getLandingPage, ensureUniqueSlug, publishLandingPage } from "@/lib/landing-pages/store";
 import { getDomainById, bindDomainToLandingPage } from "@/lib/domains-db";
 import { addDomainToProject } from "@/lib/vercel";
@@ -19,11 +18,8 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/landing
   const page = await getLandingPage(id, session.user.id);
   if (!page) return NextResponse.json({ error: ApiErrors.NOT_FOUND }, { status: 404 });
 
-  if (
-    !isLandingPageStructureValid(page.data) ||
-    collectFieldIssues(page.data).length > 0 ||
-    collectContactIssues(page.data).length > 0
-  ) {
+  // 与客户端 ValidationBar / 发布按钮同一份门槛（collectPublishIssues），两端标准一致。
+  if (!isLandingPageStructureValid(page.data) || collectPublishIssues(page.data).length > 0) {
     return NextResponse.json({ error: ApiErrors.VALIDATION_FAILED }, { status: 422 });
   }
 
