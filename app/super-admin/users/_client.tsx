@@ -36,7 +36,7 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [compTarget, setCompTarget] = useState<UserRow | null>(null);
   const [compValue, setCompValue] = useState<PlanId | "none">("none");
-  const [saving, setSaving] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
@@ -45,11 +45,16 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
   }, [rows, keyword]);
 
   async function apply(id: string, body: Record<string, unknown>, okMsg: string) {
-    setSaving(true);
-    const ok = await patchUser(id, body);
-    setSaving(false);
-    if (ok) { message.success(okMsg); router.refresh(); }
-    else message.error("操作失败，请重试");
+    setSavingId(id);
+    try {
+      const ok = await patchUser(id, body);
+      if (ok) { message.success(okMsg); router.refresh(); }
+      else message.error("操作失败，请重试");
+    } catch {
+      message.error("操作失败，请检查网络后重试");
+    } finally {
+      setSavingId(null);
+    }
   }
 
   const columns: ColumnsType<UserRow> = [
@@ -139,7 +144,7 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
               },
             }}
           >
-            <Button size="small" icon={<MoreOutlined />} loading={saving} />
+            <Button size="small" icon={<MoreOutlined />} loading={savingId === row.id} />
           </Dropdown>
         </Space>
       ),
@@ -172,7 +177,7 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
       <Modal
         title={compTarget ? `赠送套餐 — ${compTarget.email}` : "赠送套餐"}
         open={!!compTarget}
-        confirmLoading={saving}
+        confirmLoading={savingId === compTarget?.id}
         onCancel={() => setCompTarget(null)}
         onOk={async () => {
           if (!compTarget) return;
