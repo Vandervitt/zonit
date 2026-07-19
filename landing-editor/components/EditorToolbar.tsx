@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useMeta } from "../MetaContext";
-import { useEditorState, toDraft } from "../store/editorStore";
+import { useEditorState, useEditorDispatch, useEditorHistory, toDraft } from "../store/editorStore";
 import { collectPublishIssues } from "../lib/publishIssues";
 import { ValidationBar } from "./ValidationBar";
 import { PublishDialog } from "./PublishDialog";
@@ -18,11 +18,24 @@ const SAVE_LABEL: Record<string, string> = {
 export function EditorToolbar() {
   const { pageId, name, setName, saveState, saveError, status, publishedDirty, flushSaveRef } = useMeta();
   const state = useEditorState();
+  const dispatch = useEditorDispatch();
+  const { canUndo, canRedo } = useEditorHistory();
   const [publishOpen, setPublishOpen] = useState(false);
   const [blockers, setBlockers] = useState<string[]>([]);
   const [trackingOpen, setTrackingOpen] = useState(false);
   const [antiBanOpen, setAntiBanOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+
+  // Cmd/Ctrl+Z 撤销、Shift+Cmd/Ctrl+Z 重做（拦截浏览器默认，编辑器内容均为受控输入）。
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "z") return;
+      e.preventDefault();
+      dispatch({ kind: e.shiftKey ? "redo" : "undo" });
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [dispatch]);
 
   function handlePublish() {
     const issues = collectPublishIssues(toDraft(state));
@@ -43,6 +56,26 @@ export function EditorToolbar() {
         className="w-56 rounded-md border border-transparent bg-transparent px-2 py-1 text-sm font-semibold text-ink hover:border-edge focus:border-brand-500 focus:outline-none"
         placeholder="页面名称"
       />
+      <div className="flex items-center gap-0.5">
+        <button
+          onClick={() => dispatch({ kind: "undo" })}
+          disabled={!canUndo}
+          title="撤销（⌘Z / Ctrl+Z）"
+          aria-label="撤销"
+          className="rounded-md px-2 py-1 text-sm text-ink-soft hover:bg-canvas disabled:opacity-30"
+        >
+          ↺
+        </button>
+        <button
+          onClick={() => dispatch({ kind: "redo" })}
+          disabled={!canRedo}
+          title="重做（⇧⌘Z / Ctrl+Shift+Z）"
+          aria-label="重做"
+          className="rounded-md px-2 py-1 text-sm text-ink-soft hover:bg-canvas disabled:opacity-30"
+        >
+          ↻
+        </button>
+      </div>
       {saveState === "error" ? (
         <button onClick={() => void flushSaveRef.current?.()} className="text-xs text-red-500 underline underline-offset-2 hover:text-red-600">
           {saveError || "保存失败，点击重试"}

@@ -191,8 +191,68 @@ export function reducer(state: EditorState, action: EditorAction): EditorState {
   }
 }
 
+// ---------------------------------------------------------------------------
+// 撤销/重做：历史栈包装。select 视为纯选中不入历史；同目标连续输入在合并窗口内
+// 折叠为一步（一次 undo 回到输入前）；replaceDraft（AI 一键成页）同样入历史，可一步恢复。
+// ---------------------------------------------------------------------------
+
+export type HistoryAction = EditorAction | { kind: "undo" } | { kind: "redo" };
+
+export interface HistoryState {
+  past: EditorState[];
+  present: EditorState;
+  future: EditorState[];
+  /** 上一次入历史动作的合并指纹与时间戳，用于连续输入折叠。 */
+  lastEdit: { fingerprint: string; at: number } | null;
+}
+
+const HISTORY_LIMIT = 50;
+/** 同目标连续修改的合并窗口（ms）：窗口内不新增历史步。 */
+const COALESCE_MS = 800;
+
+export function initHistory(present: EditorState): HistoryState {
+  return { past: [], present, future: [], lastEdit: null };
+}
+
+/** 动作的合并指纹：同 kind + 同目标（updateSection 按区块 key 区分）。 */
+function editFingerprint(action: EditorAction): string {
+  return action.kind === "updateSection" ? `updateSection:${action.key}` : action.kind;
+}
+
+export function historyReducer(h: HistoryState, action: HistoryAction, now = Date.now()): HistoryState {
+  if (action.kind === "undo") {
+    if (h.past.length === 0) return h;
+    const previous = h.past[h.past.length - 1];
+    return {
+      past: h.past.slice(0, -1),
+      present: previous,
+      future: [h.present, ...h.future],
+      lastEdit: null,
+    };
+  }
+  if (action.kind === "redo") {
+    if (h.future.length === 0) return h;
+    const [next, ...rest] = h.future;
+    return { past: [...h.past, h.present], present: next, future: rest, lastEdit: null };
+  }
+
+  const next = reducer(h.present, action);
+  if (next === h.present) return h;
+
+  // 纯选中：更新 present，不入历史、不打断合并窗口。
+  if (action.kind === "select") return { ...h, present: next };
+
+  const fingerprint = editFingerprint(action);
+  const coalesce =
+    h.lastEdit !== null && h.lastEdit.fingerprint === fingerprint && now - h.lastEdit.at < COALESCE_MS;
+
+  const past = coalesce ? h.past : [...h.past, h.present].slice(-HISTORY_LIMIT);
+  return { past, present: next, future: [], lastEdit: { fingerprint, at: now } };
+}
+
 const StateContext = createContext<EditorState | null>(null);
-const DispatchContext = createContext<Dispatch<EditorAction> | null>(null);
+const DispatchContext = createContext<Dispatch<HistoryAction> | null>(null);
+const HistoryMetaContext = createContext<{ canUndo: boolean; canRedo: boolean } | null>(null);
 
 export function EditorProvider({
   initial,
@@ -201,12 +261,29 @@ export function EditorProvider({
   initial: EditorState;
   children: ReactNode;
 }) {
-  const [state, dispatch] = useReducer(reducer, initial);
+  // 包一层去掉 now 参数：useReducer 的 reducer 签名不接受额外入参（now 仅测试用）。
+  const [history, dispatch] = useReducer(
+    (h: HistoryState, a: HistoryAction) => historyReducer(h, a),
+    initial,
+    initHistory,
+  );
   return (
-    <StateContext.Provider value={state}>
-      <DispatchContext.Provider value={dispatch}>{children}</DispatchContext.Provider>
+    <StateContext.Provider value={history.present}>
+      <DispatchContext.Provider value={dispatch}>
+        <HistoryMetaContext.Provider
+          value={{ canUndo: history.past.length > 0, canRedo: history.future.length > 0 }}
+        >
+          {children}
+        </HistoryMetaContext.Provider>
+      </DispatchContext.Provider>
     </StateContext.Provider>
   );
+}
+
+export function useEditorHistory(): { canUndo: boolean; canRedo: boolean } {
+  const ctx = useContext(HistoryMetaContext);
+  if (!ctx) throw new Error("useEditorHistory must be used within EditorProvider");
+  return ctx;
 }
 
 export function useEditorState(): EditorState {
@@ -215,7 +292,7 @@ export function useEditorState(): EditorState {
   return ctx;
 }
 
-export function useEditorDispatch(): Dispatch<EditorAction> {
+export function useEditorDispatch(): Dispatch<HistoryAction> {
   const ctx = useContext(DispatchContext);
   if (!ctx) throw new Error("useEditorDispatch must be used within EditorProvider");
   return ctx;
