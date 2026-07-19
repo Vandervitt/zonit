@@ -46,6 +46,22 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
     }
     patch.compPlan = body.compPlan as PlanId | null;
+
+    if (body.compPlan === null) {
+      // 取消赠送：一并清空到期，避免残留到期时间。
+      patch.compPlanExpiresAt = null;
+    } else if ("compPlanExpiresAt" in body) {
+      const raw = body.compPlanExpiresAt;
+      if (raw === null) {
+        patch.compPlanExpiresAt = null; // 永久
+      } else {
+        const ms = new Date(raw).getTime();
+        if (Number.isNaN(ms) || ms <= Date.now()) {
+          return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
+        }
+        patch.compPlanExpiresAt = new Date(ms).toISOString();
+      }
+    }
   }
   if ("role" in body) {
     if (!ROLES.includes(body.role)) {
