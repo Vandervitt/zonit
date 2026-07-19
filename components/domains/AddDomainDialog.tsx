@@ -20,6 +20,7 @@ const DOMAIN_ERROR_MAP: Record<string, string> = {
   domain_tld_blocked: "暂不支持中国大陆管辖域名（如 .cn），其解析受备案与注册局政策影响，请使用 .com / .net 等国际域名",
   domain_taken: "该域名已被其他账号绑定",
   vercel_api_error: "Vercel API 调用失败，请稍后重试",
+  limit_exceeded: "已达到当前套餐的域名数量上限，请升级套餐或先禁用一个已有域名",
 };
 
 function mapDomainError(err: ApiError): string {
@@ -37,6 +38,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
       jsonRequest<{ records: DnsRecord[] }>(ApiRoutes.Domains, "POST", payload),
     {
       errorToast: false,
+      throwOnError: true,
       onSuccess: ({ records: newRecords }) => {
         setRecords(newRecords ?? []);
         onAdded();
