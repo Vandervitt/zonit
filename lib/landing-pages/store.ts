@@ -160,10 +160,12 @@ export async function unpublishLandingPage(id: string, userId: string): Promise<
   return result.rows[0] ? toClient(result.rows[0]) : null;
 }
 
-/** 公开渲染用：按 slug 取已发布页面，data 为发布时的快照（published_data），不含发布后的草稿编辑。 */
+/** 公开渲染用：按 slug 取已发布页面（owner 被禁用时视同不存在）。data 为发布时快照。 */
 export async function getPublishedBySlug(slug: string): Promise<LandingPageRow | null> {
   const result = await pool.query(
-    `SELECT * FROM landing_pages WHERE slug = $1 AND status = 'published'`,
+    `SELECT lp.* FROM landing_pages lp
+       JOIN users u ON u.id = lp.user_id
+     WHERE lp.slug = $1 AND lp.status = 'published' AND u.disabled_at IS NULL`,
     [slug],
   );
   const row = result.rows[0];
@@ -192,9 +194,16 @@ export async function renameLandingPage(id: string, userId: string, name: string
   return result.rows[0] ? toClient(result.rows[0]) : null;
 }
 
-/** 预览渲染用：按 id 取页面（不按 owner、不按 status 过滤——草稿也可预览）。 */
-export async function getPageForPreview(id: string): Promise<LandingPageRow | null> {
-  const result = await pool.query(`SELECT * FROM landing_pages WHERE id = $1`, [id]);
+/** 预览渲染用：按 id 取页面（草稿也可预览），附带 owner 是否被禁用。 */
+export async function getPageForPreview(
+  id: string,
+): Promise<(LandingPageRow & { owner_disabled: boolean }) | null> {
+  const result = await pool.query(
+    `SELECT lp.*, (u.disabled_at IS NOT NULL) AS owner_disabled
+       FROM landing_pages lp JOIN users u ON u.id = lp.user_id
+     WHERE lp.id = $1`,
+    [id],
+  );
   return result.rows[0] ?? null;
 }
 

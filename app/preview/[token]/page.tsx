@@ -14,7 +14,7 @@ async function loadValidPreview(token: string) {
   const pageId = decodePageId(token);
   if (!pageId) return null;
   const page = await getPageForPreview(pageId);
-  if (!page || !page.preview_secret) return null;
+  if (!page || !page.preview_secret || page.owner_disabled) return null;
   const ok = verifyPreviewToken({
     token,
     previewSecret: page.preview_secret,
