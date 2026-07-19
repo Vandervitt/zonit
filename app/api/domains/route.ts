@@ -12,7 +12,7 @@ import {
   bindDomainToLandingPage,
 } from "@/lib/domains-db";
 import { addDomainToProject, type DnsRecord } from "@/lib/vercel";
-import { normalizeDomain } from "@/lib/domain";
+import { isMainlandChinaDomain, normalizeDomain } from "@/lib/domain";
 
 export async function GET() {
   const session = await auth();
@@ -34,6 +34,10 @@ export async function POST(request: Request) {
   const domain = typeof rawDomain === "string" ? normalizeDomain(rawDomain) : null;
   if (!domain) {
     return NextResponse.json({ error: ApiErrors.INVALID_DOMAIN }, { status: 400 });
+  }
+
+  if (isMainlandChinaDomain(domain)) {
+    return NextResponse.json({ error: ApiErrors.DOMAIN_TLD_BLOCKED }, { status: 400 });
   }
 
   // Check plan limits

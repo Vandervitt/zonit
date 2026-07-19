@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizeDomain } from "./domain";
+import { isMainlandChinaDomain, normalizeDomain } from "./domain";
 
 describe("normalizeDomain", () => {
   it("accepts a bare hostname", () => {
@@ -30,5 +30,33 @@ describe("normalizeDomain", () => {
     expect(normalizeDomain("not a domain")).toBeNull();
     expect(normalizeDomain("https://")).toBeNull();
     expect(normalizeDomain("localhost")).toBeNull();
+  });
+});
+
+describe("isMainlandChinaDomain", () => {
+  it("blocks .cn and its second-level registry zones", () => {
+    expect(isMainlandChinaDomain("example.cn")).toBe(true);
+    expect(isMainlandChinaDomain("shop.example.com.cn")).toBe(true);
+    expect(isMainlandChinaDomain("example.net.cn")).toBe(true);
+    expect(isMainlandChinaDomain("example.org.cn")).toBe(true);
+    expect(isMainlandChinaDomain("example.gov.cn")).toBe(true);
+  });
+
+  it("blocks mainland-administered IDN TLDs in punycode form", () => {
+    expect(isMainlandChinaDomain("xn--fiq228c.xn--fiqs8s")).toBe(true); // 例子.中国
+    expect(isMainlandChinaDomain("xn--fiq228c.xn--fiqz9s")).toBe(true); // 例子.中國
+    expect(isMainlandChinaDomain("example.xn--55qx5d")).toBe(true); // .公司
+    expect(isMainlandChinaDomain("example.xn--io0a7i")).toBe(true); // .网络
+  });
+
+  it("allows international TLDs", () => {
+    expect(isMainlandChinaDomain("zapbridge.tech")).toBe(false);
+    expect(isMainlandChinaDomain("example.com")).toBe(false);
+    expect(isMainlandChinaDomain("example.co")).toBe(false);
+  });
+
+  it("does not confuse a cn label elsewhere in the hostname", () => {
+    expect(isMainlandChinaDomain("cn.example.com")).toBe(false);
+    expect(isMainlandChinaDomain("example.cnn")).toBe(false);
   });
 });

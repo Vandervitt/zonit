@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Modal, Form, Input, Button, Typography, App } from "antd";
 import { CopyOutlined, CheckOutlined } from "@ant-design/icons";
 import { ApiRoutes } from "@/lib/constants";
-import { normalizeDomain } from "@/lib/domain";
+import { isMainlandChinaDomain, normalizeDomain } from "@/lib/domain";
 import type { DnsRecord } from "@/lib/vercel";
 import { jsonRequest, ApiError } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
@@ -17,6 +17,7 @@ interface Props {
 
 const DOMAIN_ERROR_MAP: Record<string, string> = {
   invalid_domain: "域名格式不正确",
+  domain_tld_blocked: "暂不支持中国大陆管辖域名（如 .cn），其解析受备案与注册局政策影响，请使用 .com / .net 等国际域名",
   domain_taken: "该域名已被其他账号绑定",
   vercel_api_error: "Vercel API 调用失败，请稍后重试",
 };
@@ -99,10 +100,17 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
               rules={[
                 { required: true, message: "请输入域名" },
                 {
-                  validator: (_, value) =>
-                    !value || normalizeDomain(value)
-                      ? Promise.resolve()
-                      : Promise.reject(new Error(DOMAIN_ERROR_MAP.invalid_domain)),
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    const normalized = normalizeDomain(value);
+                    if (!normalized) {
+                      return Promise.reject(new Error(DOMAIN_ERROR_MAP.invalid_domain));
+                    }
+                    if (isMainlandChinaDomain(normalized)) {
+                      return Promise.reject(new Error(DOMAIN_ERROR_MAP.domain_tld_blocked));
+                    }
+                    return Promise.resolve();
+                  },
                 },
               ]}
             >
