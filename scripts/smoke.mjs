@@ -22,6 +22,7 @@ const root = base.replace(/\/$/, "");
 const probes = [
   ["/", [200], "营销首页可访问"],
   ["/pricing", [200], "定价页公开可访问"],
+  ["/anti-ban", [200], "反同质化叙事页公开可访问"],
   ["/robots.txt", [200], "动态 robots（app/robots.ts）"],
   ["/sitemap.xml", [200], "动态 sitemap（app/sitemap.ts）"],
   ["/api/cron/capi-flush", [401], "Cron 鉴权生效（无 secret 应 401）"],

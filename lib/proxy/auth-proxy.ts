@@ -6,6 +6,7 @@ export const PUBLIC_PATHS = [
   "/login",
   "/register",
   "/pricing",
+  "/anti-ban", // 反同质化叙事页：营销公开页
   "/p",
   "/preview", // 草稿分享预览：凭签名 token 公开访问，无需登录
   "/robots.txt",

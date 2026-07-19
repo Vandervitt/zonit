@@ -82,6 +82,10 @@ describe("handleAuth 公开路径按段边界匹配", () => {
     expect(handleAuth(makeReq("/pricing"))).toBeNull();
   });
 
+  it("/anti-ban 营销公开页放行", () => {
+    expect(handleAuth(makeReq("/anti-ban"))).toBeNull();
+  });
+
   it("/api/auth 子路径放行：/api/auth/callback/google", () => {
     expect(handleAuth(makeReq("/api/auth/callback/google"))).toBeNull();
   });
