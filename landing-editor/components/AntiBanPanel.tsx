@@ -6,7 +6,7 @@ import { useMeta } from "../MetaContext";
 import { hasAntiBan } from "@/lib/plans";
 import { newVariantSeed } from "@/landing-renderer/variant";
 
-/** 反同质化面板：Pro/Agency 可「重新打散指纹」；其余套餐显示升级引导。 */
+/** 反同质化面板：Agency 可「重新打散指纹」；其余套餐显示升级引导。 */
 export function AntiBanPanel({ onClose }: { onClose: () => void }) {
   const state = useEditorState();
   const dispatch = useEditorDispatch();
@@ -53,7 +53,7 @@ export function AntiBanPanel({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <div className="mt-4 rounded-md border border-edge p-3 text-xs text-ink-muted">
-            反同质化风控为 Pro 及以上套餐权益，升级后可为已发布页打散指纹、规避投放查重。
+            反同质化风控为 Agency 套餐权益，升级后可为已发布页打散指纹、规避投放查重。
           </div>
         )}
 
