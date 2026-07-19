@@ -7,14 +7,14 @@ const body = Sora({ subsets: ["latin"], weight: ["400", "500", "600"], display: 
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "反同质化风控 — 让每个投放页指纹独立 | Zap Bridge",
+  title: "反同质化风控 — 让同模板页面不再千篇一律 | Zap Bridge",
   description:
-    "海外获客投手最怕页面雷同被平台判重、限流甚至连坐封号。Zap Bridge 的反同质化风控引擎为 Agency 套餐内建：内容对所有人一致，指纹却互不相同，随时可一键重洗。",
+    "页面雷同容易被投放平台判为重复内容，带来拒审与限流。Zap Bridge 的反同质化风控为 Agency 套餐内建：内容保持一致，打散页面结构指纹，降低同模板页面被判重的概率，并支持一键重洗。",
   openGraph: {
     type: "website",
-    title: "反同质化风控 — 让每个投放页指纹独立",
+    title: "反同质化风控 — 让同模板页面不再千篇一律",
     description:
-      "内容一模一样，指纹各不相同。为规模化投放的广告主打散页面结构指纹，规避查重限流与账户关联——这不是 cloaking，是正当广告主的护栏。",
+      "内容保持一致，结构各不相同。为规模化投放的广告主打散页面结构指纹，降低被相似度检测误判的概率——这不是 cloaking，是正当广告主的护栏。",
   },
 };
 

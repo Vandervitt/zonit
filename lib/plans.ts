@@ -51,7 +51,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     landingPagesLimit: Infinity, domainsLimit: Infinity,
     hasWatermark: false, allTemplates: true, basicPixel: true, advancedTracking: true, antiBan: true, leadWebhook: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,
-    highlights: ["无限落地页 + 无限域名", "页面结构变体", "AI 生成额度提升至 300 次/月"],
+    highlights: ["无限落地页 + 无限域名", "反同质化", "AI 生成额度提升至 300 次/月"],
   },
 };
 
@@ -74,7 +74,7 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
   { label: "基础数据追踪 (1× Meta Pixel)", desc: "接入 1 个 Meta Pixel，追踪落地页转化", valueFor: (p) => p.basicPixel },
   { label: "去除品牌水印", desc: "移除页面底部平台水印，纯你的品牌", valueFor: (p) => !p.hasWatermark },
   { label: "多平台追踪与 CAPI", desc: "Meta / TikTok / Google 追踪 + Meta / TikTok 服务端回传", valueFor: (p) => p.advancedTracking },
-  { label: "页面结构变体", desc: "调整 Hero 布局、包裹结构与 meta 标识，降低页面完全一致的概率", valueFor: (p) => p.antiBan },
+  { label: "反同质化", desc: "更换页面变体种子打散结构指纹，降低同模板页面被判重的概率", valueFor: (p) => p.antiBan },
   { label: "线索 Webhook 推送", desc: "新线索实时 POST 到你的 CRM / Zapier（含签名）", valueFor: (p) => p.leadWebhook },
   { label: "AI 整页生成", desc: "输入业务资料，AI 按当前模板生成整页营销文案", valueFor: (p) => fmtLimit(p.aiPageQuota, "次/月") },
   { label: "AI 智能改写", desc: "逐段润色改写文案，快速产出多个版本", valueFor: (p) => fmtLimit(p.aiRewriteQuota, "次/月") },

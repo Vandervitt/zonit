@@ -54,36 +54,42 @@ const STEPS = [
   },
 ];
 
-const FEATURES = [
+const FEATURES: {
+  icon: typeof LayoutTemplate;
+  title: string;
+  desc: string;
+  link?: { href: string; label: string };
+}[] = [
   {
     icon: LayoutTemplate,
     title: "海外获客模板库",
-    desc: "30+ 套咨询与留资模板，覆盖美妆、服饰、家居、数码、本地服务等行业，可直接作为编辑起点。",
+    desc: "30+ 套咨询与留资模板，覆盖美妆、医美、家装、数码、本地服务等行业——不用从空白页开始，选完即有投放级页面结构。",
   },
   {
     icon: Pencil,
     title: "可视化内容编辑",
-    desc: "通过区块表单修改文案与图片，拖拽调整区块顺序，自动保存草稿，并实时切换桌面与移动端预览。",
+    desc: "区块表单改文案与图片，拖拽排序、自动保存，桌面与移动端实时预览——所见即投放所得，不用等开发排期。",
   },
   {
     icon: Globe,
     title: "自有品牌域名发布",
-    desc: "付费套餐可绑定自有品牌域名；完成 DNS 验证后发布页面，并支持独立 SEO 标题、描述与分享图。",
+    desc: "付费套餐绑定自有品牌域名，完成 DNS 验证即可发布；独立 SEO 标题、描述与分享图，访客看到的始终是你的品牌。",
   },
   {
     icon: Radar,
     title: "多平台追踪 + 转化回传",
-    desc: "按套餐配置 Meta、TikTok、GA4 与 Google Ads；Pro 及以上支持 Meta / TikTok 服务端转化回传和 UTM 来源记录。",
+    desc: "按套餐配置 Meta、TikTok、GA4 与 Google Ads；Pro 及以上支持 Meta / TikTok 服务端转化回传与 UTM 来源记录，给广告平台更完整的转化信号。",
   },
   {
     icon: ShieldCheck,
-    title: "页面结构变体",
-    desc: "Agency 套餐可更换页面变体种子，在内容一致的前提下调整 Hero 布局、包裹结构与 meta 标识，降低同模板页面完全一致的概率。",
+    title: "反同质化",
+    desc: "Agency 套餐可一键更换页面变体种子：内容不变，Hero 布局、包裹结构与 meta 标识随种子改变，降低同模板页面被平台判重的概率。",
+    link: { href: Routes.AntiBan, label: "了解反同质化机制" },
   },
   {
     icon: Sparkles,
     title: "AI 一键生成 & 智能改写",
-    desc: "输入业务资料后，AI 可按当前模板生成整页营销文案和图库配图，也可逐段改写；发布前仍需核对事实、案例与素材。",
+    desc: "输入业务资料，AI 按当前模板生成整页营销文案与图库配图，也可逐段改写——初稿几分钟就有；发布前仍需核对事实、案例与素材。",
   },
 ];
 
@@ -121,7 +127,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
         >
           投放级落地页
           <br className="hidden sm:block" />
-          <span className={gradientText}>免费创建与预览，准备投放再发布</span>
+          <span className={gradientText}>让每一次点击都有迹可循</span>
         </motion.h1>
 
         <motion.p
@@ -129,8 +135,8 @@ function Hero({ fonts }: { fonts: Fonts }) {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
         >
-          为做海外获客的创业者与小团队打造：从 30+ 模板开始，编辑内容、AI 生成文案并实时预览；
-          准备投放时升级发布到品牌域名，再按套餐配置像素、UTM 与服务端转化回传。
+          为做海外获客的创业者与小团队打造：30+ 行业模板起步，AI 整页成稿，几分钟做出第一版；
+          像素、UTM 与服务端转化回传一站配好，广告费花在能归因、能转化的页面上。
         </motion.p>
 
         <motion.div
@@ -279,8 +285,8 @@ function Steps({ fonts }: { fonts: Fonts }) {
     <section className="relative px-6 py-24">
       <SectionHead
         kicker="// 三步上线"
-        title="先免费完成页面，准备投放时再发布"
-        desc="创建、编辑与预览无需付费；需要公开投放时，升级套餐并完成自有域名验证即可发布。"
+        title="从选模板到上线投放，只需三步"
+        desc="页面制作全程可视化，不用写一行代码；准备公开投放时，升级并完成自有域名验证即可发布。"
         fonts={fonts}
       />
       <div className="relative mx-auto mt-16 max-w-5xl">
@@ -321,12 +327,12 @@ function Features({ fonts }: { fonts: Fonts }) {
     <section className="relative px-6 py-24">
       <SectionHead
         kicker="// 为转化而生"
-        title="从页面制作，到发布与获客数据采集"
-        desc="先把咨询与留资页面做好，再按投放需要启用自有域名、像素、UTM 和服务端回传。"
+        title="转化所需的每一环，都替你备齐"
+        desc="页面、域名、追踪、AI 文案——先把咨询与留资页做好，再按投放节奏逐步启用。"
         fonts={fonts}
       />
       <div className="mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map(({ icon: Icon, title, desc }, i) => (
+        {FEATURES.map(({ icon: Icon, title, desc, link }, i) => (
           <motion.div
             key={title}
             initial={{ opacity: 0, y: 24 }}
@@ -340,6 +346,15 @@ function Features({ fonts }: { fonts: Fonts }) {
             </span>
             <h3 className={`mt-5 text-lg font-semibold text-foreground ${fonts.display}`}>{title}</h3>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
+            {link && (
+              <Link
+                href={link.href}
+                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-aqua-600 transition-colors hover:text-aqua-700"
+              >
+                {link.label}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            )}
           </motion.div>
         ))}
       </div>
@@ -455,11 +470,11 @@ function FinalCTA({ fonts }: { fonts: Fonts }) {
         <div className={`pointer-events-none absolute left-1/2 top-0 h-56 w-96 -translate-x-1/2 ${glowAura("aqua-400")}`} />
         <Sparkles className="relative mx-auto h-8 w-8 text-aqua-500" />
         <h2 className={`relative mt-5 text-3xl font-bold tracking-tight text-foreground sm:text-5xl ${fonts.display}`}>
-          先免费做好第一版<br className="hidden sm:block" />
-          海外获客落地页
+          你的下一条投放计划<br className="hidden sm:block" />
+          值得一张投放级落地页
         </h2>
         <p className="relative mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          无需信用卡即可创建、编辑并预览；准备投放时再升级，绑定自己的品牌域名发布。
+          现在就能创建、编辑并预览，无需信用卡；准备投放时再升级，发布到你自己的品牌域名。
         </p>
         <div className="relative mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link href={Routes.Register} className={ctaPrimary}>
