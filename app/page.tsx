@@ -7,14 +7,14 @@ const body = Sora({ subsets: ["latin"], weight: ["400", "500", "600"], display: 
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Zap Bridge — 海外获客落地页，免费创建与预览",
+  title: "Zap Bridge — 投放级海外获客落地页",
   description:
-    "为海外获客打造的落地页工具：30+ 咨询与留资模板、可视化内容编辑、AI 文案生成和实时预览；升级后可发布到自有品牌域名，并配置 Meta、TikTok 与 Google 追踪。",
+    "为海外获客打造的投放级落地页：30+ 行业模板起步，AI 整页成稿，几分钟出第一版；像素、UTM 与服务端转化回传一站配好，广告费花在能归因、能转化的页面上。",
   openGraph: {
     type: "website",
-    title: "Zap Bridge — 海外获客落地页，免费创建与预览",
+    title: "Zap Bridge — 投放级海外获客落地页",
     description:
-      "先免费选模板、改内容并实时预览；准备投放时升级发布到自有品牌域名，并按套餐配置像素、UTM 与服务端转化回传。",
+      "30+ 咨询与留资模板 + AI 整页成稿，几分钟做出第一版；发布到自有品牌域名，并按套餐配置 Meta、TikTok 与 Google 追踪归因。",
   },
 };
 

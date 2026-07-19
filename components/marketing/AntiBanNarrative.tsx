@@ -110,7 +110,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
           className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
         >
           海外获客投手最深的恐惧不是没量，而是页面雷同被平台判重、限流，甚至连坐封号。
-          Zap Bridge 的反同质化风控引擎，让每个已发布页拥有独立指纹——内容对所有人一致，指纹却互不相同。
+          Zap Bridge 的反同质化风控引擎让每个已发布页拥有独立的结构变体——内容对所有人一致，显著降低被相似度检测判重的概率。
         </motion.p>
 
         <motion.div
@@ -174,9 +174,9 @@ function Mechanisms({ fonts }: { fonts: Fonts }) {
   return (
     <section className="relative px-6 py-24">
       <SectionHead
-        kicker="// 指纹独立化引擎"
-        title="内容一模一样，指纹各不相同"
-        desc="发布时按页面种子确定性地打散页面指纹；页面被判重或限流时，一键重洗即可换一副全新指纹。"
+        kicker="// 指纹打散引擎"
+        title="内容保持一致，结构各不相同"
+        desc="发布时按页面种子确定性地打散结构指纹；页面被判重或限流时，一键重洗即可换一副新的结构变体。"
         fonts={fonts}
       />
       <div className="mx-auto mt-14 grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2">
@@ -253,7 +253,7 @@ function AgencyCta({ fonts }: { fonts: Fonts }) {
         </h2>
         <p className="relative mx-auto mt-5 max-w-xl text-base leading-relaxed text-muted-foreground">
           批量投放、多广告主、多页面并跑，最怕的就是彼此关联被连坐。反同质化风控引擎为 Agency
-          套餐内建：每个已发布页指纹独立，随时可一键重洗，让规模化投放不再自我拖累。
+          套餐内建：每个已发布页拥有独立的结构变体，随时可一键重洗，降低批量页面被关联判重的风险。
         </p>
         <div className="relative mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link href={`${Routes.Home}#pricing`} className={ctaPrimary}>
