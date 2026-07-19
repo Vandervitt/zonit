@@ -20,17 +20,17 @@ export function LandingPage({
   theme?: RendererTheme; // 显式覆盖；默认按 branding 派生
   pageId?: string;
   variant?: PageVariant; // 反同质化变体；缺省恒等（输出不变）
-  preview?: boolean; // 预览渲染：留资表单停用提交，避免写入真实线索
+  preview?: boolean; // 预览渲染：留资表单停用提交；不完整 CTA 按钮显示占位标注而非隐藏
 }) {
   const resolved = theme ?? resolveTheme(page.branding?.theme);
   const logo = page.branding?.logo;
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
-      <Hero data={page.hero} theme={resolved} logo={logo} layout={variant.heroLayout} />
-      {page.sections.map((section, i) => renderSection(section, resolved, i, variant))}
+      <Hero data={page.hero} theme={resolved} logo={logo} layout={variant.heroLayout} preview={preview} />
+      {page.sections.map((section, i) => renderSection(section, resolved, i, variant, preview))}
       {page.leadForm?.enabled ? <LeadForm data={page.leadForm} pageId={pageId} theme={resolved} preview={preview} /> : null}
       <Footer data={page.footer} theme={resolved} logo={logo} />
-      {page.floatingButton && <FloatingButton data={page.floatingButton} theme={resolved} />}
+      {page.floatingButton && <FloatingButton data={page.floatingButton} theme={resolved} preview={preview} />}
     </div>
   );
 }
