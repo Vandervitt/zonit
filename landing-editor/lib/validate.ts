@@ -5,6 +5,15 @@
 
 import { SECTION_REGISTRY, type LandingPageDraft } from "@/types/schema.draft";
 
+/** 校验项的跳转落点：编辑器固定面板（hero/footer/floatingButton…）或 sections 中的序号。 */
+export type IssueTarget = { kind: "fixed"; id: string } | { kind: "section"; index: number };
+
+/** 结构化校验项：message 为展示文案，target 缺省表示无明确落点（不可点击跳转）。 */
+export interface PublishIssue {
+  message: string;
+  target?: IssueTarget;
+}
+
 // 允许的非 http 链接协议（私域 / 通话 / 邮件）
 const ALLOWED_SCHEMES = ["tel:", "mailto:", "whatsapp:", "sms:"];
 
@@ -61,29 +70,39 @@ const FIELD_VALIDATORS: Record<string, (v: string) => string | undefined> = {
   contactEmail: validateEmail,
 };
 
-/** 递归收集 node 内所有字段格式错误，统一冠以区块标签前缀。 */
-function walkFieldIssues(node: unknown, label: string, out: string[]): void {
+/** 递归收集 node 内所有字段格式错误，统一冠以区块标签前缀并挂上跳转落点。 */
+function walkFieldIssues(node: unknown, label: string, target: IssueTarget, out: PublishIssue[]): void {
   if (Array.isArray(node)) {
-    for (const item of node) walkFieldIssues(item, label, out);
+    for (const item of node) walkFieldIssues(item, label, target, out);
     return;
   }
   if (!node || typeof node !== "object") return;
   for (const [key, val] of Object.entries(node)) {
     if (typeof val === "string") {
       const msg = FIELD_VALIDATORS[key]?.(val);
-      if (msg) out.push(`${label}：${msg}`);
+      if (msg) out.push({ message: `${label}：${msg}`, target });
     } else {
-      walkFieldIssues(val, label, out);
+      walkFieldIssues(val, label, target, out);
     }
   }
 }
 
+/** 聚合整页字段级格式错误（按文案去重），每项带编辑器跳转落点。 */
+export function collectFieldIssueItems(draft: LandingPageDraft): PublishIssue[] {
+  const out: PublishIssue[] = [];
+  walkFieldIssues(draft.hero, "首屏", { kind: "fixed", id: "hero" }, out);
+  draft.sections.forEach((s, index) =>
+    walkFieldIssues(s.data, SECTION_REGISTRY[s.type]?.label ?? s.type, { kind: "section", index }, out),
+  );
+  walkFieldIssues(draft.footer, "页脚", { kind: "fixed", id: "footer" }, out);
+  if (draft.floatingButton) {
+    walkFieldIssues(draft.floatingButton, "悬浮按钮", { kind: "fixed", id: "floatingButton" }, out);
+  }
+  const seen = new Set<string>();
+  return out.filter((i) => (seen.has(i.message) ? false : (seen.add(i.message), true)));
+}
+
 /** 聚合整页字段级格式错误（去重）。空数组表示全部字段格式合法。 */
 export function collectFieldIssues(draft: LandingPageDraft): string[] {
-  const out: string[] = [];
-  walkFieldIssues(draft.hero, "首屏", out);
-  draft.sections.forEach((s) => walkFieldIssues(s.data, SECTION_REGISTRY[s.type]?.label ?? s.type, out));
-  walkFieldIssues(draft.footer, "页脚", out);
-  if (draft.floatingButton) walkFieldIssues(draft.floatingButton, "悬浮按钮", out);
-  return [...new Set(out)];
+  return collectFieldIssueItems(draft).map((i) => i.message);
 }

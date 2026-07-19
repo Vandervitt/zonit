@@ -5,6 +5,7 @@
 //  2) 发布门槛 collectContactIssues 校验首屏主 CTA 非空（格式由 validate.ts 的 validateLink 负责），
 //     并兜底扫模板占位号（覆盖遗留页，或 section 级残留）。
 import type { LandingPageDraft } from "@/types/schema.draft";
+import type { PublishIssue } from "./validate";
 
 // 模板样例反复出现的占位假号（US 格式 1555…，故意不可拨打）。仅用于发布兜底扫描。
 export const PLACEHOLDER_CONTACTS = ["15551234567", "15553219876", "15557654321"];
@@ -20,18 +21,28 @@ export function blankPrimaryCtaLinks(draft: LandingPageDraft): LandingPageDraft 
   return clone;
 }
 
-/** 发布门槛：首屏主 CTA 不得为空；并兜底扫占位号（遗留 / section 残留）。为空即通过。 */
-export function collectContactIssues(draft: LandingPageDraft): string[] {
-  const issues: string[] = [];
+/** 发布门槛（结构化）：首屏主 CTA 不得为空（可跳 hero）；占位号兜底扫全文（无固定落点）。 */
+export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[] {
+  const issues: PublishIssue[] = [];
 
   const heroCtaLink = draft.hero?.cta?.link?.trim() ?? "";
   if (!heroCtaLink) {
-    issues.push("首屏 CTA 按钮链接为空，访客点击无法联系你，请填入 WhatsApp / Telegram / tel: / 邮箱 等联系方式");
+    issues.push({
+      message: "首屏 CTA 按钮链接为空，访客点击无法联系你，请填入 WhatsApp / Telegram / tel: / 邮箱 等联系方式",
+      target: { kind: "fixed", id: "hero" },
+    });
   }
 
   if (PLACEHOLDER_CONTACTS.some((n) => JSON.stringify(draft).includes(n))) {
-    issues.push("联系方式仍是模板占位号码（如 WhatsApp wa.me/1555…），请改成你的真实号码，否则收不到线索");
+    issues.push({
+      message: "联系方式仍是模板占位号码（如 WhatsApp wa.me/1555…），请改成你的真实号码，否则收不到线索",
+    });
   }
 
   return issues;
+}
+
+/** 发布门槛：同 collectContactIssueItems，仅返回文案（服务端与既有消费方使用）。 */
+export function collectContactIssues(draft: LandingPageDraft): string[] {
+  return collectContactIssueItems(draft).map((i) => i.message);
 }
