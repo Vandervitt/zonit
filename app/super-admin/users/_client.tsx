@@ -250,6 +250,11 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
           {compValue !== "none" && (
             <div>
               <Typography.Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>有效期</Typography.Text>
+              {compTarget?.compPlan && !compTarget.compExpired && !compTarget.compPlanExpiresAt && (
+                <Typography.Text type="warning" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
+                  当前为永久赠送；保存将改为下面选定的有效期。
+                </Typography.Text>
+              )}
               <Segmented
                 value={compDuration}
                 onChange={(v) => setCompDuration(v as CompDuration)}

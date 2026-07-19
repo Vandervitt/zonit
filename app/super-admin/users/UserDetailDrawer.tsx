@@ -35,11 +35,13 @@ export function UserDetailDrawer({ userId, onClose }: { userId: string | null; o
   const [detail, setDetail] = useState<Detail | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [nowMs] = useState(() => Date.now());
+  // 每次打开（userId 变化）刷新，避免长会话下沿用过时的时间戳误判「已过期」。
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
     if (!userId) return;
     let active = true;
+    setNowMs(Date.now());
     async function load(id: string) {
       setDetail(null); setError(false); setLoading(true);
       try {
