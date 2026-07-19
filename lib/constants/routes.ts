@@ -8,6 +8,7 @@ export enum Routes {
   Analytics = '/admin/analytics',
   Billing = '/admin/billing',
   Pricing = '/pricing',
+  AntiBan = '/anti-ban',            // 反同质化叙事页（公开）
   LandingPages = '/admin/landing-pages',
   Leads = '/admin/leads',
   Settings = '/admin/settings',
