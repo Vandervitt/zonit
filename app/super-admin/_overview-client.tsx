@@ -1,14 +1,18 @@
 "use client";
 
-import { Row, Col, Card, Statistic, Button, Tag, Typography, Space } from "antd";
+import { Row, Col, Card, Statistic, Tag, Typography, Space } from "antd";
 import { BRAND } from "@/lib/theme/brand";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
+import { PLAN_ORDER, PLANS, type PlanId } from "@/lib/plans";
+import type { DailyPoint } from "@/lib/super-admin/trend";
+import { TrendCharts } from "./TrendCharts";
 import {
   UserOutlined,
   GlobalOutlined,
   CreditCardOutlined,
   RiseOutlined,
   FileTextOutlined,
+  ContactsOutlined,
 } from "@ant-design/icons";
 
 export interface LatestPage {
@@ -23,6 +27,10 @@ export interface OverviewStats {
   totalUsers: number;
   totalPages: number;
   activeSubs: number;
+  totalLeads: number;
+  planDist: Record<PlanId, number>;
+  userTrend: DailyPoint[];
+  leadTrend: DailyPoint[];
   latestPages: LatestPage[];
 }
 
@@ -54,6 +62,12 @@ export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
       prefix: <RiseOutlined style={{ color: SEMANTIC.warning }} />,
       suffix: "%",
     },
+    {
+      title: "线索总量",
+      value: stats.totalLeads,
+      prefix: <ContactsOutlined style={{ color: SEMANTIC.success }} />,
+      suffix: undefined as string | undefined,
+    },
   ];
 
   return (
@@ -81,7 +95,10 @@ export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
         ))}
       </Row>
 
-      {/* 下半区：最新落地页 + CTA */}
+      {/* 近 30 天趋势图 */}
+      <TrendCharts userTrend={stats.userTrend} leadTrend={stats.leadTrend} />
+
+      {/* 下半区：最新落地页 + 套餐分布 */}
       <Row gutter={[16, 16]}>
         <Col xs={24} md={14}>
           <Card
@@ -136,26 +153,15 @@ export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
         </Col>
 
         <Col xs={24} md={10}>
-          <Card
-            style={{
-              background: `linear-gradient(135deg, ${BRAND} 0%, #0c83bf 100%)`,
-              border: "none",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            styles={{ body: { textAlign: "center", width: "100%" } }}
-          >
-            <Typography.Title level={4} style={{ color: "#fff", margin: "0 0 8px" }}>
-              需要新的平台功能？
-            </Typography.Title>
-            <Typography.Paragraph style={{ color: "rgba(255,255,255,0.8)", marginBottom: 20 }}>
-              可在此扩展管理模板、区块或全局系统设置。
-            </Typography.Paragraph>
-            <Button type="primary" ghost>
-              查看文档
-            </Button>
+          <Card title="套餐分布（生效口径）">
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {PLAN_ORDER.map((p) => (
+                <div key={p} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <Typography.Text>{PLANS[p].label}</Typography.Text>
+                  <Typography.Text strong>{stats.planDist[p]}</Typography.Text>
+                </div>
+              ))}
+            </div>
           </Card>
         </Col>
       </Row>
