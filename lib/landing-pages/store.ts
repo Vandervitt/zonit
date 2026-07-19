@@ -229,3 +229,13 @@ export async function rotatePreviewSecret(id: string, userId: string): Promise<s
   );
   return result.rows[0]?.preview_secret ?? null;
 }
+
+/** 把草稿恢复为线上快照（published_data）；未发布过（无快照）时不生效返回 null。 */
+export async function restoreDraftFromLive(id: string, userId: string): Promise<ClientLandingPageRow | null> {
+  const result = await pool.query(
+    `UPDATE landing_pages SET data = published_data, updated_at = NOW()
+     WHERE id = $1 AND user_id = $2 AND published_data IS NOT NULL RETURNING *`,
+    [id, userId],
+  );
+  return result.rows[0] ? toClient(result.rows[0]) : null;
+}
