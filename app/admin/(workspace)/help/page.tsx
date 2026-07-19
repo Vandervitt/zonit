@@ -1,20 +1,38 @@
 "use client";
 
-import { Card, Collapse, Typography, Space } from "antd";
-
-const FAQ = [
-  { key: "1", label: "如何发布落地页到我的域名？", children: <p>在「域名」绑定并验证你的域名，然后在编辑器中点「发布」，选择已验证域名即可。</p> },
-  { key: "2", label: "AI 成页额度如何计算？", children: <p>按自然月计算，每月重置；额外 credit 永不过期，月额度用尽后自动消耗 credit。</p> },
-  { key: "3", label: "落地页支持哪些转化方式？", children: <p>支持引导访客通过 WhatsApp、电话、邮件、Telegram 等方式联系或留资，不含购物车/支付。</p> },
-];
+import Link from "next/link";
+import { Card, Typography, Space, Row, Col } from "antd";
+import { Routes } from "@/lib/constants";
+import { HELP_CHAPTERS } from "./_content";
 
 export default function HelpPage() {
   return (
-    <Space direction="vertical" size={20} style={{ width: "100%", maxWidth: 760 }}>
-      <Typography.Title level={3} style={{ margin: 0 }}>帮助</Typography.Title>
-      <Card title="常见问题"><Collapse items={FAQ} defaultActiveKey={["1"]} ghost /></Card>
-      <Card title="需要更多帮助？">
-        <Typography.Paragraph type="secondary">遇到问题可发邮件至 support@zapbridge.com，我们会尽快回复。</Typography.Paragraph>
+    <Space direction="vertical" size={20} style={{ width: "100%", maxWidth: 960 }}>
+      <div>
+        <Typography.Title level={3} style={{ margin: 0 }}>帮助中心</Typography.Title>
+        <Typography.Paragraph type="secondary" style={{ marginTop: 8, marginBottom: 0 }}>
+          从建页到收线索的完整使用指南。新用户建议从「快速上手」开始，按目录顺序读完主链路（前六章）。
+        </Typography.Paragraph>
+      </div>
+      <Row gutter={[16, 16]}>
+        {HELP_CHAPTERS.map((c, i) => (
+          <Col key={c.slug} xs={24} sm={12} lg={8}>
+            <Link href={`${Routes.Help}/${c.slug}`}>
+              <Card hoverable size="small" style={{ height: "100%" }}>
+                <Typography.Text type="secondary">{String(i + 1).padStart(2, "0")}</Typography.Text>
+                <Typography.Title level={5} style={{ marginTop: 4, marginBottom: 4 }}>{c.title}</Typography.Title>
+                <Typography.Paragraph type="secondary" style={{ marginBottom: 0, fontSize: 13 }}>
+                  {c.summary}
+                </Typography.Paragraph>
+              </Card>
+            </Link>
+          </Col>
+        ))}
+      </Row>
+      <Card size="small">
+        <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
+          没找到答案？发邮件至 support@zapbridge.com，附上页面链接与问题截图，我们会尽快回复。
+        </Typography.Paragraph>
       </Card>
     </Space>
   );
