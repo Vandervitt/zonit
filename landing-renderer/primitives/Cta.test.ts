@@ -13,8 +13,8 @@ const theme = {
   accentShadow: "shadow-c",
 } as RendererTheme;
 
-const html = (text: string, link: string, variant?: "primary" | "secondary") =>
-  renderToStaticMarkup(createElement(Cta, { cta: { text, link }, theme, variant }));
+const html = (text: string, link: string, variant?: "primary" | "secondary", preview?: boolean) =>
+  renderToStaticMarkup(createElement(Cta, { cta: { text, link }, theme, variant, preview }));
 
 describe("Cta 空内容守卫", () => {
   it("链接为空 → 不渲染（primary）", () => {
@@ -33,5 +33,32 @@ describe("Cta 空内容守卫", () => {
     const out = html("Chat", "https://wa.me/8613800138000");
     expect(out).toContain('href="https://wa.me/8613800138000"');
     expect(out).toContain("Chat");
+  });
+});
+
+describe("Cta 预览占位态", () => {
+  it("预览 + 链接为空 → 渲染不可点击占位，保留文案并标注线上不显示", () => {
+    const out = html("Chat", "", "primary", true);
+    expect(out).not.toContain("<a");
+    expect(out).toContain("Chat");
+    expect(out).toContain("链接未填");
+    expect(out).toContain("线上不显示");
+  });
+
+  it("预览 + 文案为空 → 占位标注文案未填", () => {
+    const out = html("", "https://wa.me/8613800138000", "secondary", true);
+    expect(out).not.toContain("<a");
+    expect(out).toContain("文案未填");
+    expect(out).toContain("线上不显示");
+  });
+
+  it("预览 + 内容完整 → 与线上一致正常渲染", () => {
+    const out = html("Chat", "https://wa.me/8613800138000", "primary", true);
+    expect(out).toContain('href="https://wa.me/8613800138000"');
+    expect(out).not.toContain("线上不显示");
+  });
+
+  it("非预览 + 不完整 → 仍不渲染（线上守卫不受影响）", () => {
+    expect(html("Chat", "", "primary", false)).toBe("");
   });
 });

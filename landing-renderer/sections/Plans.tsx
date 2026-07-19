@@ -6,7 +6,7 @@ import { SectionHeading } from "../primitives/SectionHeading";
 import { Cta } from "../primitives/Cta";
 import { Countdown } from "../components/Countdown";
 
-export function Plans({ data, theme }: { data: PlansSection; theme: RendererTheme }) {
+export function Plans({ data, theme, preview }: { data: PlansSection; theme: RendererTheme; preview?: boolean }) {
   return (
     <SectionShell>
       <SectionHeading title={data.title} subtitle={data.subtitle} />
@@ -38,7 +38,7 @@ export function Plans({ data, theme }: { data: PlansSection; theme: RendererThem
                 </div>
               )}
               <div className="mt-6 pt-2">
-                <Cta cta={p.cta} theme={theme} />
+                <Cta cta={p.cta} theme={theme} preview={preview} />
               </div>
             </div>
           ))}

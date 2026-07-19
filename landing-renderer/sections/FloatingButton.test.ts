@@ -9,8 +9,8 @@ import type { RendererTheme } from "../theme";
 
 const theme = { accentGradient: "bg-a", accentShadow: "shadow-c" } as RendererTheme;
 
-const html = (text: string, link: string) =>
-  renderToStaticMarkup(createElement(FloatingButton, { data: { text, link }, theme }));
+const html = (text: string, link: string, preview?: boolean) =>
+  renderToStaticMarkup(createElement(FloatingButton, { data: { text, link }, theme, preview }));
 
 describe("FloatingButton 空内容守卫", () => {
   it("链接为空 → 不渲染", () => {
@@ -25,5 +25,25 @@ describe("FloatingButton 空内容守卫", () => {
     const out = html("Chat", "https://wa.me/8613800138000");
     expect(out).toContain('href="https://wa.me/8613800138000"');
     expect(out).toContain("Chat");
+  });
+});
+
+describe("FloatingButton 预览占位态", () => {
+  it("预览 + 链接为空 → 渲染不可点击占位并标注线上不显示", () => {
+    const out = html("Chat", "", true);
+    expect(out).not.toContain("<a");
+    expect(out).toContain("Chat");
+    expect(out).toContain("链接未填");
+    expect(out).toContain("线上不显示");
+  });
+
+  it("预览 + 内容完整 → 与线上一致正常渲染", () => {
+    const out = html("Chat", "https://wa.me/8613800138000", true);
+    expect(out).toContain('href="https://wa.me/8613800138000"');
+    expect(out).not.toContain("线上不显示");
+  });
+
+  it("非预览 + 不完整 → 仍不渲染", () => {
+    expect(html("Chat", "", false)).toBe("");
   });
 });
