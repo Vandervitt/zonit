@@ -1,5 +1,5 @@
 import pool from "@/lib/db";
-import { effectivePlan, type PlanId } from "@/lib/plans";
+import { effectivePlan, activeCompPlan, type PlanId } from "@/lib/plans";
 
 /**
  * 取用户生效套餐（= max(plan, comp_plan)）；用户行不存在或已被禁用时返回 null。
@@ -7,13 +7,14 @@ import { effectivePlan, type PlanId } from "@/lib/plans";
  */
 export async function getUserPlanOrNull(userId: string): Promise<PlanId | null> {
   const result = await pool.query(
-    "SELECT plan, comp_plan, disabled_at FROM users WHERE id = $1",
+    "SELECT plan, comp_plan, comp_plan_expires_at, disabled_at FROM users WHERE id = $1",
     [userId],
   );
   if (result.rows.length === 0) return null;
   const row = result.rows[0];
   if (row.disabled_at) return null;
-  return effectivePlan((row.plan ?? "free") as PlanId, row.comp_plan as PlanId | null);
+  const comp = activeCompPlan(row.comp_plan as PlanId | null, row.comp_plan_expires_at, new Date());
+  return effectivePlan((row.plan ?? "free") as PlanId, comp);
 }
 
 export async function getUserPlan(userId: string): Promise<PlanId> {
@@ -23,10 +24,11 @@ export async function getUserPlan(userId: string): Promise<PlanId> {
 /** 取某落地页 owner 的生效套餐（发布页/CAPI 派发按套餐门控用）。缺失回退 free。 */
 export async function getPlanByPageId(pageId: string): Promise<PlanId> {
   const result = await pool.query(
-    `SELECT u.plan, u.comp_plan FROM landing_pages lp JOIN users u ON u.id = lp.user_id WHERE lp.id = $1`,
+    `SELECT u.plan, u.comp_plan, u.comp_plan_expires_at FROM landing_pages lp JOIN users u ON u.id = lp.user_id WHERE lp.id = $1`,
     [pageId],
   );
   const row = result.rows[0];
   if (!row) return "free";
-  return effectivePlan((row.plan ?? "free") as PlanId, row.comp_plan as PlanId | null);
+  const comp = activeCompPlan(row.comp_plan as PlanId | null, row.comp_plan_expires_at, new Date());
+  return effectivePlan((row.plan ?? "free") as PlanId, comp);
 }

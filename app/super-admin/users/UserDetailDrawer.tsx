@@ -1,26 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Drawer, Descriptions, Table, Tag, Typography, Spin, Alert } from "antd";
+import dayjs from "dayjs";
+import { Drawer, Descriptions, Table, Tag, Typography, Spin, Alert, Space } from "antd";
 import type { PlanId } from "@/lib/plans";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 
 interface DetailPage { id: string; name: string; status: string; slug: string | null; bound_domain: string | null }
 interface Detail {
   id: string; name: string | null; email: string;
-  plan: PlanId; comp_plan: PlanId | null; role: string;
+  plan: PlanId; comp_plan: PlanId | null; comp_plan_expires_at: string | null; role: string;
   disabled_at: string | null; created_at: string; ls_customer_id: string | null;
   leads_count: number; pages: DetailPage[];
+}
+
+function GiftValue({ plan, expiresAt, nowMs }: { plan: PlanId | null; expiresAt: string | null; nowMs: number }) {
+  if (!plan) return <>—</>;
+  const expired = Boolean(expiresAt) && dayjs(expiresAt).valueOf() <= nowMs;
+  return (
+    <Space size={6}>
+      <PlanBadge plan={plan} />
+      {expired ? (
+        <Tag>已过期 · {dayjs(expiresAt).format("YYYY-MM-DD")}</Tag>
+      ) : expiresAt ? (
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>{dayjs(expiresAt).format("YYYY-MM-DD")} 到期</Typography.Text>
+      ) : (
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>永久</Typography.Text>
+      )}
+    </Space>
+  );
 }
 
 export function UserDetailDrawer({ userId, onClose }: { userId: string | null; onClose: () => void }) {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  // 每次打开（userId 变化）刷新，避免长会话下沿用过时的时间戳误判「已过期」。
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
     if (!userId) return;
     let active = true;
+    setNowMs(Date.now());
     async function load(id: string) {
       setDetail(null); setError(false); setLoading(true);
       try {
@@ -49,7 +70,7 @@ export function UserDetailDrawer({ userId, onClose }: { userId: string | null; o
             <Descriptions.Item label="名称">{detail.name || "—"}</Descriptions.Item>
             <Descriptions.Item label="付费套餐"><PlanBadge plan={detail.plan} /></Descriptions.Item>
             <Descriptions.Item label="赠送套餐">
-              {detail.comp_plan ? <PlanBadge plan={detail.comp_plan} /> : "—"}
+              <GiftValue plan={detail.comp_plan} expiresAt={detail.comp_plan_expires_at} nowMs={nowMs} />
             </Descriptions.Item>
             <Descriptions.Item label="LS Customer">{detail.ls_customer_id || "—"}</Descriptions.Item>
             <Descriptions.Item label="状态">

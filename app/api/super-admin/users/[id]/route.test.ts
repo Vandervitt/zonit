@@ -48,15 +48,39 @@ describe("PATCH /api/super-admin/users/[id]", () => {
     expect((await PATCH(patchReq({ role: "ADMIN" }), params("u2"))).status).toBe(400);
     expect((await PATCH(patchReq({}), params("u2"))).status).toBe(400);
   });
-  it("合法更新（赠送 pro + 禁用）→ 200 并透传数据层", async () => {
+  it("合法更新（赠送 pro + 禁用，不带到期）→ 200 并透传数据层（到期不动）", async () => {
     const res = await PATCH(patchReq({ compPlan: "pro", disabled: true }), params("u2"));
     expect(res.status).toBe(200);
     expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: "pro", disabled: true });
   });
-  it("取消赠送（compPlan: null）→ 200", async () => {
+  it("取消赠送（compPlan: null）→ 200 并强制清空到期", async () => {
     const res = await PATCH(patchReq({ compPlan: null }), params("u2"));
     expect(res.status).toBe(200);
-    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: null });
+    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: null, compPlanExpiresAt: null });
+  });
+
+  const future = new Date(Date.now() + 7 * 86400_000).toISOString();
+  const past = new Date(Date.now() - 86400_000).toISOString();
+
+  it("赠送 pro + 未来到期 → 200 并透传到期", async () => {
+    const res = await PATCH(patchReq({ compPlan: "pro", compPlanExpiresAt: future }), params("u2"));
+    expect(res.status).toBe(200);
+    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: "pro", compPlanExpiresAt: future });
+  });
+  it("赠送 pro + 到期为 null（永久）→ 200", async () => {
+    const res = await PATCH(patchReq({ compPlan: "pro", compPlanExpiresAt: null }), params("u2"));
+    expect(res.status).toBe(200);
+    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: "pro", compPlanExpiresAt: null });
+  });
+  it("赠送 + 过去到期 → 400 且不更新", async () => {
+    const res = await PATCH(patchReq({ compPlan: "pro", compPlanExpiresAt: past }), params("u2"));
+    expect(res.status).toBe(400);
+    expect(updateUserAdminFields).not.toHaveBeenCalled();
+  });
+  it("赠送 + 非法日期 → 400", async () => {
+    const res = await PATCH(patchReq({ compPlan: "pro", compPlanExpiresAt: "not-a-date" }), params("u2"));
+    expect(res.status).toBe(400);
+    expect(updateUserAdminFields).not.toHaveBeenCalled();
   });
 });
 
