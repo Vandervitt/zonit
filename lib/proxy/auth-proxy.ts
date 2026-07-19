@@ -71,9 +71,14 @@ export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
     return null;
   }
 
-  // 租户后台及其它页面：需登录
-  if (!isLoggedIn) {
-    return NextResponse.redirect(new URL("/login", req.url));
+  // 租户后台（/admin 树）：需登录。仅对受保护前缀跳登录，
+  // 其余未登记路径一律放行交给 Next 渲染——未知路由由此命中 app/not-found（404），
+  // 不再被误重定向到 /login（受保护页仅 /admin 与上方 /super-admin 两棵树）。
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    if (!isLoggedIn) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    return null;
   }
 
   return null;
