@@ -8,10 +8,11 @@ interface DomainRow {
   domain: string;
   enabled: boolean;
   verified: boolean;
+  landing_page_id?: string | null;
 }
 
 export function PublishDialog({ onClose }: { onClose: () => void }) {
-  const { pageId } = useMeta();
+  const { pageId, setStatus, setPublishedDirty } = useMeta();
   const [domains, setDomains] = useState<DomainRow[]>([]);
   const [domainId, setDomainId] = useState("");
   const [busy, setBusy] = useState(false);
@@ -25,9 +26,12 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
       const all: DomainRow[] = await res.json();
       const usable = all.filter((d) => d.enabled && d.verified);
       setDomains(usable);
-      if (usable[0]) setDomainId(usable[0].id);
+      // 优先预选当前页已绑定的域名（更新发布不换绑），否则取第一个。
+      const bound = usable.find((d) => d.landing_page_id === pageId);
+      const preset = bound ?? usable[0];
+      if (preset) setDomainId(preset.id);
     })();
-  }, []);
+  }, [pageId]);
 
   async function publish() {
     if (!domainId || busy) return;
@@ -50,6 +54,8 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
         return;
       }
       setLiveUrl(`https://${json.domain}/`);
+      setStatus("published");
+      setPublishedDirty(false); // 刚发布：线上快照与草稿一致
     } finally {
       setBusy(false);
     }

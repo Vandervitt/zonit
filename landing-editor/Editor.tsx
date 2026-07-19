@@ -17,12 +17,17 @@ export function Editor({
   initialName,
   initialDraft,
   plan,
+  initialStatus = "draft",
+  initialPublishedDirty = false,
   autoGenerate = false,
 }: {
   pageId: string;
   initialName: string;
   initialDraft: LandingPageDraft;
   plan: PlanId;
+  initialStatus?: "draft" | "published";
+  /** 已发布页的草稿是否领先线上快照（updated_at > published_at）。 */
+  initialPublishedDirty?: boolean;
   /** 从「AI 一键成页」进入（?ai=1）时为 true：默认弹出生成表单。 */
   autoGenerate?: boolean;
 }) {
@@ -30,7 +35,13 @@ export function Editor({
   return (
     <DndProvider backend={HTML5Backend}>
       <EditorProvider initial={initial}>
-        <MetaProvider pageId={pageId} initialName={initialName} plan={plan}>
+        <MetaProvider
+          pageId={pageId}
+          initialName={initialName}
+          plan={plan}
+          initialStatus={initialStatus}
+          initialPublishedDirty={initialPublishedDirty}
+        >
           <AutoSave />
           <EditorLayout />
           <GenerateBriefDialog defaultOpen={autoGenerate} />

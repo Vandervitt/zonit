@@ -9,19 +9,24 @@ export interface LandingPageRow {
   slug: string | null;
   status: "draft" | "published";
   data: LandingPageDraft;
+  published_data: LandingPageDraft | null;
   published_at: string | null;
   created_at: string;
   updated_at: string;
   preview_secret: string | null;
 }
 
-/** 客户端可见的落地页行：剔除 preview_secret（预览分享的撤销密钥不应下发到浏览器）。 */
-export type ClientLandingPageRow = Omit<LandingPageRow, "preview_secret">;
+/** 客户端可见的落地页行：剔除 preview_secret（撤销密钥）与 published_data（线上快照，客户端只编辑草稿）。 */
+export type ClientLandingPageRow = Omit<LandingPageRow, "preview_secret" | "published_data">;
 
-/** 从 DB 行剥离 preview_secret，用于任何要经 API 返回给客户端的落地页数据。 */
+/** 列表行：额外带当前绑定的已验证域名（无绑定为 null），供列表展示与线上预览链接。 */
+export type LandingPageListRow = ClientLandingPageRow & { bound_domain: string | null };
+
+/** 从 DB 行剥离 preview_secret / published_data，用于任何要经 API 返回给客户端的落地页数据。 */
 function toClient(row: LandingPageRow): ClientLandingPageRow {
   const rest = { ...row };
   delete (rest as Partial<LandingPageRow>).preview_secret;
+  delete (rest as Partial<LandingPageRow>).published_data;
   return rest;
 }
 
@@ -47,12 +52,19 @@ export async function createLandingPage(
   return toClient(result.rows[0]);
 }
 
-export async function listLandingPages(userId: string): Promise<ClientLandingPageRow[]> {
+export async function listLandingPages(userId: string): Promise<LandingPageListRow[]> {
   const result = await pool.query(
-    `SELECT * FROM landing_pages WHERE user_id = $1 ORDER BY updated_at DESC`,
+    `SELECT lp.*, d.domain AS bound_domain
+       FROM landing_pages lp
+       LEFT JOIN LATERAL (
+         SELECT domain FROM domains
+          WHERE landing_page_id = lp.id AND enabled = true AND verified = true
+          LIMIT 1
+       ) d ON true
+     WHERE lp.user_id = $1 ORDER BY lp.updated_at DESC`,
     [userId],
   );
-  return result.rows.map(toClient);
+  return result.rows.map((row) => ({ ...toClient(row), bound_domain: row.bound_domain ?? null }));
 }
 
 export async function getLandingPage(id: string, userId: string): Promise<ClientLandingPageRow | null> {
@@ -128,9 +140,11 @@ export async function publishLandingPage(
   userId: string,
   slug: string,
 ): Promise<ClientLandingPageRow | null> {
+  // published_data 快照当前草稿：线上只读快照，后续编辑草稿不影响线上，直到再次发布。
+  // published_at 每次发布刷新，updated_at > published_at 即「有未发布的修改」。
   const result = await pool.query(
     `UPDATE landing_pages
-       SET status = 'published', slug = $1, published_at = COALESCE(published_at, NOW()), updated_at = NOW()
+       SET status = 'published', slug = $1, published_data = data, published_at = NOW(), updated_at = NOW()
      WHERE id = $2 AND user_id = $3 RETURNING *`,
     [slug, id, userId],
   );
@@ -146,13 +160,15 @@ export async function unpublishLandingPage(id: string, userId: string): Promise<
   return result.rows[0] ? toClient(result.rows[0]) : null;
 }
 
-/** 公开渲染用：按 slug 取已发布页面。 */
+/** 公开渲染用：按 slug 取已发布页面，data 为发布时的快照（published_data），不含发布后的草稿编辑。 */
 export async function getPublishedBySlug(slug: string): Promise<LandingPageRow | null> {
   const result = await pool.query(
     `SELECT * FROM landing_pages WHERE slug = $1 AND status = 'published'`,
     [slug],
   );
-  return result.rows[0] ?? null;
+  const row = result.rows[0];
+  if (!row) return null;
+  return { ...row, data: row.published_data ?? row.data };
 }
 
 /** 复制为新草稿：name 加「副本」，status/slug 走默认（draft / null），data 整体拷贝。 */

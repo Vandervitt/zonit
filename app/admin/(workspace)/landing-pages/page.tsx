@@ -15,7 +15,20 @@ import {
 } from "@/lib/constants";
 import { TemplatePickerDialog } from "@/landing-editor/components/TemplatePickerDialog";
 
-interface PageRow { id: string; name: string; slug: string | null; status: "draft" | "published"; updated_at: string; }
+interface PageRow {
+  id: string;
+  name: string;
+  slug: string | null;
+  status: "draft" | "published";
+  updated_at: string;
+  published_at: string | null;
+  bound_domain: string | null;
+}
+
+/** 已发布页的草稿是否领先线上快照（发布快照语义下的「有未发布修改」）。 */
+function hasUnpublishedChanges(r: PageRow): boolean {
+  return r.status === "published" && r.published_at !== null && new Date(r.updated_at) > new Date(r.published_at);
+}
 
 export default function LandingPagesPage() {
   const { message } = App.useApp();
@@ -70,14 +83,23 @@ export default function LandingPagesPage() {
                 {name}
               </Typography.Text>
             ) },
-          { title: "状态", dataIndex: "status", width: 110,
-            render: (s: PageRow["status"]) => <Tag color={s === "published" ? "green" : "default"}>{s === "published" ? "已发布" : "草稿"}</Tag> },
+          { title: "状态", dataIndex: "status", width: 190,
+            render: (s: PageRow["status"], r: PageRow) => (
+              <Space size={4}>
+                <Tag color={s === "published" ? "green" : "default"}>{s === "published" ? "已发布" : "草稿"}</Tag>
+                {hasUnpublishedChanges(r) && <Tag color="orange">有未发布修改</Tag>}
+              </Space>
+            ) },
+          { title: "域名", dataIndex: "bound_domain", width: 180, ellipsis: true,
+            render: (d: string | null) => d ?? <Typography.Text type="secondary">—</Typography.Text> },
           { title: "更新时间", dataIndex: "updated_at", width: 200, render: (t: string) => new Date(t).toLocaleString() },
           { title: "操作", width: 300, render: (_: unknown, r: PageRow) => (
             <Space size="middle">
               <Link href={landingEditorPath(r.id)}>编辑</Link>
               <a onClick={() => duplicate(r.id)}>复制</a>
-              {r.status === "published" && r.slug && <a href={`/p/${r.slug}`} target="_blank" rel="noreferrer">预览</a>}
+              {r.status === "published" && r.bound_domain && (
+                <a href={`https://${r.bound_domain}/`} target="_blank" rel="noreferrer">线上查看</a>
+              )}
               {r.status === "published" && <a onClick={() => unpublish(r.id)}>取消发布</a>}
               <Popconfirm title="确定删除该落地页？" okText="删除" okButtonProps={{ danger: true }} onConfirm={() => remove(r.id)}>
                 <a style={{ color: SEMANTIC.error }}>删除</a>
