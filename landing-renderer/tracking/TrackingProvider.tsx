@@ -7,11 +7,12 @@ import { parseUtm, mergeUtmIntoUrl } from "./utm";
 import { PixelSink, BeaconSink, type EventSink } from "./sinks";
 import { inferChannel } from "./events";
 import { ConsentBar } from "./ConsentBar";
+import { shouldCollectFirstParty } from "@/lib/tracking/geo";
 
 const CONSENT_KEY = "lp_consent";
 const UTM_KEY = "lp_utm";
 
-export function TrackingProvider({ tracking, pageId, children }: { tracking?: PageTracking; pageId: string; children: ReactNode }) {
+export function TrackingProvider({ tracking, pageId, euVisitor = false, children }: { tracking?: PageTracking; pageId: string; euVisitor?: boolean; children: ReactNode }) {
   const consentEnabled = tracking?.consent?.enabled ?? true;
   // SSR 与首帧统一为「未同意/未拒绝」，再由 effect 读 localStorage 校正，避免水合不一致与 SSR 访问 localStorage。
   const [consented, setConsented] = useState<boolean>(false);
@@ -29,13 +30,20 @@ export function TrackingProvider({ tracking, pageId, children }: { tracking?: Pa
     try { utmRef.current = JSON.parse(sessionStorage.getItem(UTM_KEY) ?? "{}"); } catch { utmRef.current = {}; }
   }, []);
 
-  // first-party beacon：独立于同意条，mount 即发 page_view（始终采集，匿名无 cookie）。
+  // first-party beacon：非欧盟访客 mount 即采集（匿名无 cookie）；欧盟/EEA 访客随同意门控。
+  // 建 sink 一次，page_view 待「可采集」时发一次（避免重复）。
+  const collect = shouldCollectFirstParty(euVisitor, consented);
+  const collectRef = useRef(collect);
+  collectRef.current = collect;
+  const pvSentRef = useRef(false);
   useEffect(() => {
-    if (beaconRef.current) return;
-    beaconRef.current = new BeaconSink(pageId);
-    beaconRef.current.track("page_view", { ...utmRef.current });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (!beaconRef.current) beaconRef.current = new BeaconSink(pageId);
+  }, [pageId]);
+  useEffect(() => {
+    if (!collect || pvSentRef.current) return;
+    pvSentRef.current = true;
+    beaconRef.current?.track("page_view", { ...utmRef.current });
+  }, [collect]);
 
   // 读已存同意（仅客户端）：未启用同意条则视为已同意；否则按 localStorage 校正。
   useEffect(() => {
@@ -73,7 +81,8 @@ export function TrackingProvider({ tracking, pageId, children }: { tracking?: Pa
     if (!target) return;
     const channel = target.getAttribute("data-cta") ?? "external";
     sinksRef.current.forEach((s) => s.track("cta_click", { channel, ...utmRef.current }));
-    beaconRef.current?.track("cta_click", { channel, ...utmRef.current });
+    // 第一方 cta_click 同样受欧盟同意门控（未同意的欧盟访客不回传）。
+    if (collectRef.current) beaconRef.current?.track("cta_click", { channel, ...utmRef.current });
     if (tracking?.utmPassthrough && inferChannel(target.href) === "external") {
       const merged = mergeUtmIntoUrl(target.href, utmRef.current);
       if (merged !== target.href) { e.preventDefault(); window.location.href = merged; }

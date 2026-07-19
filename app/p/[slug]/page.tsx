@@ -10,6 +10,7 @@ import { resolvePageMeta } from "@/lib/seo/resolve";
 import { getUserPlan } from "@/lib/plans-db";
 import { hasWatermark, hasAntiBan } from "@/lib/plans";
 import { gateTrackingByPlan } from "@/lib/tracking/gate";
+import { isEeaCountry } from "@/lib/tracking/geo";
 import { deriveVariant, IDENTITY_VARIANT } from "@/landing-renderer/variant";
 
 async function isAppHostDirect(): Promise<boolean> {
@@ -76,8 +77,11 @@ export default async function PublicLandingPage({
   const tracking = gateTrackingByPlan(page.data.tracking, plan);
   const variant = hasAntiBan(plan) ? deriveVariant(page.data.variantSeed ?? page.id) : IDENTITY_VARIANT;
 
+  // CMP 欧盟门控：按 Vercel 边缘 geo 头判定访客地区，欧盟/EEA 访客的第一方埋点随同意门控。
+  const euVisitor = isEeaCountry((await headers()).get("x-vercel-ip-country"));
+
   return (
-    <TrackingProvider tracking={tracking} pageId={page.id}>
+    <TrackingProvider tracking={tracking} pageId={page.id} euVisitor={euVisitor}>
       <LandingPage page={page.data} pageId={page.id} variant={variant} />
       {hasWatermark(plan) && <Watermark />}
     </TrackingProvider>
