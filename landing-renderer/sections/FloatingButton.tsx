@@ -9,6 +9,7 @@ import type { RendererTheme } from "../theme";
 import { inferChannel } from "../tracking/events";
 
 export function FloatingButton({ data, theme }: { data: FloatingButtonData; theme: RendererTheme }) {
+  const complete = Boolean(data.link?.trim() && data.text?.trim());
   const ref = useRef<HTMLAnchorElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -24,6 +25,10 @@ export function FloatingButton({ data, theme }: { data: FloatingButtonData; them
     io.observe(hero);
     return () => io.disconnect();
   }, []);
+
+  // 链接或文案为空则整体不渲染（守卫需在 hooks 之后，遵守 hooks 规则）：
+  // 悬浮按钮常驻右下角，空链接会成为点了回页顶的死按钮（存量已发布页兜底）
+  if (!complete) return null;
 
   return (
     <a

@@ -21,7 +21,11 @@ export function blankPrimaryCtaLinks(draft: LandingPageDraft): LandingPageDraft 
   return clone;
 }
 
-/** 发布门槛（结构化）：首屏主 CTA 不得为空（可跳 hero）；占位号兜底扫全文（无固定落点）。 */
+/**
+ * 发布门槛（结构化）：主联系 CTA（首屏主按钮 + 悬浮按钮）链接与文案均不得为空
+ * （与 blankPrimaryCtaLinks 置空的范围一一对应，置空即强制填回）；
+ * 占位号兜底扫全文（无固定落点）。悬浮按钮可选，不存在则不校验。
+ */
 export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[] {
   const issues: PublishIssue[] = [];
 
@@ -31,6 +35,27 @@ export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[
       message: "首屏 CTA 按钮链接为空，访客点击无法联系你，请填入 WhatsApp / Telegram / tel: / 邮箱 等联系方式",
       target: { kind: "fixed", id: "hero" },
     });
+  }
+  if (!draft.hero?.cta?.text?.trim()) {
+    issues.push({
+      message: "首屏 CTA 按钮文案为空，请填写行动引导语（如 Chat on WhatsApp）",
+      target: { kind: "fixed", id: "hero" },
+    });
+  }
+
+  if (draft.floatingButton) {
+    if (!draft.floatingButton.link?.trim()) {
+      issues.push({
+        message: "悬浮按钮链接为空，访客点击无法联系你，请填入联系方式，或关闭该按钮",
+        target: { kind: "fixed", id: "floatingButton" },
+      });
+    }
+    if (!draft.floatingButton.text?.trim()) {
+      issues.push({
+        message: "悬浮按钮文案为空，请填写行动引导语，或关闭该按钮",
+        target: { kind: "fixed", id: "floatingButton" },
+      });
+    }
   }
 
   if (PLACEHOLDER_CONTACTS.some((n) => JSON.stringify(draft).includes(n))) {

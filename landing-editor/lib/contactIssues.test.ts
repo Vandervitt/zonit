@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { collectContactIssues, blankPrimaryCtaLinks } from "./contactIssues";
+import { collectContactIssues, collectContactIssueItems, blankPrimaryCtaLinks } from "./contactIssues";
 import type { LandingPageDraft } from "@/types/schema.draft";
 
 const draft = (heroLink: string, extra: Record<string, unknown> = {}) =>
-  ({ hero: { cta: { link: heroLink } }, sections: [], ...extra } as unknown as LandingPageDraft);
+  ({ hero: { cta: { text: "Go", link: heroLink } }, sections: [], ...extra } as unknown as LandingPageDraft);
 
 describe("collectContactIssues", () => {
   it("首屏 CTA 为真实号码、无占位 → 无问题", () => {
@@ -33,6 +33,37 @@ describe("collectContactIssues", () => {
   it("首屏 CTA 缺失也当作空", () => {
     const d = { hero: {}, sections: [] } as unknown as LandingPageDraft;
     expect(collectContactIssues(d).some((m) => m.includes("为空"))).toBe(true);
+  });
+
+  it("悬浮按钮存在但链接为空 → 报空链接问题，target 指向 floatingButton", () => {
+    const d = draft("https://wa.me/8613800138000", { floatingButton: { text: "Chat", link: "  " } });
+    const hit = collectContactIssueItems(d).find((i) => i.message.includes("悬浮按钮链接为空"));
+    expect(hit).toBeDefined();
+    expect(hit?.target).toEqual({ kind: "fixed", id: "floatingButton" });
+  });
+
+  it("无悬浮按钮 → 不报悬浮相关问题", () => {
+    const r = collectContactIssues(draft("https://wa.me/8613800138000"));
+    expect(r.some((m) => m.includes("悬浮"))).toBe(false);
+  });
+
+  it("悬浮按钮链接已填且非占位 → 无问题", () => {
+    const d = draft("https://wa.me/8613800138000", { floatingButton: { text: "Chat", link: "https://t.me/brand" } });
+    expect(collectContactIssues(d)).toEqual([]);
+  });
+
+  it("首屏 CTA 文案为空 → 报文案问题，target 指向 hero", () => {
+    const d = { hero: { cta: { text: "  ", link: "https://wa.me/8613800138000" } }, sections: [] } as unknown as LandingPageDraft;
+    const hit = collectContactIssueItems(d).find((i) => i.message.includes("首屏 CTA 按钮文案为空"));
+    expect(hit).toBeDefined();
+    expect(hit?.target).toEqual({ kind: "fixed", id: "hero" });
+  });
+
+  it("悬浮按钮文案为空（链接已填）→ 报文案问题", () => {
+    const d = draft("https://wa.me/8613800138000", { floatingButton: { text: "", link: "https://t.me/brand" } });
+    const hit = collectContactIssueItems(d).find((i) => i.message.includes("悬浮按钮文案为空"));
+    expect(hit).toBeDefined();
+    expect(hit?.target).toEqual({ kind: "fixed", id: "floatingButton" });
   });
 });
 

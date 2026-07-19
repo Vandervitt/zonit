@@ -4,6 +4,8 @@ import type { RendererTheme } from "../theme";
 import { inferChannel } from "../tracking/events";
 
 export function Cta({ cta, theme, variant = "primary" }: { cta: CtaButton; theme: RendererTheme; variant?: "primary" | "secondary" }) {
+  // 链接或文案为空则不渲染：避免输出 href="" 的死按钮（存量已发布页 / 可选按钮字段为空）
+  if (!cta.link?.trim() || !cta.text?.trim()) return null;
   const dataCta = inferChannel(cta.link);
   if (variant === "secondary") {
     return (
