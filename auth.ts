@@ -43,6 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
         const user = result.rows[0];
         if (!user?.password_hash) return null;
+        if (user.disabled_at) return null; // 已禁用账号：拒绝登录
 
         const valid = await bcrypt.compare(
           credentials.password as string,
@@ -90,8 +91,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       try {
         // 检查用户是否已经是系统内用户（针对受邀用户）
-        const existingUser = await pool.query("SELECT id, invited_at FROM users WHERE email = $1", [user.email]);
+        const existingUser = await pool.query(
+          "SELECT id, disabled_at FROM users WHERE email = $1",
+          [user.email]
+        );
         if (existingUser.rows.length > 0) {
+          if (existingUser.rows[0].disabled_at) {
+            console.warn("SignIn failed: account disabled", user.email);
+            return false;
+          }
           user.id = existingUser.rows[0].id;
           console.log("SignIn success: Existing user found");
           return true; // 已存在用户（包括受邀注册后的）允许登录
@@ -121,12 +129,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const userId = user?.id ?? token.sub;
         if (userId) {
           const r = await pool.query(
-            "SELECT email, plan, comp_plan, role, trial_expires_at FROM users WHERE id = $1",
+            "SELECT email, plan, comp_plan, role, trial_expires_at, disabled_at FROM users WHERE id = $1",
             [userId]
           );
           const userData = r.rows[0];
-          
+
           if (userData) {
+            if (userData.disabled_at) {
+              // 已禁用：清空会话权益与角色；API 侧由 getUserPlanOrNull → session_stale 兜底
+              token.plan = "free" as PlanId;
+              token.role = UserRole.USER;
+              return token;
+            }
             const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim());
             const isHardwareAdmin = adminEmails.includes(userData.email);
 
