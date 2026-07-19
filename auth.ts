@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import pool from "@/lib/db";
 import { Routes, UserRole } from "@/lib/constants";
 import { isTrustedEmail } from "@/lib/auth/trusted-email";
-import { effectivePlan, type PlanId } from "@/lib/plans";
+import { effectivePlan, activeCompPlan, type PlanId } from "@/lib/plans";
 
 // Debug configuration
 if (!process.env.AUTH_SECRET) {
@@ -129,7 +129,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const userId = user?.id ?? token.sub;
         if (userId) {
           const r = await pool.query(
-            "SELECT email, plan, comp_plan, role, trial_expires_at, disabled_at FROM users WHERE id = $1",
+            "SELECT email, plan, comp_plan, comp_plan_expires_at, role, trial_expires_at, disabled_at FROM users WHERE id = $1",
             [userId]
           );
           const userData = r.rows[0];
@@ -165,7 +165,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               currentPlan = "agency";
             }
 
-            token.plan = effectivePlan(currentPlan as PlanId, userData.comp_plan ?? null);
+            const comp = activeCompPlan(userData.comp_plan ?? null, userData.comp_plan_expires_at, new Date());
+            token.plan = effectivePlan(currentPlan as PlanId, comp);
             token.role = (isHardwareAdmin ? UserRole.SUPER_ADMIN : (userData.role ?? UserRole.USER)) as UserRole;
           }
         }

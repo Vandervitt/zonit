@@ -2,7 +2,8 @@ import pool from "@/lib/db";
 import type { PlanId } from "@/lib/plans";
 
 export interface AdminUserPatch {
-  compPlan?: PlanId | null;      // null = 取消赠送
+  compPlan?: PlanId | null;              // null = 取消赠送
+  compPlanExpiresAt?: string | null;     // ISO；null = 永久；取消赠送时随之置空
   role?: "USER" | "SUPER_ADMIN";
   disabled?: boolean;
 }
@@ -13,6 +14,7 @@ export async function updateUserAdminFields(userId: string, patch: AdminUserPatc
   const values: unknown[] = [];
   let i = 1;
   if (patch.compPlan !== undefined) { set.push(`comp_plan = $${i++}`); values.push(patch.compPlan); }
+  if (patch.compPlanExpiresAt !== undefined) { set.push(`comp_plan_expires_at = $${i++}`); values.push(patch.compPlanExpiresAt); }
   if (patch.role !== undefined) { set.push(`role = $${i++}`); values.push(patch.role); }
   if (patch.disabled !== undefined) {
     set.push(patch.disabled ? `disabled_at = COALESCE(disabled_at, NOW())` : `disabled_at = NULL`);
@@ -32,6 +34,7 @@ export interface AdminUserDetail {
   email: string;
   plan: PlanId;
   comp_plan: PlanId | null;
+  comp_plan_expires_at: string | null;
   role: string;
   disabled_at: string | null;
   invited_at: string | null;
@@ -44,7 +47,7 @@ export interface AdminUserDetail {
 /** 用户详情：基础信息 + 名下落地页（含绑定域名）+ 线索总数。不存在返回 null。 */
 export async function getUserAdminDetail(userId: string): Promise<AdminUserDetail | null> {
   const userRes = await pool.query(
-    `SELECT id, name, email, plan, comp_plan, role, disabled_at, invited_at, created_at, ls_customer_id
+    `SELECT id, name, email, plan, comp_plan, comp_plan_expires_at, role, disabled_at, invited_at, created_at, ls_customer_id
        FROM users WHERE id = $1`,
     [userId],
   );

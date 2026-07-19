@@ -95,6 +95,21 @@ export function canBindDomain(plan: PlanId): boolean {
   return PLANS[plan].domainsLimit > 0;
 }
 
+/**
+ * 赠送套餐是否仍有效：存在且（无到期=永久 或 到期在将来）→ 返回该档，否则 null。
+ * 到期时刻正好等于 now 视为已过期。供各「生效套餐」读取点在算 effectivePlan 前过滤。
+ */
+export function activeCompPlan(
+  compPlan: PlanId | null | undefined,
+  expiresAt: Date | string | null | undefined,
+  now: Date,
+): PlanId | null {
+  if (!compPlan) return null;
+  if (expiresAt == null) return compPlan;
+  const expMs = expiresAt instanceof Date ? expiresAt.getTime() : new Date(expiresAt).getTime();
+  return expMs > now.getTime() ? compPlan : null;
+}
+
 /** 生效套餐 = max(付费 plan, 超管赠送 comp_plan)；赠送为空时即付费档。 */
 export function effectivePlan(plan: PlanId, compPlan: PlanId | null | undefined): PlanId {
   if (!compPlan) return plan;
