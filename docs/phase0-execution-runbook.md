@@ -42,7 +42,7 @@
 - [ ] `DATABASE_URL`（Step 1）
 - [ ] `DATABASE_URL_UNPOOLED`（Step 1，**构建期迁移要用，务必在构建环境可见**）
 - [ ] `AUTH_SECRET`（Step 1 新值）
-- [ ] `NEXTAUTH_URL` = 生产地址，如 `https://app.zonit.com`
+- [ ] `NEXTAUTH_URL` = 生产地址，如 `https://app.zapbridge.com`
 - [ ] `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`（secret 用 Step 1 新值）
 - [ ] `VERCEL_API_TOKEN` / `VERCEL_PROJECT_ID` / `VERCEL_TEAM_ID`（Step 3）
 - [ ] `BLOB_READ_WRITE_TOKEN`（Step 2 已自动注入，确认存在即可）

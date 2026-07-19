@@ -19,7 +19,7 @@
 | Webhook 投递可靠性 | **队列表 + cron 重试**（镜像 CAPI），目标宕机数分钟仍补投 |
 | 套餐门控 | **邮件全档** + **Webhook 仅 Pro/Agency**（与 `advancedTracking` 门控风格一致） |
 | 设置粒度 | **按租户（user_id）**：一个邮件开关 + 一个 Webhook URL/密钥，覆盖该租户所有页面 |
-| 出站签名 | `X-Zonit-Signature: sha256=<hmac-hex>` over raw JSON body，镜像 lemonsqueezy 入站 |
+| 出站签名 | `X-Zap-Bridge-Signature: sha256=<hmac-hex>` over raw JSON body，镜像 lemonsqueezy 入站 |
 | cron 可达性 | 把 `/api/cron` 加入中间件 `PUBLIC_PATHS`（各 cron 路由自身 `CRON_SECRET` 才是门）——**同时修复现有 capi-flush 兜底被中间件挡住的既有问题** |
 | 不做 | WhatsApp/Telegram 通知渠道、Zapier 官方 app（先用通用 Webhook 承接）、per-page 覆盖设置 |
 
@@ -237,7 +237,7 @@ describe("webhook 签名", () => {
 
 - [ ] **Step 3: 实现** `lib/webhooks/sign.ts`（镜像 `lib/lemonsqueezy.ts` 的 HMAC + timingSafeEqual）
 ```ts
-// 出站 webhook 签名：X-Zonit-Signature: sha256=<hmac-hex>。镜像 lemonsqueezy 入站校验习惯。
+// 出站 webhook 签名：X-Zap-Bridge-Signature: sha256=<hmac-hex>。镜像 lemonsqueezy 入站校验习惯。
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export function signWebhookBody(rawBody: string, secret: string): string {
@@ -476,7 +476,7 @@ async function httpPost(url: string, body: string, signature: string): Promise<{
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Zonit-Signature": signature, "User-Agent": "Zonit-Webhook/1" },
+      headers: { "Content-Type": "application/json", "X-Zap-Bridge-Signature": signature, "User-Agent": "Zap-Bridge-Webhook/1" },
       body,
       signal: ctrl.signal,
     });
@@ -891,7 +891,7 @@ export function LeadNotificationSettings() {
                 <span>启用推送</span>
                 <Button type="primary" size="small" loading={saving} onClick={() => save({ webhook_url: url })}>保存 URL</Button>
               </Space>
-              {s.hasSecret && <Typography.Text type="secondary">签名密钥已配置，请求头 <code>X-Zonit-Signature: sha256=…</code></Typography.Text>}
+              {s.hasSecret && <Typography.Text type="secondary">签名密钥已配置，请求头 <code>X-Zap-Bridge-Signature: sha256=…</code></Typography.Text>}
               {secretOnce && <Typography.Text type="warning">签名密钥（仅显示一次，请复制）：<code>{secretOnce}</code></Typography.Text>}
             </Space>
           ) : (
@@ -916,7 +916,7 @@ export function LeadNotificationSettings() {
 
 - [ ] **Step 1: 分层验证** `pnpm vitest run && pnpm tsc --noEmit && pnpm eslint . && pnpm build 2>&1 | tail -15` → 全绿；build 路由含 `/api/cron/webhook-flush`、`/api/lead-notifications`。
 
-- [ ] **Step 2: 本地手动冒烟**（dev + 本地库）：Dev Login → 设置页开邮件（验证需要 `RESEND_API_KEY`，无则看日志 `not_configured`）；Pro 账号填 `https://webhook.site/<id>` 开启 webhook 保存 → 提交一条测试线索（`curl POST /api/leads`）→ webhook.site 收到带 `X-Zonit-Signature` 的 POST，且用返回的 secret `verifyWebhookSignature` 通过；关开关后再提交不再收到。
+- [ ] **Step 2: 本地手动冒烟**（dev + 本地库）：Dev Login → 设置页开邮件（验证需要 `RESEND_API_KEY`，无则看日志 `not_configured`）；Pro 账号填 `https://webhook.site/<id>` 开启 webhook 保存 → 提交一条测试线索（`curl POST /api/leads`）→ webhook.site 收到带 `X-Zap-Bridge-Signature` 的 POST，且用返回的 secret `verifyWebhookSignature` 通过；关开关后再提交不再收到。
 
 - [ ] **Step 3: 更新路线图** 标记 Phase 2 完成（`docs/superpowers/plans/2026-07-18-产品优先级执行路线.md`）。
 

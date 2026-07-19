@@ -90,7 +90,7 @@ export function LeadNotificationSettings() {
               </Space>
               {s.hasSecret && (
                 <Typography.Text type="secondary">
-                  签名密钥已配置，请求头 <code>X-Zonit-Signature: sha256=…</code>
+                  签名密钥已配置，请求头 <code>X-Zap-Bridge-Signature: sha256=…</code>
                 </Typography.Text>
               )}
               {secretOnce && (

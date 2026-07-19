@@ -1,6 +1,6 @@
-# 🚀 Zonit Super Admin 操作指南
+# 🚀 Zap Bridge Super Admin 操作指南
 
-本指南介绍了如何配置、初始化以及使用 Zonit 的多租户管理后台。
+本指南介绍了如何配置、初始化以及使用 Zap Bridge 的多租户管理后台。
 
 ## 1. 核心架构概览
 
@@ -26,7 +26,7 @@
 
 ```bash
 # 支持多个邮箱，用英文逗号分隔
-ADMIN_EMAILS=your-name@example.com,admin@zonit.com
+ADMIN_EMAILS=your-name@example.com,admin@zapbridge.com
 ```
 
 ### 第三步：登录激活
@@ -73,5 +73,5 @@ ADMIN_EMAILS=your-name@example.com,admin@zonit.com
 
 ---
 
-**Zonit Architecture Team**
+**Zap Bridge Architecture Team**
 *Last Updated: 2026-04-27*

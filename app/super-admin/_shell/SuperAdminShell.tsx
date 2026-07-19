@@ -75,7 +75,7 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
                 strong
                 style={{ color: "#fff", display: "block", fontSize: 13, letterSpacing: "0.04em" }}
               >
-                ZONIT ADMIN
+                ZAP BRIDGE ADMIN
               </Typography.Text>
               <Typography.Text
                 style={{

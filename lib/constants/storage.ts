@@ -1,1 +1,1 @@
-export const STORAGE_KEY = 'zonit_sites_v1';
+export const STORAGE_KEY = 'zapbridge_sites_v1';

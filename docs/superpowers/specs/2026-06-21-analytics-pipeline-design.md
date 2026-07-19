@@ -6,9 +6,9 @@
 
 ## 背景与动机
 
-落地页是非交易、引导联系的（CTA 为 WhatsApp / tel / mailto / sms / telegram 深链，无平台托管表单）。现有追踪是客户端 Pixel（page_view / cta_click 广播给 Meta/GA4/TikTok），数据进广告平台、不进 Zonit。`landing-renderer/tracking/sinks.ts` 文件尾已明确注释预留 first-party 采集 sink（`navigator.sendBeacon("/api/track", ...)`），但尚未实现。
+落地页是非交易、引导联系的（CTA 为 WhatsApp / tel / mailto / sms / telegram 深链，无平台托管表单）。现有追踪是客户端 Pixel（page_view / cta_click 广播给 Meta/GA4/TikTok），数据进广告平台、不进 Zap Bridge。`landing-renderer/tracking/sinks.ts` 文件尾已明确注释预留 first-party 采集 sink（`navigator.sendBeacon("/api/track", ...)`），但尚未实现。
 
-本 spec 实现这个预留管道：落地页把匿名事件回传 Zonit → 存库 → 后台聚合展示，让「投放分析」页有真实数据：访问量、CTA 点击、点击率、渠道分布、UTM 来源、按天趋势、按落地页维度。
+本 spec 实现这个预留管道：落地页把匿名事件回传 Zap Bridge → 存库 → 后台聚合展示，让「投放分析」页有真实数据：访问量、CTA 点击、点击率、渠道分布、UTM 来源、按天趋势、按落地页维度。
 
 ## 关键决策（已确认）
 
@@ -35,7 +35,7 @@
   - `ready()` 恒 `true`；`init()` 空操作。
   - `track(event, params)`：构造 payload `{ pageId, event, channel?, utm_source?, utm_medium?, utm_campaign? }`，用 `navigator.sendBeacon(TRACK_URL, new Blob([JSON.stringify(payload)], { type: "text/plain" }))` 发送；`sendBeacon` 不可用时 `fetch(TRACK_URL, { method: "POST", body, keepalive: true })` 兜底。
   - 用 `text/plain` body 规避 CORS 预检（simple request）。
-  - `TRACK_URL`：落地页在租户域名，采集端在 Zonit 应用域名——URL 须指向 Zonit 主域（绝对 URL，来自构建期环境变量或注入的配置）。具体取值在实现时确认（参考项目既有的 app host 配置 `lib/host`）。
+  - `TRACK_URL`：落地页在租户域名，采集端在 Zap Bridge 应用域名——URL 须指向 Zap Bridge 主域（绝对 URL，来自构建期环境变量或注入的配置）。具体取值在实现时确认（参考项目既有的 app host 配置 `lib/host`）。
 - **`TrackingProvider`** 改造：
   - 新增 `pageId: string` prop。
   - BeaconSink 生命周期**独立于同意条**：mount 时即创建 BeaconSink 并发 `page_view`（不等 consent）；CTA 点击时 BeaconSink 与（已同意的）PixelSink 各自 `track("cta_click", ...)`。

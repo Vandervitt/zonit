@@ -1,7 +1,7 @@
 import debug from "debug";
 
 // 初始化 debug 命名空间
-const log = debug("zonit:request");
+const log = debug("zapbridge:request");
 
 // 内部日志打印逻辑
 const internalLog = (msg: string, data?: unknown) => {

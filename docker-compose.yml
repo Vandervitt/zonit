@@ -5,13 +5,13 @@ services:
       # 宿主 5432 常被其它本地 Postgres 占用，这里发布到 5433（与 .env.local 的 DATABASE_URL 一致）
       - "5433:5432"
     environment:
-      POSTGRES_DB: zonit
+      POSTGRES_DB: zapbridge
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d zonit"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d zapbridge"]
       interval: 5s
       timeout: 5s
       retries: 5

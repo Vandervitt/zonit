@@ -1,6 +1,6 @@
 # Super Admin 邀请与试用系统设计文档
 
-本文档详细介绍了针对 Zonit 项目设计的 Super Admin 邀请系统。该系统允许管理员通过自定义域名邮箱向用户发送包含特定权益（如 15 天 Pro 会员）的邀请链接。
+本文档详细介绍了针对 Zap Bridge 项目设计的 Super Admin 邀请系统。该系统允许管理员通过自定义域名邮箱向用户发送包含特定权益（如 15 天 Pro 会员）的邀请链接。
 
 ## 1. 功能概述
 
@@ -56,7 +56,7 @@
 # Resend API Key (从 resend.com 获取)
 RESEND_API_KEY=re_your_api_key
 # 发件人地址 (需在 Resend 验证域名)
-EMAIL_FROM=Zonit <invite@yourdomain.com>
+EMAIL_FROM=Zap Bridge <invite@yourdomain.com>
 ```
 
 ### 4.2 核心代码文件

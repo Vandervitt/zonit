@@ -26,7 +26,7 @@ async function httpPost(url: string, body: string, signature: string): Promise<{
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Zonit-Signature": signature, "User-Agent": "Zonit-Webhook/1" },
+      headers: { "Content-Type": "application/json", "X-Zap-Bridge-Signature": signature, "User-Agent": "Zap-Bridge-Webhook/1" },
       body,
       signal: ctrl.signal,
     });

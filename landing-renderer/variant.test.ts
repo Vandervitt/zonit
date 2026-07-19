@@ -15,7 +15,7 @@ describe("fnv1a", () => {
     expect(fnv1a("abc")).not.toBe(fnv1a("abd"));
   });
   it("输出为无符号 32 位整数", () => {
-    const h = fnv1a("zonit");
+    const h = fnv1a("zapbridge");
     expect(Number.isInteger(h)).toBe(true);
     expect(h).toBeGreaterThanOrEqual(0);
     expect(h).toBeLessThanOrEqual(0xffffffff);

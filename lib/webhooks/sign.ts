@@ -1,4 +1,4 @@
-// 出站 webhook 签名：X-Zonit-Signature: sha256=<hmac-hex>。镜像 lemonsqueezy 入站校验习惯。
+// 出站 webhook 签名：X-Zap-Bridge-Signature: sha256=<hmac-hex>。镜像 lemonsqueezy 入站校验习惯。
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export function signWebhookBody(rawBody: string, secret: string): string {

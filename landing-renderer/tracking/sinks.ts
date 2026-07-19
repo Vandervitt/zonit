@@ -58,7 +58,7 @@ export class PixelSink implements EventSink {
   }
 }
 
-/** first-party 采集 sink：匿名事件回传 Zonit，独立于第三方像素与同意条。 */
+/** first-party 采集 sink：匿名事件回传 Zap Bridge，独立于第三方像素与同意条。 */
 export class BeaconSink implements EventSink {
   private readonly url: string;
   constructor(private readonly pageId: string) {

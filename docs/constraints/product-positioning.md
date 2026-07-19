@@ -1,7 +1,7 @@
 # Product Positioning
 
 - This project builds overseas landing pages for lead generation.
-- The platform itself may charge its customers for using Zonit, including account billing, pricing plans, checkout, subscriptions, invoices, or payment provider integrations in platform-owned SaaS surfaces.
+- The platform itself may charge its customers for using Zap Bridge, including account billing, pricing plans, checkout, subscriptions, invoices, or payment provider integrations in platform-owned SaaS surfaces.
 - Generated landing pages must not be transaction-oriented: platform monetization must stay separate from generated page schema, copy, components, SEO metadata, analytics events, templates, public landing page rendering, and JSON-LD.
 - Generated pages should guide visitors to contact, consult, book, chat, or submit a lead.
 - MVP scope is simple, high-converting landing pages with the least necessary schema, UI, and logic.

@@ -33,7 +33,7 @@
 - [ ] **Step 1: 安装 openai**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npm install openai
+cd /Users/lajiao/Work/zapbridge && npm install openai
 ```
 
 Expected: openai 出现在 `package.json` dependencies
@@ -130,7 +130,7 @@ export interface ReviewsSchema {
 - [ ] **Step 5: 类型检查**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit
 ```
 
 Expected: 无报错
@@ -249,7 +249,7 @@ function HeroBlock({ data, primaryColor, highlight }: { data: HeroSchema; primar
 - [ ] **Step 2: 类型检查**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit
 ```
 
 Expected: 无报错
@@ -322,7 +322,7 @@ function AuthorityBlock({ data, primaryColor, id, highlight }: { data: Authority
 - [ ] **Step 2: 类型检查**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit
 ```
 
 Expected: 无报错
@@ -399,7 +399,7 @@ function BundlesBlock({ data, primaryColor, highlight }: { data: BundlesSchema; 
 - [ ] **Step 2: 类型检查**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit
 ```
 
 Expected: 无报错
@@ -474,7 +474,7 @@ function ReviewsBlock({ data, id, highlight }: { data: ReviewsSchema; id?: strin
 - [ ] **Step 2: 类型检查**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit
 ```
 
 Expected: 无报错
@@ -564,7 +564,7 @@ export async function rewriteBlockContent(
 - [ ] **Step 2: 类型检查**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit
 ```
 
 Expected: 无报错
@@ -586,7 +586,7 @@ git commit -m "feat(actions): 添加 AI 洗稿 Server Action"
 - [ ] **Step 1: 创建组件目录并新建文件**
 
 ```bash
-mkdir -p /Users/lajiao/Work/zonit/components/editor
+mkdir -p /Users/lajiao/Work/zapbridge/components/editor
 ```
 
 新建 `components/editor/AiRewriteButton.tsx`：
@@ -643,7 +643,7 @@ export function AiRewriteButton({ blockType, currentData, onSuccess }: Props) {
 - [ ] **Step 2: 类型检查**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit
 ```
 
 Expected: 无报错
@@ -839,7 +839,7 @@ switch (block.type) {
 - [ ] **Step 7: 类型检查**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit
 ```
 
 Expected: 无报错
@@ -847,7 +847,7 @@ Expected: 无报错
 - [ ] **Step 8: 启动 dev server 手动验证**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npm run dev
+cd /Users/lajiao/Work/zapbridge && npm run dev
 ```
 
 验证清单：

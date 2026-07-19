@@ -4,7 +4,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY) 
   : null;
 
-const FROM_EMAIL = process.env.EMAIL_FROM || 'Zonit <onboarding@resend.dev>';
+const FROM_EMAIL = process.env.EMAIL_FROM || 'Zap Bridge <onboarding@resend.dev>';
 
 /** HTML 转义：邮件正文插入不可信内容（如公开留资字段）前必须转义，防 HTML 注入。 */
 export function escapeHtml(input: string): string {
@@ -38,11 +38,11 @@ export async function sendInvitationEmail({
     const data = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `您收到一份来自 Zonit 的专属邀请`,
+      subject: `您收到一份来自 Zap Bridge 的专属邀请`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #333;">欢迎加入 Zonit</h2>
-          <p>您已被邀请加入 Zonit 平台，并获得以下专属权益：</p>
+          <h2 style="color: #333;">欢迎加入 Zap Bridge</h2>
+          <p>您已被邀请加入 Zap Bridge 平台，并获得以下专属权益：</p>
           <div style="background: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p style="margin: 0; font-weight: bold; color: #0070f3;">🎁 权益内容：${plan} 会员资格</p>
             <p style="margin: 5px 0 0 0; color: #666;">⏳ 试用时长：${days} 天</p>

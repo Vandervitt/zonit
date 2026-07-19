@@ -22,7 +22,7 @@ Read these constraint files before making related changes:
 
 Hard rules:
 
-- Platform billing is allowed for Zonit's own SaaS customers, but generated landing pages must stay non-transactional.
+- Platform billing is allowed for Zap Bridge's own SaaS customers, but generated landing pages must stay non-transactional.
 - Do not introduce payment, checkout, cart, order, subscription, refund, cash-on-delivery, or ecommerce transaction concepts into generated landing pages.
 - This project uses `proxy.ts` as middleware.
 - Tailwind only: no custom CSS and no inline styles.

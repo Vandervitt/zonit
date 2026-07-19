@@ -555,7 +555,7 @@ git commit -m "feat(editor): TierEditor 和 ReviewEditor 新增图片字段"
 - [ ] **Step 1: 删除 brainstorm 用的 mockup 文件**
 
 ```bash
-rm /Users/lajiao/Work/zonit/public/mockup-image-picker.html
+rm /Users/lajiao/Work/zapbridge/public/mockup-image-picker.html
 ```
 
 - [ ] **Step 2: Commit**
