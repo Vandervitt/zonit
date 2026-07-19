@@ -11,7 +11,7 @@
 **关键事实（已核实）：**
 - `landing_pages.id` 是 **TEXT**（`gen_random_uuid()::TEXT`）→ `analytics_events.page_id` 用 **TEXT**。
 - 迁移风格：`exports.up = (pgm) => pgm.sql(...)` / `exports.down`，文件 `migrations/013_add_analytics_events.js`，命令 `pnpm migrate:up`。
-- `NEXT_PUBLIC_APP_URL`（dev=`http://localhost:3001`）= Zonit 主域；beacon POST 到 `${NEXT_PUBLIC_APP_URL}/api/track`（客户端可读 NEXT_PUBLIC_）。
+- `NEXT_PUBLIC_APP_URL`（dev=`http://localhost:3001`）= Zap Bridge 主域；beacon POST 到 `${NEXT_PUBLIC_APP_URL}/api/track`（客户端可读 NEXT_PUBLIC_）。
 - CTA 链接带 `data-cta`=channel；`TrackingProvider` 的 `onClickCapture` 已读取 channel + utm。
 - `event` 枚举 `'page_view'|'cta_click'`；`channel` ∈ `whatsapp/tel/mailto/sms/telegram/external`。
 - db 实例：`import pool from "@/lib/db"`（默认导出 pg Pool）。`auth` 来自 `@/auth`，`ApiErrors` 来自 `@/lib/constants`。
@@ -97,7 +97,7 @@ git commit -m "feat(analytics): 新增 analytics_events 事件流水表"
 - [ ] **Step 1: 在文件尾部（替换那段注释掉的 BeaconSink 占位）新增实现**
 
 ```typescript
-/** first-party 采集 sink：匿名事件回传 Zonit，独立于第三方像素与同意条。 */
+/** first-party 采集 sink：匿名事件回传 Zap Bridge，独立于第三方像素与同意条。 */
 export class BeaconSink implements EventSink {
   private readonly url: string;
   constructor(private readonly pageId: string) {

@@ -331,7 +331,7 @@ export function ExtractedTemplateEditorPanel({
 - [ ] **Step 2: Run type check**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit 2>&1 | head -40
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit 2>&1 | head -40
 ```
 
 Expected: no errors in `ExtractedTemplateEditorPanel.tsx`. Fix any before continuing.
@@ -404,7 +404,7 @@ with:
 - [ ] **Step 4: Run type check**
 
 ```bash
-cd /Users/lajiao/Work/zonit && npx tsc --noEmit 2>&1 | head -40
+cd /Users/lajiao/Work/zapbridge && npx tsc --noEmit 2>&1 | head -40
 ```
 
 Expected: no errors. Fix any before continuing.

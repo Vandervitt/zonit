@@ -9,7 +9,7 @@ loadEnv({ path: '.env' });
 
 export const isDbE2EEnabled = process.env.RUN_DB_E2E === '1';
 export const E2E_USER_ID = '00000000-0000-0000-0000-00000000e2e0';
-export const E2E_USER_EMAIL = 'e2e-fixture@zonit.test';
+export const E2E_USER_EMAIL = 'e2e-fixture@zapbridge.test';
 export const SLUG_PREFIX = 'e2e-';
 
 let pool: Pool | null = null;

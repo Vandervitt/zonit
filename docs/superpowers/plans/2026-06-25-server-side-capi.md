@@ -177,10 +177,10 @@ exports.down = (pgm) => {
 
 - [ ] **Step 3: 应用迁移并校验**
 
-Run: `docker exec zonit-pg-dev pg_isready -U postgres -d zonit && pnpm migrate:up`
+Run: `docker exec zapbridge-pg-dev pg_isready -U postgres -d zapbridge && pnpm migrate:up`
 Expected: `Migrations complete!`
 
-Run: `docker exec zonit-pg-dev psql -U postgres -d zonit -c "\dt page_capi_credentials capi_events"`
+Run: `docker exec zapbridge-pg-dev psql -U postgres -d zapbridge -c "\dt page_capi_credentials capi_events"`
 Expected: 两表都在
 
 - [ ] **Step 4: 提交**
@@ -1302,7 +1302,7 @@ test.describe("CAPI 服务端回传", () => {
 
 - [ ] **Step 4: 确保 DB + 迁移 + seed**
 
-Run: `docker exec zonit-pg-dev pg_isready -U postgres -d zonit && pnpm migrate:up && pnpm db:seed-dev`
+Run: `docker exec zapbridge-pg-dev pg_isready -U postgres -d zapbridge && pnpm migrate:up && pnpm db:seed-dev`
 Expected: migrations complete + seed 成功
 
 - [ ] **Step 5: 跑该 e2e**

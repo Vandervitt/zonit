@@ -13,7 +13,7 @@
 ## 关键事实（探查结论）
 
 - 落地页是非交易、引导联系的：CTA 为 WhatsApp / tel / mailto / sms / telegram 深链跳转，**无平台托管表单**，故无传统「表单 leads 入库」。
-- 现有追踪是客户端 Pixel（page_view / cta_click 广播给 Meta/GA4/TikTok），数据进广告平台、不进 Zonit。`landing-renderer/tracking/sinks.ts` 注释明确 first-party 采集 sink「留作后续刀」——即平台第一方采集尚未实现。
+- 现有追踪是客户端 Pixel（page_view / cta_click 广播给 Meta/GA4/TikTok），数据进广告平台、不进 Zap Bridge。`landing-renderer/tracking/sinks.ts` 注释明确 first-party 采集 sink「留作后续刀」——即平台第一方采集尚未实现。
 - 因此「投放分析」需要的真实数据源在本 spec 中**不存在**，留作 ② 分析管道 spec；本 spec 概览页只展示「资产与额度」类真实可查数据。
 - `ai_usage` 有计算逻辑（`lib/ai/usage.ts`）但无对前端的 GET 查询接口。
 - 落地页列表 API（`GET /api/landing-pages`）、域名、素材、计费 API 均可直接复用。

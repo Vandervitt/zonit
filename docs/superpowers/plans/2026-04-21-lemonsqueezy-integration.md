@@ -34,7 +34,7 @@
 - [ ] **Step 1: 安装 SDK**
 
 ```bash
-cd /Users/lajiao/Work/zonit && pnpm add @lemonsqueezy/lemonsqueezy.js
+cd /Users/lajiao/Work/zapbridge && pnpm add @lemonsqueezy/lemonsqueezy.js
 ```
 
 预期输出：`packages/node_modules/.pnpm/...` 安装成功，无报错。
@@ -196,7 +196,7 @@ git commit -m "feat(billing): 添加 lemonsqueezy 工具函数封装"
 - [ ] **Step 1: 创建目录并创建文件**
 
 ```bash
-mkdir -p /Users/lajiao/Work/zonit/app/api/billing/checkout
+mkdir -p /Users/lajiao/Work/zapbridge/app/api/billing/checkout
 ```
 
 创建 `app/api/billing/checkout/route.ts`，内容如下：
@@ -260,7 +260,7 @@ git commit -m "feat(billing): 添加 checkout API 路由"
 - [ ] **Step 1: 创建目录并创建文件**
 
 ```bash
-mkdir -p /Users/lajiao/Work/zonit/app/api/billing/portal
+mkdir -p /Users/lajiao/Work/zapbridge/app/api/billing/portal
 ```
 
 创建 `app/api/billing/portal/route.ts`，内容如下：
@@ -343,7 +343,7 @@ git commit -m "feat(billing): 添加 customer portal API 路由"
 - [ ] **Step 1: 创建目录**
 
 ```bash
-mkdir -p /Users/lajiao/Work/zonit/app/api/webhooks/lemonsqueezy
+mkdir -p /Users/lajiao/Work/zapbridge/app/api/webhooks/lemonsqueezy
 ```
 
 - [ ] **Step 2: 创建 route 文件**

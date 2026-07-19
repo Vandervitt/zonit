@@ -39,7 +39,7 @@
 | 变量 | 用途 | 获取 |
 |---|---|---|
 | `AUTH_SECRET` | next-auth 会话加密 | `openssl rand -base64 32` —— **须重新生成（历史已泄露）** |
-| `NEXTAUTH_URL` | 邀请邮件链接基址，`lib/email.ts` | 生产应用地址，如 `https://app.zonit.com` |
+| `NEXTAUTH_URL` | 邀请邮件链接基址，`lib/email.ts` | 生产应用地址，如 `https://app.zapbridge.com` |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth，`auth.ts` | Google Cloud Console —— **secret 须轮换**；回调加 `<域名>/api/auth/callback/google` |
 | `ADMIN_EMAILS` | 逗号分隔，登录即授予 ADMIN，`auth.ts:153` | 平台管理员邮箱列表 |
 

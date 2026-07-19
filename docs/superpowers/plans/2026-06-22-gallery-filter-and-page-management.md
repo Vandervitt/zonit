@@ -649,7 +649,7 @@ test.describe("画廊筛选 + 落地页复制/改名", () => {
 
 - [ ] **Step 2: 确保本地 DB 在跑并已 seed**
 
-Run: `docker exec zonit-pg-dev pg_isready -U postgres -d zonit && pnpm db:seed-dev`
+Run: `docker exec zapbridge-pg-dev pg_isready -U postgres -d zapbridge && pnpm db:seed-dev`
 Expected: `accepting connections` + seed 成功
 
 - [ ] **Step 3: 跑该 e2e**

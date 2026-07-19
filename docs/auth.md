@@ -20,7 +20,7 @@
 ## 目录结构
 
 ```
-zonit/
+zapbridge/
 ├── auth.ts                              # Auth.js 核心配置
 ├── proxy.ts                             # 路由保护（Next.js 16 Proxy）
 ├── .env.local                           # 环境变量

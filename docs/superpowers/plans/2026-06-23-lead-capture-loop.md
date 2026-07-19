@@ -142,12 +142,12 @@ exports.down = (pgm) => {
 
 - [ ] **Step 2: 应用迁移到本地库**
 
-Run: `docker exec zonit-pg-dev pg_isready -U postgres -d zonit && pnpm migrate:up`
+Run: `docker exec zapbridge-pg-dev pg_isready -U postgres -d zapbridge && pnpm migrate:up`
 Expected: `Migrations complete!`，无错误
 
 - [ ] **Step 3: 校验表存在**
 
-Run: `docker exec zonit-pg-dev psql -U postgres -d zonit -c "\d leads"`
+Run: `docker exec zapbridge-pg-dev psql -U postgres -d zapbridge -c "\d leads"`
 Expected: 列出 leads 表结构（含 payload jsonb、is_read 等）
 
 - [ ] **Step 4: 提交**
@@ -1334,7 +1334,7 @@ test.describe("线索闭环", () => {
 
 - [ ] **Step 2: 确保 DB 在跑 + 迁移已应用 + seed**
 
-Run: `docker exec zonit-pg-dev pg_isready -U postgres -d zonit && pnpm migrate:up && pnpm db:seed-dev`
+Run: `docker exec zapbridge-pg-dev pg_isready -U postgres -d zapbridge && pnpm migrate:up && pnpm db:seed-dev`
 Expected: migrations complete + seed 成功
 
 - [ ] **Step 3: 跑该 e2e**

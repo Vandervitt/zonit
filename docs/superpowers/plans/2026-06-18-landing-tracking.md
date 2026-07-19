@@ -930,7 +930,7 @@ Expected: exit:0。
 
 - [ ] **Step 2.5: 确认 dev 库已 seed、dev server 在 3001**
 
-Run: `lsof -nP -iTCP:3001 -sTCP:LISTEN | head` （无则 `npm run dev` 后台启动）；`docker ps | grep zonit-pg-dev`（无则 `npm run db:start && npm run db:seed-dev`）。
+Run: `lsof -nP -iTCP:3001 -sTCP:LISTEN | head` （无则 `npm run dev` 后台启动）；`docker ps | grep zapbridge-pg-dev`（无则 `npm run db:start && npm run db:seed-dev`）。
 
 - [ ] **Step 3: 浏览器 E2E（用 chrome-devtools MCP，手动驱动）**
 
