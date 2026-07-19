@@ -53,6 +53,11 @@ describe("handleAuth 既有守卫不回归", () => {
     expect(locationOf(res)).toBe("https://app.example.com/login");
   });
 
+  it("未登录访问 /admin 子路径 → 重定向 /login", () => {
+    const res = handleAuth(makeReq("/admin/domains"));
+    expect(locationOf(res)).toBe("https://app.example.com/login");
+  });
+
   it("普通用户访问 /super-admin → 重定向 /admin", () => {
     const res = handleAuth(makeReq("/super-admin", { loggedIn: true, role: UserRole.USER }));
     expect(locationOf(res)).toBe("https://app.example.com/admin");
@@ -90,9 +95,16 @@ describe("handleAuth 公开路径按段边界匹配", () => {
     expect(handleAuth(makeReq("/api/auth/callback/google"))).toBeNull();
   });
 
-  it("同前缀但非段边界的未登记路由不再被误放行：未登录 /premium → 跳 /login", () => {
-    const res = handleAuth(makeReq("/premium"));
-    expect(locationOf(res)).toBe("https://app.example.com/login");
+  it("未登记的未知路由放行交给 Next 渲染 not-found（未登录不再跳登录）：/premium", () => {
+    expect(handleAuth(makeReq("/premium"))).toBeNull();
+  });
+
+  it("未知路由已登录同样放行渲染 404：/premium", () => {
+    expect(handleAuth(makeReq("/premium", { loggedIn: true }))).toBeNull();
+  });
+
+  it("任意未知路由未登录放行（不跳登录）：/__definitely_not_a_route__", () => {
+    expect(handleAuth(makeReq("/__definitely_not_a_route__"))).toBeNull();
   });
 
   it("/api/cron 子路径放行（各路由自身 CRON_SECRET 鉴权）：/api/cron/webhook-flush", () => {
