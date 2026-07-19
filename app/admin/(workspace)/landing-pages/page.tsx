@@ -35,12 +35,14 @@ export default function LandingPagesPage() {
   const { data, mutate, isLoading } = useSWR<PageRow[]>(ApiRoutes.LandingPages);
 
   async function unpublish(id: string) {
-    await fetch(apiLandingUnpublishPath(id), { method: "POST" });
+    const res = await fetch(apiLandingUnpublishPath(id), { method: "POST" });
+    if (!res.ok) { message.error("取消发布失败"); return; }
     message.success("已取消发布");
     void mutate();
   }
   async function remove(id: string) {
-    await fetch(apiLandingPagePath(id), { method: "DELETE" });
+    const res = await fetch(apiLandingPagePath(id), { method: "DELETE" });
+    if (!res.ok) { message.error("删除失败"); return; }
     message.success("已删除");
     void mutate();
   }
@@ -63,6 +65,7 @@ export default function LandingPagesPage() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ name: trimmed }),
     });
+    if (res.status === 409) { message.error("该名称已被其他落地页使用"); void mutate(); return; }
     if (!res.ok) { message.error("重命名失败"); void mutate(); return; }
     message.success("已重命名");
     void mutate();
@@ -100,7 +103,17 @@ export default function LandingPagesPage() {
               {r.status === "published" && r.bound_domain && (
                 <a href={`https://${r.bound_domain}/`} target="_blank" rel="noreferrer">线上查看</a>
               )}
-              {r.status === "published" && <a onClick={() => unpublish(r.id)}>取消发布</a>}
+              {r.status === "published" && (
+                <Popconfirm
+                  title="确定取消发布？"
+                  description={r.bound_domain ? `线上页面将立即从 ${r.bound_domain} 下线，若有广告在投请先确认。` : "线上页面将立即下线。"}
+                  okText="取消发布"
+                  okButtonProps={{ danger: true }}
+                  onConfirm={() => unpublish(r.id)}
+                >
+                  <a>取消发布</a>
+                </Popconfirm>
+              )}
               <Popconfirm title="确定删除该落地页？" okText="删除" okButtonProps={{ danger: true }} onConfirm={() => remove(r.id)}>
                 <a style={{ color: SEMANTIC.error }}>删除</a>
               </Popconfirm>

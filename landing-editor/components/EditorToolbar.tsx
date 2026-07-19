@@ -12,11 +12,11 @@ import { SharePreviewPanel } from "./SharePreviewPanel";
 import { landingPreviewPath, Routes } from "@/lib/constants";
 
 const SAVE_LABEL: Record<string, string> = {
-  idle: "", saving: "保存中…", saved: "已保存", error: "保存失败，重试",
+  idle: "", saving: "保存中…", saved: "已保存",
 };
 
 export function EditorToolbar() {
-  const { pageId, name, setName, saveState, status, publishedDirty } = useMeta();
+  const { pageId, name, setName, saveState, saveError, status, publishedDirty, flushSaveRef } = useMeta();
   const state = useEditorState();
   const [publishOpen, setPublishOpen] = useState(false);
   const [blockers, setBlockers] = useState<string[]>([]);
@@ -43,9 +43,13 @@ export function EditorToolbar() {
         className="w-56 rounded-md border border-transparent bg-transparent px-2 py-1 text-sm font-semibold text-ink hover:border-edge focus:border-brand-500 focus:outline-none"
         placeholder="页面名称"
       />
-      <span className={`text-xs ${saveState === "error" ? "text-red-500" : "text-ink-muted"}`}>
-        {SAVE_LABEL[saveState]}
-      </span>
+      {saveState === "error" ? (
+        <button onClick={() => void flushSaveRef.current?.()} className="text-xs text-red-500 underline underline-offset-2 hover:text-red-600">
+          {saveError || "保存失败，点击重试"}
+        </button>
+      ) : (
+        <span className="text-xs text-ink-muted">{SAVE_LABEL[saveState]}</span>
+      )}
       {status === "published" && (
         publishedDirty ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">

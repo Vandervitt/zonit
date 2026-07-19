@@ -171,13 +171,14 @@ export async function getPublishedBySlug(slug: string): Promise<LandingPageRow |
   return { ...row, data: row.published_data ?? row.data };
 }
 
-/** 复制为新草稿：name 加「副本」，status/slug 走默认（draft / null），data 整体拷贝。 */
+/** 复制为新草稿：name 加「副本」（撞名自动追加序号），status/slug 走默认（draft / null），data 整体拷贝。 */
 export async function duplicateLandingPage(id: string, userId: string): Promise<ClientLandingPageRow | null> {
   const src = await getLandingPage(id, userId);
   if (!src) return null;
+  const name = await ensureUniqueName(userId, `${src.name} 副本`);
   const result = await pool.query(
     `INSERT INTO landing_pages (user_id, name, data) VALUES ($1, $2, $3) RETURNING *`,
-    [userId, `${src.name} 副本`, JSON.stringify(src.data)],
+    [userId, name, JSON.stringify(src.data)],
   );
   return toClient(result.rows[0]);
 }
