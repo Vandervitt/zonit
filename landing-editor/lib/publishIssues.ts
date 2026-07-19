@@ -8,9 +8,11 @@ import {
   type RequiredGroup,
   type LandingPageDraft,
 } from "@/types/schema.draft";
-import { collectFieldIssues } from "./validate";
+import { collectFieldIssueItems, type PublishIssue } from "./validate";
 import { collectTrackingIssues } from "./trackingIssues";
-import { collectContactIssues } from "./contactIssues";
+import { collectContactIssueItems } from "./contactIssues";
+
+export type { PublishIssue, IssueTarget } from "./validate";
 
 const groupLabels: Record<RequiredGroup, string> = {
   "core-value": "套餐 或 特性",
@@ -26,12 +28,20 @@ export function collectStructureIssues(draft: LandingPageDraft): string[] {
   return issues;
 }
 
-/** 发布门槛的全部未通过项；为空表示可以发布。 */
-export function collectPublishIssues(draft: LandingPageDraft): string[] {
+/**
+ * 发布门槛的全部未通过项（结构化）；为空表示可以发布。带 target 的项可在编辑器内
+ * 点击跳转对应模块；结构类 / 追踪类 / 占位号扫描无明确落点，不带 target。
+ */
+export function collectPublishIssueItems(draft: LandingPageDraft): PublishIssue[] {
   return [
-    ...collectStructureIssues(draft),
-    ...collectFieldIssues(draft),
-    ...collectTrackingIssues(draft),
-    ...collectContactIssues(draft),
+    ...collectStructureIssues(draft).map((message) => ({ message })),
+    ...collectFieldIssueItems(draft),
+    ...collectTrackingIssues(draft).map((message) => ({ message })),
+    ...collectContactIssueItems(draft),
   ];
+}
+
+/** 发布门槛的全部未通过项（纯文案，与 collectPublishIssueItems 同源）；为空表示可以发布。 */
+export function collectPublishIssues(draft: LandingPageDraft): string[] {
+  return collectPublishIssueItems(draft).map((i) => i.message);
 }

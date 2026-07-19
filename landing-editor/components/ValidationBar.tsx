@@ -1,13 +1,27 @@
 "use client";
 // landing-editor/components/ValidationBar.tsx
 import { useState } from "react";
-import { useEditorState, toDraft } from "../store/editorStore";
-import { collectPublishIssues } from "../lib/publishIssues";
+import { useEditorState, useEditorDispatch, toDraft } from "../store/editorStore";
+import { collectPublishIssueItems, type IssueTarget } from "../lib/publishIssues";
 
 export function ValidationBar() {
   const state = useEditorState();
-  const issues = collectPublishIssues(toDraft(state));
+  const dispatch = useEditorDispatch();
+  const issues = collectPublishIssueItems(toDraft(state));
   const [open, setOpen] = useState(false);
+
+  /** 把校验项落点换算成编辑器 selectedId（section 按序号取 _key）。 */
+  function resolveTarget(target: IssueTarget): string | null {
+    if (target.kind === "fixed") return target.id;
+    return state.sections[target.index]?._key ?? null;
+  }
+
+  function jump(target: IssueTarget) {
+    const id = resolveTarget(target);
+    if (!id) return;
+    dispatch({ kind: "select", id });
+    setOpen(false);
+  }
 
   if (issues.length === 0) {
     return (
@@ -38,7 +52,17 @@ export function ValidationBar() {
             {issues.map((issue, i) => (
               <li key={i} className="flex gap-1.5">
                 <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-amber-500" />
-                <span>{issue}</span>
+                {issue.target && resolveTarget(issue.target) ? (
+                  <button
+                    onClick={() => jump(issue.target!)}
+                    className="text-left underline decoration-amber-300 underline-offset-2 hover:text-ink"
+                    title="点击定位到对应模块"
+                  >
+                    {issue.message}
+                  </button>
+                ) : (
+                  <span>{issue.message}</span>
+                )}
               </li>
             ))}
           </ul>
