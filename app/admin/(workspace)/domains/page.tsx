@@ -14,6 +14,7 @@ import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { PLANS } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 import type { TableColumnsType } from "antd";
+import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
 
 interface Domain {
   id: string;
@@ -163,6 +164,7 @@ export default function DomainsPage() {
         </Button>
       </div>
 
+      <LoadErrorAlert error={domainsQuery.error} onRetry={() => void domainsQuery.mutate()} label="域名列表" />
       <Table<Domain>
         rowKey="id"
         dataSource={domains}

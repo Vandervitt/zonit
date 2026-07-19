@@ -7,6 +7,7 @@ import { EyeOutlined, AimOutlined, PercentageOutlined, ContactsOutlined } from "
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ApiRoutes } from "@/lib/constants";
 import type { AnalyticsResult } from "@/lib/analytics/queries";
+import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
 
 interface PageRow { id: string; name: string; }
 
@@ -36,6 +37,9 @@ export default function AnalyticsPage() {
             options={[{ label: "近 7 天", value: 7 }, { label: "近 30 天", value: 30 }, { label: "近 90 天", value: 90 }]} />
         </Space>
       </div>
+
+      <LoadErrorAlert error={data.error} onRetry={() => void data.mutate()} label="分析数据" />
+      <LoadErrorAlert error={pages.error} onRetry={() => void pages.mutate()} label="落地页筛选列表" />
 
       <Row gutter={16}>
         <Col xs={12} sm={6}><Card><Statistic title="访问量 (PV)" value={a?.totals.views ?? 0} prefix={<EyeOutlined />} /></Card></Col>

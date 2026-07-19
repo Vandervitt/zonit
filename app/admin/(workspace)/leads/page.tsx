@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { Table, Typography, Tag, Space, Button, Popconfirm, App } from "antd";
 import { ApiRoutes, apiLeadPath, apiLeadsExportPath } from "@/lib/constants";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
+import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
 
 interface LeadRow {
   id: string;
@@ -20,7 +21,7 @@ const contactSummary = (p: LeadRow["payload"]) =>
 
 export default function LeadsPage() {
   const { message } = App.useApp();
-  const { data, mutate, isLoading } = useSWR<LeadRow[]>(ApiRoutes.Leads);
+  const { data, error, mutate, isLoading } = useSWR<LeadRow[]>(ApiRoutes.Leads);
 
   async function setRead(id: string, isRead: boolean) {
     await fetch(apiLeadPath(id), { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ isRead }) });
@@ -38,6 +39,7 @@ export default function LeadsPage() {
         <Typography.Title level={3} style={{ margin: 0 }}>线索</Typography.Title>
         <Button href={apiLeadsExportPath()} target="_blank">导出 CSV</Button>
       </div>
+      <LoadErrorAlert error={error} onRetry={() => void mutate()} label="线索列表" />
       <Table<LeadRow>
         rowKey="id"
         loading={isLoading}

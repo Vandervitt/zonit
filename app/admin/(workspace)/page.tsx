@@ -9,6 +9,7 @@ import { Routes, ApiRoutes, landingEditorPath } from "@/lib/constants";
 import { PLANS, type PlanId } from "@/lib/plans";
 import { TemplatePickerDialog } from "@/landing-editor/components/TemplatePickerDialog";
 import type { UsageSummary } from "@/lib/ai/usage-summary";
+import { LoadErrorAlert } from "./_shell/LoadErrorAlert";
 
 interface PageRow { id: string; name: string; slug: string | null; status: "draft" | "published"; updated_at: string; }
 interface DomainRow { id: string; verified: boolean; }
@@ -36,6 +37,10 @@ export default function OverviewPage() {
   return (
     <Space direction="vertical" size={20} style={{ width: "100%" }}>
       <Typography.Title level={3} style={{ margin: 0 }}>概览</Typography.Title>
+
+      <LoadErrorAlert error={pages.error} onRetry={() => void pages.mutate()} label="落地页数据" />
+      <LoadErrorAlert error={domains.error} onRetry={() => void domains.mutate()} label="域名数据" />
+      <LoadErrorAlert error={usage.error} onRetry={() => void usage.mutate()} label="AI 用量数据" />
 
       <Row gutter={16}>
         <Col xs={24} sm={12} lg={6}>
