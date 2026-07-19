@@ -25,6 +25,21 @@ export function EditorToolbar() {
   const [trackingOpen, setTrackingOpen] = useState(false);
   const [antiBanOpen, setAntiBanOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [restoreOpen, setRestoreOpen] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+
+  async function handleRestoreLive() {
+    setRestoring(true);
+    try {
+      const res = await fetch(`/api/landing-pages/${pageId}/restore-live`, { method: "POST" });
+      if (!res.ok) return; // 失败保持弹层，用户可重试或关闭
+      const { page } = await res.json();
+      dispatch({ kind: "replaceDraft", draft: page.data }); // 入 undo 历史，可一步撤销
+      setRestoreOpen(false);
+    } finally {
+      setRestoring(false);
+    }
+  }
 
   // Cmd/Ctrl+Z 撤销、Shift+Cmd/Ctrl+Z 重做（拦截浏览器默认，编辑器内容均为受控输入）。
   useEffect(() => {
@@ -95,6 +110,32 @@ export function EditorToolbar() {
             已发布
           </span>
         )
+      )}
+      {status === "published" && publishedDirty && (
+        <div className="relative">
+          <button
+            onClick={() => setRestoreOpen((v) => !v)}
+            className="rounded-md border border-edge px-2 py-1 text-xs text-ink-soft hover:bg-canvas"
+          >
+            恢复为线上版本
+          </button>
+          {restoreOpen && (
+            <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-lg border border-edge bg-panel p-3 shadow-xl">
+              <p className="text-sm text-ink">将当前草稿恢复为线上正在展示的版本？</p>
+              <p className="mt-1 text-xs text-ink-muted">当前未发布的修改会被覆盖，可用撤销（⌘Z）找回。</p>
+              <div className="mt-3 flex justify-end gap-2">
+                <button onClick={() => setRestoreOpen(false)} className="rounded-md px-2.5 py-1 text-xs text-ink-soft hover:bg-canvas">取消</button>
+                <button
+                  onClick={() => void handleRestoreLive()}
+                  disabled={restoring}
+                  className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+                >
+                  {restoring ? "恢复中…" : "确认恢复"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       )}
       <div className="flex-1" />
       <ValidationBar />
