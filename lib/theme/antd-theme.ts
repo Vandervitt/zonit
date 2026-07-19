@@ -43,7 +43,13 @@ export const adminTheme: ThemeConfig = {
 };
 
 // super-admin：深色 Sider 变体，复用同色系。
+// siderBg 必须显式覆盖为深色：嵌套 ConfigProvider 会合并父级 adminTheme，
+// 若不写就会继承 adminTheme 的 siderBg:#ffffff，导致 Sider 容器（Logo 区/菜单下方空白）发白，
+// 只有 Menu 自身是深色 → 两截割裂。与 Menu 深色底 #001529 对齐。
 export const superAdminSiderTheme: ThemeConfig = {
   algorithm: antdTheme.darkAlgorithm,
   token: { colorPrimary: BRAND, borderRadius: 10 },
+  components: {
+    Layout: { siderBg: "#001529", triggerBg: "#001529" },
+  },
 };
