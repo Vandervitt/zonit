@@ -157,6 +157,12 @@ export function SiteFooter({ fonts }: { fonts: Fonts }) {
           <Link href={`${Routes.Home}#pricing`} className="transition-colors hover:text-aqua-700">
             套餐定价
           </Link>
+          <Link href={Routes.Privacy} className="transition-colors hover:text-aqua-700">
+            隐私政策
+          </Link>
+          <Link href={Routes.Terms} className="transition-colors hover:text-aqua-700">
+            服务条款
+          </Link>
           <Link href={Routes.Login} className="transition-colors hover:text-aqua-700">
             登录
           </Link>
