@@ -30,3 +30,44 @@ export function isMainlandChinaDomain(host: string): boolean {
   const tld = host.toLowerCase().split(".").pop() ?? "";
   return tld === "cn" || MAINLAND_IDN_TLDS.has(tld);
 }
+
+// Major mainland-China DNS providers (NS hostname suffixes). Used only for a
+// non-blocking advisory at domain-add time — the core audience legitimately
+// registers domains at Aliyun/Tencent while hosting overseas, so this must
+// never hard-block. Suffixes match on label boundaries.
+const MAINLAND_NS_SUFFIXES = [
+  "hichina.com", // Aliyun (万网)
+  "alidns.com", // Aliyun cloud DNS
+  "dnspod.net", // Tencent DNSPod
+  "dnspod.cn",
+  "dnsv2.com", // DNSPod enterprise zones
+  "dnsv3.com",
+  "dnsv4.com",
+  "dnsv5.com",
+  "dns.com", // 帝恩思
+  "xinnet.cn", // 新网
+  "xincache.com",
+  "myhostadmin.net", // west.cn (西部数码)
+  "west263.com",
+  "dns.la",
+  "22.cn", // 爱名网
+  "huaweicloud-dns.com", // Huawei Cloud (含 .cn/.net/.org 变体)
+  "huaweicloud-dns.cn",
+  "huaweicloud-dns.net",
+  "huaweicloud-dns.org",
+  "baidubce.com", // Baidu Cloud
+];
+
+/**
+ * Whether any of the domain's nameservers belongs to a mainland-China DNS
+ * provider. Returns the matched provider domain for display, or null.
+ */
+export function mainlandNsProvider(nameservers: string[]): string | null {
+  for (const ns of nameservers) {
+    const host = ns.toLowerCase().replace(/\.$/, "");
+    for (const suffix of MAINLAND_NS_SUFFIXES) {
+      if (host === suffix || host.endsWith(`.${suffix}`)) return suffix;
+    }
+  }
+  return null;
+}

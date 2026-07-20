@@ -3,7 +3,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
-import { Table, Button, Tag, Switch, Popconfirm, Typography, Empty, Space } from "antd";
+import { Table, Button, Tag, Switch, Popconfirm, Typography, Empty, Space, Tooltip } from "antd";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { AddDomainDialog } from "@/components/domains/AddDomainDialog";
 import { UpgradeDialog } from "@/components/billing/UpgradeDialog";
@@ -36,6 +36,28 @@ export default function DomainsPage() {
   const domainsQuery = useSWR<Domain[]>(ApiRoutes.Domains);
   const domains = domainsQuery.data ?? [];
   const enabledCount = domains.filter(d => d.enabled).length;
+
+  // 已验证域名的 DNS 配置健康（所有权验证通过 ≠ A/CNAME 已指向本平台）：
+  // 列表加载后拉取一次，misconfigured 时在验证状态列亮橙标。
+  const verifiedIds = domains.filter(d => d.verified).map(d => d.id);
+  const healthQuery = useSWR<Record<string, string>>(
+    verifiedIds.length > 0 ? [ApiRoutes.Domains, "health", verifiedIds.join(",")] : null,
+    async () => {
+      const entries = await Promise.all(
+        verifiedIds.map(async (id) => {
+          try {
+            const { health } = await fetcher<{ health?: string }>(apiDomainStatusPath(id));
+            return [id, health ?? "unknown"] as const;
+          } catch {
+            return [id, "unknown"] as const;
+          }
+        }),
+      );
+      return Object.fromEntries(entries);
+    },
+    { revalidateOnFocus: false },
+  );
+  const healthMap = healthQuery.data ?? {};
 
   // 后台轮询所有未验证的域名（每 5s）；命中已验证后立刻刷新整张列表
   const hasUnverified = domains.some(d => !d.verified);
@@ -106,7 +128,23 @@ export default function DomainsPage() {
       width: 160,
       render: (_: unknown, record: Domain) =>
         record.verified ? (
-          <Tag color="green">已验证</Tag>
+          healthMap[record.id] === "misconfigured" ? (
+            <Space size={4}>
+              <Tag color="green">已验证</Tag>
+              <Tooltip title="域名所有权已验证，但其 DNS 记录未指向本平台，访客访问该域名看不到你的落地页。请到 DNS 服务商检查 A/CNAME 记录。">
+                <Tag color="orange">未指向本平台</Tag>
+              </Tooltip>
+              <Button
+                type="text"
+                size="small"
+                icon={<ReloadOutlined spin={healthQuery.isValidating} />}
+                title="重新检测 DNS 指向"
+                onClick={() => void healthQuery.mutate()}
+              />
+            </Space>
+          ) : (
+            <Tag color="green">已验证</Tag>
+          )
         ) : (
           <Space size={4}>
             <Tag>待验证</Tag>

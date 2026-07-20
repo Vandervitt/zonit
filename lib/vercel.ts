@@ -103,6 +103,27 @@ export async function getDomainVerification(domain: string): Promise<"pending" |
   return "pending";
 }
 
+export type DomainHealth = "ok" | "misconfigured" | "unknown";
+
+/**
+ * 域名 DNS 配置健康：所有权验证通过 ≠ DNS 已指向本平台（如域名曾在同一
+ * Vercel 账号下免验证通过，但 A/CNAME 仍指向别处，发布即静默空操作）。
+ * 复用 Vercel dashboard 同款检测端点；接口异常按 unknown 处理（fail-open）。
+ */
+export async function getDomainConfigHealth(domain: string): Promise<DomainHealth> {
+  try {
+    const res = await fetch(`${BASE}/v6/domains/${domain}/config${teamQuery()}`, {
+      headers: headers(),
+    });
+    if (!res.ok) return "unknown";
+    const data = await res.json();
+    if (typeof data.misconfigured !== "boolean") return "unknown";
+    return data.misconfigured ? "misconfigured" : "ok";
+  } catch {
+    return "unknown";
+  }
+}
+
 export async function removeDomainFromProject(domain: string): Promise<void> {
   await fetch(
     `${BASE}/v9/projects/${projectId()}/domains/${domain}${teamQuery()}`,

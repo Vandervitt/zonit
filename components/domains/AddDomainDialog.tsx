@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Modal, Form, Input, Button, Typography, App } from "antd";
+import { Modal, Form, Input, Button, Typography, App, Alert } from "antd";
 import { CopyOutlined, CheckOutlined } from "@ant-design/icons";
 import { ApiRoutes } from "@/lib/constants";
 import { isMainlandChinaDomain, normalizeDomain } from "@/lib/domain";
@@ -31,16 +31,18 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   const { message } = App.useApp();
   const [form] = Form.useForm<{ domain: string }>();
   const [records, setRecords] = useState<DnsRecord[] | null>(null);
+  const [mainlandNs, setMainlandNs] = useState<string | null>(null);
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
 
   const addMutation = useMutation(
     (payload: { domain: string }) =>
-      jsonRequest<{ records: DnsRecord[] }>(ApiRoutes.Domains, "POST", payload),
+      jsonRequest<{ records: DnsRecord[]; mainlandNs?: string | null }>(ApiRoutes.Domains, "POST", payload),
     {
       errorToast: false,
       throwOnError: true,
-      onSuccess: ({ records: newRecords }) => {
+      onSuccess: ({ records: newRecords, mainlandNs: ns }) => {
         setRecords(newRecords ?? []);
+        setMainlandNs(ns ?? null);
         onAdded();
       },
     },
@@ -49,6 +51,7 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
   function reset() {
     form.resetFields();
     setRecords(null);
+    setMainlandNs(null);
     setCopiedValue(null);
     addMutation.reset();
   }
@@ -141,6 +144,14 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
           <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
             域名已添加。请前往你的 DNS 服务商（Cloudflare / AWS Route53 / Namecheap 等）添加以下记录，Vercel 将在 DNS 生效后自动签发 SSL 证书。
           </Typography.Paragraph>
+          {mainlandNs ? (
+            <Alert
+              type="warning"
+              showIcon
+              message="检测到该域名使用中国大陆 DNS 服务商"
+              description={`当前 NS 属于 ${mainlandNs}。域名本身可正常使用，但受大陆监管政策影响（如实名/备案要求变化），存在被服务商暂停解析的风险。做海外投放建议将 DNS 迁移到 Cloudflare 等海外服务商，或至少知晓此风险。`}
+            />
+          ) : null}
           {records.map((record, i) => (
             <div
               key={`${record.type}-${record.name}-${i}`}
