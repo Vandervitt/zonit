@@ -60,3 +60,35 @@ describe("isMainlandChinaDomain", () => {
     expect(isMainlandChinaDomain("example.cnn")).toBe(false);
   });
 });
+
+describe("mainlandNsProvider", () => {
+  it("识别主流大陆 DNS 服务商 NS（返回服务商域）", async () => {
+    const { mainlandNsProvider } = await import("./domain");
+    expect(mainlandNsProvider(["dns3.hichina.com", "dns4.hichina.com"])).toBe("hichina.com");
+    expect(mainlandNsProvider(["ns1.alidns.com"])).toBe("alidns.com");
+    expect(mainlandNsProvider(["f1g1ns1.dnspod.net"])).toBe("dnspod.net");
+    expect(mainlandNsProvider(["ns3.dnsv5.com"])).toBe("dnsv5.com");
+    expect(mainlandNsProvider(["ns1.dns.com"])).toBe("dns.com");
+    expect(mainlandNsProvider(["ns1.myhostadmin.net"])).toBe("myhostadmin.net");
+    expect(mainlandNsProvider(["ns1.huaweicloud-dns.com"])).toBe("huaweicloud-dns.com");
+  });
+
+  it("海外 DNS 服务商返回 null", async () => {
+    const { mainlandNsProvider } = await import("./domain");
+    expect(mainlandNsProvider(["dana.ns.cloudflare.com", "kip.ns.cloudflare.com"])).toBeNull();
+    expect(mainlandNsProvider(["ns1.vercel-dns.com"])).toBeNull();
+    expect(mainlandNsProvider(["dns1.registrar-servers.com"])).toBeNull();
+    expect(mainlandNsProvider([])).toBeNull();
+  });
+
+  it("不被形似后缀误伤（子串不算，须按域名段边界匹配）", async () => {
+    const { mainlandNsProvider } = await import("./domain");
+    expect(mainlandNsProvider(["ns1.nothichina.com"])).toBeNull();
+    expect(mainlandNsProvider(["ns1.mydns.company"])).toBeNull();
+  });
+
+  it("大小写与结尾点归一", async () => {
+    const { mainlandNsProvider } = await import("./domain");
+    expect(mainlandNsProvider(["DNS3.HiChina.COM."])).toBe("hichina.com");
+  });
+});

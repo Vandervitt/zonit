@@ -12,7 +12,8 @@ import {
   bindDomainToLandingPage,
 } from "@/lib/domains-db";
 import { addDomainToProject, type DnsRecord } from "@/lib/vercel";
-import { isMainlandChinaDomain, normalizeDomain } from "@/lib/domain";
+import { isMainlandChinaDomain, mainlandNsProvider, normalizeDomain } from "@/lib/domain";
+import { lookupNameservers } from "@/lib/domain-ns";
 
 export async function GET() {
   const session = await auth();
@@ -39,6 +40,10 @@ export async function POST(request: Request) {
   if (isMainlandChinaDomain(domain)) {
     return NextResponse.json({ error: ApiErrors.DOMAIN_TLD_BLOCKED }, { status: 400 });
   }
+
+  // 大陆 DNS 服务商软提示（不阻断）：目标客群常在阿里云/腾讯买域名做海外投放，
+  // 命中仅随响应返回 mainlandNs 供前端展示风险提醒；解析失败 fail-open。
+  const mainlandNs = mainlandNsProvider(await lookupNameservers(domain));
 
   // Check plan limits
   const currentPlan = (session.user.plan ?? "free") as keyof typeof PLANS;
@@ -68,7 +73,7 @@ export async function POST(request: Request) {
     if (landingPageId) {
       await bindDomainToLandingPage(existing.id, session.user.id, landingPageId);
     }
-    return NextResponse.json({ ...updated, records }, { status: 200 });
+    return NextResponse.json({ ...updated, records, mainlandNs }, { status: 200 });
   }
 
   // New domain, check limit
@@ -95,5 +100,5 @@ export async function POST(request: Request) {
     row.verified = true;
   }
 
-  return NextResponse.json({ ...row, records: vercelConfig.records }, { status: 201 });
+  return NextResponse.json({ ...row, records: vercelConfig.records, mainlandNs }, { status: 201 });
 }
