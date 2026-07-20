@@ -125,25 +125,33 @@ export default function DomainsPage() {
     {
       title: "验证状态",
       key: "verified",
-      width: 160,
+      width: 220,
       render: (_: unknown, record: Domain) =>
         record.verified ? (
           healthMap[record.id] === "misconfigured" ? (
             <Space size={4}>
               <Tag color="green">已验证</Tag>
-              <Tooltip title="域名所有权已验证，但其 DNS 记录未指向本平台，访客访问该域名看不到你的落地页。请到 DNS 服务商检查 A/CNAME 记录。">
-                <Tag color="orange">未指向本平台</Tag>
+              <Tooltip title="域名所有权已验证，但 DNS 记录配置不正确，访客访问该域名看不到你的落地页。请到 DNS 服务商检查 A/CNAME 记录。">
+                <Tag color="orange">DNS 未正确配置</Tag>
               </Tooltip>
               <Button
                 type="text"
                 size="small"
                 icon={<ReloadOutlined spin={healthQuery.isValidating} />}
-                title="重新检测 DNS 指向"
+                title="重新检测 DNS 配置"
                 onClick={() => void healthQuery.mutate()}
               />
             </Space>
           ) : (
-            <Tag color="green">已验证</Tag>
+            <Space size={4}>
+              <Tag color="green">已验证</Tag>
+              {/* 健康检查 fail-open：unknown（接口异常）时不给「已正确配置」的虚假承诺 */}
+              {healthMap[record.id] === "ok" ? (
+                <Tooltip title="域名所有权已验证，且 DNS 记录已正确指向，访客可以正常访问你的落地页。">
+                  <Tag color="green">DNS 已正确配置</Tag>
+                </Tooltip>
+              ) : null}
+            </Space>
           )
         ) : (
           <Space size={4}>
