@@ -7,6 +7,11 @@ import { hostnameOf, isCustomDomain, TENANT_HOST_HEADER } from "@/lib/host";
 // 不能被改写到 /p/{slug}，否则会返回落地页 HTML 而非 robots/sitemap。
 const METADATA_PATHS = new Set(["/robots.txt", "/sitemap.xml"]);
 
+// 访客在租户域名上第一方调用的公开 API（留资/埋点）。改写会把 POST 吞成
+// 落地页 HTML 200，客户端 res.ok 误判成功而数据静默丢失，故必须放行；
+// 仅列访客端点，其余 /api 维持改写，暴露面保持最小。
+const PUBLIC_TENANT_API_PATHS = new Set(["/api/leads", "/api/track"]);
+
 export async function handleTenancy(req: NextRequest) {
   const hostname = hostnameOf(req.headers.get("host"));
 
@@ -14,6 +19,7 @@ export async function handleTenancy(req: NextRequest) {
   // 否则会把 /_next/webpack-hmr 等改写成 /p/{slug} 页面，导致客户端运行时无法启动、页面不水合。
   if (req.nextUrl.pathname.startsWith("/_next/")) return null;
   if (METADATA_PATHS.has(req.nextUrl.pathname)) return null;
+  if (PUBLIC_TENANT_API_PATHS.has(req.nextUrl.pathname)) return null;
 
   if (isCustomDomain(hostname)) {
     // 新流程：自定义域名 → 已发布落地页
