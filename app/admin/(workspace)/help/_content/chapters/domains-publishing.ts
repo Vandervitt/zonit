@@ -3,7 +3,7 @@ import type { HelpChapterData } from "../types";
 export const domainsPublishing: HelpChapterData = {
   slug: "domains-publishing",
   title: "域名与发布",
-  summary: "为什么必须自有域名、DNS 配置步骤、验证排查与发布状态流转。",
+  summary: "为什么必须自有域名、DNS 配置步骤、状态标识解读、验证排查与发布状态流转。",
   sections: [
     {
       id: "why-own-domain",
@@ -24,7 +24,7 @@ export const domainsPublishing: HelpChapterData = {
         {
           t: "callout",
           tone: "info",
-          text: "还没有域名？在 Namecheap、Cloudflare、GoDaddy 等注册商购买即可，一般每年 $10 左右。建议选 .com 或目标市场常见后缀。",
+          text: "还没有域名？强烈建议在 Vercel（vercel.com/domains）购买：其域名解析默认托管在 Vercel，绑定到本平台后自动生效，完全无需手动配置 DNS 记录，也不受大陆服务商政策影响。在 Namecheap、Cloudflare、GoDaddy 等注册商购买同样支持（一般每年 $10 左右），但需要按下文手动配置 DNS。建议选 .com 或目标市场常见后缀。",
         },
       ],
     },
@@ -36,7 +36,7 @@ export const domainsPublishing: HelpChapterData = {
           t: "steps",
           items: [
             { title: "添加域名", desc: "进入「域名」→ 输入你的域名（如 example.com 或 www.example.com）并添加。暂不支持中国大陆管辖域名（.cn / .com.cn / .中国 等），其解析受备案与注册局政策影响，请使用 .com / .net 等国际域名。" },
-            { title: "到注册商配置 DNS 记录", desc: "登录你买域名的平台（Namecheap / GoDaddy / Cloudflare 等），进入 DNS 管理，按下表添加记录。" },
+            { title: "到注册商配置 DNS 记录", desc: "登录你买域名的平台（Namecheap / GoDaddy / Cloudflare 等），进入 DNS 管理，按下表添加记录。在 Vercel 购买的域名可跳过此步，解析自动生效。" },
             { title: "等待验证", desc: "系统每 5 秒自动检测验证状态，通过后域名显示「已验证」，即可用于发布。" },
           ],
         },
@@ -52,6 +52,35 @@ export const domainsPublishing: HelpChapterData = {
           t: "callout",
           tone: "warning",
           text: "裸域不能用 CNAME，必须用 A 记录；上表配置对 Cloudflare、Route53、Namecheap、GoDaddy 全部通用。使用 Cloudflare 时建议先把代理（橙色云朵）关为「仅 DNS」，验证通过后再按需开启。",
+        },
+        {
+          t: "callout",
+          tone: "warning",
+          text: "添加域名时若检测到解析托管在中国大陆 DNS 服务商（阿里云 / DNSPod 等），会出现风险提示：域名本身可正常使用，但受大陆监管政策影响存在被暂停解析的风险。做海外投放建议把 DNS 迁移到 Cloudflare 等海外服务商。",
+        },
+      ],
+    },
+    {
+      id: "dns-status",
+      heading: "看懂域名列表的状态标识",
+      blocks: [
+        {
+          t: "p",
+          text: "「已验证」只代表域名所有权归你，不代表 DNS 解析已经配好。这是两件事：验证通过但 DNS 指向别处（比如域名之前挂着博客或停放页）时，发布不会报错，但访客访问域名看到的仍是原来的内容，而不是你的落地页。因此域名列表在「已验证」之外还会标出 DNS 配置状态：",
+        },
+        {
+          t: "table",
+          head: ["状态标识", "含义", "你需要做什么"],
+          rows: [
+            ["已验证 + DNS 已正确配置（绿）", "所有权与解析都就绪，访客可正常访问落地页", "无需处理，放心发布"],
+            ["已验证 + DNS 未正确配置（橙）", "所有权已验证，但 A/CNAME 记录没有指向本平台，访客看不到落地页", "到 DNS 服务商按上表检查并修正记录，然后点旁边的刷新按钮复检"],
+            ["待验证", "所有权尚未验证", "按上文完成 DNS 配置并等待自动验证"],
+          ],
+        },
+        {
+          t: "callout",
+          tone: "info",
+          text: "DNS 状态检测偶尔会因网络原因暂时不可用，此时只显示「已验证」而不显示 DNS 标识，稍后刷新页面即可重新检测。",
         },
       ],
     },
