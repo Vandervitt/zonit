@@ -94,6 +94,21 @@ export function AddDomainDialog({ open, onOpenChange, onAdded }: Props) {
           <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
             绑定你自己的域名，用户访问时地址栏显示你的品牌域名。
           </Typography.Paragraph>
+          <Alert
+            type="info"
+            showIcon
+            style={{ marginBottom: 16 }}
+            message="还没有域名？强烈建议在 Vercel 购买"
+            description={
+              <>
+                在{" "}
+                <Typography.Link href="https://vercel.com/domains" target="_blank" rel="noopener noreferrer">
+                  Vercel 官网
+                </Typography.Link>{" "}
+                购买的域名解析默认托管在 Vercel，绑定到本平台后自动生效，无需手动配置 A/CNAME 等 DNS 记录，也不受大陆服务商政策影响。在其他服务商（GoDaddy / Namecheap / 阿里云等）购买的域名同样支持，但需要你到其解析控制台手动添加 DNS 记录后才能生效。
+              </>
+            }
+          />
           <Form
             form={form}
             layout="vertical"
