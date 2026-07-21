@@ -229,7 +229,7 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
         }}
       >
         <Typography.Paragraph type="secondary">
-          生效套餐取「付费套餐」与「赠送套餐」中的较高档；Lemon Squeezy 订阅事件只覆写付费套餐，不影响赠送。
+          生效套餐取「付费套餐」与「赠送套餐」中的较高档；收款渠道的订阅事件只覆写付费套餐，不影响赠送。
         </Typography.Paragraph>
         <Space direction="vertical" size={12} style={{ width: "100%" }}>
           <div>

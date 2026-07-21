@@ -1,0 +1,33 @@
+// 计费 provider 抽象层：把「谁来收款」（Dodo / Creem）从业务代码里解耦。
+// active provider 存于 platform_settings（super-admin 可切换），webhook 端点各 provider 独立。
+import type { PlanId } from "@/lib/plans";
+
+export type BillingProviderId = "dodo" | "creem";
+
+/** 规范化后的计费事件——业务侧只认这三种语义，与具体 provider 无关。 */
+export type BillingEvent =
+  | { kind: "subscription_activated"; userId: string; plan: PlanId; customerId?: string; subscriptionId?: string }
+  | { kind: "subscription_ended"; userId: string } // 取消/过期/挂起/失败 → 回落 free
+  | { kind: "credit_purchased"; userId: string; credits: number }
+  | { kind: "ignored" };
+
+export interface CreateCheckoutInput {
+  /** 订阅套餐 id（starter/pro/agency）。 */
+  planId: string;
+  email: string;
+  userId: string;
+  /** 当前请求 origin，用于拼 return_url。 */
+  baseUrl: string;
+}
+
+export interface BillingProvider {
+  readonly id: BillingProviderId;
+  /** 该 provider 是否已配好必需的环境变量（未配则 super-admin 选它时给出明确报错）。 */
+  isConfigured(): boolean;
+  /** 创建订阅结账会话，返回可跳转的 checkout URL。 */
+  createCheckout(input: CreateCheckoutInput): Promise<string>;
+  /** 取客户自助管理（取消/换卡）门户 URL。 */
+  getPortalUrl(customerId: string): Promise<string>;
+  /** 校验签名并把原始 webhook 解析为规范化事件；验签失败必须抛错。 */
+  verifyAndParse(rawBody: string, headers: Record<string, string>): Promise<BillingEvent>;
+}

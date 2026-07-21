@@ -188,7 +188,7 @@ export default function BillingPage() {
 
       {currentPlanId !== "free" && (
         <Text type="secondary" style={{ display: "block", marginTop: 24, textAlign: "center", fontSize: 12 }}>
-          如需取消订阅，请通过 管理订阅 进入 Lemon Squeezy 操作
+          如需取消订阅，请通过 管理订阅 进入收款渠道的客户门户操作
         </Text>
       )}
     </main>
