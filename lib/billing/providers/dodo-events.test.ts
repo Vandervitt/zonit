@@ -34,6 +34,7 @@ describe("parseDodoEvent — 订阅激活", () => {
       plan: "pro",
       customerId: "cus_1",
       subscriptionId: "sub_1",
+      eventTime: null,
     });
   });
 
@@ -62,7 +63,7 @@ describe("parseDodoEvent — 订阅结束回落 free", () => {
   for (const t of ["subscription.expired", "subscription.on_hold", "subscription.failed"]) {
     it(`${t} → subscription_ended`, () => {
       const r = parseDodoEvent(sub(t, "pdt_pro"), map);
-      expect(r).toEqual({ kind: "subscription_ended", userId: "u1" });
+      expect(r).toEqual({ kind: "subscription_ended", userId: "u1", eventTime: null });
     });
   }
 });
@@ -80,6 +81,7 @@ describe("parseDodoEvent — 周期末取消：保留权益并记录到期时间
       kind: "subscription_cancel_scheduled",
       userId: "u1",
       expiresAt: "2026-08-04T00:00:00Z",
+      eventTime: null,
     });
   });
 
@@ -88,7 +90,7 @@ describe("parseDodoEvent — 周期末取消：保留权益并记录到期时间
       sub("subscription.cancelled", "pdt_agency", { cancel_at_next_billing_date: false }),
       map,
     );
-    expect(r).toEqual({ kind: "subscription_ended", userId: "u1" });
+    expect(r).toEqual({ kind: "subscription_ended", userId: "u1", eventTime: null });
   });
 
   it("cancelled 缺 cancel_at_next_billing_date 字段 → 视为周期末取消（不提前剥夺已付权益）", () => {
@@ -110,7 +112,15 @@ describe("parseDodoEvent — 周期末取消：保留权益并记录到期时间
       kind: "subscription_cancel_scheduled",
       userId: "u1",
       expiresAt: "2026-08-04T00:00:00Z",
+      eventTime: null,
     });
+  });
+
+  it("顶层 timestamp 提取为 eventTime（ISO 归一化，时序守卫用）", () => {
+    const ev = { ...sub("subscription.active", "pdt_pro"), timestamp: "2026-07-21T10:00:00.000Z" };
+    expect(parseDodoEvent(ev, map)).toMatchObject({ eventTime: "2026-07-21T10:00:00.000Z" });
+    const evMs = { ...sub("subscription.cancelled", "pdt_pro"), timestamp: 1753093200000 };
+    expect(parseDodoEvent(evMs, map)).toMatchObject({ eventTime: new Date(1753093200000).toISOString() });
   });
 
   it("plan_changed 且 cancel_at_next_billing_date=false（恢复订阅）→ 激活并将清掉到期标记", () => {

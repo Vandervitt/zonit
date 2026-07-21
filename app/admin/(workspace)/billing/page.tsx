@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm, App } from "antd";
 import { CheckOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
@@ -19,12 +18,17 @@ const { Title, Text } = Typography;
 function SuccessToast() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { notification } = App.useApp();
   useEffect(() => {
     if (searchParams.get("success") === "1") {
-      toast.success("订阅成功！套餐将在几秒内生效。");
+      notification.success({
+        message: "订阅成功",
+        description: "套餐将在几秒内生效，稍后刷新本页即可看到。",
+        placement: "topRight",
+      });
       router.replace(Routes.Billing);
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, notification]);
   return null;
 }
 
@@ -47,17 +51,24 @@ export default function BillingPage() {
   const checkout = useMutation(
     (planId: string) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCheckout, "POST", { planId }),
     {
-      errorToast: () => "无法创建结账链接，请稍后重试",
+      onError: () => {
+        notification.error({ message: "无法创建结账链接", description: "请稍后重试。", placement: "topRight" });
+        return false;
+      },
       onSuccess: (res) => {
         if (!res.checkoutUrl) {
-          toast.error("无法创建结账链接，请稍后重试");
+          notification.error({ message: "无法创建结账链接", description: "请稍后重试。", placement: "topRight" });
           return;
         }
         // 新标签打开支付页，保留本页；被浏览器拦截弹窗时退回当前标签跳转。
         const win = window.open(res.checkoutUrl, "_blank", "noopener,noreferrer");
         if (win) {
           setAwaitingRefresh(true);
-          toast.info("支付页已在新标签页打开，完成后请刷新本页查看最新套餐");
+          notification.info({
+            message: "支付页已在新标签页打开",
+            description: "完成支付后请刷新本页查看最新套餐。",
+            placement: "topRight",
+          });
         } else {
           window.location.href = res.checkoutUrl;
         }
@@ -68,10 +79,13 @@ export default function BillingPage() {
   const portal = useMutation(
     () => fetcher<{ portalUrl?: string }>(ApiRoutes.BillingPortal),
     {
-      errorToast: () => "无法获取管理链接，请稍后重试",
+      onError: () => {
+        notification.error({ message: "无法获取管理链接", description: "请稍后重试。", placement: "topRight" });
+        return false;
+      },
       onSuccess: (res) => {
         if (res.portalUrl) window.location.href = res.portalUrl;
-        else toast.error("无法获取管理链接，请稍后重试");
+        else notification.error({ message: "无法获取管理链接", description: "请稍后重试。", placement: "topRight" });
       },
     },
   );
@@ -90,11 +104,16 @@ export default function BillingPage() {
           });
           return false; // 已用 notification 提示，跳过默认 toast
         }
+        notification.error({ message: "套餐切换失败", description: "请稍后重试或联系支持。", placement: "topRight" });
+        return false;
       },
-      errorToast: () => "套餐切换失败，请稍后重试或联系支持",
       onSuccess: () => {
         setAwaitingRefresh(true);
-        toast.success("套餐切换请求已提交，生效后刷新本页即可看到新档位");
+        notification.success({
+          message: "套餐切换请求已提交",
+          description: "生效后刷新本页即可看到新档位。",
+          placement: "topRight",
+        });
       },
     },
   );
@@ -103,10 +122,18 @@ export default function BillingPage() {
   const resume = useMutation(
     () => jsonRequest<{ ok?: boolean }>(ApiRoutes.BillingResume, "POST"),
     {
+      onError: () => {
+        notification.error({ message: "恢复订阅失败", description: "请稍后重试或联系支持。", placement: "topRight" });
+        return false;
+      },
       onSuccess: () => {
         setCancelScheduled(false);
         setAwaitingRefresh(true);
-        toast.success("订阅已恢复，将正常续费；现在可以切换档位了");
+        notification.success({
+          message: "订阅已恢复",
+          description: "将正常续费，现在可以切换档位了。",
+          placement: "topRight",
+        });
       },
     },
   );
