@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
@@ -7,6 +8,7 @@ import pool from "@/lib/db";
 import { Routes, UserRole } from "@/lib/constants";
 import { isTrustedEmail } from "@/lib/auth/trusted-email";
 import { effectivePlan, activeCompPlan, type PlanId } from "@/lib/plans";
+import { sendWelcomeEmail } from "@/lib/email";
 
 // Debug configuration
 if (!process.env.AUTH_SECRET) {
@@ -118,6 +120,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
         user.id = inserted.rows[0].id;
         console.log("SignIn success: New trusted user created", user.id);
+
+        // 新用户（Google 首次登录建号）发欢迎/onboarding 邮件（best-effort，绝不阻断登录）。
+        const welcomeTo = user.email;
+        const welcomeName = user.name ?? null;
+        try {
+          after(async () => {
+            try {
+              const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+              await sendWelcomeEmail({ to: welcomeTo, name: welcomeName, appUrl });
+            } catch (err) {
+              console.error("welcome email (oauth) failed:", err);
+            }
+          });
+        } catch (err) {
+          console.error("welcome email (oauth) schedule failed:", err);
+        }
+
         return true;
       } catch (error) {
         console.error("SignIn callback error:", error);
