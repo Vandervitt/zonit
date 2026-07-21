@@ -16,6 +16,7 @@ export const PUBLIC_PATHS = [
   "/api/templates",
   "/api/track", // 公开采集端点：访客在租户域名匿名回传，无需登录
   "/api/cron", // Vercel Cron 端点：由各路由的 CRON_SECRET Bearer 自行鉴权
+  "/api/webhooks", // 支付渠道回调（Dodo/Creem）：服务器到服务器无登录态，靠各路由 standardwebhooks 签名验签鉴权
 ];
 
 type ProxyAuth = {
