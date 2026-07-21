@@ -115,4 +115,12 @@ describe("handleAuth 公开路径按段边界匹配", () => {
     const res = handleAuth(makeReq("/api/domains"));
     expect((res as Response | null)?.status).toBe(401);
   });
+
+  it("支付 webhook 端点未登录放行（靠签名验签鉴权）：/api/webhooks/dodo", () => {
+    expect(handleAuth(makeReq("/api/webhooks/dodo", { method: "POST" }))).toBeNull();
+  });
+
+  it("支付 webhook 端点未登录放行：/api/webhooks/creem", () => {
+    expect(handleAuth(makeReq("/api/webhooks/creem", { method: "POST" }))).toBeNull();
+  });
 });
