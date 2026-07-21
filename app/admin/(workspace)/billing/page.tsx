@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm } from "antd";
+import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm, App } from "antd";
 import { CheckOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PLANS, PLAN_ORDER } from "@/lib/plans";
@@ -30,9 +30,13 @@ function SuccessToast() {
 
 export default function BillingPage() {
   const { data: session } = useSession();
+  const { notification } = App.useApp();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   // 支付页在新标签打开后置为 true，提示用户完成支付后刷新本页以拉取最新套餐。
   const [awaitingRefresh, setAwaitingRefresh] = useState(false);
+  // 渠道侧订阅处于「周期末取消」（换档 409 才得知）：本地 DB 可能没记到期时间
+  // （历史事件乱序等失同步场景），据此兜底渲染取消提示条与「恢复订阅」入口。
+  const [cancelScheduled, setCancelScheduled] = useState(false);
 
   const currentPlanId = (session?.user?.plan ?? "free") as PlanId;
   const currentPlan = PLANS[currentPlanId];
@@ -76,10 +80,18 @@ export default function BillingPage() {
   const changePlan = useMutation(
     (planId: string) => jsonRequest<{ ok?: boolean }>(ApiRoutes.BillingChangePlan, "POST", { planId }),
     {
-      errorToast: (err) =>
-        err.code === "subscription_cancel_scheduled"
-          ? "订阅已安排取消，暂不能换档：请先点击上方「恢复订阅」，恢复后再切换"
-          : "套餐切换失败，请稍后重试或联系支持",
+      onError: (err) => {
+        if (err.code === "subscription_cancel_scheduled") {
+          setCancelScheduled(true);
+          notification.warning({
+            message: "订阅已安排取消，暂不能换档",
+            description: "当前订阅将在本计费周期结束时取消。请先在上方提示条点击「恢复订阅」，恢复后即可切换档位。",
+            placement: "topRight",
+          });
+          return false; // 已用 notification 提示，跳过默认 toast
+        }
+      },
+      errorToast: () => "套餐切换失败，请稍后重试或联系支持",
       onSuccess: () => {
         setAwaitingRefresh(true);
         toast.success("套餐切换请求已提交，生效后刷新本页即可看到新档位");
@@ -92,8 +104,9 @@ export default function BillingPage() {
     () => jsonRequest<{ ok?: boolean }>(ApiRoutes.BillingResume, "POST"),
     {
       onSuccess: () => {
+        setCancelScheduled(false);
         setAwaitingRefresh(true);
-        toast.success("订阅已恢复，将正常续费；刷新本页后取消提示会消失");
+        toast.success("订阅已恢复，将正常续费；现在可以切换档位了");
       },
     },
   );
@@ -153,13 +166,17 @@ export default function BillingPage() {
         <Text type="secondary">管理你的订阅套餐</Text>
       </div>
 
-      {billingExpiresAt && currentPlanId !== "free" && (
+      {(billingExpiresAt || cancelScheduled) && currentPlanId !== "free" && (
         <Alert
           type="warning"
           showIcon
           style={{ marginBottom: 24 }}
           message="订阅已取消"
-          description={`当前 ${currentPlan.label} 套餐权益保留至 ${new Date(billingExpiresAt).toLocaleString("zh-CN")}，到期后自动回落 Free。取消期间无法切换档位，恢复订阅后即可正常续费与换档。`}
+          description={
+            billingExpiresAt
+              ? `当前 ${currentPlan.label} 套餐权益保留至 ${new Date(billingExpiresAt).toLocaleString("zh-CN")}，到期后自动回落 Free。取消期间无法切换档位，恢复订阅后即可正常续费与换档。`
+              : `当前 ${currentPlan.label} 订阅已安排在本计费周期结束时取消，期间无法切换档位。点击「恢复订阅」可撤销取消并继续正常续费。`
+          }
           action={
             <Button size="small" type="primary" loading={resume.isMutating} onClick={() => void resume.trigger()}>
               恢复订阅
