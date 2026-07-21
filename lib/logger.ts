@@ -1,4 +1,5 @@
 import debug from "debug";
+import * as Sentry from "@sentry/nextjs";
 
 // 初始化 debug 命名空间
 const log = debug("zapbridge:request");
@@ -81,8 +82,8 @@ export async function withLogger<T>(
 
     internalLog(`[${id}] SUCCESS ${duration.toFixed(2)}ms`, logData);
 
-    // TODO: 后期在此处接入 Sentry
-    // Sentry.addBreadcrumb({ category: 'api', message: name, data: logData });
+    // 成功请求留一条面包屑，便于后续异常发生时回溯上下文（DSN 缺失时为 no-op）。
+    Sentry.addBreadcrumb({ category: "api", message: name, level: "info", data: logData });
 
     return result;
   } catch (error: unknown) {
@@ -109,8 +110,8 @@ export async function withLogger<T>(
 
     internalLog(`[${id}] FAILED ${duration.toFixed(2)}ms`, logData);
 
-    // TODO: 后期在此处接入 Sentry
-    // Sentry.captureException(error, { extra: logData });
+    // 请求级错误上报 Sentry（DSN 缺失时为 no-op）；throw 保持不变，交由上层处理。
+    Sentry.captureException(error, { extra: { log: logData } });
 
     throw error;
   }
