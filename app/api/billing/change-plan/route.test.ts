@@ -57,4 +57,17 @@ describe("POST /api/billing/change-plan", () => {
     changePlanMock.mockRejectedValue(new Error("dodo 402: payment failed"));
     expect((await POST(req({ planId: "agency" }))).status).toBe(500);
   });
+
+  it("订阅处于周期末取消（SDK err.status=409）→ 业务 409 subscription_cancel_scheduled", async () => {
+    const err = Object.assign(new Error("409 Subscription scheduled for cancellation"), { status: 409 });
+    changePlanMock.mockRejectedValue(err);
+    const res = await POST(req({ planId: "pro" }));
+    expect(res.status).toBe(409);
+    expect(await res.json()).toEqual({ error: "subscription_cancel_scheduled" });
+  });
+
+  it("仅凭错误文案也能识别取消排期 → 409", async () => {
+    changePlanMock.mockRejectedValue(new Error("Subscription scheduled for cancellation"));
+    expect((await POST(req({ planId: "pro" }))).status).toBe(409);
+  });
 });

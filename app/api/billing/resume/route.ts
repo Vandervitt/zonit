@@ -5,19 +5,12 @@ import { ApiErrors } from "@/lib/constants";
 import { getProvider } from "@/lib/billing/provider";
 import type { BillingProviderId } from "@/lib/billing/types";
 
-const PAID_PLANS = new Set(["starter", "pro", "agency"]);
-
-// 已订阅用户升/降档：改现有订阅的 product（走渠道 change-plan/upgrade API），
-// 禁止走 checkout 另开新订阅（会重复扣费）。档位落库由 subscription.plan_changed webhook 回写。
-export async function POST(request: Request) {
+// 恢复订阅：撤销周期末取消，订阅继续正常续费。
+// 到期标记的清除由渠道 plan_changed（cancel 标记翻转）webhook 回写。
+export async function POST() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: ApiErrors.UNAUTHORIZED }, { status: 401 });
-  }
-
-  const { planId } = (await request.json().catch(() => ({}))) as { planId?: string };
-  if (!planId || !PAID_PLANS.has(planId)) {
-    return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
 
   const result = await pool.query(
@@ -32,15 +25,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    await getProvider(providerId).changePlan(subscriptionId, planId);
+    await getProvider(providerId).resume(subscriptionId);
     return NextResponse.json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    // 渠道拒绝：订阅处于「周期末取消」状态时不允许换档 → 映射成业务 409，前端引导先恢复订阅。
-    const status = (err as { status?: number }).status;
-    if (status === 409 || /scheduled for cancellation/i.test(message)) {
-      return NextResponse.json({ error: "subscription_cancel_scheduled" }, { status: 409 });
-    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

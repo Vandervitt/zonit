@@ -76,10 +76,24 @@ export default function BillingPage() {
   const changePlan = useMutation(
     (planId: string) => jsonRequest<{ ok?: boolean }>(ApiRoutes.BillingChangePlan, "POST", { planId }),
     {
-      errorToast: () => "套餐切换失败，请稍后重试或联系支持",
+      errorToast: (err) =>
+        err.code === "subscription_cancel_scheduled"
+          ? "订阅已安排取消，暂不能换档：请先点击上方「恢复订阅」，恢复后再切换"
+          : "套餐切换失败，请稍后重试或联系支持",
       onSuccess: () => {
         setAwaitingRefresh(true);
         toast.success("套餐切换请求已提交，生效后刷新本页即可看到新档位");
+      },
+    },
+  );
+
+  // 撤销周期末取消，订阅恢复正常续费；到期标记由渠道 webhook 清除。
+  const resume = useMutation(
+    () => jsonRequest<{ ok?: boolean }>(ApiRoutes.BillingResume, "POST"),
+    {
+      onSuccess: () => {
+        setAwaitingRefresh(true);
+        toast.success("订阅已恢复，将正常续费；刷新本页后取消提示会消失");
       },
     },
   );
@@ -145,7 +159,12 @@ export default function BillingPage() {
           showIcon
           style={{ marginBottom: 24 }}
           message="订阅已取消"
-          description={`当前 ${currentPlan.label} 套餐权益保留至 ${new Date(billingExpiresAt).toLocaleString("zh-CN")}，到期后自动回落 Free。如需继续使用，可通过「管理订阅」恢复。`}
+          description={`当前 ${currentPlan.label} 套餐权益保留至 ${new Date(billingExpiresAt).toLocaleString("zh-CN")}，到期后自动回落 Free。取消期间无法切换档位，恢复订阅后即可正常续费与换档。`}
+          action={
+            <Button size="small" type="primary" loading={resume.isMutating} onClick={() => void resume.trigger()}>
+              恢复订阅
+            </Button>
+          }
         />
       )}
 

@@ -54,6 +54,16 @@ export function parseDodoEvent(event: AnyRec, map: DodoProductMap): BillingEvent
   const userId = userIdOf(d);
 
   if (SUB_ACTIVE.has(type)) {
+    // Dodo 切换取消标记时也会发 plan_changed：payload 仍标记取消中就按周期末取消
+    // 处理（幂等、与事件到达顺序无关），避免误清刚写入的到期时间。
+    if (d.cancel_at_next_billing_date === true) {
+      if (!userId) return { kind: "ignored" };
+      return {
+        kind: "subscription_cancel_scheduled",
+        userId,
+        expiresAt: stringField(d, "next_billing_date") ?? null,
+      };
+    }
     const productId = stringField(d, "product_id");
     const plan = productId ? map.planByProduct[productId] : undefined;
     if (!userId || !plan) return { kind: "ignored" };
