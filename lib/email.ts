@@ -63,6 +63,77 @@ export async function sendInvitationEmail({
   }
 }
 
+export async function sendWelcomeEmail({
+  to, name, appUrl,
+}: {
+  to: string;
+  name?: string | null;
+  appUrl: string;
+}) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const greeting = name ? escapeHtml(name) : "你好";
+  const startUrl = `${appUrl}/admin/landing-pages`;
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `欢迎加入 Zap Bridge，3 步上线你的第一张获客落地页`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 8px;">欢迎，${greeting} 👋</h2>
+          <p style="color:#555;margin:0 0 20px;">Zap Bridge 帮你不写代码、几分钟做出一张能跑广告、能收线索的出海落地页。三步就能跑通：</p>
+          <div style="background:#f7f9fc;padding:16px 18px;border-radius:8px;margin:0 0 20px;">
+            <p style="margin:0 0 10px;color:#111;"><strong>1. 建页</strong> —— 选行业模板，或 AI 一句话生成整页</p>
+            <p style="margin:0 0 10px;color:#111;"><strong>2. 绑定域名</strong> —— 发布到你自己的品牌域名，投放更可信</p>
+            <p style="margin:0;color:#111;"><strong>3. 开投收客</strong> —— 配好像素，收 WhatsApp / 表单线索</p>
+          </div>
+          <a href="${startUrl}" style="display:inline-block;background:#0070f3;color:#fff;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">开始建页</a>
+          <p style="font-size:13px;color:#888;margin-top:28px;">遇到任何问题，直接回复这封邮件，或在后台侧边栏点「联系创始人」找我。祝出单顺利 🚀</p>
+        </div>`,
+    });
+    // Resend SDK 不抛错，API 层错误经 error 字段返回：显式暴露，避免静默失败。
+    if (error) { console.error("Failed to send welcome email:", error); return { error }; }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send welcome email:", error);
+    return { error };
+  }
+}
+
+export async function sendFeedbackNotificationEmail({
+  to, source, message, meta, dashboardUrl,
+}: {
+  to: string;
+  source: string;
+  message: string;
+  meta: Record<string, string | undefined>;
+  dashboardUrl: string;
+}) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const rows = Object.entries(meta)
+    .filter(([, v]) => typeof v === "string" && v)
+    .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666;">${escapeHtml(k)}</td><td style="padding:4px 0;color:#111;">${escapeHtml(String(v))}</td></tr>`)
+    .join("");
+  try {
+    const data = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `💬 新用户反馈 · ${escapeHtml(source)}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 12px;">收到一条用户反馈</h2>
+          <div style="background:#f4f4f4;padding:15px;border-radius:5px;margin:0 0 16px;color:#111;white-space:pre-wrap;">${escapeHtml(message)}</div>
+          <table style="border-collapse:collapse;font-size:13px;">${rows}</table>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:#0070f3;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在超管收件箱查看</a></p>
+        </div>`,
+    });
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send feedback notification email:", error);
+    return { error };
+  }
+}
+
 export async function sendLeadNotificationEmail({
   to, pageName, fields, dashboardUrl,
 }: {

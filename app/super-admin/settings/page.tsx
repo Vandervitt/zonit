@@ -2,6 +2,7 @@ import pool from "@/lib/db";
 import { effectivePlan, activeCompPlan, type PlanId } from "@/lib/plans";
 import { UserRole } from "@/lib/constants";
 import { hostnameOf, appHostname } from "@/lib/host";
+import { getFounderContact } from "@/lib/platform-settings";
 import { SuperAdminSettingsClient, type SettingsData, type SuperAdminRow } from "./_client";
 
 async function getSuperAdmins(): Promise<SuperAdminRow[]> {
@@ -30,7 +31,7 @@ function adminWhitelistCount(): number {
 }
 
 export default async function SuperAdminSettingsPage() {
-  const admins = await getSuperAdmins();
+  const [admins, founderContact] = await Promise.all([getSuperAdmins(), getFounderContact()]);
 
   const data: SettingsData = {
     env: {
@@ -41,6 +42,7 @@ export default async function SuperAdminSettingsPage() {
     },
     admins,
     adminWhitelistCount: adminWhitelistCount(),
+    founderContact,
   };
 
   return <SuperAdminSettingsClient data={data} />;

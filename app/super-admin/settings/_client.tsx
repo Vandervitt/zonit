@@ -7,7 +7,9 @@ import type { ColumnsType } from "antd/es/table";
 import { PLANS, PLAN_ORDER, PLAN_FEATURE_ROWS, type PlanId } from "@/lib/plans";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { PlanBadge } from "@/components/billing/PlanBadge";
+import type { FounderContact } from "@/lib/platform-settings";
 import { PlatformHealth, type PlatformEnv } from "./PlatformHealth";
+import { FounderContactForm } from "./FounderContactForm";
 
 export interface SuperAdminRow {
   id: string;
@@ -20,6 +22,7 @@ export interface SettingsData {
   env: PlatformEnv;
   admins: SuperAdminRow[];
   adminWhitelistCount: number;
+  founderContact: FounderContact;
 }
 
 const adminColumns: ColumnsType<SuperAdminRow> = [
@@ -111,6 +114,8 @@ export function SuperAdminSettingsClient({ data }: { data: SettingsData }) {
 
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
         <PlatformHealth env={data.env} />
+
+        <FounderContactForm initial={data.founderContact} />
 
         <Card title="超管成员">
           <Alert

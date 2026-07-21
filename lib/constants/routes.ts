@@ -26,6 +26,7 @@ export enum ApiRoutes {
   UnsplashSearch = '/api/unsplash/search',
   LandingPages = '/api/landing-pages',
   Leads = '/api/leads',
+  Feedback = '/api/feedback',
   AiUsage = '/api/ai/usage',
   Analytics = '/api/analytics',
   Templates = '/api/templates',

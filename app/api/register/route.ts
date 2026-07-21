@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import bcrypt from "bcryptjs";
 import pool from "@/lib/db";
 import { ApiErrors } from "@/lib/constants";
 import { isTrustedEmail } from "@/lib/auth/trusted-email";
 import { withLogger } from "@/lib/logger";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -79,6 +80,21 @@ export async function POST(request: NextRequest) {
     }
 
     await client.query('COMMIT');
+
+    // 注册成功后发欢迎/onboarding 邮件（best-effort，COMMIT 之后调度，绝不影响注册结果；未配置 Resend 则跳过）。
+    try {
+      after(async () => {
+        try {
+          const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+          await sendWelcomeEmail({ to: email, name, appUrl });
+        } catch (err) {
+          console.error("welcome email (register) failed:", err);
+        }
+      });
+    } catch (err) {
+      console.error("welcome email (register) schedule failed:", err);
+    }
+
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {
     await client.query('ROLLBACK');

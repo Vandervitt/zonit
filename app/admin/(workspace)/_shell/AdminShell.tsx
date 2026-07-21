@@ -7,12 +7,20 @@ import { useSession, signOut } from "next-auth/react";
 import { Layout, Menu, Tag, Dropdown, Avatar, Typography } from "antd";
 import { ThunderboltFilled, LogoutOutlined } from "@ant-design/icons";
 import { ADMIN_NAV, resolveActiveNavKey } from "./nav";
+import { FounderContact } from "./FounderContact";
+import type { FounderContact as FounderContactData } from "@/lib/platform-settings";
 import { PLANS } from "@/lib/plans";
 import { BRAND } from "@/lib/theme/brand";
 
 const { Sider, Header, Content } = Layout;
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({
+  children,
+  founderContact,
+}: {
+  children: React.ReactNode;
+  founderContact: FounderContactData;
+}) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -33,14 +41,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <Layout style={{ minHeight: "100vh" }}>
       <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} theme="light" width={224}
         style={{ borderInlineEnd: "1px solid #eef3f9" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 20px" }}>
-          <span style={{ display: "grid", placeItems: "center", width: 30, height: 30,
-            borderRadius: 8, background: BRAND, color: "#fff" }}>
-            <ThunderboltFilled />
-          </span>
-          {!collapsed && <Typography.Text strong>Zap Bridge</Typography.Text>}
+        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 20px" }}>
+            <span style={{ display: "grid", placeItems: "center", width: 30, height: 30,
+              borderRadius: 8, background: BRAND, color: "#fff" }}>
+              <ThunderboltFilled />
+            </span>
+            {!collapsed && <Typography.Text strong>Zap Bridge</Typography.Text>}
+          </div>
+          <Menu mode="inline" selectedKeys={[selectedKey]} items={menuItems}
+            style={{ borderInlineEnd: 0, flex: 1 }} />
+          <FounderContact collapsed={collapsed} contact={founderContact} />
         </div>
-        <Menu mode="inline" selectedKeys={[selectedKey]} items={menuItems} style={{ borderInlineEnd: 0 }} />
       </Sider>
       <Layout>
         <Header style={{ display: "flex", alignItems: "center", justifyContent: "flex-end",
