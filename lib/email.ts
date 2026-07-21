@@ -63,6 +63,40 @@ export async function sendInvitationEmail({
   }
 }
 
+export async function sendFeedbackNotificationEmail({
+  to, source, message, meta, dashboardUrl,
+}: {
+  to: string;
+  source: string;
+  message: string;
+  meta: Record<string, string | undefined>;
+  dashboardUrl: string;
+}) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const rows = Object.entries(meta)
+    .filter(([, v]) => typeof v === "string" && v)
+    .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666;">${escapeHtml(k)}</td><td style="padding:4px 0;color:#111;">${escapeHtml(String(v))}</td></tr>`)
+    .join("");
+  try {
+    const data = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `💬 新用户反馈 · ${escapeHtml(source)}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 12px;">收到一条用户反馈</h2>
+          <div style="background:#f4f4f4;padding:15px;border-radius:5px;margin:0 0 16px;color:#111;white-space:pre-wrap;">${escapeHtml(message)}</div>
+          <table style="border-collapse:collapse;font-size:13px;">${rows}</table>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:#0070f3;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在超管收件箱查看</a></p>
+        </div>`,
+    });
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send feedback notification email:", error);
+    return { error };
+  }
+}
+
 export async function sendLeadNotificationEmail({
   to, pageName, fields, dashboardUrl,
 }: {

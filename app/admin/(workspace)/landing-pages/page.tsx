@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import { Table, Button, Tag, Space, Popconfirm, Typography, App } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
+import { FeedbackModal } from "@/components/admin/FeedbackModal";
+import type { FeedbackSource } from "@/lib/feedback";
 import {
   landingEditorPath,
   apiLandingUnpublishPath,
@@ -31,21 +34,34 @@ function hasUnpublishedChanges(r: PageRow): boolean {
   return r.status === "published" && r.published_at !== null && new Date(r.updated_at) > new Date(r.published_at);
 }
 
+// 流失点反馈的快捷原因（取消发布 / 删除共用）。
+const CHURN_REASONS = ["太复杂 / 不好用", "效果不好 / 没收到线索", "改用其他工具了", "只是先试试 / 暂时不用", "其他原因"];
+
+interface FeedbackState {
+  source: FeedbackSource;
+  title: string;
+  pageId: string;
+  pageName: string;
+}
+
 export default function LandingPagesPage() {
   const { message } = App.useApp();
   const { data, error, mutate, isLoading } = useSWR<PageRow[]>(ApiRoutes.LandingPages);
+  const [feedback, setFeedback] = useState<FeedbackState | null>(null);
 
-  async function unpublish(id: string) {
+  async function unpublish(id: string, name: string) {
     const res = await fetch(apiLandingUnpublishPath(id), { method: "POST" });
     if (!res.ok) { message.error("取消发布失败"); return; }
     message.success("已取消发布");
     void mutate();
+    setFeedback({ source: "unpublish", title: "为什么取消发布？", pageId: id, pageName: name });
   }
-  async function remove(id: string) {
+  async function remove(id: string, name: string) {
     const res = await fetch(apiLandingPagePath(id), { method: "DELETE" });
     if (!res.ok) { message.error("删除失败"); return; }
     message.success("已删除");
     void mutate();
+    setFeedback({ source: "delete", title: "为什么删除这个页面？", pageId: id, pageName: name });
   }
   async function duplicate(id: string) {
     const res = await fetch(apiLandingDuplicatePath(id), { method: "POST" });
@@ -111,17 +127,26 @@ export default function LandingPagesPage() {
                   description={r.bound_domain ? `线上页面将立即从 ${r.bound_domain} 下线，若有广告在投请先确认。` : "线上页面将立即下线。"}
                   okText="取消发布"
                   okButtonProps={{ danger: true }}
-                  onConfirm={() => unpublish(r.id)}
+                  onConfirm={() => unpublish(r.id, r.name)}
                 >
                   <a>取消发布</a>
                 </Popconfirm>
               )}
-              <Popconfirm title="确定删除该落地页？" okText="删除" okButtonProps={{ danger: true }} onConfirm={() => remove(r.id)}>
+              <Popconfirm title="确定删除该落地页？" okText="删除" okButtonProps={{ danger: true }} onConfirm={() => remove(r.id, r.name)}>
                 <a style={{ color: SEMANTIC.error }}>删除</a>
               </Popconfirm>
             </Space>
           ) },
         ]} />
+      <FeedbackModal
+        open={feedback !== null}
+        onClose={() => setFeedback(null)}
+        source={feedback?.source ?? "general"}
+        title={feedback?.title ?? ""}
+        prompt="一句话帮我们改进，只有创始人会看到（选填）。"
+        quickReasons={CHURN_REASONS}
+        context={{ pageId: feedback?.pageId, pageName: feedback?.pageName }}
+      />
     </Space>
   );
 }
