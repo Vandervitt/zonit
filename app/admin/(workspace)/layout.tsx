@@ -1,10 +1,12 @@
+import { getFounderContact } from "@/lib/platform-settings";
 import { AdminProviders } from "./_shell/AdminProviders";
 import { AdminShell } from "./_shell/AdminShell";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const founderContact = await getFounderContact();
   return (
     <AdminProviders>
-      <AdminShell>{children}</AdminShell>
+      <AdminShell founderContact={founderContact}>{children}</AdminShell>
     </AdminProviders>
   );
 }

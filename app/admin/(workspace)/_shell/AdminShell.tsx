@@ -8,12 +8,19 @@ import { Layout, Menu, Tag, Dropdown, Avatar, Typography } from "antd";
 import { ThunderboltFilled, LogoutOutlined } from "@ant-design/icons";
 import { ADMIN_NAV, resolveActiveNavKey } from "./nav";
 import { FounderContact } from "./FounderContact";
+import type { FounderContact as FounderContactData } from "@/lib/platform-settings";
 import { PLANS } from "@/lib/plans";
 import { BRAND } from "@/lib/theme/brand";
 
 const { Sider, Header, Content } = Layout;
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({
+  children,
+  founderContact,
+}: {
+  children: React.ReactNode;
+  founderContact: FounderContactData;
+}) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -44,7 +51,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </div>
           <Menu mode="inline" selectedKeys={[selectedKey]} items={menuItems}
             style={{ borderInlineEnd: 0, flex: 1 }} />
-          <FounderContact collapsed={collapsed} />
+          <FounderContact collapsed={collapsed} contact={founderContact} />
         </div>
       </Sider>
       <Layout>
