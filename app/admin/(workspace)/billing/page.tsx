@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Typography, Card, Descriptions, Button, Space } from "antd";
+import { Typography, Card, Descriptions, Button, Space, Alert } from "antd";
 import { CheckOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PLANS, PLAN_ORDER } from "@/lib/plans";
@@ -31,6 +31,8 @@ function SuccessToast() {
 export default function BillingPage() {
   const { data: session } = useSession();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  // 支付页在新标签打开后置为 true，提示用户完成支付后刷新本页以拉取最新套餐。
+  const [awaitingRefresh, setAwaitingRefresh] = useState(false);
 
   const currentPlanId = (session?.user?.plan ?? "free") as PlanId;
   const currentPlan = PLANS[currentPlanId];
@@ -41,8 +43,18 @@ export default function BillingPage() {
     {
       errorToast: () => "无法创建结账链接，请稍后重试",
       onSuccess: (res) => {
-        if (res.checkoutUrl) window.location.href = res.checkoutUrl;
-        else toast.error("无法创建结账链接，请稍后重试");
+        if (!res.checkoutUrl) {
+          toast.error("无法创建结账链接，请稍后重试");
+          return;
+        }
+        // 新标签打开支付页，保留本页；被浏览器拦截弹窗时退回当前标签跳转。
+        const win = window.open(res.checkoutUrl, "_blank", "noopener,noreferrer");
+        if (win) {
+          setAwaitingRefresh(true);
+          toast.info("支付页已在新标签页打开，完成后请刷新本页查看最新套餐");
+        } else {
+          window.location.href = res.checkoutUrl;
+        }
       },
     },
   );
@@ -111,6 +123,21 @@ export default function BillingPage() {
         </Title>
         <Text type="secondary">管理你的订阅套餐</Text>
       </div>
+
+      {awaitingRefresh && (
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginBottom: 24 }}
+          message="支付完成后请刷新页面"
+          description="结账已在新标签页打开。完成支付后，点击右侧按钮刷新以显示最新的订阅档位。"
+          action={
+            <Button size="small" type="primary" onClick={() => window.location.reload()}>
+              刷新页面
+            </Button>
+          }
+        />
+      )}
 
       <Card
         title="当前套餐"
