@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Typography, Card, Descriptions, Button, Space, Alert } from "antd";
+import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm } from "antd";
 import { CheckOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PLANS, PLAN_ORDER } from "@/lib/plans";
@@ -72,9 +72,22 @@ export default function BillingPage() {
     },
   );
 
-  async function handleUpgrade(planId: string) {
+  // 已订阅用户升/降档：改现有订阅（渠道按比例计费），不得走 checkout 另开订阅（会重复扣费）。
+  const changePlan = useMutation(
+    (planId: string) => jsonRequest<{ ok?: boolean }>(ApiRoutes.BillingChangePlan, "POST", { planId }),
+    {
+      errorToast: () => "套餐切换失败，请稍后重试或联系支持",
+      onSuccess: () => {
+        setAwaitingRefresh(true);
+        toast.success("套餐切换请求已提交，生效后刷新本页即可看到新档位");
+      },
+    },
+  );
+
+  async function handleSelectPlan(planId: string) {
     setLoadingPlan(planId);
-    await checkout.trigger(planId);
+    if (currentPlanId === "free") await checkout.trigger(planId);
+    else await changePlan.trigger(planId);
     setLoadingPlan(null);
   }
 
@@ -141,8 +154,8 @@ export default function BillingPage() {
           type="info"
           showIcon
           style={{ marginBottom: 24 }}
-          message="支付完成后请刷新页面"
-          description="结账已在新标签页打开。完成支付后，点击右侧按钮刷新以显示最新的订阅档位。"
+          message="操作完成后请刷新页面"
+          description="支付或套餐切换生效后，点击右侧按钮刷新以显示最新的订阅档位。"
           action={
             <Button size="small" type="primary" onClick={() => window.location.reload()}>
               刷新页面
@@ -177,53 +190,67 @@ export default function BillingPage() {
         <Descriptions items={currentPlanDescItems} column={1} size="small" />
       </Card>
 
-      {currentIdx < PLAN_ORDER.length - 1 && (
-        <div>
-          <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
-            可升级套餐
-          </Text>
-          <Space direction="vertical" style={{ width: "100%" }} size={12}>
-            {PLAN_ORDER.slice(currentIdx + 1).map((planId) => {
-              const plan = PLANS[planId];
-              const isLoading = loadingPlan === planId;
-              return (
-                <Card key={planId}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-                    <div style={{ flex: 1 }}>
-                      <Space style={{ marginBottom: 8 }}>
-                        <PlanBadge plan={planId} />
-                        <Text strong>{plan.priceText}</Text>
-                      </Space>
-                      <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
-                        包含 {PLANS[PLAN_ORDER[PLAN_ORDER.indexOf(planId) - 1]].label} 全部权益
-                      </Text>
-                      <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                        {plan.highlights.map((h) => (
-                          <li key={h} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                            <CheckOutlined style={{ color: SEMANTIC.success, fontSize: 12, flexShrink: 0 }} />
-                            <Text type="secondary" style={{ fontSize: 12 }}>
-                              {h}
-                            </Text>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <Button
-                      type="primary"
-                      loading={isLoading}
-                      disabled={!!loadingPlan && !isLoading}
-                      onClick={() => handleUpgrade(planId)}
-                      style={{ flexShrink: 0 }}
-                    >
-                      升级
-                    </Button>
+      <div>
+        <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
+          {currentPlanId === "free" ? "可升级套餐" : "更换套餐（立即生效，差额按比例计费/抵扣）"}
+        </Text>
+        <Space direction="vertical" style={{ width: "100%" }} size={12}>
+          {PLAN_ORDER.filter((p) => p !== "free" && p !== currentPlanId).map((planId) => {
+            const plan = PLANS[planId];
+            const isLoading = loadingPlan === planId;
+            const isUpgrade = PLAN_ORDER.indexOf(planId) > currentIdx;
+            const button = (
+              <Button
+                type={isUpgrade ? "primary" : "default"}
+                loading={isLoading}
+                disabled={!!loadingPlan && !isLoading}
+                onClick={isUpgrade || currentPlanId === "free" ? () => handleSelectPlan(planId) : undefined}
+                style={{ flexShrink: 0 }}
+              >
+                {isUpgrade ? "升级" : "降级"}
+              </Button>
+            );
+            return (
+              <Card key={planId}>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+                  <div style={{ flex: 1 }}>
+                    <Space style={{ marginBottom: 8 }}>
+                      <PlanBadge plan={planId} />
+                      <Text strong>{plan.priceText}</Text>
+                    </Space>
+                    <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
+                      包含 {PLANS[PLAN_ORDER[PLAN_ORDER.indexOf(planId) - 1]].label} 全部权益
+                    </Text>
+                    <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                      {plan.highlights.map((h) => (
+                        <li key={h} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                          <CheckOutlined style={{ color: SEMANTIC.success, fontSize: 12, flexShrink: 0 }} />
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {h}
+                          </Text>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </Card>
-              );
-            })}
-          </Space>
-        </div>
-      )}
+                  {isUpgrade ? (
+                    button
+                  ) : (
+                    <Popconfirm
+                      title="确认降级？"
+                      description={`将立即切换到 ${plan.label}，超出新档上限的功能会受限，差额按比例抵扣。`}
+                      okText="确认降级"
+                      cancelText="再想想"
+                      onConfirm={() => handleSelectPlan(planId)}
+                    >
+                      {button}
+                    </Popconfirm>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </Space>
+      </div>
 
       {currentPlanId !== "free" && (
         <Text type="secondary" style={{ display: "block", marginTop: 24, textAlign: "center", fontSize: 12 }}>

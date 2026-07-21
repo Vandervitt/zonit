@@ -33,6 +33,7 @@ export enum ApiRoutes {
   Register = '/api/register',
   BillingCheckout = '/api/billing/checkout',
   BillingPortal = '/api/billing/portal',
+  BillingChangePlan = '/api/billing/change-plan',
   AdminTemplates = '/api/admin/templates',
   AdminInvite = '/api/admin/invite',
 }
