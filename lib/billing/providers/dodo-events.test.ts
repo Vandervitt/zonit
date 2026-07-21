@@ -59,12 +59,42 @@ describe("parseDodoEvent — 订阅激活", () => {
 });
 
 describe("parseDodoEvent — 订阅结束回落 free", () => {
-  for (const t of ["subscription.cancelled", "subscription.expired", "subscription.on_hold", "subscription.failed"]) {
+  for (const t of ["subscription.expired", "subscription.on_hold", "subscription.failed"]) {
     it(`${t} → subscription_ended`, () => {
       const r = parseDodoEvent(sub(t, "pdt_pro"), map);
       expect(r).toEqual({ kind: "subscription_ended", userId: "u1" });
     });
   }
+});
+
+describe("parseDodoEvent — 周期末取消：保留权益并记录到期时间", () => {
+  it("cancelled + cancel_at_next_billing_date=true → cancel_scheduled(带 next_billing_date)", () => {
+    const r = parseDodoEvent(
+      sub("subscription.cancelled", "pdt_agency", {
+        cancel_at_next_billing_date: true,
+        next_billing_date: "2026-08-04T00:00:00Z",
+      }),
+      map,
+    );
+    expect(r).toEqual({
+      kind: "subscription_cancel_scheduled",
+      userId: "u1",
+      expiresAt: "2026-08-04T00:00:00Z",
+    });
+  });
+
+  it("cancelled + cancel_at_next_billing_date=false（立即取消）→ subscription_ended", () => {
+    const r = parseDodoEvent(
+      sub("subscription.cancelled", "pdt_agency", { cancel_at_next_billing_date: false }),
+      map,
+    );
+    expect(r).toEqual({ kind: "subscription_ended", userId: "u1" });
+  });
+
+  it("cancelled 缺 cancel_at_next_billing_date 字段 → 视为周期末取消（不提前剥夺已付权益）", () => {
+    const r = parseDodoEvent(sub("subscription.cancelled", "pdt_agency"), map);
+    expect(r).toMatchObject({ kind: "subscription_cancel_scheduled", userId: "u1" });
+  });
 });
 
 describe("parseDodoEvent — 一次性充值", () => {

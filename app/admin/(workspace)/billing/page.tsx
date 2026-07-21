@@ -37,6 +37,8 @@ export default function BillingPage() {
   const currentPlanId = (session?.user?.plan ?? "free") as PlanId;
   const currentPlan = PLANS[currentPlanId];
   const currentIdx = PLAN_ORDER.indexOf(currentPlanId);
+  // 周期末取消：权益保留至该时间，到期由渠道 expired 事件回落 free。
+  const billingExpiresAt = session?.user?.billingExpiresAt ?? null;
 
   const checkout = useMutation(
     (planId: string) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCheckout, "POST", { planId }),
@@ -123,6 +125,16 @@ export default function BillingPage() {
         </Title>
         <Text type="secondary">管理你的订阅套餐</Text>
       </div>
+
+      {billingExpiresAt && currentPlanId !== "free" && (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 24 }}
+          message="订阅已取消"
+          description={`当前 ${currentPlan.label} 套餐权益保留至 ${new Date(billingExpiresAt).toLocaleString("zh-CN")}，到期后自动回落 Free。如需继续使用，可通过「管理订阅」恢复。`}
+        />
+      )}
 
       {awaitingRefresh && (
         <Alert
