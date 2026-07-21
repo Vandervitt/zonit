@@ -44,7 +44,7 @@ function HeroBackground({ data, theme, logo, preview }: { data: HeroSection; the
           {data.secondaryCta && <Cta cta={data.secondaryCta} theme={theme} variant="secondary" preview={preview} />}
         </div>
         {data.endorsementText && <p className="mt-4 text-sm text-slate-500">{data.endorsementText}</p>}
-        {data.showcase && <Media media={data.showcase} className="mt-10 w-full rounded-2xl object-cover shadow-xl" />}
+        {data.showcase && <Media media={data.showcase} priority className="mt-10 w-full rounded-2xl object-cover shadow-xl" />}
       </div>
     </section>
   );
@@ -85,7 +85,7 @@ function HeroSplit({
         </div>
         {data.showcase && (
           <div className={side === "left" ? "lg:order-1" : ""}>
-            <Media media={data.showcase} className="w-full rounded-2xl object-cover shadow-xl" />
+            <Media media={data.showcase} priority className="w-full rounded-2xl object-cover shadow-xl" />
           </div>
         )}
       </div>
@@ -113,7 +113,7 @@ function HeroCentered({ data, theme, logo, preview }: { data: HeroSection; theme
         </div>
         {data.endorsementText && <p className="mt-4 text-sm text-slate-500">{data.endorsementText}</p>}
         {data.showcase && (
-          <Media media={data.showcase} className="mx-auto mt-10 w-full rounded-2xl object-cover shadow-xl" />
+          <Media media={data.showcase} priority className="mx-auto mt-10 w-full rounded-2xl object-cover shadow-xl" />
         )}
       </div>
     </section>
