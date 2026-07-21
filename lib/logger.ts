@@ -111,7 +111,7 @@ export async function withLogger<T>(
     internalLog(`[${id}] FAILED ${duration.toFixed(2)}ms`, logData);
 
     // 请求级错误上报 Sentry（DSN 缺失时为 no-op）；throw 保持不变，交由上层处理。
-    Sentry.captureException(error, { extra: logData });
+    Sentry.captureException(error, { extra: { log: logData } });
 
     throw error;
   }
