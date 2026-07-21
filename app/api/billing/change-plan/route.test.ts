@@ -41,9 +41,11 @@ describe("POST /api/billing/change-plan", () => {
     expect(changePlanMock).not.toHaveBeenCalled();
   });
 
-  it("无有效订阅 → 404", async () => {
+  it("无有效订阅 → 404 且返回业务码 no_active_subscription", async () => {
     queryMock.mockResolvedValue({ rows: [{ billing_provider: null, billing_subscription_id: null }] });
-    expect((await POST(req({ planId: "pro" }))).status).toBe(404);
+    const res = await POST(req({ planId: "pro" }));
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "no_active_subscription" });
     expect(changePlanMock).not.toHaveBeenCalled();
   });
 

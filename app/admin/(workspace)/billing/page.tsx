@@ -104,6 +104,15 @@ export default function BillingPage() {
           });
           return false; // 已用 notification 提示，跳过默认 toast
         }
+        if (err.code === "no_active_subscription") {
+          // 赠送套餐或无有效订阅：无自助订阅可改，重试无效，据实说明。
+          notification.warning({
+            message: "当前套餐无法在此切换",
+            description: "你的套餐来自管理员赠送、暂无自助订阅，无法在此升降档。如需调整请联系我们。",
+            placement: "topRight",
+          });
+          return false;
+        }
         notification.error({ message: "套餐切换失败", description: "请稍后重试或联系支持。", placement: "topRight" });
         return false;
       },
