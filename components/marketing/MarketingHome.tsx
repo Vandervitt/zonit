@@ -18,7 +18,7 @@ import {
 import { Routes } from "@/lib/constants";
 import { PlanComparison } from "@/components/billing/PlanComparison";
 import { ctaPrimary, ctaGhost, gradientText, glassCard, pill, glowAura } from "@/lib/theme";
-import { Backdrop, SiteNav, SiteFooter, SectionHead, fadeUp, type Fonts } from "./chrome";
+import { Backdrop, SiteNav, SiteFooter, SectionHead, type Fonts } from "./chrome";
 
 /* ------------------------------------------------------------------ *
  * 数据
@@ -104,6 +104,14 @@ const FUNNEL = [
  * Hero
  * ------------------------------------------------------------------ */
 
+// 首屏入场：仅做位移、不做 opacity 淡入。SSR 即以 translateY 渲染出可见文本，
+// LCP 的 H1 首帧即可上屏（不必等客户端 JS hydrate 播放动画），hydrate 后滑入到位。
+// 位移不计入 CLS。below-fold 区块仍保留 opacity 淡入（whileInView），滚动进入视口时揭示。
+const heroRise = {
+  hidden: { y: 24 },
+  show: { y: 0 },
+};
+
 function Hero({ fonts }: { fonts: Fonts }) {
   return (
     <section className="relative px-6 pt-36 pb-20 sm:pt-44">
@@ -113,7 +121,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
         variants={{ show: { transition: { staggerChildren: 0.12 } } }}
         className="mx-auto max-w-4xl text-center"
       >
-        <motion.div variants={fadeUp} transition={{ duration: 0.6, ease: "easeOut" }}>
+        <motion.div variants={heroRise} transition={{ duration: 0.6, ease: "easeOut" }}>
           <span className={`${pill} uppercase tracking-[0.18em] ${fonts.mono}`}>
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-aqua-500" />
             海外获客落地页引擎
@@ -121,7 +129,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
         </motion.div>
 
         <motion.h1
-          variants={fadeUp}
+          variants={heroRise}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className={`mt-7 text-4xl font-bold leading-[1.12] tracking-tight text-foreground sm:text-6xl ${fonts.display}`}
         >
@@ -131,7 +139,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
         </motion.h1>
 
         <motion.p
-          variants={fadeUp}
+          variants={heroRise}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
         >
@@ -140,7 +148,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
         </motion.p>
 
         <motion.div
-          variants={fadeUp}
+          variants={heroRise}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
@@ -154,7 +162,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
         </motion.div>
 
         <motion.p
-          variants={fadeUp}
+          variants={heroRise}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className={`mt-5 text-xs tracking-wide text-muted-foreground/80 ${fonts.mono}`}
         >

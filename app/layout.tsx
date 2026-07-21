@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import { Syne, Sora, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { fontBody, fontHead, fontMono } from "@/lib/fonts";
 import { Providers } from "./providers";
 import "./globals.css";
 
-// 全局字体基座（玫瑰智核）：正文 Sora、标题 Syne、等宽 JetBrains Mono。
-// 以 CSS 变量注入，由 styles/theme.css 的 --font-sans / --font-display / --font-mono 引用。
-const fontBody = Sora({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-body", display: "swap" });
-const fontHead = Syne({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-head", display: "swap" });
-const fontMono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono-app", display: "swap" });
+// 字体基座统一在 lib/fonts.ts 定义（单一实例），此处以 CSS 变量注入：
+// styles/theme.css 的 --font-sans / --font-display 与 globals.css 的 --font-mono 引用这些变量。
 
 export const metadata: Metadata = {
   title: "Zap Bridge",
