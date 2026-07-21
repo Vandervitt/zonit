@@ -12,12 +12,7 @@ export interface DodoProductMap {
 }
 
 const SUB_ACTIVE = new Set(["subscription.active", "subscription.renewed", "subscription.plan_changed"]);
-const SUB_ENDED = new Set([
-  "subscription.cancelled",
-  "subscription.expired",
-  "subscription.on_hold",
-  "subscription.failed",
-]);
+const SUB_ENDED = new Set(["subscription.expired", "subscription.on_hold", "subscription.failed"]);
 
 type AnyRec = Record<string, unknown>;
 
@@ -74,6 +69,19 @@ export function parseDodoEvent(event: AnyRec, map: DodoProductMap): BillingEvent
   if (SUB_ENDED.has(type)) {
     if (!userId) return { kind: "ignored" };
     return { kind: "subscription_ended", userId };
+  }
+
+  // 取消：Dodo 默认周期末取消（cancel_at_next_billing_date），已付周期内权益保留，
+  // 到期由 subscription.expired 回落 free；仅显式立即取消（false）才马上结束。
+  // 字段缺失按周期末处理，避免提前剥夺已付权益。
+  if (type === "subscription.cancelled") {
+    if (!userId) return { kind: "ignored" };
+    if (d.cancel_at_next_billing_date === false) return { kind: "subscription_ended", userId };
+    return {
+      kind: "subscription_cancel_scheduled",
+      userId,
+      expiresAt: stringField(d, "next_billing_date") ?? stringField(d, "cancelled_at") ?? null,
+    };
   }
 
   // 一次性充值：payment.succeeded 且不属于订阅（订阅首付由 subscription.* 处理，避免双计）。

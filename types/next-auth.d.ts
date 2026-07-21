@@ -8,6 +8,8 @@ declare module "next-auth" {
       id: string;
       plan: PlanId;
       role: UserRole;
+      /** 周期末取消的权益到期时间（ISO）；未取消为 null。 */
+      billingExpiresAt: string | null;
     };
   }
 }
@@ -16,5 +18,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     plan: PlanId;
     role: UserRole;
+    billingExpiresAt?: string | null;
   }
 }

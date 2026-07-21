@@ -148,7 +148,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const userId = user?.id ?? token.sub;
         if (userId) {
           const r = await pool.query(
-            "SELECT email, plan, comp_plan, comp_plan_expires_at, role, trial_expires_at, disabled_at FROM users WHERE id = $1",
+            "SELECT email, plan, comp_plan, comp_plan_expires_at, role, trial_expires_at, disabled_at, billing_expires_at FROM users WHERE id = $1",
             [userId]
           );
           const userData = r.rows[0];
@@ -186,6 +186,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
             const comp = activeCompPlan(userData.comp_plan ?? null, userData.comp_plan_expires_at, new Date());
             token.plan = effectivePlan(currentPlan as PlanId, comp);
+            // 周期末取消的到期时间（无取消时为 null），billing 页展示「权益保留至 X」用。
+            token.billingExpiresAt = userData.billing_expires_at
+              ? new Date(userData.billing_expires_at).toISOString()
+              : null;
             token.role = (isHardwareAdmin ? UserRole.SUPER_ADMIN : (userData.role ?? UserRole.USER)) as UserRole;
           }
         }
@@ -199,6 +203,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.id = token.sub!;
       session.user.plan = token.plan as PlanId;
       session.user.role = token.role as UserRole;
+      session.user.billingExpiresAt = (token.billingExpiresAt as string | null) ?? null;
       return session;
     },
   },
