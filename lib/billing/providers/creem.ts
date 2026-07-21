@@ -1,22 +1,96 @@
-// Creem provider 占位。Creem KYC 已通过、留作备份渠道，但产品与提现尚未就绪，
-// 暂不实现具体逻辑。super-admin 切到 creem 时 isConfigured() 返回 false，
-// 结账/门户接口据此给出「渠道未配置」的明确报错，而非静默失败。
-import type { BillingEvent, BillingProvider } from "../types";
+// Creem provider 实现（备份收款渠道）。REST 很薄，直接 fetch，不引入 SDK。
+// 验签：HMAC-SHA256(raw body, CREEM_WEBHOOK_SECRET) 十六进制，对比 creem-signature 头。
+import crypto from "crypto";
+import type { PlanId } from "@/lib/plans";
+import type { BillingEvent, BillingProvider, CreateCheckoutInput } from "../types";
+import { parseCreemEvent, type CreemProductMap } from "./creem-events";
 
-const NOT_IMPLEMENTED = "Creem 收款渠道尚未配置（占位）。请在 super-admin 切回 Dodo，或先在 Creem 完成产品与提现设置。";
+export function creemProductMap(): CreemProductMap {
+  const planByProduct: Record<string, PlanId> = {};
+  const add = (id: string | undefined, plan: PlanId) => { if (id) planByProduct[id] = plan; };
+  add(process.env.CREEM_PRODUCT_STARTER, "starter");
+  add(process.env.CREEM_PRODUCT_PRO, "pro");
+  add(process.env.CREEM_PRODUCT_AGENCY, "agency");
+
+  const creditsByProduct: Record<string, number> = {};
+  if (process.env.CREEM_CREDITS_50) creditsByProduct[process.env.CREEM_CREDITS_50] = 50;
+  if (process.env.CREEM_CREDITS_200) creditsByProduct[process.env.CREEM_CREDITS_200] = 200;
+
+  return { planByProduct, creditsByProduct };
+}
+
+function productForPlan(planId: string): string | undefined {
+  const byPlan: Record<string, string | undefined> = {
+    starter: process.env.CREEM_PRODUCT_STARTER,
+    pro: process.env.CREEM_PRODUCT_PRO,
+    agency: process.env.CREEM_PRODUCT_AGENCY,
+  };
+  return byPlan[planId];
+}
+
+function apiBase(): string {
+  return process.env.CREEM_ENVIRONMENT === "live_mode" ? "https://api.creem.io" : "https://test-api.creem.io";
+}
+
+async function creemPost<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${apiBase()}${path}`, {
+    method: "POST",
+    headers: { "x-api-key": process.env.CREEM_API_KEY!, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`creem ${res.status}: ${text.slice(0, 300)}`);
+  }
+  return (await res.json()) as T;
+}
 
 export const creemProvider: BillingProvider = {
   id: "creem",
+
   isConfigured(): boolean {
-    return false;
+    return Boolean(
+      process.env.CREEM_API_KEY &&
+      process.env.CREEM_WEBHOOK_SECRET &&
+      process.env.CREEM_PRODUCT_STARTER &&
+      process.env.CREEM_PRODUCT_PRO &&
+      process.env.CREEM_PRODUCT_AGENCY,
+    );
   },
-  async createCheckout(): Promise<string> {
-    throw new Error(NOT_IMPLEMENTED);
+
+  async createCheckout({ planId, email, userId, baseUrl }: CreateCheckoutInput): Promise<string> {
+    const productId = productForPlan(planId);
+    if (!productId) throw new Error(`No Creem product configured for plan: ${planId}`);
+
+    const session = await creemPost<{ checkout_url?: string; url?: string }>("/v1/checkouts", {
+      product_id: productId,
+      success_url: `${baseUrl}/admin/billing?success=1`,
+      customer: { email },
+      metadata: { user_id: userId },
+    });
+    const url = session.checkout_url ?? session.url;
+    if (!url) throw new Error("Creem returned no checkout_url");
+    return url;
   },
-  async getPortalUrl(): Promise<string> {
-    throw new Error(NOT_IMPLEMENTED);
+
+  async getPortalUrl(customerId: string): Promise<string> {
+    const res = await creemPost<{ customer_portal_link?: string }>("/v1/customers/billing", {
+      customer_id: customerId,
+    });
+    if (!res.customer_portal_link) throw new Error("Creem returned no customer_portal_link");
+    return res.customer_portal_link;
   },
-  async verifyAndParse(): Promise<BillingEvent> {
-    throw new Error(NOT_IMPLEMENTED);
+
+  async verifyAndParse(rawBody: string, headers: Record<string, string>): Promise<BillingEvent> {
+    const secret = process.env.CREEM_WEBHOOK_SECRET;
+    const signature = headers["creem-signature"] ?? "";
+    if (!secret || !signature) throw new Error("Missing creem signature");
+    const digest = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+    const ok =
+      digest.length === signature.length &&
+      crypto.timingSafeEqual(Buffer.from(digest, "utf8"), Buffer.from(signature, "utf8"));
+    if (!ok) throw new Error("Invalid creem signature");
+    const event = JSON.parse(rawBody) as Record<string, unknown>;
+    return parseCreemEvent(event, creemProductMap());
   },
 };

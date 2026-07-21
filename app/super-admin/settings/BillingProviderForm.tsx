@@ -57,7 +57,7 @@ export function BillingProviderForm({ initial }: { initial: BillingProviderState
               <Space>Dodo Payments {statusTag(initial.dodoConfigured)}</Space>
             </Radio>
             <Radio value="creem">
-              <Space>Creem {statusTag(initial.creemConfigured)}<Typography.Text type="secondary">（备份，占位）</Typography.Text></Space>
+              <Space>Creem {statusTag(initial.creemConfigured)}<Typography.Text type="secondary">（备份渠道）</Typography.Text></Space>
             </Radio>
           </Space>
         </Radio.Group>
