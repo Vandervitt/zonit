@@ -67,6 +67,18 @@ export const dodoProvider: BillingProvider = {
     return session.link;
   },
 
+  async changePlan(subscriptionId: string, planId: string): Promise<void> {
+    const productId = productForPlan(planId);
+    if (!productId) throw new Error(`No Dodo product configured for plan: ${planId}`);
+    // 按比例立即计费/抵扣；扣款失败则不切换（避免降到付不起的档还生效）。
+    await client().subscriptions.changePlan(subscriptionId, {
+      product_id: productId,
+      quantity: 1,
+      proration_billing_mode: "prorated_immediately",
+      on_payment_failure: "prevent_change",
+    });
+  },
+
   async verifyAndParse(rawBody: string, headers: Record<string, string>): Promise<BillingEvent> {
     const wh = new Webhook(process.env.DODO_PAYMENTS_WEBHOOK_KEY!);
     // 验签失败会抛错，交由路由返回 401。

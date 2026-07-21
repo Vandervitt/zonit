@@ -81,6 +81,16 @@ export const creemProvider: BillingProvider = {
     return res.customer_portal_link;
   },
 
+  async changePlan(subscriptionId: string, planId: string): Promise<void> {
+    const productId = productForPlan(planId);
+    if (!productId) throw new Error(`No Creem product configured for plan: ${planId}`);
+    // Creem 的 upgrade 端点同时处理升档与降档，按比例立即计费。
+    await creemPost(`/v1/subscriptions/${encodeURIComponent(subscriptionId)}/upgrade`, {
+      product_id: productId,
+      update_behavior: "proration-charge-immediately",
+    });
+  },
+
   async verifyAndParse(rawBody: string, headers: Record<string, string>): Promise<BillingEvent> {
     const secret = process.env.CREEM_WEBHOOK_SECRET;
     const signature = headers["creem-signature"] ?? "";

@@ -30,6 +30,8 @@ export interface BillingProvider {
   createCheckout(input: CreateCheckoutInput): Promise<string>;
   /** 取客户自助管理（取消/换卡）门户 URL。 */
   getPortalUrl(customerId: string): Promise<string>;
+  /** 已订阅用户升/降档：改现有订阅的 product（按比例计费），禁止另开新订阅。 */
+  changePlan(subscriptionId: string, planId: string): Promise<void>;
   /** 校验签名并把原始 webhook 解析为规范化事件；验签失败必须抛错。 */
   verifyAndParse(rawBody: string, headers: Record<string, string>): Promise<BillingEvent>;
 }
