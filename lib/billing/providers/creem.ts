@@ -91,6 +91,11 @@ export const creemProvider: BillingProvider = {
     });
   },
 
+  async resume(): Promise<void> {
+    // Creem 未提供公开的撤销取消 API，引导用户走客户门户处理。
+    throw new Error("Creem 渠道暂不支持在线恢复订阅，请通过「管理订阅」进入客户门户操作");
+  },
+
   async verifyAndParse(rawBody: string, headers: Record<string, string>): Promise<BillingEvent> {
     const secret = process.env.CREEM_WEBHOOK_SECRET;
     const signature = headers["creem-signature"] ?? "";

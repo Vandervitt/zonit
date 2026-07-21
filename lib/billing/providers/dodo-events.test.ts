@@ -95,6 +95,31 @@ describe("parseDodoEvent — 周期末取消：保留权益并记录到期时间
     const r = parseDodoEvent(sub("subscription.cancelled", "pdt_agency"), map);
     expect(r).toMatchObject({ kind: "subscription_cancel_scheduled", userId: "u1" });
   });
+
+  // Dodo 在切换取消标记时会发 plan_changed；若 payload 标记仍为取消中，
+  // 不能按激活处理（会误清到期时间），需与事件到达顺序无关。
+  it("plan_changed 但 payload 带 cancel_at_next_billing_date=true → 仍按周期末取消处理", () => {
+    const r = parseDodoEvent(
+      sub("subscription.plan_changed", "pdt_agency", {
+        cancel_at_next_billing_date: true,
+        next_billing_date: "2026-08-04T00:00:00Z",
+      }),
+      map,
+    );
+    expect(r).toEqual({
+      kind: "subscription_cancel_scheduled",
+      userId: "u1",
+      expiresAt: "2026-08-04T00:00:00Z",
+    });
+  });
+
+  it("plan_changed 且 cancel_at_next_billing_date=false（恢复订阅）→ 激活并将清掉到期标记", () => {
+    const r = parseDodoEvent(
+      sub("subscription.plan_changed", "pdt_agency", { cancel_at_next_billing_date: false }),
+      map,
+    );
+    expect(r).toMatchObject({ kind: "subscription_activated", plan: "agency" });
+  });
 });
 
 describe("parseDodoEvent — 一次性充值", () => {

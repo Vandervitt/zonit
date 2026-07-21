@@ -32,6 +32,8 @@ export interface BillingProvider {
   getPortalUrl(customerId: string): Promise<string>;
   /** 已订阅用户升/降档：改现有订阅的 product（按比例计费），禁止另开新订阅。 */
   changePlan(subscriptionId: string, planId: string): Promise<void>;
+  /** 撤销周期末取消（恢复订阅继续续费）。不支持的渠道应抛错并提示走客户门户。 */
+  resume(subscriptionId: string): Promise<void>;
   /** 校验签名并把原始 webhook 解析为规范化事件；验签失败必须抛错。 */
   verifyAndParse(rawBody: string, headers: Record<string, string>): Promise<BillingEvent>;
 }

@@ -79,6 +79,11 @@ export const dodoProvider: BillingProvider = {
     });
   },
 
+  async resume(subscriptionId: string): Promise<void> {
+    // 撤销周期末取消：清掉 cancel_at_next_billing_date，订阅恢复正常续费。
+    await client().subscriptions.update(subscriptionId, { cancel_at_next_billing_date: false });
+  },
+
   async verifyAndParse(rawBody: string, headers: Record<string, string>): Promise<BillingEvent> {
     const wh = new Webhook(process.env.DODO_PAYMENTS_WEBHOOK_KEY!);
     // 验签失败会抛错，交由路由返回 401。

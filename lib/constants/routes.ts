@@ -34,6 +34,7 @@ export enum ApiRoutes {
   BillingCheckout = '/api/billing/checkout',
   BillingPortal = '/api/billing/portal',
   BillingChangePlan = '/api/billing/change-plan',
+  BillingResume = '/api/billing/resume',
   AdminTemplates = '/api/admin/templates',
   AdminInvite = '/api/admin/invite',
 }
