@@ -6,10 +6,10 @@ export type BillingProviderId = "dodo" | "creem";
 
 /** 规范化后的计费事件——业务侧只认这三种语义，与具体 provider 无关。 */
 export type BillingEvent =
-  | { kind: "subscription_activated"; userId: string; plan: PlanId; customerId?: string; subscriptionId?: string }
-  | { kind: "subscription_ended"; userId: string } // 过期/挂起/失败/立即取消 → 回落 free
+  | { kind: "subscription_activated"; userId: string; plan: PlanId; customerId?: string; subscriptionId?: string; eventTime: string | null }
+  | { kind: "subscription_ended"; userId: string; eventTime: string | null } // 过期/挂起/失败/立即取消 → 回落 free
   // 周期末取消：权益保留至 expiresAt（当期结束），到期由 subscription.expired 回落。
-  | { kind: "subscription_cancel_scheduled"; userId: string; expiresAt: string | null }
+  | { kind: "subscription_cancel_scheduled"; userId: string; expiresAt: string | null; eventTime: string | null }
   | { kind: "credit_purchased"; userId: string; credits: number }
   | { kind: "ignored" };
 

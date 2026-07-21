@@ -34,6 +34,14 @@ function stringField(d: AnyRec, key: string): string | undefined {
   return typeof v === "string" && v.length > 0 ? v : undefined;
 }
 
+/** 事件发生时间（顶层 timestamp，字符串或毫秒数）归一化为 ISO；缺失/非法为 null。 */
+export function eventTimeOf(event: AnyRec): string | null {
+  const v = event.timestamp;
+  if (typeof v !== "string" && typeof v !== "number") return null;
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
 /** 从一次性支付事件里解析出充值额度（兼容 product_id 与 product_cart[]）。 */
 function creditsOf(d: AnyRec, map: DodoProductMap): number {
   const direct = stringField(d, "product_id");
@@ -52,6 +60,7 @@ export function parseDodoEvent(event: AnyRec, map: DodoProductMap): BillingEvent
   const type = typeof event.type === "string" ? event.type : "";
   const d = dataOf(event);
   const userId = userIdOf(d);
+  const eventTime = eventTimeOf(event);
 
   if (SUB_ACTIVE.has(type)) {
     // Dodo 切换取消标记时也会发 plan_changed：payload 仍标记取消中就按周期末取消
@@ -62,6 +71,7 @@ export function parseDodoEvent(event: AnyRec, map: DodoProductMap): BillingEvent
         kind: "subscription_cancel_scheduled",
         userId,
         expiresAt: stringField(d, "next_billing_date") ?? null,
+        eventTime,
       };
     }
     const productId = stringField(d, "product_id");
@@ -73,12 +83,13 @@ export function parseDodoEvent(event: AnyRec, map: DodoProductMap): BillingEvent
       plan,
       customerId: customerIdOf(d),
       subscriptionId: stringField(d, "subscription_id"),
+      eventTime,
     };
   }
 
   if (SUB_ENDED.has(type)) {
     if (!userId) return { kind: "ignored" };
-    return { kind: "subscription_ended", userId };
+    return { kind: "subscription_ended", userId, eventTime };
   }
 
   // 取消：Dodo 默认周期末取消（cancel_at_next_billing_date），已付周期内权益保留，
@@ -86,11 +97,12 @@ export function parseDodoEvent(event: AnyRec, map: DodoProductMap): BillingEvent
   // 字段缺失按周期末处理，避免提前剥夺已付权益。
   if (type === "subscription.cancelled") {
     if (!userId) return { kind: "ignored" };
-    if (d.cancel_at_next_billing_date === false) return { kind: "subscription_ended", userId };
+    if (d.cancel_at_next_billing_date === false) return { kind: "subscription_ended", userId, eventTime };
     return {
       kind: "subscription_cancel_scheduled",
       userId,
       expiresAt: stringField(d, "next_billing_date") ?? stringField(d, "cancelled_at") ?? null,
+      eventTime,
     };
   }
 

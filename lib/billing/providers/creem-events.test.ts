@@ -37,6 +37,7 @@ describe("parseCreemEvent — 订阅授权（active/paid/trialing）", () => {
         plan: "pro",
         customerId: "cust_1",
         subscriptionId: "sub_1",
+        eventTime: null,
       });
     });
   }
@@ -69,14 +70,22 @@ describe("parseCreemEvent — 取消/结束", () => {
       kind: "subscription_cancel_scheduled",
       userId: "u1",
       expiresAt: "2026-08-12T11:58:38.000Z",
+      eventTime: null,
     });
   });
 
   for (const t of ["subscription.expired", "subscription.paused"]) {
     it(`${t} → subscription_ended`, () => {
-      expect(parseCreemEvent(sub(t, "prod_pro"), map)).toEqual({ kind: "subscription_ended", userId: "u1" });
+      expect(parseCreemEvent(sub(t, "prod_pro"), map)).toEqual({ kind: "subscription_ended", userId: "u1", eventTime: null });
     });
   }
+});
+
+describe("parseCreemEvent — 事件时间提取", () => {
+  it("顶层 created_at(毫秒) 归一化为 eventTime ISO", () => {
+    const ev = { ...sub("subscription.active", "prod_pro"), created_at: 1753093200000 };
+    expect(parseCreemEvent(ev, map)).toMatchObject({ eventTime: new Date(1753093200000).toISOString() });
+  });
 });
 
 describe("parseCreemEvent — checkout.completed 一次性充值", () => {

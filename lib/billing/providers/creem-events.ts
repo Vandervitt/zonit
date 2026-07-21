@@ -37,10 +37,19 @@ function stringField(obj: AnyRec, key: string): string | undefined {
   return typeof v === "string" && v.length > 0 ? v : undefined;
 }
 
+/** 事件发生时间（顶层 created_at 毫秒数或字符串）归一化为 ISO；缺失/非法为 null。 */
+function eventTimeOf(event: AnyRec): string | null {
+  const v = event.created_at;
+  if (typeof v !== "string" && typeof v !== "number") return null;
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
 export function parseCreemEvent(event: AnyRec, map: CreemProductMap): BillingEvent {
   const type = typeof event.eventType === "string" ? event.eventType : "";
   const obj = (event.object ?? {}) as AnyRec;
   const userId = userIdOf(obj);
+  const eventTime = eventTimeOf(event);
 
   if (SUB_GRANT.has(type)) {
     const productId = idOf(obj.product);
@@ -52,6 +61,7 @@ export function parseCreemEvent(event: AnyRec, map: CreemProductMap): BillingEve
       plan,
       customerId: idOf(obj.customer),
       subscriptionId: idOf(obj.id) ?? stringField(obj, "id"),
+      eventTime,
     };
   }
 
@@ -62,12 +72,13 @@ export function parseCreemEvent(event: AnyRec, map: CreemProductMap): BillingEve
       kind: "subscription_cancel_scheduled",
       userId,
       expiresAt: stringField(obj, "current_period_end_date") ?? null,
+      eventTime,
     };
   }
 
   if (SUB_REVOKE.has(type)) {
     if (!userId) return { kind: "ignored" };
-    return { kind: "subscription_ended", userId };
+    return { kind: "subscription_ended", userId, eventTime };
   }
 
   // 一次性充值：checkout.completed 且订单非 recurring（订阅由 subscription.* 处理，避免双计）。
