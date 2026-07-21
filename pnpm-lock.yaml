@@ -143,6 +143,9 @@ importers:
       debug:
         specifier: ^4.4.3
         version: 4.4.3
+      dodopayments:
+        specifier: ^2.42.2
+        version: 2.42.2
       embla-carousel-react:
         specifier: 8.6.0
         version: 8.6.0(react@19.2.4)
@@ -215,6 +218,9 @@ importers:
       sonner:
         specifier: 2.0.3
         version: 2.0.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      standardwebhooks:
+        specifier: ^1.0.0
+        version: 1.0.0
       swr:
         specifier: ^2.4.1
         version: 2.4.1(react@19.2.4)
@@ -3285,6 +3291,10 @@ packages:
   doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
     engines: {node: '>=0.10.0'}
+
+  dodopayments@2.42.2:
+    resolution: {integrity: sha512-XBF8zrnfkjAhX7OyrR3KauK6bH+oW3yZ+uqy6RBWI5XdZvrEtASabvvfHrBX3UGR3Bbxl3t1rkpcao+riKSOuw==}
+    hasBin: true
 
   dom-helpers@5.2.1:
     resolution: {integrity: sha512-nRCa7CK3VTrM2NmGkIy4cbK7IZlgBE/PYMn55rrXefr5xXDP0LdtfPnblFDoVdcAfslJ7or6iqAUnx0CCGIWQA==}
@@ -8560,6 +8570,10 @@ snapshots:
   doctrine@2.1.0:
     dependencies:
       esutils: 2.0.3
+
+  dodopayments@2.42.2:
+    dependencies:
+      standardwebhooks: 1.0.0
 
   dom-helpers@5.2.1:
     dependencies:

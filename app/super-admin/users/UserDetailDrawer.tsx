@@ -10,7 +10,7 @@ interface DetailPage { id: string; name: string; status: string; slug: string | 
 interface Detail {
   id: string; name: string | null; email: string;
   plan: PlanId; comp_plan: PlanId | null; comp_plan_expires_at: string | null; role: string;
-  disabled_at: string | null; created_at: string; ls_customer_id: string | null;
+  disabled_at: string | null; created_at: string; billing_provider: string | null; billing_customer_id: string | null;
   leads_count: number; pages: DetailPage[];
 }
 
@@ -72,7 +72,9 @@ export function UserDetailDrawer({ userId, onClose }: { userId: string | null; o
             <Descriptions.Item label="赠送套餐">
               <GiftValue plan={detail.comp_plan} expiresAt={detail.comp_plan_expires_at} nowMs={nowMs} />
             </Descriptions.Item>
-            <Descriptions.Item label="LS Customer">{detail.ls_customer_id || "—"}</Descriptions.Item>
+            <Descriptions.Item label="收款渠道 / Customer">
+              {detail.billing_customer_id ? `${detail.billing_provider ?? "—"} / ${detail.billing_customer_id}` : "—"}
+            </Descriptions.Item>
             <Descriptions.Item label="状态">
               {detail.disabled_at ? <Tag color="error">已禁用</Tag> : <Tag color="success">正常</Tag>}
             </Descriptions.Item>

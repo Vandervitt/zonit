@@ -10,6 +10,7 @@ import { PlanBadge } from "@/components/billing/PlanBadge";
 import type { FounderContact } from "@/lib/platform-settings";
 import { PlatformHealth, type PlatformEnv } from "./PlatformHealth";
 import { FounderContactForm } from "./FounderContactForm";
+import { BillingProviderForm, type BillingProviderState } from "./BillingProviderForm";
 
 export interface SuperAdminRow {
   id: string;
@@ -23,6 +24,7 @@ export interface SettingsData {
   admins: SuperAdminRow[];
   adminWhitelistCount: number;
   founderContact: FounderContact;
+  billingProvider: BillingProviderState;
 }
 
 const adminColumns: ColumnsType<SuperAdminRow> = [
@@ -114,6 +116,8 @@ export function SuperAdminSettingsClient({ data }: { data: SettingsData }) {
 
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
         <PlatformHealth env={data.env} />
+
+        <BillingProviderForm initial={data.billingProvider} />
 
         <FounderContactForm initial={data.founderContact} />
 

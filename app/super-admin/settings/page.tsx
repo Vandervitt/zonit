@@ -2,7 +2,8 @@ import pool from "@/lib/db";
 import { effectivePlan, activeCompPlan, type PlanId } from "@/lib/plans";
 import { UserRole } from "@/lib/constants";
 import { hostnameOf, appHostname } from "@/lib/host";
-import { getFounderContact } from "@/lib/platform-settings";
+import { getFounderContact, getBillingProviderId } from "@/lib/platform-settings";
+import { getProvider } from "@/lib/billing/provider";
 import { SuperAdminSettingsClient, type SettingsData, type SuperAdminRow } from "./_client";
 
 async function getSuperAdmins(): Promise<SuperAdminRow[]> {
@@ -31,7 +32,11 @@ function adminWhitelistCount(): number {
 }
 
 export default async function SuperAdminSettingsPage() {
-  const [admins, founderContact] = await Promise.all([getSuperAdmins(), getFounderContact()]);
+  const [admins, founderContact, activeProvider] = await Promise.all([
+    getSuperAdmins(),
+    getFounderContact(),
+    getBillingProviderId(),
+  ]);
 
   const data: SettingsData = {
     env: {
@@ -43,6 +48,11 @@ export default async function SuperAdminSettingsPage() {
     admins,
     adminWhitelistCount: adminWhitelistCount(),
     founderContact,
+    billingProvider: {
+      active: activeProvider,
+      dodoConfigured: getProvider("dodo").isConfigured(),
+      creemConfigured: getProvider("creem").isConfigured(),
+    },
   };
 
   return <SuperAdminSettingsClient data={data} />;

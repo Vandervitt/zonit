@@ -39,7 +39,8 @@ export interface AdminUserDetail {
   disabled_at: string | null;
   invited_at: string | null;
   created_at: string;
-  ls_customer_id: string | null;
+  billing_provider: string | null;
+  billing_customer_id: string | null;
   leads_count: number;
   pages: { id: string; name: string; status: string; slug: string | null; bound_domain: string | null }[];
 }
@@ -47,7 +48,7 @@ export interface AdminUserDetail {
 /** 用户详情：基础信息 + 名下落地页（含绑定域名）+ 线索总数。不存在返回 null。 */
 export async function getUserAdminDetail(userId: string): Promise<AdminUserDetail | null> {
   const userRes = await pool.query(
-    `SELECT id, name, email, plan, comp_plan, comp_plan_expires_at, role, disabled_at, invited_at, created_at, ls_customer_id
+    `SELECT id, name, email, plan, comp_plan, comp_plan_expires_at, role, disabled_at, invited_at, created_at, billing_provider, billing_customer_id
        FROM users WHERE id = $1`,
     [userId],
   );

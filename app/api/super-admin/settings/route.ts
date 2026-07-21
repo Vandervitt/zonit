@@ -4,6 +4,7 @@ import { UserRole, ApiErrors } from "@/lib/constants";
 import {
   getFounderContact,
   setFounderContact,
+  setBillingProviderId,
   type FounderContact,
 } from "@/lib/platform-settings";
 
@@ -41,6 +42,16 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") {
     return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
+  }
+
+  // 收款渠道切换（独立于联系创始人配置）。
+  if ("billingProvider" in body) {
+    const v = body.billingProvider;
+    if (v !== "dodo" && v !== "creem") {
+      return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
+    }
+    await setBillingProviderId(v);
+    return NextResponse.json({ ok: true, billingProvider: v });
   }
 
   const patch: Partial<FounderContact> = {};
