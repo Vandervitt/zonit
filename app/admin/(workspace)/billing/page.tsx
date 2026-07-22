@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
+import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm, App } from "antd";
-import { CheckOutlined } from "@ant-design/icons";
+import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm, Statistic, App } from "antd";
+import { CheckOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PLANS, PLAN_ORDER } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 import { CREDIT_PACKS } from "@/lib/credits";
+import type { UsageSummary } from "@/lib/ai/usage-summary";
 import { Routes, ApiRoutes } from "@/lib/constants";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { fetcher, jsonRequest } from "@/lib/api/fetcher";
@@ -51,6 +53,11 @@ export default function BillingPage() {
   // 渠道侧订阅处于「周期末取消」（换档 409 才得知）：本地 DB 可能没记到期时间
   // （历史事件乱序等失同步场景），据此兜底渲染取消提示条与「恢复订阅」入口。
   const [cancelScheduled, setCancelScheduled] = useState(false);
+
+  // AI 额度用量/余额：充值区需在购买入口旁展示当前可用额度，否则用户付费后原地看不到到账反馈。
+  // SWR 默认 focus 时重验证，从渠道支付页切回本页即会自动刷新余额。
+  const usage = useSWR<UsageSummary>(ApiRoutes.AiUsage);
+  const creditBalance = usage.data?.creditBalance;
 
   // 生效套餐（含赠送）只用于权益上限展示；换档/管理订阅一律以付费订阅档为基准，
   // 否则「赠送档 > 付费档」时会把赠送档误当成当前订阅档（如订阅 starter + 赠送 pro 显示成 pro）。
@@ -426,6 +433,22 @@ export default function BillingPage() {
         <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 12 }}>
           额度仅用于「AI 整页生成」，当月免费额度用尽后自动消耗、永不过期。AI 文案改写不使用额度：当月改写额度用尽需等次月重置或升级套餐。一次性付款，不影响订阅。
         </Text>
+        <Card style={{ marginBottom: 12 }}>
+          <Space align="center" size={12} style={{ width: "100%", justifyContent: "space-between" }}>
+            <Statistic
+              title="当前可用充值额度"
+              value={usage.error ? "—" : creditBalance ?? "—"}
+              loading={!usage.data && !usage.error}
+              prefix={<ThunderboltOutlined style={{ color: SEMANTIC.warning }} />}
+              suffix="次"
+            />
+            <Text type="secondary" style={{ fontSize: 12, textAlign: "right" }}>
+              充值额度永不过期，
+              <br />
+              免费额度用尽后自动消耗。
+            </Text>
+          </Space>
+        </Card>
         <Space direction="vertical" style={{ width: "100%" }} size={12}>
           {CREDIT_PACKS.map((pack) => {
             const isLoading = loadingCredits === pack.credits;
