@@ -22,12 +22,23 @@ export interface CreateCheckoutInput {
   baseUrl: string;
 }
 
+export interface CreateCreditCheckoutInput {
+  /** 充值额度档位（50/200），后端据此反查一次性产品 id。 */
+  credits: number;
+  email: string;
+  userId: string;
+  /** 当前请求 origin，用于拼 return_url。 */
+  baseUrl: string;
+}
+
 export interface BillingProvider {
   readonly id: BillingProviderId;
   /** 该 provider 是否已配好必需的环境变量（未配则 super-admin 选它时给出明确报错）。 */
   isConfigured(): boolean;
   /** 创建订阅结账会话，返回可跳转的 checkout URL。 */
   createCheckout(input: CreateCheckoutInput): Promise<string>;
+  /** 创建 AI 额度充值（一次性支付）结账会话，返回可跳转的 checkout URL。 */
+  createCreditCheckout(input: CreateCreditCheckoutInput): Promise<string>;
   /** 取客户自助管理（取消/换卡）门户 URL。 */
   getPortalUrl(customerId: string): Promise<string>;
   /** 已订阅用户升/降档：改现有订阅的 product（按比例计费），禁止另开新订阅。 */
