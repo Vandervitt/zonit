@@ -11,7 +11,7 @@ export const billing: HelpChapterData = {
       blocks: [
         {
           t: "table",
-          head: ["权益", "Free（$0）", "Starter（$29/月）", "Pro（$79/月）", "Agency（$199/月）"],
+          head: ["权益", "Free（$0）", "Starter（$29.99/月）", "Pro（$79.99/月）", "Agency（$199.99/月）"],
           rows: [
             ["落地页数量", "1", "3", "20", "无限"],
             ["自定义域名", "0", "1", "5", "无限"],

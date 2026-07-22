@@ -28,7 +28,9 @@ export async function POST(request: Request) {
   const subscriptionId = result.rows[0]?.billing_subscription_id as string | undefined;
 
   if (!providerId || !subscriptionId) {
-    return NextResponse.json({ error: "No active subscription" }, { status: 404 });
+    // 赠送套餐（comp_plan）或尚无有效订阅：无渠道订阅可改。返回业务码，前端给出准确文案，
+    // 避免让用户以为是临时故障而反复重试。
+    return NextResponse.json({ error: "no_active_subscription" }, { status: 404 });
   }
 
   try {
