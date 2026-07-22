@@ -15,6 +15,35 @@ export const fadeUp = {
   show: { opacity: 1, y: 0 },
 };
 
+/**
+ * 定价区锚点链接。
+ * 本页已存在 #pricing 时拦截默认行为、平滑滚动过去——无论地址栏当前 hash 是否已是
+ * #pricing（原生 <a> 在 hash 未变化时不会重复滚动，导致“第二次点击不跳转”）。
+ * 若当前页没有该区块（如反同质化页），则不拦截，交由 Link 正常跳转到首页定价区。
+ */
+export function PricingLink({
+  href = `${Routes.Home}#pricing`,
+  className,
+  children,
+}: {
+  href?: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const onClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const el = document.getElementById("pricing");
+    if (!el) return;
+    e.preventDefault();
+    el.scrollIntoView();
+    history.replaceState(null, "", "#pricing");
+  };
+  return (
+    <Link href={href} onClick={onClick} className={className}>
+      {children}
+    </Link>
+  );
+}
+
 /* ------------------------------------------------------------------ *
  * 装饰背景（克制光感 + 细网格）
  * ------------------------------------------------------------------ */
@@ -79,12 +108,9 @@ export function SiteNav({ fonts }: { fonts: Fonts }) {
           >
             反同质化
           </Link>
-          <Link
-            href={`${Routes.Home}#pricing`}
-            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
-          >
+          <PricingLink className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700">
             套餐定价
-          </Link>
+          </PricingLink>
           <Link
             href={Routes.Login}
             className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
@@ -154,9 +180,9 @@ export function SiteFooter({ fonts }: { fonts: Fonts }) {
           <Link href={Routes.AntiBan} className="transition-colors hover:text-aqua-700">
             反同质化
           </Link>
-          <Link href={`${Routes.Home}#pricing`} className="transition-colors hover:text-aqua-700">
+          <PricingLink className="transition-colors hover:text-aqua-700">
             套餐定价
-          </Link>
+          </PricingLink>
           <Link href={Routes.Privacy} className="transition-colors hover:text-aqua-700">
             隐私政策
           </Link>
