@@ -2,7 +2,7 @@
 import DodoPayments from "dodopayments";
 import { Webhook } from "standardwebhooks";
 import type { PlanId } from "@/lib/plans";
-import type { BillingEvent, BillingProvider, CreateCheckoutInput } from "../types";
+import type { BillingEvent, BillingProvider, CreateCheckoutInput, CreateCreditCheckoutInput } from "../types";
 import { parseDodoEvent, type DodoProductMap } from "./dodo-events";
 
 /** 从 env 装配 product 映射（缺失的项跳过，isConfigured 会校验必需项）。 */
@@ -27,6 +27,14 @@ function productForPlan(planId: string): string | undefined {
     agency: process.env.DODO_PRODUCT_AGENCY,
   };
   return byPlan[planId];
+}
+
+function productForCredits(credits: number): string | undefined {
+  const byCredits: Record<number, string | undefined> = {
+    50: process.env.DODO_CREDITS_50,
+    200: process.env.DODO_CREDITS_200,
+  };
+  return byCredits[credits];
 }
 
 function client(): DodoPayments {
@@ -55,6 +63,21 @@ export const dodoProvider: BillingProvider = {
       product_cart: [{ product_id: productId, quantity: 1 }],
       customer: { email, name: email },
       return_url: `${baseUrl}/admin/billing?success=1`,
+      metadata: { user_id: userId },
+    });
+    if (!session.checkout_url) throw new Error("Dodo returned no checkout_url");
+    return session.checkout_url;
+  },
+
+  async createCreditCheckout({ credits, email, userId, baseUrl }: CreateCreditCheckoutInput): Promise<string> {
+    const productId = productForCredits(credits);
+    if (!productId) throw new Error(`No Dodo product configured for credits: ${credits}`);
+
+    const session = await client().checkoutSessions.create({
+      product_cart: [{ product_id: productId, quantity: 1 }],
+      customer: { email, name: email },
+      // 一次性充值成功后回 billing 页，用 topup=1 触发充值成功提示（与订阅 success=1 区分）。
+      return_url: `${baseUrl}/admin/billing?topup=1`,
       metadata: { user_id: userId },
     });
     if (!session.checkout_url) throw new Error("Dodo returned no checkout_url");

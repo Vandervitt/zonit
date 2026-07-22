@@ -2,7 +2,7 @@
 // 验签：HMAC-SHA256(raw body, CREEM_WEBHOOK_SECRET) 十六进制，对比 creem-signature 头。
 import crypto from "crypto";
 import type { PlanId } from "@/lib/plans";
-import type { BillingEvent, BillingProvider, CreateCheckoutInput } from "../types";
+import type { BillingEvent, BillingProvider, CreateCheckoutInput, CreateCreditCheckoutInput } from "../types";
 import { parseCreemEvent, type CreemProductMap } from "./creem-events";
 
 export function creemProductMap(): CreemProductMap {
@@ -26,6 +26,14 @@ function productForPlan(planId: string): string | undefined {
     agency: process.env.CREEM_PRODUCT_AGENCY,
   };
   return byPlan[planId];
+}
+
+function productForCredits(credits: number): string | undefined {
+  const byCredits: Record<number, string | undefined> = {
+    50: process.env.CREEM_CREDITS_50,
+    200: process.env.CREEM_CREDITS_200,
+  };
+  return byCredits[credits];
 }
 
 function apiBase(): string {
@@ -65,6 +73,21 @@ export const creemProvider: BillingProvider = {
     const session = await creemPost<{ checkout_url?: string; url?: string }>("/v1/checkouts", {
       product_id: productId,
       success_url: `${baseUrl}/admin/billing?success=1`,
+      customer: { email },
+      metadata: { user_id: userId },
+    });
+    const url = session.checkout_url ?? session.url;
+    if (!url) throw new Error("Creem returned no checkout_url");
+    return url;
+  },
+
+  async createCreditCheckout({ credits, email, userId, baseUrl }: CreateCreditCheckoutInput): Promise<string> {
+    const productId = productForCredits(credits);
+    if (!productId) throw new Error(`No Creem product configured for credits: ${credits}`);
+
+    const session = await creemPost<{ checkout_url?: string; url?: string }>("/v1/checkouts", {
+      product_id: productId,
+      success_url: `${baseUrl}/admin/billing?topup=1`,
       customer: { email },
       metadata: { user_id: userId },
     });

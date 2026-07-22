@@ -148,7 +148,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const userId = user?.id ?? token.sub;
         if (userId) {
           const r = await pool.query(
-            "SELECT email, plan, comp_plan, comp_plan_expires_at, role, trial_expires_at, disabled_at, billing_expires_at FROM users WHERE id = $1",
+            "SELECT email, plan, comp_plan, comp_plan_expires_at, role, trial_expires_at, disabled_at, billing_expires_at, billing_subscription_id FROM users WHERE id = $1",
             [userId]
           );
           const userData = r.rows[0];
@@ -190,6 +190,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.billingExpiresAt = userData.billing_expires_at
               ? new Date(userData.billing_expires_at).toISOString()
               : null;
+            // 是否持有渠道真实订阅：赠送套餐（comp_plan）无 subscription_id，据此在 billing 页
+            // 隐藏「更换套餐」自助换档区（换档会 404，对赠送用户无意义）。
+            token.hasSubscription = Boolean(userData.billing_subscription_id);
             token.role = (isHardwareAdmin ? UserRole.SUPER_ADMIN : (userData.role ?? UserRole.USER)) as UserRole;
           }
         }
@@ -204,6 +207,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.plan = token.plan as PlanId;
       session.user.role = token.role as UserRole;
       session.user.billingExpiresAt = (token.billingExpiresAt as string | null) ?? null;
+      session.user.hasSubscription = Boolean(token.hasSubscription);
       return session;
     },
   },

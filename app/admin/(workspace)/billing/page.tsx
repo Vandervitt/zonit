@@ -8,6 +8,7 @@ import { CheckOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PLANS, PLAN_ORDER } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
+import { CREDIT_PACKS } from "@/lib/credits";
 import { Routes, ApiRoutes } from "@/lib/constants";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { fetcher, jsonRequest } from "@/lib/api/fetcher";
@@ -27,6 +28,13 @@ function SuccessToast() {
         placement: "topRight",
       });
       router.replace(Routes.Billing);
+    } else if (searchParams.get("topup") === "1") {
+      notification.success({
+        message: "充值成功",
+        description: "AI 额度将在几秒内到账，稍后刷新页面即可看到最新余额。",
+        placement: "topRight",
+      });
+      router.replace(Routes.Billing);
     }
   }, [searchParams, router, notification]);
   return null;
@@ -36,6 +44,8 @@ export default function BillingPage() {
   const { data: session } = useSession();
   const { notification } = App.useApp();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  // 正在发起结账的充值档位（credits 数量），用于按钮 loading 与互斥禁用。
+  const [loadingCredits, setLoadingCredits] = useState<number | null>(null);
   // 支付页在新标签打开后置为 true，提示用户完成支付后刷新本页以拉取最新套餐。
   const [awaitingRefresh, setAwaitingRefresh] = useState(false);
   // 渠道侧订阅处于「周期末取消」（换档 409 才得知）：本地 DB 可能没记到期时间
@@ -47,6 +57,9 @@ export default function BillingPage() {
   const currentIdx = PLAN_ORDER.indexOf(currentPlanId);
   // 周期末取消：权益保留至该时间，到期由渠道 expired 事件回落 free。
   const billingExpiresAt = session?.user?.billingExpiresAt ?? null;
+  // 赠送套餐（comp_plan）无渠道真实订阅：自助换档会 404，隐藏「更换套餐」区、改示说明。
+  // free 用户仍需展示升级区（走 checkout 新开订阅），故仅对「非 free 且无订阅」隐藏。
+  const isCompedWithoutSub = currentPlanId !== "free" && session?.user?.hasSubscription === false;
 
   const checkout = useMutation(
     (planId: string) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCheckout, "POST", { planId }),
@@ -67,6 +80,34 @@ export default function BillingPage() {
           notification.info({
             message: "支付页已在新标签页打开",
             description: "完成支付后请刷新本页查看最新套餐。",
+            placement: "topRight",
+          });
+        } else {
+          window.location.href = res.checkoutUrl;
+        }
+      },
+    },
+  );
+
+  // AI 额度充值：一次性支付，额度由 credit_purchased webhook 回写余额。与订阅 checkout 同样在新标签打开。
+  const credits = useMutation(
+    (amount: number) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCredits, "POST", { credits: amount }),
+    {
+      onError: () => {
+        notification.error({ message: "无法创建充值链接", description: "请稍后重试。", placement: "topRight" });
+        return false;
+      },
+      onSuccess: (res) => {
+        if (!res.checkoutUrl) {
+          notification.error({ message: "无法创建充值链接", description: "请稍后重试。", placement: "topRight" });
+          return;
+        }
+        const win = window.open(res.checkoutUrl, "_blank", "noopener,noreferrer");
+        if (win) {
+          setAwaitingRefresh(true);
+          notification.info({
+            message: "支付页已在新标签页打开",
+            description: "完成支付后请刷新本页查看最新额度余额。",
             placement: "topRight",
           });
         } else {
@@ -152,6 +193,12 @@ export default function BillingPage() {
     if (currentPlanId === "free") await checkout.trigger(planId);
     else await changePlan.trigger(planId);
     setLoadingPlan(null);
+  }
+
+  async function handleBuyCredits(amount: number) {
+    setLoadingCredits(amount);
+    await credits.trigger(amount);
+    setLoadingCredits(null);
   }
 
   const portalLoading = portal.isMutating;
@@ -241,7 +288,7 @@ export default function BillingPage() {
         style={{ marginBottom: 24 }}
         extra={
           <Space>
-            {currentPlanId !== "free" && (
+            {currentPlanId !== "free" && !isCompedWithoutSub && (
               <Button
                 loading={portalLoading}
                 onClick={() => void portal.trigger()}
@@ -262,6 +309,14 @@ export default function BillingPage() {
         <Descriptions items={currentPlanDescItems} column={1} size="small" />
       </Card>
 
+      {isCompedWithoutSub ? (
+        <Alert
+          type="info"
+          showIcon
+          message="当前套餐由管理员赠送"
+          description="赠送套餐没有可自助管理的订阅，无法在此升级或降级。如需调整套餐，请联系我们。"
+        />
+      ) : (
       <div>
         <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
           {currentPlanId === "free" ? "可升级套餐" : "更换套餐（立即生效，差额按比例计费/抵扣）"}
@@ -323,8 +378,47 @@ export default function BillingPage() {
           })}
         </Space>
       </div>
+      )}
 
-      {currentPlanId !== "free" && (
+      <div style={{ marginTop: 32 }}>
+        <Text strong style={{ display: "block", marginBottom: 4 }}>
+          AI 额度充值
+        </Text>
+        <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 12 }}>
+          额外购买的额度永不过期，月额度用尽后自动消耗。一次性付款，不影响订阅。
+        </Text>
+        <Space direction="vertical" style={{ width: "100%" }} size={12}>
+          {CREDIT_PACKS.map((pack) => {
+            const isLoading = loadingCredits === pack.credits;
+            return (
+              <Card key={pack.credits}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                  <div style={{ flex: 1 }}>
+                    <Space style={{ marginBottom: 4 }}>
+                      <Text strong>{pack.credits} 次 AI 额度</Text>
+                      <Text strong>{pack.priceText}</Text>
+                    </Space>
+                    <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+                      {pack.desc}
+                    </Text>
+                  </div>
+                  <Button
+                    type={pack.highlight ? "primary" : "default"}
+                    loading={isLoading}
+                    disabled={loadingCredits !== null && !isLoading}
+                    onClick={() => handleBuyCredits(pack.credits)}
+                    style={{ flexShrink: 0 }}
+                  >
+                    购买
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
+        </Space>
+      </div>
+
+      {currentPlanId !== "free" && !isCompedWithoutSub && (
         <Text type="secondary" style={{ display: "block", marginTop: 24, textAlign: "center", fontSize: 12 }}>
           如需取消订阅，请通过 管理订阅 进入收款渠道的客户门户操作
         </Text>
