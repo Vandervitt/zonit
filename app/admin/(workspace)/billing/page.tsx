@@ -52,14 +52,22 @@ export default function BillingPage() {
   // （历史事件乱序等失同步场景），据此兜底渲染取消提示条与「恢复订阅」入口。
   const [cancelScheduled, setCancelScheduled] = useState(false);
 
-  const currentPlanId = (session?.user?.plan ?? "free") as PlanId;
+  // 生效套餐（含赠送）只用于权益上限展示；换档/管理订阅一律以付费订阅档为基准，
+  // 否则「赠送档 > 付费档」时会把赠送档误当成当前订阅档（如订阅 starter + 赠送 pro 显示成 pro）。
+  const effectivePlanId = (session?.user?.plan ?? "free") as PlanId;
+  const currentPlanId = (session?.user?.paidPlan ?? effectivePlanId) as PlanId;
   const currentPlan = PLANS[currentPlanId];
   const currentIdx = PLAN_ORDER.indexOf(currentPlanId);
+  const compPlanId = session?.user?.compPlan ?? null;
+  const compPlanExpiresAt = session?.user?.compPlanExpiresAt ?? null;
+  // 赠送档高于付费档：权益按赠送档生效，需在页面明示两者区别。
+  const giftedAbovePaid =
+    compPlanId !== null && PLAN_ORDER.indexOf(compPlanId) > PLAN_ORDER.indexOf(currentPlanId);
   // 周期末取消：权益保留至该时间，到期由渠道 expired 事件回落 free。
   const billingExpiresAt = session?.user?.billingExpiresAt ?? null;
   // 赠送套餐（comp_plan）无渠道真实订阅：自助换档会 404，隐藏「更换套餐」区、改示说明。
-  // free 用户仍需展示升级区（走 checkout 新开订阅），故仅对「非 free 且无订阅」隐藏。
-  const isCompedWithoutSub = currentPlanId !== "free" && session?.user?.hasSubscription === false;
+  // free 用户仍需展示升级区（走 checkout 新开订阅），故仅对「非 free 生效档且无订阅」隐藏。
+  const isCompedWithoutSub = effectivePlanId !== "free" && session?.user?.hasSubscription === false;
 
   const checkout = useMutation(
     (planId: string) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCheckout, "POST", { planId }),
@@ -203,36 +211,59 @@ export default function BillingPage() {
 
   const portalLoading = portal.isMutating;
 
+  // 权益上限按生效套餐（含赠送）展示；「套餐」「订阅档位」两行区分赠送与付费。
+  const entitlementPlan = PLANS[effectivePlanId];
   const currentPlanDescItems = [
     {
       key: "plan",
       label: "套餐",
       children: (
         <Space>
-          <PlanBadge plan={currentPlanId} />
-          <Text strong>{currentPlan.priceText}</Text>
+          <PlanBadge plan={effectivePlanId} />
+          {giftedAbovePaid ? (
+            <Text type="secondary">
+              管理员赠送
+              {compPlanExpiresAt ? `（至 ${new Date(compPlanExpiresAt).toLocaleDateString("zh-CN")}）` : ""}
+            </Text>
+          ) : (
+            <Text strong>{currentPlan.priceText}</Text>
+          )}
         </Space>
       ),
     },
+    ...(giftedAbovePaid && session?.user?.hasSubscription
+      ? [
+          {
+            key: "subscription",
+            label: "订阅档位",
+            children: (
+              <Space>
+                <PlanBadge plan={currentPlanId} />
+                <Text strong>{currentPlan.priceText}</Text>
+              </Space>
+            ),
+          },
+        ]
+      : []),
     {
       key: "pages",
       label: "落地页上限",
-      children: currentPlan.landingPagesLimit === Infinity ? "无限" : `${currentPlan.landingPagesLimit} 张`,
+      children: entitlementPlan.landingPagesLimit === Infinity ? "无限" : `${entitlementPlan.landingPagesLimit} 张`,
     },
     {
       key: "domains",
       label: "域名上限",
       children:
-        currentPlan.domainsLimit === 0
+        entitlementPlan.domainsLimit === 0
           ? "不支持"
-          : currentPlan.domainsLimit === Infinity
+          : entitlementPlan.domainsLimit === Infinity
           ? "无限"
-          : `${currentPlan.domainsLimit} 个`,
+          : `${entitlementPlan.domainsLimit} 个`,
     },
     {
       key: "watermark",
       label: "品牌水印",
-      children: currentPlan.hasWatermark ? "有" : "无",
+      children: entitlementPlan.hasWatermark ? "有" : "无",
     },
   ];
 
@@ -321,6 +352,14 @@ export default function BillingPage() {
         <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
           {currentPlanId === "free" ? "可升级套餐" : "更换套餐（立即生效，差额按比例计费/抵扣）"}
         </Text>
+        {giftedAbovePaid && compPlanId && (
+          <Alert
+            type="info"
+            showIcon
+            style={{ marginBottom: 12 }}
+            message={`升降档只调整付费订阅（当前 ${currentPlan.label}），不影响管理员赠送的 ${PLANS[compPlanId].label} 权益。`}
+          />
+        )}
         <Space direction="vertical" style={{ width: "100%" }} size={12}>
           {PLAN_ORDER.filter((p) => p !== "free" && p !== currentPlanId).map((planId) => {
             const plan = PLANS[planId];
