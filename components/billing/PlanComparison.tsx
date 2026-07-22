@@ -38,7 +38,7 @@ export function PlanComparison({
             {PLAN_ORDER.map((planId) => {
               const plan = PLANS[planId];
               const c = cta(planId);
-              const isFree = plan.priceText === "$0";
+              const isFree = planId === "free";
               return (
                 <th
                   key={planId}
