@@ -1,5 +1,6 @@
 export enum AuthProvider {
   Credentials = 'credentials',
+  EmailOtp = 'email-otp',
   Google = 'google',
   Apple = 'apple',
   Microsoft = 'microsoft-entra-id',

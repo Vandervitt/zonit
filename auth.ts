@@ -5,8 +5,10 @@ import Credentials from "next-auth/providers/credentials";
 // import PostgresAdapter from "@auth/pg-adapter";
 import bcrypt from "bcryptjs";
 import pool from "@/lib/db";
-import { Routes, UserRole } from "@/lib/constants";
-import { isTrustedEmail } from "@/lib/auth/trusted-email";
+import { Routes, UserRole, AuthProvider } from "@/lib/constants";
+import { isValidEmailFormat } from "@/lib/auth/trusted-email";
+import { verifyOtp } from "@/lib/auth/otp";
+import { provisionUserByEmail } from "@/lib/auth/provision";
 import { effectivePlan, activeCompPlan, type PlanId } from "@/lib/plans";
 import { sendWelcomeEmail } from "@/lib/email";
 
@@ -21,12 +23,37 @@ if (!process.env.AUTH_GOOGLE_ID || !process.env.AUTH_GOOGLE_SECRET) {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: true,
   // adapter: PostgresAdapter(pool),
-  session: { strategy: "jwt" },
+  // 免密 OTP 为主，会话保持 30 天并每日滑动续期：活跃用户几乎无需重复收码。
+  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60, updateAge: 24 * 60 * 60 },
   trustHost: true,
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
+    // 邮箱验证码（OTP）免密登录/注册：主入口，支持任意邮箱后缀。
+    Credentials({
+      id: AuthProvider.EmailOtp,
+      name: "Email OTP",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        code: { label: "Code", type: "text" },
+        token: { label: "Invite Token", type: "text" },
+      },
+      async authorize(credentials) {
+        const email = typeof credentials?.email === "string" ? credentials.email : "";
+        const code = typeof credentials?.code === "string" ? credentials.code : "";
+        const token = typeof credentials?.token === "string" ? credentials.token : null;
+        if (!isValidEmailFormat(email) || !/^\d{6}$/.test(code)) return null;
+
+        const result = await verifyOtp(email, code);
+        if (result !== "ok") return null;
+
+        // 验证码通过 → find-or-create（新用户可套用邀请 token 权益）。
+        const user = await provisionUserByEmail(email, { token });
+        if (user.disabled) return null; // 禁用账号拒绝登录
+        return { id: user.id, name: user.name, email: user.email, image: user.image };
+      },
     }),
     Credentials({
       credentials: {
@@ -36,8 +63,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // 限制 Credentials 登录也必须是信任的域名
-        if (!isTrustedEmail(credentials.email as string)) return null;
+        // 老用户密码登录兜底：仅做基础格式校验（域名已放开）
+        if (!isValidEmailFormat(credentials.email as string)) return null;
 
         const result = await pool.query(
           "SELECT * FROM users WHERE email = $1",
@@ -107,9 +134,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return true; // 已存在用户（包括受邀注册后的）允许登录
         }
 
-        // 核心拦截逻辑：针对新用户 OAuth 登录进行域名检查
-        if (!isTrustedEmail(user.email)) {
-          console.warn("SignIn failed: Email domain not trusted", user.email);
+        // 基础格式校验（域名已放开：任意邮箱后缀均可注册）
+        if (!isValidEmailFormat(user.email)) {
+          console.warn("SignIn failed: Invalid email format", user.email);
           return false;
         }
 

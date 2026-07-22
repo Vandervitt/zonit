@@ -8,6 +8,7 @@ import { Grid2x2 } from "lucide-react";
 import { Routes, AuthProvider } from "@/lib/constants";
 import { useMutation } from "@/lib/api/use-mutation";
 import { ApiError } from "@/lib/api/fetcher";
+import { OtpAuthForm } from "@/components/auth/OtpAuthForm";
 
 // 本地 dev 默认占位账密：配合 `pnpm db:seed-dev` 种入的 admin 用户，一键登录联调
 const DEV_EMAIL = process.env.NODE_ENV === "development" ? "admin@zapbridge.com" : "";
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState(DEV_EMAIL);
   const [password, setPassword] = useState(DEV_PASSWORD);
+  const [showPassword, setShowPassword] = useState(false);
   const [oauthProvider, setOauthProvider] = useState<AuthProvider | null>(null);
 
   const oauthSignIn = useMutation(
@@ -50,13 +52,13 @@ export default function LoginPage() {
     setOauthProvider(null);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
     void credentialsSignIn.trigger({ email, password });
   }
 
-  const error = credentialsSignIn.error?.message;
-  const loading = credentialsSignIn.isMutating;
+  const passwordError = credentialsSignIn.error?.message;
+  const passwordLoading = credentialsSignIn.isMutating;
   const oauthLoading = oauthProvider;
 
   return (
@@ -69,12 +71,12 @@ export default function LoginPage() {
       </div>
 
       <h1 className="text-2xl text-foreground mb-1">欢迎回来</h1>
-      <p className="text-sm text-muted-foreground mb-6">使用你的常用账号登录</p>
+      <p className="text-sm text-muted-foreground mb-6">输入邮箱获取验证码即可登录</p>
 
       <div className="flex flex-col gap-3 mb-6">
         <button
           onClick={() => handleOAuthSignIn(AuthProvider.Google)}
-          disabled={!!oauthLoading || loading}
+          disabled={!!oauthLoading}
           className="w-full flex items-center justify-center gap-3 border border-aqua-200 rounded-xl py-2.5 text-sm text-foreground/80 hover:bg-aqua-50 hover:border-aqua-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {oauthLoading === AuthProvider.Google ? (
@@ -93,41 +95,11 @@ export default function LoginPage() {
 
       <div className="flex items-center gap-3 mb-6">
         <div className="flex-1 h-px bg-aqua-100" />
-        <span className="text-xs text-muted-foreground italic">或使用邮箱</span>
+        <span className="text-xs text-muted-foreground italic">或使用邮箱验证码</span>
         <div className="flex-1 h-px bg-aqua-100" />
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <div className="relative">
-          <input
-            type="email"
-            placeholder="工作或个人邮箱"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
-          />
-          <p className="mt-1.5 text-[10px] text-muted-foreground px-1">
-            * 仅支持 Gmail 邮箱
-          </p>
-        </div>
-        <input
-          type="password"
-          placeholder="密码"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
-        />
-        {error && <p className="text-xs text-destructive font-medium bg-destructive/10 p-2 rounded-lg">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2.5 mt-2 rounded-xl bg-gradient-to-r from-aqua-500 to-tech text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 shadow-lg shadow-aqua-500/30"
-        >
-          {loading ? "验证中…" : "邮箱登录"}
-        </button>
-      </form>
+      <OtpAuthForm />
 
       <p className="text-xs text-muted-foreground text-center mt-5">
         还没有账号？{" "}
@@ -135,6 +107,52 @@ export default function LoginPage() {
           注册
         </Link>
       </p>
+
+      {/* 老用户密码登录兜底：默认折叠，不主推。 */}
+      <div className="mt-5 pt-4 border-t border-dashed border-aqua-100">
+        {!showPassword ? (
+          <button
+            type="button"
+            onClick={() => setShowPassword(true)}
+            className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            用密码登录（老用户）
+          </button>
+        ) : (
+          <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3">
+            <label htmlFor="pw-email" className="sr-only">邮箱</label>
+            <input
+              id="pw-email"
+              type="email"
+              placeholder="邮箱"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
+            />
+            <label htmlFor="pw-password" className="sr-only">密码</label>
+            <input
+              id="pw-password"
+              type="password"
+              placeholder="密码"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
+            />
+            {passwordError && <p className="text-xs text-destructive font-medium bg-destructive/10 p-2 rounded-lg">{passwordError}</p>}
+            <button
+              type="submit"
+              disabled={passwordLoading}
+              className="w-full py-2.5 rounded-xl border border-aqua-300 text-sm font-medium text-foreground/80 hover:bg-aqua-50 transition-colors disabled:opacity-60"
+            >
+              {passwordLoading ? "验证中…" : "密码登录"}
+            </button>
+          </form>
+        )}
+      </div>
 
       {process.env.NODE_ENV === "development" && (
         <div className="mt-4 pt-4 border-t border-dashed border-aqua-100">

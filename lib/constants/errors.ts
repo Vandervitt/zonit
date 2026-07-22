@@ -7,6 +7,8 @@ export const ApiErrors = {
   SITE_NAME_EXISTS: 'Site name already exists.',
   EMAIL_IN_USE: 'Email already in use.',
   EMAIL_NOT_SUPPORTED: 'Only Gmail addresses are supported.',
+  EMAIL_INVALID: 'Please enter a valid email address.',
+  OTP_INVALID: 'Invalid or expired verification code.',
   FIELDS_REQUIRED: 'All fields are required.',
   QUOTA_EXCEEDED: 'quota_exceeded',
   LIMIT_EXCEEDED: 'limit_exceeded',
