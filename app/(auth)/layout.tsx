@@ -6,7 +6,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-glow-1/25 blur-3xl" />
         <div className="absolute -bottom-24 right-1/4 h-96 w-96 rounded-full bg-glow-2/20 blur-3xl" />
       </div>
-      <div className="relative">{children}</div>
+      <div className="relative w-full max-w-md">{children}</div>
     </div>
   );
 }
