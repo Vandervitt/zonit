@@ -1,54 +1,25 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Grid2x2, TicketCheck } from "lucide-react";
-import { Routes, ApiRoutes, AuthProvider } from "@/lib/constants";
+import { Routes, AuthProvider } from "@/lib/constants";
 import { withLogger } from "@/lib/logger";
-import { jsonRequest } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
+import { OtpAuthForm } from "@/components/auth/OtpAuthForm";
 
 function RegisterPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const isInvited = Boolean(token);
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   const googleSignIn = useMutation(
     () => withLogger("GOOGLE_SIGN_IN", "auth/google", "POST", {}, () =>
       signIn(AuthProvider.Google, { callbackUrl: Routes.Home }),
     ),
   );
-
-  // 行内显示错误（不弹 toast）：从 ApiError.message 拿后端 error 字段
-  const register = useMutation(
-    async (payload: { name: string; email: string; password: string; token: string | null }) => {
-      await withLogger("USER_REGISTRATION", ApiRoutes.Register, "POST", payload, () =>
-        jsonRequest(ApiRoutes.Register, "POST", payload),
-      );
-      await withLogger("CREDENTIALS_SIGN_IN", "auth/credentials", "POST", { email: payload.email }, () =>
-        signIn(AuthProvider.Credentials, { email: payload.email, password: payload.password, redirect: false }),
-      );
-    },
-    {
-      errorToast: false,
-      onSuccess: () => { router.push(Routes.Home); router.refresh(); },
-    },
-  );
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    void register.trigger({ name, email, password, token });
-  }
-
-  const error = register.error?.message;
-  const loading = register.isMutating;
   const googleLoading = googleSignIn.isMutating;
 
   return (
@@ -61,7 +32,7 @@ function RegisterPageContent() {
       </div>
 
       <h1 className="text-2xl text-foreground mb-1">创建账号</h1>
-      <p className="text-sm text-muted-foreground mb-4">注册后即可开始使用</p>
+      <p className="text-sm text-muted-foreground mb-4">输入邮箱获取验证码，即可开始使用</p>
 
       {isInvited && (
         <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-xl mb-6">
@@ -72,7 +43,7 @@ function RegisterPageContent() {
 
       <button
         onClick={() => void googleSignIn.trigger()}
-        disabled={googleLoading || loading}
+        disabled={googleLoading}
         className="w-full flex items-center justify-center gap-3 border border-aqua-200 rounded-xl py-2.5 text-sm text-foreground/80 hover:bg-aqua-50 hover:border-aqua-300 transition-colors mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {googleLoading ? (
@@ -90,50 +61,11 @@ function RegisterPageContent() {
 
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-1 h-px bg-aqua-100" />
-        <span className="text-xs text-muted-foreground">或</span>
+        <span className="text-xs text-muted-foreground">或使用邮箱</span>
         <div className="flex-1 h-px bg-aqua-100" />
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input
-          type="text"
-          placeholder="姓名"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
-        />
-        <div>
-          <input
-            type="email"
-            placeholder="邮箱"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
-          />
-          <p className="mt-1.5 text-[10px] text-muted-foreground px-1">
-            * 仅支持 Gmail 邮箱
-          </p>
-        </div>
-        <input
-          type="password"
-          placeholder="密码"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-          className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
-        />
-        {error && <p className="text-xs text-destructive">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-aqua-500 to-tech text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 shadow-lg shadow-aqua-500/30"
-        >
-          {loading ? "创建中…" : "创建账号"}
-        </button>
-      </form>
+      <OtpAuthForm token={token} />
 
       <p className="text-xs text-muted-foreground text-center mt-5">
         已有账号？{" "}

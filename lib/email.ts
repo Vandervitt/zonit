@@ -63,6 +63,37 @@ export async function sendInvitationEmail({
   }
 }
 
+export async function sendOtpEmail({
+  to, code,
+}: {
+  to: string;
+  code: string;
+}) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `Zap Bridge 登录验证码：${code}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 8px;">登录验证码</h2>
+          <p style="color:#555;margin:0 0 20px;">使用以下验证码登录 Zap Bridge。验证码 10 分钟内有效，请勿泄露给他人。</p>
+          <div style="background:#f7f9fc;padding:20px;border-radius:8px;text-align:center;margin:0 0 20px;">
+            <span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#0070f3;">${escapeHtml(code)}</span>
+          </div>
+          <p style="font-size:13px;color:#888;margin:0;">如果你没有尝试登录，请忽略这封邮件，你的账号是安全的。</p>
+        </div>`,
+    });
+    // Resend SDK 不抛错，API 层错误经 error 字段返回：显式暴露，避免静默失败。
+    if (error) { console.error("Failed to send OTP email:", error); return { error }; }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send OTP email:", error);
+    return { error };
+  }
+}
+
 export async function sendWelcomeEmail({
   to, name, appUrl,
 }: {
