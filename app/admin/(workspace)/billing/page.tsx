@@ -47,6 +47,9 @@ export default function BillingPage() {
   const currentIdx = PLAN_ORDER.indexOf(currentPlanId);
   // 周期末取消：权益保留至该时间，到期由渠道 expired 事件回落 free。
   const billingExpiresAt = session?.user?.billingExpiresAt ?? null;
+  // 赠送套餐（comp_plan）无渠道真实订阅：自助换档会 404，隐藏「更换套餐」区、改示说明。
+  // free 用户仍需展示升级区（走 checkout 新开订阅），故仅对「非 free 且无订阅」隐藏。
+  const isCompedWithoutSub = currentPlanId !== "free" && session?.user?.hasSubscription === false;
 
   const checkout = useMutation(
     (planId: string) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCheckout, "POST", { planId }),
@@ -241,7 +244,7 @@ export default function BillingPage() {
         style={{ marginBottom: 24 }}
         extra={
           <Space>
-            {currentPlanId !== "free" && (
+            {currentPlanId !== "free" && !isCompedWithoutSub && (
               <Button
                 loading={portalLoading}
                 onClick={() => void portal.trigger()}
@@ -262,6 +265,14 @@ export default function BillingPage() {
         <Descriptions items={currentPlanDescItems} column={1} size="small" />
       </Card>
 
+      {isCompedWithoutSub ? (
+        <Alert
+          type="info"
+          showIcon
+          message="当前套餐由管理员赠送"
+          description="赠送套餐没有可自助管理的订阅，无法在此升级或降级。如需调整套餐，请联系我们。"
+        />
+      ) : (
       <div>
         <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
           {currentPlanId === "free" ? "可升级套餐" : "更换套餐（立即生效，差额按比例计费/抵扣）"}
@@ -323,8 +334,9 @@ export default function BillingPage() {
           })}
         </Space>
       </div>
+      )}
 
-      {currentPlanId !== "free" && (
+      {currentPlanId !== "free" && !isCompedWithoutSub && (
         <Text type="secondary" style={{ display: "block", marginTop: 24, textAlign: "center", fontSize: 12 }}>
           如需取消订阅，请通过 管理订阅 进入收款渠道的客户门户操作
         </Text>
