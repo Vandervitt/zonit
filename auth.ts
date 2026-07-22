@@ -157,6 +157,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (userData.disabled_at) {
               // 已禁用：清空会话权益与角色；API 侧由 getUserPlanOrNull → session_stale 兜底
               token.plan = "free" as PlanId;
+              token.paidPlan = "free" as PlanId;
+              token.compPlan = null;
+              token.compPlanExpiresAt = null;
               token.role = UserRole.USER;
               return token;
             }
@@ -186,6 +189,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
             const comp = activeCompPlan(userData.comp_plan ?? null, userData.comp_plan_expires_at, new Date());
             token.plan = effectivePlan(currentPlan as PlanId, comp);
+            // 付费订阅档与赠送档分开下发：billing 页换档基准必须是付费档，
+            // 否则赠送档更高时会把赠送档误当成「当前订阅档位」展示。
+            token.paidPlan = currentPlan as PlanId;
+            token.compPlan = comp;
+            token.compPlanExpiresAt = comp && userData.comp_plan_expires_at
+              ? new Date(userData.comp_plan_expires_at).toISOString()
+              : null;
             // 周期末取消的到期时间（无取消时为 null），billing 页展示「权益保留至 X」用。
             token.billingExpiresAt = userData.billing_expires_at
               ? new Date(userData.billing_expires_at).toISOString()
@@ -205,6 +215,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     session({ session, token }) {
       session.user.id = token.sub!;
       session.user.plan = token.plan as PlanId;
+      // 旧 token 无 paidPlan 时回退生效档（jwt 回调每请求重算，仅极端兜底）。
+      session.user.paidPlan = (token.paidPlan as PlanId | undefined) ?? (token.plan as PlanId);
+      session.user.compPlan = (token.compPlan as PlanId | null | undefined) ?? null;
+      session.user.compPlanExpiresAt = (token.compPlanExpiresAt as string | null | undefined) ?? null;
       session.user.role = token.role as UserRole;
       session.user.billingExpiresAt = (token.billingExpiresAt as string | null) ?? null;
       session.user.hasSubscription = Boolean(token.hasSubscription);
