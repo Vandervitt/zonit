@@ -385,7 +385,7 @@ export default function BillingPage() {
           AI 额度充值
         </Text>
         <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 12 }}>
-          额外购买的额度永不过期，月额度用尽后自动消耗。一次性付款，不影响订阅。
+          额度仅用于「AI 整页生成」，当月免费额度用尽后自动消耗、永不过期。AI 文案改写不使用额度：当月改写额度用尽需等次月重置或升级套餐。一次性付款，不影响订阅。
         </Text>
         <Space direction="vertical" style={{ width: "100%" }} size={12}>
           {CREDIT_PACKS.map((pack) => {
@@ -395,7 +395,7 @@ export default function BillingPage() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
                   <div style={{ flex: 1 }}>
                     <Space style={{ marginBottom: 4 }}>
-                      <Text strong>{pack.credits} 次 AI 额度</Text>
+                      <Text strong>{pack.credits} 次整页生成额度</Text>
                       <Text strong>{pack.priceText}</Text>
                     </Space>
                     <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
