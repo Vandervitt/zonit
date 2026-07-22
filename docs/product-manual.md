@@ -93,7 +93,7 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 
 ## 五、套餐与商业化（`lib/plans.ts`，Lemon Squeezy 计费）
 
-| 权益 | Free $0 | Starter $29.99/mo | Pro $79.99/mo（主推）| Agency $199.99/mo |
+| 权益 | Free CN¥0 | Starter CN¥29.99/月 | Pro CN¥79.99/月（主推）| Agency CN¥199.99/月 |
 |---|---|---|---|---|
 | 落地页数 | 1 | 3 | 20 | 无限 |
 | 自定义域名 | 0（不可发布）| 1 | 5 | 无限 |

@@ -14,8 +14,8 @@ export interface CreditPack {
 }
 
 export const CREDIT_PACKS: CreditPack[] = [
-  { credits: 50, priceText: "$19.99", desc: "适合偶尔补量" },
-  { credits: 200, priceText: "$59.99", desc: "单价更低，重度使用推荐", highlight: true },
+  { credits: 50, priceText: "CN¥19.99", desc: "适合偶尔补量" },
+  { credits: 200, priceText: "CN¥59.99", desc: "单价更低，重度使用推荐", highlight: true },
 ];
 
 /** 允许购买的额度档位集合，供路由校验入参。 */
