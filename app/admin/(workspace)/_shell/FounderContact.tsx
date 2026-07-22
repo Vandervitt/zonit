@@ -56,31 +56,13 @@ function buildContent({ wechatId, wechatQrUrl, email }: FounderContactData) {
   );
 }
 
-export function FounderContact({
-  collapsed,
-  contact,
-}: {
-  collapsed: boolean;
-  contact: FounderContactData;
-}) {
+export function FounderContact({ contact }: { contact: FounderContactData }) {
   // 未配置任何联系方式则不展示入口，避免弹出空面板。
   if (!contact.wechatId && !contact.wechatQrUrl && !contact.email) return null;
 
   return (
-    <div style={{ marginBlockStart: "auto", padding: collapsed ? "12px 0" : "12px 16px",
-      borderBlockStart: "1px solid #eef3f9" }}>
-      <Popover content={buildContent(contact)} trigger="click" placement="rightTop">
-        {collapsed ? (
-          <Button type="text" block icon={<CustomerServiceOutlined style={{ color: BRAND }} />} />
-        ) : (
-          <Button type="text" block style={{ height: "auto", padding: "8px 10px", textAlign: "start" }}>
-            <Space size={8}>
-              <CustomerServiceOutlined style={{ color: BRAND }} />
-              <span style={{ fontSize: 13 }}>联系创始人</span>
-            </Space>
-          </Button>
-        )}
-      </Popover>
-    </div>
+    <Popover content={buildContent(contact)} trigger="click" placement="bottomRight">
+      <Button type="text" icon={<CustomerServiceOutlined style={{ color: BRAND }} />} title="联系创始人" />
+    </Popover>
   );
 }

@@ -60,7 +60,7 @@ export default function LoginPage() {
   const oauthLoading = oauthProvider;
 
   return (
-    <div className="w-full max-w-sm bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl shadow-aqua-500/10 border border-aqua-100 p-8">
+    <div className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl shadow-aqua-500/10 border border-aqua-100 p-8">
       <div className="flex items-center gap-2 mb-8">
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-aqua-500 to-tech flex items-center justify-center shadow-sm shadow-aqua-500/30">
           <Grid2x2 className="w-4 h-4 text-white" />
@@ -68,8 +68,8 @@ export default function LoginPage() {
         <span className="text-foreground tracking-widest text-sm uppercase">Zap Bridge</span>
       </div>
 
-      <h1 className="text-2xl text-foreground mb-1">Welcome back</h1>
-      <p className="text-sm text-muted-foreground mb-6">Sign in with your trusted account</p>
+      <h1 className="text-2xl text-foreground mb-1">欢迎回来</h1>
+      <p className="text-sm text-muted-foreground mb-6">使用你的常用账号登录</p>
 
       <div className="flex flex-col gap-3 mb-6">
         <button
@@ -87,13 +87,13 @@ export default function LoginPage() {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
           )}
-          {oauthLoading === AuthProvider.Google ? "Connecting..." : "Google"}
+          {oauthLoading === AuthProvider.Google ? "连接中…" : "Google 登录"}
         </button>
       </div>
 
       <div className="flex items-center gap-3 mb-6">
         <div className="flex-1 h-px bg-aqua-100" />
-        <span className="text-xs text-muted-foreground italic">or use email</span>
+        <span className="text-xs text-muted-foreground italic">或使用邮箱</span>
         <div className="flex-1 h-px bg-aqua-100" />
       </div>
 
@@ -101,19 +101,19 @@ export default function LoginPage() {
         <div className="relative">
           <input
             type="email"
-            placeholder="Work or Personal Email"
+            placeholder="工作或个人邮箱"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
           />
           <p className="mt-1.5 text-[10px] text-muted-foreground px-1">
-            * Only Gmail addresses supported
+            * 仅支持 Gmail 邮箱
           </p>
         </div>
         <input
           type="password"
-          placeholder="Password"
+          placeholder="密码"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -125,14 +125,14 @@ export default function LoginPage() {
           disabled={loading}
           className="w-full py-2.5 mt-2 rounded-xl bg-gradient-to-r from-aqua-500 to-tech text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 shadow-lg shadow-aqua-500/30"
         >
-          {loading ? "Verifying…" : "Sign in with Email"}
+          {loading ? "验证中…" : "邮箱登录"}
         </button>
       </form>
 
       <p className="text-xs text-muted-foreground text-center mt-5">
-        No account?{" "}
+        还没有账号？{" "}
         <Link href={Routes.Register} className="text-aqua-600 font-medium hover:underline">
-          Sign up
+          注册
         </Link>
       </p>
 
@@ -144,7 +144,7 @@ export default function LoginPage() {
             disabled={devSignIn.isMutating}
             className="w-full py-2 rounded-xl border border-dashed border-amber-300 bg-amber-50 text-amber-700 text-xs font-medium hover:bg-amber-100 transition-colors disabled:opacity-50"
           >
-            {devSignIn.isMutating ? "Logging in…" : "⚡ Dev Login (local only)"}
+            {devSignIn.isMutating ? "登录中…" : "⚡ Dev 登录（仅本地）"}
           </button>
         </div>
       )}

@@ -52,7 +52,7 @@ function RegisterPageContent() {
   const googleLoading = googleSignIn.isMutating;
 
   return (
-    <div className="w-full max-w-sm bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl shadow-aqua-500/10 border border-aqua-100 p-8">
+    <div className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl shadow-aqua-500/10 border border-aqua-100 p-8">
       <div className="flex items-center gap-2 mb-8">
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-aqua-500 to-tech flex items-center justify-center shadow-sm shadow-aqua-500/30">
           <Grid2x2 className="w-4 h-4 text-white" />
@@ -60,8 +60,8 @@ function RegisterPageContent() {
         <span className="text-foreground tracking-widest text-sm uppercase">Zap Bridge</span>
       </div>
 
-      <h1 className="text-2xl text-foreground mb-1">Create account</h1>
-      <p className="text-sm text-muted-foreground mb-4">Sign up to get started</p>
+      <h1 className="text-2xl text-foreground mb-1">创建账号</h1>
+      <p className="text-sm text-muted-foreground mb-4">注册后即可开始使用</p>
 
       {isInvited && (
         <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-xl mb-6">
@@ -85,19 +85,19 @@ function RegisterPageContent() {
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
         )}
-        {googleLoading ? "Connecting..." : "Continue with Google"}
+        {googleLoading ? "连接中…" : "使用 Google 继续"}
       </button>
 
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-1 h-px bg-aqua-100" />
-        <span className="text-xs text-muted-foreground">or</span>
+        <span className="text-xs text-muted-foreground">或</span>
         <div className="flex-1 h-px bg-aqua-100" />
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
           type="text"
-          placeholder="Full name"
+          placeholder="姓名"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -106,19 +106,19 @@ function RegisterPageContent() {
         <div>
           <input
             type="email"
-            placeholder="Email"
+            placeholder="邮箱"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
           />
           <p className="mt-1.5 text-[10px] text-muted-foreground px-1">
-            * Only Gmail addresses supported
+            * 仅支持 Gmail 邮箱
           </p>
         </div>
         <input
           type="password"
-          placeholder="Password"
+          placeholder="密码"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -131,14 +131,14 @@ function RegisterPageContent() {
           disabled={loading}
           className="w-full py-2.5 rounded-xl bg-gradient-to-r from-aqua-500 to-tech text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 shadow-lg shadow-aqua-500/30"
         >
-          {loading ? "Creating account…" : "Create account"}
+          {loading ? "创建中…" : "创建账号"}
         </button>
       </form>
 
       <p className="text-xs text-muted-foreground text-center mt-5">
-        Already have an account?{" "}
+        已有账号？{" "}
         <Link href={Routes.Login} className="text-aqua-600 font-medium hover:underline">
-          Sign in
+          登录
         </Link>
       </p>
     </div>

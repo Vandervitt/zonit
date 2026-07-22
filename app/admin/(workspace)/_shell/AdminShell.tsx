@@ -51,12 +51,12 @@ export function AdminShell({
           </div>
           <Menu mode="inline" selectedKeys={[selectedKey]} items={menuItems}
             style={{ borderInlineEnd: 0, flex: 1 }} />
-          <FounderContact collapsed={collapsed} contact={founderContact} />
         </div>
       </Sider>
       <Layout>
         <Header style={{ display: "flex", alignItems: "center", justifyContent: "flex-end",
           gap: 12, paddingInline: 20, borderBlockEnd: "1px solid #eef3f9" }}>
+          <FounderContact contact={founderContact} />
           <Tag color={plan === "free" ? "default" : "blue"}>{PLANS[plan].label}</Tag>
           <Dropdown menu={{ items: [
             { key: "out", icon: <LogoutOutlined />, label: "退出登录",
