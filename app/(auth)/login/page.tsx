@@ -10,15 +10,8 @@ import { useMutation } from "@/lib/api/use-mutation";
 import { ApiError } from "@/lib/api/fetcher";
 import { OtpAuthForm } from "@/components/auth/OtpAuthForm";
 
-// 本地 dev 默认占位账密：配合 `pnpm db:seed-dev` 种入的 admin 用户，一键登录联调
-const DEV_EMAIL = process.env.NODE_ENV === "development" ? "admin@zapbridge.com" : "";
-const DEV_PASSWORD = process.env.NODE_ENV === "development" ? "Password1!" : "";
-
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState(DEV_EMAIL);
-  const [password, setPassword] = useState(DEV_PASSWORD);
-  const [showPassword, setShowPassword] = useState(false);
   const [oauthProvider, setOauthProvider] = useState<AuthProvider | null>(null);
 
   const oauthSignIn = useMutation(
@@ -34,31 +27,12 @@ export default function LoginPage() {
     { onSuccess: () => { router.push(Routes.Dashboard); router.refresh(); } },
   );
 
-  const credentialsSignIn = useMutation(
-    async (args: { email: string; password: string }) => {
-      const res = await signIn(AuthProvider.Credentials, { ...args, redirect: false });
-      if (res?.error) throw new ApiError(401, "Invalid email or password.");
-      return res;
-    },
-    {
-      errorToast: false,
-      onSuccess: () => { router.push(Routes.Dashboard); router.refresh(); },
-    },
-  );
-
   async function handleOAuthSignIn(provider: AuthProvider) {
     setOauthProvider(provider);
     await oauthSignIn.trigger(provider);
     setOauthProvider(null);
   }
 
-  function handlePasswordSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    void credentialsSignIn.trigger({ email, password });
-  }
-
-  const passwordError = credentialsSignIn.error?.message;
-  const passwordLoading = credentialsSignIn.isMutating;
   const oauthLoading = oauthProvider;
 
   return (
@@ -107,52 +81,6 @@ export default function LoginPage() {
           注册
         </Link>
       </p>
-
-      {/* 老用户密码登录兜底：默认折叠，不主推。 */}
-      <div className="mt-5 pt-4 border-t border-dashed border-aqua-100">
-        {!showPassword ? (
-          <button
-            type="button"
-            onClick={() => setShowPassword(true)}
-            className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            用密码登录（老用户）
-          </button>
-        ) : (
-          <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3">
-            <label htmlFor="pw-email" className="sr-only">邮箱</label>
-            <input
-              id="pw-email"
-              type="email"
-              placeholder="邮箱"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
-            />
-            <label htmlFor="pw-password" className="sr-only">密码</label>
-            <input
-              id="pw-password"
-              type="password"
-              placeholder="密码"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className="w-full px-4 py-2.5 rounded-xl border border-aqua-200 bg-white/60 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-aqua-400 focus:ring-2 focus:ring-aqua-200 transition-colors"
-            />
-            {passwordError && <p className="text-xs text-destructive font-medium bg-destructive/10 p-2 rounded-lg">{passwordError}</p>}
-            <button
-              type="submit"
-              disabled={passwordLoading}
-              className="w-full py-2.5 rounded-xl border border-aqua-300 text-sm font-medium text-foreground/80 hover:bg-aqua-50 transition-colors disabled:opacity-60"
-            >
-              {passwordLoading ? "验证中…" : "密码登录"}
-            </button>
-          </form>
-        )}
-      </div>
 
       {process.env.NODE_ENV === "development" && (
         <div className="mt-4 pt-4 border-t border-dashed border-aqua-100">
