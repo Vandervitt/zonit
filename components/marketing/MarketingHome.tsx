@@ -18,7 +18,7 @@ import {
 import { Routes } from "@/lib/constants";
 import { PlanComparison } from "@/components/billing/PlanComparison";
 import { ctaPrimary, ctaGhost, gradientText, glassCard, pill, glowAura } from "@/lib/theme";
-import { Backdrop, SiteNav, SiteFooter, SectionHead, type Fonts } from "./chrome";
+import { Backdrop, SiteNav, SiteFooter, SectionHead, PricingLink, type Fonts } from "./chrome";
 
 /* ------------------------------------------------------------------ *
  * 数据
@@ -156,9 +156,9 @@ function Hero({ fonts }: { fonts: Fonts }) {
             免费开始
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-          <Link href="#pricing" className={ctaGhost}>
+          <PricingLink href="#pricing" className={ctaGhost}>
             查看套餐
-          </Link>
+          </PricingLink>
         </motion.div>
 
         <motion.p

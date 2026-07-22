@@ -17,7 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Routes } from "@/lib/constants";
-import { Backdrop, SiteNav, SiteFooter, SectionHead, fadeUp, type Fonts } from "./chrome";
+import { Backdrop, SiteNav, SiteFooter, SectionHead, PricingLink, fadeUp, type Fonts } from "./chrome";
 import { ctaPrimary, ctaGhost, gradientText, glassCard, pill, glowAura } from "@/lib/theme";
 
 /* ------------------------------------------------------------------ *
@@ -122,9 +122,9 @@ function Hero({ fonts }: { fonts: Fonts }) {
             免费开始
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-          <Link href={`${Routes.Home}#pricing`} className={ctaGhost}>
+          <PricingLink className={ctaGhost}>
             查看 Agency 套餐
-          </Link>
+          </PricingLink>
         </motion.div>
       </motion.div>
     </section>
@@ -256,10 +256,10 @@ function AgencyCta({ fonts }: { fonts: Fonts }) {
           套餐内建：每个已发布页拥有独立的结构变体，随时可一键重洗，降低批量页面被关联判重的风险。
         </p>
         <div className="relative mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href={`${Routes.Home}#pricing`} className={ctaPrimary}>
+          <PricingLink className={ctaPrimary}>
             了解 Agency 套餐
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          </PricingLink>
           <Link href={Routes.Register} className={ctaGhost}>
             先免费创建页面
           </Link>
