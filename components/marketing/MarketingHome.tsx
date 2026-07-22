@@ -63,7 +63,7 @@ const FEATURES: {
   {
     icon: LayoutTemplate,
     title: "海外获客模板库",
-    desc: "30+ 套咨询与留资模板，覆盖美妆、医美、家装、数码、本地服务等行业——不用从空白页开始，选完即有投放级页面结构。",
+    desc: "30+ 套咨询与留资模板，覆盖美妆、医美、服饰、家居、数码、保健、母婴等行业——不用从空白页开始，选完即有投放级页面结构。",
   },
   {
     icon: Pencil,
@@ -94,7 +94,7 @@ const FEATURES: {
 ];
 
 const FUNNEL = [
-  { icon: Lock, label: "Cookie 同意门控", note: "可选开启，同意后加载第三方像素" },
+  { icon: Lock, label: "Cookie 同意门控", note: "默认开启，同意后加载第三方像素" },
   { icon: Radar, label: "多平台像素", note: "Meta / TikTok / GA4 / Google Ads" },
   { icon: MousePointerClick, label: "获客行为采集", note: "CTA 点击 + 表单提交" },
   { icon: BarChart3, label: "转化回传 + 基础看板", note: "Meta / TikTok CAPI + PV / CTA / UTM 来源" },
