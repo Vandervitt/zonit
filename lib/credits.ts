@@ -1,4 +1,7 @@
-// AI 额度充值包（一次性购买，credit 永不过期，月额度用尽后自动消耗）。
+// AI 额度充值包（一次性购买，credit 永不过期）。
+// 仅用于「AI 整页生成」：当月免费额度用尽后自动消耗 credit。
+// 注意：AI 文案改写(rewrite)不消耗 credit —— 当月改写额度用尽只能等次月重置或升级套餐
+// （有意的升级驱动，见 lib/ai/usage.ts checkAndConsume 中 kind==="page" 才动 credit）。
 // credits 数量必须与收款渠道产品映射一致（env DODO_CREDITS_50 / DODO_CREDITS_200，
 // CREEM_CREDITS_50 / CREEM_CREDITS_200），后端据 credits 反查产品 id 建结账会话。
 
