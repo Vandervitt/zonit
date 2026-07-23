@@ -7,6 +7,7 @@ import { leadRateLimiter } from "@/lib/leads/rate-limit";
 import { insertLead, listLeads } from "@/lib/leads/store";
 import { enqueueCapiEvents } from "@/lib/capi/dispatch";
 import { notifyNewLead } from "@/lib/leads/notify";
+import { recordFirstLeadMilestone } from "@/lib/platform-milestones";
 
 const cap = (v: unknown, n: number): string | null =>
   typeof v === "string" && v.length > 0 ? v.slice(0, n) : null;
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
       utm_medium: cap(utm.utm_medium, 128),
       utm_campaign: cap(utm.utm_campaign, 128),
     });
+    await recordFirstLeadMilestone(pageId);
   } catch {
     // 坏 page_id 等 FK 错误：best-effort 忽略
   }

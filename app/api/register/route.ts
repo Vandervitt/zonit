@@ -5,6 +5,7 @@ import { ApiErrors } from "@/lib/constants";
 import { isValidEmailFormat } from "@/lib/auth/trusted-email";
 import { withLogger } from "@/lib/logger";
 import { sendWelcomeEmail } from "@/lib/email";
+import { recordMilestone } from "@/lib/platform-milestones";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       bcrypt.hash(password, 12)
     );
     
-    await withLogger("DB_CREATE_USER", "db/users", "INSERT", { name, email, userPlan }, () => 
+    const created = await withLogger("DB_CREATE_USER", "db/users", "INSERT", { name, email, userPlan }, () =>
       client.query(
         "INSERT INTO users (name, email, password_hash, plan, trial_expires_at, invited_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
         [name, email, hash, userPlan, trialExpiresAt, invitationId ? new Date() : null]
@@ -79,6 +80,8 @@ export async function POST(request: NextRequest) {
     }
 
     await client.query('COMMIT');
+
+    await recordMilestone(created.rows[0].id, "signup");
 
     // 注册成功后发欢迎/onboarding 邮件（best-effort，COMMIT 之后调度，绝不影响注册结果；未配置 Resend 则跳过）。
     try {

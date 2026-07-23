@@ -7,6 +7,7 @@ import { collectPublishIssues } from "@/landing-editor/lib/publishIssues";
 import { getLandingPage, ensureUniqueSlug, publishLandingPage } from "@/lib/landing-pages/store";
 import { getDomainById, bindDomainToLandingPage } from "@/lib/domains-db";
 import { addDomainToProject } from "@/lib/vercel";
+import { recordMilestone } from "@/lib/platform-milestones";
 
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/landing-pages/[id]/publish">) {
   const session = await auth();
@@ -45,5 +46,6 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/landing
   if (!bound) return NextResponse.json({ error: ApiErrors.DOMAIN_NOT_VERIFIED }, { status: 422 });
 
   const published = await publishLandingPage(id, session.user.id, finalSlug);
+  await recordMilestone(session.user.id, "page_published");
   return NextResponse.json({ ...published, domain: domain.domain });
 }

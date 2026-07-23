@@ -2,6 +2,7 @@ import { after } from "next/server";
 import pool from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
 import { normalizeEmail } from "@/lib/auth/otp";
+import { recordMilestone } from "@/lib/platform-milestones";
 
 export type ProvisionedUser = {
   id: string;
@@ -78,6 +79,7 @@ export async function provisionUserByEmail(
     await client.query("COMMIT");
 
     const u = inserted.rows[0];
+    await recordMilestone(u.id, "signup");
 
     // 新用户发欢迎邮件（best-effort，绝不阻断登录；未配置 Resend 自动跳过）。
     try {

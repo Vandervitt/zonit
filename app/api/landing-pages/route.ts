@@ -6,6 +6,7 @@ import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 import { createLandingPage, listLandingPages, ensureUniqueName } from "@/lib/landing-pages/store";
 import { getUserPlanOrNull } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
+import { recordMilestone } from "@/lib/platform-milestones";
 
 export async function GET() {
   const session = await auth();
@@ -44,5 +45,6 @@ export async function POST(request: Request) {
   // 同模板可重复创建：撞 (user_id, name) 唯一约束时自动追加「 2」「 3」…，避免 500。
   const name = await ensureUniqueName(session.user.id, template.name);
   const row = await createLandingPage(session.user.id, name, draft);
+  await recordMilestone(session.user.id, "page_created");
   return NextResponse.json(row, { status: 201 });
 }
