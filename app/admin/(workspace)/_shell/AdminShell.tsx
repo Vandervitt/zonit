@@ -9,7 +9,8 @@ import { ThunderboltFilled, LogoutOutlined } from "@ant-design/icons";
 import { ADMIN_NAV, resolveActiveNavKey } from "./nav";
 import { FounderContact } from "./FounderContact";
 import type { FounderContact as FounderContactData } from "@/lib/platform-settings";
-import { PLANS } from "@/lib/plans";
+import { PLANS, PLAN_ORDER } from "@/lib/plans";
+import { Routes } from "@/lib/constants";
 import { BRAND } from "@/lib/theme/brand";
 
 const { Sider, Header, Content } = Layout;
@@ -25,6 +26,11 @@ export function AdminShell({
   const pathname = usePathname();
   const { data: session } = useSession();
   const plan = session?.user?.plan ?? "free";
+  // 赠送/试用档高于付费档时，标签明示来源与到期时间（点击进 billing 查看/升级）。
+  const compPlan = session?.user?.compPlan ?? null;
+  const paidPlan = session?.user?.paidPlan ?? "free";
+  const compAbovePaid = compPlan !== null && PLAN_ORDER.indexOf(compPlan) > PLAN_ORDER.indexOf(paidPlan);
+  const compExpiresAt = session?.user?.compPlanExpiresAt ?? null;
 
   const selectedKey = resolveActiveNavKey(pathname);
 
@@ -57,7 +63,16 @@ export function AdminShell({
         <Header style={{ display: "flex", alignItems: "center", justifyContent: "flex-end",
           gap: 12, paddingInline: 20, borderBlockEnd: "1px solid #eef3f9" }}>
           <FounderContact contact={founderContact} />
-          <Tag color={plan === "free" ? "default" : "blue"}>{PLANS[plan].label}</Tag>
+          {compAbovePaid ? (
+            <Link href={Routes.Billing}>
+              <Tag color="purple" style={{ cursor: "pointer" }}>
+                {PLANS[plan].label} 体验
+                {compExpiresAt ? ` · 至 ${new Date(compExpiresAt).toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" })}` : ""}
+              </Tag>
+            </Link>
+          ) : (
+            <Tag color={plan === "free" ? "default" : "blue"}>{PLANS[plan].label}</Tag>
+          )}
           <Dropdown menu={{ items: [
             { key: "out", icon: <LogoutOutlined />, label: "退出登录",
               onClick: () => signOut({ callbackUrl: "/login" }) },

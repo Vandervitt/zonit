@@ -56,6 +56,18 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 
 export const PLAN_ORDER: PlanId[] = ["free", "starter", "pro", "agency"];
 
+// 注册赠送试用：新用户建号即写入 comp_plan（复用赠送套餐机制，到期由
+// activeCompPlan 自动回落，无独立降级逻辑）。对外文案统一「注册即赠 Pro 7 天」。
+export const SIGNUP_TRIAL_PLAN: PlanId = "pro";
+export const SIGNUP_TRIAL_DAYS = 7;
+
+/** 注册试用到期时刻（从 now 起算）。 */
+export function signupTrialExpiry(now: Date = new Date()): Date {
+  const d = new Date(now);
+  d.setDate(d.getDate() + SIGNUP_TRIAL_DAYS);
+  return d;
+}
+
 // 对比表行定义：valueFor 返回字符串（额度）或布尔（有无）；desc 为该权益的作用说明。
 export interface PlanFeatureRow {
   label: string;

@@ -9,7 +9,7 @@ export default function PricingPage() {
       <div className="relative max-w-5xl mx-auto">
         <div className="text-center mb-14">
           <h1 className="text-4xl font-bold text-foreground mb-3">选择适合你的套餐</h1>
-          <p className="text-muted-foreground text-lg">先用免费版起步，赚到第一桶金后再按需升级</p>
+          <p className="text-muted-foreground text-lg">注册即赠 Pro 全功能 7 天，先跑通获客链路，再按需升级</p>
         </div>
         <PlanComparison />
       </div>

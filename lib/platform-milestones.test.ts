@@ -46,6 +46,15 @@ describe("recordFirstLeadMilestone", () => {
   });
 });
 
+describe("listUserMilestones", () => {
+  it("返回该用户已达成事件，过滤未知脏值", async () => {
+    query.mockResolvedValueOnce({ rows: [{ event: "signup" }, { event: "bogus" }, { event: "page_created" }] });
+    const events = await import("./platform-milestones").then((m) => m.listUserMilestones("u1"));
+    expect(events).toEqual(["signup", "page_created"]);
+    expect(query.mock.calls[0][1]).toEqual(["u1"]);
+  });
+});
+
 describe("getFunnelStats", () => {
   it("聚合各里程碑人数，缺失事件补 0，中位耗时透传为数字", async () => {
     query

@@ -28,6 +28,7 @@ export enum ApiRoutes {
   Leads = '/api/leads',
   Feedback = '/api/feedback',
   AiUsage = '/api/ai/usage',
+  Milestones = '/api/milestones',
   Analytics = '/api/analytics',
   Templates = '/api/templates',
   Register = '/api/register',

@@ -3,16 +3,52 @@
 import Link from "next/link";
 import useSWR from "swr";
 import { useSession } from "next-auth/react";
-import { Row, Col, Card, Statistic, Progress, Table, Button, Tag, Space, Typography } from "antd";
-import { FileTextOutlined, GlobalOutlined, RobotOutlined, CrownOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { Row, Col, Card, Statistic, Progress, Table, Button, Tag, Space, Typography, Steps } from "antd";
+import { FileTextOutlined, GlobalOutlined, RobotOutlined, CrownOutlined, ArrowRightOutlined, RocketOutlined } from "@ant-design/icons";
 import { Routes, ApiRoutes, landingEditorPath } from "@/lib/constants";
 import { PLANS, type PlanId } from "@/lib/plans";
+import type { MilestoneEvent } from "@/lib/platform-milestones";
 import { TemplatePickerDialog } from "@/landing-editor/components/TemplatePickerDialog";
 import type { UsageSummary } from "@/lib/ai/usage-summary";
 import { LoadErrorAlert } from "./_shell/LoadErrorAlert";
 
 interface PageRow { id: string; name: string; slug: string | null; status: "draft" | "published"; updated_at: string; }
 interface DomainRow { id: string; verified: boolean; }
+
+// 上手清单：与激活漏斗同源（platform_milestones），达成语义为「曾经完成过」。
+const ONBOARDING_STEPS: { event: MilestoneEvent; title: string; desc: string; href: string }[] = [
+  { event: "page_created", title: "创建落地页", desc: "选行业模板或 AI 一键生成", href: Routes.LandingPages },
+  { event: "domain_verified", title: "绑定并验证域名", desc: "页面发布到你自己的品牌域名", href: Routes.Domains },
+  { event: "page_published", title: "发布上线", desc: "发布到已验证域名，即可开始投放", href: Routes.LandingPages },
+  { event: "first_lead", title: "收到首条线索", desc: "访客留资后在线索收件箱查看", href: Routes.Leads },
+];
+
+function OnboardingChecklist({ achieved }: { achieved: MilestoneEvent[] }) {
+  const done = new Set(achieved);
+  const allDone = ONBOARDING_STEPS.every((s) => done.has(s.event));
+  if (allDone) return null;
+  const current = ONBOARDING_STEPS.findIndex((s) => !done.has(s.event));
+  return (
+    <Card
+      title={
+        <Space>
+          <RocketOutlined />
+          4 步上线你的获客落地页
+        </Space>
+      }
+    >
+      <Steps
+        size="small"
+        current={current}
+        items={ONBOARDING_STEPS.map((s, i) => ({
+          title: done.has(s.event) ? s.title : <Link href={s.href}>{s.title}</Link>,
+          description: s.desc,
+          status: done.has(s.event) ? "finish" : i === current ? "process" : "wait",
+        }))}
+      />
+    </Card>
+  );
+}
 
 export default function OverviewPage() {
   const { data: session } = useSession();
@@ -22,6 +58,7 @@ export default function OverviewPage() {
   const pages = useSWR<PageRow[]>(ApiRoutes.LandingPages);
   const domains = useSWR<DomainRow[]>(ApiRoutes.Domains);
   const usage = useSWR<UsageSummary>(ApiRoutes.AiUsage);
+  const milestones = useSWR<{ events: MilestoneEvent[] }>(ApiRoutes.Milestones);
 
   const pageList = pages.data ?? [];
   const published = pageList.filter((p) => p.status === "published").length;
@@ -41,6 +78,8 @@ export default function OverviewPage() {
       <LoadErrorAlert error={pages.error} onRetry={() => void pages.mutate()} label="落地页数据" />
       <LoadErrorAlert error={domains.error} onRetry={() => void domains.mutate()} label="域名数据" />
       <LoadErrorAlert error={usage.error} onRetry={() => void usage.mutate()} label="AI 用量数据" />
+
+      {milestones.data && <OnboardingChecklist achieved={milestones.data.events} />}
 
       <Row gutter={16}>
         <Col xs={24} sm={12} lg={6}>

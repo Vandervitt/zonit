@@ -37,6 +37,14 @@ export async function recordFirstLeadMilestone(pageId: string): Promise<void> {
   }
 }
 
+/** 某用户已达成的里程碑集合（上手清单用）。 */
+export async function listUserMilestones(userId: string): Promise<MilestoneEvent[]> {
+  const res = await pool.query(`SELECT event FROM platform_milestones WHERE user_id = $1`, [userId]);
+  return res.rows
+    .map((r) => r.event as string)
+    .filter((e): e is MilestoneEvent => (MILESTONE_EVENTS as readonly string[]).includes(e));
+}
+
 export interface FunnelStats {
   /** 各里程碑达成人数。 */
   counts: Record<MilestoneEvent, number>;

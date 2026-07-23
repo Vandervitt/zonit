@@ -32,7 +32,7 @@ function RegisterPageContent() {
       </div>
 
       <h1 className="text-2xl text-foreground mb-1">创建账号</h1>
-      <p className="text-sm text-muted-foreground mb-4">输入邮箱获取验证码，即可开始使用</p>
+      <p className="text-sm text-muted-foreground mb-4">输入邮箱获取验证码，注册即赠 Pro 全功能试用 7 天</p>
 
       {isInvited && (
         <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-xl mb-6">

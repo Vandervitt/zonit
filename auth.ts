@@ -9,7 +9,7 @@ import { Routes, UserRole, AuthProvider } from "@/lib/constants";
 import { isValidEmailFormat } from "@/lib/auth/trusted-email";
 import { verifyOtp } from "@/lib/auth/otp";
 import { provisionUserByEmail } from "@/lib/auth/provision";
-import { effectivePlan, activeCompPlan, type PlanId } from "@/lib/plans";
+import { effectivePlan, activeCompPlan, SIGNUP_TRIAL_PLAN, signupTrialExpiry, type PlanId } from "@/lib/plans";
 import { sendWelcomeEmail } from "@/lib/email";
 import { recordMilestone } from "@/lib/platform-milestones";
 
@@ -141,10 +141,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return false;
         }
 
-        // 新用户：写入 users 表并以本地 ID 覆盖 user.id，确保 JWT/Session 用本地 ID
+        // 新用户：写入 users 表并以本地 ID 覆盖 user.id，确保 JWT/Session 用本地 ID；
+        // 建号即赠 Pro 试用（comp_plan 机制，到期自动回落）。
         const inserted = await pool.query(
-          "INSERT INTO users (email, name, image) VALUES ($1, $2, $3) RETURNING id",
-          [user.email, user.name ?? null, user.image ?? null]
+          "INSERT INTO users (email, name, image, comp_plan, comp_plan_expires_at) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+          [user.email, user.name ?? null, user.image ?? null, SIGNUP_TRIAL_PLAN, signupTrialExpiry()]
         );
         user.id = inserted.rows[0].id;
         console.log("SignIn success: New trusted user created", user.id);
