@@ -103,6 +103,12 @@ export function SiteNav({ fonts }: { fonts: Fonts }) {
         </Link>
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
           <Link
+            href={Routes.Templates}
+            className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
+          >
+            模板库
+          </Link>
+          <Link
             href={Routes.AntiBan}
             className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
           >
@@ -177,6 +183,9 @@ export function SiteFooter({ fonts }: { fonts: Fonts }) {
           <span>© {new Date().getFullYear()}</span>
         </div>
         <nav className="flex items-center gap-5">
+          <Link href={Routes.Templates} className="transition-colors hover:text-aqua-700">
+            模板库
+          </Link>
           <Link href={Routes.AntiBan} className="transition-colors hover:text-aqua-700">
             反同质化
           </Link>

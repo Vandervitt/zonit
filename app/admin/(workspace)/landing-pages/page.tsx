@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Table, Button, Tag, Space, Popconfirm, Typography, App } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
@@ -42,6 +43,45 @@ interface FeedbackState {
   title: string;
   pageId: string;
   pageName: string;
+}
+
+/**
+ * 公开模板画廊深链：/admin/landing-pages?template=<id> 直接按该模板建草稿并进编辑器。
+ * useSearchParams 需要 Suspense 边界，故独立成子组件挂载。
+ */
+function TemplateDeepLink() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { message } = App.useApp();
+  const fired = useRef(false);
+
+  useEffect(() => {
+    const templateId = searchParams.get("template");
+    if (!templateId || fired.current) return;
+    fired.current = true;
+    void (async () => {
+      const res = await fetch(ApiRoutes.LandingPages, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ templateId }),
+      });
+      if (res.status === 403) {
+        message.error("已达当前套餐的落地页上限，请升级后再创建");
+        router.replace(Routes.Billing);
+        return;
+      }
+      if (!res.ok) {
+        message.error("从模板创建失败，请重试");
+        router.replace(Routes.LandingPages);
+        return;
+      }
+      const row: PageRow = await res.json();
+      message.success("已从模板创建草稿");
+      router.replace(landingEditorPath(row.id));
+    })();
+  }, [searchParams, router, message]);
+
+  return null;
 }
 
 export default function LandingPagesPage() {
@@ -90,6 +130,9 @@ export default function LandingPagesPage() {
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
+      <Suspense fallback={null}>
+        <TemplateDeepLink />
+      </Suspense>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography.Title level={3} style={{ margin: 0 }}>落地页</Typography.Title>
         <TemplatePickerDialog><Button type="primary" icon={<PlusOutlined />}>新建</Button></TemplatePickerDialog>
