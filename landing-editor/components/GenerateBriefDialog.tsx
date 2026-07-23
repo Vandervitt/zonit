@@ -1,7 +1,8 @@
 "use client";
 // landing-editor/components/GenerateBriefDialog.tsx
 //
-// 编辑器内「AI 一键成页」资料表单：进入编辑器后（?ai=1）默认弹出，填写产品资料后调用
+// 编辑器内「AI 一键成页」资料表单：首次经 ?ai=1 深链进入时默认弹出，也可由工具栏「AI 一键成页」
+// 按钮再次唤起（开关状态在 MetaContext 共享）。填写产品资料后调用
 // /api/landing-pages/generate（带 pageId）为当前空白页原地生成文案，成功即把生成的
 // LandingPageDraft 灌入编辑器 store（autosave 兜底落库），并清掉 URL 上的 ?ai 标记。
 //
@@ -34,12 +35,20 @@ const LANGUAGES = [
   "Tiếng Việt",
 ];
 
+/** 语气预设（多选）：join 后作为 brief.tone 注入 prompt，指导整页文案调性。 */
+const TONE_OPTIONS = ["专业", "亲和", "可信赖", "高端", "活力", "紧迫感", "简洁真诚"];
+
+/** 咨询渠道预设（多选）：对齐编辑器 CTA + 留资表单实际支持的转化渠道
+ *  —— WhatsApp/Telegram/电话/邮件深链 + 在线留资表单；join 后作为 brief.ctaGoal 注入 prompt。 */
+const CTA_CHANNELS = ["WhatsApp", "Telegram", "电话", "邮件", "在线留资表单"];
+
 interface BriefForm {
   productName: string;
   description: string;
   targetAudience?: string;
-  tone?: string;
-  ctaGoal?: string;
+  // 语气与咨询渠道均为多选，表单内以数组承载；提交前 join 成字符串再发给生成接口。
+  tone?: string[];
+  ctaGoal?: string[];
   language: string;
   pastedIntro?: string;
   autoImages: boolean;
@@ -86,24 +95,24 @@ function GeneratingState({ elapsedMs }: { elapsedMs: number }) {
   );
 }
 
-export function GenerateBriefDialog({ defaultOpen = false }: { defaultOpen?: boolean }) {
+export function GenerateBriefDialog() {
   // 自带 antd 上下文：编辑器路由缺全局 Provider，component={false} 不额外产生 DOM 包裹。
   return (
     <ConfigProvider theme={adminTheme} locale={zhCN}>
       <App component={false}>
-        <BriefModal defaultOpen={defaultOpen} />
+        <BriefModal />
       </App>
     </ConfigProvider>
   );
 }
 
-function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
+function BriefModal() {
   const router = useRouter();
   const dispatch = useEditorDispatch();
-  const { pageId } = useMeta();
+  // open 状态上抬到 MetaContext：首开来自 ?ai=1 深链，之后可由工具栏「AI 一键成页」按钮再次唤起。
+  const { pageId, generateOpen: open, setGenerateOpen: setOpen } = useMeta();
   const { message } = App.useApp();
   const [form] = Form.useForm<BriefForm>();
-  const [open, setOpen] = useState(defaultOpen);
   const [loading, setLoading] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
 
@@ -132,10 +141,16 @@ function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
     }
     setLoading(true);
     try {
+      // 多选字段 join 成顿号分隔字符串，契合生成接口/ prompt 对 tone、ctaGoal 的 string 约定。
+      const brief = {
+        ...values,
+        tone: values.tone?.length ? values.tone.join("、") : undefined,
+        ctaGoal: values.ctaGoal?.length ? values.ctaGoal.join("、") : undefined,
+      };
       const res = await fetch("/api/landing-pages/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pageId, brief: values }),
+        body: JSON.stringify({ pageId, brief }),
       });
       if (handleSessionExpired(res, router)) return;
       const data = await res.json();
@@ -204,10 +219,20 @@ function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
           <Input placeholder="如 东南亚中小电商卖家" maxLength={500} />
         </Form.Item>
         <Form.Item label="语气" name="tone">
-          <Input placeholder="专业 / 亲和 / 紧迫 / 高端" maxLength={200} />
+          <Select
+            mode="multiple"
+            allowClear
+            placeholder="可多选，如 专业、亲和"
+            options={TONE_OPTIONS.map((t) => ({ value: t, label: t }))}
+          />
         </Form.Item>
-        <Form.Item label="转化目标" name="ctaGoal">
-          <Input placeholder="咨询 / 预约 / 留资 / WhatsApp" maxLength={200} />
+        <Form.Item label="咨询渠道" name="ctaGoal">
+          <Select
+            mode="multiple"
+            allowClear
+            placeholder="访客的咨询 / 转化渠道，可多选"
+            options={CTA_CHANNELS.map((c) => ({ value: c, label: c }))}
+          />
         </Form.Item>
         <Form.Item label="生成语言" name="language">
           <Select options={LANGUAGES.map((l) => ({ value: l, label: l }))} />
