@@ -3,6 +3,7 @@ import pool from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
 import { normalizeEmail } from "@/lib/auth/otp";
 import { recordMilestone } from "@/lib/platform-milestones";
+import { SIGNUP_TRIAL_PLAN, signupTrialExpiry } from "@/lib/plans";
 
 export type ProvisionedUser = {
   id: string;
@@ -62,11 +63,12 @@ export async function provisionUserByEmail(
       }
     }
 
+    // 注册赠送 Pro 试用（comp_plan 机制）：与邀请权益并存，生效档取两者较高。
     const inserted = await client.query(
-      `INSERT INTO users (email, name, plan, trial_expires_at, invited_at, email_verified)
-       VALUES ($1, $2, $3, $4, $5, NOW())
+      `INSERT INTO users (email, name, plan, trial_expires_at, invited_at, email_verified, comp_plan, comp_plan_expires_at)
+       VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7)
        RETURNING id, email, name, image`,
-      [email, null, userPlan, trialExpiresAt, invitationId ? new Date() : null],
+      [email, null, userPlan, trialExpiresAt, invitationId ? new Date() : null, SIGNUP_TRIAL_PLAN, signupTrialExpiry()],
     );
 
     if (invitationId) {

@@ -6,6 +6,7 @@ import { isValidEmailFormat } from "@/lib/auth/trusted-email";
 import { withLogger } from "@/lib/logger";
 import { sendWelcomeEmail } from "@/lib/email";
 import { recordMilestone } from "@/lib/platform-milestones";
+import { SIGNUP_TRIAL_PLAN, signupTrialExpiry } from "@/lib/plans";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -64,8 +65,8 @@ export async function POST(request: NextRequest) {
     
     const created = await withLogger("DB_CREATE_USER", "db/users", "INSERT", { name, email, userPlan }, () =>
       client.query(
-        "INSERT INTO users (name, email, password_hash, plan, trial_expires_at, invited_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
-        [name, email, hash, userPlan, trialExpiresAt, invitationId ? new Date() : null]
+        "INSERT INTO users (name, email, password_hash, plan, trial_expires_at, invited_at, comp_plan, comp_plan_expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+        [name, email, hash, userPlan, trialExpiresAt, invitationId ? new Date() : null, SIGNUP_TRIAL_PLAN, signupTrialExpiry()]
       )
     );
 

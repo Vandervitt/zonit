@@ -166,7 +166,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className={`mt-5 text-xs tracking-wide text-muted-foreground/80 ${fonts.mono}`}
         >
-          免费创建与预览 · 无需信用卡 · 无需写一行代码
+          注册即赠 Pro 全功能 7 天 · 无需信用卡 · 无需写一行代码
         </motion.p>
       </motion.div>
 
