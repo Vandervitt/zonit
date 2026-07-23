@@ -165,6 +165,67 @@ export async function sendFeedbackNotificationEmail({
   }
 }
 
+export interface DigestEmailPage {
+  name: string;
+  views: number;
+  ctaClicks: number;
+  leads: number;
+  viewsTrend: string;
+  ctaTrend: string;
+  leadsTrend: string;
+}
+
+export async function sendWeeklyDigestEmail({
+  to, pages, dashboardUrl, settingsUrl,
+}: {
+  to: string;
+  pages: DigestEmailPage[];
+  dashboardUrl: string;
+  settingsUrl: string;
+}) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const totalLeads = pages.reduce((n, p) => n + p.leads, 0);
+  const rows = pages
+    .map(
+      (p) => `<tr>
+        <td style="padding:8px 12px 8px 0;color:#111;border-bottom:1px solid #f0f0f0;">${escapeHtml(p.name)}</td>
+        <td style="padding:8px 12px;color:#111;text-align:right;border-bottom:1px solid #f0f0f0;">${p.views} <span style="color:#999;font-size:12px;">${escapeHtml(p.viewsTrend)}</span></td>
+        <td style="padding:8px 12px;color:#111;text-align:right;border-bottom:1px solid #f0f0f0;">${p.ctaClicks} <span style="color:#999;font-size:12px;">${escapeHtml(p.ctaTrend)}</span></td>
+        <td style="padding:8px 0 8px 12px;color:#111;text-align:right;border-bottom:1px solid #f0f0f0;"><strong>${p.leads}</strong> <span style="color:#999;font-size:12px;">${escapeHtml(p.leadsTrend)}</span></td>
+      </tr>`,
+    )
+    .join("");
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `📈 本周获客周报：${totalLeads} 条新线索`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 4px;">本周获客周报</h2>
+          <p style="color:#666;margin:0 0 20px;">过去 7 天你的已发布落地页表现（对比再上一周）：</p>
+          <table style="border-collapse:collapse;width:100%;font-size:14px;">
+            <tr>
+              <th style="padding:0 12px 8px 0;color:#666;text-align:left;font-weight:normal;">落地页</th>
+              <th style="padding:0 12px 8px;color:#666;text-align:right;font-weight:normal;">曝光</th>
+              <th style="padding:0 12px 8px;color:#666;text-align:right;font-weight:normal;">CTA 点击</th>
+              <th style="padding:0 0 8px 12px;color:#666;text-align:right;font-weight:normal;">线索</th>
+            </tr>
+            ${rows}
+          </table>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:#0070f3;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">查看投放分析</a></p>
+          <p style="font-size:12px;color:#999;margin-top:24px;">不想收周报？可在<a href="${settingsUrl}" style="color:#999;">「设置 → 线索通知」</a>关闭。</p>
+        </div>`,
+    });
+    // Resend SDK 不抛错，API 层错误经 error 字段返回：显式暴露，避免静默失败。
+    if (error) { console.error("Failed to send weekly digest email:", error); return { error }; }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send weekly digest email:", error);
+    return { error };
+  }
+}
+
 export async function sendLeadNotificationEmail({
   to, pageName, fields, dashboardUrl,
 }: {

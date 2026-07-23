@@ -13,6 +13,7 @@ export async function GET() {
     webhook_enabled: s.webhook_enabled,
     webhook_url: s.webhook_url,
     hasSecret: !!s.webhook_secret,
+    weekly_digest_enabled: s.weekly_digest_enabled,
   });
 }
 
@@ -30,6 +31,7 @@ export async function PUT(request: NextRequest) {
     email_enabled: body.email_enabled !== false,
     webhook_enabled: body.webhook_enabled === true,
     webhook_url: url,
+    weekly_digest_enabled: body.weekly_digest_enabled !== false,
   });
   const justGenerated = !before.webhook_secret && !!s.webhook_secret;
   return NextResponse.json({
@@ -37,6 +39,7 @@ export async function PUT(request: NextRequest) {
     webhook_enabled: s.webhook_enabled,
     webhook_url: s.webhook_url,
     hasSecret: !!s.webhook_secret,
+    weekly_digest_enabled: s.weekly_digest_enabled,
     ...(justGenerated ? { secret: s.webhook_secret } : {}),
   });
 }

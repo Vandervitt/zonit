@@ -11,7 +11,9 @@ import {
   MILESTONE_EVENTS,
 } from "./platform-milestones";
 
-beforeEach(() => query.mockReset());
+beforeEach(() => {
+  query.mockReset();
+});
 
 describe("recordMilestone", () => {
   it("以 ON CONFLICT DO NOTHING 写入（首次达成幂等语义）", async () => {
