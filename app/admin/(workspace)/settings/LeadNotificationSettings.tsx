@@ -11,6 +11,7 @@ interface Settings {
   webhook_enabled: boolean;
   webhook_url: string | null;
   hasSecret: boolean;
+  weekly_digest_enabled: boolean;
 }
 
 export function LeadNotificationSettings() {
@@ -43,6 +44,7 @@ export function LeadNotificationSettings() {
           email_enabled: next.email_enabled ?? s.email_enabled,
           webhook_enabled: next.webhook_enabled ?? s.webhook_enabled,
           webhook_url: next.webhook_url !== undefined ? next.webhook_url : url,
+          weekly_digest_enabled: next.weekly_digest_enabled ?? s.weekly_digest_enabled,
         }),
       });
       if (!res.ok) throw new Error();
@@ -66,6 +68,11 @@ export function LeadNotificationSettings() {
         <Space>
           <Switch checked={s.email_enabled} loading={saving} onChange={(v) => save({ email_enabled: v })} />
           <span>新线索邮件通知（发送到 {session?.user?.email}）</span>
+        </Space>
+
+        <Space>
+          <Switch checked={s.weekly_digest_enabled} loading={saving} onChange={(v) => save({ weekly_digest_enabled: v })} />
+          <span>每周获客周报（每周一汇总各页曝光 / CTA 点击 / 线索）</span>
         </Space>
 
         <div>

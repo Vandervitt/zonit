@@ -8,7 +8,6 @@
     }
   },
   "crons": [
-    { "path": "/api/cron/capi-flush", "schedule": "0 0 * * *" },
-    { "path": "/api/cron/webhook-flush", "schedule": "30 0 * * *" }
+    { "path": "/api/cron/daily", "schedule": "0 1 * * *" }
   ]
 }
