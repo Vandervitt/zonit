@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { getDomainById, updateDomain } from "@/lib/domains-db";
 import { getDomainVerification, getDomainConfigHealth } from "@/lib/vercel";
+import { recordMilestone } from "@/lib/platform-milestones";
 
 export async function GET(
   _req: NextRequest,
@@ -31,6 +32,7 @@ export async function GET(
 
   if (vercelStatus === "verified") {
     await updateDomain(id, session.user.id, { verified: true });
+    await recordMilestone(session.user.id, "domain_verified");
   }
 
   return NextResponse.json({ status: vercelStatus });

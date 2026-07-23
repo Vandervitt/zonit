@@ -11,6 +11,7 @@ import { verifyOtp } from "@/lib/auth/otp";
 import { provisionUserByEmail } from "@/lib/auth/provision";
 import { effectivePlan, activeCompPlan, type PlanId } from "@/lib/plans";
 import { sendWelcomeEmail } from "@/lib/email";
+import { recordMilestone } from "@/lib/platform-milestones";
 
 // Debug configuration
 if (!process.env.AUTH_SECRET) {
@@ -147,6 +148,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
         user.id = inserted.rows[0].id;
         console.log("SignIn success: New trusted user created", user.id);
+        await recordMilestone(user.id!, "signup");
 
         // 新用户（Google 首次登录建号）发欢迎/onboarding 邮件（best-effort，绝不阻断登录）。
         const welcomeTo = user.email;

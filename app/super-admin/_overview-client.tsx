@@ -1,10 +1,11 @@
 "use client";
 
-import { Row, Col, Card, Statistic, Tag, Typography, Space } from "antd";
+import { Row, Col, Card, Statistic, Tag, Typography, Space, Progress } from "antd";
 import { BRAND } from "@/lib/theme/brand";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { PLAN_ORDER, PLANS, type PlanId } from "@/lib/plans";
 import type { DailyPoint } from "@/lib/super-admin/trend";
+import type { FunnelStats, MilestoneEvent } from "@/lib/platform-milestones";
 import { TrendCharts } from "./TrendCharts";
 import {
   UserOutlined,
@@ -13,6 +14,7 @@ import {
   RiseOutlined,
   FileTextOutlined,
   ContactsOutlined,
+  FunnelPlotOutlined,
 } from "@ant-design/icons";
 
 export interface LatestPage {
@@ -32,6 +34,67 @@ export interface OverviewStats {
   userTrend: DailyPoint[];
   leadTrend: DailyPoint[];
   latestPages: LatestPage[];
+  funnel: FunnelStats;
+}
+
+const FUNNEL_STAGES: { event: MilestoneEvent; label: string }[] = [
+  { event: "signup", label: "注册" },
+  { event: "page_created", label: "创建落地页" },
+  { event: "domain_verified", label: "域名验证" },
+  { event: "page_published", label: "发布上线" },
+  { event: "first_lead", label: "收到首条线索" },
+];
+
+function formatMedianHours(h: number | null): string {
+  if (h == null) return "—";
+  if (h < 1) return `${Math.round(h * 60)} 分钟`;
+  if (h < 48) return `${h.toFixed(1)} 小时`;
+  return `${(h / 24).toFixed(1)} 天`;
+}
+
+function ActivationFunnel({ funnel }: { funnel: FunnelStats }) {
+  const signupCount = funnel.counts.signup;
+  return (
+    <Card
+      title={
+        <Space>
+          <FunnelPlotOutlined />
+          激活漏斗（首次达成人数）
+        </Space>
+      }
+      extra={
+        <Typography.Text type="secondary">
+          注册 → 首次发布中位耗时：{formatMedianHours(funnel.medianHoursToPublish)}
+        </Typography.Text>
+      }
+      style={{ marginBottom: 24 }}
+    >
+      <Row gutter={[16, 16]}>
+        {FUNNEL_STAGES.map((stage, i) => {
+          const count = funnel.counts[stage.event];
+          const prev = i === 0 ? null : funnel.counts[FUNNEL_STAGES[i - 1].event];
+          const stepRate = prev ? ((count / prev) * 100).toFixed(0) : null;
+          const overallPct = signupCount > 0 ? Math.round((count / signupCount) * 100) : 0;
+          return (
+            <Col key={stage.event} xs={12} md={8} lg={Math.floor(24 / FUNNEL_STAGES.length)}>
+              <Statistic
+                title={stage.label}
+                value={count}
+                suffix={
+                  stepRate != null ? (
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                      · 上一步 {stepRate}%
+                    </Typography.Text>
+                  ) : undefined
+                }
+              />
+              <Progress percent={i === 0 ? 100 : overallPct} size="small" showInfo={false} style={{ marginTop: 4 }} />
+            </Col>
+          );
+        })}
+      </Row>
+    </Card>
+  );
 }
 
 export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
@@ -94,6 +157,9 @@ export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
           </Col>
         ))}
       </Row>
+
+      {/* 激活漏斗 */}
+      <ActivationFunnel funnel={stats.funnel} />
 
       {/* 近 30 天趋势图 */}
       <TrendCharts userTrend={stats.userTrend} leadTrend={stats.leadTrend} />

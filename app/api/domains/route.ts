@@ -14,6 +14,7 @@ import {
 import { addDomainToProject, type DnsRecord } from "@/lib/vercel";
 import { isMainlandChinaDomain, mainlandNsProvider, normalizeDomain } from "@/lib/domain";
 import { lookupNameservers } from "@/lib/domain-ns";
+import { recordMilestone } from "@/lib/platform-milestones";
 
 export async function GET() {
   const session = await auth();
@@ -98,6 +99,7 @@ export async function POST(request: Request) {
   if (vercelConfig.verified) {
     await updateDomain(row.id, session.user.id, { verified: true });
     row.verified = true;
+    await recordMilestone(session.user.id, "domain_verified");
   }
 
   return NextResponse.json({ ...row, records: vercelConfig.records, mainlandNs }, { status: 201 });
