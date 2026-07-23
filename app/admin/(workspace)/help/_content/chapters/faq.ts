@@ -49,6 +49,10 @@ export const faq: HelpChapterData = {
               a: "Free 与 Starter 套餐页面底部会显示平台水印，升级到 Pro 及以上自动移除。",
             },
             {
+              q: "注册赠送的 Pro 试用到期后会怎样？",
+              a: "自动回到 Free：页面与数据全部保留、已发布页面继续在线，但 Pro 专属能力（去水印、多平台追踪与 CAPI、线索 Webhook）停止生效，页面水印恢复显示。随时可升级恢复。",
+            },
+            {
               q: "换套餐后原来的页面会丢吗?",
               a: "不会。降级后已有页面与数据保留，但超出新套餐配额的能力（如高级追踪、Webhook）停止生效。",
             },
@@ -109,7 +113,7 @@ export const faq: HelpChapterData = {
       blocks: [
         {
           t: "p",
-          text: "以上没有解决你的问题？发邮件至 support@zapbridge.com，附上页面链接与问题截图，我们会尽快回复。",
+          text: "以上没有解决你的问题？发邮件至 support@zapbridge.tech，附上页面链接与问题截图，我们会尽快回复；也可在后台侧边栏点「联系创始人」。",
         },
       ],
     },

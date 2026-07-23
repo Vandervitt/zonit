@@ -31,7 +31,7 @@ export default function HelpPage() {
       </Row>
       <Card size="small">
         <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
-          没找到答案？发邮件至 support@zapbridge.com，附上页面链接与问题截图，我们会尽快回复。
+          没找到答案？发邮件至 support@zapbridge.tech，附上页面链接与问题截图，我们会尽快回复。
         </Typography.Paragraph>
       </Card>
     </Space>

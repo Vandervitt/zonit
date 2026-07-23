@@ -30,6 +30,7 @@ export const billing: HelpChapterData = {
         {
           t: "list",
           items: [
+            "新注册账号自动获得 Pro 全功能试用 7 天，到期自动回到 Free（无需信用卡，页面与数据保留）。",
             "Free / Starter 套餐的页面底部会显示平台水印，Pro 及以上自动移除。",
             "怎么选：单页试水选 Starter；正经投放（需要 CAPI 归因与线索自动化）选 Pro；多客户 / 多页面矩阵或需要反同质化选 Agency。",
           ],
