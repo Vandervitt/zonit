@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| 文档类型 | 产品说明书（现状版）|
+| 文档类型 | 产品说明书（现状版，2026-07-23 同步）|
 | 状态 | 产品已上线生产（https://zapbridge.tech ，2026-07-16 上线，07-19 生产 smoke 8/8 通过）|
 | 面向读者 | 产品、运营、新成员 |
 | 关联文档 | 早期简版 PRD：`docs/landing-page-flow-product-overview.md`；产品/工程约束：`docs/constraints/*`；自定义域名架构：`docs/custom-domain-publishing.md` |
@@ -16,7 +16,7 @@
 Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Builder / lead-gen 工具），聚焦**海外获客（leadgen）**场景：
 
 - **品类**：自助式落地页搭建器 + 投放追踪 + 线索管理。
-- **转化方式（核心红线：非交易）**：生成的落地页只引导访客通过 **WhatsApp / Telegram / 表单 / 电话 / 邮件 / 预约咨询**留资，**绝不包含**下单、结账、购物车、订单、订阅、退款、货到付款等任何电商交易环节。平台自身向 SaaS 客户收费（订阅套餐，Lemon Squeezy 计费），但平台收费与生成页面的能力边界严格分离。
+- **转化方式（核心红线：非交易）**：生成的落地页只引导访客通过 **WhatsApp / Telegram / 表单 / 电话 / 邮件 / 预约咨询**留资，**绝不包含**下单、结账、购物车、订单、订阅、退款、货到付款等任何电商交易环节。平台自身向 SaaS 客户收费（订阅套餐 + AI 额度包，Dodo / Creem 双收款渠道），但平台收费与生成页面的能力边界严格分离。
 - **价值主张**：**选模板（或 AI 生成）→ 改内容 → 发布到自有域名**，几分钟上线；页面跑在用户自己的品牌域名上，利于品牌、SEO 与投放可信度；像素/CAPI/线索链路开箱即用。
 
 ### 目标用户与 JTBD
@@ -29,11 +29,11 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 
 | 端 | 路由 | 面向 | 职责 |
 |---|---|---|---|
-| **官网**（marketing）| `/`、`/pricing`、`/anti-ban` | 潜在用户 | 营销首页、定价页、反同质化叙事页；转化为注册用户 |
-| **admin**（租户后台）| `/admin/*` | 租户（`USER`）| 落地页、线索、分析、域名、素材、账单的自助管理——产品主体 |
-| **super-admin**（平台后台）| `/super-admin/*` | 平台运营（`SUPER_ADMIN`）| 管理租户/用户、平台设置 |
+| **官网**（marketing）| `/`、`/pricing`、`/anti-ban`、`/templates` | 潜在用户 | 营销首页、定价页、反同质化叙事页、公开模板画廊（SEO 获客面，33 套模板列表 + 样稿 live 渲染详情页，深链注册后直达建页）；转化为注册用户 |
+| **admin**（租户后台）| `/admin/*` | 租户（`USER`）| 落地页、线索、分析、域名、素材、账单的自助管理——产品主体；概览含「4 步上线」上手清单 |
+| **super-admin**（平台后台）| `/super-admin/*` | 平台运营（`SUPER_ADMIN`）| 管理租户/用户、平台设置、数据看板（含注册→建页→域名→发布→首线索激活漏斗与 TTFP 中位数）|
 
-- 认证：NextAuth（邮箱注册 + Google 登录）；数据按用户隔离，仅本人可见可改。
+- 认证：NextAuth，**邮箱验证码（OTP）免密登录为主 + Google 一键登录**（密码登录入口已下线，仅存量兜底）；**注册即赠 Pro 全功能试用 7 天**（复用赠送套餐机制，到期自动回落 Free）。数据按用户隔离，仅本人可见可改。
 - 公开面：已发布落地页在用户自有域名对外公开（按 host 多租户渲染）；预览路径 `/p/[slug]`；编辑与后台需登录；未知路由渲染 404。
 
 ## 三、用户旅程（端到端）
@@ -77,10 +77,12 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 - 事件口径全部 lead-gen 化：`Lead / Contact / FormSubmit / WhatsAppClick`，无任何 purchase/checkout 事件。
 - **合规**：欧盟/EEA/GB 访客 CMP Cookie 同意门控，第一方埋点随同意状态放行。
 
-### 5. 线索管理
+### 5. 线索管理与通知
 
 - **线索收件箱**（`/admin/leads`）：查看、筛选留资线索。
+- **新线索邮件通知**（四档全含，可关）：留资实时发送邮件到注册邮箱。
 - **线索 Webhook**（Pro/Agency）：新线索实时 POST 到用户 CRM / Zapier / Make，含签名与失败重试。
+- **每周获客周报**（默认开，可在「设置 → 线索通知」退订）：每周一汇总近 7 天各已发布页曝光 / CTA 点击 / 线索与环比；无已发布页或全零用户跳过。
 - 归因：识别线索来自哪个 CTA / 表单 / 渠道。
 
 ### 6. 反同质化（Agency 专属）
@@ -91,7 +93,7 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 
 - 投放分析页：曝光 → CTA 点击 → 线索的**转化漏斗**、线索统计、流量数据。
 
-## 五、套餐与商业化（`lib/plans.ts`，Lemon Squeezy 计费）
+## 五、套餐与商业化（`lib/plans.ts`，Dodo / Creem 双收款渠道）
 
 | 权益 | Free CN¥0 | Starter CN¥29.99/月 | Pro CN¥79.99/月（主推）| Agency CN¥199.99/月 |
 |---|---|---|---|---|
@@ -108,6 +110,13 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 
 所有布尔权益均有服务端执行点门控（已于 2026-07-19 全量核验一致）；数量限额服务端真实拦截。
 
+补充机制（2026-07-23 同步）：
+
+- **收款渠道抽象**：Dodo / Creem 双 provider（`lib/billing/`），active provider 存于平台设置、super-admin 可切换；webhook 端点各自独立，事件规范化为订阅激活 / 结束 / 周期末取消 / credit 到账四种语义。
+- **AI 额度充值包**（`lib/credits.ts`）：一次性购买，credit 永不过期——50 次 CN¥19.99、200 次 CN¥59.99；**仅「AI 整页生成」消耗 credit**，改写额度用尽只能等次月或升级（有意的升级驱动）。
+- **注册试用**：新用户建号即赠 Pro 7 天（写入 `comp_plan`，到期由 `activeCompPlan` 自动回落）；与超管赠送同机制，生效套餐 = max(付费档, 赠送档)。
+- **超管赠送**：super-admin 可按用户赠送任意档位与期限（永久或定期）。
+
 ## 六、关键约束（硬红线）
 
 1. **非交易**：生成页面的 schema、文案、组件、SEO、埋点事件、模板一律不得引入交易语义（无 PaymentTrust/ShippingInfo 区块，Offer 的 `priceText` 仅为展示文案）。
@@ -118,13 +127,13 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 
 ## 七、技术形态（简）
 
-- **栈**：Next.js（App Router，部署 Vercel）+ Postgres（Neon，手动 SQL 迁移 node-pg-migrate）+ Vercel Blob（素材）+ NextAuth + Ant Design（后台）/ Tailwind + Radix（编辑器与公开页）+ Lemon Squeezy（计费）+ Sentry / Speed Insights（监控）。
+- **栈**：Next.js（App Router，部署 Vercel）+ Postgres（Neon，手动 SQL 迁移 node-pg-migrate）+ Vercel Blob（素材）+ NextAuth（OTP + Google）+ Ant Design（后台）/ Tailwind + Radix（编辑器与公开页）+ Dodo / Creem（计费）+ Resend（邮件）+ Sentry / Speed Insights（监控）。
 - **代码分区**：`app/`（三端路由 + API）、`landing-editor/`（编辑器与模板样例）、`landing-renderer/`（公开页渲染、变体、水印、追踪）、`lib/`（plans/tracking/capi/leads/proxy 等域逻辑）、`types/schema.ts` + `lib/schema.zod.ts`（落地页 schema 单一事实源）。
-- **平台约束**：Vercel Hobby 计划 cron 最快每日一次——异步投递（CAPI/Webhook）happy-path 靠落库后 `after()` 即时 flush，cron 仅兜底。
+- **平台约束**：Vercel Hobby 计划 cron 最快每日一次且数量有限——异步投递（CAPI/Webhook）happy-path 靠落库后 `after()` 即时 flush；兜底与周报合并为单一每日编排器 `/api/cron/daily`（依次 CAPI 重发、webhook 重投、周报仅周一发送）。
 
 ## 八、现状与路线
 
-**已上线**（截至 2026-07-19）：上述全部核心功能均在生产可用；上线就绪审计已清零（生产 smoke 8/8），仅剩「用户真机全链路走查」与一处本地 env 注释清理两件非阻断项。
+**已上线**（截至 2026-07-23）：上述全部核心功能均在生产可用；上线就绪审计已清零，真机全链路走查已完成（07-20/07-22）。07-23 增量：平台激活漏斗埋点与 super-admin 漏斗看板、注册赠 Pro 试用 7 天、admin 上手清单、公开模板画廊 `/templates`（SEO 获客面 + sitemap）、每周获客周报邮件。
 
 **待做 / 路线方向**：
 

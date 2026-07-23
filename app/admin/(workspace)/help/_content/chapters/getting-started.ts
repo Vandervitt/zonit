@@ -24,7 +24,7 @@ export const gettingStarted: HelpChapterData = {
         {
           t: "callout",
           tone: "info",
-          text: "Free 套餐可以完整体验建页、编辑和在线预览；发布到对外域名需要升级到含域名额度的套餐（Starter 及以上）。",
+          text: "新注册账号自动获得 Pro 全功能试用 7 天（含发布、CAPI、去水印），可完整跑通上线与收线索；试用到期回到 Free 后，发布需要升级到含域名额度的套餐（Starter 及以上）。概览页的「4 步上线」清单会跟着你的进度打勾。",
         },
       ],
     },
