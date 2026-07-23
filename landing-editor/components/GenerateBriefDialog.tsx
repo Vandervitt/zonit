@@ -1,7 +1,8 @@
 "use client";
 // landing-editor/components/GenerateBriefDialog.tsx
 //
-// 编辑器内「AI 一键成页」资料表单：进入编辑器后（?ai=1）默认弹出，填写产品资料后调用
+// 编辑器内「AI 一键成页」资料表单：首次经 ?ai=1 深链进入时默认弹出，也可由工具栏「AI 一键成页」
+// 按钮再次唤起（开关状态在 MetaContext 共享）。填写产品资料后调用
 // /api/landing-pages/generate（带 pageId）为当前空白页原地生成文案，成功即把生成的
 // LandingPageDraft 灌入编辑器 store（autosave 兜底落库），并清掉 URL 上的 ?ai 标记。
 //
@@ -86,24 +87,24 @@ function GeneratingState({ elapsedMs }: { elapsedMs: number }) {
   );
 }
 
-export function GenerateBriefDialog({ defaultOpen = false }: { defaultOpen?: boolean }) {
+export function GenerateBriefDialog() {
   // 自带 antd 上下文：编辑器路由缺全局 Provider，component={false} 不额外产生 DOM 包裹。
   return (
     <ConfigProvider theme={adminTheme} locale={zhCN}>
       <App component={false}>
-        <BriefModal defaultOpen={defaultOpen} />
+        <BriefModal />
       </App>
     </ConfigProvider>
   );
 }
 
-function BriefModal({ defaultOpen }: { defaultOpen: boolean }) {
+function BriefModal() {
   const router = useRouter();
   const dispatch = useEditorDispatch();
-  const { pageId } = useMeta();
+  // open 状态上抬到 MetaContext：首开来自 ?ai=1 深链，之后可由工具栏「AI 一键成页」按钮再次唤起。
+  const { pageId, generateOpen: open, setGenerateOpen: setOpen } = useMeta();
   const { message } = App.useApp();
   const [form] = Form.useForm<BriefForm>();
-  const [open, setOpen] = useState(defaultOpen);
   const [loading, setLoading] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
 

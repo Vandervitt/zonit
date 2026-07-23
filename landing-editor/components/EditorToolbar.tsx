@@ -16,7 +16,7 @@ const SAVE_LABEL: Record<string, string> = {
 };
 
 export function EditorToolbar() {
-  const { pageId, name, setName, saveState, saveError, status, publishedDirty, flushSaveRef } = useMeta();
+  const { pageId, name, setName, saveState, saveError, status, publishedDirty, setGenerateOpen, flushSaveRef } = useMeta();
   const state = useEditorState();
   const dispatch = useEditorDispatch();
   const { canUndo, canRedo } = useEditorHistory();
@@ -25,6 +25,7 @@ export function EditorToolbar() {
   const [trackingOpen, setTrackingOpen] = useState(false);
   const [antiBanOpen, setAntiBanOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [regenOpen, setRegenOpen] = useState(false);
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [restoreError, setRestoreError] = useState("");
@@ -153,6 +154,29 @@ export function EditorToolbar() {
       )}
       <div className="flex-1" />
       <ValidationBar />
+      <div className="relative">
+        <button
+          onClick={() => setRegenOpen((v) => !v)}
+          className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
+        >
+          AI 一键成页
+        </button>
+        {regenOpen && (
+          <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-lg border border-edge bg-panel p-3 shadow-xl">
+            <p className="text-sm text-ink">用 AI 依据你的资料重写整页文案？</p>
+            <p className="mt-1 text-xs text-ink-muted">当前页面全部内容会被生成结果覆盖，可用撤销（⌘Z）找回。</p>
+            <div className="mt-3 flex justify-end gap-2">
+              <button onClick={() => setRegenOpen(false)} className="rounded-md px-2.5 py-1 text-xs text-ink-soft hover:bg-canvas">取消</button>
+              <button
+                onClick={() => { setRegenOpen(false); setGenerateOpen(true); }}
+                className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-700"
+              >
+                继续
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
       <button
         onClick={() => setTrackingOpen(true)}
         className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"

@@ -41,10 +41,11 @@ export function Editor({
           plan={plan}
           initialStatus={initialStatus}
           initialPublishedDirty={initialPublishedDirty}
+          initialGenerateOpen={autoGenerate}
         >
           <AutoSave />
           <EditorLayout />
-          <GenerateBriefDialog defaultOpen={autoGenerate} />
+          <GenerateBriefDialog />
         </MetaProvider>
       </EditorProvider>
     </DndProvider>

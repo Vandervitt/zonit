@@ -20,6 +20,9 @@ interface MetaValue {
   /** 已发布页存在「未发布到线上」的草稿改动（发布快照语义）。 */
   publishedDirty: boolean;
   setPublishedDirty: (d: boolean) => void;
+  /** 「AI 一键成页」资料弹窗是否打开：由 ?ai=1 深链首开或工具栏按钮唤起，共享给 GenerateBriefDialog。 */
+  generateOpen: boolean;
+  setGenerateOpen: (o: boolean) => void;
   /** AutoSave 注册的立即落库函数：取消防抖并保存当前草稿，resolve 保存是否成功（无待保存改动时为 true）。 */
   flushSaveRef: MutableRefObject<(() => Promise<boolean>) | null>;
 }
@@ -32,6 +35,7 @@ export function MetaProvider({
   plan,
   initialStatus = "draft",
   initialPublishedDirty = false,
+  initialGenerateOpen = false,
   children,
 }: {
   pageId: string;
@@ -39,6 +43,7 @@ export function MetaProvider({
   plan: PlanId;
   initialStatus?: PageStatus;
   initialPublishedDirty?: boolean;
+  initialGenerateOpen?: boolean;
   children: ReactNode;
 }) {
   const [name, setName] = useState(initialName);
@@ -46,10 +51,11 @@ export function MetaProvider({
   const [saveError, setSaveError] = useState("");
   const [status, setStatus] = useState<PageStatus>(initialStatus);
   const [publishedDirty, setPublishedDirty] = useState(initialPublishedDirty);
+  const [generateOpen, setGenerateOpen] = useState(initialGenerateOpen);
   const flushSaveRef = useRef<(() => Promise<boolean>) | null>(null);
   return (
     <MetaCtx.Provider
-      value={{ pageId, name, setName, saveState, setSaveState, saveError, setSaveError, plan, status, setStatus, publishedDirty, setPublishedDirty, flushSaveRef }}
+      value={{ pageId, name, setName, saveState, setSaveState, saveError, setSaveError, plan, status, setStatus, publishedDirty, setPublishedDirty, generateOpen, setGenerateOpen, flushSaveRef }}
     >
       {children}
     </MetaCtx.Provider>
