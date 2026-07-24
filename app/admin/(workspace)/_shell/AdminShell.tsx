@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Layout, Menu, Tag, Dropdown, Avatar, Typography } from "antd";
-import { ThunderboltFilled, LogoutOutlined } from "@ant-design/icons";
+import { LogoutOutlined } from "@ant-design/icons";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { ADMIN_NAV, resolveActiveNavKey } from "./nav";
 import { FounderContact } from "./FounderContact";
 import type { FounderContact as FounderContactData } from "@/lib/platform-settings";
@@ -49,10 +50,7 @@ export function AdminShell({
         style={{ borderInlineEnd: "1px solid #eef3f9" }}>
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 20px" }}>
-            <span style={{ display: "grid", placeItems: "center", width: 30, height: 30,
-              borderRadius: 8, background: BRAND, color: "#fff" }}>
-              <ThunderboltFilled />
-            </span>
+            <BrandMark className="h-[30px] w-[30px] rounded-lg" />
             {!collapsed && <Typography.Text strong>Zap Bridge</Typography.Text>}
           </div>
           <Menu mode="inline" selectedKeys={[selectedKey]} items={menuItems}

@@ -11,6 +11,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Zap Bridge",
   description: "Build and publish high-converting landing pages on your own domain.",
+  icons: { icon: "/brand-mark.svg" },
 };
 
 export default function RootLayout({
