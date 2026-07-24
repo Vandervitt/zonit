@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Grid2x2, TicketCheck } from "lucide-react";
+import { Zap, TicketCheck } from "lucide-react";
 import { Routes, AuthProvider } from "@/lib/constants";
 import { withLogger } from "@/lib/logger";
 import { useMutation } from "@/lib/api/use-mutation";
@@ -26,7 +26,7 @@ function RegisterPageContent() {
     <div className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl shadow-aqua-500/10 border border-aqua-100 p-8">
       <div className="flex items-center gap-2 mb-8">
         <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-aqua-500 to-tech flex items-center justify-center shadow-sm shadow-aqua-500/30">
-          <Grid2x2 className="w-4 h-4 text-white" />
+          <Zap className="w-4 h-4 text-white" strokeWidth={2.6} />
         </div>
         <span className="text-foreground tracking-widest text-sm uppercase">Zap Bridge</span>
       </div>
