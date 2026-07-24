@@ -11,12 +11,12 @@ import {
   Bell,
   Settings,
   HelpCircle,
-  Zap,
   LogOut,
   CreditCard,
   Link2,
   Image,
 } from "lucide-react";
+import { BrandMark } from "./brand/BrandMark";
 import { PlanBadge } from "./billing/PlanBadge";
 import { Routes } from "@/lib/constants";
 import type { PlanId } from "@/lib/plans";
@@ -46,9 +46,7 @@ export function Sidebar() {
     <aside className="w-52 min-h-screen bg-white/70 backdrop-blur-sm flex flex-col py-6 px-4 shrink-0 border-r border-aqua-100">
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8 px-2">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-aqua-500 to-tech flex items-center justify-center shadow-sm shadow-aqua-500/30">
-          <Zap className="w-4 h-4 text-white" strokeWidth={2.6} />
-        </div>
+        <BrandMark className="w-7 h-7 rounded-lg shadow-sm shadow-aqua-500/30" />
         <span className="text-foreground tracking-widest text-sm uppercase">
           Zap Bridge
         </span>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
-import { Zap } from "lucide-react";
+import { BrandMark } from "@/components/brand/BrandMark";
 import { Routes } from "@/lib/constants";
 import { glowAura } from "@/lib/theme";
 
@@ -94,9 +94,7 @@ export function SiteNav({ fonts }: { fonts: Fonts }) {
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href={Routes.Home} className="group flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-aqua-500 to-tech text-white shadow-sm shadow-aqua-500/30">
-            <Zap className="h-4 w-4" strokeWidth={2.6} />
-          </span>
+          <BrandMark className="h-8 w-8 rounded-lg shadow-sm shadow-aqua-500/30" />
           <span className={`text-base font-bold tracking-tight text-foreground ${fonts.display}`}>
             Zap Bridge
           </span>
@@ -176,9 +174,7 @@ export function SiteFooter({ fonts }: { fonts: Fonts }) {
     <footer className="border-t border-border px-6 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
         <div className="flex items-center gap-2">
-          <span className="grid h-6 w-6 place-items-center rounded-md bg-gradient-to-br from-aqua-500 to-tech text-white">
-            <Zap className="h-3 w-3" strokeWidth={2.6} />
-          </span>
+          <BrandMark className="h-6 w-6 rounded-md" />
           <span className={`font-semibold text-foreground ${fonts.display}`}>Zap Bridge</span>
           <span>© {new Date().getFullYear()}</span>
         </div>
