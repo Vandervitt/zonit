@@ -12,6 +12,8 @@ import { hasWatermark, hasAntiBan } from "@/lib/plans";
 import { gateTrackingByPlan } from "@/lib/tracking/gate";
 import { isEeaCountry } from "@/lib/tracking/geo";
 import { deriveVariant, IDENTITY_VARIANT } from "@/landing-renderer/variant";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { landingFaqJsonLd, landingOrganizationJsonLd } from "@/lib/seo/landing-jsonld";
 
 async function isAppHostDirect(): Promise<boolean> {
   return isAppHost(resolveTenantHostname(await headers()));
@@ -80,10 +82,20 @@ export default async function PublicLandingPage({
   // CMP 欧盟门控：按 Vercel 边缘 geo 头判定访客地区，欧盟/EEA 访客的第一方埋点随同意门控。
   const euVisitor = isEeaCountry((await headers()).get("x-vercel-ip-country"));
 
+  // 结构化数据（SEO 富媒体 + GEO）：注入租户品牌/域名实体，noindex 页不输出。
+  const noindex = page.data.seo?.noindex === true;
+  const hostname = resolveTenantHostname(await headers());
+  const faqJsonLd = noindex ? null : landingFaqJsonLd(page.data);
+  const orgJsonLd = noindex ? null : landingOrganizationJsonLd(page.data, hostname);
+
   return (
-    <TrackingProvider tracking={tracking} pageId={page.id} euVisitor={euVisitor}>
-      <LandingPage page={page.data} pageId={page.id} variant={variant} />
-      {hasWatermark(plan) && <Watermark />}
-    </TrackingProvider>
+    <>
+      {faqJsonLd && <JsonLd data={faqJsonLd} />}
+      {orgJsonLd && <JsonLd data={orgJsonLd} />}
+      <TrackingProvider tracking={tracking} pageId={page.id} euVisitor={euVisitor}>
+        <LandingPage page={page.data} pageId={page.id} variant={variant} />
+        {hasWatermark(plan) && <Watermark />}
+      </TrackingProvider>
+    </>
   );
 }
