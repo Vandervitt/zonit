@@ -3,9 +3,10 @@ import type { NextRequest } from "next/server";
 import { getLandingSlugByCustomDomain } from "@/lib/domains-db";
 import { hostnameOf, isCustomDomain, TENANT_HOST_HEADER } from "@/lib/host";
 
-// 这些公开元数据路由按 host 自行生成（app/robots.ts、app/sitemap.ts），
-// 不能被改写到 /p/{slug}，否则会返回落地页 HTML 而非 robots/sitemap。
-const METADATA_PATHS = new Set(["/robots.txt", "/sitemap.xml"]);
+// 这些公开元数据路由按 host 自行生成（app/robots.ts、app/sitemap.ts、
+// app/llms.txt），不能被改写到 /p/{slug}，否则会返回落地页 HTML 而非
+// robots/sitemap/llms.txt。租户域上 /llms.txt 由路由处理器自行返回 404（Phase B 再做租户版）。
+const METADATA_PATHS = new Set(["/robots.txt", "/sitemap.xml", "/llms.txt"]);
 
 // 访客在租户域名上第一方调用的公开 API（留资/埋点）。改写会把 POST 吞成
 // 落地页 HTML 200，客户端 res.ok 误判成功而数据静默丢失，故必须放行；
