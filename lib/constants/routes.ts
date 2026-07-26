@@ -10,6 +10,7 @@ export enum Routes {
   Pricing = '/pricing',
   AntiBan = '/anti-ban',            // 反同质化叙事页（公开）
   Templates = '/templates',         // 公开模板画廊（SEO 获客页）
+  Guides = '/guides',               // 公开获客指南（SEO 内容营销）
   Privacy = '/privacy',             // 隐私政策（公开）
   Terms = '/terms',                 // 服务条款（公开）
   LandingPages = '/admin/landing-pages',
@@ -44,6 +45,7 @@ export enum ApiRoutes {
 }
 
 export const templateDetailPath = (id: string) => `/templates/${id}`;
+export const guideDetailPath = (slug: string) => `/guides/${slug}`;
 
 export const apiAdminTemplatePath = (id: string) => `/api/admin/templates/${id}`;
 export const apiMediaPath = (id: string) => `/api/media/${id}`;

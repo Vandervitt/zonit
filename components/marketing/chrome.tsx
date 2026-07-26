@@ -107,6 +107,12 @@ export function SiteNav({ fonts }: { fonts: Fonts }) {
             模板库
           </Link>
           <Link
+            href={Routes.Guides}
+            className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
+          >
+            指南
+          </Link>
+          <Link
             href={Routes.AntiBan}
             className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
           >
