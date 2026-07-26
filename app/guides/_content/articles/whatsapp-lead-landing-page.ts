@@ -107,4 +107,18 @@ export const whatsappLeadLandingPage: GuideArticle = {
       ],
     },
   ],
+  references: [
+    {
+      label: "在广告管理工具中创建点击进入 WhatsApp 的广告 — Meta 商务帮助中心",
+      url: "https://www.facebook.com/business/help/447934475640650",
+    },
+    {
+      label: "WhatsApp Business Platform 概览 — Meta for Developers",
+      url: "https://developers.facebook.com/docs/whatsapp/overview/",
+    },
+    {
+      label: "Meta Conversions API（服务端转化回传）— Meta for Developers",
+      url: "https://developers.facebook.com/docs/marketing-api/conversions-api/",
+    },
+  ],
 };

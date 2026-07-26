@@ -90,4 +90,22 @@ export const landingPageConversionAttribution: GuideArticle = {
       ],
     },
   ],
+  references: [
+    {
+      label: "Conversions API 文档 — Meta for Developers",
+      url: "https://developers.facebook.com/docs/marketing-api/conversions-api/",
+    },
+    {
+      label: "像素与 Conversions API 事件去重 — Meta for Developers",
+      url: "https://developers.facebook.com/documentation/ads-commerce/conversions-api/deduplicate-pixel-and-server-events",
+    },
+    {
+      label: "使用自定义 URL 收集广告系列数据（UTM）— Google Analytics 帮助",
+      url: "https://support.google.com/analytics/answer/10917952",
+    },
+    {
+      label: "App Tracking Transparency（ATT）— Apple Developer",
+      url: "https://developer.apple.com/documentation/apptrackingtransparency",
+    },
+  ],
 };

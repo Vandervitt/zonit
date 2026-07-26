@@ -109,6 +109,26 @@ export function GuideArticleView({ article }: { article: GuideArticle }) {
       {article.sections.map((s) => (
         <Section key={s.id} section={s} />
       ))}
+      {article.references && article.references.length > 0 && (
+        <section id="references" className="mt-12 scroll-mt-28">
+          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">参考资料</h2>
+          <p className="mt-2 text-sm text-muted-foreground">本文相关规则与说明以下列官方来源为准，请以官方最新文档为准。</p>
+          <ul className="mt-4 space-y-2">
+            {article.references.map((ref) => (
+              <li key={ref.url} className="text-sm leading-relaxed">
+                <a
+                  href={ref.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-aqua-700 underline decoration-aqua-300 underline-offset-2 hover:decoration-aqua-600"
+                >
+                  {ref.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

@@ -105,4 +105,18 @@ export const facebookAdLandingPageCompliance: GuideArticle = {
       ],
     },
   ],
+  references: [
+    {
+      label: "Meta 广告标准（Advertising Standards）— Meta 透明度中心",
+      url: "https://transparency.meta.com/policies/ad-standards/",
+    },
+    {
+      label: "不可接受的商业行为（Unacceptable Business Practices）— Meta 透明度中心",
+      url: "https://transparency.meta.com/policies/ad-standards/fraud-scams/unacceptable-business-practices/",
+    },
+    {
+      label: "健康与保健类广告政策（Health and Wellness）— Meta 透明度中心",
+      url: "https://transparency.meta.com/policies/ad-standards/restricted-goods-services/health-wellness/",
+    },
+  ],
 };

@@ -31,4 +31,6 @@ export interface GuideArticle {
   /** 首段导语 */
   intro: string;
   sections: GuideSection[];
+  /** 官方参考资料（提升可信度 / E-E-A-T / GEO）；URL 须为核实过的真实官方来源。 */
+  references?: { label: string; url: string }[];
 }
