@@ -10,6 +10,14 @@ import { LandingPage } from "@/landing-renderer/LandingPage";
 import { IDENTITY_VARIANT } from "@/landing-renderer/variant";
 import { Routes, templateDetailPath } from "@/lib/constants";
 import type { LandingPageDraft } from "@/types/schema.draft";
+import { marketingMetadata } from "@/lib/seo/site";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  buildTemplateSeoContent,
+  conversionText,
+  templateBreadcrumbJsonLd,
+  templateFaqJsonLd,
+} from "@/lib/seo/template-content";
 
 /**
  * 画廊展示预处理：样稿的 CTA 链接刻意留白（选用后由用户填写），preview 渲染会对
@@ -37,12 +45,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const t = TEMPLATES.find((x) => x.id === slug);
   if (!t) return {};
   const title = `${t.name} — ${t.industry} 获客落地页模板 | Zap Bridge`;
-  const description = `${t.tagline}投放级留资结构、合规页脚开箱即用；选用后改内容、绑域名，几分钟发布到你自己的品牌域名。`;
-  return {
+  const description = `${t.tagline}${conversionText(t)} 留资、投放级结构、合规页脚开箱即用；改内容、绑定自有品牌域名，几分钟发布上线。`;
+  return marketingMetadata({
     title,
     description,
-    openGraph: { type: "website", title, description, images: [{ url: t.thumbnail }] },
-  };
+    path: templateDetailPath(t.id),
+    ogImage: t.thumbnail,
+  });
 }
 
 export default async function TemplateDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -53,9 +62,12 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
   const draft = toDisplayDraft(await loadTemplateDraft(t.id));
   const related = TEMPLATES.filter((x) => x.tags.category === t.tags.category && x.id !== t.id).slice(0, 3);
   const startHref = `${Routes.LandingPages}?template=${t.id}`;
+  const seo = buildTemplateSeoContent(t, draft);
 
   return (
     <div className={`min-h-screen bg-background ${fonts.body}`}>
+      <JsonLd data={templateBreadcrumbJsonLd(t)} />
+      <JsonLd data={templateFaqJsonLd(seo.faqs)} />
       <SiteNav fonts={fonts} />
       <main className="mx-auto max-w-6xl px-6 pb-24 pt-32">
         <nav className={`text-xs text-muted-foreground ${fonts.mono}`}>
@@ -98,12 +110,61 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
           </div>
         </header>
 
+        <section className="mt-8 max-w-3xl">
+          <p className="text-base leading-relaxed text-foreground/80">{seo.intro}</p>
+        </section>
+
         <p className={`mt-10 text-xs text-muted-foreground ${fonts.mono}`}>
           ↓ 以下为模板样稿实时渲染（文案与图片均可在编辑器中替换；预览中留资入口不产生真实提交）
         </p>
         <div className="mt-3 overflow-hidden rounded-2xl border border-border shadow-sm">
           <LandingPage page={draft} pageId={`template-${t.id}`} variant={IDENTITY_VARIANT} preview />
         </div>
+
+        <section className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>这套模板包含什么</h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {seo.included.map((label) => (
+                <span key={label} className="rounded-full bg-aqua-50 px-3 py-1 text-sm text-aqua-700">
+                  {label}
+                </span>
+              ))}
+            </div>
+
+            <h2 className={`mt-10 text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>如何用它获客</h2>
+            <ol className="mt-4 space-y-4">
+              {seo.howToUse.map((s, i) => (
+                <li key={s.step} className="flex gap-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-aqua-600 to-tech text-sm font-semibold text-white">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{s.step}</p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{s.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <aside className="rounded-2xl border border-border bg-white/60 p-6">
+            <h2 className={`text-base font-bold tracking-tight text-foreground ${fonts.display}`}>适合谁</h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{seo.whoFor}</p>
+          </aside>
+        </section>
+
+        <section className="mt-16">
+          <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>常见问题</h2>
+          <dl className="mt-6 divide-y divide-border border-t border-border">
+            {seo.faqs.map((f) => (
+              <div key={f.q} className="py-5">
+                <dt className="text-sm font-semibold text-foreground">{f.q}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
 
         {related.length > 0 && (
           <section className="mt-16">
