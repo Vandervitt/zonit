@@ -47,6 +47,11 @@ export interface TemplateMeta {
   industry: string;
   /** 一句话简介（选择页卡片描述） */
   tagline: string;
+  /**
+   * 模板详情页 SEO 独特简介（2–4 句中文）。用于详情页正文首段与 meta，
+   * 提供每页真正独特的内容以支撑长尾词收录；留空则由 tagline + 标签派生兜底。
+   */
+  seoIntro?: string;
   /** 卡片缩略图（在线占位图，与该模板 hero 背景图一致的字面量 URL） */
   thumbnail: string;
   /** 投放梯队 */
@@ -61,6 +66,8 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Aurae Skincare",
     industry: "美妆 / 护肤",
     tagline: "皮肤咨询型落地页，访客经 WhatsApp 领取免费肤质分析。",
+    seoIntro:
+      "Aurae Skincare 是一套专为护肤品牌出海获客设计的落地页模板，用「免费肤质分析」作为钩子把广告流量转成 WhatsApp 咨询线索。首屏突出肤质痛点与解决方案，配合成分说明、真实前后对比与用户口碑，逐步建立信任并引导留资。适合通过 Meta / TikTok 投放护肤、抗老、祛痘类产品的独立站与代运营团队，想要「重咨询、轻交易」的获客承接页。",
     thumbnail: "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
     tags: { category: "beauty", subcategory: "skincare", archetype: "种草留资", conversion: ["whatsapp"], risk: "medium", tone: "emotional" },
@@ -70,6 +77,8 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Lumora Dental Studio",
     industry: "牙科 / 医美",
     tagline: "牙科预约型落地页，免费微笑评估 + WhatsApp 预约咨询。",
+    seoIntro:
+      "Lumora Dental Studio 是面向牙科、口腔与医美诊所的本地获客落地页模板，围绕「免费微笑评估」把广告点击转化为 WhatsApp 预约咨询。页面以案例对比、医生资质与患者评价建立专业背书，用清晰的预约入口降低犹豫门槛。适合做种植牙、隐形正畸、美白等高客单服务的诊所与营销机构，用于承接本地投放并沉淀预约线索。",
     thumbnail: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1600&q=80",
     tier: "t2",
     tags: { category: "medical", subcategory: "dental", archetype: "预约咨询", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
@@ -79,6 +88,8 @@ export const TEMPLATES: TemplateMeta[] = [
     name: "Solterra Home Solar",
     industry: "家装 / 太阳能",
     tagline: "家装太阳能落地页，免费上门测评 + 省电方案咨询。",
+    seoIntro:
+      "Solterra Home Solar 是为家用太阳能、储能与家装节能服务打造的高意向获客落地页模板，用「免费上门测评 + 省电方案」把广告流量转成 WhatsApp 咨询与表单预约。页面以省电测算、安装流程与真实客户案例讲清价值，用理性说服打消大额投入的顾虑。适合太阳能安装商、能源代理与家装公司做区域投放，承接需要上门核算的高客单线索。",
     thumbnail: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1600&q=80",
     tier: "t2",
     tags: { category: "home-improvement", subcategory: "solar", archetype: "预约咨询", conversion: ["whatsapp", "form"], risk: "medium", tone: "rational" },

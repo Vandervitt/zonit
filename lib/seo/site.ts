@@ -37,10 +37,15 @@ export function marketingMetadata(input: {
   path: string;
   ogTitle?: string;
   ogDescription?: string;
+  /** 自定义 OG 图（如模板缩略图）；缺省用品牌 OG 卡片。 */
+  ogImage?: string;
 }): Metadata {
   const canonical = absoluteUrl(input.path);
   const ogTitle = input.ogTitle ?? input.title;
   const ogDescription = input.ogDescription ?? input.description;
+  const ogImage = input.ogImage
+    ? { url: input.ogImage, alt: input.title }
+    : { url: OG_IMAGE_URL, width: 1200, height: 630, alt: SITE_NAME };
   return {
     title: input.title,
     description: input.description,
@@ -52,13 +57,13 @@ export function marketingMetadata(input: {
       locale: SITE_LOCALE,
       title: ogTitle,
       description: ogDescription,
-      images: [{ url: OG_IMAGE_URL, width: 1200, height: 630, alt: SITE_NAME }],
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
       description: ogDescription,
-      images: [OG_IMAGE_URL],
+      images: [ogImage.url],
     },
   };
 }
