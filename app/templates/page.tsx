@@ -5,18 +5,17 @@ import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { CATEGORY_LABELS, CONVERSION_LABELS } from "@/landing-editor/samples/templateFilter";
 import { Routes, templateDetailPath } from "@/lib/constants";
+import { marketingMetadata } from "@/lib/seo/site";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = marketingMetadata({
   title: "30+ 海外获客落地页模板库 — 按行业挑选，直接开始 | Zap Bridge",
   description:
     "覆盖美妆、服饰、3C、家居、保健、母婴等行业的海外获客落地页模板：WhatsApp / 表单留资范式、投放级结构、合规页脚开箱即用。挑一套喜欢的，几分钟改成你自己的页面。",
-  openGraph: {
-    type: "website",
-    title: "30+ 海外获客落地页模板库 | Zap Bridge",
-    description:
-      "按行业挑一套投放级获客落地页模板，改内容、绑域名、发布上线——不用从空白页开始。",
-  },
-};
+  path: Routes.Templates,
+  ogTitle: "30+ 海外获客落地页模板库 | Zap Bridge",
+  ogDescription:
+    "按行业挑一套投放级获客落地页模板，改内容、绑域名、发布上线——不用从空白页开始。",
+});
 
 const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
 

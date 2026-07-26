@@ -22,8 +22,30 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     };
   }
 
-  // 平台主域：放开营销面（/、/pricing），禁后台与接口。
+  // 平台主域：放开营销面（/、/pricing、/templates、/anti-ban），禁后台与接口；
+  // 显式欢迎生成式引擎/AI 爬虫（GEO），使营销内容可被 AI 摘要抓取与引用。
+  const disallow = ["/admin", "/super-admin", "/api"];
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/super-admin", "/api"] },
+    rules: [
+      { userAgent: "*", allow: "/", disallow },
+      {
+        userAgent: [
+          "GPTBot",
+          "OAI-SearchBot",
+          "ChatGPT-User",
+          "Google-Extended",
+          "PerplexityBot",
+          "ClaudeBot",
+          "Claude-Web",
+          "anthropic-ai",
+          "Applebot-Extended",
+          "cohere-ai",
+          "Amazonbot",
+        ],
+        allow: "/",
+        disallow,
+      },
+    ],
+    sitemap: `https://${hostname}/sitemap.xml`,
   };
 }
