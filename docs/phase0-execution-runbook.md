@@ -53,7 +53,7 @@
 - [ ] `ADMIN_EMAILS` = 平台管理员邮箱（逗号分隔，登录即授 ADMIN）
 - [ ] 至少一个 AI key：`AI_API_KEY` / `OPENAI_API_KEY` / `DASHSCOPE_API_KEY` / `GEMINI_API_KEY`（否则落地页 AI 生成不可用）
 - [ ] 建议：`RESEND_API_KEY` + `EMAIL_FROM`（邀请邮件）、`UNSPLASH_ACCESS_KEY`（配图搜索）
-- [ ] 付费如启用：LemonSqueezy 全套（见 `deploy-env-checklist.md`）
+- [ ] 付费如启用：生效收款渠道全套（Dodo 或 Creem，见 `deploy-env-checklist.md`）
 
 CLI 路线示例：
 ```bash

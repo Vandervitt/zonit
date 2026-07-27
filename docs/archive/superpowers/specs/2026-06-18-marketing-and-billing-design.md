@@ -1,7 +1,7 @@
 # 官网 + 路由分层 + 订阅计划 设计 spec
 
 > 状态：设计已确认，待写实现计划。
-> 关联：`docs/landing-page-flow-product-overview.md`（产品定位）、`docs/superpowers/specs/2026-04-21-lemonsqueezy-integration-design.md`（计费集成）、上线就绪审计（已完成 P0 sites 清理与 P1 边界/SEO，见分支 `fix_20260618_清理sites残留`）。
+> 关联：`docs/landing-page-flow-product-overview.md`（产品定位）、`docs/archive/superpowers/specs/2026-04-21-lemonsqueezy-integration-design.md`（计费集成）、上线就绪审计（已完成 P0 sites 清理与 P1 边界/SEO，见分支 `fix_20260618_清理sites残留`）。
 
 ## 背景与目标
 

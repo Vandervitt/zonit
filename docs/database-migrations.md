@@ -29,7 +29,7 @@ pnpm add -D node-pg-migrate
 |------|------|
 | `001_initial_schema.js` | 基础表：users / accounts / sessions / verification_tokens / sites |
 | `002_add_plan.js` | users 增加 plan 字段；sites 增加 custom_domain 字段 |
-| `003_add_ls_columns.js` | users 增加 ls_customer_id / ls_subscription_id（Lemon Squeezy 计费） |
+| `003_add_ls_columns.js` | users 增加 ls_customer_id / ls_subscription_id（LemonSqueezy 计费，**后续已被通用 billing_* 字段取代**） |
 | `004_add_domains_table.js` | 新建 domains 表及索引 |
 
 ## 常用命令

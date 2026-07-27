@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js App Router、node-pg-migrate、antd v5、recharts 2.15、vitest、NextAuth v5 (JWT)。
 
-**对应 Spec:** `docs/superpowers/specs/2026-07-20-super-admin-enhancements-design.md`
+**对应 Spec:** `docs/archive/superpowers/specs/2026-07-20-super-admin-enhancements-design.md`
 
 **交付节奏:** 4 个 PR，严格按序（B 依赖 A，C/D 依赖 A/B 合入后的 main）。每个 PR 开工前按全局 Git 铁律建分支：
 

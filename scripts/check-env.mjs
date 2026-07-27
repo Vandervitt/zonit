@@ -41,10 +41,18 @@ const recommended = [
 const aiKeys = ["AI_API_KEY", "OPENAI_API_KEY", "DASHSCOPE_API_KEY", "GEMINI_API_KEY"];
 
 // 同组要么全配、要么全不配（部分配置多半是漏配）
+// 生效收款渠道由 super-admin 在 dodo / creem 间切换（见 lib/billing/provider.ts），
+// 两组各自要么全配、要么全不配。
 const groups = [
-  ["计费 LemonSqueezy", [
-    "LEMONSQUEEZY_API_KEY", "LEMONSQUEEZY_STORE_ID", "LEMONSQUEEZY_WEBHOOK_SECRET",
-    "LEMONSQUEEZY_VARIANT_STARTER", "LEMONSQUEEZY_VARIANT_PRO", "LEMONSQUEEZY_VARIANT_AGENCY",
+  ["计费 Dodo", [
+    "DODO_PAYMENTS_API_KEY", "DODO_PAYMENTS_WEBHOOK_KEY", "DODO_PAYMENTS_ENVIRONMENT",
+    "DODO_PRODUCT_STARTER", "DODO_PRODUCT_PRO", "DODO_PRODUCT_AGENCY",
+    "DODO_CREDITS_50", "DODO_CREDITS_200",
+  ]],
+  ["计费 Creem", [
+    "CREEM_API_KEY", "CREEM_WEBHOOK_SECRET", "CREEM_ENVIRONMENT",
+    "CREEM_PRODUCT_STARTER", "CREEM_PRODUCT_PRO", "CREEM_PRODUCT_AGENCY",
+    "CREEM_CREDITS_50", "CREEM_CREDITS_200",
   ]],
 ];
 

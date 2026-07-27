@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16(App Router)、TypeScript、Tailwind、vitest、Playwright。
 
-设计来源:`docs/superpowers/specs/2026-06-23-brand-theming-design.md`
+设计来源:`docs/archive/superpowers/specs/2026-06-23-brand-theming-design.md`
 
 ---
 

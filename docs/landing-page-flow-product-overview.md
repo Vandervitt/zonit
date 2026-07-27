@@ -2,7 +2,7 @@
 
 > **一句话定位**：让海外获客的个人创业者与小团队，无需开发，几分钟内基于行业模板做出并发布一张投放级落地页到自己的域名。
 >
-> 面向产品、运营与新成员快速理解。工程实现细节（数据表、API、路由、门禁、多租户等）见详细设计：`docs/superpowers/specs/2026-06-17-landing-page-flow-design.md`。
+> 面向产品、运营与新成员快速理解。工程实现细节（数据表、API、路由、门禁、多租户等）见详细设计：`docs/archive/superpowers/specs/2026-06-17-landing-page-flow-design.md`。
 
 | | |
 |---|---|

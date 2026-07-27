@@ -918,7 +918,7 @@ export function LeadNotificationSettings() {
 
 - [ ] **Step 2: 本地手动冒烟**（dev + 本地库）：Dev Login → 设置页开邮件（验证需要 `RESEND_API_KEY`，无则看日志 `not_configured`）；Pro 账号填 `https://webhook.site/<id>` 开启 webhook 保存 → 提交一条测试线索（`curl POST /api/leads`）→ webhook.site 收到带 `X-Zap-Bridge-Signature` 的 POST，且用返回的 secret `verifyWebhookSignature` 通过；关开关后再提交不再收到。
 
-- [ ] **Step 3: 更新路线图** 标记 Phase 2 完成（`docs/superpowers/plans/2026-07-18-产品优先级执行路线.md`）。
+- [ ] **Step 3: 更新路线图** 标记 Phase 2 完成（`docs/archive/superpowers/plans/2026-07-18-产品优先级执行路线.md`）。
 
 - [ ] **Step 4: PR** 按护栏推送 + `gh pr create --base main`。CI 全绿后交用户合并。
 

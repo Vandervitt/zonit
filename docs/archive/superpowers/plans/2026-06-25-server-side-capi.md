@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16(App Router)、TypeScript、pg、node-pg-migrate、vitest、Playwright、Vercel Cron。
 
-设计来源:`docs/superpowers/specs/2026-06-25-server-side-capi-design.md`
+设计来源:`docs/archive/superpowers/specs/2026-06-25-server-side-capi-design.md`
 
 ---
 

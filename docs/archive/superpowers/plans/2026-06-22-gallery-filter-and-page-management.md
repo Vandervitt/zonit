@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16(App Router)、TypeScript、Tailwind（画廊）、antd（后台列表）、SWR、pg、vitest、Playwright。
 
-设计来源:`docs/superpowers/specs/2026-06-22-gallery-filter-and-page-management-design.md`
+设计来源:`docs/archive/superpowers/specs/2026-06-22-gallery-filter-and-page-management-design.md`
 
 ---
 

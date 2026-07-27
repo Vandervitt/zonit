@@ -10,7 +10,7 @@
 
 **测试约定（项目化 TDD 适配）：** 本仓库无单测框架；遵循 `docs/constraints/testing-and-validation.md`——每任务以 `npx tsc --noEmit`（无新增错误）+ `npx eslint <files>`（0 errors）为门禁，数据/接口任务加迁移与 curl 冒烟，整链路以 Phase 6 的 Playwright e2e 收口。基线已知错误：`templates/template/**` 的 `prefilledMessage`（与本计划无关，勿计入）。
 
-**依赖来源：** 详细设计 `docs/superpowers/specs/2026-06-17-landing-page-flow-design.md`。
+**依赖来源：** 详细设计 `docs/archive/superpowers/specs/2026-06-17-landing-page-flow-design.md`。
 
 ---
 

@@ -2,7 +2,18 @@
 
 ## 概览
 
-本项目认证模块基于 **Auth.js v5 (NextAuth)** 构建，支持 Google OAuth 与邮箱/密码两种登录方式，会话数据持久化至 PostgreSQL，路由保护通过 Next.js 16 的 `proxy.ts` 实现。
+本项目认证模块基于 **Auth.js v5 (NextAuth)** 构建，会话数据持久化至 PostgreSQL，路由保护通过 Next.js 16 的 `proxy.ts` 实现。
+
+当前面向用户开放的登录方式有两种：
+
+| 方式 | Provider id | 状态 |
+|---|---|---|
+| Google OAuth | `google` | ✅ 主力 |
+| 邮箱验证码（OTP） | `email-otp` | ✅ 主力，支持任意邮箱后缀 |
+| 邮箱 / 密码 | `credentials` | ⚠️ **遗留兜底**：provider 仍注册，但登录页与注册页均无入口，仅老用户可用 |
+| 开发直登 | `dev` | 仅 `NODE_ENV=development` 且设置 `DEV_USER_EMAIL` 时激活 |
+
+> 邮箱域名白名单（曾经的 `TRUSTED_DOMAINS`，仅放行 Gmail 等）**已废弃**。现在只做基础格式校验，邮箱归属真实性由 OTP 验证码保证，单一事实源见 `lib/auth/trusted-email.ts`。
 
 ---
 
@@ -26,16 +37,26 @@ zapbridge/
 ├── .env.local                           # 环境变量
 ├── lib/
 │   ├── db.ts                            # PostgreSQL 连接池
-│   └── schema.sql                       # 数据库建表脚本
+│   └── auth/                            # OTP、邮箱校验、建号
 └── app/
     ├── api/
     │   ├── auth/[...nextauth]/route.ts  # Auth.js 请求处理器
-    │   └── register/route.ts           # 邮箱注册接口
+    │   ├── auth/otp/send/route.ts       # 发送邮箱验证码
+    │   └── register/route.ts            # 邮箱注册接口（密码 + 可选邀请码，UI 已无入口）
     └── (auth)/
         ├── layout.tsx                   # 认证页面布局
-        ├── login/page.tsx              # 登录页
-        └── register/page.tsx           # 注册页
+        ├── login/page.tsx               # 登录页（Google + 邮箱验证码）
+        └── register/page.tsx            # 注册页（Google + 邮箱验证码）
 ```
+
+其他相关文件：
+
+| 文件 | 用途 |
+|---|---|
+| `components/auth/OtpAuthForm.tsx` | 邮箱验证码登录/注册表单 |
+| `lib/auth/otp.ts` | 验证码生成、校验、限流 |
+| `lib/auth/trusted-email.ts` | 邮箱格式校验单一事实源 |
+| `lib/proxy/auth-proxy.ts` | 路由级鉴权与角色分流 |
 
 ---
 
@@ -65,7 +86,55 @@ Auth.js 写入 users / accounts 表
 重定向至 /（仪表盘）
 ```
 
-### 邮箱/密码流程
+### 邮箱验证码（OTP）流程
+
+当前登录页与注册页实际使用的邮箱路径。
+
+```
+用户填写 email
+        │
+        ▼
+POST /api/auth/otp/send
+        │
+        ├── 基础格式校验（isValidEmailFormat，不限域名）
+        ├── 限流 / 冷却检查
+        └── 生成验证码 → 写入 email_otps 表 → 发信（Resend）
+        │
+        ▼
+用户填入收到的验证码
+        │
+        ▼
+signIn("email-otp", { email, code })
+        │
+        ▼
+Auth.js Credentials.authorize()（provider id = email-otp）
+        │
+        ├── 校验验证码有效性 / 是否过期 / 尝试次数
+        ├── 首次登录则 find-or-create 建号（provisionUserByEmail，
+        │   新用户可套用邀请 token 权益）
+        └── 账号被禁用则拒绝登录
+        │
+        ▼（校验通过）
+签发 JWT → 重定向至 /admin
+```
+
+**防爆破参数**（单一事实源 `lib/auth/otp.ts`）：6 位数字码空间仅 10^6，
+靠「短有效期 + 尝试上限 + 发送限流」三重防护。
+
+| 常量 | 值 | 含义 |
+|---|---|---|
+| `OTP_LENGTH` | 6 | 验证码位数 |
+| `OTP_TTL_MS` | 10 分钟 | 有效期 |
+| `OTP_RESEND_COOLDOWN_MS` | 60 秒 | 重发冷却 |
+| `OTP_MAX_ATTEMPTS` | 5 | 单个码最多校验次数 |
+
+验证码在库中以哈希存储（`hashOtpCode`），不落明文。邮件发送走 Resend
+（`sendOtpEmail`），发送接口另有 IP 维度限流。
+
+### 邮箱/密码流程 ⚠️ 遗留
+
+> **注意**：以下流程的 provider 与 `/api/register` 接口仍存在于代码中，但**登录页与注册页均已不提供入口**。
+> 仅历史上已设置过密码的老用户可通过直接调用接口使用。新用户一律走 Google OAuth 或邮箱验证码。
 
 **注册：**
 
@@ -110,15 +179,34 @@ Auth.js Credentials.authorize()
 所有 HTTP 请求
         │
         ▼
-proxy.ts（Next.js Proxy，原 middleware）
+proxy.ts
         │
-        ├── 路径在白名单内？(/login /register /api/auth /api/register)
-        │       └── 是 → 放行
+        ├── handleTenancy()  ← 多租户域名改写，必须先于鉴权返回
         │
-        └── 读取 Cookie: authjs.session-token
-                ├── 存在 → 放行
-                └── 不存在 → 301 重定向至 /login
+        ▼
+lib/proxy/auth-proxy.ts :: handleAuth()
+        │
+        ├── "/" 营销首页 → 始终放行（已登录也不跳转）
+        ├── 已登录访问 /login 或 /register → 跳 /admin
+        ├── 命中 PUBLIC_PATHS（按路径段边界匹配）→ 放行
+        ├── POST/OPTIONS /api/leads（访客留资）→ 放行
+        │
+        ├── /super-admin/** → 未登录跳 /login；非 SUPER_ADMIN 跳 /admin
+        ├── /api/**（非公开）→ 未登录返回 401 JSON
+        ├── /admin/**        → 未登录跳 /login
+        └── 其余未登记路径   → 放行交给 Next 渲染（未知路由命中 404，
+                                不再被误重定向到 /login）
 ```
+
+**PUBLIC_PATHS**（单一事实源 `lib/proxy/auth-proxy.ts`）：
+
+`/login`、`/register`、`/pricing`、`/anti-ban`、`/p`、`/preview`、
+`/robots.txt`、`/sitemap.xml`、`/api/auth`、`/api/register`、`/api/templates`、
+`/api/track`、`/api/cron`、`/api/webhooks`
+
+其中 `/api/track`（访客匿名回传）、`/api/cron`（靠 `CRON_SECRET` Bearer 自鉴权）、
+`/api/webhooks`（靠 standardwebhooks 验签）、`/preview`（靠签名 token）均为
+「中间件放行、各路由自行鉴权」的模式，不是无保护端点。
 
 ---
 
@@ -281,15 +369,19 @@ CREATE TABLE verification_tokens (
 | `AUTH_GOOGLE_ID` | Google OAuth Client ID | Google Cloud Console |
 | `AUTH_GOOGLE_SECRET` | Google OAuth Client Secret | Google Cloud Console |
 | `DATABASE_URL` | PostgreSQL 连接串 | 自建或云服务 |
+| `ADMIN_EMAILS` | 超管白名单（逗号分隔），命中者登录时自动提升为 `SUPER_ADMIN` | 自行指定，详见 `docs/SUPER_ADMIN_GUIDE.md` |
+| `RESEND_API_KEY` | 发送邮箱验证码所需 | Resend 控制台 |
+| `EMAIL_FROM` | 验证码邮件发件人地址 | 需与已验证域名一致 |
+| `DEV_USER_EMAIL` | 仅开发环境：启用免密直登 provider ⛔ 禁止进生产 | 本地自行指定 |
 
 ---
 
 ## 部署前检查清单
 
 1. 填写 `.env.local` 所有字段
-2. 执行 `lib/schema.sql` 完成建表
+2. 执行 `pnpm migrate:up` 完成建表（schema 由 `migrations/` 下的迁移文件管理）
 3. 在 Google Cloud Console 添加授权重定向 URI：
-   - 开发：`http://localhost:3000/api/auth/callback/google`
+   - 开发：`http://localhost:3001/api/auth/callback/google`
    - 生产：`https://yourdomain.com/api/auth/callback/google`
 4. 生产环境确认 `AUTH_SECRET` 已设置（缺失时 Auth.js 会抛出错误）
 
@@ -297,7 +389,9 @@ CREATE TABLE verification_tokens (
 
 ## 安全说明
 
-- 密码使用 bcrypt（cost factor 12）哈希存储，原文不落库
+- 邮箱验证码以哈希存储，原文不落库；10 分钟过期、5 次尝试上限、60 秒重发冷却
+- 遗留密码（如有）使用 bcrypt（cost factor 12）哈希存储，原文不落库
+- 邮箱域名白名单已废弃，改由 OTP 验证码证明邮箱归属
 - JWT 由 `AUTH_SECRET` 签名，默认有效期 30 天
 - Cookie 在生产环境自动加 `__Secure-` 前缀，要求 HTTPS
 - `proxy.ts` 对所有非白名单路由（包括 `_next/data` RSC 数据路由）执行 Token 校验

@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next 16 App Router、TypeScript、`openai` ^6（Structured Outputs）、`zod` ^4、`pg` + node-pg-migrate、Vitest（本计划新增单测）、Playwright（既有 e2e）。
 
-参考 spec：`docs/superpowers/specs/2026-06-20-ai-page-generation-design.md`
+参考 spec：`docs/archive/superpowers/specs/2026-06-20-ai-page-generation-design.md`
 
 ---
 

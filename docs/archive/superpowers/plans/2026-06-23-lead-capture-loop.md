@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16(App Router)、TypeScript、Tailwind(渲染/编辑器)、antd(后台)、pg、node-pg-migrate、vitest、Playwright。
 
-设计来源:`docs/superpowers/specs/2026-06-23-lead-capture-loop-design.md`
+设计来源:`docs/archive/superpowers/specs/2026-06-23-lead-capture-loop-design.md`
 
 ---
 
