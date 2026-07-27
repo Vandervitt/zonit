@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { Check, X } from "lucide-react";
 import { Routes } from "@/lib/constants";
-import { PLANS, PLAN_ORDER, PLAN_FEATURE_ROWS } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, planFeatureRows, planPriceText } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { localePath } from "@/lib/i18n/routes";
+import type { Locale } from "@/lib/i18n/config";
 
 function FeatureValue({ value }: { value: string | boolean }) {
   if (typeof value === "boolean") {
@@ -19,26 +22,31 @@ function FeatureValue({ value }: { value: string | boolean }) {
  * ctaFor 决定每档 CTA 的去向与文案（默认：free→注册、其余→升级）。
  */
 export function PlanComparison({
+  locale = "en",
   ctaFor,
 }: {
+  locale?: Locale;
   ctaFor?: (planId: PlanId) => { href: string; label: string };
 }) {
+  const t = getDictionary(locale).plans;
+  const rows = planFeatureRows(t, locale);
+  // Routes.Billing 指向 /admin/billing，后台不参与国际化，故不加语言前缀。
   const cta = ctaFor ?? ((planId: PlanId) =>
     planId === "free"
-      ? { href: Routes.Register, label: "免费开始" }
-      : { href: Routes.Billing, label: "立即升级" });
+      ? { href: localePath(locale, Routes.Register), label: t.table.ctaFree }
+      : { href: Routes.Billing, label: t.table.ctaUpgrade });
 
   return (
     <div className="overflow-x-auto rounded-2xl border border-aqua-100">
       <table className="w-full min-w-[760px] text-sm">
         <thead>
           <tr className="border-b border-aqua-100 bg-aqua-50/60 align-bottom">
-            <th className="w-[24%] px-6 py-5 text-left font-medium text-muted-foreground">功能</th>
-            <th className="w-[28%] px-6 py-5 text-left font-medium text-muted-foreground">说明</th>
+            <th className="w-[24%] px-6 py-5 text-left font-medium text-muted-foreground">{t.table.feature}</th>
+            <th className="w-[28%] px-6 py-5 text-left font-medium text-muted-foreground">{t.table.description}</th>
             {PLAN_ORDER.map((planId) => {
               const plan = PLANS[planId];
               const c = cta(planId);
-              const isFree = planId === "free";
+              const price = planPriceText(plan, locale);
               return (
                 <th
                   key={planId}
@@ -52,12 +60,14 @@ export function PlanComparison({
                           : "text-transparent"
                       }`}
                     >
-                      最受欢迎
+                      {t.table.mostPopular}
                     </span>
                     <span className="text-xs uppercase tracking-widest text-muted-foreground">{plan.label}</span>
                     <span className="text-2xl font-bold text-foreground">
-                      {isFree ? "免费" : plan.priceText.split("/")[0]}
-                      {!isFree && <span className="text-sm font-normal text-muted-foreground">/月</span>}
+                      {price.amount}
+                      {price.suffix && (
+                        <span className="text-sm font-normal text-muted-foreground">{price.suffix}</span>
+                      )}
                     </span>
                     <Link
                       href={c.href}
@@ -76,8 +86,8 @@ export function PlanComparison({
           </tr>
         </thead>
         <tbody>
-          {PLAN_FEATURE_ROWS.map((row, i) => (
-            <tr key={row.label} className={i % 2 === 0 ? "bg-white" : "bg-aqua-50/40"}>
+          {rows.map((row, i) => (
+            <tr key={row.key} className={i % 2 === 0 ? "bg-white" : "bg-aqua-50/40"}>
               <td className="px-6 py-3 font-medium text-foreground/90">{row.label}</td>
               <td className="px-6 py-3 text-muted-foreground">{row.desc}</td>
               {PLAN_ORDER.map((planId) => (
