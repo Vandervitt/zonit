@@ -17,7 +17,7 @@ export function generateOtpCode(): string {
   return randomInt(0, 1_000_000).toString().padStart(OTP_LENGTH, "0");
 }
 
-/** 哈希验证码（与项目密码哈希一致用 bcrypt），绝不落明文。 */
+/** 哈希验证码（bcrypt），绝不落明文。 */
 export function hashOtpCode(code: string): Promise<string> {
   return bcrypt.hash(code, BCRYPT_ROUNDS);
 }

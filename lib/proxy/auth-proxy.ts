@@ -12,7 +12,6 @@ export const PUBLIC_PATHS = [
   "/robots.txt",
   "/sitemap.xml",
   "/api/auth",
-  "/api/register",
   "/api/templates",
   "/api/track", // 公开采集端点：访客在租户域名匿名回传，无需登录
   "/api/cron", // Vercel Cron 端点：由各路由的 CRON_SECRET Bearer 自行鉴权

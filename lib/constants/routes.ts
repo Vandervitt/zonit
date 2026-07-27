@@ -33,7 +33,6 @@ export enum ApiRoutes {
   Milestones = '/api/milestones',
   Analytics = '/api/analytics',
   Templates = '/api/templates',
-  Register = '/api/register',
   OtpSend = '/api/auth/otp/send',
   BillingCheckout = '/api/billing/checkout',
   BillingPortal = '/api/billing/portal',

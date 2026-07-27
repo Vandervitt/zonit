@@ -3,7 +3,6 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 // import PostgresAdapter from "@auth/pg-adapter";
-import bcrypt from "bcryptjs";
 import pool from "@/lib/db";
 import { Routes, UserRole, AuthProvider } from "@/lib/constants";
 import { isValidEmailFormat } from "@/lib/auth/trusted-email";
@@ -53,34 +52,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // 验证码通过 → find-or-create（新用户可套用邀请 token 权益）。
         const user = await provisionUserByEmail(email, { token });
         if (user.disabled) return null; // 禁用账号拒绝登录
-        return { id: user.id, name: user.name, email: user.email, image: user.image };
-      },
-    }),
-    Credentials({
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-
-        // 老用户密码登录兜底：仅做基础格式校验（域名已放开）
-        if (!isValidEmailFormat(credentials.email as string)) return null;
-
-        const result = await pool.query(
-          "SELECT * FROM users WHERE email = $1",
-          [credentials.email]
-        );
-        const user = result.rows[0];
-        if (!user?.password_hash) return null;
-        if (user.disabled_at) return null; // 已禁用账号：拒绝登录
-
-        const valid = await bcrypt.compare(
-          credentials.password as string,
-          user.password_hash
-        );
-        if (!valid) return null;
-
         return { id: user.id, name: user.name, email: user.email, image: user.image };
       },
     }),

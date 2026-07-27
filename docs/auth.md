@@ -4,14 +4,17 @@
 
 本项目认证模块基于 **Auth.js v5 (NextAuth)** 构建，会话数据持久化至 PostgreSQL，路由保护通过 Next.js 16 的 `proxy.ts` 实现。
 
-当前面向用户开放的登录方式有两种：
+当前支持的登录方式：
 
 | 方式 | Provider id | 状态 |
 |---|---|---|
 | Google OAuth | `google` | ✅ 主力 |
 | 邮箱验证码（OTP） | `email-otp` | ✅ 主力，支持任意邮箱后缀 |
-| 邮箱 / 密码 | `credentials` | ⚠️ **遗留兜底**：provider 仍注册，但登录页与注册页均无入口，仅老用户可用 |
 | 开发直登 | `dev` | 仅 `NODE_ENV=development` 且设置 `DEV_USER_EMAIL` 时激活 |
+
+> **邮箱 / 密码登录已下线**：`credentials` provider、`/api/register` 接口及相关常量均已移除。
+> 历史上设过密码的老用户改用同一邮箱走验证码登录即可——`provisionUserByEmail` 按邮箱
+> find-or-create，命中已有账号直接返回，不会重复建号，数据与权益完全保留。
 
 > 邮箱域名白名单（曾经的 `TRUSTED_DOMAINS`，仅放行 Gmail 等）**已废弃**。现在只做基础格式校验，邮箱归属真实性由 OTP 验证码保证，单一事实源见 `lib/auth/trusted-email.ts`。
 
@@ -24,7 +27,7 @@
 | `next-auth` | v5 (beta) | 认证框架 |
 | `@auth/pg-adapter` | latest | Auth.js PostgreSQL 适配器 |
 | `pg` | latest | PostgreSQL 客户端 |
-| `bcryptjs` | latest | 密码哈希 |
+| `bcryptjs` | latest | 邮箱验证码哈希 |
 
 ---
 
@@ -41,8 +44,7 @@ zapbridge/
 └── app/
     ├── api/
     │   ├── auth/[...nextauth]/route.ts  # Auth.js 请求处理器
-    │   ├── auth/otp/send/route.ts       # 发送邮箱验证码
-    │   └── register/route.ts            # 邮箱注册接口（密码 + 可选邀请码，UI 已无入口）
+    │   └── auth/otp/send/route.ts       # 发送邮箱验证码
     └── (auth)/
         ├── layout.tsx                   # 认证页面布局
         ├── login/page.tsx               # 登录页（Google + 邮箱验证码）
@@ -131,48 +133,6 @@ Auth.js Credentials.authorize()（provider id = email-otp）
 验证码在库中以哈希存储（`hashOtpCode`），不落明文。邮件发送走 Resend
 （`sendOtpEmail`），发送接口另有 IP 维度限流。
 
-### 邮箱/密码流程 ⚠️ 遗留
-
-> **注意**：以下流程的 provider 与 `/api/register` 接口仍存在于代码中，但**登录页与注册页均已不提供入口**。
-> 仅历史上已设置过密码的老用户可通过直接调用接口使用。新用户一律走 Google OAuth 或邮箱验证码。
-
-**注册：**
-
-```
-用户填写 name / email / password
-        │
-        ▼
-POST /api/register
-        │
-        ├── 检查 email 是否已存在
-        ├── bcrypt.hash(password, 12)
-        └── INSERT INTO users (name, email, password_hash)
-        │
-        ▼
-自动调用 signIn("credentials") 完成登录
-        │
-        ▼
-签发 JWT → 重定向至 /
-```
-
-**登录：**
-
-```
-用户填写 email / password
-        │
-        ▼
-signIn("credentials", { email, password })
-        │
-        ▼
-Auth.js Credentials.authorize()
-        │
-        ├── SELECT * FROM users WHERE email = $1
-        └── bcrypt.compare(password, password_hash)
-        │
-        ▼（校验通过）
-签发 JWT → 重定向至 /
-```
-
 ### 路由保护流程
 
 ```
@@ -201,7 +161,7 @@ lib/proxy/auth-proxy.ts :: handleAuth()
 **PUBLIC_PATHS**（单一事实源 `lib/proxy/auth-proxy.ts`）：
 
 `/login`、`/register`、`/pricing`、`/anti-ban`、`/p`、`/preview`、
-`/robots.txt`、`/sitemap.xml`、`/api/auth`、`/api/register`、`/api/templates`、
+`/robots.txt`、`/sitemap.xml`、`/api/auth`、`/api/templates`、
 `/api/track`、`/api/cron`、`/api/webhooks`
 
 其中 `/api/track`（访客匿名回传）、`/api/cron`（靠 `CRON_SECRET` Bearer 自鉴权）、
@@ -260,23 +220,6 @@ export default pool;
 
 使用单例 `Pool`，在整个应用生命周期内复用连接，避免每次请求新建连接。
 
----
-
-### `app/api/register/route.ts` — 注册接口
-
-| 字段 | 类型 | 说明 |
-|---|---|---|
-| `name` | string | 用户姓名 |
-| `email` | string | 邮箱，唯一 |
-| `password` | string | 明文密码，后端 bcrypt 加密 |
-
-响应状态：
-- `201` — 注册成功
-- `400` — 字段缺失
-- `409` — 邮箱已存在
-
----
-
 ## 数据库设计
 
 ### ER 图
@@ -303,11 +246,10 @@ CREATE TABLE users (
   email          TEXT UNIQUE,
   email_verified TIMESTAMPTZ,
   image          TEXT,
-  password_hash  TEXT            -- 仅邮箱注册用户有值，OAuth 用户为 NULL
 );
 ```
 
-> `password_hash` 是对 Auth.js 标准 schema 的扩展字段，存储 bcrypt 哈希（cost factor 12）。
+> 历史遗留的 `password_hash` 列仍存在于库中（`001_initial_schema.js`），但密码登录已下线，代码不再读写该列。
 
 ---
 
@@ -390,7 +332,6 @@ CREATE TABLE verification_tokens (
 ## 安全说明
 
 - 邮箱验证码以哈希存储，原文不落库；10 分钟过期、5 次尝试上限、60 秒重发冷却
-- 遗留密码（如有）使用 bcrypt（cost factor 12）哈希存储，原文不落库
 - 邮箱域名白名单已废弃，改由 OTP 验证码证明邮箱归属
 - JWT 由 `AUTH_SECRET` 签名，默认有效期 30 天
 - Cookie 在生产环境自动加 `__Secure-` 前缀，要求 HTTPS

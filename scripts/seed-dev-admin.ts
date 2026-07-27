@@ -1,7 +1,10 @@
 // scripts/seed-dev-admin.ts
 // 本地 dev 用：种默认管理员账号 + 必要联调数据（已验证自有域名），
-// 配合登录页预填账密，本地即可跑通「登录→建页→编辑→预览→发布→公开渲染」全流程。
+// 本地即可跑通「登录→建页→编辑→预览→发布→公开渲染」全流程。
 // 用法：pnpm db:seed-dev （读取 .env.local 的 DATABASE_URL，仅用于本地 docker 库）
+//
+// 登录方式（密码登录已下线）：在 .env.local 设 DEV_USER_EMAIL=admin@zapbridge.com
+// 后用登录页的开发直登；或直接走邮箱验证码（需配 RESEND_API_KEY / EMAIL_FROM）。
 //
 // 发布后在浏览器查看公开页，需把测试域名指到本机，将下面两行加入 /etc/hosts：
 //   127.0.0.1 dev-acme.test
@@ -11,10 +14,8 @@ import { config } from "dotenv";
 config({ path: ".env.local", override: true, quiet: true });
 
 import { Pool } from "pg";
-import bcrypt from "bcryptjs";
 
 const EMAIL = "admin@zapbridge.com";
-const PASSWORD = "Password1!";
 const NAME = "Dev Admin";
 
 /** 预置的「已验证启用」自有域名，供发布时选择（一域名一已发布页）。 */
@@ -28,17 +29,17 @@ async function main() {
 
   // 1) admin 用户（幂等 upsert，返回 id）。本地联调需要付费功能（多页/多域名/全模板/CAPI 等），
   //    故测试账号固定为 pro 套餐。
-  const hash = await bcrypt.hash(PASSWORD, 12);
   const userRes = await pool.query(
-    `INSERT INTO users (name, email, password_hash, plan)
-     VALUES ($1, $2, $3, 'pro')
+    `INSERT INTO users (name, email, plan)
+     VALUES ($1, $2, 'pro')
      ON CONFLICT (email) DO UPDATE
-       SET password_hash = EXCLUDED.password_hash, name = EXCLUDED.name, plan = 'pro'
+       SET name = EXCLUDED.name, plan = 'pro'
      RETURNING id`,
-    [NAME, EMAIL, hash],
+    [NAME, EMAIL],
   );
   const userId: string = userRes.rows[0].id;
-  console.log(`✓ dev admin: ${EMAIL} / ${PASSWORD}  (plan=pro, id=${userId})`);
+  console.log(`✓ dev admin: ${EMAIL}  (plan=pro, id=${userId})`);
+  console.log(`  登录：.env.local 设 DEV_USER_EMAIL=${EMAIL} 后用开发直登，或走邮箱验证码。`);
 
   // 2) 已验证启用的自有域名（幂等：按 domain 唯一约束 upsert，重置为本用户的 verified+enabled，并解绑旧页）
   for (const domain of DEV_DOMAINS) {

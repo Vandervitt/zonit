@@ -1,5 +1,4 @@
 export enum AuthProvider {
-  Credentials = 'credentials',
   EmailOtp = 'email-otp',
   Google = 'google',
   Dev = 'dev',
