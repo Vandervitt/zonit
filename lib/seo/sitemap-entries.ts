@@ -19,7 +19,35 @@ const PRIORITY: Record<string, number> = {
  * 与 LOCALIZED_ROUTES 必须互斥——两边都留会让 sitemap 输出重复 URL，
  * 由 lib/i18n/routes.test.ts 的互斥断言守护。
  */
-export const PENDING_ROUTES: readonly string[] = [Routes.Templates, Routes.Guides];
+export const PENDING_ROUTES: readonly string[] = [Routes.Guides];
+
+/**
+ * 已国际化的动态详情页（如 33 个模板详情）：每条出双语两条并互挂 hreflang。
+ * routePath 须落在 LOCALIZED_PREFIXES 之下，否则 localePath 会原样返回，两条 URL 撞车。
+ */
+export function localizedDetailEntries(
+  base: string,
+  paths: { routePath: string; lastModified: Date }[],
+  priority = 0.7,
+): MetadataRoute.Sitemap {
+  const abs = (p: string) => `${base}${p}`;
+  const entries: MetadataRoute.Sitemap = [];
+  for (const { routePath, lastModified } of paths) {
+    const languages = Object.fromEntries(
+      locales.map((l) => [hreflang[l], abs(localePath(l, routePath))]),
+    );
+    for (const l of locales) {
+      entries.push({
+        url: abs(localePath(l, routePath)),
+        lastModified,
+        changeFrequency: "monthly",
+        priority: l === defaultLocale ? priority : Number((priority * 0.9).toFixed(2)),
+        alternates: { languages },
+      });
+    }
+  }
+  return entries;
+}
 
 export function marketingEntries(base: string, now: Date): MetadataRoute.Sitemap {
   const abs = (path: string) => (path === "/" ? `${base}/` : `${base}${path}`);

@@ -22,7 +22,10 @@ import { glassCard, gradientText, gridBackdrop, glowAura, pill } from "@/lib/the
 import { landingEditorPath, Routes } from "@/lib/constants";
 import { handleSessionExpired } from "@/lib/auth-client";
 import { TEMPLATES, type TemplateMeta } from "../samples/registry";
-import { CATEGORY_LABELS, filterTemplates } from "../samples/templateFilter";
+import { categoryLabel, filterTemplates } from "../samples/templateFilter";
+
+// 编辑器属租户后台，不参与营销面国际化，固定取中文。
+const ADMIN_LOCALE = "zh" as const;
 
 const monoCls = "font-[family-name:var(--font-mono-app)]";
 
@@ -38,7 +41,7 @@ function useCategoryChips(): CategoryChip[] {
     const counts = new Map<string, number>();
     for (const t of TEMPLATES) counts.set(t.tags.category, (counts.get(t.tags.category) ?? 0) + 1);
     return [...counts.entries()]
-      .map(([value, count]) => ({ value, label: CATEGORY_LABELS[value] ?? value, count }))
+      .map(([value, count]) => ({ value, label: categoryLabel(ADMIN_LOCALE, value), count }))
       .sort((a, b) => b.count - a.count);
   }, []);
 }
@@ -48,7 +51,7 @@ export function TemplatePickerDialog({ children }: { children: React.ReactNode }
   const [query, setQuery] = useState("");
   const chips = useCategoryChips();
   const list = useMemo(
-    () => filterTemplates(TEMPLATES, { category: category ?? undefined, query: query || undefined }),
+    () => filterTemplates(TEMPLATES, { category: category ?? undefined, query: query || undefined }, ADMIN_LOCALE),
     [category, query],
   );
   const filtering = category !== null || query.trim() !== "";
@@ -229,7 +232,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
             monoCls,
           )}
         >
-          {template.industry}
+          {template.industry[ADMIN_LOCALE]}
         </span>
 
         {/* 浮现操作按钮 */}
@@ -259,7 +262,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
         <h3 className="text-base font-semibold tracking-tight text-foreground transition-colors group-hover:text-aqua-700">
           {template.name}
         </h3>
-        <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{template.tagline}</p>
+        <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{template.tagline[ADMIN_LOCALE]}</p>
       </div>
     </div>
   );

@@ -11,10 +11,10 @@ export const generateStaticParams = templateStaticParams;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  return templateDetailMetadata(slug, "en");
+  return templateDetailMetadata(slug, "zh");
 }
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  return <TemplateDetailView slug={slug} locale="en" />;
+  return <TemplateDetailView slug={slug} locale="zh" />;
 }

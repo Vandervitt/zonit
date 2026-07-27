@@ -15,13 +15,14 @@ export const LOCALIZED_ROUTES = [
   "/anti-ban",
   "/login",
   "/register",
+  "/templates",
 ] as const;
 
 /**
  * 已完成国际化的动态子树前缀：其下任意子路径都参与国际化（如 /templates/<id>）。
  * 同样只登记镜像已存在的前缀——PR 3 上模板画廊时加 "/templates"，PR 4 上指南时加 "/guides"。
  */
-export const LOCALIZED_PREFIXES: readonly string[] = [];
+export const LOCALIZED_PREFIXES: readonly string[] = ["/templates"];
 
 /** 分离出路径主体与 hash/query 后缀，避免把前缀插到 # 或 ? 后面。 */
 function splitSuffix(path: string): [string, string] {

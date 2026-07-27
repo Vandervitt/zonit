@@ -72,16 +72,14 @@ describe("isLocalizedRoute", () => {
   });
 
   it("尚未镜像的营销页为假——分期交付期间必须降级到英文侧路径，否则链到 404", () => {
-    // /templates 与 /guides 的 /zh 镜像要到 PR 3 / PR 4 才存在，
-    // 此时中文页导航里的「模板库」必须仍指向 /templates（内容尚为中文，正好合适）。
-    expect(isLocalizedRoute("/templates")).toBe(false);
-    expect(localePath("zh", "/templates")).toBe("/templates");
+    // /guides 的 /zh 镜像要到 PR 4 才存在，
+    // 此时中文页导航里的「指南」必须仍指向 /guides（内容尚为中文，正好合适）。
     expect(isLocalizedRoute("/guides")).toBe(false);
     expect(localePath("zh", "/guides")).toBe("/guides");
   });
 
-  it("PR 2 已镜像的页面为真", () => {
-    for (const route of ["/pricing", "/anti-ban", "/login", "/register"]) {
+  it("已镜像的页面为真（含 /templates 动态子树）", () => {
+    for (const route of ["/pricing", "/anti-ban", "/login", "/register", "/templates", "/templates/skincare"]) {
       expect(isLocalizedRoute(route), route).toBe(true);
       expect(localePath("zh", route)).toBe(`/zh${route}`);
     }

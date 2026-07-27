@@ -1,7 +1,7 @@
 import { templateGalleryMetadata, TemplateGalleryView } from "@/components/marketing/pages/TemplateGallery";
 
-export const metadata = templateGalleryMetadata("en");
+export const metadata = templateGalleryMetadata("zh");
 
 export default function Page() {
-  return <TemplateGalleryView locale="en" />;
+  return <TemplateGalleryView locale="zh" />;
 }
