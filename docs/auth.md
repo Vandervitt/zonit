@@ -249,7 +249,8 @@ CREATE TABLE users (
 );
 ```
 
-> 历史遗留的 `password_hash` 列仍存在于库中（`001_initial_schema.js`），但密码登录已下线，代码不再读写该列。
+> `password_hash` 列已随密码登录下线一并丢弃（迁移 `031_drop_password_hash.js`）。
+> 该迁移的 `down` 只恢复列结构、**不恢复哈希数据**——因密码登录已无代码路径，不影响功能。
 
 ---
 
