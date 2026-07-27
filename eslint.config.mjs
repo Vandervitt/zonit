@@ -40,7 +40,7 @@ const eslintConfig = defineConfig([
             {
               group: ["@mui/*", "@emotion/*"],
               message:
-                "本项目 UI 仅用 shadcn/ui（前台）与 Ant Design（后台），勿引入 MUI/emotion。",
+                "本项目 UI 仅用 Tailwind 直写（前台，预设见 lib/theme.ts）与 Ant Design（后台），勿引入 MUI/emotion。",
             },
           ],
         },
