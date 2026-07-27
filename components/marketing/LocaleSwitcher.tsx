@@ -16,15 +16,19 @@ export function LocaleSwitcher({ locale, className }: { locale: Locale; classNam
   const { pathname: bare } = stripLocale(pathname ?? "/");
   const target: Locale = locale === "en" ? "zh" : "en";
   const t = getDictionary(locale).common.localeSwitcher;
+  const label = target === "en" ? t.toEn : t.toZh;
 
   return (
     <Link
       href={localePath(target, bare)}
       hrefLang={hreflang[target]}
-      aria-label={t.ariaLabel}
+      // 可访问名必须包含可见文本（WCAG 2.5.3 Label in Name）：
+      // 只写 aria-label="Switch language" 会盖掉可见的「中文」，
+      // 使语音控制用户无法用看到的词触达该链接。
+      aria-label={`${t.ariaLabel}: ${label}`}
       className={className}
     >
-      {target === "en" ? t.toEn : t.toZh}
+      {label}
     </Link>
   );
 }
