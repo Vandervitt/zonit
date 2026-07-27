@@ -24,6 +24,9 @@ type ProxyAuth = {
   };
 } | null;
 
+/** 登录/注册入口（含 /zh 镜像）：已登录时统一跳转后台。 */
+const AUTH_ENTRY_PATHS = new Set(["/login", "/register", "/zh/login", "/zh/register"]);
+
 export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
@@ -33,8 +36,9 @@ export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
     return null;
   }
 
-  // 已登录用户点登录/注册：直接进租户后台（仅此入口触发跳转）
-  if (isLoggedIn && (pathname === "/login" || pathname === "/register")) {
+  // 已登录用户点登录/注册：直接进租户后台（仅此入口触发跳转）。
+  // 含中文镜像路由——/zh/login 与 /login 是同一入口的两种语言版本。
+  if (isLoggedIn && AUTH_ENTRY_PATHS.has(pathname)) {
     return NextResponse.redirect(new URL("/admin", req.url));
   }
 

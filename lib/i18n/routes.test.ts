@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { locales, defaultLocale, htmlLang, ogLocale } from "./config";
 import { LOCALIZED_ROUTES, localePath, stripLocale, isLocalizedRoute } from "./routes";
 
@@ -80,5 +82,26 @@ describe("isLocalizedRoute", () => {
   it("后台与接口为假", () => {
     expect(isLocalizedRoute("/admin")).toBe(false);
     expect(isLocalizedRoute("/api/leads")).toBe(false);
+  });
+});
+
+// 方案 B（app/zh 镜像树）的固有风险是「加了营销页忘补中文镜像」。
+// 这个测试是唯一的机械兜底：清单里登记了，磁盘上就必须有对应文件。
+describe("app/zh 镜像对等性", () => {
+  const appDir = join(process.cwd(), "app");
+
+  /** 路由 "/" → app/page.tsx；"/pricing" → app/pricing/page.tsx。 */
+  const enPageFor = (route: string) =>
+    route === "/" ? join(appDir, "page.tsx") : join(appDir, route.slice(1), "page.tsx");
+  const zhPageFor = (route: string) =>
+    route === "/" ? join(appDir, "zh", "page.tsx") : join(appDir, "zh", route.slice(1), "page.tsx");
+
+  it.each(LOCALIZED_ROUTES)("%s 同时存在英文与中文页面文件", (route) => {
+    expect(existsSync(enPageFor(route)), `缺英文页：${enPageFor(route)}`).toBe(true);
+    expect(existsSync(zhPageFor(route)), `缺中文镜像：${zhPageFor(route)}`).toBe(true);
+  });
+
+  it("app/zh 子树存在语言布局", () => {
+    expect(existsSync(join(appDir, "zh", "layout.tsx"))).toBe(true);
   });
 });
