@@ -179,7 +179,7 @@ export function localePath(locale: Locale, path: string): string {
 | `marketingMetadata()` | 单 canonical | 加 `locale` 入参，输出 `alternates.languages`：`en` / `zh-Hans` / `x-default: en` |
 | `siteStructuredData()` | `inLanguage: "zh-CN"` | 按 locale 派生 |
 | `sitemap.ts` | 单语全量 | 双语全量 + 每条 `alternates.languages`；由 `LOCALIZED_ROUTES` 驱动 |
-| `/og` | 中文字样 | 接受 `?locale=`，出双语两版 |
+| `/og` | 品牌卡片，渲染文案已全是拉丁字符（那 68 个中文字全在注释里） | **无需改动**，双语共用 |
 | `llms.txt` | 中文 | 改英文主体，正文列出双语 URL（不做 `/zh/llms.txt`——属过度设计） |
 | `site.ts` 注释、`llms.txt` 正文 | 「面向中国出海广告主」 | 英文面改为国际化表述 |
 
@@ -205,9 +205,13 @@ Next.js App Router 中只有根布局能输出 `<html>`，而 B 方案下 `/zh/*
 
 公开面与 `/admin` 后台共用三处，只改公开面会把刀切在中间：
 
-### 6.1 `lib/plans.ts`（~580 中文字）
+### 6.1 `lib/plans.ts` + `PlanComparison`（~580 中文字）—— 归入 PR 1
 
 套餐权益文案，定价区与后台计费页共用。改法：`plans.ts` 只留结构化数据（id / 价格 / 额度 / 布尔权益），展示文案全量搬进字典；后台侧取 `zh` 字典，行为不变。
+
+需要一并处理的还有：`PLAN_FEATURE_ROWS` 的 `valueFor` 返回值内嵌中文量词（`"张"` / `"个"` / `"次/月"`），以及 `PlanComparison` 组件里内联的「功能 / 说明 / 最受欢迎 / 免费 / 月 / 立即升级」。
+
+**排期修正**：本项原计划放 PR 3，现前移至 PR 1。原因是首页内嵌 `#pricing` 区块直接渲染 `PlanComparison`——不一起做，PR 1 交付的「英文首页」会中间夹一张中文套餐表，不是一个自洽的交付物。
 
 ### 6.2 `landing-editor/samples/registry.ts`（~5,000 中文字，33 套）
 
@@ -259,9 +263,9 @@ export type TemplateArchetype = "种草留资" | "预约咨询" | "比价线索"
 
 | PR | 内容 | 中文量 |
 | --- | --- | --- |
-| 1 | i18n 基建 + `app/zh/` 骨架 + `LOCALIZED_ROUTES` 清单 + 切换器 + SEO 全套（hreflang / sitemap / og / JSON-LD / lang）+ 首页与 nav/footer | ~1,300 |
+| 1 | i18n 基建 + `app/zh/` 骨架 + `LOCALIZED_ROUTES` 清单 + 切换器 + SEO 全套（hreflang / sitemap / JSON-LD / lang）+ 首页与 nav/footer + **`plans.ts` 文案外提** | ~1,880 |
 | 2 | pricing、anti-ban、login/register、404/error | ~1,120 |
-| 3 | **共用层切分**（plans 文案外提、archetype slug 化）+ 模板画廊 + 33 个详情页 | ~6,000 |
+| 3 | **`registry.ts` 切分**（archetype slug 化 + 模板文案双语）+ 模板画廊 + 33 个详情页 | ~5,600 |
 | 4 | guides 列表/详情 + 3 篇长文英文版 + llms.txt | ~2,900 |
 | 5 | privacy + terms 英译 + 语言差异条款（以英文版为准） | ~2,610 |
 
