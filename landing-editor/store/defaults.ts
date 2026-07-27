@@ -2,8 +2,6 @@
 // 各节点 / 列表项的默认值工厂，供 store 的 addSection 与表单 RepeatableList 复用。
 
 import type {
-  HeroSection,
-  FooterSection,
   FloatingButton,
   LeadForm,
   LandingSection,
@@ -22,20 +20,6 @@ import type {
   Branding,
   PageSeo,
 } from "@/types/schema.draft";
-
-export const createHero = (): HeroSection => ({
-  title: "用一句话说清你的核心价值",
-  subtitle: "用副标题补充关键利益点，引导访客咨询。",
-  cta: { text: "立即咨询", link: "" },
-});
-
-export const createFooter = (): FooterSection => ({
-  brandName: "品牌名称",
-  copyrightYear: String(new Date().getFullYear()),
-  contactEmail: "",
-  privacyPolicy: "隐私政策",
-  termsOfService: "服务条款",
-});
 
 export const createFloatingButton = (): FloatingButton => ({
   text: "立即咨询",

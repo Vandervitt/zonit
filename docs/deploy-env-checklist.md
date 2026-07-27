@@ -82,9 +82,18 @@
 - 各源 key：`OPENAI_API_KEY`(+`OPENAI_BASE_URL`/`OPENAI_MODEL`)、`DASHSCOPE_API_KEY`、`GEMINI_API_KEY`
 - ⛔ `AI_FAKE`：测试桩，**禁止进生产**
 
-### 计费 LemonSqueezy 🟡（启用付费才需要，要配就配全）
+### 计费 🟡（启用付费才需要，要配就配全）
 
-`LEMONSQUEEZY_API_KEY`、`LEMONSQUEEZY_STORE_ID`、`LEMONSQUEEZY_WEBHOOK_SECRET`、`LEMONSQUEEZY_VARIANT_STARTER/PRO/AGENCY`、`LS_CREDITS_50_VARIANT_ID`、`LS_CREDITS_200_VARIANT_ID`。webhook 指向 `<域名>/api/webhooks/lemonsqueezy`。详见 `docs/billing-lemonsqueezy-setup.md`。
+生效收款渠道由超管在 `/super-admin/settings` 于 **Dodo / Creem** 间切换（见 `lib/billing/provider.ts`），实际启用哪个就配哪一组：
+
+| 渠道 | 变量 | Webhook 地址 |
+|---|---|---|
+| Dodo | `DODO_PAYMENTS_API_KEY`、`DODO_PAYMENTS_WEBHOOK_KEY`、`DODO_PAYMENTS_ENVIRONMENT`、`DODO_PRODUCT_STARTER/PRO/AGENCY`、`DODO_CREDITS_50`、`DODO_CREDITS_200` | `<域名>/api/webhooks/dodo` |
+| Creem | `CREEM_API_KEY`、`CREEM_WEBHOOK_SECRET`、`CREEM_ENVIRONMENT`、`CREEM_PRODUCT_STARTER/PRO/AGENCY`、`CREEM_CREDITS_50`、`CREEM_CREDITS_200` | `<域名>/api/webhooks/creem` |
+
+`pnpm check:env` 会对两组分别做「要么全配、要么全不配」的半配检查。
+
+> 早期的 LemonSqueezy 接入已废弃，相关 `LEMONSQUEEZY_*` / `LS_*` 变量可从环境中移除。
 
 ### 邮件 / 其他 🟡
 

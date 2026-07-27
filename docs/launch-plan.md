@@ -3,7 +3,7 @@
 > **文档类型**：上线路线图 / 工作指导清单
 > **生成日期**：2026-06-30
 > **适用分支基线**：审计基于 main + 近 12 天已合并的子项（CAPI / 线索 / SEO 面板 / 营销官网 / 计费）
-> **关联文档**：`docs/landing-page-flow-product-overview.md`（产品说明书）、`docs/constraints/*`（约束）、`docs/billing-lemonsqueezy-setup.md`
+> **关联文档**：`docs/landing-page-flow-product-overview.md`（产品说明书）、`docs/constraints/*`（约束）、`docs/deploy-env-checklist.md`（计费等环境变量）
 
 ---
 
@@ -34,7 +34,7 @@
 | 服务端转化 CAPI（Meta/TikTok + Cron 兜底） | ✅ 已合（子项 E） |
 | 线索收件箱 + 表单 + 导出 | ✅ `app/admin/.../leads` |
 | SEO 编辑面板（每页覆盖 + noindex） | ✅ 已合（子项 F） |
-| 平台计费 LemonSqueezy（checkout / portal / webhook） | ✅ 已实现 |
+| 平台计费（checkout / portal / webhook） | ✅ 已实现（当前渠道 Dodo / Creem，可超管切换；原 LemonSqueezy 已废弃） |
 | 营销官网（漏斗前门） | ✅ 已存在（原审计记的「缺失」已不成立） |
 | 多语言 i18n | 📋 仅有设计 / 计划（子项 G，未动工） |
 
@@ -60,7 +60,7 @@
   - [ ] `BLOB_READ_WRITE_TOKEN`
   - [ ] OAuth（Google / 其他已启用 provider）
   - [ ] `CRON_SECRET`（CAPI Cron 兜底鉴权）
-  - [ ] LemonSqueezy keys + webhook secret
+  - [ ] 生效收款渠道的 keys + webhook secret（Dodo 或 Creem，见 `deploy-env-checklist.md`）
 - [ ] 轮换所有曾暴露的密钥（Neon / AUTH_SECRET / Google secret）
 - [ ] 生产部署一次 → `vercel-build` 把迁移推到生产库
 - [ ] 拿一个真实域名走完整冒烟：

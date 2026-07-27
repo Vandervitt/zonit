@@ -63,7 +63,7 @@ EMAIL_FROM=Zap Bridge <invite@yourdomain.com>
 - `lib/email.ts`: 邮件发送逻辑封装。
 - `migrations/006_add_invitations.js`: 数据库表结构迁移。
 - `app/api/admin/invite/route.ts`: 管理员发送邀请接口。
-- `app/api/register/route.ts`: 处理 Token 的注册逻辑。
+- `lib/auth/provision.ts`: 邮箱验证码登录时按 Token 套用邀请权益并建号（原 `app/api/register/route.ts` 已随密码登录下线一并移除）。
 - `auth.ts`: 试用期检查与权限放行逻辑。
 
 ## 5. 安全建议

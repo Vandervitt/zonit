@@ -63,8 +63,3 @@ export async function markFeedbackRead(id: string, isRead: boolean): Promise<boo
   const result = await pool.query(`UPDATE feedback SET is_read = $2 WHERE id = $1`, [id, isRead]);
   return (result.rowCount ?? 0) > 0;
 }
-
-export async function countUnreadFeedback(): Promise<number> {
-  const result = await pool.query(`SELECT COUNT(*)::int AS n FROM feedback WHERE is_read = false`);
-  return (result.rows[0]?.n as number) ?? 0;
-}

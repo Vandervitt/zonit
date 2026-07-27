@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Card, Table, Tag, Typography, Space, Alert, Button } from "antd";
+import { Card, Table, Tag, Typography, Space, Alert } from "antd";
 import { CheckCircleTwoTone, CloseOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { PLANS, PLAN_ORDER, PLAN_FEATURE_ROWS, type PlanId } from "@/lib/plans";

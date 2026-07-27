@@ -5,7 +5,7 @@
 import type { TemplateMeta } from "@/landing-editor/samples/registry";
 import type { LandingPageDraft, LandingSectionType } from "@/types/schema.draft";
 import { SECTION_REGISTRY } from "@/types/schema.draft";
-import { CATEGORY_LABELS, CONVERSION_LABELS } from "@/landing-editor/samples/templateFilter";
+import { CONVERSION_LABELS } from "@/landing-editor/samples/templateFilter";
 import { Routes, templateDetailPath } from "@/lib/constants";
 import { absoluteUrl } from "@/lib/seo/site";
 
@@ -30,11 +30,6 @@ export interface TemplateSeoContent {
 /** 转化方式中文短语，如 "WhatsApp / 表单"。 */
 export function conversionText(t: TemplateMeta): string {
   return t.tags.conversion.map((c) => CONVERSION_LABELS[c] ?? c).join(" / ");
-}
-
-/** 行业大类中文标签。 */
-export function categoryLabel(t: TemplateMeta): string {
-  return CATEGORY_LABELS[t.tags.category] ?? t.tags.category;
 }
 
 /** 从真实样稿提取「包含哪些板块」中文标签（固定首屏 + 中部区块 + 留资表单）。 */

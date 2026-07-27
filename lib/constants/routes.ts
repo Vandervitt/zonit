@@ -33,7 +33,6 @@ export enum ApiRoutes {
   Milestones = '/api/milestones',
   Analytics = '/api/analytics',
   Templates = '/api/templates',
-  Register = '/api/register',
   OtpSend = '/api/auth/otp/send',
   BillingCheckout = '/api/billing/checkout',
   BillingPortal = '/api/billing/portal',
@@ -47,7 +46,6 @@ export enum ApiRoutes {
 export const templateDetailPath = (id: string) => `/templates/${id}`;
 export const guideDetailPath = (slug: string) => `/guides/${slug}`;
 
-export const apiAdminTemplatePath = (id: string) => `/api/admin/templates/${id}`;
 export const apiMediaPath = (id: string) => `/api/media/${id}`;
 
 export const apiDomainPath = (id: string) => `/api/domains/${id}`;
@@ -55,7 +53,6 @@ export const apiDomainStatusPath = (id: string) => `/api/domains/${id}/status`;
 
 export const landingEditorPath = (id: string) => `/admin/editor/${id}`;
 export const landingPreviewPath = (id: string) => `/admin/editor/${id}/preview`;
-export const apiLandingPagesPath = () => `/api/landing-pages`;
 export const apiLandingPagePath = (id: string) => `/api/landing-pages/${id}`;
 export const apiLandingPublishPath = (id: string) => `/api/landing-pages/${id}/publish`;
 export const apiLandingUnpublishPath = (id: string) => `/api/landing-pages/${id}/unpublish`;

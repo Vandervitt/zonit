@@ -35,12 +35,6 @@ const KEYS = {
   email: "founder_email",
 } as const;
 
-export const EMPTY_FOUNDER_CONTACT: FounderContact = {
-  wechatId: "",
-  wechatQrUrl: "",
-  email: "",
-};
-
 export async function getFounderContact(): Promise<FounderContact> {
   const result = await pool.query(
     `SELECT key, value FROM platform_settings WHERE key = ANY($1)`,

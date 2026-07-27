@@ -27,10 +27,12 @@ pnpm add -D node-pg-migrate
 
 | 文件 | 说明 |
 |------|------|
-| `001_initial_schema.js` | 基础表：users / accounts / sessions / verification_tokens / sites |
+| `001_initial_schema.js` | 基础表：users / accounts / sessions / verification_tokens / sites（其中 users.password_hash 已由 031 丢弃） |
 | `002_add_plan.js` | users 增加 plan 字段；sites 增加 custom_domain 字段 |
-| `003_add_ls_columns.js` | users 增加 ls_customer_id / ls_subscription_id（Lemon Squeezy 计费） |
+| `003_add_ls_columns.js` | users 增加 ls_customer_id / ls_subscription_id（LemonSqueezy 计费，**后续已被通用 billing_* 字段取代**） |
 | `004_add_domains_table.js` | 新建 domains 表及索引 |
+| …… | （其余按序号递增，此表仅列早期几项，完整清单以 `migrations/` 目录为准） |
+| `031_drop_password_hash.js` | ⚠️ **破坏性**：丢弃 users.password_hash（密码登录已下线）。`down` 只恢复列结构，不恢复哈希数据 |
 
 ## 常用命令
 

@@ -73,12 +73,3 @@ export async function hasAllowance(
   if (kind === "page") return (await creditBalance(db, userId)) > 0;
   return false;
 }
-
-/** 给 UI 的用量汇总。 */
-export async function getUsageSummary(db: DbLike, userId: string) {
-  return {
-    pageUsed: await monthCount(db, userId, "page"),
-    rewriteUsed: await monthCount(db, userId, "rewrite"),
-    creditBalance: await creditBalance(db, userId),
-  };
-}

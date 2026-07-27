@@ -13,8 +13,6 @@ const eslintConfig = defineConfig([
     "build/**",
     "test-results/**",
     "next-env.d.ts",
-    "test-db.js",
-    "test-proxy.js",
   ]),
   // UI 一致性护栏：品牌色单一源 + 禁止引入第三套 UI 库。
   // 令牌唯一源见 styles/theme.css；TS 侧常量见 lib/theme/brand.ts。

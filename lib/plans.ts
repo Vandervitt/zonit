@@ -91,9 +91,6 @@ export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
   { label: "AI 智能改写", desc: "逐段润色改写文案，快速产出多个版本", valueFor: (p) => fmtLimit(p.aiRewriteQuota, "次/月") },
 ];
 
-export function getLandingPagesLimit(plan: PlanId): number {
-  return PLANS[plan].landingPagesLimit;
-}
 export function hasWatermark(plan: PlanId): boolean {
   return PLANS[plan].hasWatermark;
 }
@@ -103,10 +100,6 @@ export function hasAntiBan(plan: PlanId): boolean {
 export function hasLeadWebhook(plan: PlanId): boolean {
   return PLANS[plan].leadWebhook;
 }
-export function canBindDomain(plan: PlanId): boolean {
-  return PLANS[plan].domainsLimit > 0;
-}
-
 /**
  * 赠送套餐是否仍有效：存在且（无到期=永久 或 到期在将来）→ 返回该档，否则 null。
  * 到期时刻正好等于 now 视为已过期。供各「生效套餐」读取点在算 effectivePlan 前过滤。
