@@ -79,12 +79,13 @@ type LimitUnit = keyof PlansDict["units"];
 // 直接引各语言字典模块（而非走 getDictionary），避免 plans.ts ↔ dictionaries/index.ts 循环依赖。
 const PLANS_DICT: Record<Locale, PlansDict> = { en: enPlans, zh: zhPlans };
 
-/** 额度展示：Infinity → 不限；0 → 破折号；其余带本地化量词。 */
+/** 额度展示：Infinity → 不限；0 → 破折号；其余带本地化量词（英文区分单复数）。 */
 export function formatPlanLimit(n: number, locale: Locale, unit: LimitUnit): string {
   const t = PLANS_DICT[locale];
   if (n === Infinity) return t.unlimited;
   if (n === 0) return "—";
-  return `${n} ${t.units[unit]}`;
+  const forms = t.units[unit];
+  return `${n} ${n === 1 ? forms.one : forms.other}`;
 }
 
 /**

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import { localePath, stripLocale } from "@/lib/i18n/routes";
+import { localePath, stripLocale, isLocalizedRoute } from "@/lib/i18n/routes";
 import { hreflang, type Locale } from "@/lib/i18n/config";
 
 /**
@@ -14,6 +14,12 @@ import { hreflang, type Locale } from "@/lib/i18n/config";
 export function LocaleSwitcher({ locale, className }: { locale: Locale; className?: string }) {
   const pathname = usePathname();
   const { pathname: bare } = stripLocale(pathname ?? "/");
+
+  // 分期交付期间，尚未有 /zh 镜像的页面（/guides、/templates 等）不显示切换器：
+  // 那里 localePath 会原样返回当前路径，按钮点了等于原地刷新，是个死链接。
+  // 各页在自己的 PR 里进入 LOCALIZED_ROUTES 后，切换器自动出现。
+  if (!isLocalizedRoute(bare)) return null;
+
   const target: Locale = locale === "en" ? "zh" : "en";
   const t = getDictionary(locale).common.localeSwitcher;
   const label = target === "en" ? t.toEn : t.toZh;

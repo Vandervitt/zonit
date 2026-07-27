@@ -2,7 +2,12 @@ export const plans = {
   free: "Free",
   unlimited: "Unlimited",
   perMonthSuffix: "/mo",
-  units: { pages: "pages", domains: "domains", perMonth: "/ mo" },
+  // 量词区分单复数：英文 "1 page" / "3 pages"。中文无此变化，两个形态取同值。
+  units: {
+    pages: { one: "page", other: "pages" },
+    domains: { one: "domain", other: "domains" },
+    perMonth: { one: "/ mo", other: "/ mo" },
+  },
   table: {
     feature: "Feature",
     description: "What it does",

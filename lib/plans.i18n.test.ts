@@ -19,6 +19,18 @@ describe("formatPlanLimit", () => {
     expect(formatPlanLimit(80, "en", "perMonth")).toBe("80 / mo");
     expect(formatPlanLimit(80, "zh", "perMonth")).toBe("80 次/月");
   });
+
+  it("英文量词按单复数变化——Free 档是 1 page 而非 1 pages", () => {
+    expect(formatPlanLimit(1, "en", "pages")).toBe("1 page");
+    expect(formatPlanLimit(1, "en", "domains")).toBe("1 domain");
+    expect(formatPlanLimit(2, "en", "pages")).toBe("2 pages");
+  });
+
+  it("中文量词不随数量变化", () => {
+    expect(formatPlanLimit(1, "zh", "pages")).toBe("1 张");
+    expect(formatPlanLimit(3, "zh", "pages")).toBe("3 张");
+    expect(formatPlanLimit(1, "zh", "domains")).toBe("1 个");
+  });
 });
 
 describe("planPriceText", () => {

@@ -2,7 +2,12 @@ export const plans = {
   free: "免费",
   unlimited: "无限",
   perMonthSuffix: "/月",
-  units: { pages: "张", domains: "个", perMonth: "次/月" },
+  // 中文量词无单复数变化，两个形态取同值（形状须与英文字典一致）。
+  units: {
+    pages: { one: "张", other: "张" },
+    domains: { one: "个", other: "个" },
+    perMonth: { one: "次/月", other: "次/月" },
+  },
   table: {
     feature: "功能",
     description: "说明",

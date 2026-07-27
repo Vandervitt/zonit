@@ -57,6 +57,16 @@ test.describe("营销站双语", () => {
     await expect(page.locator('div[lang="zh-Hans"]').first()).toBeAttached();
   });
 
+  test("尚未国际化的页面不显示切换器——那里它会是个死链接", async ({ page }) => {
+    await page.goto("/guides");
+    await expect(page.getByRole("link", { name: /Switch language|切换语言/ })).toHaveCount(0);
+    // 首页仍应有（nav 与 footer 各一个）
+    await page.goto("/");
+    expect(
+      await page.getByRole("link", { name: /Switch language/ }).count(),
+    ).toBeGreaterThan(0);
+  });
+
   test("未国际化的后台入口不受影响：/zh/admin 返回 404", async ({ page }) => {
     const res = await page.goto("/zh/admin");
     expect(res?.status()).toBe(404);
