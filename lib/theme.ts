@@ -17,10 +17,6 @@ export const gradientText =
 export const ctaPrimary =
   "group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-7 py-3.5 font-semibold text-white shadow-sm shadow-aqua-600/25 transition-all hover:shadow-md hover:shadow-aqua-600/30 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aqua-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-/** 柔色按钮：浅青底 + 深青字（轻盈默认款） */
-export const ctaSoft =
-  "inline-flex items-center justify-center gap-2 rounded-xl bg-aqua-100 px-7 py-3.5 font-semibold text-aqua-700 transition-colors hover:bg-aqua-200";
-
 /** 次级 CTA：描边玻璃按钮 */
 export const ctaGhost =
   "inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-white/70 px-7 py-3.5 font-medium text-foreground/80 backdrop-blur transition-colors hover:border-aqua-300 hover:text-aqua-700";
@@ -28,14 +24,6 @@ export const ctaGhost =
 /** 玻璃拟态卡片表面（轻盈、近白、细描边、柔投影） */
 export const glassCard =
   "rounded-2xl border border-border bg-white/80 shadow-[0_18px_50px_-34px_rgba(15,23,42,.30)] backdrop-blur-xl";
-
-/** 玻璃面板（更轻，用于浮层/导航） */
-export const glassPanel =
-  "border border-border/80 bg-white/75 backdrop-blur-xl";
-
-/** 图标徽章（浅青圆角方块） */
-export const iconBadge =
-  "grid place-items-center rounded-xl border border-aqua-100 bg-aqua-50 text-aqua-600";
 
 /** 标签胶囊（kicker / 状态） */
 export const pill =

@@ -48,14 +48,3 @@ export async function upsertLeadNotifySettings(
   );
   return res.rows[0];
 }
-
-/** 轮换 webhook 密钥（旧密钥立即失效）。返回新密钥或 null（无 URL 时不生成）。 */
-export async function rotateWebhookSecret(userId: string): Promise<string | null> {
-  const res = await pool.query(
-    `UPDATE lead_notification_settings
-        SET webhook_secret = CASE WHEN webhook_url IS NOT NULL THEN $2 ELSE webhook_secret END, updated_at = NOW()
-      WHERE user_id = $1 RETURNING webhook_secret`,
-    [userId, randomBytes(24).toString("hex")],
-  );
-  return res.rows[0]?.webhook_secret ?? null;
-}

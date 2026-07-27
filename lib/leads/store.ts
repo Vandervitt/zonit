@@ -71,13 +71,3 @@ export async function deleteLead(id: string, userId: string): Promise<boolean> {
   );
   return res.rows.length > 0;
 }
-
-export async function countUnread(userId: string): Promise<number> {
-  const res = await pool.query(
-    `SELECT COUNT(*)::int AS n
-       FROM leads l JOIN landing_pages p ON p.id = l.page_id
-      WHERE p.user_id = $1 AND l.is_read = false`,
-    [userId],
-  );
-  return res.rows[0].n;
-}
