@@ -6,6 +6,10 @@ import { motion, useReducedMotion } from "motion/react";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { Routes } from "@/lib/constants";
 import { glowAura } from "@/lib/theme";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { localePath } from "@/lib/i18n/routes";
+import type { Locale } from "@/lib/i18n/config";
+import { LocaleSwitcher } from "./LocaleSwitcher";
 
 export type Fonts = { display: string; body: string; mono: string };
 
@@ -22,10 +26,12 @@ export const fadeUp = {
  * 若当前页没有该区块（如反同质化页），则不拦截，交由 Link 正常跳转到首页定价区。
  */
 export function PricingLink({
-  href = `${Routes.Home}#pricing`,
+  locale,
+  href = `${localePath(locale, Routes.Home)}#pricing`,
   className,
   children,
 }: {
+  locale: Locale;
   href?: string;
   className?: string;
   children: React.ReactNode;
@@ -75,7 +81,8 @@ export function Backdrop() {
  * 顶部导航
  * ------------------------------------------------------------------ */
 
-export function SiteNav({ fonts }: { fonts: Fonts }) {
+export function SiteNav({ fonts, locale }: { fonts: Fonts; locale: Locale }) {
+  const t = getDictionary(locale).common.nav;
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -93,7 +100,7 @@ export function SiteNav({ fonts }: { fonts: Fonts }) {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href={Routes.Home} className="group flex items-center gap-2">
+        <Link href={localePath(locale, Routes.Home)} className="group flex items-center gap-2">
           <BrandMark className="h-8 w-8 rounded-lg shadow-sm shadow-aqua-500/30" />
           <span className={`text-base font-bold tracking-tight text-foreground ${fonts.display}`}>
             Zap Bridge
@@ -101,37 +108,44 @@ export function SiteNav({ fonts }: { fonts: Fonts }) {
         </Link>
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
           <Link
-            href={Routes.Templates}
+            href={localePath(locale, Routes.Templates)}
             className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
           >
-            模板库
+            {t.templates}
           </Link>
           <Link
-            href={Routes.Guides}
+            href={localePath(locale, Routes.Guides)}
             className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
           >
-            指南
+            {t.guides}
           </Link>
           <Link
-            href={Routes.AntiBan}
+            href={localePath(locale, Routes.AntiBan)}
             className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
           >
-            反同质化
+            {t.antiBan}
           </Link>
-          <PricingLink className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700">
-            套餐定价
-          </PricingLink>
-          <Link
-            href={Routes.Login}
+          <PricingLink
+            locale={locale}
             className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
           >
-            登录
+            {t.pricing}
+          </PricingLink>
+          <LocaleSwitcher
+            locale={locale}
+            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
+          />
+          <Link
+            href={localePath(locale, Routes.Login)}
+            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
+          >
+            {t.login}
           </Link>
           <Link
-            href={Routes.Register}
+            href={localePath(locale, Routes.Register)}
             className="rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-4 py-2 font-medium text-white shadow-sm shadow-aqua-600/25 transition-all hover:brightness-105"
           >
-            免费开始
+            {t.register}
           </Link>
         </nav>
       </div>
@@ -175,7 +189,8 @@ export function SectionHead({
  * 页脚
  * ------------------------------------------------------------------ */
 
-export function SiteFooter({ fonts }: { fonts: Fonts }) {
+export function SiteFooter({ fonts, locale }: { fonts: Fonts; locale: Locale }) {
+  const t = getDictionary(locale).common.footer;
   return (
     <footer className="border-t border-border px-6 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
@@ -184,28 +199,29 @@ export function SiteFooter({ fonts }: { fonts: Fonts }) {
           <span className={`font-semibold text-foreground ${fonts.display}`}>Zap Bridge</span>
           <span>© {new Date().getFullYear()}</span>
         </div>
-        <nav className="flex items-center gap-5">
-          <Link href={Routes.Templates} className="transition-colors hover:text-aqua-700">
-            模板库
+        <nav className="flex flex-wrap items-center justify-center gap-5">
+          <Link href={localePath(locale, Routes.Templates)} className="transition-colors hover:text-aqua-700">
+            {t.templates}
           </Link>
-          <Link href={Routes.AntiBan} className="transition-colors hover:text-aqua-700">
-            反同质化
+          <Link href={localePath(locale, Routes.AntiBan)} className="transition-colors hover:text-aqua-700">
+            {t.antiBan}
           </Link>
-          <PricingLink className="transition-colors hover:text-aqua-700">
-            套餐定价
+          <PricingLink locale={locale} className="transition-colors hover:text-aqua-700">
+            {t.pricing}
           </PricingLink>
-          <Link href={Routes.Privacy} className="transition-colors hover:text-aqua-700">
-            隐私政策
+          <Link href={localePath(locale, Routes.Privacy)} className="transition-colors hover:text-aqua-700">
+            {t.privacy}
           </Link>
-          <Link href={Routes.Terms} className="transition-colors hover:text-aqua-700">
-            服务条款
+          <Link href={localePath(locale, Routes.Terms)} className="transition-colors hover:text-aqua-700">
+            {t.terms}
           </Link>
-          <Link href={Routes.Login} className="transition-colors hover:text-aqua-700">
-            登录
+          <Link href={localePath(locale, Routes.Login)} className="transition-colors hover:text-aqua-700">
+            {t.login}
           </Link>
-          <Link href={Routes.Register} className="transition-colors hover:text-aqua-700">
-            免费开始
+          <Link href={localePath(locale, Routes.Register)} className="transition-colors hover:text-aqua-700">
+            {t.register}
           </Link>
+          <LocaleSwitcher locale={locale} className="transition-colors hover:text-aqua-700" />
         </nav>
       </div>
     </footer>

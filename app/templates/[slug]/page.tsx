@@ -70,7 +70,7 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
     <div className={`min-h-screen bg-background ${fonts.body}`}>
       <JsonLd data={templateBreadcrumbJsonLd(t)} />
       <JsonLd data={templateFaqJsonLd(seo.faqs)} />
-      <SiteNav fonts={fonts} />
+      <SiteNav fonts={fonts} locale="zh" />
       <main className="mx-auto max-w-6xl px-6 pb-24 pt-32">
         <nav className={`text-xs text-muted-foreground ${fonts.mono}`}>
           <Link href={Routes.Templates} className="hover:text-aqua-700">模板库</Link>
@@ -193,7 +193,7 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
           </section>
         )}
       </main>
-      <SiteFooter fonts={fonts} />
+      <SiteFooter fonts={fonts} locale="zh" />
     </div>
   );
 }

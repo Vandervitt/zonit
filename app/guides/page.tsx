@@ -21,7 +21,7 @@ const fonts = { display: fontHead.className, body: fontBody.className, mono: fon
 export default function GuidesPage() {
   return (
     <div className={`min-h-screen bg-background ${fonts.body}`}>
-      <SiteNav fonts={fonts} />
+      <SiteNav fonts={fonts} locale="zh" />
       <main className="mx-auto max-w-5xl px-6 pb-24 pt-32">
         <header className="max-w-2xl">
           <span className={`text-xs uppercase tracking-[0.22em] text-aqua-600 ${fonts.mono}`}>指南</span>
@@ -49,7 +49,7 @@ export default function GuidesPage() {
           ))}
         </div>
       </main>
-      <SiteFooter fonts={fonts} />
+      <SiteFooter fonts={fonts} locale="zh" />
     </div>
   );
 }

@@ -40,7 +40,7 @@ export default function TemplatesGalleryPage() {
   const groups = groupByCategory();
   return (
     <div className={`min-h-screen bg-background ${fonts.body}`}>
-      <SiteNav fonts={fonts} />
+      <SiteNav fonts={fonts} locale="zh" />
       <main className="mx-auto max-w-6xl px-6 pb-24 pt-32">
         <header className="mx-auto max-w-2xl text-center">
           <span className={`text-xs uppercase tracking-[0.22em] text-aqua-600 ${fonts.mono}`}>Templates</span>
@@ -101,7 +101,7 @@ export default function TemplatesGalleryPage() {
           </section>
         ))}
       </main>
-      <SiteFooter fonts={fonts} />
+      <SiteFooter fonts={fonts} locale="zh" />
     </div>
   );
 }

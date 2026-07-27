@@ -122,7 +122,7 @@ function Hero({ fonts }: { fonts: Fonts }) {
             免费开始
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-          <PricingLink className={ctaGhost}>
+          <PricingLink locale="zh" className={ctaGhost}>
             查看 Agency 套餐
           </PricingLink>
         </motion.div>
@@ -256,7 +256,7 @@ function AgencyCta({ fonts }: { fonts: Fonts }) {
           套餐内建：每个已发布页拥有独立的结构变体，随时可一键重洗，降低批量页面被关联判重的风险。
         </p>
         <div className="relative mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <PricingLink className={ctaPrimary}>
+          <PricingLink locale="zh" className={ctaPrimary}>
             了解 Agency 套餐
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </PricingLink>
@@ -278,7 +278,7 @@ export default function AntiBanNarrative({ fonts }: { fonts: Fonts }) {
     <div className={`relative min-h-screen bg-background text-foreground ${fonts.body}`}>
       <Backdrop />
       <div className="relative">
-        <SiteNav fonts={fonts} />
+        <SiteNav fonts={fonts} locale="zh" />
         <main>
           <Hero fonts={fonts} />
           <Fears fonts={fonts} />
@@ -286,7 +286,7 @@ export default function AntiBanNarrative({ fonts }: { fonts: Fonts }) {
           <Ethics fonts={fonts} />
           <AgencyCta fonts={fonts} />
         </main>
-        <SiteFooter fonts={fonts} />
+        <SiteFooter fonts={fonts} locale="zh" />
       </div>
     </div>
   );

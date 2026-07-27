@@ -92,7 +92,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
       <JsonLd data={articleJsonLd(g)} />
       <JsonLd data={breadcrumbJsonLd(g)} />
       {faqItems.length > 0 && <JsonLd data={faqJsonLd(faqItems)} />}
-      <SiteNav fonts={fonts} />
+      <SiteNav fonts={fonts} locale="zh" />
       <main className="mx-auto max-w-3xl px-6 pb-24 pt-32">
         <nav className={`text-xs text-muted-foreground ${fonts.mono}`}>
           <Link href={Routes.Guides} className="hover:text-aqua-700">
@@ -157,7 +157,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
           </section>
         )}
       </main>
-      <SiteFooter fonts={fonts} />
+      <SiteFooter fonts={fonts} locale="zh" />
     </div>
   );
 }
