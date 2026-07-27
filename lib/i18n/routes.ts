@@ -9,7 +9,13 @@ export const ZH_PREFIX = "/zh";
  * **只登记「app/zh 镜像已存在」的路由**：提前登记会让 localePath 产出尚不存在的
  * /zh/xxx 地址，把中文页导航直接链到 404。后续 PR 上线一页就追加一条。
  */
-export const LOCALIZED_ROUTES = ["/"] as const;
+export const LOCALIZED_ROUTES = [
+  "/",
+  "/pricing",
+  "/anti-ban",
+  "/login",
+  "/register",
+] as const;
 
 /**
  * 已完成国际化的动态子树前缀：其下任意子路径都参与国际化（如 /templates/<id>）。

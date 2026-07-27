@@ -25,17 +25,28 @@ describe("marketingEntries", () => {
 
   it("尚未国际化的营销页只出英文侧单条，不伪造 /zh 链接", () => {
     const urls = marketingEntries(BASE, NOW).map((e) => e.url);
-    expect(urls).toContain(`${BASE}/pricing`);
-    expect(urls).toContain(`${BASE}/anti-ban`);
     expect(urls).toContain(`${BASE}/templates`);
     expect(urls).toContain(`${BASE}/guides`);
-    expect(urls).not.toContain(`${BASE}/zh/pricing`);
     expect(urls).not.toContain(`${BASE}/zh/templates`);
+    expect(urls).not.toContain(`${BASE}/zh/guides`);
   });
 
   it("尚未国际化的条目不带 alternates", () => {
     const entries = marketingEntries(BASE, NOW);
-    expect(entries.find((e) => e.url === `${BASE}/pricing`)?.alternates).toBeUndefined();
+    expect(entries.find((e) => e.url === `${BASE}/templates`)?.alternates).toBeUndefined();
+  });
+
+  it("PR 2 上线的页面出双语两条并互挂 hreflang", () => {
+    const entries = marketingEntries(BASE, NOW);
+    const urls = entries.map((e) => e.url);
+    for (const route of ["/pricing", "/anti-ban", "/login", "/register"]) {
+      expect(urls).toContain(`${BASE}${route}`);
+      expect(urls).toContain(`${BASE}/zh${route}`);
+      expect(entries.find((e) => e.url === `${BASE}${route}`)?.alternates?.languages).toEqual({
+        en: `${BASE}${route}`,
+        "zh-Hans": `${BASE}/zh${route}`,
+      });
+    }
   });
 
   it("不产生重复 URL", () => {

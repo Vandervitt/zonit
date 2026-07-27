@@ -14,13 +14,12 @@ const PRIORITY: Record<string, number> = {
   [Routes.AntiBan]: 0.6,
 };
 
-/** 尚未国际化的营销页（后续 PR 逐条从这里移入 LOCALIZED_ROUTES）。 */
-const PENDING_ROUTES: readonly string[] = [
-  Routes.Pricing,
-  Routes.AntiBan,
-  Routes.Templates,
-  Routes.Guides,
-];
+/**
+ * 尚未国际化的营销页（后续 PR 逐条从这里移入 LOCALIZED_ROUTES）。
+ * 与 LOCALIZED_ROUTES 必须互斥——两边都留会让 sitemap 输出重复 URL，
+ * 由 lib/i18n/routes.test.ts 的互斥断言守护。
+ */
+export const PENDING_ROUTES: readonly string[] = [Routes.Templates, Routes.Guides];
 
 export function marketingEntries(base: string, now: Date): MetadataRoute.Sitemap {
   const abs = (path: string) => (path === "/" ? `${base}/` : `${base}${path}`);
