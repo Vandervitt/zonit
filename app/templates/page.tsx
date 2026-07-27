@@ -8,6 +8,8 @@ import { Routes, templateDetailPath } from "@/lib/constants";
 import { marketingMetadata } from "@/lib/seo/site";
 
 export const metadata: Metadata = marketingMetadata({
+  // 尚未国际化：显式声明中文，保持现有 canonical 与描述不变（见 PR 2/3/4）
+  locale: "zh",
   title: "30+ 海外获客落地页模板库 — 按行业挑选，直接开始 | Zap Bridge",
   description:
     "覆盖美妆、服饰、3C、家居、保健、母婴等行业的海外获客落地页模板：WhatsApp / 表单留资范式、投放级结构、合规页脚开箱即用。挑一套喜欢的，几分钟改成你自己的页面。",

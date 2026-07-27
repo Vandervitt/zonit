@@ -9,6 +9,8 @@ const body = Sora({ subsets: ["latin"], weight: ["400", "500", "600"], display: 
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], display: "swap" });
 
 export const metadata: Metadata = marketingMetadata({
+  // 尚未国际化：显式声明中文，保持现有 canonical 与描述不变（见 PR 2/3/4）
+  locale: "zh",
   title: "反同质化风控 — 让同模板页面不再千篇一律 | Zap Bridge",
   description:
     "页面雷同容易被投放平台判为重复内容，带来拒审与限流。Zap Bridge 的反同质化风控为 Agency 套餐内建：内容保持一致，打散页面结构指纹，降低同模板页面被判重的概率，并支持一键重洗。",

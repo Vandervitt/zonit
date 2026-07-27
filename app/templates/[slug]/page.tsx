@@ -47,6 +47,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = `${t.name} — ${t.industry} 获客落地页模板 | Zap Bridge`;
   const description = `${t.tagline}${conversionText(t)} 留资、投放级结构、合规页脚开箱即用；改内容、绑定自有品牌域名，几分钟发布上线。`;
   return marketingMetadata({
+  // 尚未国际化：显式声明中文，保持现有 canonical 与描述不变（见 PR 2/3/4）
+  locale: "zh",
     title,
     description,
     path: templateDetailPath(t.id),

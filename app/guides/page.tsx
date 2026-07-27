@@ -7,6 +7,8 @@ import { marketingMetadata } from "@/lib/seo/site";
 import { GUIDES } from "./_content";
 
 export const metadata: Metadata = marketingMetadata({
+  // 尚未国际化：显式声明中文，保持现有 canonical 与描述不变（见 PR 2/3/4）
+  locale: "zh",
   title: "海外获客落地页指南 — 投放、合规与转化归因实操 | Zap Bridge",
   description:
     "面向出海广告主的获客落地页实操指南：广告落地页防拒审、WhatsApp 获客页搭建、转化归因(像素/UTM/CAPI)等，帮你把广告费花在能转化、能归因的页面上。",

@@ -1,0 +1,56 @@
+// 平台主域营销面的 sitemap 条目（纯函数，便于测试）。
+// 已进入 LOCALIZED_ROUTES 的路由出双语两条并互挂 hreflang；
+// 尚未国际化的页面只出当前路径单条——不伪造 /zh 链接，否则 sitemap 会指向 404，损伤收录。
+import type { MetadataRoute } from "next";
+import { locales, hreflang, defaultLocale } from "@/lib/i18n/config";
+import { LOCALIZED_ROUTES, localePath } from "@/lib/i18n/routes";
+import { Routes } from "@/lib/constants";
+
+const PRIORITY: Record<string, number> = {
+  "/": 1,
+  [Routes.Templates]: 0.9,
+  [Routes.Pricing]: 0.8,
+  [Routes.Guides]: 0.8,
+  [Routes.AntiBan]: 0.6,
+};
+
+/** 尚未国际化的营销页（后续 PR 逐条从这里移入 LOCALIZED_ROUTES）。 */
+const PENDING_ROUTES: readonly string[] = [
+  Routes.Pricing,
+  Routes.AntiBan,
+  Routes.Templates,
+  Routes.Guides,
+];
+
+export function marketingEntries(base: string, now: Date): MetadataRoute.Sitemap {
+  const abs = (path: string) => (path === "/" ? `${base}/` : `${base}${path}`);
+  const entries: MetadataRoute.Sitemap = [];
+
+  for (const route of LOCALIZED_ROUTES) {
+    const languages = Object.fromEntries(
+      locales.map((l) => [hreflang[l], abs(localePath(l, route))]),
+    );
+    const basePriority = PRIORITY[route] ?? 0.7;
+    for (const l of locales) {
+      entries.push({
+        url: abs(localePath(l, route)),
+        lastModified: now,
+        changeFrequency: "weekly",
+        // 非默认语言轻微降权，避免与默认语言页面在同一权重上互相稀释。
+        priority: l === defaultLocale ? basePriority : Number((basePriority * 0.9).toFixed(2)),
+        alternates: { languages },
+      });
+    }
+  }
+
+  for (const route of PENDING_ROUTES) {
+    entries.push({
+      url: abs(route),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: PRIORITY[route] ?? 0.7,
+    });
+  }
+
+  return entries;
+}

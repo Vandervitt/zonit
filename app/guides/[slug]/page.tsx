@@ -23,6 +23,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const g = getGuide(slug);
   if (!g) return {};
   return marketingMetadata({
+  // 尚未国际化：显式声明中文，保持现有 canonical 与描述不变（见 PR 2/3/4）
+  locale: "zh",
     title: `${g.title} | Zap Bridge`,
     description: g.description,
     path: guideDetailPath(g.slug),
