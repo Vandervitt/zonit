@@ -4,7 +4,7 @@
 - Do not write custom CSS.
 - Do not use inline styles.
 - Always use Tailwind utility classes.
-- Refer to `tailwind.config.js` for color definitions.
+- Refer to `styles/theme.css` for color definitions (Tailwind v4 `@theme`; there is no `tailwind.config.js`).
 - MVP pages should be simple, direct, and conversion-focused.
 - Avoid ecommerce or product-transaction assumptions in copy, components, SEO metadata, analytics events, and templates.
 
@@ -12,7 +12,9 @@
 
 本项目按区域使用两套设计系统,不得混用:
 
-- **前台**(官网 `app`、落地页 `app/p`、`landing-renderer`、营销组件):shadcn/ui(Radix + Tailwind),组件走 `components/ui/*`,成套样式走 `lib/theme.ts` 预设。
+- **前台**(官网 `app`、落地页 `app/p`、`landing-renderer`、营销组件):**Tailwind 直写**,成套样式走 `lib/theme.ts` 预设(`ctaPrimary`/`glassCard`/`pill` 等),不依赖组件库。
+  - `components/ui/*` 仅保留 4 个 Radix 基元:`dialog`、`popover`、`sonner`(toast)、`utils`(`cn`)。**需要新的交互基元时优先用 Tailwind 手写**;确有无障碍/焦点管理刚需(如新的浮层类组件)才按 shadcn 约定补入,并在此列出。
+  - 历史上曾整套引入 shadcn/ui,但 49 个组件里 45 个从未被使用,已于 2026-07-27 移除。**不要因为「项目用 shadcn」就直接 `npx shadcn add`**。
 - **后台**(`app/admin`、`app/super-admin`):Ant Design v5,主题经 `lib/theme/antd-theme.ts` 的 ConfigProvider 注入。
 - 禁止引入第三套 UI 库(MUI/emotion 等);ESLint 已通过 `no-restricted-imports` 阻断。
 
