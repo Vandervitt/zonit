@@ -57,6 +57,49 @@ test.describe("营销站双语", () => {
     await expect(page.locator('div[lang="zh-Hans"]').first()).toBeAttached();
   });
 
+  test("/pricing 与 /zh/pricing 各出对应语言", async ({ page }) => {
+    await page.goto("/pricing");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Pick the plan that fits");
+    await page.goto("/zh/pricing");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("选择适合你的套餐");
+  });
+
+  test("/anti-ban 与 /zh/anti-ban 各出对应语言", async ({ page }) => {
+    await page.goto("/anti-ban");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("One template, ten advertisers");
+    await page.goto("/zh/anti-ban");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("同一套模板，十个广告主");
+  });
+
+  test("/login 与 /zh/login 各出对应语言", async ({ page }) => {
+    await page.goto("/login");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Welcome back");
+    await expect(page.getByPlaceholder("Your email")).toBeVisible();
+    await page.goto("/zh/login");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("欢迎回来");
+    await expect(page.getByPlaceholder("你的邮箱")).toBeVisible();
+  });
+
+  test("/register 与 /zh/register 各出对应语言", async ({ page }) => {
+    await page.goto("/register");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Create your account");
+    await page.goto("/zh/register");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("创建账号");
+  });
+
+  test("PR 2 各页的切换器往返都保持在同一页", async ({ page }) => {
+    // 切换器的 aria-label 用「当前页语言」表述：英文页是 "Switch language: 中文"，
+    // 中文页是 "切换语言: English"。
+    // /pricing 不在此列——该页本来就没有站点导航（裸 main + 对比表），故无切换器落点。
+    for (const route of ["/anti-ban", "/login", "/register"]) {
+      await page.goto(route);
+      await page.getByRole("link", { name: /Switch language/ }).first().click();
+      await expect(page).toHaveURL(new RegExp(`/zh${route}$`));
+      await page.getByRole("link", { name: /切换语言/ }).first().click();
+      await expect(page).toHaveURL(new RegExp(`localhost:3001${route}$`));
+    }
+  });
+
   test("尚未国际化的页面不显示切换器——那里它会是个死链接", async ({ page }) => {
     await page.goto("/guides");
     await expect(page.getByRole("link", { name: /Switch language|切换语言/ })).toHaveCount(0);

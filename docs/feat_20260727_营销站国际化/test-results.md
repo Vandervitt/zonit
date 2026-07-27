@@ -1,7 +1,60 @@
-# PR 1 验证结果
+# 验证结果
 
 - 日期：2026-07-27
 - 分支：`feat_20260727_营销站国际化`
+
+---
+
+# PR 2：pricing / anti-ban / login / register 双语
+
+## 门槛执行结果
+
+| 层级 | 命令 | 结果 |
+| --- | --- | --- |
+| 类型 | `pnpm exec tsc --noEmit` | ✅ 通过 |
+| 单元 | `pnpm test` | ✅ **485 passed / 75 files** |
+| Lint | `pnpm lint` | ✅ 0 error（5 warning 为既有） |
+| E2E | `pnpm test:e2e e2e/i18n.spec.ts` | ✅ **15 passed** |
+| 构建 | `pnpm build` | ⏭️ 同 PR 1，本地 Google Fonts 不可达，以 CI 为准 |
+
+## 相对原计划的两处修正
+
+1. **`/not-found` 与 `/error` 移出范围，未做改动。**
+   计划里按「74 个中文字」把它们列进了 PR 2，但实际读代码后确认：这 74 个字**全在注释里**，用户可见文案本来就是英文（`404` / `This page isn't available.` / `Something went wrong`）。文件顶部注释写明其设计意图是「保持品牌中立——它会渲染在租户自有域名上」。把平台语言引入这两页反而是错的：租户访客在**自己域名**上撞到 404，不该看到平台的语言体系。故不改。
+
+2. **`/pricing` 页没有语言切换器落点。**
+   该页本来就没有站点导航（裸 `<main>` + 对比表），是既有页面设计，非本次引入。其双语内容、canonical、hreflang 均已正确。是否给该页补 nav 属独立 UX 决策，未在 i18n 改造中顺手做。
+
+## 走查中发现并修复的 2 个真实缺陷
+
+1. **登录/注册页原本无任何语言出口**
+   这两页走 `AuthShell`（无导航栏），改造后虽然内容双语，但落在英文登录页的中文用户没有任何切换入口。
+   修复：`AuthShell` 接 `locale`，在页角补品牌链接 + 语言切换器。
+
+2. **镜像对等性测试不认路由组，对英文侧同样误判**
+   `/login` 实际位于 `app/(auth)/login/page.tsx`，PR 1 的测试按字面路径拼接，把 `/login` 加进清单后**英文侧**就会被报为「缺页」。
+   修复：`findPage` 改为可穿过 `(xxx)` 路由组目录递归查找，并补一条断言锁定该行为。
+
+## 新增的清单互斥断言
+
+一页上线要同时做两件事：加进 `LOCALIZED_ROUTES`、从 sitemap 的 `PENDING_ROUTES` 移除。只做前者会让 sitemap 同时输出该页的双语条目和单语条目（重复 URL）。已加断言强制两个清单互斥。
+
+## 人工走查
+
+| 检查项 | 结果 |
+| --- | --- |
+| `/anti-ban` 英文全文（hero / 三重风险 / 四项机制 / 合规边界 / Agency CTA） | ✅ |
+| `/zh/anti-ban` 与改造前逐段一致 | ✅ |
+| `/pricing` `/zh/pricing` 标题与副标题各出对应语言 | ✅ |
+| `/login` `/zh/login` 标题、邮箱占位符、切换器 aria-label | ✅ |
+| `/zh/register` 标题 | ✅ |
+| 已登录访问 `/login` 仍正确重定向 `/admin` | ✅ |
+| hreflang（注意 Next 输出为 `hrefLang` 驼峰） | ✅ 三条齐全 |
+
+---
+
+# PR 1：i18n 基建 + 首页双语
+
 - 范围：i18n 基建 + 首页双语 + 套餐文案外提 + SEO/sitemap 双语
 
 ## 门槛执行结果
