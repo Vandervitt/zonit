@@ -1,4 +1,6 @@
 import { Resend } from 'resend';
+import { BRAND } from '@/lib/theme/brand';
+import { PLANS, planEntitlementLines, type PlanId } from '@/lib/plans';
 
 const resend = process.env.RESEND_API_KEY 
   ? new Resend(process.env.RESEND_API_KEY) 
@@ -16,16 +18,26 @@ export function escapeHtml(input: string): string {
     .replace(/'/g, "&#39;");
 }
 
-export async function sendInvitationEmail({ 
-  to, 
-  token, 
-  plan = 'Pro', 
-  days = 15 
-}: { 
-  to: string, 
-  token: string, 
-  plan?: string, 
-  days?: number 
+/** 邀请链接有效期的人类可读描述：≥24h 且整天时按天说，否则按小时。 */
+export function formatLinkValidity(expiresAt: Date, now: Date = new Date()): string {
+  const hours = Math.max(1, Math.round((expiresAt.getTime() - now.getTime()) / 3_600_000));
+  if (hours >= 24 && hours % 24 === 0) return `${hours / 24} 天`;
+  return `${hours} 小时`;
+}
+
+export async function sendInvitationEmail({
+  to,
+  token,
+  plan = "pro",
+  days = 15,
+  expiresAt,
+}: {
+  to: string;
+  token: string;
+  plan?: PlanId | string;
+  days?: number;
+  /** 邀请链接失效时刻；邮件里的有效期文案由它渲染，不再写死。 */
+  expiresAt: Date;
 }) {
   if (!resend) {
     console.error('RESEND_API_KEY is not configured');
@@ -33,29 +45,77 @@ export async function sendInvitationEmail({
   }
 
   const inviteUrl = `${process.env.NEXTAUTH_URL}/register?token=${token}`;
+  const planId = plan as PlanId;
+  const planCfg = PLANS[planId];
+  const planLabel = planCfg?.label ?? String(plan);
+  const validity = formatLinkValidity(expiresAt);
+  const priceNote = planCfg && planCfg.priceAmount > 0
+    ? `这档平时 ${planCfg.currency}${planCfg.priceAmount}/月`
+    : "";
+
+  // 权益清单从 PLANS 派生，套餐配置一改邮件自动跟着变（见 planEntitlementLines）。
+  const entitlements = planCfg
+    ? planEntitlementLines(planId, "zh")
+        .map(
+          (e) => `<tr>
+            <td style="padding:5px 12px 5px 0;color:#555;">${escapeHtml(e.label)}</td>
+            <td style="padding:5px 0;color:#111;font-weight:bold;text-align:right;white-space:nowrap;">${e.value ? escapeHtml(e.value) : "✓"}</td>
+          </tr>`,
+        )
+        .join("")
+    : "";
 
   try {
-    const data = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `您收到一份来自 Zap Bridge 的专属邀请`,
+      subject: `送你 ${days} 天 Zap Bridge ${planLabel}：一个下午做出能跑广告的获客落地页`,
       html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #333;">欢迎加入 Zap Bridge</h2>
-          <p>您已被邀请加入 Zap Bridge 平台，并获得以下专属权益：</p>
-          <div style="background: #f4f4f4; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 0; font-weight: bold; color: #0070f3;">🎁 权益内容：${plan} 会员资格</p>
-            <p style="margin: 5px 0 0 0; color: #666;">⏳ 试用时长：${days} 天</p>
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 12px;">一个下午，把你的获客落地页跑起来</h2>
+          <p style="color:#555;margin:0 0 22px;line-height:1.75;">
+            做海外获客，最拖后腿的常常不是投放，是那张落地页——找外包几千起步、来回等一周，
+            改个标题还得再排一次期。<strong style="color:#111;">Zap Bridge 就是来终结这件事的。</strong>
+          </p>
+
+          <p style="color:#111;margin:0 0 10px;font-weight:bold;">三步，页面就能开始收线索</p>
+          <div style="background:#f7f9fc;padding:18px 20px;border-radius:8px;margin:0 0 22px;line-height:1.75;">
+            <p style="margin:0 0 14px;color:#111;">
+              <strong>① 选模板，让 AI 把整页写成你的</strong><br />
+              <span style="color:#555;">30+ 行业获客模板挑一套做骨架，填一段业务介绍，AI 顺着这套模板把标题、卖点、CTA 全部改写成你的内容，再到可视化编辑器里换字换图。全程不碰一行代码。</span>
+            </p>
+            <p style="margin:0 0 14px;color:#111;">
+              <strong>② 发布到你自己的品牌域名</strong><br />
+              <span style="color:#555;">平台直接算好你要加的那一条 DNS 记录，复制到域名商粘贴即可，HTTPS 证书自动签发、自动续期。自有域名投放过审更顺，客户看到的是你的品牌，而不是一眼就认出的第三方工具链接。</span>
+            </p>
+            <p style="margin:0;color:#111;">
+              <strong>③ 线索接得住，广告费算得清</strong><br />
+              <span style="color:#555;">WhatsApp 一键开聊、表单留资，线索自动归集到后台；像素、UTM 与服务端回传（CAPI）全都内置，填个凭据就能开，不用自己搭服务器。钱花在哪、换回了什么，一目了然。</span>
+            </p>
           </div>
-          <p>请点击下方按钮完成注册并领取您的权益：</p>
-          <a href="${inviteUrl}" style="display: inline-block; background: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">立即注册领取</a>
-          <p style="font-size: 12px; color: #999; margin-top: 30px;">
-            此链接 24 小时内有效。如果您没有请求此邀请，请忽略此邮件。
+
+          <p style="color:#111;margin:0 0 4px;font-weight:bold;">
+            这份邀请直接为你开通 ${escapeHtml(planLabel)}，整整 ${days} 天${priceNote ? `<span style="color:#888;font-weight:normal;font-size:13px;">（${escapeHtml(priceNote)}）</span>` : ""}
+          </p>
+          <p style="color:#888;font-size:13px;margin:0 0 12px;">以下是你这份邀请实际解锁的功能：</p>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;margin:0 0 8px;">${entitlements}</table>
+          <p style="color:#888;font-size:13px;margin:0 0 24px;">权益从你完成注册那天才开始计时，不点开就不会白白流走。</p>
+
+          <a href="${inviteUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:13px 26px;text-decoration:none;border-radius:5px;font-weight:bold;">接受邀请，开始搭页</a>
+
+          <p style="font-size:13px;color:#888;margin-top:28px;line-height:1.7;">
+            此邀请链接 ${validity}内有效，需用本邮箱（${escapeHtml(to)}）注册。<br />
+            有任何问题，直接回复这封邮件就能找到我。<br />
+            如果你没有申请过这份邀请，忽略即可。
           </p>
         </div>
       `,
     });
 
+    if (error) {
+      console.error('Failed to send invitation email:', error);
+      return { error };
+    }
     return { success: true, data };
   } catch (error) {
     console.error('Failed to send invitation email:', error);
@@ -80,7 +140,7 @@ export async function sendOtpEmail({
           <h2 style="color:#111;margin:0 0 8px;">登录验证码</h2>
           <p style="color:#555;margin:0 0 20px;">使用以下验证码登录 Zap Bridge。验证码 10 分钟内有效，请勿泄露给他人。</p>
           <div style="background:#f7f9fc;padding:20px;border-radius:8px;text-align:center;margin:0 0 20px;">
-            <span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#0070f3;">${escapeHtml(code)}</span>
+            <span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:${BRAND};">${escapeHtml(code)}</span>
           </div>
           <p style="font-size:13px;color:#888;margin:0;">如果你没有尝试登录，请忽略这封邮件，你的账号是安全的。</p>
         </div>`,
@@ -118,7 +178,7 @@ export async function sendWelcomeEmail({
             <p style="margin:0 0 10px;color:#111;"><strong>2. 绑定域名</strong> —— 发布到你自己的品牌域名，投放更可信</p>
             <p style="margin:0;color:#111;"><strong>3. 开投收客</strong> —— 配好像素，收 WhatsApp / 表单线索</p>
           </div>
-          <a href="${startUrl}" style="display:inline-block;background:#0070f3;color:#fff;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">开始建页</a>
+          <a href="${startUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">开始建页</a>
           <p style="font-size:13px;color:#888;margin-top:28px;">遇到任何问题，直接回复这封邮件，或在后台侧边栏点「联系创始人」找我。祝出单顺利 🚀</p>
         </div>`,
     });
@@ -155,7 +215,7 @@ export async function sendFeedbackNotificationEmail({
           <h2 style="color:#111;margin:0 0 12px;">收到一条用户反馈</h2>
           <div style="background:#f4f4f4;padding:15px;border-radius:5px;margin:0 0 16px;color:#111;white-space:pre-wrap;">${escapeHtml(message)}</div>
           <table style="border-collapse:collapse;font-size:13px;">${rows}</table>
-          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:#0070f3;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在超管收件箱查看</a></p>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在超管收件箱查看</a></p>
         </div>`,
     });
     return { success: true, data };
@@ -213,7 +273,7 @@ export async function sendWeeklyDigestEmail({
             </tr>
             ${rows}
           </table>
-          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:#0070f3;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">查看投放分析</a></p>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">查看投放分析</a></p>
           <p style="font-size:12px;color:#999;margin-top:24px;">不想收周报？可在<a href="${settingsUrl}" style="color:#999;">「设置 → 线索通知」</a>关闭。</p>
         </div>`,
     });
@@ -249,7 +309,7 @@ export async function sendLeadNotificationEmail({
           <h2 style="color:#111;margin:0 0 4px;">收到一条新线索</h2>
           <p style="color:#666;margin:0 0 16px;">来自落地页：<strong>${escapeHtml(pageName)}</strong></p>
           <table style="border-collapse:collapse;font-size:14px;">${rows || '<tr><td style="color:#999;">（无字段）</td></tr>'}</table>
-          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:#0070f3;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在后台查看</a></p>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在后台查看</a></p>
           <p style="font-size:12px;color:#999;margin-top:24px;">你可在「设置 → 线索通知」关闭此邮件。</p>
         </div>`,
     });

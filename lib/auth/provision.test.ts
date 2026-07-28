@@ -56,14 +56,35 @@ describe("provisionUserByEmail", () => {
     expect(recordMilestone).toHaveBeenCalledWith("u-new", "signup");
   });
 
-  it("新用户（带有效邀请）：邀请套餐照常应用，同时仍赠送试用（生效档取较高）", async () => {
+  it("新用户（带有效邀请）：邀请权益写 comp_plan 并覆盖默认赠送，plan 仍为 free", async () => {
     stubQueries({
       invitation: [{ id: "inv1", plan: "agency", duration_days: 30 }],
     });
+    const before = Date.now();
     await provisionUserByEmail("a@b.c", { token: "tok" });
     const [, params] = clientQuery.mock.calls.find(([sql]) => (sql as string).includes("INSERT INTO users")) as [string, unknown[]];
-    expect(params[2]).toBe("agency"); // 邀请档写入 plan
-    expect(params[5]).toBe(SIGNUP_TRIAL_PLAN); // 试用照常赠送
+    // 付费档不受邀请影响，否则受邀用户会被计入付费统计
+    expect(params[2]).toBe("free");
+    expect(params[3]).toBeNull(); // 不再写旧的 trial_expires_at
+    expect(params[5]).toBe("agency"); // 邀请档写入赠送档
+    const days = ((params[6] as Date).getTime() - before) / 86_400_000;
+    expect(days).toBeGreaterThan(29.99);
+    expect(days).toBeLessThan(30.01);
+  });
+
+  it("新用户（邀请档低于默认赠送）：仍以邀请为准，不回抬到 Pro", async () => {
+    stubQueries({ invitation: [{ id: "inv1", plan: "starter", duration_days: 90 }] });
+    await provisionUserByEmail("a@b.c", { token: "tok" });
+    const [, params] = clientQuery.mock.calls.find(([sql]) => (sql as string).includes("INSERT INTO users")) as [string, unknown[]];
+    expect(params[5]).toBe("starter");
+  });
+
+  it("token 无效（已过期/已用）：回落到默认注册赠送", async () => {
+    stubQueries({ invitation: [] });
+    await provisionUserByEmail("a@b.c", { token: "stale" });
+    const [, params] = clientQuery.mock.calls.find(([sql]) => (sql as string).includes("INSERT INTO users")) as [string, unknown[]];
+    expect(params[5]).toBe(SIGNUP_TRIAL_PLAN);
+    expect(clientQuery.mock.calls.some(([sql]) => (sql as string).includes("UPDATE invitations"))).toBe(false);
   });
 
   it("已存在用户：直接返回，不 INSERT、不重复记里程碑", async () => {
