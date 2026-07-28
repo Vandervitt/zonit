@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { Routes } from "@/lib/constants";
 import { glowAura } from "@/lib/theme";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
+import { isActiveNavRoute } from "@/lib/i18n/nav-active";
 import type { Locale } from "@/lib/i18n/config";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 
@@ -81,8 +83,36 @@ export function Backdrop() {
  * 顶部导航
  * ------------------------------------------------------------------ */
 
+const NAV_LINK_BASE = "rounded-lg px-3 py-2 transition-colors";
+const NAV_LINK_IDLE = "text-muted-foreground hover:text-aqua-700";
+const NAV_LINK_ACTIVE = "bg-aqua-50 font-medium text-aqua-700";
+
+/** 顶部导航条目：命中当前路由时高亮，并向读屏器暴露 aria-current。 */
+function NavLink({
+  href,
+  active,
+  className = "",
+  children,
+}: {
+  href: string;
+  active: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={`${NAV_LINK_BASE} ${active ? NAV_LINK_ACTIVE : NAV_LINK_IDLE} ${className}`}
+    >
+      {children}
+    </Link>
+  );
+}
+
 export function SiteNav({ fonts, locale }: { fonts: Fonts; locale: Locale }) {
   const t = getDictionary(locale).common.nav;
+  const pathname = usePathname() ?? "";
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -107,40 +137,38 @@ export function SiteNav({ fonts, locale }: { fonts: Fonts; locale: Locale }) {
           </span>
         </Link>
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
-          <Link
+          <NavLink
             href={localePath(locale, Routes.Templates)}
-            className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
+            active={isActiveNavRoute(pathname, Routes.Templates)}
+            className="hidden sm:block"
           >
             {t.templates}
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             href={localePath(locale, Routes.Guides)}
-            className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
+            active={isActiveNavRoute(pathname, Routes.Guides)}
+            className="hidden sm:block"
           >
             {t.guides}
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             href={localePath(locale, Routes.AntiBan)}
-            className="hidden rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700 sm:block"
+            active={isActiveNavRoute(pathname, Routes.AntiBan)}
+            className="hidden sm:block"
           >
             {t.antiBan}
-          </Link>
-          <PricingLink
-            locale={locale}
-            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
-          >
+          </NavLink>
+          {/* 定价是首页锚点区（/pricing 独立页不带本导航），没有可点亮的"当前页"语义 */}
+          <PricingLink locale={locale} className={`${NAV_LINK_BASE} ${NAV_LINK_IDLE}`}>
             {t.pricing}
           </PricingLink>
-          <LocaleSwitcher
-            locale={locale}
-            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
-          />
-          <Link
+          <LocaleSwitcher locale={locale} className={`${NAV_LINK_BASE} ${NAV_LINK_IDLE}`} />
+          <NavLink
             href={localePath(locale, Routes.Login)}
-            className="rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:text-aqua-700"
+            active={isActiveNavRoute(pathname, Routes.Login)}
           >
             {t.login}
-          </Link>
+          </NavLink>
           <Link
             href={localePath(locale, Routes.Register)}
             className="rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-4 py-2 font-medium text-white shadow-sm shadow-aqua-600/25 transition-all hover:brightness-105"
