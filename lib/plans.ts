@@ -69,6 +69,32 @@ export function signupTrialExpiry(now: Date = new Date()): Date {
   return d;
 }
 
+export interface CompGrant {
+  plan: PlanId;
+  expiresAt: Date;
+}
+
+/**
+ * 建号时写入 comp_plan 的赠送档。
+ *
+ * 邀请存在则**完全覆盖**默认注册赠送——超管在邀请弹窗里显式选了档位与天数，
+ * 那就是他的意图；默认的「注册即赠 Pro 7 天」只是无邀请时的兜底。
+ * 不做「取较高档」之类的合并：comp_plan 只有一列，存不下两份赠送，
+ * 任何合并规则都会在某个方向上偏离超管的显式选择，反而更难预测。
+ *
+ * 邀请权益一律走 comp_plan（赠送档），绝不写 users.plan（付费档）——
+ * 后者会把受邀用户计入付费统计并污染计费页展示。
+ */
+export function signupCompGrant(
+  invite: { plan: PlanId; durationDays: number } | null | undefined,
+  now: Date = new Date(),
+): CompGrant {
+  if (!invite) return { plan: SIGNUP_TRIAL_PLAN, expiresAt: signupTrialExpiry(now) };
+  const expiresAt = new Date(now);
+  expiresAt.setDate(expiresAt.getDate() + invite.durationDays);
+  return { plan: invite.plan, expiresAt };
+}
+
 /* ------------------------------------------------------------------ *
  * 展示层：结构化数据 + 字典 → 可渲染文案
  * ------------------------------------------------------------------ */

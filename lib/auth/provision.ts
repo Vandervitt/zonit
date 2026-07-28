@@ -3,7 +3,7 @@ import pool from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
 import { normalizeEmail } from "@/lib/auth/otp";
 import { recordMilestone } from "@/lib/platform-milestones";
-import { SIGNUP_TRIAL_PLAN, signupTrialExpiry } from "@/lib/plans";
+import { signupCompGrant, type PlanId } from "@/lib/plans";
 
 export type ProvisionedUser = {
   id: string;
@@ -16,7 +16,10 @@ export type ProvisionedUser = {
 /**
  * 按邮箱 find-or-create 用户，供免密 OTP 登录使用。
  * - 已存在：直接返回（含 disabled 标记，交由调用方拒绝禁用账号）。
- * - 不存在：可选套用邀请 token 的套餐/试用期，建号并调度欢迎邮件。
+ * - 不存在：写入赠送档（有邀请 token 则用邀请权益，否则默认注册赠送），建号并调度欢迎邮件。
+ *
+ * 注意：邀请 token 只在**建号**时生效。已注册邮箱带 token 登录会走上面的早退分支，
+ * token 被完全忽略——所以给老用户补权益必须用超管赠送，不能靠重发邀请。
  * 全程单事务，避免并发下重复建号。
  */
 export async function provisionUserByEmail(
@@ -44,9 +47,8 @@ export async function provisionUserByEmail(
       };
     }
 
-    // 新用户：处理可选邀请 token（套餐 + 试用期）。
-    let userPlan = "free";
-    let trialExpiresAt: Date | null = null;
+    // 新用户：处理可选邀请 token。
+    let invite: { plan: PlanId; durationDays: number } | null = null;
     let invitationId: string | null = null;
     if (opts.token) {
       const inviteRes = await client.query(
@@ -55,20 +57,22 @@ export async function provisionUserByEmail(
       );
       const invitation = inviteRes.rows[0];
       if (invitation) {
-        userPlan = invitation.plan;
         invitationId = invitation.id;
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + invitation.duration_days);
-        trialExpiresAt = expiry;
+        invite = { plan: invitation.plan as PlanId, durationDays: invitation.duration_days };
       }
     }
 
-    // 注册赠送 Pro 试用（comp_plan 机制）：与邀请权益并存，生效档取两者较高。
+    // 赠送档一律走 comp_plan：邀请存在则覆盖默认的「注册即赠 Pro 7 天」，
+    // 否则用默认赠送（见 signupCompGrant）。
+    // plan（付费档）恒为 free —— 邀请权益绝不写付费档，否则受邀用户会被计入
+    // 付费统计并污染计费页展示。trial_expires_at 属旧试用机制，新用户不再写入
+    // （auth.ts 中的到期降级分支仅为存量行保留）。
+    const grant = signupCompGrant(invite);
     const inserted = await client.query(
       `INSERT INTO users (email, name, plan, trial_expires_at, invited_at, email_verified, comp_plan, comp_plan_expires_at)
        VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7)
        RETURNING id, email, name, image`,
-      [email, null, userPlan, trialExpiresAt, invitationId ? new Date() : null, SIGNUP_TRIAL_PLAN, signupTrialExpiry()],
+      [email, null, "free", null, invitationId ? new Date() : null, grant.plan, grant.expiresAt],
     );
 
     if (invitationId) {
