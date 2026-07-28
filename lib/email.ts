@@ -86,11 +86,11 @@ export async function sendInvitationEmail({
             </p>
             <p style="margin:0 0 14px;color:#111;">
               <strong>② 发布到你自己的品牌域名</strong><br />
-              <span style="color:#555;">DNS 和 HTTPS 自动配好，不用折腾解析。自有域名投放过审更顺，客户看到的也是你的品牌，而不是一眼就认出的第三方工具链接。</span>
+              <span style="color:#555;">平台直接算好你要加的那一条 DNS 记录，复制到域名商粘贴即可，HTTPS 证书自动签发、自动续期。自有域名投放过审更顺，客户看到的是你的品牌，而不是一眼就认出的第三方工具链接。</span>
             </p>
             <p style="margin:0;color:#111;">
               <strong>③ 线索接得住，广告费算得清</strong><br />
-              <span style="color:#555;">WhatsApp 一键开聊、表单留资，线索自动归集；像素、UTM 与服务端回传（CAPI）平台都替你接好，钱花在哪、换回了什么，一目了然。</span>
+              <span style="color:#555;">WhatsApp 一键开聊、表单留资，线索自动归集到后台；像素、UTM 与服务端回传（CAPI）全都内置，填个凭据就能开，不用自己搭服务器。钱花在哪、换回了什么，一目了然。</span>
             </p>
           </div>
 
