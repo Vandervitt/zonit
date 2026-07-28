@@ -17,6 +17,8 @@ export const LOCALIZED_ROUTES = [
   "/register",
   "/templates",
   "/guides",
+  "/privacy",
+  "/terms",
 ] as const;
 
 /**

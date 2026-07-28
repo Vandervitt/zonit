@@ -137,11 +137,22 @@ test.describe("营销站双语", () => {
     expect(body).toContain("/zh/templates");
   });
 
+  test("法务页双语，且两版都声明以英文版为准", async ({ page }) => {
+    await page.goto("/privacy");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Privacy Policy");
+    await expect(page.getByText(/the English version prevails/)).toBeVisible();
+
+    await page.goto("/zh/terms");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("服务条款");
+    await expect(page.getByText(/以英文版为准/)).toBeVisible();
+  });
+
   test("各页的切换器往返都保持在同一页", async ({ page }) => {
     // 切换器的 aria-label 用「当前页语言」表述：英文页是 "Switch language: 中文"，
     // 中文页是 "切换语言: English"。
     // /pricing 不在此列——该页本来就没有站点导航（裸 main + 对比表），故无切换器落点。
     for (const route of ["/anti-ban", "/login", "/register", "/templates", "/guides"]) {
+      // /privacy 与 /terms 同 /pricing：法务页无站点导航，故无切换器落点。
       await page.goto(route);
       await page.getByRole("link", { name: /Switch language/ }).first().click();
       await expect(page).toHaveURL(new RegExp(`/zh${route}$`));
