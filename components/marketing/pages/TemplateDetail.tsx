@@ -81,8 +81,6 @@ export async function TemplateDetailView({ slug, locale }: { slug: string; local
             {dict.detail.breadcrumbRoot}
           </Link>
           <span className="mx-2">/</span>
-          <span>{t.industry[locale]}</span>
-          <span className="mx-2">/</span>
           <span className="text-foreground">{t.name}</span>
         </nav>
 
