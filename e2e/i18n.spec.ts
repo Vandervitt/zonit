@@ -87,11 +87,36 @@ test.describe("营销站双语", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText("创建账号");
   });
 
+  test("模板画廊：行业分组标题与卡片各出对应语言", async ({ page }) => {
+    await page.goto("/templates");
+    await expect(page.getByRole("heading", { name: "Beauty & personal care" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Toys & baby" })).toBeVisible();
+    await page.goto("/zh/templates");
+    await expect(page.getByRole("heading", { name: "美妆个护" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "玩具母婴" })).toBeVisible();
+  });
+
+  test("模板详情页：seoIntro 与派生 FAQ 各出对应语言", async ({ page }) => {
+    await page.goto("/templates/vitamins");
+    await expect(page.getByText(/Vitae Nutrition is a discovery-capture template/)).toBeVisible();
+    await expect(page.getByText(/Can I change anything in the Vitae Nutrition template/)).toBeVisible();
+    await page.goto("/zh/templates/vitamins");
+    await expect(page.getByText(/Vitae Nutrition 是面向膳食补充剂出海/)).toBeVisible();
+    await expect(page.getByText(/Vitae Nutrition 模板可以随意修改吗/)).toBeVisible();
+  });
+
+  test("模板详情页面包屑随语言变化", async ({ page }) => {
+    await page.goto("/templates/vitamins");
+    await expect(page.getByRole("link", { name: "Templates" }).first()).toBeVisible();
+    await page.goto("/zh/templates/vitamins");
+    await expect(page.getByRole("link", { name: "模板库" }).first()).toBeVisible();
+  });
+
   test("PR 2 各页的切换器往返都保持在同一页", async ({ page }) => {
     // 切换器的 aria-label 用「当前页语言」表述：英文页是 "Switch language: 中文"，
     // 中文页是 "切换语言: English"。
     // /pricing 不在此列——该页本来就没有站点导航（裸 main + 对比表），故无切换器落点。
-    for (const route of ["/anti-ban", "/login", "/register"]) {
+    for (const route of ["/anti-ban", "/login", "/register", "/templates"]) {
       await page.goto(route);
       await page.getByRole("link", { name: /Switch language/ }).first().click();
       await expect(page).toHaveURL(new RegExp(`/zh${route}$`));

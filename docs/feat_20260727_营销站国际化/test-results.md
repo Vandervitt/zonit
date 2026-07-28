@@ -5,6 +5,54 @@
 
 ---
 
+# PR 3：模板画廊 + 33 个详情页双语
+
+## 门槛执行结果
+
+| 层级 | 命令 | 结果 |
+| --- | --- | --- |
+| 类型 | `pnpm exec tsc --noEmit` | ✅ 通过 |
+| 单元 | `pnpm test` | ✅ **492 passed / 75 files** |
+| Lint | `pnpm lint` | ✅ 0 error（5 warning 为既有） |
+| E2E | `pnpm test:e2e e2e/i18n.spec.ts` | ✅ **18 passed** |
+| 后台回归 | `RUN_DB_E2E=1 ... gallery-and-pages` | ⚠️ 2 failed——**既有失败**，见下 |
+| 构建 | `pnpm build` | ⏭️ 同前，本地 Google Fonts 不可达，以 CI 为准 |
+
+## 改动规模
+
+| 项 | 内容 |
+| --- | --- |
+| `TemplateArchetype` | 中文字面量联合类型 → 英文 slug（`seeding` / `consult` / `compare` / `demo`），展示名进字典 |
+| `registry.ts` | 33 套模板的 `industry` / `tagline` / `seoIntro` 改 `LocalizedText`，补 33 段英文（含 33 段 seoIntro 本地化改写） |
+| `templateFilter.ts` | `CATEGORY_LABELS` / `CONVERSION_LABELS` 常量 → `categoryLabel()` / `conversionLabel()` / `archetypeLabel()` 按 locale 取字典；`filterTemplates` / `facetOptions` 接 locale |
+| `template-content.ts` | intro / whoFor / howToUse / faqs / 面包屑全部按 locale 派生，句式模板进字典（占位符 `{name}` `{industry}` `{archetype}` `{conversion}`） |
+| 区块标签 | `SECTION_REGISTRY.label` 仅有中文，英文侧新增 12 键映射（Hero / Stats / Features / …） |
+| sitemap | 新增 `localizedDetailEntries()`，33 个模板详情页各出双语两条并互挂 hreflang |
+
+## 一处判断更正
+
+探查阶段我误报「`tags.category` 有 40 种但只映射了 8 个，画廊 32 个分组标题在显示英文 slug」。**该结论错误**：正则 `category: "..."` 把 `subcategory: "..."` 一并匹配了。实际 `tags.category` 只有 **8 种**，`CATEGORY_LABELS` 正好全覆盖，不存在既有缺陷。本步因此缩小为「把 8 个行业标签 + 5 个转化标签 + 4 个范式标签双语化」。
+
+已补一条测试防止此类回退：遍历真实 `TEMPLATES`，断言每个 `category` 与 `archetype` 在两种语言下都有展示名、不回退成裸 slug。
+
+## 后台回归的归因
+
+`gallery-and-pages.spec.ts` 的 2 条失败（`getByText('Aurae Skincare')` 找不到）在 PR 1 阶段已于 `main` 基线复跑确认为既有失败。本 PR 动了 `TemplatePickerDialog`，故额外做了**浏览器实测**：登录后台 → 落地页 → 新建 → 模板选择器，确认 33 套模板、8 个行业 chip 带计数（6+5+5+5+5+5+1+1=33）、中文行业标签与 tagline 均正常渲染，`Aurae Skincare` 可见。判定失败与本次改动无关。
+
+## 人工走查
+
+| 检查项 | 结果 |
+| --- | --- |
+| `/templates` 8 个英文行业分组标题 | ✅ Beauty & personal care / Medical / Home improvement / Apparel & accessories / Consumer tech / Home & living / Health & supplements / Toys & baby |
+| `/zh/templates` 8 个中文分组标题 | ✅ 与改造前一致 |
+| `/templates/vitamins` 英文 seoIntro + 派生 FAQ | ✅ 占位符替换正确 |
+| `/zh/templates/vitamins` 中文 seoIntro + 派生 FAQ | ✅ 与改造前一致 |
+| 面包屑 JSON-LD 双语 | ✅ `Templates / Supplements / …` vs `模板库 / 保健 / …` |
+| 「包含哪些板块」标签双语 | ✅ `Hero\|Stats\|Features\|Process\|Reviews\|Guarantee\|FAQ` vs `首屏主视觉\|数据展示\|特性\|服务流程\|评价\|安全保障\|常见问题` |
+| **后台模板选择器（登录实测）** | ✅ 33 套、8 chip 计数、中文标签均正常 |
+
+---
+
 # PR 2：pricing / anti-ban / login / register 双语
 
 ## 门槛执行结果
