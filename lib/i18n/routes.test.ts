@@ -71,15 +71,18 @@ describe("isLocalizedRoute", () => {
     expect(isLocalizedRoute("/")).toBe(true);
   });
 
-  it("尚未镜像的营销页为假——分期交付期间必须降级到英文侧路径，否则链到 404", () => {
-    // /guides 的 /zh 镜像要到 PR 4 才存在，
-    // 此时中文页导航里的「指南」必须仍指向 /guides（内容尚为中文，正好合适）。
-    expect(isLocalizedRoute("/guides")).toBe(false);
-    expect(localePath("zh", "/guides")).toBe("/guides");
+  it("未登记的路由为假——降级到原路径而非产出不存在的 /zh 地址", () => {
+    // 将来新增营销页时，在补出 app/zh 镜像之前不得进入清单：
+    // 提前登记会让导航链到 /zh/<新页> 这个尚不存在的地址（404）。
+    expect(isLocalizedRoute("/changelog")).toBe(false);
+    expect(localePath("zh", "/changelog")).toBe("/changelog");
   });
 
-  it("已镜像的页面为真（含 /templates 动态子树）", () => {
-    for (const route of ["/pricing", "/anti-ban", "/login", "/register", "/templates", "/templates/skincare"]) {
+  it("已镜像的页面为真（含 /templates 与 /guides 动态子树）", () => {
+    for (const route of [
+      "/pricing", "/anti-ban", "/login", "/register",
+      "/templates", "/templates/skincare", "/guides", "/guides/whatsapp-lead-landing-page",
+    ]) {
       expect(isLocalizedRoute(route), route).toBe(true);
       expect(localePath("zh", route)).toBe(`/zh${route}`);
     }

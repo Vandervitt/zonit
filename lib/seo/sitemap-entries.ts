@@ -19,7 +19,7 @@ const PRIORITY: Record<string, number> = {
  * 与 LOCALIZED_ROUTES 必须互斥——两边都留会让 sitemap 输出重复 URL，
  * 由 lib/i18n/routes.test.ts 的互斥断言守护。
  */
-export const PENDING_ROUTES: readonly string[] = [Routes.Guides];
+export const PENDING_ROUTES: readonly string[] = [];
 
 /**
  * 已国际化的动态详情页（如 33 个模板详情）：每条出双语两条并互挂 hreflang。

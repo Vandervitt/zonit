@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { marketingEntries, localizedDetailEntries } from "./sitemap-entries";
+import { marketingEntries, localizedDetailEntries, PENDING_ROUTES } from "./sitemap-entries";
 import { LOCALIZED_ROUTES } from "@/lib/i18n/routes";
 
 const BASE = "https://zapbridge.tech";
@@ -23,21 +23,20 @@ describe("marketingEntries", () => {
     expect(entries.find((e) => e.url === `${BASE}/zh`)?.alternates?.languages).toEqual(expected);
   });
 
-  it("尚未国际化的营销页只出英文侧单条，不伪造 /zh 链接", () => {
-    const urls = marketingEntries(BASE, NOW).map((e) => e.url);
-    expect(urls).toContain(`${BASE}/guides`);
-    expect(urls).not.toContain(`${BASE}/zh/guides`);
+  it("全部营销页均已国际化——PENDING_ROUTES 已清空", () => {
+    expect(PENDING_ROUTES).toEqual([]);
   });
 
-  it("尚未国际化的条目不带 alternates", () => {
-    const entries = marketingEntries(BASE, NOW);
-    expect(entries.find((e) => e.url === `${BASE}/guides`)?.alternates).toBeUndefined();
+  it("每条营销条目都带 alternates（不再有单语遗留）", () => {
+    for (const e of marketingEntries(BASE, NOW)) {
+      expect(e.alternates?.languages, e.url).toBeDefined();
+    }
   });
 
-  it("PR 2 上线的页面出双语两条并互挂 hreflang", () => {
+  it("各营销页出双语两条并互挂 hreflang", () => {
     const entries = marketingEntries(BASE, NOW);
     const urls = entries.map((e) => e.url);
-    for (const route of ["/pricing", "/anti-ban", "/login", "/register", "/templates"]) {
+    for (const route of ["/pricing", "/anti-ban", "/login", "/register", "/templates", "/guides"]) {
       expect(urls).toContain(`${BASE}${route}`);
       expect(urls).toContain(`${BASE}/zh${route}`);
       expect(entries.find((e) => e.url === `${BASE}${route}`)?.alternates?.languages).toEqual({
@@ -77,9 +76,8 @@ describe("localizedDetailEntries", () => {
   });
 
   it("未进入 LOCALIZED_PREFIXES 的路径会产生重复 URL——用断言暴露该误用", () => {
-    const entries = localizedDetailEntries(BASE, [{ routePath: "/guides/foo", lastModified: NOW }]);
-    const urls = entries.map((e) => e.url);
     // localePath 对未登记前缀原样返回，两条 URL 相同：调用方必须先把前缀加进清单。
-    expect(new Set(urls).size).toBe(1);
+    const entries = localizedDetailEntries(BASE, [{ routePath: "/changelog/foo", lastModified: NOW }]);
+    expect(new Set(entries.map((e) => e.url)).size).toBe(1);
   });
 });

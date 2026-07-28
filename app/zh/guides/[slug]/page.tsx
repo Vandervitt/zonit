@@ -7,10 +7,10 @@ export const generateStaticParams = guideStaticParams;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  return guideDetailMetadata(slug, "en");
+  return guideDetailMetadata(slug, "zh");
 }
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  return <GuideDetailView slug={slug} locale="en" />;
+  return <GuideDetailView slug={slug} locale="zh" />;
 }

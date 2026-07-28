@@ -20,13 +20,13 @@ describe("marketingMetadata", () => {
   });
 
   it("尚未国际化的页面不输出 hreflang——否则两条 alternate 会指向同一 URL", () => {
-    // /guides 的 /zh 镜像要到 PR 4 才存在，此时 canonical 必须仍是英文侧路径。
-    const m = marketingMetadata({ locale: "zh", title: "T", description: "D", path: "/guides" });
-    expect(m.alternates?.canonical).toBe(`${SITE_URL}/guides`);
+    // 未登记进 LOCALIZED_ROUTES 的路径（如将来新增但尚无镜像的页面）canonical 保持原样。
+    const m = marketingMetadata({ locale: "zh", title: "T", description: "D", path: "/changelog" });
+    expect(m.alternates?.canonical).toBe(`${SITE_URL}/changelog`);
     expect(m.alternates?.languages).toBeUndefined();
   });
 
-  it("PR 2 上线的页面 canonical 与 hreflang 均按 locale 派生", () => {
+  it("已上线页面的 canonical 与 hreflang 均按 locale 派生", () => {
     const zh = marketingMetadata({ locale: "zh", title: "T", description: "D", path: "/pricing" });
     expect(zh.alternates?.canonical).toBe(`${SITE_URL}/zh/pricing`);
     expect((zh.alternates?.languages as Record<string, string>)["x-default"]).toBe(
