@@ -10,6 +10,7 @@ import { conversionLabel, archetypeLabel } from "@/landing-editor/samples/templa
 import { Routes, templateDetailPath } from "@/lib/constants";
 import { absoluteUrl } from "@/lib/seo/site";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { localePath } from "@/lib/i18n/routes";
 import type { Locale } from "@/lib/i18n/config";
 
 export interface FaqQA {
@@ -89,7 +90,11 @@ export function buildTemplateSeoContent(
   };
 }
 
-/** BreadcrumbList 结构化数据（与页面面包屑一致）。 */
+/**
+ * BreadcrumbList 结构化数据（与页面面包屑一致）。
+ * 只保留有真实 URL 的层级：行业没有独立落地页，作为无 item 的中间层会被
+ * Search Console 判为「未填写字段 item」，故不进面包屑（行业文案仍展示在 h1 旁）。
+ */
 export function templateBreadcrumbJsonLd(t: TemplateMeta, locale: Locale): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
@@ -99,10 +104,14 @@ export function templateBreadcrumbJsonLd(t: TemplateMeta, locale: Locale): Recor
         "@type": "ListItem",
         position: 1,
         name: getDictionary(locale).templates.detail.breadcrumbRoot,
-        item: absoluteUrl(Routes.Templates),
+        item: absoluteUrl(localePath(locale, Routes.Templates)),
       },
-      { "@type": "ListItem", position: 2, name: t.industry[locale] },
-      { "@type": "ListItem", position: 3, name: t.name, item: absoluteUrl(templateDetailPath(t.id)) },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: t.name,
+        item: absoluteUrl(localePath(locale, templateDetailPath(t.id))),
+      },
     ],
   };
 }
