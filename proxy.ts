@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest, NextFetchEvent, NextMiddleware } from "next/server";
 import { handleTenancy } from "@/lib/proxy/tenant-proxy";
+import { handleLocaleGeo } from "@/lib/proxy/locale-proxy";
 import { handleAuth } from "@/lib/proxy/auth-proxy";
 import { TENANT_HOST_HEADER } from "@/lib/host";
 
@@ -30,6 +31,12 @@ const authProxy = auth((req) => {
 export async function proxy(req: NextRequest, ctx: NextFetchEvent) {
   const tenancyResponse = await handleTenancy(req);
   if (tenancyResponse) return tenancyResponse;
+
+  // 语言分流必须排在租户改写之后：租户自有域名的落地页不属于营销面，
+  // 走到这里的一定是 app 主域请求。排在鉴权之前则是因为首页恒为公开页，
+  // 没必要为一次纯 header 判定先解一遍 session。
+  const localeResponse = handleLocaleGeo(req);
+  if (localeResponse) return localeResponse;
 
   return authProxy(req, ctx);
 }

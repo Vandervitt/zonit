@@ -168,7 +168,25 @@ export function localePath(locale: Locale, path: string): string {
 
 `components/marketing/LocaleSwitcher.tsx`（client）：读 `usePathname()`，在 `/zh` 前缀有无之间互换，落到 SiteNav 与 SiteFooter。
 
-**URL 是语言的唯一事实源**——不写 cookie、不做 `Accept-Language` 自动重定向。理由：自动重定向会让爬虫按其出口 IP / 请求头拿到非预期语言版本，直接污染项目已有的 canonical / GSC 投入（PR#108）。切换器就是一个普通链接。
+**URL 是渲染语言的唯一事实源**——切换器本身就是一个普通链接，不改变任何页面的渲染依据。
+
+切换时额外写一枚 `zb_locale` cookie，仅供 §4.6 的首页 IP 分流判断「用户已手动表态」，不参与渲染。
+
+### 4.6 首页 IP 分流（2026-07-28 追加）
+
+`lib/proxy/locale-proxy.ts`，挂在 `proxy.ts` 的租户改写之后、鉴权之前：中国大陆 IP（Vercel 边缘注入的 `x-vercel-ip-country === "CN"`）访问 `/` 时 307 到 `/zh`，其余地区维持英文默认页。
+
+本节推翻了本文档原先「不做任何自动重定向」的决定。原决定要防的是**污染 canonical / hreflang 与 GSC 投入（PR#108）**，该目的通过三道闸原样保留：
+
+| 闸 | 作用 |
+| --- | --- |
+| 爬虫 UA 豁免 | Googlebot / Bingbot / Baiduspider / GPTBot / ClaudeBot 等一律不跳，抓到的永远是 URL 自身对应的语言版本 |
+| 仅首页文档请求 | 只认 `sec-fetch-dest: document`；RSC 预取与客户端导航不跳，否则语言切换器会被中间件劫回中文 |
+| cookie 优先于 IP | `zb_locale=en` 时大陆 IP 也不跳，用户的手动选择不会被地理规则反复推翻 |
+
+其他口径：仅大陆，港澳台不跳（目前只有简体词典）；用 307 而非 308，避免浏览器与中间盒把「/ → /zh」永久固化；跳转响应带 `cache-control: no-store`，防止 CDN 把中文跳转缓存给全球访客。
+
+分流范围**仅限 `/`**——`/pricing`、`/templates` 等保持用户点进来的语言，外链与搜索结果的落点不被改写。
 
 ## 5. SEO（必须与改造同批，不可后补）
 

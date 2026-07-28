@@ -178,3 +178,58 @@ test.describe("营销站双语", () => {
     expect(res?.status()).toBe(404);
   });
 });
+
+// 首页 IP 分流：Vercel 在边缘注入 x-vercel-ip-country，本地用 extraHTTPHeaders 模拟。
+test.describe("首页按 IP 分流语言", () => {
+  test("大陆 IP 访问 / → 落到中文首页", async ({ browser }) => {
+    const ctx = await browser.newContext({ extraHTTPHeaders: { "x-vercel-ip-country": "CN" } });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/zh$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("投放级落地页");
+    await ctx.close();
+  });
+
+  test("非大陆 IP 访问 / → 留在英文首页", async ({ browser }) => {
+    const ctx = await browser.newContext({ extraHTTPHeaders: { "x-vercel-ip-country": "US" } });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    await expect(page).toHaveURL(/localhost:3001\/$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ad-ready landing pages");
+    await ctx.close();
+  });
+
+  test("大陆 IP 手动切回 English 后刷新不再被弹回中文", async ({ browser }) => {
+    const ctx = await browser.newContext({ extraHTTPHeaders: { "x-vercel-ip-country": "CN" } });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/zh$/);
+
+    await page.getByRole("link", { name: /Switch language|切换语言/ }).first().click();
+    await expect(page).toHaveURL(/localhost:3001\/$/);
+
+    await page.reload();
+    await expect(page).toHaveURL(/localhost:3001\/$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ad-ready landing pages");
+    await ctx.close();
+  });
+
+  test("分流只作用于首页：大陆 IP 的 /pricing 仍是英文", async ({ browser }) => {
+    const ctx = await browser.newContext({ extraHTTPHeaders: { "x-vercel-ip-country": "CN" } });
+    const page = await ctx.newPage();
+    await page.goto("/pricing");
+    await expect(page).toHaveURL(/\/pricing$/);
+    await ctx.close();
+  });
+
+  test("爬虫 UA 不参与分流：大陆 IP 的 Googlebot 仍拿英文首页", async ({ browser }) => {
+    const ctx = await browser.newContext({
+      extraHTTPHeaders: { "x-vercel-ip-country": "CN" },
+      userAgent: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+    });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    await expect(page).toHaveURL(/localhost:3001\/$/);
+    await ctx.close();
+  });
+});

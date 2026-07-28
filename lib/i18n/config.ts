@@ -16,6 +16,13 @@ export const ogLocale: Record<Locale, string> = { en: "en_US", zh: "zh_CN" };
 /** hreflang 取值（x-default 另行指向默认语言）。 */
 export const hreflang: Record<Locale, string> = { en: "en", zh: "zh-Hans" };
 
+/**
+ * 记录用户手动切换语言的 cookie 名。
+ * 由 LocaleSwitcher（客户端）写入、proxy 的语言分流段读取——放在这个零依赖模块里，
+ * 免得客户端组件为一个常量去 import 带 `next/server` 的中间件模块。
+ */
+export const LOCALE_COOKIE = "zb_locale";
+
 export function isLocale(value: string): value is Locale {
   return (locales as readonly string[]).includes(value);
 }
