@@ -29,7 +29,7 @@ export function LegalPage({
   return (
     <div className={`relative min-h-screen bg-background text-foreground ${fonts.body}`}>
       <Backdrop />
-      <SiteNav fonts={fonts} />
+      <SiteNav fonts={fonts} locale="zh" />
 
       <main className="relative mx-auto max-w-3xl px-6 pb-24 pt-32">
         <motion.header
@@ -65,7 +65,7 @@ export function LegalPage({
         </div>
       </main>
 
-      <SiteFooter fonts={fonts} />
+      <SiteFooter fonts={fonts} locale="zh" />
     </div>
   );
 }

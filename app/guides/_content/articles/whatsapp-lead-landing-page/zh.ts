@@ -1,4 +1,4 @@
-import type { GuideArticle } from "../types";
+import type { GuideArticle } from "../../types";
 
 export const whatsappLeadLandingPage: GuideArticle = {
   slug: "whatsapp-lead-landing-page",

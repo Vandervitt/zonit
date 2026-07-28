@@ -1,4 +1,4 @@
-import type { GuideArticle } from "../types";
+import type { GuideArticle } from "../../types";
 
 export const facebookAdLandingPageCompliance: GuideArticle = {
   slug: "facebook-ad-landing-page-compliance",

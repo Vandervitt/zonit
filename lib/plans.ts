@@ -1,9 +1,17 @@
+// 本文件只保留「结构化事实」：限额、权益开关、价格数值。
+// 一切展示文案（权益名称、说明、量词、每档要点）都在 lib/i18n/dictionaries/*/plans.ts，
+// 由下方展示层函数按 locale 组装——公开营销面出双语，/admin 后台固定取中文。
+import type { Locale } from "./i18n/config";
+import { plans as enPlans } from "./i18n/dictionaries/en/plans";
+import { plans as zhPlans } from "./i18n/dictionaries/zh/plans";
+
 export type PlanId = "free" | "starter" | "pro" | "agency";
 
 export interface PlanConfig {
   id: PlanId;
-  label: string;
-  priceText: string;            // 仅展示
+  label: string;                // 档位品牌名（Free / Starter / Pro / Agency），不翻译
+  priceAmount: number;          // 月费数值
+  currency: string;             // 计价货币属商业决策，不随界面语言变化
   color: string;
   highlight?: boolean;          // "最受欢迎"
   // 后端强制限额
@@ -18,39 +26,32 @@ export interface PlanConfig {
   // AI 用量（月额度；Infinity = 不限）
   aiPageQuota: number;
   aiRewriteQuota: number;
-  // 相对下一档的「增量」权益要点（首页/billing 递进式卡片用；free 为基础项）。
-  // 展示侧会自动在非 free 档前加「包含<上一档>全部权益」，故此处只列本档新增。
-  highlights: string[];
 }
 
 export const PLANS: Record<PlanId, PlanConfig> = {
   free: {
-    id: "free", label: "Free", priceText: "CN¥0", color: "slate",
+    id: "free", label: "Free", priceAmount: 0, currency: "CN¥", color: "slate",
     landingPagesLimit: 1, domainsLimit: 0,
     hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 3, aiRewriteQuota: 10,
-    highlights: ["1 张落地页", "全量 30+ 海外获客模板", "可视化内容编辑器", "在线预览（发布需升级绑定域名）"],
   },
   starter: {
-    id: "starter", label: "Starter", priceText: "CN¥29.99/月", color: "blue",
+    id: "starter", label: "Starter", priceAmount: 29.99, currency: "CN¥", color: "blue",
     landingPagesLimit: 3, domainsLimit: 1,
     hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 15, aiRewriteQuota: 100,
-    highlights: ["3 张落地页 + 1 个自定义域名", "1× Meta Pixel 追踪"],
   },
   pro: {
-    id: "pro", label: "Pro", priceText: "CN¥79.99/月", color: "violet", highlight: true,
+    id: "pro", label: "Pro", priceAmount: 79.99, currency: "CN¥", color: "violet", highlight: true,
     landingPagesLimit: 20, domainsLimit: 5,
     hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: false, leadWebhook: true,
     aiPageQuota: 80, aiRewriteQuota: Infinity,
-    highlights: ["20 张落地页 + 5 个域名", "去除品牌水印", "Meta / TikTok / Google 追踪 + Meta / TikTok CAPI"],
   },
   agency: {
-    id: "agency", label: "Agency", priceText: "CN¥199.99/月", color: "amber",
+    id: "agency", label: "Agency", priceAmount: 199.99, currency: "CN¥", color: "amber",
     landingPagesLimit: Infinity, domainsLimit: Infinity,
     hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: true, leadWebhook: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,
-    highlights: ["无限落地页 + 无限域名", "反同质化", "AI 生成额度提升至 300 次/月"],
   },
 };
 
@@ -68,28 +69,70 @@ export function signupTrialExpiry(now: Date = new Date()): Date {
   return d;
 }
 
-// 对比表行定义：valueFor 返回字符串（额度）或布尔（有无）；desc 为该权益的作用说明。
+/* ------------------------------------------------------------------ *
+ * 展示层：结构化数据 + 字典 → 可渲染文案
+ * ------------------------------------------------------------------ */
+
+type PlansDict = typeof enPlans;
+type LimitUnit = keyof PlansDict["units"];
+
+// 直接引各语言字典模块（而非走 getDictionary），避免 plans.ts ↔ dictionaries/index.ts 循环依赖。
+const PLANS_DICT: Record<Locale, PlansDict> = { en: enPlans, zh: zhPlans };
+
+/** 额度展示：Infinity → 不限；0 → 破折号；其余带本地化量词（英文区分单复数）。 */
+export function formatPlanLimit(n: number, locale: Locale, unit: LimitUnit): string {
+  const t = PLANS_DICT[locale];
+  if (n === Infinity) return t.unlimited;
+  if (n === 0) return "—";
+  const forms = t.units[unit];
+  return `${n} ${n === 1 ? forms.one : forms.other}`;
+}
+
+/**
+ * 价格展示（拆分版）：对比表里金额与周期后缀分开排版，free 档显示「免费」而非 CN¥0。
+ * 金额与货币不随语言变化，仅周期后缀本地化。
+ */
+export function planPriceText(plan: PlanConfig, locale: Locale): { amount: string; suffix: string } {
+  const t = PLANS_DICT[locale];
+  if (plan.priceAmount === 0) return { amount: t.free, suffix: "" };
+  return { amount: `${plan.currency}${plan.priceAmount}`, suffix: t.perMonthSuffix };
+}
+
+/**
+ * 价格展示（单行版）：等价于改造前的 PlanConfig.priceText，
+ * free 档同样输出 `CN¥0`——后台既有排版依赖这一形态，不在 i18n 改造中顺手改 UX。
+ */
+export function planPriceLabel(plan: PlanConfig, locale: Locale): string {
+  const suffix = plan.priceAmount === 0 ? "" : PLANS_DICT[locale].perMonthSuffix;
+  return `${plan.currency}${plan.priceAmount}${suffix}`;
+}
+
+/** 对比表行定义：valueFor 返回字符串（额度）或布尔（有无）；desc 为该权益的作用说明。 */
 export interface PlanFeatureRow {
+  /** 稳定标识，供测试与后续引用锚定（不随语言变化）。 */
+  key: string;
   label: string;
   desc: string;
   valueFor: (plan: PlanConfig) => string | boolean;
 }
 
-const fmtLimit = (n: number, unit: string) => (n === Infinity ? "无限" : n === 0 ? "—" : `${n} ${unit}`);
-
-export const PLAN_FEATURE_ROWS: PlanFeatureRow[] = [
-  { label: "落地页数量", desc: "可创建并保存的落地页总数", valueFor: (p) => fmtLimit(p.landingPagesLimit, "张") },
-  { label: "自定义域名", desc: "把页面发布到你自己的品牌域名", valueFor: (p) => fmtLimit(p.domainsLimit, "个") },
-  { label: "海外获客模板", desc: "30+ 咨询与留资模板，可直接作为编辑起点", valueFor: () => true },
-  { label: "可视化内容编辑器", desc: "表单编辑文案与图片，支持区块排序和实时预览", valueFor: () => true },
-  { label: "基础数据追踪 (1× Meta Pixel)", desc: "接入 1 个 Meta Pixel，追踪落地页转化", valueFor: (p) => p.basicPixel },
-  { label: "去除品牌水印", desc: "移除页面底部平台水印，纯你的品牌", valueFor: (p) => !p.hasWatermark },
-  { label: "多平台追踪与 CAPI", desc: "Meta / TikTok / Google 追踪 + Meta / TikTok 服务端回传", valueFor: (p) => p.advancedTracking },
-  { label: "反同质化", desc: "更换页面变体种子打散结构指纹，降低同模板页面被判重的概率", valueFor: (p) => p.antiBan },
-  { label: "线索 Webhook 推送", desc: "新线索实时 POST 到你的 CRM / Zapier（含签名）", valueFor: (p) => p.leadWebhook },
-  { label: "AI 整页生成", desc: "输入业务资料，AI 按当前模板生成整页营销文案", valueFor: (p) => fmtLimit(p.aiPageQuota, "次/月") },
-  { label: "AI 智能改写", desc: "逐段润色改写文案，快速产出多个版本", valueFor: (p) => fmtLimit(p.aiRewriteQuota, "次/月") },
-];
+/** 按字典产出对比表行；权益判定逻辑与语言无关，只有文案随 locale 变化。 */
+export function planFeatureRows(t: PlansDict, locale: Locale = "en"): PlanFeatureRow[] {
+  const r = t.rows;
+  return [
+    { key: "landingPages", ...r.landingPages, valueFor: (p) => formatPlanLimit(p.landingPagesLimit, locale, "pages") },
+    { key: "customDomain", ...r.customDomain, valueFor: (p) => formatPlanLimit(p.domainsLimit, locale, "domains") },
+    { key: "templates", ...r.templates, valueFor: () => true },
+    { key: "editor", ...r.editor, valueFor: () => true },
+    { key: "basicPixel", ...r.basicPixel, valueFor: (p) => p.basicPixel },
+    { key: "watermark", ...r.watermark, valueFor: (p) => !p.hasWatermark },
+    { key: "advancedTracking", ...r.advancedTracking, valueFor: (p) => p.advancedTracking },
+    { key: "antiBan", ...r.antiBan, valueFor: (p) => p.antiBan },
+    { key: "leadWebhook", ...r.leadWebhook, valueFor: (p) => p.leadWebhook },
+    { key: "aiPage", ...r.aiPage, valueFor: (p) => formatPlanLimit(p.aiPageQuota, locale, "perMonth") },
+    { key: "aiRewrite", ...r.aiRewrite, valueFor: (p) => formatPlanLimit(p.aiRewriteQuota, locale, "perMonth") },
+  ];
+}
 
 export function hasWatermark(plan: PlanId): boolean {
   return PLANS[plan].hasWatermark;

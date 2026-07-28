@@ -1,4 +1,4 @@
-import type { GuideArticle } from "../types";
+import type { GuideArticle } from "../../types";
 
 export const landingPageConversionAttribution: GuideArticle = {
   slug: "landing-page-conversion-attribution",

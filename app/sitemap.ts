@@ -4,8 +4,9 @@ import { hostnameOf, isCustomDomain } from "@/lib/host";
 import { getLandingSlugByCustomDomain } from "@/lib/domains-db";
 import { getPublishedBySlug } from "@/lib/landing-pages/store";
 import { TEMPLATES } from "@/landing-editor/samples/registry";
-import { GUIDES } from "@/app/guides/_content";
-import { Routes, templateDetailPath, guideDetailPath } from "@/lib/constants";
+import { GUIDE_SLUGS, getGuide } from "@/app/guides/_content";
+import { templateDetailPath, guideDetailPath } from "@/lib/constants";
+import { marketingEntries, localizedDetailEntries } from "@/lib/seo/sitemap-entries";
 
 // 多租户 sitemap：租户自有域名输出其唯一已发布落地页（根路径）；
 // 平台主域输出营销页 + 公开模板画廊（SEO 获客面）。
@@ -14,25 +15,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!isCustomDomain(hostname)) {
     const base = `https://${hostname}`;
     const now = new Date();
-    const marketing: MetadataRoute.Sitemap = [
-      { url: `${base}/`, lastModified: now, changeFrequency: "weekly", priority: 1 },
-      { url: `${base}${Routes.Pricing}`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
-      { url: `${base}${Routes.AntiBan}`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
-      { url: `${base}${Routes.Templates}`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-      { url: `${base}${Routes.Guides}`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    ];
-    const templates: MetadataRoute.Sitemap = TEMPLATES.map((t) => ({
-      url: `${base}${templateDetailPath(t.id)}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }));
-    const guides: MetadataRoute.Sitemap = GUIDES.map((g) => ({
-      url: `${base}${guideDetailPath(g.slug)}`,
-      lastModified: new Date(g.dateModified ?? g.datePublished),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }));
+    const marketing = marketingEntries(base, now);
+    // 模板详情页已双语（PR 3），每套出 en/zh 两条并互挂 hreflang。
+    const templates = localizedDetailEntries(
+      base,
+      TEMPLATES.map((t) => ({ routePath: templateDetailPath(t.id), lastModified: now })),
+    );
+    // 指南详情页已双语（PR 4），每篇出 en/zh 两条并互挂 hreflang。
+    const guides = localizedDetailEntries(
+      base,
+      GUIDE_SLUGS.map((slug) => {
+        const g = getGuide("en", slug)!;
+        return {
+          routePath: guideDetailPath(slug),
+          lastModified: new Date(g.dateModified ?? g.datePublished),
+        };
+      }),
+    );
     return [...marketing, ...templates, ...guides];
   }
 

@@ -1,0 +1,43 @@
+export const auth = {
+  login: {
+    metaTitle: "登录 | Zap Bridge",
+    title: "欢迎回来",
+    subtitle: "输入邮箱获取验证码即可登录",
+    google: "Google 登录",
+    googleLoading: "连接中…",
+    divider: "或使用邮箱验证码",
+    noAccount: "还没有账号？",
+    registerLink: "注册",
+    devButton: "⚡ Dev 登录（仅本地）",
+    devLoading: "登录中…",
+  },
+  register: {
+    metaTitle: "注册 | Zap Bridge",
+    title: "创建账号",
+    subtitle: "输入邮箱获取验证码，注册即赠 Pro 全功能试用 7 天",
+    invited: "专属邀请权益已应用",
+    google: "使用 Google 继续",
+    googleLoading: "连接中…",
+    divider: "或使用邮箱",
+    hasAccount: "已有账号？",
+    loginLink: "登录",
+  },
+  otp: {
+    emailLabel: "邮箱",
+    emailPlaceholder: "你的邮箱",
+    emailHint: "* 支持任意邮箱，我们会发送一个 6 位验证码",
+    sendCode: "发送验证码",
+    sending: "发送中…",
+    codeLabel: "验证码",
+    codePlaceholder: "6 位验证码",
+    /** `{email}` 会被替换为实际邮箱。 */
+    codeSentTo: "验证码已发送至 {email}",
+    submit: "登录 / 注册",
+    verifying: "验证中…",
+    changeEmail: "← 换个邮箱",
+    resend: "重新发送",
+    /** `{seconds}` 会被替换为剩余秒数。 */
+    resendCooldown: "重新发送（{seconds}s）",
+    invalidCode: "验证码错误或已过期，请重试。",
+  },
+};

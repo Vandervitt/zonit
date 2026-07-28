@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Card, Table, Tag, Typography, Space, Alert } from "antd";
 import { CheckCircleTwoTone, CloseOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { PLANS, PLAN_ORDER, PLAN_FEATURE_ROWS, type PlanId } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, planFeatureRows, planPriceLabel, type PlanId } from "@/lib/plans";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import type { FounderContact } from "@/lib/platform-settings";
@@ -67,8 +68,9 @@ interface PlanTableRow {
   values: Record<PlanId, string | boolean>;
 }
 
-const planRows: PlanTableRow[] = PLAN_FEATURE_ROWS.map((row) => ({
-  key: row.label,
+// 平台后台固定中文，不参与营销面国际化。
+const planRows: PlanTableRow[] = planFeatureRows(getDictionary("zh").plans, "zh").map((row) => ({
+  key: row.key,
   label: row.label,
   desc: row.desc,
   values: Object.fromEntries(
@@ -98,7 +100,7 @@ const planColumns: ColumnsType<PlanTableRow> = [
       <Space direction="vertical" size={0}>
         <span>{PLANS[p].label}</span>
         <Typography.Text type="secondary" style={{ fontSize: 11, fontWeight: 400 }}>
-          {PLANS[p].priceText}
+          {planPriceLabel(PLANS[p], "zh")}
         </Typography.Text>
       </Space>
     ),

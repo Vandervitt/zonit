@@ -7,7 +7,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm, Statistic, App } from "antd";
 import { CheckOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
-import { PLANS, PLAN_ORDER } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, planPriceLabel } from "@/lib/plans";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { PlanId } from "@/lib/plans";
 import { CREDIT_PACKS } from "@/lib/credits";
 import type { UsageSummary } from "@/lib/ai/usage-summary";
@@ -233,7 +234,7 @@ export default function BillingPage() {
               {compPlanExpiresAt ? `（至 ${new Date(compPlanExpiresAt).toLocaleDateString("zh-CN")}）` : ""}
             </Text>
           ) : (
-            <Text strong>{currentPlan.priceText}</Text>
+            <Text strong>{planPriceLabel(currentPlan, "zh")}</Text>
           )}
         </Space>
       ),
@@ -246,7 +247,7 @@ export default function BillingPage() {
             children: (
               <Space>
                 <PlanBadge plan={currentPlanId} />
-                <Text strong>{currentPlan.priceText}</Text>
+                <Text strong>{planPriceLabel(currentPlan, "zh")}</Text>
               </Space>
             ),
           },
@@ -389,13 +390,13 @@ export default function BillingPage() {
                   <div style={{ flex: 1 }}>
                     <Space style={{ marginBottom: 8 }}>
                       <PlanBadge plan={planId} />
-                      <Text strong>{plan.priceText}</Text>
+                      <Text strong>{planPriceLabel(plan, "zh")}</Text>
                     </Space>
                     <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
                       包含 {PLANS[PLAN_ORDER[PLAN_ORDER.indexOf(planId) - 1]].label} 全部权益
                     </Text>
                     <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                      {plan.highlights.map((h) => (
+                      {getDictionary("zh").plans.highlights[planId].map((h) => (
                         <li key={h} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                           <CheckOutlined style={{ color: SEMANTIC.success, fontSize: 12, flexShrink: 0 }} />
                           <Text type="secondary" style={{ fontSize: 12 }}>

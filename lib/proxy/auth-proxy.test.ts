@@ -27,6 +27,31 @@ describe("handleAuth 首页重定向", () => {
   });
 });
 
+describe("handleAuth 中文镜像路由", () => {
+  it("已登录访问 /zh/login → 重定向 /admin", () => {
+    const res = handleAuth(makeReq("/zh/login", { loggedIn: true }));
+    expect(locationOf(res)).toBe("https://app.example.com/admin");
+  });
+
+  it("已登录访问 /zh/register → 重定向 /admin", () => {
+    const res = handleAuth(makeReq("/zh/register", { loggedIn: true }));
+    expect(locationOf(res)).toBe("https://app.example.com/admin");
+  });
+
+  it("未登录访问 /zh/login 放行（公开）", () => {
+    expect(handleAuth(makeReq("/zh/login"))).toBeNull();
+  });
+
+  it("/zh 首页始终放行", () => {
+    expect(handleAuth(makeReq("/zh"))).toBeNull();
+    expect(handleAuth(makeReq("/zh", { loggedIn: true }))).toBeNull();
+  });
+
+  it("/zh/admin 不被当作受保护后台——它不是已注册路由，交给 Next 出 404", () => {
+    expect(handleAuth(makeReq("/zh/admin"))).toBeNull();
+  });
+});
+
 describe("handleAuth 登录/注册页在已登录时跳转 /admin", () => {
   it("已登录访问 /login → 重定向 /admin", () => {
     const res = handleAuth(makeReq("/login", { loggedIn: true }));

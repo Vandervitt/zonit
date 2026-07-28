@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Modal, Button, Typography } from "antd";
 import { Routes } from "@/lib/constants";
-import { PLANS } from "@/lib/plans";
+import { PLANS, planPriceLabel } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 
 interface Props {
@@ -45,7 +45,7 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
             router.push(Routes.Billing);
           }}
         >
-          查看 {target.label} 套餐 · {target.priceText}
+          查看 {target.label} 套餐 · {planPriceLabel(target, "zh")}
         </Button>,
       ]}
     >

@@ -1,6 +1,8 @@
 // 获客指南正文渲染器（纯 Tailwind，无 antd / 无内联样式）。
 // 与后台 HelpChapter（antd 版）分离，公开站专用；块模型见 _content/types.ts。
 import type { GuideArticle, GuideBlock, GuideSection } from "../_content/types";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/config";
 
 function Block({ block }: { block: GuideBlock }) {
   switch (block.t) {
@@ -102,7 +104,8 @@ function Section({ section }: { section: GuideSection }) {
   );
 }
 
-export function GuideArticleView({ article }: { article: GuideArticle }) {
+export function GuideArticleView({ article, locale }: { article: GuideArticle; locale: Locale }) {
+  const t = getDictionary(locale).guides.detail;
   return (
     <div>
       <p className="text-lg leading-relaxed text-foreground/80">{article.intro}</p>
@@ -111,8 +114,8 @@ export function GuideArticleView({ article }: { article: GuideArticle }) {
       ))}
       {article.references && article.references.length > 0 && (
         <section id="references" className="mt-12 scroll-mt-28">
-          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">参考资料</h2>
-          <p className="mt-2 text-sm text-muted-foreground">本文相关规则与说明以下列官方来源为准，请以官方最新文档为准。</p>
+          <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">{t.referencesHeading}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{t.referencesNote}</p>
           <ul className="mt-4 space-y-2">
             {article.references.map((ref) => (
               <li key={ref.url} className="text-sm leading-relaxed">
