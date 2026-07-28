@@ -5,6 +5,49 @@
 
 ---
 
+# PR 4：获客指南三篇长文双语 + llms.txt
+
+## 门槛执行结果
+
+| 层级 | 命令 | 结果 |
+| --- | --- | --- |
+| 类型 | `pnpm exec tsc --noEmit` | ✅ 通过 |
+| 单元 | `pnpm test` | ✅ **493 passed / 75 files** |
+| Lint | `pnpm lint` | ✅ 0 error（5 warning 为既有） |
+| E2E | `pnpm test:e2e e2e/i18n.spec.ts` | ✅ **20 passed** |
+| 构建 | `pnpm build` | ⏭️ 同前，本地 Google Fonts 不可达，以 CI 为准 |
+
+## 改动规模
+
+| 项 | 内容 |
+| --- | --- |
+| 内容模型 | `articles/<slug>.ts` → `articles/<slug>/{en,zh}.ts`；两语言共用同一 slug，hreflang 配对无需映射表 |
+| 索引 | `GUIDES` 常量 → `getGuides(locale)` / `getGuide(locale, slug)` / `GUIDE_SLUGS` |
+| 长文 | 3 篇完整英文版（合规 8 要点 / WhatsApp 落地页 / 转化归因），含表格、步骤、FAQ、参考资料全部块 |
+| `GuideArticleView` | 接 locale，「参考资料」段落双语 |
+| Article JSON-LD | `inLanguage` 由写死 `zh-CN` 改为按 locale 派生；`mainEntityOfPage` 与面包屑按 locale 加前缀 |
+| sitemap | 3 篇指南详情复用 `localizedDetailEntries()` 出双语条目 |
+| `llms.txt` | 正文改英文，「Languages」段说明双语策略，关键页面同时列出中英两版 URL |
+
+## 过渡期断言的收敛
+
+`PENDING_ROUTES` 现已清空——全部 9 条营销路由都已国际化。原先以「当前还没上线的页面」为样本的 5 条断言（分别用过 `/pricing`、`/templates`、`/guides`）已无样本可用，改为：
+
+- 用合成路径 `/changelog`（恒不在清单内）测「未登记路由降级到原路径」的**机制**，不再依赖某个具体待办页
+- `PENDING_ROUTES` 断言改为「应为空」+「每条营销条目都带 alternates，不再有单语遗留」
+- E2E「未国际化页面不显示切换器」→ 反转为「已国际化的页面都显示切换器」，反向保护移交单测
+
+## 人工走查
+
+| 检查项 | 结果 |
+| --- | --- |
+| `/guides/whatsapp-lead-landing-page` 六个英文章节标题 | ✅ Why capture leads over WhatsApp / What a high-converting… / From template to published / The five most common mistakes / Common questions / References |
+| `/zh/guides/...` 六个中文标题 | ✅ 与改造前逐项一致 |
+| Article JSON-LD `inLanguage` | ✅ `en` vs `zh-Hans` |
+| `/llms.txt` | ✅ 英文正文 + 双语 URL 清单 |
+
+---
+
 # PR 3：模板画廊 + 33 个详情页双语
 
 ## 门槛执行结果

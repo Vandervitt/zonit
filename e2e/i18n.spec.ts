@@ -112,11 +112,36 @@ test.describe("营销站双语", () => {
     await expect(page.getByRole("link", { name: "模板库" }).first()).toBeVisible();
   });
 
-  test("PR 2 各页的切换器往返都保持在同一页", async ({ page }) => {
+  test("指南列表与详情各出对应语言", async ({ page }) => {
+    await page.goto("/guides");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "Overseas lead-gen landing page guides",
+    );
+    await page.goto("/guides/whatsapp-lead-landing-page");
+    await expect(page.getByRole("heading", { name: "The five most common mistakes" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "References" })).toBeVisible();
+
+    await page.goto("/zh/guides");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("海外获客落地页指南");
+    await page.goto("/zh/guides/whatsapp-lead-landing-page");
+    await expect(page.getByRole("heading", { name: "最常见的 5 个错误" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "参考资料" })).toBeVisible();
+  });
+
+  test("llms.txt 为英文并同时列出双语 URL", async ({ request }) => {
+    const res = await request.get("/llms.txt");
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+    expect(body).toContain("Core capabilities");
+    expect(body).toContain("/zh/pricing");
+    expect(body).toContain("/zh/templates");
+  });
+
+  test("各页的切换器往返都保持在同一页", async ({ page }) => {
     // 切换器的 aria-label 用「当前页语言」表述：英文页是 "Switch language: 中文"，
     // 中文页是 "切换语言: English"。
     // /pricing 不在此列——该页本来就没有站点导航（裸 main + 对比表），故无切换器落点。
-    for (const route of ["/anti-ban", "/login", "/register", "/templates"]) {
+    for (const route of ["/anti-ban", "/login", "/register", "/templates", "/guides"]) {
       await page.goto(route);
       await page.getByRole("link", { name: /Switch language/ }).first().click();
       await expect(page).toHaveURL(new RegExp(`/zh${route}$`));
@@ -125,14 +150,16 @@ test.describe("营销站双语", () => {
     }
   });
 
-  test("尚未国际化的页面不显示切换器——那里它会是个死链接", async ({ page }) => {
-    await page.goto("/guides");
-    await expect(page.getByRole("link", { name: /Switch language|切换语言/ })).toHaveCount(0);
-    // 首页仍应有（nav 与 footer 各一个）
-    await page.goto("/");
-    expect(
-      await page.getByRole("link", { name: /Switch language/ }).count(),
-    ).toBeGreaterThan(0);
+  test("已国际化的页面都显示切换器", async ({ page }) => {
+    // 反向保护见 lib/i18n/routes.test.ts：未登记路由 localePath 原样返回，
+    // LocaleSwitcher 据此隐藏，避免链到不存在的 /zh 地址。
+    for (const route of ["/", "/anti-ban", "/templates", "/guides", "/login"]) {
+      await page.goto(route);
+      expect(
+        await page.getByRole("link", { name: /Switch language/ }).count(),
+        route,
+      ).toBeGreaterThan(0);
+    }
   });
 
   test("未国际化的后台入口不受影响：/zh/admin 返回 404", async ({ page }) => {
