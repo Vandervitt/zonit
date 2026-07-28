@@ -160,6 +160,27 @@ export function planFeatureRows(t: PlansDict, locale: Locale = "en"): PlanFeatur
   ];
 }
 
+export interface PlanEntitlementLine {
+  key: string;
+  label: string;
+  /** 额度型权益的值（如「20 张」）；有无型权益为 null。 */
+  value: string | null;
+}
+
+/**
+ * 某档**实际拥有**的权益清单：布尔为假、额度为 0 的行剔除。
+ * 供邮件等无法渲染对比表的场景使用——从 planFeatureRows 派生，
+ * 套餐配置或字典一改，产出自动跟着变，不会与 PLANS 漂移。
+ */
+export function planEntitlementLines(plan: PlanId, locale: Locale = "zh"): PlanEntitlementLine[] {
+  const cfg = PLANS[plan];
+  return planFeatureRows(PLANS_DICT[locale], locale).flatMap((r) => {
+    const v = r.valueFor(cfg);
+    if (v === false || v === "—") return [];
+    return [{ key: r.key, label: r.label, value: v === true ? null : v }];
+  });
+}
+
 export function hasWatermark(plan: PlanId): boolean {
   return PLANS[plan].hasWatermark;
 }

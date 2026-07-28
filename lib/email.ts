@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { BRAND } from '@/lib/theme/brand';
-import { PLANS, type PlanId } from '@/lib/plans';
+import { PLANS, planEntitlementLines, type PlanId } from '@/lib/plans';
 
 const resend = process.env.RESEND_API_KEY 
   ? new Resend(process.env.RESEND_API_KEY) 
@@ -45,26 +45,68 @@ export async function sendInvitationEmail({
   }
 
   const inviteUrl = `${process.env.NEXTAUTH_URL}/register?token=${token}`;
-  const planLabel = PLANS[plan as PlanId]?.label ?? String(plan);
+  const planId = plan as PlanId;
+  const planCfg = PLANS[planId];
+  const planLabel = planCfg?.label ?? String(plan);
   const validity = formatLinkValidity(expiresAt);
+  const priceNote = planCfg && planCfg.priceAmount > 0
+    ? `这档平时 ${planCfg.currency}${planCfg.priceAmount}/月`
+    : "";
+
+  // 权益清单从 PLANS 派生，套餐配置一改邮件自动跟着变（见 planEntitlementLines）。
+  const entitlements = planCfg
+    ? planEntitlementLines(planId, "zh")
+        .map(
+          (e) => `<tr>
+            <td style="padding:5px 12px 5px 0;color:#555;">${escapeHtml(e.label)}</td>
+            <td style="padding:5px 0;color:#111;font-weight:bold;text-align:right;white-space:nowrap;">${e.value ? escapeHtml(e.value) : "✓"}</td>
+          </tr>`,
+        )
+        .join("")
+    : "";
 
   try {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `Zap Bridge 邀请你试用 ${planLabel}（${days} 天）`,
+      subject: `送你 ${days} 天 Zap Bridge ${planLabel}：一个下午做出能跑广告的获客落地页`,
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
-          <h2 style="color:#111;margin:0 0 8px;">你被邀请试用 Zap Bridge</h2>
-          <p style="color:#555;margin:0 0 20px;">Zap Bridge 帮你不写代码、几分钟做出一张能跑广告、能收线索的出海落地页。这份邀请为你开通：</p>
-          <div style="background:#f7f9fc;padding:16px 18px;border-radius:8px;margin:0 0 20px;">
-            <p style="margin:0 0 6px;color:#111;"><strong>${escapeHtml(planLabel)}</strong> 全部功能</p>
-            <p style="margin:0;color:#555;">有效期 ${days} 天，自你完成注册当天起算</p>
+          <h2 style="color:#111;margin:0 0 12px;">一个下午，把你的获客落地页跑起来</h2>
+          <p style="color:#555;margin:0 0 22px;line-height:1.75;">
+            做海外获客，最拖后腿的常常不是投放，是那张落地页——找外包几千起步、来回等一周，
+            改个标题还得再排一次期。<strong style="color:#111;">Zap Bridge 就是来终结这件事的。</strong>
+          </p>
+
+          <p style="color:#111;margin:0 0 10px;font-weight:bold;">三步，页面就能开始收线索</p>
+          <div style="background:#f7f9fc;padding:18px 20px;border-radius:8px;margin:0 0 22px;line-height:1.75;">
+            <p style="margin:0 0 14px;color:#111;">
+              <strong>① 选模板，让 AI 把整页写成你的</strong><br />
+              <span style="color:#555;">30+ 行业获客模板挑一套做骨架，填一段业务介绍，AI 顺着这套模板把标题、卖点、CTA 全部改写成你的内容，再到可视化编辑器里换字换图。全程不碰一行代码。</span>
+            </p>
+            <p style="margin:0 0 14px;color:#111;">
+              <strong>② 发布到你自己的品牌域名</strong><br />
+              <span style="color:#555;">DNS 和 HTTPS 自动配好，不用折腾解析。自有域名投放过审更顺，客户看到的也是你的品牌，而不是一眼就认出的第三方工具链接。</span>
+            </p>
+            <p style="margin:0;color:#111;">
+              <strong>③ 线索接得住，广告费算得清</strong><br />
+              <span style="color:#555;">WhatsApp 一键开聊、表单留资，线索自动归集；像素、UTM 与服务端回传（CAPI）平台都替你接好，钱花在哪、换回了什么，一目了然。</span>
+            </p>
           </div>
-          <a href="${inviteUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">接受邀请并注册</a>
-          <p style="font-size:13px;color:#888;margin-top:28px;">
+
+          <p style="color:#111;margin:0 0 4px;font-weight:bold;">
+            这份邀请直接为你开通 ${escapeHtml(planLabel)}，整整 ${days} 天${priceNote ? `<span style="color:#888;font-weight:normal;font-size:13px;">（${escapeHtml(priceNote)}）</span>` : ""}
+          </p>
+          <p style="color:#888;font-size:13px;margin:0 0 12px;">以下是你这份邀请实际解锁的功能：</p>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;margin:0 0 8px;">${entitlements}</table>
+          <p style="color:#888;font-size:13px;margin:0 0 24px;">权益从你完成注册那天才开始计时，不点开就不会白白流走。</p>
+
+          <a href="${inviteUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:13px 26px;text-decoration:none;border-radius:5px;font-weight:bold;">接受邀请，开始搭页</a>
+
+          <p style="font-size:13px;color:#888;margin-top:28px;line-height:1.7;">
             此邀请链接 ${validity}内有效，需用本邮箱（${escapeHtml(to)}）注册。<br />
-            如果你没有申请过这份邀请，忽略这封邮件即可。
+            有任何问题，直接回复这封邮件就能找到我。<br />
+            如果你没有申请过这份邀请，忽略即可。
           </p>
         </div>
       `,
