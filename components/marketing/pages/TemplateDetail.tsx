@@ -202,7 +202,7 @@ export async function TemplateDetailView({ slug, locale }: { slug: string; local
                       <img
                         src={image.src}
                         srcSet={image.srcSet}
-                        sizes="(max-width: 1024px) 100vw, 33vw"
+                        sizes="(max-width: 640px) 100vw, 33vw"
                         alt={dict.gallery.thumbnailAlt.replace("{name}", r.name)}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"

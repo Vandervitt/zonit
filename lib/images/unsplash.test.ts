@@ -37,6 +37,16 @@ describe("buildUnsplashImageSources", () => {
     expect(buildUnsplashImageSources(url)).toEqual({ src: url });
   });
 
+  // thumbnail 类型为 string，不保证是绝对 URL；解析失败必须降级而非抛错，
+  // 否则 Server Component 内同步渲染会直接让整页 500。
+  it.each(["", "/local/thumb.png", "thumb.png", "not a url"])(
+    "falls back to the original value instead of throwing for %j",
+    (value) => {
+      expect(() => buildUnsplashImageSources(value)).not.toThrow();
+      expect(buildUnsplashImageSources(value)).toEqual({ src: value });
+    },
+  );
+
   it("adds Unsplash parameters when the URL has no query string", () => {
     const result = buildUnsplashImageSources("https://images.unsplash.com/photo-123");
 

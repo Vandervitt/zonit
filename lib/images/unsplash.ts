@@ -21,7 +21,15 @@ function buildUnsplashUrl(url: URL, width: number): string {
 }
 
 export function buildUnsplashImageSources(imageUrl: string): UnsplashImageSources {
-  const url = new URL(imageUrl);
+  // thumbnail 仅约束为 string，可能是空串或相对路径；此处在 Server Component 内同步执行，
+  // 解析失败必须降级为原值，不能让整页渲染抛错。
+  let url: URL;
+  try {
+    url = new URL(imageUrl);
+  } catch {
+    return { src: imageUrl };
+  }
+
   if (!isUnsplashUrl(url)) return { src: imageUrl };
 
   const src = buildUnsplashUrl(url, 800);

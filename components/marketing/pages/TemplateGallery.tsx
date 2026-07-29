@@ -69,12 +69,15 @@ export function TemplateGalleryView({ locale }: { locale: Locale }) {
           </p>
         </header>
 
-        {groups.map((g) => (
+        {groups.map((g, groupIndex) => (
           <section key={g.category} className="mt-16">
             <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>{g.label}</h2>
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {g.items.map((tpl, index) => {
                 const image = buildUnsplashImageSources(tpl.thumbnail);
+                // 抢占式加载只给首屏首组的前三张（lg 下首屏一行 3 列）；
+                // index 是组内序号，若不叠加 groupIndex 判定，每个行业分组都会各抢 3 张。
+                const isAboveFold = groupIndex === 0 && index < 3;
                 return (
                   <Link
                     key={tpl.id}
@@ -88,8 +91,8 @@ export function TemplateGalleryView({ locale }: { locale: Locale }) {
                         srcSet={image.srcSet}
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         alt={t.gallery.thumbnailAlt.replace("{name}", tpl.name)}
-                        loading={index < 3 ? "eager" : "lazy"}
-                        fetchPriority={index === 0 ? "high" : undefined}
+                        loading={isAboveFold ? "eager" : "lazy"}
+                        fetchPriority={isAboveFold && index === 0 ? "high" : undefined}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       />
                     </div>

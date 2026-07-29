@@ -107,6 +107,15 @@ test.describe("营销站双语", () => {
     await expect(images.nth(1)).toHaveAttribute("loading", "eager");
     await expect(images.nth(2)).toHaveAttribute("loading", "eager");
     await expect(images.nth(3)).toHaveAttribute("loading", "lazy");
+
+    // 画廊按行业分为多个 section，抢占式加载只应发生在首屏首组，
+    // 否则折叠下方的图片会一并抢占带宽，反而拖慢 LCP。
+    await expect(page.locator("main img[loading='eager']")).toHaveCount(3);
+    await expect(page.locator("main img[fetchpriority='high']")).toHaveCount(1);
+    await expect(page.locator("main section").nth(1).locator("img").first()).toHaveAttribute(
+      "loading",
+      "lazy",
+    );
   });
 
   test("模板详情页：seoIntro 与派生 FAQ 各出对应语言", async ({ page }) => {
