@@ -8,6 +8,7 @@ import { Routes, templateDetailPath } from "@/lib/constants";
 import { marketingMetadata } from "@/lib/seo/site";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
+import { buildUnsplashImageSources } from "@/lib/images/unsplash";
 import type { Locale } from "@/lib/i18n/config";
 
 const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
@@ -72,44 +73,50 @@ export function TemplateGalleryView({ locale }: { locale: Locale }) {
           <section key={g.category} className="mt-16">
             <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>{g.label}</h2>
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {g.items.map((tpl) => (
-                <Link
-                  key={tpl.id}
-                  href={localePath(locale, templateDetailPath(tpl.id))}
-                  className="group overflow-hidden rounded-2xl border border-border bg-white/70 shadow-sm transition-all hover:-translate-y-0.5 hover:border-aqua-300 hover:shadow-md"
-                >
-                  <div className="aspect-[16/10] overflow-hidden bg-aqua-50">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- 外链缩略图与模板选择器同源，未纳入 next/image 域名白名单 */}
-                    <img
-                      src={tpl.thumbnail}
-                      alt={t.gallery.thumbnailAlt.replace("{name}", tpl.name)}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                    />
-                  </div>
-                  <div className="p-5">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="font-semibold text-foreground">{tpl.name}</h3>
-                      <span className={`shrink-0 text-[11px] text-muted-foreground ${fonts.mono}`}>
-                        {tpl.industry[locale]}
-                      </span>
+              {g.items.map((tpl, index) => {
+                const image = buildUnsplashImageSources(tpl.thumbnail);
+                return (
+                  <Link
+                    key={tpl.id}
+                    href={localePath(locale, templateDetailPath(tpl.id))}
+                    className="group overflow-hidden rounded-2xl border border-border bg-white/70 shadow-sm transition-all hover:-translate-y-0.5 hover:border-aqua-300 hover:shadow-md"
+                  >
+                    <div className="aspect-[16/10] overflow-hidden bg-aqua-50">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- 外链缩略图与模板选择器同源，未纳入 next/image 域名白名单 */}
+                      <img
+                        src={image.src}
+                        srcSet={image.srcSet}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        alt={t.gallery.thumbnailAlt.replace("{name}", tpl.name)}
+                        loading={index < 3 ? "eager" : "lazy"}
+                        fetchPriority={index === 0 ? "high" : undefined}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                      />
                     </div>
-                    <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-                      {tpl.tagline[locale]}
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {tpl.tags.conversion.map((c) => (
-                        <span key={c} className="rounded-full bg-aqua-50 px-2 py-0.5 text-[11px] text-aqua-700">
-                          {t.gallery.captureTag.replace("{channel}", conversionLabel(locale, c))}
+                    <div className="p-5">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="font-semibold text-foreground">{tpl.name}</h3>
+                        <span className={`shrink-0 text-[11px] text-muted-foreground ${fonts.mono}`}>
+                          {tpl.industry[locale]}
                         </span>
-                      ))}
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">
-                        {archetypeLabel(locale, tpl.tags.archetype)}
-                      </span>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                        {tpl.tagline[locale]}
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {tpl.tags.conversion.map((c) => (
+                          <span key={c} className="rounded-full bg-aqua-50 px-2 py-0.5 text-[11px] text-aqua-700">
+                            {t.gallery.captureTag.replace("{channel}", conversionLabel(locale, c))}
+                          </span>
+                        ))}
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600">
+                          {archetypeLabel(locale, tpl.tags.archetype)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </section>
         ))}
