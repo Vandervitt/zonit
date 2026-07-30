@@ -10,7 +10,7 @@ import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PLANS, PLAN_ORDER, planPriceLabel } from "@/lib/plans";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { PlanId } from "@/lib/plans";
-import { CREDIT_PACKS } from "@/lib/credits";
+import { CREDIT_PACKS, creditPackPriceLabel } from "@/lib/credits";
 import type { UsageSummary } from "@/lib/ai/usage-summary";
 import { Routes, ApiRoutes } from "@/lib/constants";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
@@ -59,6 +59,11 @@ export default function BillingPage() {
   // SWR 默认 focus 时重验证，从渠道支付页切回本页即会自动刷新余额。
   const usage = useSWR<UsageSummary>(ApiRoutes.AiUsage);
   const creditBalance = usage.data?.creditBalance;
+
+  // 人民币参考换算：收款货币是美元，后台面向中文用户，故在美元价旁附「约 ¥xx」。
+  // 取不到汇率时（接口异常）仅展示美元，不阻塞任何计费操作。
+  const fx = useSWR<{ rate: number }>(ApiRoutes.FxUsdCny);
+  const cnyRate = fx.data?.rate ?? null;
 
   // 生效套餐（含赠送）只用于权益上限展示；换档/管理订阅一律以付费订阅档为基准，
   // 否则「赠送档 > 付费档」时会把赠送档误当成当前订阅档（如订阅 starter + 赠送 pro 显示成 pro）。
@@ -234,7 +239,7 @@ export default function BillingPage() {
               {compPlanExpiresAt ? `（至 ${new Date(compPlanExpiresAt).toLocaleDateString("zh-CN")}）` : ""}
             </Text>
           ) : (
-            <Text strong>{planPriceLabel(currentPlan, "zh")}</Text>
+            <Text strong>{planPriceLabel(currentPlan, "zh", cnyRate)}</Text>
           )}
         </Space>
       ),
@@ -247,7 +252,7 @@ export default function BillingPage() {
             children: (
               <Space>
                 <PlanBadge plan={currentPlanId} />
-                <Text strong>{planPriceLabel(currentPlan, "zh")}</Text>
+                <Text strong>{planPriceLabel(currentPlan, "zh", cnyRate)}</Text>
               </Space>
             ),
           },
@@ -390,7 +395,7 @@ export default function BillingPage() {
                   <div style={{ flex: 1 }}>
                     <Space style={{ marginBottom: 8 }}>
                       <PlanBadge plan={planId} />
-                      <Text strong>{planPriceLabel(plan, "zh")}</Text>
+                      <Text strong>{planPriceLabel(plan, "zh", cnyRate)}</Text>
                     </Space>
                     <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
                       包含 {PLANS[PLAN_ORDER[PLAN_ORDER.indexOf(planId) - 1]].label} 全部权益
@@ -459,7 +464,7 @@ export default function BillingPage() {
                   <div style={{ flex: 1 }}>
                     <Space style={{ marginBottom: 4 }}>
                       <Text strong>{pack.credits} 次整页生成额度</Text>
-                      <Text strong>{pack.priceText}</Text>
+                      <Text strong>{creditPackPriceLabel(pack, cnyRate)}</Text>
                     </Space>
                     <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
                       {pack.desc}

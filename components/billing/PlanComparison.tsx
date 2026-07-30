@@ -24,9 +24,12 @@ function FeatureValue({ value }: { value: string | boolean }) {
 export function PlanComparison({
   locale = "en",
   ctaFor,
+  cnyRate,
 }: {
   locale?: Locale;
   ctaFor?: (planId: PlanId) => { href: string; label: string };
+  /** 人民币参考换算汇率；不传（英文面）则只展示美元。 */
+  cnyRate?: number | null;
 }) {
   const t = getDictionary(locale).plans;
   const rows = planFeatureRows(t, locale);
@@ -46,7 +49,7 @@ export function PlanComparison({
             {PLAN_ORDER.map((planId) => {
               const plan = PLANS[planId];
               const c = cta(planId);
-              const price = planPriceText(plan, locale);
+              const price = planPriceText(plan, locale, cnyRate);
               return (
                 <th
                   key={planId}
@@ -68,6 +71,10 @@ export function PlanComparison({
                       {price.suffix && (
                         <span className="text-sm font-normal text-muted-foreground">{price.suffix}</span>
                       )}
+                    </span>
+                    {/* 参考换算另起一行：不能与美元金额同排，否则易被读成结算金额 */}
+                    <span className="-mt-1 h-4 text-xs font-normal text-muted-foreground">
+                      {price.approx}
                     </span>
                     <Link
                       href={c.href}

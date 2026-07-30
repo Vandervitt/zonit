@@ -14,6 +14,7 @@ import {
   LayoutTemplate,
   Pencil,
   Globe,
+  Inbox,
 } from "lucide-react";
 import { Routes } from "@/lib/constants";
 import { PlanComparison } from "@/components/billing/PlanComparison";
@@ -43,13 +44,16 @@ const PLATFORMS = [
 const STEP_ICONS = [LayoutTemplate, Pencil, Globe] as const;
 const STEP_NOS = ["01", "02", "03"] as const;
 
+// 顺序即卡片顺序：反同质化排最后——它只在 Agency 档解锁，且对正规品牌客户
+// 是需要解释才不误会的能力，不该抢在核心能力之前。
 const FEATURE_ICONS = {
   templates: LayoutTemplate,
   editor: Pencil,
+  ai: Sparkles,
   domain: Globe,
   tracking: Radar,
+  leads: Inbox,
   antiBan: ShieldCheck,
-  ai: Sparkles,
 } as const;
 
 const FUNNEL_ICONS = {
@@ -419,7 +423,17 @@ function TrackingShowcase({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
  * 定价（融合对比表，复用 PlanComparison 单一数据源）
  * ------------------------------------------------------------------ */
 
-function Pricing({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeDict }) {
+function Pricing({
+  fonts,
+  locale,
+  t,
+  cnyRate,
+}: {
+  fonts: Fonts;
+  locale: Locale;
+  t: HomeDict;
+  cnyRate?: number | null;
+}) {
   return (
     <section id="pricing" className="relative scroll-mt-24 px-6 py-24">
       <SectionHead
@@ -431,6 +445,7 @@ function Pricing({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeDi
       <div className="mx-auto mt-16 max-w-6xl">
         <PlanComparison
           locale={locale}
+          cnyRate={cnyRate}
           ctaFor={(planId) => ({
             // 首页两档 CTA 都去注册页——未登录访客无法直接进后台升级。
             href: localePath(locale, Routes.Register),
@@ -483,7 +498,16 @@ function FinalCTA({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeD
  * 页面装配
  * ------------------------------------------------------------------ */
 
-export default function MarketingHome({ fonts, locale }: { fonts: Fonts; locale: Locale }) {
+export default function MarketingHome({
+  fonts,
+  locale,
+  cnyRate,
+}: {
+  fonts: Fonts;
+  locale: Locale;
+  /** 人民币参考换算汇率，由服务端页面取好下传（英文面为 null）。 */
+  cnyRate?: number | null;
+}) {
   const t = getDictionary(locale).home;
   return (
     <div className={`relative min-h-screen bg-background text-foreground ${fonts.body}`}>
@@ -496,7 +520,7 @@ export default function MarketingHome({ fonts, locale }: { fonts: Fonts; locale:
           <Steps fonts={fonts} t={t} />
           <Features fonts={fonts} locale={locale} t={t} />
           <TrackingShowcase fonts={fonts} t={t} />
-          <Pricing fonts={fonts} locale={locale} t={t} />
+          <Pricing fonts={fonts} locale={locale} t={t} cnyRate={cnyRate} />
           <FinalCTA fonts={fonts} locale={locale} t={t} />
         </main>
         <SiteFooter fonts={fonts} locale={locale} />

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PLANS, PLAN_ORDER, planFeatureRows, formatPlanLimit, planPriceText } from "./plans";
+import { PLANS, PLAN_ORDER, planFeatureRows, formatPlanLimit, planPriceText, planPriceLabel } from "./plans";
 import { getDictionary } from "./i18n/dictionaries";
 
 describe("formatPlanLimit", () => {
@@ -35,13 +35,33 @@ describe("formatPlanLimit", () => {
 
 describe("planPriceText", () => {
   it("free 档显示免费文案，不显示金额", () => {
-    expect(planPriceText(PLANS.free, "en")).toEqual({ amount: "Free", suffix: "" });
-    expect(planPriceText(PLANS.free, "zh")).toEqual({ amount: "免费", suffix: "" });
+    expect(planPriceText(PLANS.free, "en")).toEqual({ amount: "Free", suffix: "", approx: null });
+    expect(planPriceText(PLANS.free, "zh")).toEqual({ amount: "免费", suffix: "", approx: null });
   });
 
-  it("付费档保留货币与金额，仅后缀本地化", () => {
-    expect(planPriceText(PLANS.pro, "en")).toEqual({ amount: "CN¥79.99", suffix: "/mo" });
-    expect(planPriceText(PLANS.pro, "zh")).toEqual({ amount: "CN¥79.99", suffix: "/月" });
+  it("付费档保留美元金额，仅后缀本地化；不传汇率则无换算", () => {
+    expect(planPriceText(PLANS.pro, "en")).toEqual({ amount: "$19.99", suffix: "/mo", approx: null });
+    expect(planPriceText(PLANS.pro, "zh")).toEqual({ amount: "$19.99", suffix: "/月", approx: null });
+  });
+
+  it("传入汇率时中文面附人民币参考换算，金额本身仍是美元", () => {
+    expect(planPriceText(PLANS.pro, "zh", 7.1)).toEqual({
+      amount: "$19.99",
+      suffix: "/月",
+      approx: "约 ¥141.93",
+    });
+  });
+
+  it("免费档即便传了汇率也不产出换算", () => {
+    expect(planPriceText(PLANS.free, "zh", 7.1).approx).toBeNull();
+  });
+});
+
+describe("planPriceLabel", () => {
+  it("单行版：美元价 + 周期后缀，传汇率时括号内附参考换算", () => {
+    expect(planPriceLabel(PLANS.agency, "zh")).toBe("$49.99/月");
+    expect(planPriceLabel(PLANS.agency, "zh", 7.1)).toBe("$49.99/月（约 ¥354.93）");
+    expect(planPriceLabel(PLANS.free, "zh", 7.1)).toBe("$0");
   });
 });
 

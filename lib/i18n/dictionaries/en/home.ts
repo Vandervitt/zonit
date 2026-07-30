@@ -7,11 +7,12 @@ export const home = {
       "30+ inquiry and lead-capture templates plus AI full-page drafting — first version in minutes. Publish to your own brand domain and configure Meta, TikTok, and Google tracking by plan.",
   },
   hero: {
-    badge: "Overseas lead-gen engine",
-    titleLine1: "Ad-ready landing pages",
-    titleLine2: "that make every click traceable",
+    badge: "Built for overseas lead gen",
+    titleLine1: "Turn ad clicks into",
+    titleLine2: "WhatsApp inquiries",
+    // 首屏讲结果不讲机制：像素 / UTM / CAPI 等术语一律留到下方追踪区再展开。
     subtitle:
-      "Built for founders and small teams running paid acquisition: start from 30+ industry templates, let AI draft the whole page, and ship your first version in minutes. Pixels, UTMs, and server-side conversion forwarding are configured in one place — so your ad spend lands on pages you can actually attribute and convert.",
+      "Pick a lead-gen template, let AI write the whole page around your business, and publish to your own domain — first version live in an afternoon. Every inquiry lands in your inbox, and your ad platform learns which clicks actually converted.",
     ctaPrimary: "Start free",
     ctaSecondary: "See pricing",
     note: "7 days of full Pro on sign-up · No credit card · No code",
@@ -26,7 +27,7 @@ export const home = {
   steps: {
     kicker: "// three steps to live",
     title: "From template to live campaign in three steps",
-    desc: "The whole build is visual — no code required. When you are ready to go public, upgrade and verify your own domain to publish.",
+    desc: "The whole build is visual — no code, no dev queue. Create, edit, and preview for free; publishing on your own domain comes with the paid plans.",
     items: [
       {
         title: "Pick a lead-gen template",
@@ -37,15 +38,15 @@ export const home = {
         desc: "Select a section to rewrite copy and swap images. Drag to reorder, autosave as you go, and preview desktop and mobile live.",
       },
       {
-        title: "Upgrade and publish to your own domain",
-        desc: "When you are ready to run ads, upgrade, connect your brand domain and pass DNS verification, then publish the page and set its SEO details.",
+        title: "Publish to your own domain",
+        desc: "Connect your brand domain — we work out the exact DNS record for you to paste — then publish and set your SEO details. Custom domains come with the paid plans.",
       },
     ],
   },
   features: {
     kicker: "// built for conversion",
     title: "Everything a converting page needs, ready to go",
-    desc: "Pages, domains, tracking, AI copy — get your inquiry and lead pages right first, then switch on the rest as your campaigns scale.",
+    desc: "Pages, AI copy, domains, tracking, leads — get your inquiry and lead pages right first, then switch on the rest as your campaigns scale.",
     items: {
       templates: {
         title: "Overseas lead-gen template library",
@@ -67,6 +68,10 @@ export const home = {
         title: "Anti-duplication",
         desc: "Agency plans reseed page variants in one click: content stays put while hero layout, wrapper structure, and meta fingerprint shift with the seed — lowering the odds that same-template pages get flagged as duplicates.",
         linkLabel: "How anti-duplication works",
+      },
+      leads: {
+        title: "Leads land where you already work",
+        desc: "Every form submit and WhatsApp tap is collected in one inbox, with an email alert the moment it arrives. Export to CSV any time; Pro and above POST each new lead straight to your CRM or Zapier, and can get a weekly summary by email.",
       },
       ai: {
         title: "AI full-page generation & rewriting",
