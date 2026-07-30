@@ -30,14 +30,23 @@ function isHttpUrl(value: string): boolean {
   }
 }
 
-/** 链接字段：允许 http(s) 绝对地址或 tel:/mailto:/whatsapp:/sms: 协议；拦截交易类链接。 */
+/** 页内锚点：`#` 开头且带片段名。孤立的 `#` 不是落点，不放行。 */
+export function isPageAnchor(value: string): boolean {
+  return /^#\S+$/.test(value.trim());
+}
+
+/**
+ * 链接字段：允许 http(s) 绝对地址、tel:/mailto:/whatsapp:/sms: 协议，或页内锚点；
+ * 拦截交易类链接。放行锚点是为了让 CTA 能指向页内留资表单（表单作为主转化路径），
+ * 锚点同样过交易语义检查，不留后门。
+ */
 export function validateLink(value: string): string | undefined {
   const v = value.trim();
   if (!v) return undefined;
 
   const isScheme = ALLOWED_SCHEMES.some((s) => v.toLowerCase().startsWith(s));
-  if (!isScheme && !isHttpUrl(v)) {
-    return "请输入合法链接（https://… 或 tel:/mailto:/whatsapp:）";
+  if (!isScheme && !isPageAnchor(v) && !isHttpUrl(v)) {
+    return "请输入合法链接（https://…、tel:/mailto:/whatsapp:，或 #lead-form 这样的页内锚点）";
   }
   if (TRANSACTION_PATTERN.test(v)) {
     return "链接疑似交易页（结账/购物车/支付/订单/订阅/退款），落地页不允许";

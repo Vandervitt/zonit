@@ -6,6 +6,8 @@
 //     并兜底扫模板占位号（覆盖遗留页，或 section 级残留）。
 import type { LandingPageDraft } from "@/types/schema.draft";
 import type { PublishIssue } from "./validate";
+import { isPageAnchor } from "./validate";
+import { LEAD_FORM_ANCHOR_ID } from "@/landing-renderer/sections/LeadForm";
 
 // 模板样例反复出现的占位假号（US 格式 1555…，故意不可拨打）。仅用于发布兜底扫描。
 export const PLACEHOLDER_CONTACTS = ["15551234567", "15553219876", "15557654321"];
@@ -16,9 +18,19 @@ export const PLACEHOLDER_CONTACTS = ["15551234567", "15553219876", "15557654321"
  */
 export function blankPrimaryCtaLinks(draft: LandingPageDraft): LandingPageDraft {
   const clone = JSON.parse(JSON.stringify(draft)) as LandingPageDraft;
-  if (clone.hero?.cta) clone.hero.cta.link = "";
-  if (clone.floatingButton) clone.floatingButton.link = "";
+  if (clone.hero?.cta && !isPageAnchor(clone.hero.cta.link ?? "")) clone.hero.cta.link = "";
+  if (clone.floatingButton && !isPageAnchor(clone.floatingButton.link ?? "")) clone.floatingButton.link = "";
   return clone;
+}
+
+/**
+ * 锚点 CTA 的落点校验：指向留资表单锚点时，表单必须真的启用，否则访客点了原地不动。
+ * 返回 issue 文案；落点有效则返回 null。非锚点链接不归本函数管。
+ */
+function anchorTargetIssue(link: string, draft: LandingPageDraft, what: string): string | null {
+  if (link.trim() !== `#${LEAD_FORM_ANCHOR_ID}`) return null;
+  if (draft.leadForm?.enabled) return null;
+  return `${what}指向留资表单，但该页的留资表单未启用，访客点击不会有任何反应——请启用留资表单，或把链接改成你的联系方式`;
 }
 
 /**
@@ -32,9 +44,13 @@ export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[
   const heroCtaLink = draft.hero?.cta?.link?.trim() ?? "";
   if (!heroCtaLink) {
     issues.push({
-      message: "首屏 CTA 按钮链接为空，访客点击无法联系你，请填入 WhatsApp / Telegram / tel: / 邮箱 等联系方式",
+      message: "首屏 CTA 按钮链接为空，访客点击无法联系你，请填入 WhatsApp / Telegram / tel: / 邮箱 等联系方式，或指向页内留资表单",
       target: { kind: "fixed", id: "hero" },
     });
+  }
+  const heroAnchorIssue = anchorTargetIssue(heroCtaLink, draft, "首屏 CTA 按钮");
+  if (heroAnchorIssue) {
+    issues.push({ message: heroAnchorIssue, target: { kind: "fixed", id: "hero" } });
   }
   if (!draft.hero?.cta?.text?.trim()) {
     issues.push({
@@ -55,6 +71,10 @@ export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[
         message: "悬浮按钮文案为空，请填写行动引导语，或关闭该按钮",
         target: { kind: "fixed", id: "floatingButton" },
       });
+    }
+    const floatAnchorIssue = anchorTargetIssue(draft.floatingButton.link ?? "", draft, "悬浮按钮");
+    if (floatAnchorIssue) {
+      issues.push({ message: floatAnchorIssue, target: { kind: "fixed", id: "floatingButton" } });
     }
   }
 

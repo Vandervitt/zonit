@@ -104,7 +104,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1600&q=80",
     tier: "t2",
-    tags: { category: "home-improvement", subcategory: "solar", archetype: "consult", conversion: ["whatsapp", "form"], risk: "medium", tone: "rational" },
+    tags: { category: "home-improvement", subcategory: "solar", archetype: "consult", conversion: ["whatsapp"], risk: "medium", tone: "rational" },
   },
   {
     id: "radiantglow",
