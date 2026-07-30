@@ -2,6 +2,8 @@ export const plans = {
   free: "免费",
   unlimited: "无限",
   perMonthSuffix: "/月",
+  // 收款货币为美元，人民币仅按参考汇率换算展示，故必须保留「约」字。
+  approxCny: "约 ¥{amount}",
   // 中文量词无单复数变化，两个形态取同值（形状须与英文字典一致）。
   units: {
     pages: { one: "张", other: "张" },

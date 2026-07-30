@@ -5,6 +5,7 @@ import { Routes } from "@/lib/constants";
 import { marketingMetadata, siteStructuredData } from "@/lib/seo/site";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getCnyRateForLocale } from "@/lib/pricing/fx-server";
 import type { Locale } from "@/lib/i18n/config";
 
 /**
@@ -28,12 +29,15 @@ export function homeMetadata(locale: Locale): Metadata {
   };
 }
 
-export function HomeView({ locale }: { locale: Locale }) {
+export async function HomeView({ locale }: { locale: Locale }) {
+  // 汇率在服务端取好再下传：MarketingHome 是客户端组件，不能自己 fetch。
+  const cnyRate = await getCnyRateForLocale(locale);
   return (
     <>
       <JsonLd data={siteStructuredData(locale)} />
       <MarketingHome
         locale={locale}
+        cnyRate={cnyRate}
         fonts={{
           display: fontHead.className,
           body: fontBody.className,

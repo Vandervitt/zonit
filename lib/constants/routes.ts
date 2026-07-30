@@ -39,6 +39,7 @@ export enum ApiRoutes {
   BillingChangePlan = '/api/billing/change-plan',
   BillingResume = '/api/billing/resume',
   BillingCredits = '/api/billing/credits',
+  FxUsdCny = '/api/fx/usd-cny',
   AdminTemplates = '/api/admin/templates',
   AdminInvite = '/api/admin/invite',
 }

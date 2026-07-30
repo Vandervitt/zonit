@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { BRAND } from '@/lib/theme/brand';
-import { PLANS, planEntitlementLines, type PlanId } from '@/lib/plans';
+import { PLANS, planEntitlementLines, planPriceLabel, type PlanId } from '@/lib/plans';
+import { getUsdToCnyRate } from '@/lib/pricing/fx-server';
 
 const resend = process.env.RESEND_API_KEY 
   ? new Resend(process.env.RESEND_API_KEY) 
@@ -49,8 +50,9 @@ export async function sendInvitationEmail({
   const planCfg = PLANS[planId];
   const planLabel = planCfg?.label ?? String(plan);
   const validity = formatLinkValidity(expiresAt);
+  // 邀请邮件是中文面：美元价旁附人民币参考换算，收件人才有价格体感。
   const priceNote = planCfg && planCfg.priceAmount > 0
-    ? `这档平时 ${planCfg.currency}${planCfg.priceAmount}/月`
+    ? `这档平时 ${planPriceLabel(planCfg, "zh", await getUsdToCnyRate())}`
     : "";
 
   // 权益清单从 PLANS 派生，套餐配置一改邮件自动跟着变（见 planEntitlementLines）。

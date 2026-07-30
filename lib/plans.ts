@@ -4,14 +4,15 @@
 import type { Locale } from "./i18n/config";
 import { plans as enPlans } from "./i18n/dictionaries/en/plans";
 import { plans as zhPlans } from "./i18n/dictionaries/zh/plans";
+import { approxCnyAmount } from "./pricing/fx";
 
 export type PlanId = "free" | "starter" | "pro" | "agency";
 
 export interface PlanConfig {
   id: PlanId;
   label: string;                // 档位品牌名（Free / Starter / Pro / Agency），不翻译
-  priceAmount: number;          // 月费数值
-  currency: string;             // 计价货币属商业决策，不随界面语言变化
+  priceAmount: number;          // 月费数值（美元）
+  currency: string;             // 收款货币固定 USD，不随界面语言变化；中文面另附「约 ¥xx」参考换算
   color: string;
   highlight?: boolean;          // "最受欢迎"
   // 后端强制限额
@@ -30,25 +31,25 @@ export interface PlanConfig {
 
 export const PLANS: Record<PlanId, PlanConfig> = {
   free: {
-    id: "free", label: "Free", priceAmount: 0, currency: "CN¥", color: "slate",
+    id: "free", label: "Free", priceAmount: 0, currency: "$", color: "slate",
     landingPagesLimit: 1, domainsLimit: 0,
     hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 3, aiRewriteQuota: 10,
   },
   starter: {
-    id: "starter", label: "Starter", priceAmount: 29.99, currency: "CN¥", color: "blue",
+    id: "starter", label: "Starter", priceAmount: 5.99, currency: "$", color: "blue",
     landingPagesLimit: 3, domainsLimit: 1,
     hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 15, aiRewriteQuota: 100,
   },
   pro: {
-    id: "pro", label: "Pro", priceAmount: 79.99, currency: "CN¥", color: "violet", highlight: true,
+    id: "pro", label: "Pro", priceAmount: 19.99, currency: "$", color: "violet", highlight: true,
     landingPagesLimit: 20, domainsLimit: 5,
     hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: false, leadWebhook: true,
     aiPageQuota: 80, aiRewriteQuota: Infinity,
   },
   agency: {
-    id: "agency", label: "Agency", priceAmount: 199.99, currency: "CN¥", color: "amber",
+    id: "agency", label: "Agency", priceAmount: 49.99, currency: "$", color: "amber",
     landingPagesLimit: Infinity, domainsLimit: Infinity,
     hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: true, leadWebhook: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,
@@ -115,22 +116,42 @@ export function formatPlanLimit(n: number, locale: Locale, unit: LimitUnit): str
 }
 
 /**
- * 价格展示（拆分版）：对比表里金额与周期后缀分开排版，free 档显示「免费」而非 CN¥0。
- * 金额与货币不随语言变化，仅周期后缀本地化。
+ * 参考换算文案：给定汇率时产出「约 ¥xx」，否则为 null。
+ * 传 null/undefined 汇率即表示该展示面不需要换算（如英文站），调用方无需分支。
  */
-export function planPriceText(plan: PlanConfig, locale: Locale): { amount: string; suffix: string } {
+function approxCnyText(plan: PlanConfig, locale: Locale, cnyRate?: number | null): string | null {
+  if (cnyRate == null) return null;
+  const amount = approxCnyAmount(plan.priceAmount, cnyRate);
+  return amount ? PLANS_DICT[locale].approxCny.replace("{amount}", amount) : null;
+}
+
+/**
+ * 价格展示（拆分版）：对比表里金额与周期后缀分开排版，free 档显示「免费」而非 $0。
+ * 金额与货币（USD）不随语言变化，仅周期后缀本地化；
+ * 传入 cnyRate 时额外产出人民币参考换算，供中文面在金额下方另起一行展示。
+ */
+export function planPriceText(
+  plan: PlanConfig,
+  locale: Locale,
+  cnyRate?: number | null,
+): { amount: string; suffix: string; approx: string | null } {
   const t = PLANS_DICT[locale];
-  if (plan.priceAmount === 0) return { amount: t.free, suffix: "" };
-  return { amount: `${plan.currency}${plan.priceAmount}`, suffix: t.perMonthSuffix };
+  if (plan.priceAmount === 0) return { amount: t.free, suffix: "", approx: null };
+  return {
+    amount: `${plan.currency}${plan.priceAmount}`,
+    suffix: t.perMonthSuffix,
+    approx: approxCnyText(plan, locale, cnyRate),
+  };
 }
 
 /**
  * 价格展示（单行版）：等价于改造前的 PlanConfig.priceText，
- * free 档同样输出 `CN¥0`——后台既有排版依赖这一形态，不在 i18n 改造中顺手改 UX。
+ * free 档同样输出 `$0`——后台既有排版依赖这一形态，不在货币改造中顺手改 UX。
  */
-export function planPriceLabel(plan: PlanConfig, locale: Locale): string {
+export function planPriceLabel(plan: PlanConfig, locale: Locale, cnyRate?: number | null): string {
   const suffix = plan.priceAmount === 0 ? "" : PLANS_DICT[locale].perMonthSuffix;
-  return `${plan.currency}${plan.priceAmount}${suffix}`;
+  const approx = approxCnyText(plan, locale, cnyRate);
+  return `${plan.currency}${plan.priceAmount}${suffix}${approx ? `（${approx}）` : ""}`;
 }
 
 /** 对比表行定义：valueFor 返回字符串（额度）或布尔（有无）；desc 为该权益的作用说明。 */

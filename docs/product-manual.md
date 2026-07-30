@@ -95,7 +95,9 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 
 ## 五、套餐与商业化（`lib/plans.ts`，Dodo / Creem 双收款渠道）
 
-| 权益 | Free CN¥0 | Starter CN¥29.99/月 | Pro CN¥79.99/月（主推）| Agency CN¥199.99/月 |
+**收款货币为美元**（2026-07-30 由 CN¥ 切换）。中文面在美元价旁展示「约 ¥xx」参考换算，汇率由 `lib/pricing/fx-server.ts` 按天取自公开接口、异常时回落常量；换算**仅供参考**，实际扣款金额以收款渠道产品配置为准。
+
+| 权益 | Free $0 | Starter $5.99/月 | Pro $19.99/月（主推）| Agency $49.99/月 |
 |---|---|---|---|---|
 | 落地页数 | 1 | 3 | 20 | 无限 |
 | 自定义域名 | 0（不可发布）| 1 | 5 | 无限 |
@@ -113,7 +115,7 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 补充机制（2026-07-23 同步）：
 
 - **收款渠道抽象**：Dodo / Creem 双 provider（`lib/billing/`），active provider 存于平台设置、super-admin 可切换；webhook 端点各自独立，事件规范化为订阅激活 / 结束 / 周期末取消 / credit 到账四种语义。
-- **AI 额度充值包**（`lib/credits.ts`）：一次性购买，credit 永不过期——50 次 CN¥19.99、200 次 CN¥59.99；**仅「AI 整页生成」消耗 credit**，改写额度用尽只能等次月或升级（有意的升级驱动）。
+- **AI 额度充值包**（`lib/credits.ts`）：一次性购买，credit 永不过期——50 次 $4.99、200 次 $14.99；**仅「AI 整页生成」消耗 credit**，改写额度用尽只能等次月或升级（有意的升级驱动）。
 - **注册试用**：新用户建号即赠 Pro 7 天（写入 `comp_plan`，到期由 `activeCompPlan` 自动回落）；与超管赠送同机制，生效套餐 = max(付费档, 赠送档)。
 - **超管赠送**：super-admin 可按用户赠送任意档位与期限（永久或定期）。
 

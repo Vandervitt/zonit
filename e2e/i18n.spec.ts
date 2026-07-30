@@ -52,6 +52,20 @@ test.describe("营销站双语", () => {
     await expect(page.getByText("Most popular").first()).toBeVisible();
   });
 
+  // 收款货币是美元：两语都必须出美元价，只有中文面额外附「约 ¥xx」参考换算。
+  test("英文面只出美元价，不出人民币换算", async ({ page }) => {
+    await page.goto("/pricing");
+    await expect(page.getByText("$19.99").first()).toBeVisible();
+    await expect(page.getByText(/约 ¥/)).toHaveCount(0);
+  });
+
+  test("中文面出美元价并附人民币参考换算", async ({ page }) => {
+    await page.goto("/zh/pricing");
+    await expect(page.getByText("$19.99").first()).toBeVisible();
+    // 汇率取自实时接口，只断言形态与「约」字，不锁死具体数值。
+    await expect(page.getByText(/^约 ¥[\d,]+\.\d{2}$/).first()).toBeVisible();
+  });
+
   test("/zh 子树标注中文语言属性", async ({ page }) => {
     await page.goto("/zh");
     await expect(page.locator('div[lang="zh-Hans"]').first()).toBeAttached();
