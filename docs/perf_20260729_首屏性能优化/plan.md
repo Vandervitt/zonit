@@ -49,7 +49,7 @@
 
 ---
 
-## Stage 2 · Sentry 移出首屏（P1）⚠️ 阻塞待决策
+## Stage 2 · Sentry 移出首屏（P1）✅ 已完成
 
 **前置**：需用户确认是否接受「首屏最初数百毫秒错误捕获缺失」。
 **若不接受则整个 Stage 2 跳过** —— Turbopack 下 tree-shaking 不可用，无替代路径（见 design.md §5.2）。
@@ -64,7 +64,13 @@
 
 ---
 
-## Stage 3 · legacy polyfill（P2）
+## Stage 3 · legacy polyfill（P2）⏸️ 暂缓，需决策
+
+**风险重估**：完全移除需 browserslist 抬到 Safari 15.4+ / Chrome 93+，iOS 15.4 以下白屏；
+落地页承载付费流量，4–5 KiB（gzip）收益不足以对冲转化损失风险。
+原「风险与收益均低」的评估有误，已在 test-results.md 更正。
+折中路径需构建验证，而本地构建受 Google Fonts 阻断。
+
 
 - [ ] 收紧 browserslist 目标
 - [ ] 确认 `legacy-javascript` 审计改善
@@ -73,7 +79,7 @@
 
 ---
 
-## Stage 4 · 循环动画延迟启动（P3）
+## Stage 4 · 循环动画延迟启动（P3）✅ 已完成（改为交互触发）
 
 **注**：仅改善 Lighthouse SI，不影响 GSC。可视排期取舍决定是否执行。
 
@@ -114,5 +120,7 @@ npx lighthouse@12 <url> --only-categories=performance --preset=desktop \
 
 | # | 事项 | 阻塞范围 | 状态 |
 |---|---|---|---|
-| 1 | Sentry 动态加载的可观测性损失是否接受 | Stage 2 全部 | ⏳ 待用户决策 |
-| 2 | Stage 4 是否值得投入（仅 Lighthouse 分数） | Stage 4 | ⏳ 待用户决策 |
+| 1 | Sentry 动态加载的可观测性损失是否接受 | Stage 2 | ✅ 已批准并实施 |
+| 2 | Stage 4 是否值得投入 | Stage 4 | ✅ 已批准并实施（改交互触发） |
+| 3 | Stage 3 是否接受抬高浏览器基线的兼容性风险 | Stage 3 | ⏳ 待用户决策，建议不做 |
+| 4 | LCP / SI / TBT 的生产实测 | 全部 | ⏳ 待 Preview 部署后补测 |
