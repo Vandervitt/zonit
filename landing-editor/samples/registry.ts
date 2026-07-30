@@ -579,6 +579,45 @@ export const TEMPLATES: TemplateMeta[] = [
     tier: "t2",
     tags: { category: "local-service", subcategory: "home-cleaning", archetype: "consult", conversion: ["whatsapp", "form"], risk: "low", tone: "rational" },
   },
+  {
+    id: "industrial-equipment",
+    name: "Axelon Machinery",
+    industry: { en: "B2B / Industrial equipment", zh: "B2B / 工业设备" },
+    tagline: { en: "Machinery enquiry page — buyers get a configuration proposal and sample run.", zh: "工业设备询价落地页，提交产能参数获取选型方案与试机。" },
+    seoIntro: {
+      en: "Axelon Machinery is a configuration-enquiry template for industrial equipment makers selling overseas, turning ad traffic into engineering-qualified leads through an on-page requirements form. Sample runs with the buyer's own material, stated wear-part availability, and included commissioning answer what plant managers actually weigh before committing capital. Built for packaging, processing, and production-line manufacturers running Meta or LinkedIn campaigns that need throughput-specific enquiries rather than catalogue downloads.",
+      zh: "Axelon Machinery 是面向工业设备制造商出海获客的选型询价落地页模板，用页内需求表单把广告流量转成带产能参数的工程线索。页面以「用你的物料实际试机」「明示易损件供应时效」「含安装培训」回答工厂负责人在投入设备资金前真正衡量的问题。适合包装、加工与产线设备厂商投放 Meta / LinkedIn，承接带明确产能要求的询盘而非泛泛的样本索取。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1565043666747-69f6646db940?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "b2b", subcategory: "industrial-equipment", archetype: "consult", conversion: ["form", "whatsapp"], risk: "low", tone: "rational" },
+  },
+  {
+    id: "custom-packaging",
+    name: "Kraftline Packaging",
+    industry: { en: "B2B / Custom packaging", zh: "B2B / 定制包装" },
+    tagline: { en: "Packaging quote page — brands send specs and get a mock-up plus printed sample.", zh: "定制包装询价落地页，提交规格获取结构样与印刷打样。" },
+    seoIntro: {
+      en: "Kraftline Packaging is a sampling-enquiry template for packaging and print suppliers, turning brand traffic into specification-rich leads through an on-page quote form. Structural mock-ups before printing, physical printed samples instead of renders, and transit testing address the failures that cost brands an entire production run. Made for carton, corrugated, and label manufacturers serving DTC and retail brands who need dimensions and quantities up front rather than vague enquiries.",
+      zh: "Kraftline Packaging 是面向包装印刷供应商的打样询价落地页模板，用页内询价表单把品牌方流量转成带完整规格的线索。页面以「先出结构样再印刷」「给实物打样而非效果图」「可做运输测试」直击那些会让品牌报废整批产能的失误点。适合彩盒、瓦楞与标签厂服务 DTC 与零售品牌，承接自带尺寸与数量的实质询盘。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1607166452427-7e4477079cb9?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "b2b", subcategory: "custom-packaging", archetype: "consult", conversion: ["form", "whatsapp"], risk: "low", tone: "rational" },
+  },
+  {
+    id: "freight-forwarding",
+    name: "Portway Freight",
+    industry: { en: "B2B / Freight forwarding", zh: "B2B / 国际物流" },
+    tagline: { en: "Freight quote page — shippers get rates, transit times, and customs docs on WhatsApp.", zh: "货代运价落地页，WhatsApp 获取运价、时效与清关单证清单。" },
+    seoIntro: {
+      en: "Portway Freight is a rate-enquiry template for freight forwarders and logistics providers, turning shipper traffic into WhatsApp enquiries by promising a full landed cost rather than a headline rate. All-in quoting, prepared customs documentation, and a named coordinator target the two things that lose forwarders business: surprise local charges and silence when a vessel slips. Built for forwarders and 3PLs running trade-lane campaigns who need route and volume details, not brochure requests.",
+      zh: "Portway Freight 是面向货代与物流服务商的运价咨询落地页模板，以「给全包落地成本而非表面运价」把货主流量转成 WhatsApp 询价。页面用一口价报关杂费、代办清关单证与专属跟单员，直击货代最容易流失客户的两件事：突然冒出的地方杂费，以及船期延误时的失联。适合货代与三方物流投放特定贸易航线，承接带路线与货量的真实询盘。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "b2b", subcategory: "freight-forwarding", archetype: "consult", conversion: ["whatsapp", "form"], risk: "low", tone: "rational" },
+  },
 ];
 
 export const DEFAULT_TEMPLATE_ID = TEMPLATES[0].id;

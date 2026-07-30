@@ -29,7 +29,7 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 
 | 端 | 路由 | 面向 | 职责 |
 |---|---|---|---|
-| **官网**（marketing）| `/`、`/pricing`、`/anti-ban`、`/templates` | 潜在用户 | 营销首页、定价页、反同质化叙事页、公开模板画廊（SEO 获客面，38 套模板列表 + 样稿 live 渲染详情页，深链注册后直达建页）；转化为注册用户 |
+| **官网**（marketing）| `/`、`/pricing`、`/anti-ban`、`/templates` | 潜在用户 | 营销首页、定价页、反同质化叙事页、公开模板画廊（SEO 获客面，41 套模板列表 + 样稿 live 渲染详情页，深链注册后直达建页）；转化为注册用户 |
 | **admin**（租户后台）| `/admin/*` | 租户（`USER`）| 落地页、线索、分析、域名、素材、账单的自助管理——产品主体；概览含「4 步上线」上手清单 |
 | **super-admin**（平台后台）| `/super-admin/*` | 平台运营（`SUPER_ADMIN`）| 管理租户/用户、平台设置、数据看板（含注册→建页→域名→发布→首线索激活漏斗与 TTFP 中位数）|
 
@@ -54,9 +54,9 @@ Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Buil
 
 ### 1. 模板库与 AI 建页
 
-- **38 套行业模板**，分两梯队，全程非交易，高风险品类强制 disclaimer，四档套餐**全量开放模板**：
+- **41 套行业模板**，分两梯队，全程非交易，高风险品类强制 disclaimer，四档套餐**全量开放模板**：
   - 第一梯队（电商种草留资）：6 行业 × 5 子品类共 29 套 + solar/dental 等，主转化走 WhatsApp。
-  - 第二梯队（服务与 B2B 线索，2026-07-30 新增 5 套）：B2B/OEM 询价、SaaS demo 预约、留学咨询、移民法律、本地保洁上门报价，覆盖 b2b / education / legal / local-service 四个新行业大类。这类品类天然靠表单转化，故主 CTA 可指向页内留资表单（`#lead-form` 锚点），详见 `docs/lead-capture-channels.md`。
+  - 第二梯队（服务与 B2B 线索，2026-07-30 新增 8 套）：B2B/OEM 询价、工业设备选型、定制包装打样、国际物流运价、SaaS demo 预约、留学咨询、移民法律、本地保洁上门报价，覆盖 b2b / education / legal / local-service 四个新行业大类。这类品类天然靠表单转化，故主 CTA 可指向页内留资表单（`#lead-form` 锚点），详见 `docs/lead-capture-channels.md`。
 - **AI 一键生成整页**：按行业/描述生成文案与结构，自动 Unsplash 配图（含前后对比、头像等素材对），多 LLM 适配（Qwen/Gemini/DeepSeek/OpenRouter）。AI 生成/改写按套餐计额度。
 
 ### 2. 可视化编辑器

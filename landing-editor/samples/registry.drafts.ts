@@ -57,6 +57,9 @@ const loaders: Record<string, DraftLoader> = {
   "study-abroad": () => import("./studyAbroadDraft").then((m) => m.studyAbroadDraft),
   "immigration-law": () => import("./immigrationLawDraft").then((m) => m.immigrationLawDraft),
   "home-cleaning": () => import("./homeServicesDraft").then((m) => m.homeServicesDraft),
+  "industrial-equipment": () => import("./industrialEquipmentDraft").then((m) => m.industrialEquipmentDraft),
+  "custom-packaging": () => import("./packagingCustomDraft").then((m) => m.packagingCustomDraft),
+  "freight-forwarding": () => import("./freightForwardingDraft").then((m) => m.freightForwardingDraft),
 };
 
 /** 按 id 异步加载模板草稿体；缺省或未命中时回退默认模板。
