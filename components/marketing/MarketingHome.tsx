@@ -14,6 +14,7 @@ import {
   LayoutTemplate,
   Pencil,
   Globe,
+  Inbox,
 } from "lucide-react";
 import { Routes } from "@/lib/constants";
 import { PlanComparison } from "@/components/billing/PlanComparison";
@@ -43,13 +44,16 @@ const PLATFORMS = [
 const STEP_ICONS = [LayoutTemplate, Pencil, Globe] as const;
 const STEP_NOS = ["01", "02", "03"] as const;
 
+// 顺序即卡片顺序：反同质化排最后——它只在 Agency 档解锁，且对正规品牌客户
+// 是需要解释才不误会的能力，不该抢在核心能力之前。
 const FEATURE_ICONS = {
   templates: LayoutTemplate,
   editor: Pencil,
+  ai: Sparkles,
   domain: Globe,
   tracking: Radar,
+  leads: Inbox,
   antiBan: ShieldCheck,
-  ai: Sparkles,
 } as const;
 
 const FUNNEL_ICONS = {

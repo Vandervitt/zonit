@@ -157,13 +157,8 @@ export function SiteNav({ fonts, locale }: { fonts: Fonts; locale: Locale }) {
           >
             {t.guides}
           </NavLink>
-          <NavLink
-            href={localePath(locale, Routes.AntiBan)}
-            active={isActiveNavRoute(pathname, Routes.AntiBan)}
-            className="hidden sm:block"
-          >
-            {t.antiBan}
-          </NavLink>
+          {/* 反同质化不进一级导航：它对正规品牌客户是负面信号（像给站群批量用的），
+              且只有 Agency 档才解锁。入口保留在首页功能区卡片与页脚。 */}
           {/* 定价是首页锚点区（/pricing 独立页不带本导航），没有可点亮的"当前页"语义 */}
           <PricingLink locale={locale} className={`${NAV_LINK_BASE} ${NAV_LINK_IDLE}`}>
             {t.pricing}
