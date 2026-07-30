@@ -20,6 +20,7 @@ import {
 } from "@/lib/seo/template-content";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
+import { buildUnsplashImageSources } from "@/lib/images/unsplash";
 import type { Locale } from "@/lib/i18n/config";
 
 /**
@@ -188,29 +189,34 @@ export async function TemplateDetailView({ slug, locale }: { slug: string; local
               {dict.detail.relatedHeading}
             </h2>
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {related.map((r) => (
-                <Link
-                  key={r.id}
-                  href={localePath(locale, templateDetailPath(r.id))}
-                  className="group overflow-hidden rounded-2xl border border-border bg-white/70 shadow-sm transition-all hover:-translate-y-0.5 hover:border-aqua-300 hover:shadow-md"
-                >
-                  <div className="aspect-[16/10] overflow-hidden bg-aqua-50">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- 外链缩略图与模板选择器同源，未纳入 next/image 域名白名单 */}
-                    <img
-                      src={r.thumbnail}
-                      alt={dict.gallery.thumbnailAlt.replace("{name}", r.name)}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-sm font-semibold text-foreground">{r.name}</h3>
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                      {r.tagline[locale]}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+              {related.map((r) => {
+                const image = buildUnsplashImageSources(r.thumbnail);
+                return (
+                  <Link
+                    key={r.id}
+                    href={localePath(locale, templateDetailPath(r.id))}
+                    className="group overflow-hidden rounded-2xl border border-border bg-white/70 shadow-sm transition-all hover:-translate-y-0.5 hover:border-aqua-300 hover:shadow-md"
+                  >
+                    <div className="aspect-[16/10] overflow-hidden bg-aqua-50">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- 外链缩略图与模板选择器同源，未纳入 next/image 域名白名单 */}
+                      <img
+                        src={image.src}
+                        srcSet={image.srcSet}
+                        sizes="(max-width: 640px) 100vw, 33vw"
+                        alt={dict.gallery.thumbnailAlt.replace("{name}", r.name)}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-sm font-semibold text-foreground">{r.name}</h3>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                        {r.tagline[locale]}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </section>
         )}

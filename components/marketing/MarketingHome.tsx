@@ -21,6 +21,7 @@ import { ctaPrimary, ctaGhost, gradientText, glassCard, pill, glowAura } from "@
 import { Backdrop, SiteNav, SiteFooter, SectionHead, PricingLink, type Fonts } from "./chrome";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
+import { useDeferredMotion } from "@/lib/hooks/useDeferredMotion";
 import type { Locale } from "@/lib/i18n/config";
 
 /* ------------------------------------------------------------------ *
@@ -135,6 +136,8 @@ function Hero({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeDict 
 /* 悬浮的“编辑器实景”玻璃卡片（明亮净白） */
 function EditorMock({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
   const reduce = useReducedMotion();
+  const motionReady = useDeferredMotion();
+  const animated = !reduce && motionReady;
   return (
     <motion.div
       initial={{ opacity: 0, y: 60, rotateX: 12 }}
@@ -188,7 +191,7 @@ function EditorMock({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
         {/* 浮动追踪徽标 */}
         <motion.div
           className={`absolute -right-4 top-20 hidden items-center gap-2 rounded-xl border border-border bg-white/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur sm:flex ${fonts.mono}`}
-          animate={reduce ? undefined : { y: [0, -10, 0] }}
+          animate={animated ? { y: [0, -10, 0] } : undefined}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
           <Radar className="h-4 w-4 text-aqua-500" />
@@ -197,7 +200,7 @@ function EditorMock({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
         </motion.div>
         <motion.div
           className={`absolute -left-4 bottom-16 hidden items-center gap-2 rounded-xl border border-border bg-white/95 px-3 py-2 text-xs text-foreground shadow-lg backdrop-blur sm:flex ${fonts.mono}`}
-          animate={reduce ? undefined : { y: [0, 10, 0] }}
+          animate={animated ? { y: [0, 10, 0] } : undefined}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         >
           <MousePointerClick className="h-4 w-4 text-tech" />
@@ -214,6 +217,8 @@ function EditorMock({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
 
 function LogoMarquee({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
   const reduce = useReducedMotion();
+  const motionReady = useDeferredMotion();
+  const animated = !reduce && motionReady;
   const items = [...PLATFORMS, ...PLATFORMS];
   return (
     <section className="relative border-y border-border py-10">
@@ -223,7 +228,7 @@ function LogoMarquee({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
       <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
         <motion.div
           className="flex w-max gap-4"
-          animate={reduce ? undefined : { x: ["0%", "-50%"] }}
+          animate={animated ? { x: ["0%", "-50%"] } : undefined}
           transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
         >
           {items.map((name, i) => (

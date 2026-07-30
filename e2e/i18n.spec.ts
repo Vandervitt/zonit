@@ -96,6 +96,28 @@ test.describe("营销站双语", () => {
     await expect(page.getByRole("heading", { name: "玩具母婴" })).toBeVisible();
   });
 
+  test("模板画廊首屏图片使用高优先级与响应式来源", async ({ page }) => {
+    await page.goto("/templates");
+    const images = page.locator("main section").first().locator("img");
+
+    expect(await images.count()).toBeGreaterThan(3);
+    await expect(images.nth(0)).toHaveAttribute("loading", "eager");
+    await expect(images.nth(0)).toHaveAttribute("fetchpriority", "high");
+    await expect(images.nth(0)).toHaveAttribute("srcset", /400w.*800w.*1200w/);
+    await expect(images.nth(1)).toHaveAttribute("loading", "eager");
+    await expect(images.nth(2)).toHaveAttribute("loading", "eager");
+    await expect(images.nth(3)).toHaveAttribute("loading", "lazy");
+
+    // 画廊按行业分为多个 section，抢占式加载只应发生在首屏首组，
+    // 否则折叠下方的图片会一并抢占带宽，反而拖慢 LCP。
+    await expect(page.locator("main img[loading='eager']")).toHaveCount(3);
+    await expect(page.locator("main img[fetchpriority='high']")).toHaveCount(1);
+    await expect(page.locator("main section").nth(1).locator("img").first()).toHaveAttribute(
+      "loading",
+      "lazy",
+    );
+  });
+
   test("模板详情页：seoIntro 与派生 FAQ 各出对应语言", async ({ page }) => {
     await page.goto("/templates/vitamins");
     await expect(page.getByText(/Vitae Nutrition is a discovery-capture template/)).toBeVisible();
