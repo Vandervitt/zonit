@@ -19,6 +19,7 @@ Read these constraint files before making related changes:
 - Commit rules: `docs/constraints/commit-guidelines.md`
 - Development database migrations: `docs/dev-database-migration-workflow.md`
 - Custom domain publishing (architecture, tenancy rewrite, DNS records, gotchas): `docs/custom-domain-publishing.md`
+- Billing currency (USD pricing, live FX display, Dodo Adaptive Currency, provider parity): `docs/billing-currency.md`
 
 Hard rules:
 
