@@ -6,13 +6,13 @@ import { test, expect } from "@playwright/test";
 test.describe("营销站双语", () => {
   test("/ 渲染英文首页", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ad-ready landing pages");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Turn ad clicks into");
     await expect(page.getByRole("link", { name: "Start free" }).first()).toBeVisible();
   });
 
   test("/zh 渲染中文首页", async ({ page }) => {
     await page.goto("/zh");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("投放级落地页");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("把广告点击");
     await expect(page.getByRole("link", { name: "免费开始" }).first()).toBeVisible();
   });
 
@@ -222,7 +222,7 @@ test.describe("首页按 IP 分流语言", () => {
     const page = await ctx.newPage();
     await page.goto("/");
     await expect(page).toHaveURL(/\/zh$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("投放级落地页");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("把广告点击");
     await ctx.close();
   });
 
@@ -231,7 +231,7 @@ test.describe("首页按 IP 分流语言", () => {
     const page = await ctx.newPage();
     await page.goto("/");
     await expect(page).toHaveURL(/localhost:3001\/$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ad-ready landing pages");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Turn ad clicks into");
     await ctx.close();
   });
 
@@ -246,7 +246,7 @@ test.describe("首页按 IP 分流语言", () => {
 
     await page.reload();
     await expect(page).toHaveURL(/localhost:3001\/$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Ad-ready landing pages");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Turn ad clicks into");
     await ctx.close();
   });
 
