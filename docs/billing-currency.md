@@ -28,6 +28,14 @@
 
 换汇费 4%（订单 <$500），默认由客户承担；开启 **Fees Inclusive** 后由商户吸收，客户看到的 CNY 价与官网「约 ¥xx」一致。**不开 Fees Inclusive 就会出现官网与结账页约 4% 的落差**，务必二选一，不要放任不管。
 
+### ⚠️ 不要给 CNY 加 Localized Pricing 规则
+
+Dodo 另有 **Localized Pricing**（产品编辑页的开关，可按币种或按国家设**固定价**，永不换算）。它与 Adaptive Currency 的关系是：**有匹配规则时 Localized 优先**，且命中规则的交易强制 fees-inclusive。
+
+本项目 2026-07-30 评估后**刻意不用**它，选择了「美元基础价 + Adaptive Currency 自动换算」：一次 Dashboard 开关即覆盖全部国家（含中东、东南亚等 COD 市场），无需给每个产品逐个配规则。
+
+**这构成一条护栏**：一旦有人给 CNY 配了 Localized 固定价（如 ¥138），官网按实时汇率算出的「约 ¥135.41」就与实际扣款不符——那不再是 4% 的费用差，而是随汇率漂移的任意偏差。若将来确实要改用固定人民币价，必须同时改代码：在 `lib/plans.ts` 增加与 Dodo 规则同源的固定 CNY 价，并删除 `lib/pricing/fx*.ts`、`/api/fx/usd-cny` 与字典里的 `approxCny`，中文面改为直显真实价、去掉「约」字。
+
 ### 为什么代码里不传 `adaptive_currency_fees_inclusive`
 
 该参数只存在于 `payments.create` / `subscriptions.create` / `subscriptions.changePlan` 等请求类型上，**`checkoutSessions.create`（本项目建结账会话所用的 API）的 `CheckoutSessionRequest` 没有这个字段**（已核 `node_modules/dodopayments/resources/checkout-sessions.d.ts`）。因此本项目只能依赖 Dashboard 层的设置。
