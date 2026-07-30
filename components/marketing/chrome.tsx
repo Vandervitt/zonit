@@ -10,6 +10,7 @@ import { glowAura } from "@/lib/theme";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import { isActiveNavRoute } from "@/lib/i18n/nav-active";
+import { useDeferredMotion } from "@/lib/hooks/useDeferredMotion";
 import type { Locale } from "@/lib/i18n/config";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 
@@ -58,6 +59,9 @@ export function PricingLink({
 
 export function Backdrop() {
   const reduce = useReducedMotion();
+  // 光斑为全站营销布局共用，循环动画会持续重绘并拖高 Speed Index，故延后到首屏绘制之后。
+  const motionReady = useDeferredMotion();
+  const animated = !reduce && motionReady;
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {/* 细网格 */}
@@ -66,13 +70,15 @@ export function Backdrop() {
       <motion.div
         aria-hidden
         className={`absolute -top-48 left-1/2 h-[460px] w-[760px] -translate-x-1/2 ${glowAura("aqua-400")}`}
-        animate={reduce ? undefined : { opacity: [0.4, 0.6, 0.4], scale: [1, 1.06, 1] }}
+        // initial 与循环首帧一致，避免动画延迟启动时出现亮度跳变
+        initial={{ opacity: 0.4, scale: 1 }}
+        animate={animated ? { opacity: [0.4, 0.6, 0.4], scale: [1, 1.06, 1] } : undefined}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         aria-hidden
         className={`absolute top-32 -right-40 h-[380px] w-[380px] ${glowAura("glow-2")}`}
-        animate={reduce ? undefined : { x: [0, -40, 0], y: [0, 36, 0] }}
+        animate={animated ? { x: [0, -40, 0], y: [0, 36, 0] } : undefined}
         transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
       />
     </div>
