@@ -508,6 +508,77 @@ export const TEMPLATES: TemplateMeta[] = [
     tier: "t1",
     tags: { category: "toys-baby", subcategory: "outdoor-toy", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
   },
+
+  // ---------------------------------------------------------------------
+  // 第二梯队 · 服务与 B2B 线索
+  // 与第一梯队（实物消费品种草）不同，本组品类天然靠留资转化，故多以页内
+  // 留资表单为主 CTA（hero.cta 指向 #lead-form），WhatsApp / 电话作次通道。
+  // ---------------------------------------------------------------------
+  {
+    id: "b2b-sourcing",
+    name: "Meridian Sourcing",
+    industry: { en: "B2B / OEM manufacturing", zh: "B2B / OEM 制造" },
+    tagline: { en: "OEM enquiry page — buyers send specs and get an engineer-led quote.", zh: "OEM 询价落地页，采购方提交规格获取工程师报价。" },
+    seoIntro: {
+      en: "Meridian Sourcing is a request-for-quote template for manufacturers and trading companies selling overseas, turning ad traffic into engineering-qualified enquiries through an on-page RFQ form. Capability lines, staged inspection, and export documentation answer the questions procurement teams actually ask, while an NDA-first stance removes the biggest hesitation buyers have. Built for OEM factories, private-label suppliers, and sourcing agencies running Meta or LinkedIn campaigns that need spec-rich leads rather than casual chats.",
+      zh: "Meridian Sourcing 是面向制造企业与外贸公司出海获客的 RFQ 询价落地页模板，用页内询价表单把广告流量转成带规格的工程询盘。页面以产能线、分阶段质检与出口单证回答采购团队真正关心的问题，并以「先签 NDA」打消图纸外泄顾虑。适合 OEM 工厂、贴牌供应商与采购代理投放 Meta / LinkedIn，承接需要规格与数量的高质量线索。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "b2b", subcategory: "oem-manufacturing", archetype: "consult", conversion: ["form", "whatsapp"], risk: "low", tone: "rational" },
+  },
+  {
+    id: "saas-demo",
+    name: "Flowlane",
+    industry: { en: "B2B / SaaS", zh: "B2B / SaaS" },
+    tagline: { en: "SaaS demo booking page — visitors request a live 30-minute session.", zh: "SaaS demo 预约落地页，访客预约 30 分钟实时演示。" },
+    seoIntro: {
+      en: "Flowlane is a demo-booking template for B2B SaaS going global, turning ad traffic into scheduled sales conversations through an on-page booking form. Outcome metrics, security badges, and an explicitly no-pressure follow-up policy address the two things buyers weigh before giving up their calendar: is this real, and will I be chased. Made for operations, logistics, and workflow SaaS teams running paid acquisition who need qualified demo requests rather than raw newsletter signups.",
+      zh: "Flowlane 是面向出海 B2B SaaS 的 demo 预约落地页模板，用页内预约表单把广告流量转成有排期的销售对话。页面以成效数据、安全合规徽章与「不追着推销」的明确承诺，回应买家交出日历前最在意的两件事：是否靠谱、会不会被骚扰。适合运营、物流与流程类 SaaS 团队做付费投放，承接合格的演示预约而非泛泛订阅。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "b2b", subcategory: "saas-demo", archetype: "demo", conversion: ["form", "email"], risk: "low", tone: "rational" },
+  },
+  {
+    id: "study-abroad",
+    name: "Northbridge Education",
+    industry: { en: "Education / Study abroad", zh: "教育 / 留学" },
+    tagline: { en: "Study abroad page — free WhatsApp course shortlist and study plan.", zh: "留学咨询落地页，WhatsApp 免费选校规划与学习计划。" },
+    seoIntro: {
+      en: "Northbridge Education is a consultation template for study-abroad and language-training agencies, turning ad traffic into WhatsApp enquiries around a free personalised study plan. Course shortlists, entry requirements, and honest timelines replace brochure-speak, while an explicit no-guarantee stance keeps the page compliant in a category where overpromising is rife. Built for education agencies and language schools running Meta or TikTok campaigns that need students to start a real conversation, not just download a PDF.",
+      zh: "Northbridge Education 是面向留学与语言培训机构的咨询留资落地页模板，围绕「免费个性化学习计划」把广告流量转成 WhatsApp 咨询。页面用选校清单、入学要求与真实时间线取代宣传册话术，并明确写出「无人能保证录取」，在这个普遍夸大承诺的品类里守住合规底线。适合留学中介与语言学校投放 Meta / TikTok，承接愿意真正开口咨询的学生线索。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "education", subcategory: "study-abroad", archetype: "consult", conversion: ["whatsapp", "form"], risk: "medium", tone: "emotional" },
+  },
+  {
+    id: "immigration-law",
+    name: "Vantage Immigration",
+    industry: { en: "Legal / Immigration", zh: "法律 / 移民" },
+    tagline: { en: "Immigration consultation page — free written case assessment by form.", zh: "移民咨询落地页，表单提交获取免费书面案情评估。" },
+    seoIntro: {
+      en: "Vantage Immigration is a case-assessment template for immigration and legal practices, turning ad traffic into qualified consultation requests through an on-page assessment form. Eligibility reads, realistic timelines, and document checklists give applicants something concrete before they commit, while explicit disclaimers state that no outcome is guaranteed and that submitting the form creates no client relationship. Built for regulated practitioners and legal firms advertising in a high-scrutiny category where compliant, non-promissory copy is the difference between a running campaign and a banned one.",
+      zh: "Vantage Immigration 是面向移民与法律服务机构的案情评估落地页模板，用页内评估表单把广告流量转成合格咨询线索。页面以资格判断、真实处理时长与材料清单，让申请人在付出任何成本前先拿到实在信息；同时明确声明「无人能保证获批」「提交表单不构成委托关系」。适合持牌顾问与律所在高审查品类投放——在这里，不作承诺的合规文案就是账号能否活下来的分界线。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "legal", subcategory: "immigration", archetype: "consult", conversion: ["form", "phone"], risk: "high", tone: "rational" },
+  },
+  {
+    id: "home-cleaning",
+    name: "Brightline Home Services",
+    industry: { en: "Local services / Home cleaning", zh: "本地服务 / 家庭保洁" },
+    tagline: { en: "Home cleaning page — send photos on WhatsApp, get a quote and a slot.", zh: "家庭保洁落地页，WhatsApp 发照片即获报价与可约时段。" },
+    seoIntro: {
+      en: "Brightline Home Services is a quote-request template for local service businesses, turning neighbourhood ad traffic into WhatsApp enquiries by asking only for photos and a postcode. Vetted-and-insured badges, an agreed checklist, and a no-deposit booking policy remove the trust barriers that stop people letting a stranger into their home. Made for cleaning, maintenance, and home-service operators running local campaigns who need bookable jobs rather than browsing traffic.",
+      zh: "Brightline Home Services 是面向本地生活服务商家的上门报价落地页模板，只要照片和邮编就能把周边投放流量转成 WhatsApp 询价。页面用背调保险徽章、事先确认的清洁清单与「无需预付定金」打消让陌生人进家门的顾虑。适合保洁、维修与到家服务商家做本地投放，承接能直接排期的真实订单线索。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "local-service", subcategory: "home-cleaning", archetype: "consult", conversion: ["whatsapp", "form"], risk: "low", tone: "rational" },
+  },
 ];
 
 export const DEFAULT_TEMPLATE_ID = TEMPLATES[0].id;

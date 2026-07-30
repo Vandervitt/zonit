@@ -49,6 +49,10 @@ export const templates = {
     "toys-baby": "玩具母婴",
     medical: "医疗",
     "home-improvement": "家装",
+    b2b: "B2B 与批发",
+    education: "教育培训",
+    legal: "法律移民",
+    "local-service": "本地服务",
   },
   /** 转化渠道。 */
   conversion: {

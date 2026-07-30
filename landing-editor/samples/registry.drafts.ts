@@ -51,6 +51,12 @@ const loaders: Record<string, DraftLoader> = {
   "baby-care": () => import("./babyCareDraft").then((m) => m.babyCareDraft),
   maternity: () => import("./maternityDraft").then((m) => m.maternityDraft),
   "outdoor-toy": () => import("./outdoorToyDraft").then((m) => m.outdoorToyDraft),
+  // 第二梯队 · 服务与 B2B 线索（表单 / WhatsApp / 电话多通道）
+  "b2b-sourcing": () => import("./b2bSourcingDraft").then((m) => m.b2bSourcingDraft),
+  "saas-demo": () => import("./saasDemoDraft").then((m) => m.saasDemoDraft),
+  "study-abroad": () => import("./studyAbroadDraft").then((m) => m.studyAbroadDraft),
+  "immigration-law": () => import("./immigrationLawDraft").then((m) => m.immigrationLawDraft),
+  "home-cleaning": () => import("./homeServicesDraft").then((m) => m.homeServicesDraft),
 };
 
 /** 按 id 异步加载模板草稿体；缺省或未命中时回退默认模板。
