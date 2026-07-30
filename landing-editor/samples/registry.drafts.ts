@@ -60,6 +60,13 @@ const loaders: Record<string, DraftLoader> = {
   "industrial-equipment": () => import("./industrialEquipmentDraft").then((m) => m.industrialEquipmentDraft),
   "custom-packaging": () => import("./packagingCustomDraft").then((m) => m.packagingCustomDraft),
   "freight-forwarding": () => import("./freightForwardingDraft").then((m) => m.freightForwardingDraft),
+  "language-training": () => import("./languageTrainingDraft").then((m) => m.languageTrainingDraft),
+  "online-skills": () => import("./onlineSkillsDraft").then((m) => m.onlineSkillsDraft),
+  "k12-tutoring": () => import("./k12TutoringDraft").then((m) => m.k12TutoringDraft),
+  moving: () => import("./movingServiceDraft").then((m) => m.movingServiceDraft),
+  hvac: () => import("./hvacRepairDraft").then((m) => m.hvacRepairDraft),
+  roofing: () => import("./roofingExteriorDraft").then((m) => m.roofingExteriorDraft),
+  landscaping: () => import("./landscapingDraft").then((m) => m.landscapingDraft),
 };
 
 /** 按 id 异步加载模板草稿体；缺省或未命中时回退默认模板。
