@@ -286,10 +286,15 @@ export type LandingSection =
 
 export type LandingSectionType = LandingSection['type'];
 
-/** 留资表单单字段配置（预设字段，只能开关 + 必填）。 */
+/**
+ * 留资表单单字段配置（预设字段，只能开关 + 必填 + 改标签）。
+ * label 可选：缺省由渲染器回退到英文标签（落地页面向海外访客）；
+ * 填了则覆盖，供非英语市场（西语 / 阿语等）自行本地化。
+ */
 export interface LeadFormFieldConfig {
   enabled: boolean;
   required: boolean;
+  label?: string;
 }
 
 /** 兜底留资表单（页面级可选件，默认关；转化优先走深链）。 */

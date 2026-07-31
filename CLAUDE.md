@@ -12,6 +12,7 @@ Read these constraint files before making related changes:
 
 - Product scope and positioning: `docs/constraints/product-positioning.md`
 - Landing page schema rules: `docs/constraints/landing-page-schema.md`
+- Lead capture channels (form-as-primary conversion, anchor CTA, template authoring): `docs/lead-capture-channels.md`
 - Coding style: `docs/constraints/coding-style.md`
 - Frontend styling rules: `docs/constraints/frontend-style.md`
 - Testing and validation: `docs/constraints/testing-and-validation.md`

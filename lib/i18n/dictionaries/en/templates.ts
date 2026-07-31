@@ -50,6 +50,10 @@ export const templates = {
     "toys-baby": "Toys & baby",
     medical: "Medical",
     "home-improvement": "Home improvement",
+    b2b: "B2B & wholesale",
+    education: "Education & training",
+    legal: "Legal & immigration",
+    "local-service": "Local services",
   },
   /** 转化渠道。 */
   conversion: {

@@ -28,10 +28,11 @@ export const createFloatingButton = (): FloatingButton => ({
 
 export const createLeadForm = (): LeadForm => ({
   enabled: true,
-  title: "留下联系方式，我们尽快回复",
+  // 落地页面向海外访客，默认文案用英文；需要其它语言时在编辑器里改。
+  title: "Leave your details and we'll get back to you",
   description: "",
-  submitText: "提交",
-  successMessage: "已收到，我们会尽快联系你！",
+  submitText: "Send",
+  successMessage: "Thanks — we'll be in touch shortly.",
   fields: {
     name:     { enabled: true,  required: false },
     email:    { enabled: true,  required: false },

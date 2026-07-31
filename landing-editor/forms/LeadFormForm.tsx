@@ -1,6 +1,7 @@
 "use client";
 // landing-editor/forms/LeadFormForm.tsx
-// 留资表单页面级配置面板。固定字段集，各字段开关 + 必填。
+// 留资表单页面级配置面板。固定字段集，各字段开关 + 必填 + 前台标签。
+// 左侧中文是后台的字段名（给运营看），label 输入框填的是访客在落地页上看到的文案。
 import type { LeadForm, LeadFormFieldConfig } from "@/types/schema.draft";
 import { LEAD_CONTACT_FIELDS } from "@/types/schema.draft";
 import { Field } from "../ui/Field";
@@ -13,6 +14,15 @@ const FIELD_LABELS: Record<string, string> = {
   whatsapp: "WhatsApp",
   telegram: "Telegram",
   message: "留言",
+};
+/** 访客在落地页上看到的缺省标签，与渲染器保持一致，仅用于输入框占位提示。 */
+const FRONT_LABEL_DEFAULTS: Record<string, string> = {
+  name: "Name",
+  email: "Email",
+  phone: "Phone",
+  whatsapp: "WhatsApp",
+  telegram: "Telegram",
+  message: "Message",
 };
 const FIELD_ORDER = ["name", "email", "phone", "whatsapp", "telegram", "message"] as const;
 
@@ -42,27 +52,36 @@ export function LeadFormForm({ value, onChange }: { value: LeadForm; onChange: (
         <div className="mb-2 text-xs font-medium text-ink-soft">字段（至少启用一个联系方式）</div>
         <div className="space-y-1.5">
           {FIELD_ORDER.map((k) => (
-            <div key={k} className="flex items-center justify-between gap-2 text-sm">
-              <span className="text-ink">{FIELD_LABELS[k]}</span>
-              <div className="flex items-center gap-3 text-xs text-ink-soft">
-                <label className="flex items-center gap-1">
-                  <input
-                    type="checkbox"
-                    checked={value.fields[k].enabled}
-                    onChange={(e) => patchField(k, { enabled: e.target.checked })}
-                  />
-                  启用
-                </label>
-                <label className="flex items-center gap-1">
-                  <input
-                    type="checkbox"
-                    checked={value.fields[k].required}
-                    disabled={!value.fields[k].enabled}
-                    onChange={(e) => patchField(k, { required: e.target.checked })}
-                  />
-                  必填
-                </label>
+            <div key={k} className="space-y-1.5">
+              <div className="flex items-center justify-between gap-2 text-sm">
+                <span className="text-ink">{FIELD_LABELS[k]}</span>
+                <div className="flex items-center gap-3 text-xs text-ink-soft">
+                  <label className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={value.fields[k].enabled}
+                      onChange={(e) => patchField(k, { enabled: e.target.checked })}
+                    />
+                    启用
+                  </label>
+                  <label className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={value.fields[k].required}
+                      disabled={!value.fields[k].enabled}
+                      onChange={(e) => patchField(k, { required: e.target.checked })}
+                    />
+                    必填
+                  </label>
+                </div>
               </div>
+              {value.fields[k].enabled ? (
+                <TextInput
+                  value={value.fields[k].label ?? ""}
+                  onChange={(e) => patchField(k, { label: e.target.value })}
+                  placeholder={`前台标签（留空用 ${FRONT_LABEL_DEFAULTS[k]}）`}
+                />
+              ) : null}
             </div>
           ))}
         </div>
