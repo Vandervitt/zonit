@@ -90,6 +90,8 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
           : json.error === "domain_not_verified" ? "所选域名未验证"
           : json.error === "path_invalid" ? "路径格式不合法：只能用小写字母、数字和连字符，最多两级"
           : json.error === "path_reserved" ? "该路径为平台保留，请换一个"
+          : json.error === "publish_quota_exceeded"
+            ? `已发布 ${json.published ?? ""} 张，达到套餐额度${json.limit ? ` ${json.limit} 张` : ""}。请先取消发布其他页面，或升级套餐。`
           : "发布失败",
         );
         return;

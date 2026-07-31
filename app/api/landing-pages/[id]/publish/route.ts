@@ -9,6 +9,7 @@ import { getDomainById, bindDomainToLandingPage } from "@/lib/domains-db";
 import { isReservedRoutePath, normalizeRoutePath, ROOT_PATH } from "@/lib/domains/route-path";
 import { addDomainToProject } from "@/lib/vercel";
 import { recordMilestone } from "@/lib/platform-milestones";
+import { getPublishQuotaStatus } from "@/lib/publish-quota-db";
 
 export async function POST(request: NextRequest, ctx: RouteContext<"/api/landing-pages/[id]/publish">) {
   const session = await auth();
@@ -19,6 +20,19 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/landing
 
   const page = await getLandingPage(id, session.user.id);
   if (!page) return NextResponse.json({ error: ApiErrors.NOT_FOUND }, { status: 404 });
+
+  // 发布额度 = landingPagesLimit。达标者不受影响；超额时禁止「新增」发布，
+  // 但已发布页的「更新发布」必须放行 —— 否则超额客户连改错别字都做不到，
+  // 而那并不会增加线上页数。
+  if (page.status !== "published") {
+    const quota = await getPublishQuotaStatus(session.user.id, new Date());
+    if (quota && quota.publishedCount >= quota.limit) {
+      return NextResponse.json(
+        { error: ApiErrors.PUBLISH_QUOTA_EXCEEDED, limit: quota.limit, published: quota.publishedCount },
+        { status: 403 },
+      );
+    }
+  }
 
   // 与客户端 ValidationBar / 发布按钮同一份门槛（collectPublishIssues），两端标准一致。
   if (!isLandingPageStructureValid(page.data) || collectPublishIssues(page.data).length > 0) {

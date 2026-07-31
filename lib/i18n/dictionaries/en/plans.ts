@@ -71,9 +71,15 @@ export const plans = {
       "Visual content editor",
       "Online preview (publishing needs a paid plan and domain)",
     ],
-    starter: ["3 landing pages + 1 custom domain", "1× Meta Pixel tracking"],
+    starter: [
+      "5 landing pages, each on its own path under one domain",
+      "1 custom domain",
+      "Built for one brand with several service pages — clinics, law firms, tutors",
+      "1× Meta Pixel tracking",
+    ],
     pro: [
       "20 landing pages + 5 domains",
+      "Separate domains to isolate campaigns when running several offers",
       "Platform watermark removed",
       "Meta / TikTok / Google tracking + Meta / TikTok CAPI",
     ],

@@ -8,13 +8,15 @@ import { flushEvents } from "@/lib/capi/dispatch";
 import { getRetryableDeliveries } from "@/lib/webhooks/deliveries-store";
 import { deliverMany } from "@/lib/webhooks/dispatch";
 import { computeWeeklyDigests, trendText } from "@/lib/digest";
+import { sweepPublishQuota } from "@/lib/publish-quota-sweep";
 import { sendWeeklyDigestEmail, sendLeadNudgeEmail } from "@/lib/email";
 import { Routes } from "@/lib/constants";
 
 /**
  * 每日 cron 编排器（Vercel Hobby 计划 cron 数量有限，多任务合并为一条）：
  * ① 线索兜底重投 ② CAPI 兜底重发 ③ 线索 webhook 兜底重投 ④ 未读线索提醒
- * ⑤ 限频计数清理 ⑥ 周报摘要（仅周一实际发送，?digest=force 可强制）。
+ * ⑤ 限频计数清理 ⑥ 周报摘要（仅周一实际发送，?digest=force 可强制）
+ * ⑦ 发布配额对账与降档宽限。
  * 各任务相互隔离：任一失败不影响其余任务。鉴权用 CRON_SECRET。
  */
 export async function GET(request: NextRequest) {
@@ -78,6 +80,17 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error("cron/daily lead-nudge failed:", err);
     result.leadNudgeError = true;
+  }
+
+  // 发布配额对账：降档没有可埋点的时刻（effectivePlan 读时计算、comp_plan 过期
+  // 纯时间驱动），只能每日重算「当前是否超额」。放在线索类任务之后——它会取消
+  // 发布页面，是本编排器里唯一改变客户线上状态的任务，应在数据类任务落定后再跑。
+  try {
+    const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+    result.publishQuota = await sweepPublishQuota(now, appUrl);
+  } catch (err) {
+    console.error("cron/daily publish-quota sweep failed:", err);
+    result.publishQuotaError = true;
   }
 
   // 限频计数行清理：留 24 小时足够任何窗口回看，再久只是占空间。
