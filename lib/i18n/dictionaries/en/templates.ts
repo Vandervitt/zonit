@@ -1,18 +1,18 @@
 export const templates = {
   meta: {
-    title: "30+ overseas lead-gen landing page templates — pick by industry | Zap Bridge",
+    title: "{templates} lead-gen landing page templates — pick by industry | Zap Bridge",
     description:
-      "Lead-gen landing page templates for beauty, apparel, consumer tech, home, supplements, and baby care: WhatsApp and form capture patterns, ad-ready structure, compliant footer out of the box. Pick one and make it yours in minutes.",
-    ogTitle: "30+ overseas lead-gen landing page templates | Zap Bridge",
+      "Lead-gen landing page templates across {industries} industries — clinics, legal and immigration, education, home improvement and local services, B2B sourcing, plus beauty, apparel, home, and supplements. Form, WhatsApp, and phone capture patterns with a compliant footer out of the box.",
+    ogTitle: "{templates} lead-gen landing page templates | Zap Bridge",
     ogDescription:
-      "Pick an ad-ready lead-gen template by industry, swap the content, connect your domain, and publish — no blank page to start from.",
+      "Pick a lead-gen template by industry, swap the content, connect your domain, and publish — no blank page to start from.",
   },
   gallery: {
     kicker: "Templates",
-    title: "Overseas lead-gen template library",
+    title: "Lead-gen template library",
     /** `{templates}` 与 `{industries}` 会被替换为实际数量。 */
     subtitle:
-      "{templates} ad-ready lead-capture templates across {industries} industries. All of them are inquiry and lead-capture patterns (WhatsApp / form / phone) with a compliant footer built in — pick one, swap the content, publish to your own domain.",
+      "{templates} lead-capture templates across {industries} industries. All of them are inquiry and lead-capture patterns (form / WhatsApp / phone) with a compliant footer built in — pick one, swap the content, publish to your own domain.",
     cta: "Start free · 7 days of Pro on sign-up",
     /** 卡片上的转化标签，如 "WhatsApp capture"。`{channel}` 为渠道名。 */
     captureTag: "{channel} capture",

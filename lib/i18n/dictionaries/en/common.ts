@@ -3,7 +3,6 @@ export const common = {
   nav: {
     templates: "Templates",
     guides: "Guides",
-    antiBan: "Anti-duplication",
     pricing: "Pricing",
     login: "Log in",
     register: "Start free",

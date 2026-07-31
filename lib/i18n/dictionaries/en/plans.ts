@@ -28,7 +28,8 @@ export const plans = {
     },
     templates: {
       label: "Lead-gen templates",
-      desc: "30+ inquiry and lead-capture templates as your editing starting point",
+      // 不写死数量：模板库还在增长，而本表在客户端渲染，拿不到注册表口径。
+      desc: "Every inquiry and lead-capture template in the library, as your editing starting point",
     },
     editor: {
       label: "Visual content editor",
@@ -66,7 +67,7 @@ export const plans = {
   highlights: {
     free: [
       "1 landing page",
-      "All 30+ lead-gen templates",
+      "The full lead-gen template library",
       "Visual content editor",
       "Online preview (publishing needs a paid plan and domain)",
     ],

@@ -6,6 +6,7 @@ import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { categoryLabel, conversionLabel, archetypeLabel } from "@/landing-editor/samples/templateFilter";
 import { Routes, templateDetailPath } from "@/lib/constants";
 import { marketingMetadata } from "@/lib/seo/site";
+import { fillCounts } from "@/lib/templates/stats";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import { buildUnsplashImageSources } from "@/lib/images/unsplash";
@@ -17,11 +18,11 @@ export function templateGalleryMetadata(locale: Locale): Metadata {
   const t = getDictionary(locale).templates.meta;
   return marketingMetadata({
     locale,
-    title: t.title,
-    description: t.description,
+    title: fillCounts(t.title),
+    description: fillCounts(t.description),
     path: Routes.Templates,
-    ogTitle: t.ogTitle,
-    ogDescription: t.ogDescription,
+    ogTitle: fillCounts(t.ogTitle),
+    ogDescription: fillCounts(t.ogDescription),
   });
 }
 
@@ -70,7 +71,8 @@ export function TemplateGalleryView({ locale }: { locale: Locale }) {
         </header>
 
         {groups.map((g, groupIndex) => (
-          <section key={g.category} className="mt-16">
+          // id 供首页「按行业选」chip 直接锚到本行业分组；scroll-mt 避开固定导航条。
+          <section key={g.category} id={g.category} className="mt-16 scroll-mt-28">
             <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>{g.label}</h2>
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {g.items.map((tpl, index) => {

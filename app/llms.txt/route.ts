@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { hostnameOf, isCustomDomain } from "@/lib/host";
 import { SITE_URL, SITE_NAME } from "@/lib/seo/site";
+import { TEMPLATE_STATS } from "@/lib/templates/stats";
 
 // 平台主站 llms.txt（GEO）：给生成式引擎/LLM 一份可读的站点摘要与关键链接，
 // 便于被 AI 摘要准确理解与引用。
@@ -16,10 +17,11 @@ export async function GET() {
 
   const body = `# ${SITE_NAME}
 
-> An ad-ready landing page platform for overseas lead generation: 30+ industry templates plus AI full-page drafting get a first version out in minutes, published to your own brand domain, with pixels, UTMs, server-side conversion forwarding, and anti-duplication built in.
+> A lead-gen landing page platform for businesses that run on inquiries: ${TEMPLATE_STATS.templates} templates across ${TEMPLATE_STATS.industries} industries plus AI full-page drafting get a first version out in minutes, published to your own brand domain, with every lead landing in one inbox and pixels, UTMs, server-side conversion forwarding, and anti-duplication built in.
 
 ## Core capabilities
-- 30+ industry lead-gen landing page templates (beauty, apparel, consumer tech, home, supplements, toys & baby), built around WhatsApp and form capture patterns
+- ${TEMPLATE_STATS.templates} lead-gen landing page templates across ${TEMPLATE_STATS.industries} industries — medical and dental clinics, legal and immigration, education and training, home improvement and local services, B2B and wholesale sourcing, plus beauty, apparel, consumer tech, home, supplements, and toys & baby — built around form, WhatsApp, and phone capture patterns
+- Lead handling: form submits, WhatsApp taps, and phone clicks collected in one inbox, with email alerts, a daily reminder for unread leads, one-tap reply, delivery visibility, CSV export, and (Pro and above) webhook delivery to CRM or Zapier
 - AI full-page drafting: generate a first version from your industry and campaign goal, then refine it in the visual editor
 - One-click publishing to your own brand domain, with DNS and certificates configured automatically
 - Attribution: Meta / TikTok / Google pixels, UTMs, and server-side conversion forwarding (CAPI), unlocked by plan

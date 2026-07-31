@@ -3,7 +3,6 @@ export const common = {
   nav: {
     templates: "模板库",
     guides: "指南",
-    antiBan: "反同质化",
     pricing: "套餐定价",
     login: "登录",
     register: "免费开始",

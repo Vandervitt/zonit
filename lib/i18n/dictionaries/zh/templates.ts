@@ -1,17 +1,17 @@
 export const templates = {
   meta: {
-    title: "30+ 海外获客落地页模板库 — 按行业挑选，直接开始 | Zap Bridge",
+    title: "{templates} 套海外获客落地页模板 — 按行业挑选，直接开始 | Zap Bridge",
     description:
-      "覆盖美妆、服饰、3C、家居、保健、母婴等行业的海外获客落地页模板：WhatsApp / 表单留资范式、投放级结构、合规页脚开箱即用。挑一套喜欢的，几分钟改成你自己的页面。",
-    ogTitle: "30+ 海外获客落地页模板库 | Zap Bridge",
-    ogDescription: "按行业挑一套投放级获客落地页模板，改内容、绑域名、发布上线——不用从空白页开始。",
+      "覆盖 {industries} 个行业的海外获客落地页模板：牙科诊所与医疗、法律移民、教育培训、家装与本地服务、B2B 批发与工厂，以及美妆、服饰、3C、家居、保健、母婴。表单 / WhatsApp / 电话留资范式，合规页脚开箱即用。",
+    ogTitle: "{templates} 套海外获客落地页模板 | Zap Bridge",
+    ogDescription: "按行业挑一套获客落地页模板，改内容、绑域名、发布上线——不用从空白页开始。",
   },
   gallery: {
     kicker: "Templates",
     title: "海外获客落地页模板库",
     /** `{templates}` 与 `{industries}` 会被替换为实际数量。 */
     subtitle:
-      "{templates} 套投放级留资模板，覆盖 {industries} 个行业。全部为咨询与留资范式（WhatsApp / 表单 / 电话），自带合规页脚——挑一套，改内容，发布到你自己的域名。",
+      "{templates} 套留资模板，覆盖 {industries} 个行业。全部为咨询与留资范式（表单 / WhatsApp / 电话），自带合规页脚——挑一套，改内容，发布到你自己的域名。",
     cta: "免费开始 · 注册即赠 Pro 7 天",
     /** 卡片上的转化标签，如「WhatsApp 留资」。`{channel}` 为渠道名。 */
     captureTag: "{channel}留资",

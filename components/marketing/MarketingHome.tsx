@@ -23,6 +23,7 @@ import { Backdrop, SiteNav, SiteFooter, SectionHead, PricingLink, type Fonts } f
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import { useDeferredMotion } from "@/lib/hooks/useDeferredMotion";
+import { fillTemplateCounts, type TemplateStats } from "@/lib/templates/counts";
 import type { Locale } from "@/lib/i18n/config";
 
 /* ------------------------------------------------------------------ *
@@ -31,28 +32,37 @@ import type { Locale } from "@/lib/i18n/config";
 
 type HomeDict = Dictionary["home"];
 
+/** 文案里 `{templates}` / `{industries}` 占位符的替换器（数量由服务端下传）。 */
+type Fill = (text: string) => string;
+
+/** 单个行业大类及其模板数（由服务端按注册表算好下传）。 */
+export type IndustryStat = { category: string; count: number };
+
 // 第三方平台品牌名，不翻译。
+// 只列访客认得出的平台名：CAPI / Events API 这类实现层术语不进第二屏，
+// 它们属于下方追踪区展开讲的机制，放在这里等于在讲清价值之前先劝退。
 const PLATFORMS = [
   "Meta Pixel",
-  "Meta CAPI",
+  "Meta Ads",
+  "TikTok Pixel",
+  "TikTok Ads",
   "Google Ads",
   "Google Analytics 4",
-  "TikTok Pixel",
-  "TikTok Events API",
 ];
 
 const STEP_ICONS = [LayoutTemplate, Pencil, Globe] as const;
 const STEP_NOS = ["01", "02", "03"] as const;
 
-// 顺序即卡片顺序：反同质化排最后——它只在 Agency 档解锁，且对正规品牌客户
-// 是需要解释才不误会的能力，不该抢在核心能力之前。
+// 顺序即卡片顺序：
+// - 「一条询盘都不会丢」排第三：它是相对建站工具的真正差异点，不该埋在第六位；
+// - 反同质化排最后——它只在 Agency 档解锁，且对正规品牌客户是需要解释才不误会的能力。
 const FEATURE_ICONS = {
   templates: LayoutTemplate,
   editor: Pencil,
+  leads: Inbox,
   ai: Sparkles,
   domain: Globe,
   tracking: Radar,
-  leads: Inbox,
   antiBan: ShieldCheck,
 } as const;
 
@@ -251,10 +261,78 @@ function LogoMarquee({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
 }
 
 /* ------------------------------------------------------------------ *
+ * 按行业选（"这是给我的吗"）
+ * ------------------------------------------------------------------ */
+
+/**
+ * 首屏之后立刻回答访客的第一个问题：我这行有没有现成的东西。
+ * 模板库覆盖的行业远超首页原先举例的电商类目（诊所 / 律所 / 家装 / 教培 / B2B 均有），
+ * 这一屏把整个模板库的行业面直接摊开，每个 chip 落到模板库对应行业分组的锚点。
+ */
+function Industries({
+  fonts,
+  locale,
+  t,
+  fill,
+  industries,
+}: {
+  fonts: Fonts;
+  locale: Locale;
+  t: HomeDict;
+  fill: Fill;
+  industries: IndustryStat[];
+}) {
+  const labels = getDictionary(locale).templates.category as Record<string, string>;
+  return (
+    <section className="relative px-6 py-24">
+      <SectionHead
+        kicker={t.industries.kicker}
+        title={t.industries.title}
+        desc={fill(t.industries.desc)}
+        fonts={fonts}
+      />
+      <div className="mx-auto mt-12 flex max-w-4xl flex-wrap justify-center gap-3">
+        {industries.map(({ category, count }, i) => (
+          <motion.div
+            key={category}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.4, delay: Math.min(i, 6) * 0.05, ease: "easeOut" }}
+          >
+            <Link
+              href={`${localePath(locale, Routes.Templates)}#${category}`}
+              className="group flex items-center gap-2 rounded-full border border-border bg-white px-4 py-2 text-sm text-foreground/80 shadow-sm transition-all hover:-translate-y-0.5 hover:border-aqua-300 hover:text-aqua-700"
+            >
+              {labels[category] ?? category}
+              <span className={`text-xs text-muted-foreground ${fonts.mono}`}>
+                {(count === 1 ? t.industries.countLabel.one : t.industries.countLabel.other).replace(
+                  "{count}",
+                  String(count),
+                )}
+              </span>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+      <p className="mt-10 text-center">
+        <Link
+          href={localePath(locale, Routes.Templates)}
+          className="inline-flex items-center gap-1 text-sm font-medium text-aqua-600 transition-colors hover:text-aqua-700"
+        >
+          {t.industries.cta}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </p>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ *
  * 三步流程
  * ------------------------------------------------------------------ */
 
-function Steps({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
+function Steps({ fonts, t, fill }: { fonts: Fonts; t: HomeDict; fill: Fill }) {
   return (
     <section className="relative px-6 py-24">
       <SectionHead
@@ -286,7 +364,7 @@ function Steps({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
                 <span className={`text-3xl font-bold text-aqua-200 ${fonts.display}`}>{no}</span>
               </div>
               <h3 className={`mt-5 text-lg font-semibold text-foreground ${fonts.display}`}>{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{fill(desc)}</p>
             </motion.div>
             );
           })}
@@ -300,7 +378,17 @@ function Steps({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
  * 功能网格
  * ------------------------------------------------------------------ */
 
-function Features({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeDict }) {
+function Features({
+  fonts,
+  locale,
+  t,
+  fill,
+}: {
+  fonts: Fonts;
+  locale: Locale;
+  t: HomeDict;
+  fill: Fill;
+}) {
   // 仅反同质化一项带跳转链接，其余为纯展示卡片。
   const items = (Object.keys(FEATURE_ICONS) as (keyof typeof FEATURE_ICONS)[]).map((key) => {
     const item = t.features.items[key];
@@ -321,7 +409,7 @@ function Features({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeD
       <SectionHead
         kicker={t.features.kicker}
         title={t.features.title}
-        desc={t.features.desc}
+        desc={fill(t.features.desc)}
         fonts={fonts}
       />
       <div className="mx-auto mt-16 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -338,7 +426,7 @@ function Features({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeD
               <Icon className="h-5 w-5" />
             </span>
             <h3 className={`mt-5 text-lg font-semibold text-foreground ${fonts.display}`}>{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{fill(desc)}</p>
             {link && (
               <Link
                 href={link.href}
@@ -502,13 +590,20 @@ export default function MarketingHome({
   fonts,
   locale,
   cnyRate,
+  stats,
+  industries,
 }: {
   fonts: Fonts;
   locale: Locale;
   /** 人民币参考换算汇率，由服务端页面取好下传（英文面为 null）。 */
   cnyRate?: number | null;
+  /** 模板库口径，由服务端页面按注册表算好下传（避免注册表进客户端 bundle）。 */
+  stats: TemplateStats;
+  /** 行业大类及模板数，同上。 */
+  industries: IndustryStat[];
 }) {
   const t = getDictionary(locale).home;
+  const fill: Fill = (text) => fillTemplateCounts(text, stats);
   return (
     <div className={`relative min-h-screen bg-background text-foreground ${fonts.body}`}>
       <Backdrop />
@@ -517,8 +612,9 @@ export default function MarketingHome({
         <main>
           <Hero fonts={fonts} locale={locale} t={t} />
           <LogoMarquee fonts={fonts} t={t} />
-          <Steps fonts={fonts} t={t} />
-          <Features fonts={fonts} locale={locale} t={t} />
+          <Industries fonts={fonts} locale={locale} t={t} fill={fill} industries={industries} />
+          <Steps fonts={fonts} t={t} fill={fill} />
+          <Features fonts={fonts} locale={locale} t={t} fill={fill} />
           <TrackingShowcase fonts={fonts} t={t} />
           <Pricing fonts={fonts} locale={locale} t={t} cnyRate={cnyRate} />
           <FinalCTA fonts={fonts} locale={locale} t={t} />

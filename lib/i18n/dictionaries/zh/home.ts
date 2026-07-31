@@ -1,18 +1,21 @@
+// 中文面受众是出海获客的中小企业与代运营，保留「海外获客」叙事（英文面则按本地读者视角改写）。
+// 数量一律用 {templates} / {industries} 占位符，由 lib/templates/stats.ts 按注册表实际内容替换。
 export const home = {
   meta: {
-    title: "Zap Bridge — 投放级海外获客落地页",
+    title: "Zap Bridge — 把访客变成能打通的联系方式",
     description:
-      "为海外获客打造的投放级落地页：30+ 行业模板起步，AI 整页成稿，几分钟出第一版；像素、UTM 与服务端转化回传一站配好，广告费花在能归因、能转化的页面上。",
+      "为海外获客打造的留资落地页：{templates} 套模板覆盖 {industries} 个行业，AI 整页成稿，几分钟出第一版。表单、WhatsApp、电话，每条询盘都进同一个收件箱，一条都不丢。",
     ogDescription:
-      "30+ 咨询与留资模板 + AI 整页成稿，几分钟做出第一版；发布到自有品牌域名，并按套餐配置 Meta、TikTok 与 Google 追踪归因。",
+      "{templates} 套咨询与留资模板，覆盖 {industries} 个行业，AI 整页成稿几分钟出第一版；发布到自有品牌域名，所有线索归集到一个收件箱。",
   },
   hero: {
-    badge: "为海外获客而生",
-    titleLine1: "把广告点击",
-    titleLine2: "变成 WhatsApp 询盘",
+    badge: "为获客而生",
+    titleLine1: "把访客变成",
+    titleLine2: "能打通的联系方式",
     // 首屏讲结果不讲机制：像素 / UTM / CAPI 等术语一律留到下方追踪区再展开。
+    // 也不锁死流量来源（广告 / SEO / 社媒同样成立）与转化渠道（表单 / WhatsApp / 电话）。
     subtitle:
-      "选一套获客模板，让 AI 照着你的业务把整页写完，再发布到你自己的域名——一个下午就能上线第一版。每条询盘直接进你的收件箱，广告平台也能学到哪些点击真的转化了。",
+      "选一套获客模板，让 AI 照着你的业务把整页写完，再发布到你自己的域名——一个下午就能上线第一版。表单、WhatsApp、电话，每条询盘都进你的收件箱，中途一条都不会丢。",
     ctaPrimary: "免费开始",
     ctaSecondary: "查看套餐",
     note: "注册即赠 Pro 全功能 7 天 · 无需信用卡 · 无需写一行代码",
@@ -24,14 +27,22 @@ export const home = {
   marquee: {
     heading: "支持接入这些投放与分析工具",
   },
+  industries: {
+    kicker: "适合谁",
+    title: "不管你做哪一行，都有现成的起点",
+    desc: "{templates} 套获客模板覆盖 {industries} 个行业——诊所与律所、装修与本地服务、教培与留学、B2B 批发与工厂，也包括美妆服饰家居保健。选你的行业，从一套已经懂你怎么接询盘的页面开始。",
+    /** `{count}` 会被替换为该行业下的模板数；中文无单复数变化，两个形态取同值。 */
+    countLabel: { one: "{count} 套", other: "{count} 套" },
+    cta: "浏览完整模板库",
+  },
   steps: {
-    kicker: "// 三步上线",
-    title: "从选模板到上线投放，只需三步",
+    kicker: "三步上线",
+    title: "从选模板到页面上线，只需三步",
     desc: "页面制作全程可视化，不用写一行代码，也不用等开发排期。创建、编辑与预览完全免费；发布到自有域名为付费套餐权益。",
     items: [
       {
         title: "选一套获客模板",
-        desc: "从 30+ 海外获客模板中选择适合的行业与咨询场景，快速搭好页面结构和内容起点。",
+        desc: "从 {templates} 套模板中选择适合你行业、也贴合客户联系方式的一套，快速搭好页面结构和内容起点。",
       },
       {
         title: "可视化编辑内容",
@@ -44,72 +55,72 @@ export const home = {
     ],
   },
   features: {
-    kicker: "// 为转化而生",
+    kicker: "为转化而生",
     title: "转化所需的每一环，都替你备齐",
-    desc: "页面、AI 文案、域名、追踪、线索——先把咨询与留资页做好，再按投放节奏逐步启用。",
+    desc: "页面、AI 文案、线索、域名、追踪——先把咨询与留资页做好，再按业务节奏逐步启用。",
     items: {
       templates: {
-        title: "海外获客模板库",
-        desc: "30+ 套咨询与留资模板，覆盖美妆、医美、服饰、家居、数码、保健、母婴等行业——不用从空白页开始，选完即有投放级页面结构。",
+        title: "获客模板库",
+        desc: "{templates} 套咨询与留资模板，覆盖 {industries} 个行业：牙科诊所与医疗、法律移民、教育培训、家装与本地服务、B2B 批发与工厂，以及美妆、服饰、家居、保健、母婴——不用从空白页开始。",
       },
       editor: {
         title: "可视化内容编辑",
-        desc: "区块表单改文案与图片，拖拽排序、自动保存，桌面与移动端实时预览——所见即投放所得，不用等开发排期。",
+        desc: "区块表单改文案与图片，拖拽排序、自动保存，桌面与移动端实时预览——所见即所得，不用等开发排期。",
+      },
+      leads: {
+        title: "一条询盘都不会丢",
+        desc: "表单提交、WhatsApp 点击与电话点击统一归集到一个收件箱，新线索到达即发邮件，未跟进的第二天还会再提醒一次。一键回拨或回信，能看到每封通知到底送达没有，随时导出 CSV；Pro 及以上还能把每条线索实时 POST 到你的 CRM 或 Zapier。",
       },
       domain: {
         title: "自有品牌域名发布",
         desc: "付费套餐绑定自有品牌域名，完成 DNS 验证即可发布；独立 SEO 标题、描述与分享图，访客看到的始终是你的品牌。",
       },
       tracking: {
-        title: "多平台追踪 + 转化回传",
-        desc: "按套餐配置 Meta、TikTok、GA4 与 Google Ads；Pro 及以上支持 Meta / TikTok 服务端转化回传与 UTM 来源记录，给广告平台更完整的转化信号。",
+        title: "看清哪些流量真的会转化",
+        desc: "访问量、CTA 点击和每条线索的来源集中在一个看板里。按套餐接入 Meta、TikTok、GA4 与 Google Ads，让广告平台知道哪些点击变成了真实询盘，而不是靠猜。",
+      },
+      ai: {
+        title: "AI 一键生成 & 智能改写",
+        desc: "输入业务资料，AI 按当前模板生成整页营销文案与图库配图，也可逐段改写——初稿几分钟就有；发布前仍需核对事实、案例与素材。",
       },
       antiBan: {
         title: "反同质化",
         desc: "Agency 套餐可一键更换页面变体种子：内容不变，Hero 布局、包裹结构与 meta 标识随种子改变，降低同模板页面被平台判重的概率。",
         linkLabel: "了解反同质化机制",
       },
-      leads: {
-        title: "线索直接送到你手上",
-        desc: "表单提交与 WhatsApp 点击统一归集到一个收件箱，新线索到达即发邮件提醒；随时导出 CSV，Pro 及以上还能把每条线索实时 POST 到你的 CRM 或 Zapier，并按周收一封汇总邮件。",
-      },
-      ai: {
-        title: "AI 一键生成 & 智能改写",
-        desc: "输入业务资料，AI 按当前模板生成整页营销文案与图库配图，也可逐段改写——初稿几分钟就有；发布前仍需核对事实、案例与素材。",
-      },
     },
   },
   tracking: {
-    kicker: "// 获客数据追踪",
-    title: "CTA 与来源数据，集中回到你的看板",
-    desc: "配置追踪后，第三方像素可上报页面访问与 CTA 行为；平台看板同时汇总 PV、CTA 点击、渠道与 UTM 来源。Pro 及以上还可配置 Meta / TikTok 服务端转化回传。",
+    kicker: "转化归因",
+    title: "看清哪些点击变成了客户",
+    desc: "看板汇总访问量、CTA 点击和每条线索的来源，你就不用再为不询盘的流量买单。同时把转化结果告诉广告平台——它们正是靠这个学会去找更多同类人群。",
     bullets: [
-      "Pro 及以上支持 Meta、TikTok、GA4 与 Google Ads",
-      "Meta / TikTok 服务端转化回传，与表单事件配合去重",
-      "记录 UTM 来源并按落地页查看基础访问与 CTA 数据",
-      "可选 Cookie 同意条，同意后再加载第三方像素",
+      "一个看板看完：访问、CTA 点击、表单完成率与每页线索来源",
+      "按套餐接入 Meta、TikTok、GA4 与 Google Ads（Pro 及以上）",
+      "转化以服务端方式回传 Meta / TikTok，少被广告拦截插件吃掉",
+      "自带 Cookie 同意条，访客同意后才加载第三方追踪",
     ],
     funnel: {
-      consent: { label: "Cookie 同意门控", note: "默认开启，同意后加载第三方像素" },
-      pixels: { label: "多平台像素", note: "Meta / TikTok / GA4 / Google Ads" },
-      capture: { label: "获客行为采集", note: "CTA 点击 + 表单提交" },
+      consent: { label: "访客同意", note: "同意之后才开始追踪" },
+      pixels: { label: "已接入的平台", note: "Meta / TikTok / GA4 / Google Ads" },
+      capture: { label: "询盘被记录", note: "表单提交、CTA 与 WhatsApp 点击" },
       forwarding: {
-        label: "转化回传 + 基础看板",
-        note: "Meta / TikTok CAPI + PV / CTA / UTM 来源",
+        label: "回传 + 看板",
+        note: "转化回传 Meta / TikTok，来源进你的看板",
       },
     },
   },
   pricing: {
-    kicker: "// 简单透明的定价",
-    title: "先免费完成第一版，准备投放时再升级",
+    kicker: "简单透明的定价",
+    title: "先免费完成第一版，准备上线时再升级",
     desc: "Free 可创建、保存和在线预览；升级后绑定自有域名，并按套餐解锁更多页面、追踪与 AI 额度。",
     ctaFree: "免费开始",
     ctaPaid: "注册后升级",
   },
   finalCta: {
-    titleLine1: "你的下一条投放计划",
-    titleLine2: "值得一张投放级落地页",
-    desc: "现在就能创建、编辑并预览，无需信用卡；准备投放时再升级，发布到你自己的品牌域名。",
+    titleLine1: "你的下一次获客",
+    titleLine2: "值得一张真的能转化的页面",
+    desc: "现在就能创建、编辑并预览，无需信用卡；准备好了再升级，发布到你自己的品牌域名。",
     ctaPrimary: "免费开始",
     ctaSecondary: "已有账号，登录",
   },

@@ -6,6 +6,7 @@
 import type { Metadata } from "next";
 import { htmlLang, ogLocale, hreflang, defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import { localePath, isLocalizedRoute } from "@/lib/i18n/routes";
+import { fillCounts } from "@/lib/templates/stats";
 
 // 生产由 Vercel 注入 NEXT_PUBLIC_APP_URL（= https://zapbridge.tech）；本地为
 // http://localhost:3001；空值兜底到主域，避免 metadataBase / OG 解析到 localhost。
@@ -15,10 +16,16 @@ export const SITE_URL = (
 
 export const SITE_NAME = "Zap Bridge";
 
-// 营销站默认英文（面向国际获客客户），中文版走 /zh 前缀。
+// 营销站默认英文，中文版走 /zh 前缀。
+// 英文面受众是全球中小企业，故不出现 overseas（该表述只在出海语境成立）；中文面保留海外获客叙事。
+// 模板数量由 fillCounts 按注册表替换，避免文案与模板库口径长期脱节。
 export const siteDescription: Record<Locale, string> = {
-  en: "Zap Bridge is an ad-ready landing page platform for overseas lead generation: 30+ industry templates plus AI full-page drafting get your first version out in minutes, published to your own brand domain with pixels, UTMs, and server-side conversion forwarding built in.",
-  zh: "Zap Bridge 是面向海外获客的投放级落地页平台：30+ 行业模板 + AI 整页成稿，几分钟做出第一版；发布到自有品牌域名，像素、UTM 与服务端转化回传一站配好。",
+  en: fillCounts(
+    "Zap Bridge is a lead-gen landing page platform for businesses that run on inquiries: {templates} templates across {industries} industries plus AI full-page drafting get your first version out in minutes, published to your own brand domain, with every lead landing in one inbox.",
+  ),
+  zh: fillCounts(
+    "Zap Bridge 是面向海外获客的留资落地页平台：{templates} 套模板覆盖 {industries} 个行业，AI 整页成稿几分钟做出第一版；发布到自有品牌域名，所有线索归集到一个收件箱。",
+  ),
 };
 
 /** 以主站域名为 base 拼接绝对 URL（path 会被规整为以 / 开头）。 */

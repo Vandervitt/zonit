@@ -1,15 +1,15 @@
 export const guides = {
   meta: {
-    title: "Overseas lead-gen landing page guides — campaigns, compliance, attribution | Zap Bridge",
+    title: "Lead-gen landing page guides — campaigns, compliance, attribution | Zap Bridge",
     description:
-      "Practical guides for advertisers running overseas: keeping ad landing pages out of rejection, building WhatsApp capture pages, and conversion attribution (pixels / UTM / CAPI) — so your ad spend lands on pages that convert and can be attributed.",
-    ogTitle: "Overseas lead-gen landing page guides | Zap Bridge",
+      "Practical guides for anyone running lead-gen campaigns: keeping ad landing pages out of rejection, building pages that capture inquiries, and conversion attribution (pixels / UTM / CAPI) — so your traffic lands on pages that convert and can be attributed.",
+    ogTitle: "Lead-gen landing page guides | Zap Bridge",
   },
   list: {
     kicker: "Guides",
-    title: "Overseas lead-gen landing page guides",
+    title: "Lead-gen landing page guides",
     subtitle:
-      "Practical guides for advertisers going global: ad compliance, page construction, conversion attribution — so your ad spend lands on pages that convert and can be attributed.",
+      "Practical guides for anyone running lead-gen campaigns: ad compliance, page construction, conversion attribution — so your traffic lands on pages that convert and can be attributed.",
     readMore: "Read the guide →",
   },
   detail: {
@@ -20,8 +20,9 @@ export const guides = {
     referencesNote:
       "The rules and explanations in this article follow the official sources below. Always defer to the latest official documentation.",
     ctaTitle: "Turn this into an actual page",
+    /** `{templates}` 与 `{industries}` 会被替换为实际数量。 */
     ctaDesc:
-      "Start from 30+ industry lead-gen templates, swap the content, connect your domain, set up attribution, and publish your own landing page in minutes.",
+      "Start from {templates} lead-gen templates across {industries} industries, swap the content, connect your domain, set up attribution, and publish your own landing page in minutes.",
     ctaTemplates: "Browse templates",
     ctaRegister: "Start free",
     relatedHeading: "Related guides",

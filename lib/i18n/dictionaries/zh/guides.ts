@@ -19,7 +19,9 @@ export const guides = {
     referencesHeading: "参考资料",
     referencesNote: "本文相关规则与说明以下列官方来源为准，请以官方最新文档为准。",
     ctaTitle: "把这些落地成一个页面",
-    ctaDesc: "从 30+ 行业获客模板起步，改内容、绑域名、配好归因，几分钟发布你自己的落地页。",
+    /** `{templates}` 与 `{industries}` 会被替换为实际数量。 */
+    ctaDesc:
+      "从覆盖 {industries} 个行业的 {templates} 套获客模板起步，改内容、绑域名、配好归因，几分钟发布你自己的落地页。",
     ctaTemplates: "浏览模板库",
     ctaRegister: "免费开始",
     relatedHeading: "相关指南",

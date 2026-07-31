@@ -20,7 +20,8 @@ export const plans = {
   rows: {
     landingPages: { label: "落地页数量", desc: "可创建并保存的落地页总数" },
     customDomain: { label: "自定义域名", desc: "把页面发布到你自己的品牌域名" },
-    templates: { label: "海外获客模板", desc: "30+ 咨询与留资模板，可直接作为编辑起点" },
+    // 不写死数量：模板库还在增长，而本表在客户端渲染，拿不到注册表口径。
+    templates: { label: "海外获客模板", desc: "模板库全部咨询与留资模板，可直接作为编辑起点" },
     editor: { label: "可视化内容编辑器", desc: "表单编辑文案与图片，支持区块排序和实时预览" },
     basicPixel: { label: "基础数据追踪 (1× Meta Pixel)", desc: "接入 1 个 Meta Pixel，追踪落地页转化" },
     watermark: { label: "去除品牌水印", desc: "移除页面底部平台水印，纯你的品牌" },
@@ -37,7 +38,7 @@ export const plans = {
     aiRewrite: { label: "AI 智能改写", desc: "逐段润色改写文案，快速产出多个版本" },
   },
   highlights: {
-    free: ["1 张落地页", "全量 30+ 海外获客模板", "可视化内容编辑器", "在线预览（发布需升级绑定域名）"],
+    free: ["1 张落地页", "全量海外获客模板库", "可视化内容编辑器", "在线预览（发布需升级绑定域名）"],
     starter: ["3 张落地页 + 1 个自定义域名", "1× Meta Pixel 追踪"],
     pro: ["20 张落地页 + 5 个域名", "去除品牌水印", "Meta / TikTok / Google 追踪 + Meta / TikTok CAPI"],
     agency: ["无限落地页 + 无限域名", "反同质化", "AI 生成额度提升至 300 次/月"],
