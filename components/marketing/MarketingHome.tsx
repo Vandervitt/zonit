@@ -611,10 +611,15 @@ export default function MarketingHome({
         <SiteNav fonts={fonts} locale={locale} />
         <main>
           <Hero fonts={fonts} locale={locale} t={t} />
-          <LogoMarquee fonts={fonts} t={t} />
           <Industries fonts={fonts} locale={locale} t={t} fill={fill} industries={industries} />
           <Steps fonts={fonts} t={t} fill={fill} />
           <Features fonts={fonts} locale={locale} t={t} fill={fill} />
+          {/*
+           * 投放工具跑马灯刻意排在这里，不紧跟 Hero：Meta Pixel / TikTok Ads / Google Ads
+           * 一上来就出现会把产品重新框成「给广告投手用的工具」，抵消首屏拓宽的定位。
+           * 放在追踪区之前，它的角色是归因能力的佐证，而不是产品的第一印象。
+           */}
+          <LogoMarquee fonts={fonts} t={t} />
           <TrackingShowcase fonts={fonts} t={t} />
           <Pricing fonts={fonts} locale={locale} t={t} cnyRate={cnyRate} />
           <FinalCTA fonts={fonts} locale={locale} t={t} />
