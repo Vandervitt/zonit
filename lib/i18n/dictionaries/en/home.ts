@@ -5,7 +5,7 @@ export const home = {
   meta: {
     title: "Zap Bridge — Landing pages that turn visitors into reachable leads",
     description:
-      "Lead-gen landing pages for businesses that run on inquiries: start from {templates} templates across {industries} industries, draft a full page with AI, and ship your first version in minutes. Form, WhatsApp, or phone — every inquiry lands in one inbox you can actually work.",
+      "Lead-gen landing pages for businesses that run on inquiries: start from {templates} templates across {industries} industries, draft a full page with AI, and ship your first version in minutes. Form leads land in one inbox you can actually work, and you still see the clicks and sources behind every WhatsApp and phone inquiry.",
     ogDescription:
       "{templates} inquiry and lead-capture templates across {industries} industries, plus AI full-page drafting — first version in minutes. Publish to your own brand domain and keep every lead in one inbox.",
   },
@@ -17,7 +17,7 @@ export const home = {
     // 首屏讲结果不讲机制：像素 / UTM / CAPI 等术语一律留到下方追踪区再展开。
     // 也不锁死流量来源（广告 / SEO / 社媒同样成立）与转化渠道（表单 / WhatsApp / 电话）。
     subtitle:
-      "Pick a lead-gen template, let AI write the whole page around your business, and publish to your own domain — first version live in an afternoon. Form, WhatsApp, or phone, every inquiry lands in one inbox, and nothing goes missing on the way.",
+      "Pick a lead-gen template, let AI write the whole page around your business, and publish to your own domain — first version live in an afternoon. Form leads land straight in your inbox; WhatsApp and phone inquiries reach you on their own channels, with every click and source tracked.",
     ctaPrimary: "Start free",
     ctaSecondary: "See pricing",
     note: "7 days of full Pro on sign-up · No credit card · No code",
@@ -70,8 +70,8 @@ export const home = {
         desc: "Rewrite copy and swap images through section forms, reorder by drag, autosave as you work, and preview desktop and mobile live — what you see is what you ship, with no dev queue.",
       },
       leads: {
-        title: "Not one inquiry goes missing",
-        desc: "Form submits, WhatsApp taps, and phone clicks all land in one inbox, with an email the moment one arrives and a daily nudge for anything still unread. Reply in one tap, see whether each alert was actually delivered, and export to CSV any time — Pro and above POST each lead straight to your CRM or Zapier.",
+        title: "Not one form lead goes missing",
+        desc: "Form submissions land in one inbox, with an email the moment one arrives and a daily nudge for anything still unread. WhatsApp and phone inquiries go straight to your own chats and calls — we track their clicks and sources so you can still see what each channel brings in. Reply in one tap, check whether each alert was sent successfully, and export to CSV any time — Pro and above POST each lead straight to your CRM or Zapier.",
       },
       domain: {
         title: "Publish on your own brand domain",
@@ -94,7 +94,7 @@ export const home = {
   },
   tracking: {
     kicker: "Attribution",
-    title: "Know which clicks turned into customers",
+    title: "Know which clicks actually turned into inquiries",
     desc: "Your dashboard rolls up visits, CTA clicks, and the source behind every lead — so you can stop paying for traffic that never inquires. Ad platforms get told which clicks converted, which is how they learn to find you more of the same people.",
     bullets: [
       "One dashboard: visits, CTA clicks, form completion, and lead source per page",
