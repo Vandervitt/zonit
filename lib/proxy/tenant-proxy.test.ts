@@ -167,3 +167,42 @@ describe("handleTenancy 放行访客公开 API（回归：留资静默丢失）"
     expect(rewriteTarget(res)).toBeNull();
   });
 });
+
+// 回归：生产 cron 从未跑成功过（2026-06-26 上线 ~ 2026-07-31 发现）。
+//
+// Vercel 触发 cron 时用的是**部署 URL**（project-xxx.vercel.app），不是
+// NEXT_PUBLIC_APP_URL 里的品牌域名。isCustomDomain() 因此把它判成租户域名，
+// handleTenancy 在「该 host 没有绑定落地页」分支直接 404，请求根本进不到路由。
+// 表现：Vercel 面板里 GET /api/cron/daily 显示 Middleware 404，而同一路由
+// 在 zapbridge.tech 上访问是 401（路由自身鉴权）——差别只在 Host。
+//
+// 后果是整条 daily 编排器五周内一次没跑：线索兜底重投、CAPI / webhook 兜底重发、
+// 未读线索提醒、限频清理、周报，全部静默停摆。
+describe("handleTenancy 平台自有 host 不得被当成租户域名（回归：生产 cron 被 404）", () => {
+  it.each([
+    "/api/cron/daily",
+    "/api/cron/capi-flush",
+    "/api/cron/webhook-flush",
+  ])("Vercel 部署 URL 上的 %s 必须放行到路由", async (pathname) => {
+    const res = await handleTenancy(
+      makeReq("project-36oi3-abc123-team.vercel.app", pathname),
+    );
+    expect(res).toBeNull();
+  });
+
+  it("部署 URL 上的普通页面也不按租户改写（整个 app 都该正常）", async () => {
+    expect(await handleTenancy(makeReq("project-36oi3-abc123-team.vercel.app", "/pricing"))).toBeNull();
+    expect(await handleTenancy(makeReq("my-app.vercel.app", "/"))).toBeNull();
+  });
+
+  // cron 路由自身用 CRON_SECRET 鉴权，故即使从租户域名进来也安全放行；
+  // 这层是纵深防御：Vercel 日后再改触发 host 也不会重演本次故障。
+  it("租户域名上的 /api/cron/* 同样放行（路由自身鉴权）", async () => {
+    expect(await handleTenancy(makeReq("tenant.example", "/api/cron/daily"))).toBeNull();
+  });
+
+  it("但租户域名上的其余 /api 仍收敛为 404，暴露面不扩大", async () => {
+    const res = await handleTenancy(makeReq("tenant.example", "/api/landing-pages"));
+    expect(res?.status).toBe(404);
+  });
+});

@@ -14,6 +14,11 @@ const METADATA_PATHS = new Set(["/robots.txt", "/sitemap.xml", "/llms.txt"]);
 // 仅列访客端点，其余 /api 维持改写，暴露面保持最小。
 const PUBLIC_TENANT_API_PATHS = new Set(["/api/leads", "/api/track"]);
 
+// 定时任务：一律不按租户改写。根因已在 isAppHost 修掉（Vercel 部署域名不再被
+// 误判为租户域名），这层是纵深防御 —— cron 路由自身用 CRON_SECRET 鉴权，从任何
+// host 进来都安全，如此 Vercel 日后再改触发 host 也不会重演「整条编排器静默停摆」。
+const CRON_PATH_PREFIX = "/api/cron/";
+
 export async function handleTenancy(req: NextRequest) {
   const hostname = hostnameOf(req.headers.get("host"));
 
@@ -22,6 +27,7 @@ export async function handleTenancy(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith("/_next/")) return null;
   if (METADATA_PATHS.has(req.nextUrl.pathname)) return null;
   if (PUBLIC_TENANT_API_PATHS.has(req.nextUrl.pathname)) return null;
+  if (req.nextUrl.pathname.startsWith(CRON_PATH_PREFIX)) return null;
 
   if (isCustomDomain(hostname)) {
     const path = normalizeRoutePath(req.nextUrl.pathname);

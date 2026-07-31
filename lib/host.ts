@@ -42,8 +42,22 @@ export function resolveTenantPath(headers: Headers): string {
   return headers.get(TENANT_PATH_HEADER) || "/";
 }
 
-/** 是否为 app 自身域名（含其子域名）。未配置 appHostname 时返回 false。 */
+/**
+ * Vercel 自有部署域名（`*.vercel.app`）：预览部署 URL、生产部署 URL，以及
+ * Vercel 触发 cron 时使用的 host。这些永远属于平台，不可能是客户自有域名
+ * ——`.vercel.app` 由 Vercel 保留，客户无从注册，更无法在本平台绑定验证。
+ *
+ * 必须显式识别：否则它们会落进 isCustomDomain 被当成租户域名，而这类 host
+ * 又查不到绑定的落地页，handleTenancy 直接 404。生产 cron 正是这样被拦了
+ * 五周（2026-06-26 上线 ~ 07-31 发现），整条 daily 编排器一次没跑成功。
+ */
+function isVercelDeploymentHost(hostname: string): boolean {
+  return hostname === "vercel.app" || hostname.endsWith(".vercel.app");
+}
+
+/** 是否为 app 自身域名（含其子域名与 Vercel 部署域名）。未配置 appHostname 时返回 false。 */
 export function isAppHost(hostname: string): boolean {
+  if (isVercelDeploymentHost(hostname)) return true;
   return (
     appHostname !== null &&
     (hostname === appHostname || hostname.endsWith(`.${appHostname}`))
