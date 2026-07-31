@@ -22,9 +22,12 @@ export const plans = {
       label: "Landing pages",
       desc: "Total pages you can create and save",
     },
+    // freeValue: Free has no custom-domain slot but can still publish on a
+    // platform-assigned subdomain — showing 0 as an em dash reads as "cannot publish".
     customDomain: {
-      label: "Custom domains",
-      desc: "Publish pages on your own brand domain",
+      label: "Publishing address",
+      desc: "Publish on your own brand domain; no domain yet? use a platform-provided address",
+      freeValue: "Platform-provided address",
     },
     templates: {
       label: "Lead-gen templates",

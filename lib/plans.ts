@@ -169,7 +169,14 @@ export function planFeatureRows(t: PlansDict, locale: Locale = "en"): PlanFeatur
   const r = t.rows;
   return [
     { key: "landingPages", ...r.landingPages, valueFor: (p) => formatPlanLimit(p.landingPagesLimit, locale, "pages") },
-    { key: "customDomain", ...r.customDomain, valueFor: (p) => formatPlanLimit(p.domainsLimit, locale, "domains") },
+    {
+      key: "customDomain",
+      ...r.customDomain,
+      // Free 的 domainsLimit 是 0，但平台子域不占该额度，它照样能发布——
+      // 直接落到 formatPlanLimit 会显示破折号，读起来像「发不了」。
+      valueFor: (p) =>
+        p.domainsLimit === 0 ? r.customDomain.freeValue : formatPlanLimit(p.domainsLimit, locale, "domains"),
+    },
     { key: "templates", ...r.templates, valueFor: () => true },
     { key: "editor", ...r.editor, valueFor: () => true },
     { key: "basicPixel", ...r.basicPixel, valueFor: (p) => p.basicPixel },

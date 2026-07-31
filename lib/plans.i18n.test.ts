@@ -115,3 +115,26 @@ describe("planFeatureRows", () => {
     }
   });
 });
+
+describe("Free 档在对比表里必须体现「能发布」", () => {
+  // 平台子域（PR #145）上线后，Free 也能发布 1 张页到平台提供的地址。
+  // 但域名行取的是 domainsLimit（Free = 0），只显示破折号——客户扫一眼
+  // 整列空白，仍会以为免费档根本发不出页面。
+  it.each(["zh", "en"] as const)("%s：域名行的 Free 值不是破折号", (locale) => {
+    const dict = getDictionary(locale);
+    const row = planFeatureRows(dict.plans, locale).find((r) => r.key === "customDomain");
+    expect(row, "对比表应有域名行").toBeTruthy();
+    const value = row!.valueFor(PLANS.free);
+    expect(value).not.toBe("—");
+    expect(typeof value).toBe("string");
+    expect(String(value).trim()).not.toBe("");
+  });
+
+  it.each(["zh", "en"] as const)("%s：付费档仍显示自有域名数量", (locale) => {
+    const dict = getDictionary(locale);
+    const row = planFeatureRows(dict.plans, locale).find((r) => r.key === "customDomain")!;
+    expect(String(row.valueFor(PLANS.starter))).toContain("1");
+    expect(String(row.valueFor(PLANS.pro))).toContain("5");
+    expect(row.valueFor(PLANS.agency)).toBe(locale === "zh" ? "无限" : "Unlimited");
+  });
+});

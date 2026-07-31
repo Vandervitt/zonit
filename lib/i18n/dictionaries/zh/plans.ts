@@ -19,7 +19,9 @@ export const plans = {
   },
   rows: {
     landingPages: { label: "落地页数量", desc: "可创建并保存的落地页总数" },
-    customDomain: { label: "自定义域名", desc: "把页面发布到你自己的品牌域名" },
+    // freeValue：Free 没有自有域名槽位，但能发布到平台分配的子域——
+    // 若沿用 0 → 破折号，客户会误以为免费档根本发不出页面。
+    customDomain: { label: "发布地址", desc: "把页面发布到你自己的品牌域名；没有域名也能先用平台提供的地址", freeValue: "平台提供的地址" },
     // 不写死数量：模板库还在增长，而本表在客户端渲染，拿不到注册表口径。
     templates: { label: "海外获客模板", desc: "模板库全部咨询与留资模板，可直接作为编辑起点" },
     editor: { label: "可视化内容编辑器", desc: "表单编辑文案与图片，支持区块排序和实时预览" },

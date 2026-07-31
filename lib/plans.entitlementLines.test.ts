@@ -14,9 +14,19 @@ describe("planEntitlementLines", () => {
     expect(free).not.toContain("leadWebhook");
   });
 
-  it("剔除额度为 0 的行（free 无自定义域名）", () => {
-    expect(keysOf("free")).not.toContain("customDomain");
+  it("Free 也有发布地址（平台子域），不该从权益清单里消失", () => {
+    // 平台子域（PR #145）上线前，Free 的 domainsLimit 是 0 → 值为「—」→ 被剔除。
+    // 现在它虽无自有域名槽位，却能发布到平台分配的地址，这是它真实拥有的权益，
+    // 邮件里的套餐权益清单必须体现，否则免费用户会以为自己发不出页面。
+    expect(keysOf("free")).toContain("customDomain");
     expect(keysOf("starter")).toContain("customDomain");
+  });
+
+  it("布尔为假的行仍被剔除（剔除机制本身未失效）", () => {
+    // 上一条改了额度型的表现，这条守住剔除机制：Free 没有的能力不得出现。
+    const free = keysOf("free");
+    expect(free).not.toContain("watermark");
+    expect(free).not.toContain("advancedTracking");
   });
 
   it("Pro 含去水印、高级追踪与 webhook，但不含反同质化", () => {
