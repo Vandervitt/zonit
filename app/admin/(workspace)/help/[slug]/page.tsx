@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { TEMPLATE_STATS } from "@/lib/templates/stats";
 import { getChapter, HELP_CHAPTERS } from "../_content";
+import { fillChapterCounts } from "../_content/fill";
 import { HelpChapter } from "../_components/HelpChapter";
 
 export function generateStaticParams() {
@@ -14,5 +16,5 @@ export default async function HelpChapterPage({
   const { slug } = await params;
   const chapter = getChapter(slug);
   if (!chapter) notFound();
-  return <HelpChapter chapter={chapter} />;
+  return <HelpChapter chapter={fillChapterCounts(chapter, TEMPLATE_STATS)} />;
 }
