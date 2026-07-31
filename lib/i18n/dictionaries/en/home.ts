@@ -52,7 +52,7 @@ export const home = {
       },
       {
         title: "Publish to your own domain",
-        desc: "Connect your brand domain — we work out the exact DNS record for you to paste — then publish and set your SEO details. Custom domains come with the paid plans.",
+        desc: "Connect your brand domain — we work out the exact DNS record for you to paste — then publish and set your SEO details. One domain holds several pages, each service at its own address. Custom domains come with the paid plans.",
       },
     ],
   },
@@ -74,8 +74,8 @@ export const home = {
         desc: "Form submissions land in one inbox, with an email the moment one arrives and a daily nudge for anything still unread. WhatsApp and phone inquiries go straight to your own chats and calls — we track their clicks and sources so you can still see what each channel brings in. Reply in one tap, check whether each alert was sent successfully, and export to CSV any time — Pro and above POST each lead straight to your CRM or Zapier.",
       },
       domain: {
-        title: "Publish on your own brand domain",
-        desc: "Paid plans connect your own brand domain and publish once DNS verification passes. Independent SEO title, description, and share image — visitors only ever see your brand.",
+        title: "One brand domain, a page per service",
+        desc: "Paid plans connect your own brand domain and publish once DNS verification passes. Put several pages under the same domain, each at its own address — a clinic keeps the overview on the main domain and gives Invisalign and whitening an address each; same for law firms and training providers. Visitors stay inside your brand throughout, and every page carries its own SEO title, description, and share image.",
       },
       tracking: {
         title: "Know which traffic actually converts",

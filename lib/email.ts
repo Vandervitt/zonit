@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { BRAND } from '@/lib/theme/brand';
 import { PLANS, planEntitlementLines, planPriceLabel, type PlanId } from '@/lib/plans';
 import { getUsdToCnyRate } from '@/lib/pricing/fx-server';
+import { fillCounts } from '@/lib/templates/stats';
 import { Routes } from '@/lib/constants';
 
 const resend = process.env.RESEND_API_KEY 
@@ -85,7 +86,7 @@ export async function sendInvitationEmail({
           <div style="background:#f7f9fc;padding:18px 20px;border-radius:8px;margin:0 0 22px;line-height:1.75;">
             <p style="margin:0 0 14px;color:#111;">
               <strong>① 选模板，让 AI 把整页写成你的</strong><br />
-              <span style="color:#555;">30+ 行业获客模板挑一套做骨架，填一段业务介绍，AI 顺着这套模板把标题、卖点、CTA 全部改写成你的内容，再到可视化编辑器里换字换图。全程不碰一行代码。</span>
+              <span style="color:#555;">${fillCounts("{templates} 套行业获客模板")}挑一套做骨架，填一段业务介绍，AI 顺着这套模板把标题、卖点、CTA 全部改写成你的内容，再到可视化编辑器里换字换图。全程不碰一行代码。</span>
             </p>
             <p style="margin:0 0 14px;color:#111;">
               <strong>② 发布到你自己的品牌域名</strong><br />
