@@ -23,6 +23,14 @@ export async function handleTenancy(req: NextRequest) {
   if (PUBLIC_TENANT_API_PATHS.has(req.nextUrl.pathname)) return null;
 
   if (isCustomDomain(hostname)) {
+    // 「一域名一页」：页面只存在于根路径，其余路径本就不存在，必须 404。
+    // 此前 rewrite 只用 host 查 slug、未读 pathname，导致任意路径都返回同一张
+    // 落地页 HTML 200 —— 对搜索引擎是无限重复内容（canonical 指回根路径只是缓解，
+    // 页面本身仍被抓取）。放行名单（/_next、元数据路由、访客 API）已在上方先行返回。
+    if (req.nextUrl.pathname !== "/") {
+      return new NextResponse("Not Found", { status: 404 });
+    }
+
     // 新流程：自定义域名 → 已发布落地页
     const landingSlug = await getLandingSlugByCustomDomain(hostname);
     if (landingSlug) {
