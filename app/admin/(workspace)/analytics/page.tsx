@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { Row, Col, Card, Statistic, Segmented, Select, Table, Typography, Space, Empty, Spin } from "antd";
+import { Row, Col, Card, Statistic, Segmented, Select, Table, Tag, Typography, Space, Empty, Spin } from "antd";
 import { EyeOutlined, AimOutlined, PercentageOutlined, ContactsOutlined } from "@ant-design/icons";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ApiRoutes } from "@/lib/constants";
@@ -70,6 +70,32 @@ export default function AnalyticsPage() {
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               线索转化率（线索 / 曝光）：{pctText(a?.totals.cvr ?? 0)}
             </Typography.Text>
+          </Space>
+        )}
+      </Card>
+
+      <Card title="表单漏斗" extra={<Typography.Text type="secondary" style={{ fontSize: 12 }}>只统计页内留资表单</Typography.Text>}>
+        {data.isLoading ? <div style={{ height: 120, display: "grid", placeItems: "center" }}><Spin /></div>
+          : (a?.formFunnel.starts ?? 0) === 0 ? <Empty description="该区间还没有访客开始填写表单" />
+          : (
+          <Space direction="vertical" size={14} style={{ width: "100%" }}>
+            <Row gutter={16}>
+              <Col xs={8}><Statistic title="开始填写" value={a!.formFunnel.starts} /></Col>
+              <Col xs={8}><Statistic title="提交成功" value={a!.formFunnel.submits} /></Col>
+              <Col xs={8}><Statistic title="完成率" value={a!.formFunnel.completion * 100} precision={1} suffix="%" /></Col>
+            </Row>
+            {a!.formFunnel.errors > 0 && (
+              <div>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  提交被拒 {a!.formFunnel.errors} 次——占比高的错误码通常意味着某个字段让访客卡住了：
+                </Typography.Text>
+                <div style={{ marginTop: 8 }}>
+                  {a!.formFunnel.errorBreakdown.map((e) => (
+                    <Tag key={e.detail} style={{ marginBottom: 4 }}>{e.detail} × {e.count}</Tag>
+                  ))}
+                </div>
+              </div>
+            )}
           </Space>
         )}
       </Card>

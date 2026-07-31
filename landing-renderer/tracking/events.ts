@@ -4,6 +4,15 @@ import type { PixelProvider } from "@/types/schema.draft";
 
 export type InternalEvent = "page_view" | "cta_click";
 
+/**
+ * 第一方采集专用事件（不进第三方 pixel）：表单漏斗。
+ * 表单已是主转化路径，但此前只能看到「有多少人来」，看不到「多少人开始填却没提交」。
+ * form_submit 的 pixel 侧由 LeadForm 自己双发（与服务端 CAPI 同 event_id 去重），
+ * 故这里刻意不进 EVENT_MAP。
+ */
+export type FormEvent = "form_start" | "form_submit" | "form_error";
+export type FirstPartyEvent = InternalEvent | FormEvent;
+
 /** 各平台标准事件名（均为非交易事件，不可由用户改动）。 */
 export const EVENT_MAP: Record<PixelProvider, Record<InternalEvent, string>> = {
   meta:      { page_view: "PageView",  cta_click: "Lead" },

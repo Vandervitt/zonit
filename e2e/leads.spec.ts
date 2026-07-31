@@ -165,6 +165,25 @@ test.describe("线索闭环", () => {
     await api.dispose();
   });
 
+  test("表单漏斗埋点：三个事件落库，form_error 带错误码", async () => {
+    const api = await pwRequest.newContext();
+    await pool.query(`DELETE FROM analytics_events WHERE page_id = $1`, [pageId]);
+
+    for (const [event, detail] of [["form_start", null], ["form_submit", null], ["form_error", "bad_whatsapp"]] as const) {
+      const r = await api.post(`${BASE}/api/track`, { data: { pageId, event, detail } });
+      expect(r.status()).toBe(204);
+    }
+    // detail 只对 form_error 有意义，其余事件即使带了也不落库
+    await api.post(`${BASE}/api/track`, { data: { pageId, event: "form_start", detail: "should_be_ignored" } });
+    await api.dispose();
+
+    const rows = await pool.query(
+      `SELECT event, detail FROM analytics_events WHERE page_id = $1 ORDER BY id`, [pageId]);
+    expect(rows.rows.map((r) => r.event)).toEqual(["form_start", "form_submit", "form_error", "form_start"]);
+    expect(rows.rows[2].detail).toBe("bad_whatsapp");
+    expect(rows.rows[3].detail).toBeNull();
+  });
+
   test("通知送达可见性：邮件结果回写到线索并在后台可见", async ({ page }) => {
     const api = await pwRequest.newContext();
     const res = await api.post(`${BASE}/api/leads`, {
