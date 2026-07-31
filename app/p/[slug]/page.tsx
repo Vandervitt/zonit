@@ -5,7 +5,7 @@ import { LandingPage } from "@/landing-renderer/LandingPage";
 import { getPublishedBySlug } from "@/lib/landing-pages/store";
 import { TrackingProvider } from "@/landing-renderer/tracking/TrackingProvider";
 import { Watermark } from "@/landing-renderer/Watermark";
-import { isAppHost, resolveTenantHostname } from "@/lib/host";
+import { isAppHost, resolveTenantHostname, resolveTenantPath } from "@/lib/host";
 import { resolvePageMeta } from "@/lib/seo/resolve";
 import { getUserPlan } from "@/lib/plans-db";
 import { hasWatermark, hasAntiBan } from "@/lib/plans";
@@ -35,9 +35,11 @@ export async function generateMetadata({
   const { footer } = page.data;
   const { title, description, ogImage, noindex } = resolvePageMeta(page.data);
 
-  // 已发布页只在租户自有域名根路径可达 → canonical 指向该域名根路径。
-  const host = resolveTenantHostname(await headers());
-  const canonical = `https://${host}/`;
+  // canonical 必须是访客看到的真实地址：改写后 pathname 已变成 /p/{slug}，
+  // 故取中间件透传的原始路径（多路径发布后可能是 /invisalign 而非根）。
+  const h = await headers();
+  const host = resolveTenantHostname(h);
+  const canonical = `https://${host}${resolveTenantPath(h)}`;
 
   return {
     title,
@@ -91,9 +93,10 @@ export default async function PublicLandingPage({
 
   // 结构化数据（SEO 富媒体 + GEO）：注入租户品牌/域名实体，noindex 页不输出。
   const noindex = page.data.seo?.noindex === true;
-  const hostname = resolveTenantHostname(await headers());
+  const h = await headers();
+  const pageUrl = `https://${resolveTenantHostname(h)}${resolveTenantPath(h)}`;
   const faqJsonLd = noindex ? null : landingFaqJsonLd(page.data);
-  const orgJsonLd = noindex ? null : landingOrganizationJsonLd(page.data, hostname);
+  const orgJsonLd = noindex ? null : landingOrganizationJsonLd(page.data, pageUrl);
 
   return (
     <>

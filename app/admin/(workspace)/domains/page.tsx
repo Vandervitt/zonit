@@ -16,6 +16,13 @@ import type { PlanId } from "@/lib/plans";
 import type { TableColumnsType } from "antd";
 import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
 
+interface DomainRoute {
+  path: string;
+  landingPageId: string;
+  landingPageName: string;
+  published: boolean;
+}
+
 interface Domain {
   id: string;
   domain: string;
@@ -23,6 +30,7 @@ interface Domain {
   enabled: boolean;
   verified: boolean;
   created_at: string;
+  routes?: DomainRoute[];
 }
 
 export default function DomainsPage() {
@@ -112,15 +120,35 @@ export default function DomainsPage() {
       title: "域名",
       dataIndex: "domain",
       key: "domain",
-      render: (_: unknown, record: Domain) => (
-        <div>
-          <Typography.Text>{record.domain}</Typography.Text>
-          <br />
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            {record.landing_page_name ?? "未绑定落地页"}
-          </Typography.Text>
-        </div>
-      ),
+      render: (_: unknown, record: Domain) => {
+        const live = (record.routes ?? []).filter((r) => r.published);
+        // 根路径没有已发布页时，访客直接访问域名会 404（设计决策 D6：不回落到任意子页），
+        // 这在多路径下很容易被忽略，故显式提示而不是留空。
+        const rootMissing = live.length > 0 && !live.some((r) => r.path === "/");
+        return (
+          <div>
+            <Typography.Text>{record.domain}</Typography.Text>
+            <br />
+            {live.length === 0 ? (
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                未发布任何页面
+              </Typography.Text>
+            ) : (
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                {live.map((r) => r.path).join("、")}
+              </Typography.Text>
+            )}
+            {rootMissing && (
+              <>
+                <br />
+                <Typography.Text type="warning" style={{ fontSize: 12 }}>
+                  根路径尚未发布，直接访问 {record.domain} 会 404
+                </Typography.Text>
+              </>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: "验证状态",

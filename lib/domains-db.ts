@@ -1,9 +1,18 @@
 import pool from "@/lib/db";
 import { ROOT_PATH } from "@/lib/domains/route-path";
 
+/** 域名下的一个已占用路径（含未发布的：route 行在取消发布后保留）。 */
+export interface DomainRouteInfo {
+  path: string;
+  landingPageId: string;
+  landingPageName: string;
+  published: boolean;
+}
+
 export interface DomainRow {
   id: string;
   user_id: string;
+  routes?: DomainRouteInfo[];
   landing_page_id?: string | null;
   domain: string;
   enabled: boolean;
@@ -13,10 +22,28 @@ export interface DomainRow {
 }
 
 export async function getUserDomains(userId: string): Promise<DomainRow[]> {
+  // routes 聚合该域名下每个已占用路径及其页面，供发布弹窗按 (域名, 路径) 提示占位，
+  // 以及域名列表显示「根路径尚未发布」（设计决策 D6）。
+  // 无路由的域名 json_agg 会得到 [null]，用 FILTER 排除，保证空域名拿到空数组。
   const result = await pool.query(
-    `SELECT d.*, lp.name AS landing_page_name
+    `SELECT d.*,
+            lp.name AS landing_page_name,
+            COALESCE(r.routes, '[]'::json) AS routes
      FROM domains d
      LEFT JOIN landing_pages lp ON lp.id = d.landing_page_id
+     LEFT JOIN LATERAL (
+       SELECT json_agg(
+                json_build_object(
+                  'path', dr.path,
+                  'landingPageId', dr.landing_page_id,
+                  'landingPageName', rp.name,
+                  'published', rp.status = 'published'
+                ) ORDER BY dr.path
+              ) FILTER (WHERE dr.id IS NOT NULL) AS routes
+         FROM domain_routes dr
+         JOIN landing_pages rp ON rp.id = dr.landing_page_id
+        WHERE dr.domain_id = d.id
+     ) r ON true
      WHERE d.user_id = $1
      ORDER BY d.created_at DESC`,
     [userId]
@@ -149,6 +176,37 @@ export async function bindDomainToLandingPage(
   } finally {
     client.release();
   }
+}
+
+export interface PublishedRoute {
+  path: string;
+  slug: string;
+  updated_at: string;
+  noindex: boolean;
+}
+
+/**
+ * 某自定义域名下全部已发布路径（供租户 sitemap / robots）。
+ * noindex 取自发布快照 published_data，与公开渲染读的是同一份内容——
+ * 读草稿会让「改了草稿但没更新发布」的页在 sitemap 里按未上线的设置输出。
+ */
+export async function listPublishedRoutes(domain: string): Promise<PublishedRoute[]> {
+  const result = await pool.query(
+    `SELECT r.path,
+            lp.slug,
+            lp.updated_at,
+            COALESCE((COALESCE(lp.published_data, lp.data) -> 'seo' ->> 'noindex') = 'true', false) AS noindex
+       FROM domain_routes r
+       JOIN domains d        ON d.id = r.domain_id
+       JOIN landing_pages lp ON lp.id = r.landing_page_id
+       JOIN users u          ON u.id = lp.user_id
+      WHERE d.domain = $1
+        AND d.enabled = true AND d.verified = true
+        AND lp.status = 'published' AND u.disabled_at IS NULL
+      ORDER BY r.path`,
+    [domain],
+  );
+  return result.rows;
 }
 
 /**

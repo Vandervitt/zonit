@@ -1,9 +1,7 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 import { hostnameOf, isCustomDomain } from "@/lib/host";
-import { resolveTenantRoute } from "@/lib/domains-db";
-import { ROOT_PATH } from "@/lib/domains/route-path";
-import { getPublishedBySlug } from "@/lib/landing-pages/store";
+import { listPublishedRoutes } from "@/lib/domains-db";
 import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { GUIDE_SLUGS, getGuide } from "@/app/guides/_content";
 import { templateDetailPath, guideDetailPath } from "@/lib/constants";
@@ -36,17 +34,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [...marketing, ...templates, ...guides];
   }
 
-  const slug = await resolveTenantRoute(hostname, ROOT_PATH);
-  if (!slug) return [];
-  const page = await getPublishedBySlug(slug);
-  if (!page) return [];
-
-  return [
-    {
-      url: `https://${hostname}/`,
-      lastModified: new Date(page.updated_at ?? Date.now()),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-  ];
+  // 多路径：该域名下每张已发布页各出一条；noindex 的页不进 sitemap
+  // （既声明不收录又列进 sitemap 是自相矛盾的信号）。
+  const routes = await listPublishedRoutes(hostname);
+  return routes
+    .filter((r) => !r.noindex)
+    .map((r) => ({
+      url: `https://${hostname}${r.path}`,
+      lastModified: new Date(r.updated_at ?? Date.now()),
+      changeFrequency: "weekly" as const,
+      // 根路径是站点入口，权重高于其余服务页。
+      priority: r.path === "/" ? 1 : 0.8,
+    }));
 }
