@@ -98,8 +98,11 @@ describe("planFeatureRows", () => {
   it("落地页数量行按语言输出对应量词", () => {
     const en = planFeatureRows(getDictionary("en").plans, "en").find((r) => r.key === "landingPages");
     const zh = planFeatureRows(getDictionary("zh").plans, "zh").find((r) => r.key === "landingPages");
-    expect(en!.valueFor(PLANS.starter)).toBe("3 pages");
-    expect(zh!.valueFor(PLANS.starter)).toBe("3 张");
+    // 断言的是量词（pages / 张），不是套餐页数本身——把数字写死会让任何一次
+    // 额度调整都误报成 i18n 回归（Starter 3→5 时就发生过一次）。
+    const n = PLANS.starter.landingPagesLimit;
+    expect(en!.valueFor(PLANS.starter)).toBe(`${n} pages`);
+    expect(zh!.valueFor(PLANS.starter)).toBe(`${n} 张`);
     expect(en!.valueFor(PLANS.agency)).toBe("Unlimited");
     expect(zh!.valueFor(PLANS.agency)).toBe("无限");
   });

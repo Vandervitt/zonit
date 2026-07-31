@@ -38,7 +38,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
   },
   starter: {
     id: "starter", label: "Starter", priceAmount: 5.99, currency: "$", color: "blue",
-    landingPagesLimit: 3, domainsLimit: 1,
+    // 多路径发布后，页数额度即发布额度：5 张页可全部挂在这 1 个域名的不同路径下。
+    landingPagesLimit: 5, domainsLimit: 1,
     hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 15, aiRewriteQuota: 100,
   },

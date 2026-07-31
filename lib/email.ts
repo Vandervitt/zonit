@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { BRAND } from '@/lib/theme/brand';
 import { PLANS, planEntitlementLines, planPriceLabel, type PlanId } from '@/lib/plans';
 import { getUsdToCnyRate } from '@/lib/pricing/fx-server';
+import { Routes } from '@/lib/constants';
 
 const resend = process.env.RESEND_API_KEY 
   ? new Resend(process.env.RESEND_API_KEY) 
@@ -337,6 +338,63 @@ export async function sendLeadNudgeEmail({
     return { success: true, data };
   } catch (error) {
     console.error("Failed to send lead nudge email:", error);
+    return { error };
+  }
+}
+
+/**
+ * 发布配额超额通知。三个阶段各一封：起算、到期前、已执行。
+ * 邮件是第二条通道 —— 平台只知道是否交给 Resend，不知道客户是否收到，
+ * 故后台横幅才是主通道，这里只做补充触达。
+ */
+export async function sendPublishQuotaEmail(
+  to: string,
+  params: {
+    stage: "start" | "remind" | "enforced";
+    published: number;
+    limit: number;
+    planLabel: string;
+    daysLeft: number;
+    unpublishedCount?: number;
+    appUrl: string;
+  },
+) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const { stage, published, limit, planLabel, daysLeft, unpublishedCount = 0, appUrl } = params;
+  const pagesUrl = `${appUrl}${Routes.LandingPages}`;
+  const billingUrl = `${appUrl}${Routes.Billing}`;
+
+  const subject =
+    stage === "enforced"
+      ? `已有 ${unpublishedCount} 张落地页被取消发布`
+      : stage === "remind"
+        ? `还有 ${daysLeft} 天：超出的落地页将被取消发布`
+        : `已发布页数超出 ${planLabel} 套餐额度`;
+
+  const body =
+    stage === "enforced"
+      ? `<p style="color:#666;margin:0 0 20px;">宽限期已结束，我们取消发布了 ${unpublishedCount} 张超出额度的落地页，目前保留 ${published} 张在线。<br/><strong>页面内容没有删除</strong>，升级套餐后可以随时重新发布。</p>`
+      : `<p style="color:#666;margin:0 0 20px;">你当前有 <strong>${published}</strong> 张已发布落地页，${planLabel} 套餐的额度是 <strong>${limit}</strong> 张。<br/>已上线的页面不受影响，但暂时无法再发布新页面。<br/>如果 ${daysLeft} 天内仍未处理，我们会自动取消发布超出的部分（<strong>只是下线，内容不会删除</strong>），优先保留域名根路径与最早发布的页面。</p>`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 4px;">${escapeHtml(subject)}</h2>
+          ${body}
+          <p style="margin-top:24px;">
+            <a href="${billingUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">升级套餐</a>
+            <a href="${pagesUrl}" style="display:inline-block;margin-left:8px;color:${BRAND};padding:10px 0;text-decoration:none;">管理落地页</a>
+          </p>
+        </div>`,
+    });
+    if (error) { console.error("Failed to send publish quota email:", error); return { error }; }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send publish quota email:", error);
     return { error };
   }
 }
