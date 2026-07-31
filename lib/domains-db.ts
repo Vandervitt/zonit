@@ -1,4 +1,5 @@
 import pool from "@/lib/db";
+import { ROOT_PATH } from "@/lib/domains/route-path";
 
 export interface DomainRow {
   id: string;
@@ -98,27 +99,71 @@ export async function deleteDomainById(id: string, userId: string): Promise<bool
   return result.rows.length > 0;
 }
 
-/** 把一个已验证启用的域名绑定到落地页（一域名一页：覆盖旧的 landing_page_id）。 */
+/**
+ * 把一个已验证启用的域名绑定到落地页的某个路径。
+ *
+ * 双写期（P1）：同时写 domain_routes（新解析依据）与 domains.landing_page_id（旧列）。
+ * 旧列是全部客户页面此前的解析依据，保留双写才有回滚路径——只写新表的话，
+ * 一旦新链路出问题回滚代码，期间新发布的页在旧列里没有记录，会直接下线。
+ * P2 开放多路径后旧列语义不再成立（一域名多页无法用单列表达），届时停止双写并删列。
+ *
+ * 语义沿用「覆盖式替换」：同一域名同一路径重复发布即替换；同一张页改发到别处时，
+ * 先清掉它原来的位置（domain_routes.landing_page_id 唯一，见设计决策 D7）。
+ */
 export async function bindDomainToLandingPage(
   domainId: string,
   userId: string,
   landingPageId: string,
+  path: string = ROOT_PATH,
 ): Promise<boolean> {
-  const result = await pool.query(
-    `UPDATE domains SET landing_page_id = $1
-     WHERE id = $2 AND user_id = $3 AND enabled = true AND verified = true RETURNING id`,
-    [landingPageId, domainId, userId],
-  );
-  return result.rows.length > 0;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // 归属校验与旧列写入合并为一步：命中 0 行即域名不属于该用户或未验证启用。
+    const owned = await client.query(
+      `UPDATE domains SET landing_page_id = $1
+        WHERE id = $2 AND user_id = $3 AND enabled = true AND verified = true RETURNING id`,
+      [landingPageId, domainId, userId],
+    );
+    if (owned.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return false;
+    }
+
+    // 该页若已发布在别处，先释放原位置（一页一位置）。
+    await client.query("DELETE FROM domain_routes WHERE landing_page_id = $1", [landingPageId]);
+    await client.query(
+      `INSERT INTO domain_routes (domain_id, path, landing_page_id)
+            VALUES ($1, $2, $3)
+       ON CONFLICT (domain_id, path)
+       DO UPDATE SET landing_page_id = EXCLUDED.landing_page_id`,
+      [domainId, path, landingPageId],
+    );
+
+    await client.query("COMMIT");
+    return true;
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
-/** 公开渲染解析：自定义域名 → 已发布落地页 slug。 */
-export async function getLandingSlugByCustomDomain(domain: string): Promise<string | null> {
+/**
+ * 公开渲染解析：自定义域名 + 路径 → 已发布落地页 slug。
+ * 未命中返回 null（调用方 404）。域名未验证/未启用、页面非 published 均视为未命中。
+ */
+export async function resolveTenantRoute(domain: string, path: string): Promise<string | null> {
   const result = await pool.query(
-    `SELECT lp.slug FROM domains d
-       JOIN landing_pages lp ON lp.id = d.landing_page_id
-     WHERE d.domain = $1 AND d.enabled = true AND d.verified = true AND lp.status = 'published'`,
-    [domain],
+    `SELECT lp.slug
+       FROM domain_routes r
+       JOIN domains d        ON d.id = r.domain_id
+       JOIN landing_pages lp ON lp.id = r.landing_page_id
+      WHERE d.domain = $1 AND r.path = $2
+        AND d.enabled = true AND d.verified = true AND lp.status = 'published'`,
+    [domain, path],
   );
   return result.rows[0]?.slug ?? null;
 }

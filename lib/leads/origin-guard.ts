@@ -24,8 +24,13 @@ async function allowedHostsFor(pageId: string): Promise<Set<string>> {
   const hit = cache.get(pageId);
   if (hit && hit.expires > Date.now()) return hit.hosts;
 
+  // 经 domain_routes 反查（多路径发布后一张页仍只有一个位置，见设计决策 D7），
+  // 与 proxy 的解析依据保持同一张表——两边取不同来源必然在某次改动后悄悄错位。
   const res = await pool.query(
-    `SELECT domain FROM domains WHERE landing_page_id = $1 AND enabled = true AND verified = true`,
+    `SELECT d.domain
+       FROM domain_routes r
+       JOIN domains d ON d.id = r.domain_id
+      WHERE r.landing_page_id = $1 AND d.enabled = true AND d.verified = true`,
     [pageId],
   );
   const hosts = new Set<string>(res.rows.map((r: { domain: string }) => r.domain.toLowerCase()));
