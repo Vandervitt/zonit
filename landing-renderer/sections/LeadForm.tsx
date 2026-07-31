@@ -183,11 +183,19 @@ export function LeadForm({ data, pageId, theme, preview = false, defaultDial = F
                     value={dialIso[k]}
                     onChange={(e) => setDialIso((d) => ({ ...d, [k]: e.target.value }))}
                     onFocus={loadDialCodes}
-                    className="w-32 shrink-0 rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm focus:border-slate-500 focus:outline-none"
+                    className="w-20 shrink-0 rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm focus:border-slate-500 focus:outline-none"
                   >
-                    {dialCodes.map((c) => (
-                      <option key={c.iso} value={c.iso}>{`${c.dial} ${c.name}`}</option>
-                    ))}
+                    {dialCodes.map((c) => {
+                      const full = `${c.dial} ${c.name}`;
+                      // 被选中的那项只显示国码：原生 select 收起态显示的就是它，带上国名会被
+                      // 浏览器截断成「+1 United Sta…」。展开时其余项仍显示全称，便于按国名找。
+                      // aria-label 恒为全称，屏幕阅读器不会因此丢掉国家信息。
+                      return (
+                        <option key={c.iso} value={c.iso} aria-label={full}>
+                          {c.iso === dialIso[k] ? c.dial : full}
+                        </option>
+                      );
+                    })}
                   </select>
                   <input
                     type="tel"

@@ -69,6 +69,15 @@ describe("LeadForm 国码选择器", () => {
     expect(out).not.toContain("<option value=\"\"");
   });
 
+  it("收起态只显示国码（长国名会被浏览器截断），但 aria-label 保留全称", () => {
+    const out = html(withPhone);
+    // 被选中项的可见文本只有国码
+    expect(out).toContain(">+1</option>");
+    expect(out).not.toContain(">+1 United States</option>");
+    // 屏幕阅读器仍能拿到国家名
+    expect(out).toContain('aria-label="+1 United States"');
+  });
+
   it("默认国码来自服务端按访客 IP 解析的结果", () => {
     const out = renderToStaticMarkup(
       createElement(LeadForm, {
