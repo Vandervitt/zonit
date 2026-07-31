@@ -97,4 +97,18 @@ describe("模板库结构完整性", () => {
     const ids = TEMPLATES.map((t) => t.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it("画廊封面图不重复", () => {
+    // 封面在画廊里并排显示，两套模板用同一张图一眼就能看出来，观感等同于「没做完」。
+    // 新增模板时很容易从既有模板复制一条 meta 却忘了换 thumbnail，故用测试兜住。
+    const byPhoto = new Map<string, string[]>();
+    for (const t of TEMPLATES) {
+      const photo = t.thumbnail.match(/photo-[0-9a-f-]+/)?.[0] ?? t.thumbnail;
+      byPhoto.set(photo, [...(byPhoto.get(photo) ?? []), t.id]);
+    }
+    const duplicated = [...byPhoto]
+      .filter(([, ids]) => ids.length > 1)
+      .map(([photo, ids]) => `${photo} 被 ${ids.join(" / ")} 共用`);
+    expect(duplicated).toEqual([]);
+  });
 });

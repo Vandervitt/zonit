@@ -709,6 +709,65 @@ export const TEMPLATES: TemplateMeta[] = [
     tier: "t2",
     tags: { category: "local-service", subcategory: "landscaping", archetype: "consult", conversion: ["form", "whatsapp"], risk: "low", tone: "emotional" },
   },
+
+  // ---------------------------------------------------------------------
+  // 第二梯队 · 医疗与诊所
+  // 高客单、决策周期长、监管严格：主转化一律走页内表单——病情描述与照片
+  // 需要成段文字才收得全，即时通讯拿不到完整信息。全组 risk: high，文案
+  // 不得承诺疗效，前后对比区块必须带 disclaimer。
+  // ---------------------------------------------------------------------
+  {
+    id: "hair-transplant",
+    name: "Meridian Hair Restoration",
+    industry: { en: "Medical / Hair restoration", zh: "医疗 / 植发" },
+    tagline: { en: "Hair restoration page — patients send photos and get a written surgical assessment.", zh: "植发落地页，患者提交照片获取书面手术评估。" },
+    seoIntro: {
+      en: "Meridian Hair Restoration is a photo-assessment template for hair transplant clinics and medical travel operators, turning ad traffic into surgeon-reviewed enquiries through an on-page form that asks for specific photo angles. A written graft range, technique recommendation, and an explicit willingness to advise against surgery answer the scepticism this category has earned from overselling. Built for surgical clinics running international campaigns where patients travel to treat, and where the assessment — not the booking — is what has to be earned first.",
+      zh: "Meridian Hair Restoration 是面向植发诊所与医疗旅游机构的照片评估落地页模板，用页内表单按指定角度收集照片，把广告流量转成经医生审阅的评估线索。页面给出书面移植量区间、术式建议，并明确写出「不合适就劝你别做」，正面回应这个品类因过度销售积累的信任问题。适合跨境接诊的手术机构投放国际广告——在这里要先赢得的是评估，而不是预约。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "medical", subcategory: "hair-transplant", archetype: "consult", conversion: ["form", "whatsapp"], risk: "high", tone: "rational" },
+  },
+  {
+    id: "medical-aesthetics",
+    name: "Aurelle Aesthetic Medicine",
+    industry: { en: "Medical / Aesthetic medicine", zh: "医疗 / 医美" },
+    tagline: { en: "Aesthetic clinic page — patients request a doctor-led consultation by form.", zh: "医美诊所落地页，表单预约医生面诊评估。" },
+    seoIntro: {
+      en: "Aurelle Aesthetic Medicine is a consultation-request template for doctor-led aesthetic clinics, turning ad traffic into booked assessments through an on-page form rather than selling treatments from a menu. Whole-face assessment, batch-traceable products, and a stated policy of never treating on the day of a first consultation answer the safety questions serious patients ask — and keep the page clear of the package pricing that gets medical advertisers rejected. Built for clinics competing on clinical judgement rather than discounting.",
+      zh: "Aurelle Aesthetic Medicine 是面向医生主导型医美诊所的面诊预约落地页模板，用页内表单把广告流量转成预约评估，而不是照着项目菜单卖疗程。页面以「整脸评估」「产品批号可追溯」「初诊当天不做治疗」回应认真患者最在意的安全问题，同时避开疗程包价这类会导致医疗广告被拒的促销语义。适合靠临床判断而非折扣竞争的诊所投放。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "medical", subcategory: "aesthetic-medicine", archetype: "consult", conversion: ["form", "whatsapp"], risk: "high", tone: "rational" },
+  },
+  {
+    id: "fertility",
+    name: "Willowbrook Fertility Centre",
+    industry: { en: "Medical / Fertility", zh: "医疗 / 生殖辅助" },
+    tagline: { en: "Fertility centre page — patients request a first consultation by form or phone.", zh: "生殖中心落地页，表单或电话预约初诊咨询。" },
+    seoIntro: {
+      en: "Willowbrook Fertility Centre is a first-consultation template for regulated fertility clinics, converting a high-anxiety audience into enquiries through an on-page form with a phone line as the second route. Investigation before treatment, one consultant throughout, counselling included from day one, and a refusal to quote headline success rates address what this audience has learned to distrust. Made for licensed centres advertising in a category where overpromising is both a compliance risk and a reputational one.",
+      zh: "Willowbrook Fertility Centre 是面向持牌生殖医学中心的初诊预约落地页模板，用页内表单承接高焦虑人群的咨询，电话作为第二通道。页面以「先查清楚再谈治疗」「全程同一位主诊」「首诊即配心理咨询」「拒绝拿漂亮成功率当噱头」回应这个人群早已学会怀疑的那些话术。适合持牌机构在这个「夸大承诺既踩合规红线也毁口碑」的品类投放。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "medical", subcategory: "fertility", archetype: "consult", conversion: ["form", "phone"], risk: "high", tone: "emotional" },
+  },
+  {
+    id: "vision-correction",
+    name: "Clearview Vision Centre",
+    industry: { en: "Medical / Vision correction", zh: "医疗 / 屈光矫正" },
+    tagline: { en: "Refractive surgery page — three procedures compared, then a suitability assessment.", zh: "屈光手术落地页，三种术式并排对比后预约适应性评估。" },
+    seoIntro: {
+      en: "Clearview Vision Centre is a comparison-led template for refractive surgery centres — the library's first built around weighing options rather than pushing one. LASIK, SMILE, and implantable lenses are set side by side with the patients each suits and the trade-offs each carries, so a visitor who arrived to compare can do so honestly, then convert into a diagnostic assessment. A published decline rate does the persuading that discount offers can't. Built for any high-consideration category where visitors shop procedures before they shop clinics.",
+      zh: "Clearview Vision Centre 是面向屈光手术中心的对比型落地页模板，也是模板库中第一套以「帮访客权衡」而非「单向种草」为结构的样例。LASIK、SMILE 与 ICL 三种术式并排摆开，写清各自适合谁、代价是什么，让本来就是来比较的访客真的比得明白，再转化为适应性评估预约。用公开的「劝退率」建立信任，这比任何折扣都更管用。适合访客习惯先比方案再挑机构的高决策成本品类。",
+    },
+    thumbnail: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1600&q=80",
+    tier: "t2",
+    tags: { category: "medical", subcategory: "vision-correction", archetype: "compare", conversion: ["form", "whatsapp"], risk: "high", tone: "rational" },
+  },
 ];
 
 export const DEFAULT_TEMPLATE_ID = TEMPLATES[0].id;

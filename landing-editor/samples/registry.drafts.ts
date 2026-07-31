@@ -67,6 +67,11 @@ const loaders: Record<string, DraftLoader> = {
   hvac: () => import("./hvacRepairDraft").then((m) => m.hvacRepairDraft),
   roofing: () => import("./roofingExteriorDraft").then((m) => m.roofingExteriorDraft),
   landscaping: () => import("./landscapingDraft").then((m) => m.landscapingDraft),
+  // 第二梯队 · 医疗与诊所
+  "hair-transplant": () => import("./hairTransplantDraft").then((m) => m.hairTransplantDraft),
+  "medical-aesthetics": () => import("./medicalAestheticsDraft").then((m) => m.medicalAestheticsDraft),
+  fertility: () => import("./fertilityClinicDraft").then((m) => m.fertilityClinicDraft),
+  "vision-correction": () => import("./visionCorrectionDraft").then((m) => m.visionCorrectionDraft),
 };
 
 /** 按 id 异步加载模板草稿体；缺省或未命中时回退默认模板。
