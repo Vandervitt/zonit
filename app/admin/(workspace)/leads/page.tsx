@@ -16,6 +16,39 @@ interface LeadRow {
   utm_source: string | null;
   is_read: boolean;
   created_at: string;
+  notify_email: "off" | "sent" | "failed" | null;
+  notify_email_error: string | null;
+  notify_webhook_status: "pending" | "sent" | "failed" | null;
+  notify_webhook_error: string | null;
+}
+
+/**
+ * 通知送达状态。「关」与「—」必须能区分：前者是租户自己关了通知，
+ * 后者是这条线索早于本功能上线，都不等于「发失败了」。
+ */
+const NOTIFY_TAG: Record<string, { color: string; text: string }> = {
+  sent: { color: "green", text: "已发送" },
+  failed: { color: "red", text: "失败" },
+  pending: { color: "blue", text: "投递中" },
+  off: { color: "default", text: "关" },
+};
+
+function NotifyTag({ label, status, error }: { label: string; status: string | null; error?: string | null }) {
+  if (!status) return null;
+  const meta = NOTIFY_TAG[status] ?? { color: "default", text: status };
+  const tag = <Tag color={meta.color}>{label} {meta.text}</Tag>;
+  return error ? <Tooltip title={error}>{tag}</Tooltip> : tag;
+}
+
+function NotifyCell({ row }: { row: LeadRow }) {
+  const hasAny = row.notify_email || row.notify_webhook_status;
+  if (!hasAny) return <Typography.Text type="secondary">—</Typography.Text>;
+  return (
+    <Space size={4} wrap>
+      <NotifyTag label="邮件" status={row.notify_email} error={row.notify_email_error} />
+      <NotifyTag label="Webhook" status={row.notify_webhook_status} error={row.notify_webhook_error} />
+    </Space>
+  );
 }
 
 /** 渠道图标：一键联系按钮的视觉锚点（antd 图标库已在后台其它页使用）。 */
@@ -101,6 +134,7 @@ export default function LeadsPage() {
           { title: "页面", dataIndex: "page_name", ellipsis: true },
           { title: "联系方式", render: (_: unknown, r: LeadRow) => <ContactCell row={r} onContacted={() => void markContacted(r)} />, ellipsis: true },
           { title: "来源", render: (_: unknown, r: LeadRow) => [r.channel, r.utm_source].filter(Boolean).join(" / ") || "—", width: 140 },
+          { title: "通知", width: 160, render: (_: unknown, r: LeadRow) => <NotifyCell row={r} /> },
           { title: "时间", dataIndex: "created_at", width: 180, render: (t: string) => new Date(t).toLocaleString() },
           { title: "状态", dataIndex: "is_read", width: 90, render: (v: boolean) => <Tag color={v ? "default" : "blue"}>{v ? "已读" : "未读"}</Tag> },
           { title: "操作", width: 180, render: (_: unknown, r: LeadRow) => (

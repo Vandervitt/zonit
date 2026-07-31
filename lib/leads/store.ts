@@ -15,6 +15,11 @@ export interface LeadRow {
   utm_campaign: string | null;
   is_read: boolean;
   created_at: string;
+  /** 通知送达可见性：邮件为平台侧发送结果，webhook 状态由投递表联查。 */
+  notify_email: "off" | "sent" | "failed" | null;
+  notify_email_error: string | null;
+  notify_webhook_status: "pending" | "sent" | "failed" | null;
+  notify_webhook_error: string | null;
 }
 
 export interface LeadAttribution {
@@ -28,19 +33,37 @@ export interface LeadAttribution {
  * 公开提交入库。坏 page_id 直接抛出交调用方丢弃；其余失败重试一次
  * （Neon 瞬断与连接池抖动占多数），仍失败则抛给调用方走兜底留存。
  */
-export async function insertLead(pageId: string, payload: LeadPayload, attr: LeadAttribution): Promise<void> {
+export async function insertLead(pageId: string, payload: LeadPayload, attr: LeadAttribution): Promise<string> {
   const run = () =>
     pool.query(
       `INSERT INTO leads (page_id, payload, channel, utm_source, utm_medium, utm_campaign)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
       [pageId, JSON.stringify(payload), attr.channel ?? null, attr.utm_source ?? null, attr.utm_medium ?? null, attr.utm_campaign ?? null],
     );
   try {
-    await run();
+    return (await run()).rows[0].id;
   } catch (err) {
     if (isBadPageIdError(err)) throw err;
     await new Promise((r) => setTimeout(r, 300));
-    await run();
+    return (await run()).rows[0].id;
+  }
+}
+
+/** 邮件通知结果回写。best-effort：写失败不影响线索本身，只丢一次可见性。 */
+export async function setLeadEmailNotify(leadId: string, status: "off" | "sent" | "failed", error?: string): Promise<void> {
+  try {
+    await pool.query(`UPDATE leads SET notify_email = $2, notify_email_error = $3 WHERE id = $1`, [leadId, status, error ?? null]);
+  } catch (err) {
+    console.error("[leads/store] 回写邮件通知结果失败:", err);
+  }
+}
+
+/** 关联 webhook 投递行；状态本身不复制，读取时联查（重试会改状态，复制必过期）。 */
+export async function setLeadWebhookDelivery(leadId: string, deliveryId: string): Promise<void> {
+  try {
+    await pool.query(`UPDATE leads SET notify_webhook_delivery_id = $2 WHERE id = $1`, [leadId, deliveryId]);
+  } catch (err) {
+    console.error("[leads/store] 回写 webhook 投递关联失败:", err);
   }
 }
 
@@ -54,8 +77,11 @@ export async function listLeads(
   if (opts.pageId) { vals.push(opts.pageId); conds.push(`l.page_id = $${vals.length}`); }
   if (opts.unreadOnly) conds.push(`l.is_read = false`);
   const res = await pool.query(
-    `SELECT l.*, p.name AS page_name
-       FROM leads l JOIN landing_pages p ON p.id = l.page_id
+    `SELECT l.*, p.name AS page_name,
+            d.status AS notify_webhook_status, d.last_error AS notify_webhook_error
+       FROM leads l
+       JOIN landing_pages p ON p.id = l.page_id
+       LEFT JOIN webhook_deliveries d ON d.id = l.notify_webhook_delivery_id
       WHERE ${conds.join(" AND ")}
       ORDER BY l.created_at DESC`,
     vals,
