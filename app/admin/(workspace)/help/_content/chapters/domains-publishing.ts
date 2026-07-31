@@ -3,15 +3,19 @@ import type { HelpChapterData } from "../types";
 export const domainsPublishing: HelpChapterData = {
   slug: "domains-publishing",
   title: "域名与发布",
-  summary: "为什么必须自有域名、DNS 配置步骤、状态标识解读、验证排查与发布状态流转。",
+  summary: "平台地址与自有域名怎么选、DNS 配置步骤、状态标识解读、验证排查与发布状态流转。",
   sections: [
     {
       id: "why-own-domain",
-      heading: "为什么必须用自有域名",
+      heading: "两种发布地址：先跑通，再换成自己的品牌",
       blocks: [
         {
           t: "p",
-          text: "落地页只能发布到你自己绑定并验证过的域名，平台不提供公共子域名托管。这不是限制，而是投放的最佳实践：",
+          text: "页面可以发布到两种地址。还没有域名、或者只想先看看效果，用平台提供的地址即可——在发布弹窗点「用平台提供的地址发布」，平台按页面名分配一个专属地址，无需配置任何 DNS，立即可用，同样能正常收线索。",
+        },
+        {
+          t: "p",
+          text: "但真正投广告、做长期生意时，请换成你自己的品牌域名：",
         },
         {
           t: "list",
@@ -20,6 +24,11 @@ export const domainsPublishing: HelpChapterData = {
             "品牌资产：访客看到的是你的域名，复访、口碑与信任都沉淀在你自己的品牌上。",
             "SEO：自然流量与搜索收录积累在你的域名下，换工具也带得走。",
           ],
+        },
+        {
+          t: "callout",
+          tone: "info",
+          text: "页面随时可以从平台地址改发到自有域名——在发布弹窗换选域名即可，内容和已收到的线索都不受影响。所以不必为了等域名而卡住第一次发布。",
         },
         {
           t: "callout",

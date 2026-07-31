@@ -70,7 +70,7 @@ export default async function PublicLandingPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  // 贯彻「只发布到自有域名」：app 域名直连不提供公共托管
+  // app 主域直连不提供页面托管：客户页面只经自有域名或平台子域访问（两者都不是 appHost）
   if (await isAppHostDirect()) notFound();
 
   const { slug } = await params;
