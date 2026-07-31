@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getLandingSlugByCustomDomain } from "@/lib/domains-db";
+import { resolveTenantRoute } from "@/lib/domains-db";
+import { normalizeRoutePath, ROOT_PATH } from "@/lib/domains/route-path";
 import { hostnameOf, isCustomDomain, TENANT_HOST_HEADER } from "@/lib/host";
 
 // 这些公开元数据路由按 host 自行生成（app/robots.ts、app/sitemap.ts、
@@ -23,16 +24,18 @@ export async function handleTenancy(req: NextRequest) {
   if (PUBLIC_TENANT_API_PATHS.has(req.nextUrl.pathname)) return null;
 
   if (isCustomDomain(hostname)) {
-    // 「一域名一页」：页面只存在于根路径，其余路径本就不存在，必须 404。
-    // 此前 rewrite 只用 host 查 slug、未读 pathname，导致任意路径都返回同一张
-    // 落地页 HTML 200 —— 对搜索引擎是无限重复内容（canonical 指回根路径只是缓解，
-    // 页面本身仍被抓取）。放行名单（/_next、元数据路由、访客 API）已在上方先行返回。
-    if (req.nextUrl.pathname !== "/") {
+    const path = normalizeRoutePath(req.nextUrl.pathname);
+
+    // P1：解析依据已换成 domain_routes（域名 + 路径），但仍只开放根路径，对外行为不变。
+    // 其余路径必须 404：页面只存在于根路径，返回落地页会造成无限重复内容（见 PR #136）。
+    // P2 开放多路径时，删掉这一行即可——解析层已经按路径查了。
+    // 放行名单（/_next、元数据路由、访客 API）已在上方先行返回。
+    if (path !== ROOT_PATH) {
       return new NextResponse("Not Found", { status: 404 });
     }
 
-    // 新流程：自定义域名 → 已发布落地页
-    const landingSlug = await getLandingSlugByCustomDomain(hostname);
+    // 自定义域名 + 路径 → 已发布落地页
+    const landingSlug = await resolveTenantRoute(hostname, path);
     if (landingSlug) {
       // 改写后下游的 host 会变成 app 主域，这里把真实客户域名透传给页面/metadata，
       // 使租户判定与 canonical 不依赖改写后被污染的 host。

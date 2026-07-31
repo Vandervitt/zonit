@@ -57,8 +57,10 @@ export async function listLandingPages(userId: string): Promise<LandingPageListR
     `SELECT lp.*, d.domain AS bound_domain
        FROM landing_pages lp
        LEFT JOIN LATERAL (
-         SELECT domain FROM domains
-          WHERE landing_page_id = lp.id AND enabled = true AND verified = true
+         SELECT dom.domain
+           FROM domain_routes r
+           JOIN domains dom ON dom.id = r.domain_id
+          WHERE r.landing_page_id = lp.id AND dom.enabled = true AND dom.verified = true
           LIMIT 1
        ) d ON true
      WHERE lp.user_id = $1 ORDER BY lp.updated_at DESC`,

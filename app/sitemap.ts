@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 import { hostnameOf, isCustomDomain } from "@/lib/host";
-import { getLandingSlugByCustomDomain } from "@/lib/domains-db";
+import { resolveTenantRoute } from "@/lib/domains-db";
+import { ROOT_PATH } from "@/lib/domains/route-path";
 import { getPublishedBySlug } from "@/lib/landing-pages/store";
 import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { GUIDE_SLUGS, getGuide } from "@/app/guides/_content";
@@ -35,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [...marketing, ...templates, ...guides];
   }
 
-  const slug = await getLandingSlugByCustomDomain(hostname);
+  const slug = await resolveTenantRoute(hostname, ROOT_PATH);
   if (!slug) return [];
   const page = await getPublishedBySlug(slug);
   if (!page) return [];

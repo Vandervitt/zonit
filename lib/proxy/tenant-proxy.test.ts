@@ -3,9 +3,10 @@
 // /p/{slug}，返回 200 HTML，线索静默丢失（客户端 res.ok 误判成功）。
 import { describe, it, expect, vi, beforeAll } from "vitest";
 
+// 解析依据已换成 domain_routes（域名 + 路径）。P1 仅根路径有绑定。
 vi.mock("@/lib/domains-db", () => ({
-  getLandingSlugByCustomDomain: vi.fn(async (domain: string) =>
-    domain === "tenant.example" ? "solar-page" : null,
+  resolveTenantRoute: vi.fn(async (domain: string, path: string) =>
+    domain === "tenant.example" && path === "/" ? "solar-page" : null,
   ),
 }));
 
@@ -69,6 +70,19 @@ describe("handleTenancy 非根路径不提供落地页（回归：soft-404 重�
   it("根路径不受影响，仍改写到 /p/{slug}", async () => {
     const res = await handleTenancy(makeReq("tenant.example", "/"));
     expect(rewriteTarget(res)).toContain("/p/solar-page");
+  });
+
+  // P1 引入路径规范化后的唯一行为变化：重复斜杠折叠到根而非 404，
+  // 访客输入 brand.com// 时看到落地页而不是错误页。
+  it.each(["//", "///"])("%s 折叠为根路径并正常改写", async (pathname) => {
+    const res = await handleTenancy(makeReq("tenant.example", pathname));
+    expect(rewriteTarget(res)).toContain("/p/solar-page");
+  });
+
+  // 大小写与尾斜杠在 P1 仍是 404（多路径未开放），但走的是规范化后的比较，
+  // 而非原始 pathname —— P2 开放多路径时这些应命中同一条 route。
+  it.each(["/Services", "/services/"])("%s 在 P1 仍 404", async (pathname) => {
+    expect((await handleTenancy(makeReq("tenant.example", pathname)))?.status).toBe(404);
   });
 
   it("公开 API 与 /_next 的放行优先于路径收敛", async () => {
