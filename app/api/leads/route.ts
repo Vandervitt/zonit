@@ -52,8 +52,9 @@ export async function POST(request: NextRequest) {
     utm_medium: cap(utm.utm_medium, 128),
     utm_campaign: cap(utm.utm_campaign, 128),
   };
+  let leadId: string;
   try {
-    await insertLead(pageId, result.payload, attr);
+    leadId = await insertLead(pageId, result.payload, attr);
   } catch (err) {
     // 坏 page_id：线索无处可归，重投也永远失败 → 保持静默丢弃。
     if (isBadPageIdError(err)) return new NextResponse(null, { status: 204, headers: CORS });
@@ -104,6 +105,7 @@ export async function POST(request: NextRequest) {
     const origin = new URL(request.url).origin;
     await notifyNewLead({
       pageId,
+      leadId,
       fields: result.payload as unknown as Record<string, unknown>,
       channel: cap(body.channel, 32) ?? "form",
       utm: { utm_source: cap(utm.utm_source, 128), utm_medium: cap(utm.utm_medium, 128), utm_campaign: cap(utm.utm_campaign, 128) },

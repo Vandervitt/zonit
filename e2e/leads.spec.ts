@@ -124,6 +124,39 @@ test.describe("线索闭环", () => {
     await expect(row.getByText("已读", { exact: true })).toBeVisible({ timeout: 15_000 });
   });
 
+  test("通知送达可见性：邮件结果回写到线索并在后台可见", async ({ page }) => {
+    const api = await pwRequest.newContext();
+    const res = await api.post(`${BASE}/api/leads`, {
+      data: {
+        pageId, channel: "form",
+        fields: { name: "Notify Test", email: "notify@example.com" },
+        utm: { utm_source: "e2e-notify" },
+      },
+    });
+    expect(res.status()).toBe(204);
+    await api.dispose();
+
+    // 邮件在响应之后发（next/server after），故轮询等回写落库。
+    // 本地 dev 收件人不可达，结果多半是 failed——失败可见正是这条功能的目的。
+    await expect
+      .poll(async () => {
+        const r = await pool.query(
+          `SELECT notify_email FROM leads WHERE payload->>'name' = 'Notify Test' ORDER BY created_at DESC LIMIT 1`,
+        );
+        return r.rows[0]?.notify_email ?? null;
+      }, { timeout: 20_000 })
+      .toMatch(/^(sent|failed|off)$/);
+
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Dev Login/i }).click();
+    await page.waitForURL("**/admin", { timeout: 30_000 });
+    await page.goto("/admin/leads");
+
+    const row = page.getByRole("row").filter({ hasText: "e2e-notify" });
+    await expect(row).toBeVisible({ timeout: 15_000 });
+    await expect(row.getByText(/^邮件 (已发送|失败|关)$/)).toBeVisible();
+  });
+
   // 提醒的筛选口径全在 SQL 里，单测只能断言参数，故在真实库上验一次。
   test("未读提醒：只挑静置超 48h、未读、未提醒过、且不早于 30 天的线索", async () => {
     const seed = async (payload: object, hoursAgo: number, isRead = false, nudged = false) => {

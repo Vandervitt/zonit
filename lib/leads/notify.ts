@@ -6,6 +6,7 @@ import { hasLeadWebhook } from "@/lib/plans";
 import { sendLeadNotificationEmail } from "@/lib/email";
 import { buildLeadWebhookPayload, type LeadWebhookInput } from "./webhook-payload";
 import { insertDelivery } from "@/lib/webhooks/deliveries-store";
+import { setLeadEmailNotify, setLeadWebhookDelivery } from "./store";
 import { enqueueAndFlush } from "@/lib/webhooks/dispatch";
 
 interface OwnerCtx {
@@ -33,6 +34,14 @@ async function getOwnerCtx(pageId: string): Promise<OwnerCtx | null> {
   };
 }
 
+/** Resend 的错误形态不固定（字符串 / Error / API 错误对象），统一压成一行可读文本。 */
+function describeError(r: { error?: unknown }): string {
+  const e = r.error;
+  if (typeof e === "string") return e;
+  if (e && typeof e === "object" && "message" in e) return String((e as { message: unknown }).message);
+  return "unknown_error";
+}
+
 export interface NotifyDecision { email: boolean; webhook: boolean }
 
 /** 纯决策：邮件全档（开关 + 有邮箱）；webhook 需套餐允许 + 开关 + 有 URL。 */
@@ -48,6 +57,8 @@ export function decideNotify(ctx: {
 
 export interface NewLeadInput {
   pageId: string;
+  /** 线索行 id：通知结果回写到它上面，供后台展示送达可见性。 */
+  leadId?: string;
   fields: Record<string, unknown>;
   channel: string | null;
   utm: LeadWebhookInput["utm"];
@@ -65,13 +76,23 @@ export async function notifyNewLead(input: NewLeadInput): Promise<void> {
     planAllowsWebhook: hasLeadWebhook(await getUserPlan(ctx.userId)),
   });
 
+  const leadId = input.leadId;
+
   if (decision.email && ctx.email) {
     const to = ctx.email;
+    // 邮件在响应之后发（不占访客等待），故结果也在这里回写。
     after(async () => {
-      await sendLeadNotificationEmail({
+      const r = await sendLeadNotificationEmail({
         to, pageName: ctx.pageName, fields: input.fields, dashboardUrl: input.dashboardUrl,
       });
+      if (!leadId) return;
+      const ok = "success" in r && r.success;
+      await setLeadEmailNotify(leadId, ok ? "sent" : "failed", ok ? undefined : describeError(r));
     });
+  } else if (leadId) {
+    // 关了开关或没邮箱：明确记成 off，与「发失败」区分开——
+    // 否则客户看到空白，分不清是平台没发还是发了没到。
+    await setLeadEmailNotify(leadId, "off");
   }
 
   if (decision.webhook) {
@@ -80,6 +101,9 @@ export async function notifyNewLead(input: NewLeadInput): Promise<void> {
       channel: input.channel, utm: input.utm, createdAt: input.createdAt,
     });
     const id = await insertDelivery({ userId: ctx.userId, pageId: input.pageId, payload: payload as unknown as Record<string, unknown> });
-    if (id) enqueueAndFlush(id);
+    if (id) {
+      if (leadId) await setLeadWebhookDelivery(leadId, id);
+      enqueueAndFlush(id);
+    }
   }
 }

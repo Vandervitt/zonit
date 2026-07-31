@@ -11,12 +11,12 @@ const insert = () => insertLead(PAGE, { name: "Ann" } as never, { channel: "form
 
 beforeEach(() => {
   vi.clearAllMocks();
-  queryMock.mockResolvedValue({ rows: [] });
+  queryMock.mockResolvedValue({ rows: [{ id: "lead-1" }] });
 });
 
 describe("insertLead", () => {
-  it("首次成功不重试", async () => {
-    await insert();
+  it("首次成功不重试，并返回线索 id（通知结果要回写到它上面）", async () => {
+    expect(await insert()).toBe("lead-1");
     expect(queryMock).toHaveBeenCalledOnce();
   });
 
