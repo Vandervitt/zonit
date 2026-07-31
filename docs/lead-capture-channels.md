@@ -113,6 +113,23 @@
 - **限频改为落库**（迁移 034）是因为原实现是进程内内存：serverless 每实例各算各的，扩容会替攻击者绕过。`bucket` 存的是**加盐哈希后的 IP**，不存原始 IP。计数行由 `/api/cron/daily` 每日清理。
 - e2e 的请求全部来自同一 IP，故用例间需清 `rate_limit_hits`，否则会撞 429——撞上说明限频真的生效了。
 
+## 表单漏斗埋点
+
+表单已是主转化路径，但埋点此前只有 `page_view` / `cta_click`——看得到「有多少人来」，看不到「多少人开始填却没提交」。改表单控件（比如加国码选择器）到底压没压转化，没有数据可判。
+
+| 事件 | 何时发 | detail |
+|---|---|---|
+| `form_start` | 访客第一次动表单（每次页面加载只发一次） | — |
+| `form_submit` | 提交成功 | — |
+| `form_error` | 提交被拒 | 错误码（`bad_whatsapp` / `need_contact` / `network`…） |
+
+- **只走第一方 beacon，不进第三方 pixel**：`form_submit` 的 pixel 侧由 `LeadForm` 自己双发（与服务端 CAPI 同 `event_id` 去重），重复进 `EVENT_MAP` 会双计。
+- **欧盟同意门控照旧**：三个事件都经 `TrackingProvider` 的 `trackForm`，内部走同一个 `collectRef` 判定。
+- **没有 Provider 的场景自动降级**：`useFormTracking` 的 context 默认值是 no-op，编辑器预览与模板详情页照常渲染表单，只是不采集。
+- `detail` 只对 `form_error` 落库（`/api/track` 里显式判定），其余事件即使带了也丢弃——避免这个字段变成什么都往里塞的杂物袋。
+
+后台「投放分析 → 表单漏斗」展示开始填写 / 提交成功 / **完成率**，以及被拒次数按错误码的分布。**改表单控件前后就看完成率**；某个错误码占比突然变高，通常意味着那个字段卡住了访客。
+
 ## 表单文案的语言
 
 生成页面向海外访客，故渲染器的字段缺省标签为**英文**（`Name / Email / Phone / WhatsApp / Telegram / Message`），访客可见的状态文案（提交中、失败、预览提示）同样为英文。

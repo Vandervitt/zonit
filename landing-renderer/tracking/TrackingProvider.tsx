@@ -1,16 +1,26 @@
 // landing-renderer/tracking/TrackingProvider.tsx
 "use client";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import Script from "next/script";
 import type { PageTracking } from "@/types/schema.draft";
 import { parseUtm, mergeUtmIntoUrl } from "./utm";
 import { PixelSink, BeaconSink, type EventSink } from "./sinks";
-import { inferChannel } from "./events";
+import { inferChannel, type FormEvent } from "./events";
 import { ConsentBar } from "./ConsentBar";
 import { shouldCollectFirstParty } from "@/lib/tracking/geo";
 
 const CONSENT_KEY = "lp_consent";
 const UTM_KEY = "lp_utm";
+
+/**
+ * 表单漏斗上报入口。默认 no-op：编辑器预览、模板详情页等没有 TrackingProvider 的
+ * 场景照常渲染表单，只是不采集。欧盟同意门控在 Provider 内部统一处理，调用方无需关心。
+ */
+const FormTrackingContext = createContext<(event: FormEvent, detail?: string) => void>(() => {});
+
+export function useFormTracking() {
+  return useContext(FormTrackingContext);
+}
 
 export function TrackingProvider({ tracking, pageId, euVisitor = false, children }: { tracking?: PageTracking; pageId: string; euVisitor?: boolean; children: ReactNode }) {
   const consentEnabled = tracking?.consent?.enabled ?? true;
@@ -89,13 +99,19 @@ export function TrackingProvider({ tracking, pageId, euVisitor = false, children
     }
   }, [tracking?.utmPassthrough]);
 
+  // 表单漏斗只走第一方 beacon：pixel 侧的 Lead 由 LeadForm 自己双发（同 event_id 去重）。
+  const trackForm = useCallback((event: FormEvent, detail?: string) => {
+    if (!collectRef.current) return;
+    beaconRef.current?.track(event, { ...utmRef.current, ...(detail ? { detail } : {}) });
+  }, []);
+
   const accept = () => { localStorage.setItem(CONSENT_KEY, "accepted"); setConsented(true); };
   const decline = () => { localStorage.setItem(CONSENT_KEY, "declined"); setDeclined(true); };
 
   return (
     <div onClickCapture={onClickCapture}>
       {consented && enabledPixels.map((p) => <PixelScript key={p.provider} provider={p.provider} id={p.id} />)}
-      {children}
+      <FormTrackingContext.Provider value={trackForm}>{children}</FormTrackingContext.Provider>
       {consentEnabled && !consented && !declined && (
         <ConsentBar text={tracking?.consent.text} onAccept={accept} onDecline={decline} />
       )}

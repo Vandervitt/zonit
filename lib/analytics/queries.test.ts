@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSeries, summarize, buildFunnel } from "./queries";
+import { buildSeries, summarize, buildFunnel, buildFormFunnel } from "./queries";
 
 describe("analytics 整形", () => {
   it("summarize 计算 ctr 与线索转化率（无 views 时为 0）", () => {
@@ -25,5 +25,26 @@ describe("analytics 整形", () => {
       { date: "2026-06-19", views: 0, clicks: 0 },
       { date: "2026-06-20", views: 10, clicks: 2 },
     ]);
+  });
+});
+
+describe("buildFormFunnel", () => {
+  it("完成率 = 提交成功 / 开始填写——改表单控件前后就看它", () => {
+    const f = buildFormFunnel(200, 150, []);
+    expect(f.completion).toBe(0.75);
+    expect(f.errors).toBe(0);
+  });
+
+  it("无人开始填写时完成率为 0 而不是 NaN", () => {
+    expect(buildFormFunnel(0, 0, []).completion).toBe(0);
+  });
+
+  it("错误按码汇总，errors 为总次数（占比高的码说明某个字段卡住了访客）", () => {
+    const f = buildFormFunnel(100, 60, [
+      { detail: "bad_whatsapp", count: 25 },
+      { detail: "need_contact", count: 5 },
+    ]);
+    expect(f.errors).toBe(30);
+    expect(f.errorBreakdown[0]).toEqual({ detail: "bad_whatsapp", count: 25 });
   });
 });

@@ -4,7 +4,8 @@ import pool from "@/lib/db";
 import { isBadPageIdError } from "@/lib/db-errors";
 import { checkPublicOrigin } from "@/lib/leads/origin-guard";
 
-const EVENTS = new Set(["page_view", "cta_click"]);
+// 表单漏斗事件与页面事件同渠道上报；detail 仅用于 form_error 的错误码。
+const EVENTS = new Set(["page_view", "cta_click", "form_start", "form_submit", "form_error"]);
 const cap = (v: unknown, n: number): string | null =>
   typeof v === "string" && v.length > 0 ? v.slice(0, n) : null;
 
@@ -40,9 +41,10 @@ export async function POST(request: Request) {
   }
   try {
     await pool.query(
-      `INSERT INTO analytics_events (page_id, event, channel, utm_source, utm_medium, utm_campaign)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [pageId, event, cap(body.channel, 32), cap(body.utm_source, 128), cap(body.utm_medium, 128), cap(body.utm_campaign, 128)],
+      `INSERT INTO analytics_events (page_id, event, channel, utm_source, utm_medium, utm_campaign, detail)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [pageId, event, cap(body.channel, 32), cap(body.utm_source, 128), cap(body.utm_medium, 128), cap(body.utm_campaign, 128),
+       event === "form_error" ? cap(body.detail, 64) : null],
     );
   } catch (err) {
     // 坏 page_id：静默忽略。其余（连接中断、池打满等）不阻塞埋点响应，
