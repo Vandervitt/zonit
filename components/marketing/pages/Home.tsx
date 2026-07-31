@@ -6,6 +6,7 @@ import { marketingMetadata, siteStructuredData } from "@/lib/seo/site";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getCnyRateForLocale } from "@/lib/pricing/fx-server";
+import { TEMPLATE_STATS, fillCounts, templateIndustries } from "@/lib/templates/stats";
 import type { Locale } from "@/lib/i18n/config";
 
 /**
@@ -18,9 +19,9 @@ export function homeMetadata(locale: Locale): Metadata {
     ...marketingMetadata({
       locale,
       title: t.title,
-      description: t.description,
+      description: fillCounts(t.description),
       path: Routes.Home,
-      ogDescription: t.ogDescription,
+      ogDescription: fillCounts(t.ogDescription),
     }),
     // GSC URL 前缀验证只注入英文首页，避免中英两页重复输出同一验证标签。
     ...(locale === "en"
@@ -38,6 +39,8 @@ export async function HomeView({ locale }: { locale: Locale }) {
       <MarketingHome
         locale={locale}
         cnyRate={cnyRate}
+        stats={TEMPLATE_STATS}
+        industries={templateIndustries()}
         fonts={{
           display: fontHead.className,
           body: fontBody.className,

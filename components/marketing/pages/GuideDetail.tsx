@@ -11,6 +11,7 @@ import { GuideArticleView } from "@/app/guides/_components/GuideArticleView";
 import type { GuideArticle } from "@/app/guides/_content/types";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
+import { fillCounts } from "@/lib/templates/stats";
 import { htmlLang, type Locale } from "@/lib/i18n/config";
 
 const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
@@ -127,7 +128,7 @@ export function GuideDetailView({ slug, locale }: { slug: string; locale: Locale
 
         <section className="mt-16 rounded-2xl border border-border bg-aqua-50/50 p-8 text-center">
           <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>{t.ctaTitle}</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">{t.ctaDesc}</p>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">{fillCounts(t.ctaDesc)}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
               href={localePath(locale, Routes.Templates)}

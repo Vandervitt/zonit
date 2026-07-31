@@ -6,13 +6,13 @@ import { test, expect } from "@playwright/test";
 test.describe("营销站双语", () => {
   test("/ 渲染英文首页", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Turn ad clicks into");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Turn visitors into");
     await expect(page.getByRole("link", { name: "Start free" }).first()).toBeVisible();
   });
 
   test("/zh 渲染中文首页", async ({ page }) => {
     await page.goto("/zh");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("把广告点击");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("把访客变成");
     await expect(page.getByRole("link", { name: "免费开始" }).first()).toBeVisible();
   });
 
@@ -110,6 +110,37 @@ test.describe("营销站双语", () => {
     await expect(page.getByRole("heading", { name: "玩具母婴" })).toBeVisible();
   });
 
+  test("首页「按行业选」覆盖服务与 B2B 行业，并锚到模板库对应分组", async ({ page }) => {
+    await page.goto("/");
+    // 首页曾只举例电商类目，把诊所 / 律所 / 本地服务 / B2B 客户挡在门外。
+    const legal = page.getByRole("link", { name: /Legal & immigration/ });
+    await expect(legal).toBeVisible();
+    await expect(page.getByRole("link", { name: /Local services/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /B2B & wholesale/ })).toBeVisible();
+
+    await legal.click();
+    await expect(page).toHaveURL(/\/templates#legal$/);
+    await expect(page.getByRole("heading", { name: "Legal & immigration" })).toBeInViewport();
+  });
+
+  test("首页模板数量取注册表真实口径，不再是写死的 30+", async ({ page }) => {
+    await page.goto("/zh");
+    await expect(page.getByText("30+")).toHaveCount(0);
+    // 模板库副标题与首页用同一口径，两处数字必须一致。
+    const homeCount = (await page.getByRole("link", { name: /浏览完整模板库/ }).isVisible())
+      ? await page.locator("main").innerText()
+      : "";
+    const homeMatch = homeCount.match(/(\d+)\s*套获客模板覆盖\s*(\d+)\s*个行业/);
+    expect(homeMatch, "首页行业区文案应含模板数与行业数").not.toBeNull();
+
+    await page.goto("/zh/templates");
+    const gallery = await page.locator("main").innerText();
+    const galleryMatch = gallery.match(/(\d+)\s*套留资模板，覆盖\s*(\d+)\s*个行业/);
+    expect(galleryMatch).not.toBeNull();
+    expect(homeMatch![1]).toBe(galleryMatch![1]);
+    expect(homeMatch![2]).toBe(galleryMatch![2]);
+  });
+
   test("模板画廊首屏图片使用高优先级与响应式来源", async ({ page }) => {
     await page.goto("/templates");
     const images = page.locator("main section").first().locator("img");
@@ -151,7 +182,7 @@ test.describe("营销站双语", () => {
   test("指南列表与详情各出对应语言", async ({ page }) => {
     await page.goto("/guides");
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "Overseas lead-gen landing page guides",
+      "Lead-gen landing page guides",
     );
     await page.goto("/guides/whatsapp-lead-landing-page");
     await expect(page.getByRole("heading", { name: "The five most common mistakes" })).toBeVisible();
@@ -222,7 +253,7 @@ test.describe("首页按 IP 分流语言", () => {
     const page = await ctx.newPage();
     await page.goto("/");
     await expect(page).toHaveURL(/\/zh$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("把广告点击");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("把访客变成");
     await ctx.close();
   });
 
@@ -231,7 +262,7 @@ test.describe("首页按 IP 分流语言", () => {
     const page = await ctx.newPage();
     await page.goto("/");
     await expect(page).toHaveURL(/localhost:3001\/$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Turn ad clicks into");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Turn visitors into");
     await ctx.close();
   });
 
@@ -246,7 +277,7 @@ test.describe("首页按 IP 分流语言", () => {
 
     await page.reload();
     await expect(page).toHaveURL(/localhost:3001\/$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Turn ad clicks into");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Turn visitors into");
     await ctx.close();
   });
 
