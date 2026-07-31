@@ -171,6 +171,29 @@ export const fastFashionDraft: LandingPageDraft = {
       },
     },
   ],
+  // 第二通道：主转化仍是 WhatsApp，本表单承接不用 WhatsApp / 更愿意留邮箱的访客。
+  // 收的是同一件事（styling advice），只是换个落点，故文案与 CTA 主题保持一致。
+  leadForm: {
+    enabled: true,
+    title: "Prefer email? Get your styling advice here",
+    description:
+      "Not on WhatsApp, or would rather not message? Fill this in and a stylist will send your styling advice by email instead. Same free advice, no obligation to buy anything.",
+    submitText: "Send me my styling advice",
+    successMessage:
+      "Thanks — a stylist will email you your styling advice shortly. Check your spam folder if it hasn't arrived.",
+    fields: {
+      name: { enabled: true, required: true, label: "Your name" },
+      email: { enabled: true, required: true, label: "Email (where we send it)" },
+      phone: { enabled: false, required: false },
+      whatsapp: { enabled: true, required: false, label: "WhatsApp (optional, if you'd rather chat)" },
+      telegram: { enabled: false, required: false },
+      message: {
+        enabled: true,
+        required: true,
+        label: "Your usual size, height, and the occasion you're dressing for",
+      },
+    },
+  },
 
   footer: {
     brandName: "Lunela",

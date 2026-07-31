@@ -174,6 +174,29 @@ export const storageDraft: LandingPageDraft = {
       },
     },
   ],
+  // 第二通道：主转化仍是 WhatsApp，本表单承接不用 WhatsApp / 更愿意留邮箱的访客。
+  // 收的是同一件事（organizing plan），只是换个落点，故文案与 CTA 主题保持一致。
+  leadForm: {
+    enabled: true,
+    title: "Prefer email? Get your organizing plan here",
+    description:
+      "Not on WhatsApp, or would rather not message? Fill this in and an organizing adviser will send your organizing plan by email instead. Same free advice, no obligation to buy anything.",
+    submitText: "Send me my organizing plan",
+    successMessage:
+      "Thanks — an organizing adviser will email you your organizing plan shortly. Check your spam folder if it hasn't arrived.",
+    fields: {
+      name: { enabled: true, required: true, label: "Your name" },
+      email: { enabled: true, required: true, label: "Email (where we send it)" },
+      phone: { enabled: false, required: false },
+      whatsapp: { enabled: true, required: false, label: "WhatsApp (optional, if you'd rather chat)" },
+      telegram: { enabled: false, required: false },
+      message: {
+        enabled: true,
+        required: true,
+        label: "The room you're tackling and roughly how much space you have",
+      },
+    },
+  },
 
   footer: {
     brandName: "Tidely",

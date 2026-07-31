@@ -202,6 +202,29 @@ export const fragranceDraft: LandingPageDraft = {
       },
     },
   ],
+  // 第二通道：主转化仍是 WhatsApp，本表单承接不用 WhatsApp / 更愿意留邮箱的访客。
+  // 收的是同一件事（scent match），只是换个落点，故文案与 CTA 主题保持一致。
+  leadForm: {
+    enabled: true,
+    title: "Prefer email? Get your scent match here",
+    description:
+      "Not on WhatsApp, or would rather not message? Fill this in and a fragrance adviser will send your scent match by email instead. Same free advice, no obligation to buy anything.",
+    submitText: "Send me my scent match",
+    successMessage:
+      "Thanks — a fragrance adviser will email you your scent match shortly. Check your spam folder if it hasn't arrived.",
+    fields: {
+      name: { enabled: true, required: true, label: "Your name" },
+      email: { enabled: true, required: true, label: "Email (where we send it)" },
+      phone: { enabled: false, required: false },
+      whatsapp: { enabled: true, required: false, label: "WhatsApp (optional, if you'd rather chat)" },
+      telegram: { enabled: false, required: false },
+      message: {
+        enabled: true,
+        required: true,
+        label: "Scents you already love, and where you'd wear this one",
+      },
+    },
+  },
 
   footer: {
     brandName: "Maison Brume",

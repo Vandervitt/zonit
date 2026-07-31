@@ -171,6 +171,29 @@ export const footwearDraft: LandingPageDraft = {
       },
     },
   ],
+  // 第二通道：主转化仍是 WhatsApp，本表单承接不用 WhatsApp / 更愿意留邮箱的访客。
+  // 收的是同一件事（fit consult），只是换个落点，故文案与 CTA 主题保持一致。
+  leadForm: {
+    enabled: true,
+    title: "Prefer email? Get your fit consult here",
+    description:
+      "Not on WhatsApp, or would rather not message? Fill this in and a fit specialist will send your fit consult by email instead. Same free advice, no obligation to buy anything.",
+    submitText: "Send me my fit consult",
+    successMessage:
+      "Thanks — a fit specialist will email you your fit consult shortly. Check your spam folder if it hasn't arrived.",
+    fields: {
+      name: { enabled: true, required: true, label: "Your name" },
+      email: { enabled: true, required: true, label: "Email (where we send it)" },
+      phone: { enabled: false, required: false },
+      whatsapp: { enabled: true, required: false, label: "WhatsApp (optional, if you'd rather chat)" },
+      telegram: { enabled: false, required: false },
+      message: {
+        enabled: true,
+        required: true,
+        label: "Your usual shoe size, foot width, and what you'll use them for",
+      },
+    },
+  },
 
   footer: {
     brandName: "Atlas Footwear",
