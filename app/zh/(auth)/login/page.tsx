@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
 import { LoginView } from "@/components/auth/LoginView";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { loginMetadata } from "@/lib/seo/auth-metadata";
 
-export const metadata: Metadata = { title: getDictionary("zh").auth.login.metaTitle };
+export const metadata = loginMetadata("zh");
 
 export default function Page() {
   return <LoginView locale="zh" />;
