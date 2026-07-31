@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { replaySpooledLeads } from "@/lib/leads/spool";
 import { getRetryableEvents } from "@/lib/capi/events-store";
 import { flushEvents } from "@/lib/capi/dispatch";
 import { getRetryableDeliveries } from "@/lib/webhooks/deliveries-store";
@@ -21,6 +22,14 @@ export async function GET(request: NextRequest) {
   }
 
   const result: Record<string, unknown> = {};
+
+  // 线索兜底重投优先：落库失败被暂存的线索是真金白银，早一轮回库早一轮跟进。
+  try {
+    result.leadSpool = await replaySpooledLeads();
+  } catch (err) {
+    console.error("cron/daily lead-spool-replay failed:", err);
+    result.leadSpoolError = true;
+  }
 
   try {
     const rows = await getRetryableEvents();

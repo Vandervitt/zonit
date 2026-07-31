@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import pool from "@/lib/db";
+import { isBadPageIdError } from "@/lib/db-errors";
 
 const EVENTS = new Set(["page_view", "cta_click"]);
 const cap = (v: unknown, n: number): string | null =>
@@ -29,8 +31,13 @@ export async function POST(request: Request) {
        VALUES ($1, $2, $3, $4, $5, $6)`,
       [pageId, event, cap(body.channel, 32), cap(body.utm_source, 128), cap(body.utm_medium, 128), cap(body.utm_campaign, 128)],
     );
-  } catch {
-    // 坏 page_id 触发 FK 错误等：best-effort 忽略
+  } catch (err) {
+    // 坏 page_id：静默忽略。其余（连接中断、池打满等）不阻塞埋点响应，
+    // 但必须留证据——埋点静默失败会让漏斗数据凭空缩水且无人察觉。
+    if (!isBadPageIdError(err)) {
+      console.error("[api/track] 埋点落库失败:", err);
+      Sentry.captureException(err, { tags: { route: "api/track" }, extra: { pageId, event } });
+    }
   }
   return new NextResponse(null, { status: 204, headers: CORS });
 }

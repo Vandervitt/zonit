@@ -2,8 +2,10 @@
 // 事件 sink 抽象：统一 init/track 接口，TrackingProvider 广播事件给所有 sink。
 // 首刀只实现 PixelSink；first-party 采集 sink 留作后续刀（见文件尾）。
 import type { PixelConfig } from "@/types/schema.draft";
-import { appUrl } from "@/lib/host";
 import { EVENT_MAP, type InternalEvent } from "./events";
+
+/** 埋点上报端点（同源相对路径，见 BeaconSink）。 */
+export const TRACK_PATH = "/api/track";
 
 export type EventParams = Record<string, string>;
 
@@ -60,10 +62,14 @@ export class PixelSink implements EventSink {
 
 /** first-party 采集 sink：匿名事件回传 Zap Bridge，独立于第三方像素与同意条。 */
 export class BeaconSink implements EventSink {
-  private readonly url: string;
-  constructor(private readonly pageId: string) {
-    this.url = appUrl("/api/track");
-  }
+  /**
+   * 一律走同源相对路径：租户自有域名下 /api/track 由 tenant-proxy 白名单直通
+   * （见 PUBLIC_TENANT_API_PATHS），无需再打到 app 主域。改绝对 URL 会退化成
+   * 跨源请求，既容易被拦截器按第三方请求掐断（ERR_CONNECTION_RESET），
+   * 也会因 base 尾斜杠等配置问题吃 308——两类历史故障都由此而来。
+   */
+  private readonly url = TRACK_PATH;
+  constructor(private readonly pageId: string) {}
   ready(): boolean { return true; }
   init(): void {}
   track(event: InternalEvent, params: EventParams): void {

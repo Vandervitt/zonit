@@ -18,6 +18,20 @@
 | `blankPrimaryCtaLinks` | 跳过锚点链接——锚点不是用户的联系方式，没有强制重填的理由；非锚点主 CTA 照常清空 |
 | 发布门槛 `collectContactIssueItems` | CTA 指向 `#lead-form` 时**额外校验**表单确实已启用，否则报死链问题。这是收紧不是放行 |
 
+## 提交失败的处理（不得假成功）
+
+`POST /api/leads` 的落库失败必须分类，**任何情况下都不许在失败时返回 204**——访客看到成功提示、线索却蒸发，是这条链路最贵的故障（客户已经为那次广告点击付过钱）。
+
+| 失败类型 | 判定 | 行为 |
+|---|---|---|
+| 坏 `pageId`（FK 违约 `23503` / 非法 uuid `22P02`） | `isBadPageIdError`（`lib/db-errors.ts`） | 静默 204。线索无归属页面，重投也永远失败 |
+| 其余（连接中断、池打满、超时……） | 默认 | `insertLead` 内先重试一次 → 仍失败则上报 Sentry + 写兜底留存 + 返回 **503**，表单显示可重试 |
+
+- **兜底留存**：`lib/leads/spool.ts` 写 Vercel Blob（`lead-spool/` 前缀，**必须 `access: "private"`**——内含访客 PII），刻意不落 Postgres，因为失败场景本身多半就是库不可用。
+- **重投**：`/api/cron/daily` 每日重投一次，成功或确认无救（坏 pageId / 超 7 天）即删 blob，其余保留。Hobby 计划 cron 最快每天一次，故最坏延迟 24h——它是兜底，不是主路径。
+- **旁路环节**（里程碑、CAPI、通知）失败不阻塞 204，但一律 `console.error` + `Sentry.captureException`，禁止空 catch。`/api/track` 同规则：埋点失败不阻塞响应，但非坏 pageId 一律上报。
+- **埋点上报走同源相对路径**（`TRACK_PATH`，`landing-renderer/tracking/sinks.ts`）：租户自有域名下 `/api/track` 由 tenant-proxy 白名单直通。改回绝对 URL 会退化成跨源请求，历史上两次故障（308 重定向、`ERR_CONNECTION_RESET`）都由此而来。
+
 ## 表单文案的语言
 
 生成页面向海外访客，故渲染器的字段缺省标签为**英文**（`Name / Email / Phone / WhatsApp / Telegram / Message`），访客可见的状态文案（提交中、失败、预览提示）同样为英文。

@@ -1,6 +1,7 @@
 // lib/leads/store.ts
 // leads 读写。公开提交用 insertLead；后台查询/操作均按 user 隔离（经 landing_pages JOIN）。
 import pool from "@/lib/db";
+import { isBadPageIdError } from "@/lib/db-errors";
 import type { LeadPayload } from "./validate";
 
 export interface LeadRow {
@@ -23,13 +24,24 @@ export interface LeadAttribution {
   utm_campaign?: string | null;
 }
 
-/** 公开提交入库；坏 page_id 触发 FK 错误由调用方 best-effort 处理。 */
+/**
+ * 公开提交入库。坏 page_id 直接抛出交调用方丢弃；其余失败重试一次
+ * （Neon 瞬断与连接池抖动占多数），仍失败则抛给调用方走兜底留存。
+ */
 export async function insertLead(pageId: string, payload: LeadPayload, attr: LeadAttribution): Promise<void> {
-  await pool.query(
-    `INSERT INTO leads (page_id, payload, channel, utm_source, utm_medium, utm_campaign)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [pageId, JSON.stringify(payload), attr.channel ?? null, attr.utm_source ?? null, attr.utm_medium ?? null, attr.utm_campaign ?? null],
-  );
+  const run = () =>
+    pool.query(
+      `INSERT INTO leads (page_id, payload, channel, utm_source, utm_medium, utm_campaign)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [pageId, JSON.stringify(payload), attr.channel ?? null, attr.utm_source ?? null, attr.utm_medium ?? null, attr.utm_campaign ?? null],
+    );
+  try {
+    await run();
+  } catch (err) {
+    if (isBadPageIdError(err)) throw err;
+    await new Promise((r) => setTimeout(r, 300));
+    await run();
+  }
 }
 
 /** 列出本租户线索（经 page 关联隔离）。 */
