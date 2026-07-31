@@ -78,7 +78,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "beauty", subcategory: "skincare", archetype: "seeding", conversion: ["whatsapp"], risk: "medium", tone: "emotional" },
+    tags: { category: "beauty", subcategory: "skincare", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "medium", tone: "emotional" },
   },
   {
     id: "dental",
@@ -91,7 +91,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&w=1600&q=80",
     tier: "t2",
-    tags: { category: "medical", subcategory: "dental", archetype: "consult", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "medical", subcategory: "dental", archetype: "consult", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
   {
     id: "solar",
@@ -104,7 +104,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1600&q=80",
     tier: "t2",
-    tags: { category: "home-improvement", subcategory: "solar", archetype: "consult", conversion: ["whatsapp"], risk: "medium", tone: "rational" },
+    tags: { category: "home-improvement", subcategory: "solar", archetype: "consult", conversion: ["whatsapp", "form"], risk: "medium", tone: "rational" },
   },
   {
     id: "radiantglow",
@@ -117,7 +117,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1519084278803-b94f11e1c63b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
     tier: "t1",
-    tags: { category: "beauty", subcategory: "skincare", archetype: "seeding", conversion: ["whatsapp"], risk: "medium", tone: "emotional" },
+    tags: { category: "beauty", subcategory: "skincare", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "medium", tone: "emotional" },
   },
 
   // ===== 第一梯队 · 美妆个护 =====
@@ -132,7 +132,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "beauty", subcategory: "makeup", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "beauty", subcategory: "makeup", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
   {
     id: "beauty-device",
@@ -145,7 +145,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "beauty", subcategory: "beauty-device", archetype: "seeding", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "beauty", subcategory: "beauty-device", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
   {
     id: "hair-growth",
@@ -158,7 +158,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "beauty", subcategory: "hair-growth", archetype: "seeding", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "beauty", subcategory: "hair-growth", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
   {
     id: "fragrance",
@@ -171,7 +171,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "beauty", subcategory: "fragrance", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "beauty", subcategory: "fragrance", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
 
   // ===== 第一梯队 · 服饰配饰 =====
@@ -186,7 +186,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "apparel", subcategory: "fast-fashion", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "apparel", subcategory: "fast-fashion", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
   {
     id: "plus-size",
@@ -199,7 +199,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "apparel", subcategory: "plus-size", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "apparel", subcategory: "plus-size", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
   {
     id: "activewear",
@@ -212,7 +212,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "apparel", subcategory: "activewear", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "rational" },
+    tags: { category: "apparel", subcategory: "activewear", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "rational" },
   },
   {
     id: "shapewear",
@@ -225,7 +225,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "apparel", subcategory: "shapewear", archetype: "seeding", conversion: ["whatsapp"], risk: "medium", tone: "emotional" },
+    tags: { category: "apparel", subcategory: "shapewear", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "medium", tone: "emotional" },
   },
   {
     id: "footwear",
@@ -238,7 +238,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "apparel", subcategory: "footwear", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "rational" },
+    tags: { category: "apparel", subcategory: "footwear", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "rational" },
   },
 
   // ===== 第一梯队 · 3C 数码配件 =====
@@ -253,7 +253,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "gadget", subcategory: "phone-case", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "rational" },
+    tags: { category: "gadget", subcategory: "phone-case", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "rational" },
   },
   {
     id: "charging",
@@ -266,7 +266,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "gadget", subcategory: "charging", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "rational" },
+    tags: { category: "gadget", subcategory: "charging", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "rational" },
   },
   {
     id: "audio",
@@ -279,7 +279,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "gadget", subcategory: "audio", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "rational" },
+    tags: { category: "gadget", subcategory: "audio", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "rational" },
   },
   {
     id: "wearable",
@@ -292,7 +292,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "gadget", subcategory: "wearable", archetype: "seeding", conversion: ["whatsapp"], risk: "medium", tone: "rational" },
+    tags: { category: "gadget", subcategory: "wearable", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "medium", tone: "rational" },
   },
   {
     id: "smart-home",
@@ -305,7 +305,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "gadget", subcategory: "smart-home", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "rational" },
+    tags: { category: "gadget", subcategory: "smart-home", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "rational" },
   },
 
   // ===== 第一梯队 · 家居家纺 =====
@@ -320,7 +320,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1558997519-83ea9252edf8?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "home", subcategory: "storage", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "home", subcategory: "storage", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
   {
     id: "kitchen",
@@ -333,7 +333,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "home", subcategory: "kitchen", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "home", subcategory: "kitchen", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
   {
     id: "pet",
@@ -346,7 +346,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "home", subcategory: "pet", archetype: "seeding", conversion: ["whatsapp"], risk: "medium", tone: "emotional" },
+    tags: { category: "home", subcategory: "pet", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "medium", tone: "emotional" },
   },
   {
     id: "garden",
@@ -359,7 +359,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "home", subcategory: "garden", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "home", subcategory: "garden", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
   {
     id: "bedding",
@@ -372,7 +372,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "home", subcategory: "bedding", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "home", subcategory: "bedding", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
 
   // ===== 第一梯队 · 健康保健品 =====
@@ -387,7 +387,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "supplement", subcategory: "vitamins", archetype: "seeding", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "supplement", subcategory: "vitamins", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
   {
     id: "weight-mgmt",
@@ -400,7 +400,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "supplement", subcategory: "weight-mgmt", archetype: "seeding", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "supplement", subcategory: "weight-mgmt", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
   {
     id: "sleep",
@@ -413,7 +413,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1455642305367-68834a1da7ab?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "supplement", subcategory: "sleep", archetype: "seeding", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "supplement", subcategory: "sleep", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
   {
     id: "joint",
@@ -426,7 +426,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "supplement", subcategory: "joint", archetype: "seeding", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "supplement", subcategory: "joint", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
   {
     id: "womens-health",
@@ -439,7 +439,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "supplement", subcategory: "womens-health", archetype: "seeding", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "supplement", subcategory: "womens-health", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
 
   // ===== 第一梯队 · 玩具母婴 =====
@@ -454,7 +454,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1545558014-8692077e9b5c?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "toys-baby", subcategory: "educational-toy", archetype: "seeding", conversion: ["whatsapp"], risk: "medium", tone: "emotional" },
+    tags: { category: "toys-baby", subcategory: "educational-toy", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "medium", tone: "emotional" },
   },
   {
     id: "fidget",
@@ -467,7 +467,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "toys-baby", subcategory: "fidget", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "toys-baby", subcategory: "fidget", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
   {
     id: "baby-care",
@@ -480,7 +480,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "toys-baby", subcategory: "baby-care", archetype: "seeding", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "toys-baby", subcategory: "baby-care", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
   {
     id: "maternity",
@@ -493,7 +493,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "toys-baby", subcategory: "maternity", archetype: "seeding", conversion: ["whatsapp"], risk: "high", tone: "emotional" },
+    tags: { category: "toys-baby", subcategory: "maternity", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "high", tone: "emotional" },
   },
   {
     id: "outdoor-toy",
@@ -506,7 +506,7 @@ export const TEMPLATES: TemplateMeta[] = [
     },
     thumbnail: "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
-    tags: { category: "toys-baby", subcategory: "outdoor-toy", archetype: "seeding", conversion: ["whatsapp"], risk: "low", tone: "emotional" },
+    tags: { category: "toys-baby", subcategory: "outdoor-toy", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },
 
   // ---------------------------------------------------------------------

@@ -173,6 +173,29 @@ export const gardenDraft: LandingPageDraft = {
       },
     },
   ],
+  // 第二通道：主转化仍是 WhatsApp，本表单承接不用 WhatsApp / 更愿意留邮箱的访客。
+  // 收的是同一件事（garden plan），只是换个落点，故文案与 CTA 主题保持一致。
+  leadForm: {
+    enabled: true,
+    title: "Prefer email? Get your garden plan here",
+    description:
+      "Not on WhatsApp, or would rather not message? Fill this in and a garden adviser will send your garden plan by email instead. Same free advice, no obligation to buy anything.",
+    submitText: "Send me my garden plan",
+    successMessage:
+      "Thanks — a garden adviser will email you your garden plan shortly. Check your spam folder if it hasn't arrived.",
+    fields: {
+      name: { enabled: true, required: true, label: "Your name" },
+      email: { enabled: true, required: true, label: "Email (where we send it)" },
+      phone: { enabled: false, required: false },
+      whatsapp: { enabled: true, required: false, label: "WhatsApp (optional, if you'd rather chat)" },
+      telegram: { enabled: false, required: false },
+      message: {
+        enabled: true,
+        required: true,
+        label: "Your space, how much sun it gets, and your climate",
+      },
+    },
+  },
 
   footer: {
     brandName: "Verda",

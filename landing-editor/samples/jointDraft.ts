@@ -188,6 +188,29 @@ export const jointDraft: LandingPageDraft = {
       },
     },
   ],
+  // 第二通道：主转化仍是 WhatsApp，本表单承接不用 WhatsApp / 更愿意留邮箱的访客。
+  // 收的是同一件事（mobility check），只是换个落点，故文案与 CTA 主题保持一致。
+  leadForm: {
+    enabled: true,
+    title: "Prefer email? Get your mobility check here",
+    description:
+      "Not on WhatsApp, or would rather not message? Fill this in and a mobility adviser will send your mobility check by email instead. Same free advice, no obligation to buy anything.",
+    submitText: "Send me my mobility check",
+    successMessage:
+      "Thanks — a mobility adviser will email you your mobility check shortly. Check your spam folder if it hasn't arrived.",
+    fields: {
+      name: { enabled: true, required: true, label: "Your name" },
+      email: { enabled: true, required: true, label: "Email (where we send it)" },
+      phone: { enabled: false, required: false },
+      whatsapp: { enabled: true, required: false, label: "WhatsApp (optional, if you'd rather chat)" },
+      telegram: { enabled: false, required: false },
+      message: {
+        enabled: true,
+        required: true,
+        label: "Which joints bother you and when it's worst during the day",
+      },
+    },
+  },
 
   footer: {
     brandName: "Mobil",
