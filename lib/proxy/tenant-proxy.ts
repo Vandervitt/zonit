@@ -29,6 +29,17 @@ export async function handleTenancy(req: NextRequest) {
   if (PUBLIC_TENANT_API_PATHS.has(req.nextUrl.pathname)) return null;
   if (req.nextUrl.pathname.startsWith(CRON_PATH_PREFIX)) return null;
 
+  // 子域池的 apex（如 zapbridge.site）不属于任何用户，它只是平台分配子域的根
+  // （isPlatformSubdomainHost 对 apex 返回 false）。历史上它曾被当作客户自有域名
+  // 绑过一张模板样例页，不拦截的话访客访问根域会看到那张页面，误以为这是某个
+  // 品牌的独立站。这里在租户解析之前重定向到平台主域，也顺带保证日后任何遗留
+  // 绑定都不会露出来。子域本身不受影响。
+  const subdomainRoot = (process.env.PLATFORM_SUBDOMAIN_ROOT ?? "").trim().toLowerCase();
+  const appOrigin = process.env.NEXT_PUBLIC_APP_URL;
+  if (subdomainRoot && appOrigin && hostname === subdomainRoot) {
+    return NextResponse.redirect(new URL("/", appOrigin), 308);
+  }
+
   if (isCustomDomain(hostname)) {
     const path = normalizeRoutePath(req.nextUrl.pathname);
 

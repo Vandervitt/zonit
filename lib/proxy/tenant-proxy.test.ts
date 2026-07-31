@@ -206,3 +206,38 @@ describe("handleTenancy 平台自有 host 不得被当成租户域名（回归�
     expect(res?.status).toBe(404);
   });
 });
+
+describe("子域池 apex 重定向", () => {
+  // apex（如 zapbridge.site）是平台分配子域的根，不属于任何用户。
+  // 它历史上曾被当作客户自有域名绑过样例页——若不拦截，访客访问根域会看到
+  // 一张护肤模板样例，误以为这是某个品牌的独立站。
+  let tenancy: Tenancy["handleTenancy"];
+
+  beforeAll(async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://app.example.com");
+    vi.stubEnv("PLATFORM_SUBDOMAIN_ROOT", "pool.example");
+    vi.resetModules();
+    ({ handleTenancy: tenancy } = await import("./tenant-proxy"));
+  });
+
+  it("apex → 308 重定向到平台主域", async () => {
+    const res = await tenancy(makeReq("pool.example", "/"));
+    expect(res?.status).toBe(308);
+    expect(res?.headers.get("location")).toBe("https://app.example.com/");
+  });
+
+  it("apex 的任意路径都重定向，不落到租户 404", async () => {
+    const res = await tenancy(makeReq("pool.example", "/anything"));
+    expect(res?.status).toBe(308);
+  });
+
+  it("子域不受影响：仍按租户域解析（未绑定则 404）", async () => {
+    const res = await tenancy(makeReq("acme.pool.example", "/"));
+    expect(res?.status).toBe(404);
+  });
+
+  it("仿冒 apex 的域名不被重定向，按普通租户域处理", async () => {
+    const res = await tenancy(makeReq("evilpool.example", "/"));
+    expect(res?.status).toBe(404);
+  });
+});
