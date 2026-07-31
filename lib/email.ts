@@ -288,6 +288,59 @@ export async function sendWeeklyDigestEmail({
   }
 }
 
+export interface NudgeEmailLead {
+  pageName: string;
+  contact: string;
+  waitedHours: number;
+}
+
+/**
+ * 未读线索提醒：静置超 48h 且从未打开过的线索，每条只提醒一次（由 nudged_at 保证）。
+ * 语气克制——这是提醒不是催促，且必须给关闭入口，否则提醒会变骚扰。
+ */
+export async function sendLeadNudgeEmail({
+  to, leads, totalCount, dashboardUrl, settingsUrl,
+}: {
+  to: string;
+  leads: NudgeEmailLead[];
+  totalCount: number;
+  dashboardUrl: string;
+  settingsUrl: string;
+}) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const rows = leads
+    .map(
+      (l) => `<tr>
+        <td style="padding:8px 12px 8px 0;color:#111;border-bottom:1px solid #f0f0f0;">${escapeHtml(l.contact)}</td>
+        <td style="padding:8px 12px;color:#666;border-bottom:1px solid #f0f0f0;">${escapeHtml(l.pageName)}</td>
+        <td style="padding:8px 0 8px 12px;color:#111;text-align:right;border-bottom:1px solid #f0f0f0;">已等 ${l.waitedHours} 小时</td>
+      </tr>`,
+    )
+    .join("");
+  const more = totalCount > leads.length ? `<p style="color:#666;font-size:13px;margin:12px 0 0;">还有 ${totalCount - leads.length} 条未列出。</p>` : "";
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: `⏰ ${totalCount} 条线索还没跟进`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 4px;">有线索还在等回复</h2>
+          <p style="color:#666;margin:0 0 20px;">这些线索留资已超过 48 小时，还没有被打开过。越早联系，成交率越高。</p>
+          <table style="border-collapse:collapse;width:100%;font-size:14px;">${rows}</table>
+          ${more}
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">去跟进</a></p>
+          <p style="font-size:12px;color:#999;margin-top:24px;">每条线索只提醒一次。不想收提醒？可在<a href="${settingsUrl}" style="color:#999;">「设置 → 线索通知」</a>关闭。</p>
+        </div>`,
+    });
+    if (error) { console.error("Failed to send lead nudge email:", error); return { error }; }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send lead nudge email:", error);
+    return { error };
+  }
+}
+
 export async function sendLeadNotificationEmail({
   to, pageName, fields, dashboardUrl,
 }: {

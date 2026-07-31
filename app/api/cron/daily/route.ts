@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { replaySpooledLeads } from "@/lib/leads/spool";
+import { computeLeadNudges, markNudged } from "@/lib/leads/nudge";
 import { getRetryableEvents } from "@/lib/capi/events-store";
 import { flushEvents } from "@/lib/capi/dispatch";
 import { getRetryableDeliveries } from "@/lib/webhooks/deliveries-store";
 import { deliverMany } from "@/lib/webhooks/dispatch";
 import { computeWeeklyDigests, trendText } from "@/lib/digest";
-import { sendWeeklyDigestEmail } from "@/lib/email";
+import { sendWeeklyDigestEmail, sendLeadNudgeEmail } from "@/lib/email";
 import { Routes } from "@/lib/constants";
 
 /**
  * 每日 cron 编排器（Vercel Hobby 计划 cron 数量有限，多任务合并为一条）：
- * ① CAPI 兜底重发 ② 线索 webhook 兜底重投 ③ 周报摘要（仅周一实际发送，?digest=force 可强制）。
+ * ① 线索兜底重投 ② CAPI 兜底重发 ③ 线索 webhook 兜底重投 ④ 未读线索提醒
+ * ⑤ 周报摘要（仅周一实际发送，?digest=force 可强制）。
  * 各任务相互隔离：任一失败不影响其余任务。鉴权用 CRON_SECRET。
  */
 export async function GET(request: NextRequest) {
@@ -50,6 +52,33 @@ export async function GET(request: NextRequest) {
   }
 
   const now = new Date();
+
+  // 未读线索提醒：静置超 48h 且没被打开过的线索，每条只提醒一次。
+  // 只有邮件确实发出才 markNudged，否则提醒会被静默吞掉且永不重试。
+  try {
+    const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+    const nudges = await computeLeadNudges(now);
+    let sent = 0;
+    for (const n of nudges) {
+      const r = await sendLeadNudgeEmail({
+        to: n.email,
+        leads: n.leads,
+        totalCount: n.totalCount,
+        dashboardUrl: `${appUrl}${Routes.Leads}`,
+        settingsUrl: `${appUrl}${Routes.Settings}`,
+      });
+      if ("success" in r && r.success) {
+        await markNudged(n.leadIds);
+        sent += 1;
+      }
+    }
+    result.leadNudgeSent = sent;
+    result.leadNudgeCandidates = nudges.length;
+  } catch (err) {
+    console.error("cron/daily lead-nudge failed:", err);
+    result.leadNudgeError = true;
+  }
+
   const isMonday = now.getUTCDay() === 1;
   const force = request.nextUrl.searchParams.get("digest") === "force";
   if (isMonday || force) {
