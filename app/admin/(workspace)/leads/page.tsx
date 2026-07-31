@@ -1,8 +1,10 @@
 "use client";
 
 import useSWR from "swr";
-import { Table, Typography, Tag, Space, Button, Popconfirm, App } from "antd";
+import { Table, Typography, Tag, Space, Button, Popconfirm, App, Tooltip } from "antd";
+import { WhatsAppOutlined, PhoneOutlined, MailOutlined, SendOutlined } from "@ant-design/icons";
 import { ApiRoutes, apiLeadPath, apiLeadsExportPath } from "@/lib/constants";
+import { contactLinks, type ContactKind } from "@/lib/leads/contact-links";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
 
@@ -16,8 +18,44 @@ interface LeadRow {
   created_at: string;
 }
 
-const contactSummary = (p: LeadRow["payload"]) =>
-  [p.email, p.phone, p.whatsapp && `wa:${p.whatsapp}`, p.telegram && `tg:${p.telegram}`].filter(Boolean).join(" · ") || "—";
+/** 渠道图标：一键联系按钮的视觉锚点（antd 图标库已在后台其它页使用）。 */
+const KIND_ICON: Record<ContactKind, React.ReactNode> = {
+  whatsapp: <WhatsAppOutlined />,
+  phone: <PhoneOutlined />,
+  email: <MailOutlined />,
+  telegram: <SendOutlined />,
+};
+
+/**
+ * 一键联系单元格。点开任一渠道即视为「已跟进」并自动标已读——
+ * 点击本身就是信号，不需要客户再手动录一次状态。
+ */
+function ContactCell({ row, onContacted }: { row: LeadRow; onContacted: () => void }) {
+  const { links, plain } = contactLinks(row.payload);
+  if (links.length === 0 && plain.length === 0) return <>—</>;
+  return (
+    <Space size="small" wrap>
+      {links.map((l) => (
+        <Tooltip key={l.kind} title={l.href.replace(/^(mailto|tel):/, "")}>
+          <Button
+            size="small"
+            icon={KIND_ICON[l.kind]}
+            href={l.href}
+            target={l.external ? "_blank" : undefined}
+            rel={l.external ? "noopener noreferrer" : undefined}
+            onClick={onContacted}
+          >
+            {l.label}
+          </Button>
+        </Tooltip>
+      ))}
+      {/* 格式不合法、拼不出可靠链接的联系方式原样展示，供客户自行复制 */}
+      {plain.map((t) => (
+        <Typography.Text key={t} type="secondary" copyable>{t}</Typography.Text>
+      ))}
+    </Space>
+  );
+}
 
 export default function LeadsPage() {
   const { message } = App.useApp();
@@ -26,6 +64,11 @@ export default function LeadsPage() {
   async function setRead(id: string, isRead: boolean) {
     await fetch(apiLeadPath(id), { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ isRead }) });
     void mutate();
+  }
+  /** 点开联系渠道即自动标已读；已读的不再重复请求。 */
+  async function markContacted(r: LeadRow) {
+    if (r.is_read) return;
+    await setRead(r.id, true);
   }
   async function remove(id: string) {
     await fetch(apiLeadPath(id), { method: "DELETE" });
@@ -56,7 +99,7 @@ export default function LeadsPage() {
         }}
         columns={[
           { title: "页面", dataIndex: "page_name", ellipsis: true },
-          { title: "联系方式", render: (_: unknown, r: LeadRow) => contactSummary(r.payload), ellipsis: true },
+          { title: "联系方式", render: (_: unknown, r: LeadRow) => <ContactCell row={r} onContacted={() => void markContacted(r)} />, ellipsis: true },
           { title: "来源", render: (_: unknown, r: LeadRow) => [r.channel, r.utm_source].filter(Boolean).join(" / ") || "—", width: 140 },
           { title: "时间", dataIndex: "created_at", width: 180, render: (t: string) => new Date(t).toLocaleString() },
           { title: "状态", dataIndex: "is_read", width: 90, render: (v: boolean) => <Tag color={v ? "default" : "blue"}>{v ? "已读" : "未读"}</Tag> },
