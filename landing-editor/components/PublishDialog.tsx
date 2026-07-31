@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import { useMeta } from "../MetaContext";
 import { apiLandingPublishPath, Routes } from "@/lib/constants";
 
+interface RouteInfo {
+  path: string;
+  landingPageId: string;
+  landingPageName: string;
+  published: boolean;
+}
+
 interface DomainRow {
   id: string;
   domain: string;
@@ -10,6 +17,7 @@ interface DomainRow {
   verified: boolean;
   landing_page_id?: string | null;
   landing_page_name?: string;
+  routes?: RouteInfo[];
 }
 
 export function PublishDialog({ onClose }: { onClose: () => void }) {
@@ -18,6 +26,8 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
   const [domains, setDomains] = useState<DomainRow[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [domainId, setDomainId] = useState("");
+  // 用户输入的路径片段（不含前导斜杠），空串即发布到域名根。
+  const [pathInput, setPathInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [liveUrl, setLiveUrl] = useState("");
@@ -30,10 +40,12 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
         const all: DomainRow[] = await res.json();
         const usable = all.filter((d) => d.enabled && d.verified);
         setDomains(usable);
-        // 优先预选当前页已绑定的域名（更新发布不换绑），否则取第一个。
-        const bound = usable.find((d) => d.landing_page_id === pageId);
+        // 优先预选当前页已发布到的位置（更新发布不换位），否则取第一个域名的根路径。
+        const bound = usable.find((d) => d.routes?.some((r) => r.landingPageId === pageId));
         const preset = bound ?? usable[0];
         if (preset) setDomainId(preset.id);
+        const current = bound?.routes?.find((r) => r.landingPageId === pageId);
+        if (current) setPathInput(current.path === "/" ? "" : current.path.slice(1));
       } catch {
         setLoadFailed(true);
       }
@@ -41,8 +53,18 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
   }, [pageId]);
 
   const selected = domains?.find((d) => d.id === domainId);
-  // 所选域名已在服务另一张页面：发布即改绑，旧页面将从该域名下线。
-  const rebinding = !!selected?.landing_page_id && selected.landing_page_id !== pageId;
+  // 与服务端 normalizeRoutePath 同源的前端预览：仅用于展示与占位判断，
+  // 真正的校验以服务端为准（前端规则漂移不会放过非法路径）。
+  const targetPath = pathInput.trim()
+    ? `/${pathInput.trim().toLowerCase().replace(/^\/+|\/+$/g, "")}`
+    : "/";
+  const pathShapeOk = targetPath === "/" || /^(\/[a-z0-9-]+){1,2}$/.test(targetPath);
+  const pathReserved = /^\/(api|_next)(\/|$)/.test(targetPath);
+  // 所选位置（域名 + 路径）已在服务另一张页面：发布即顶替，原页面从该位置下线。
+  const occupied = selected?.routes?.find(
+    (r) => r.path === targetPath && r.landingPageId !== pageId,
+  );
+  const rebinding = !!occupied;
 
   async function publish() {
     if (!domainId || busy) return;
@@ -58,7 +80,7 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
       const res = await fetch(apiLandingPublishPath(pageId), {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ domainId }),
+        body: JSON.stringify({ domainId, path: targetPath }),
       });
       const json = await res.json();
       if (!res.ok) {
@@ -66,11 +88,13 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
           json.error === "validation_failed" ? "页面校验未通过，无法发布"
           : json.error === "domain_required" ? "请选择一个已验证的域名"
           : json.error === "domain_not_verified" ? "所选域名未验证"
+          : json.error === "path_invalid" ? "路径格式不合法：只能用小写字母、数字和连字符，最多两级"
+          : json.error === "path_reserved" ? "该路径为平台保留，请换一个"
           : "发布失败",
         );
         return;
       }
-      setLiveUrl(`https://${json.domain}/`);
+      setLiveUrl(`https://${json.domain}${json.path ?? "/"}`);
       setStatus("published");
       setPublishedDirty(false); // 刚发布：线上快照与草稿一致
     } catch {
@@ -81,9 +105,9 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
   }
 
   function domainLabel(d: DomainRow): string {
-    if (d.landing_page_id === pageId) return `${d.domain}（当前页面）`;
-    if (d.landing_page_id) return `${d.domain}（已绑定：${d.landing_page_name ?? "其他页面"}）`;
-    return d.domain;
+    const used = d.routes?.length ?? 0;
+    if (!used) return d.domain;
+    return `${d.domain}（已用 ${used} 个路径）`;
   }
 
   return (
@@ -121,9 +145,37 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
                 <option key={d.id} value={d.id}>{domainLabel(d)}</option>
               ))}
             </select>
+            <label className="block text-sm text-ink-soft" htmlFor="publish-path">
+              发布路径
+            </label>
+            <div className="flex items-center gap-1 rounded-md border border-edge bg-canvas px-3 py-2">
+              <span className="shrink-0 text-sm text-ink-soft">
+                {selected?.domain ?? "yourbrand.com"}/
+              </span>
+              <input
+                id="publish-path"
+                value={pathInput}
+                onChange={(e) => setPathInput(e.target.value)}
+                placeholder="留空即发布到网站首页"
+                className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-soft/60"
+              />
+            </div>
+            <p className="text-xs text-ink-soft">
+              可用小写字母、数字和连字符，最多两级，例如 <code>invisalign</code> 或{" "}
+              <code>services/whitening</code>。留空表示发布到域名根路径。
+            </p>
+
+            {!pathShapeOk && (
+              <p className="text-sm text-red-500">
+                路径格式不合法：只能用小写字母、数字和连字符，最多两级。
+              </p>
+            )}
+            {pathShapeOk && pathReserved && (
+              <p className="text-sm text-red-500">该路径为平台保留，请换一个。</p>
+            )}
             {rebinding && (
               <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-700">
-                该域名当前正在服务「{selected?.landing_page_name ?? "其他页面"}」。继续发布会把域名改绑到本页面，原页面将立即从该域名下线（若有广告在投请先确认）。
+                {selected?.domain}{targetPath === "/" ? "" : targetPath} 当前正在服务「{occupied?.landingPageName ?? "其他页面"}」。继续发布会把这个位置改为本页面，原页面将立即从该位置下线（若有广告在投请先确认）。
               </p>
             )}
             {error && <p className="text-sm text-red-500">{error}</p>}
@@ -131,7 +183,7 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
               <button onClick={onClose} className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft">取消</button>
               <button
                 onClick={publish}
-                disabled={busy}
+                disabled={busy || !pathShapeOk || pathReserved}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60 ${rebinding ? "bg-amber-600 hover:bg-amber-700" : "bg-brand-600 hover:bg-brand-700"}`}
               >
                 {busy ? "发布中…" : rebinding ? "改绑并发布" : "确认发布"}

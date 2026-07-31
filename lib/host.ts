@@ -17,6 +17,10 @@ export function appUrl(path: string, base: string = process.env.NEXT_PUBLIC_APP_
 // 因为改写后下游读到的 `host` 会变成 app 主域，无法再据此判定租户，故显式透传。
 export const TENANT_HOST_HEADER = "x-tenant-host";
 
+// 同理透传原始路径：改写到 /p/{slug} 后下游只看得到 slug，无从得知访客请求的
+// 是根路径还是 /invisalign，而 canonical 必须指向真实地址。
+export const TENANT_PATH_HEADER = "x-tenant-path";
+
 /** host 头（可能带端口）→ 纯主机名。 */
 export function hostnameOf(host: string | null | undefined): string {
   return (host ?? "").split(":")[0];
@@ -28,6 +32,14 @@ export function hostnameOf(host: string | null | undefined): string {
  */
 export function resolveTenantHostname(headers: Headers): string {
   return hostnameOf(headers.get(TENANT_HOST_HEADER) ?? headers.get("host"));
+}
+
+/**
+ * 解析租户请求的原始路径（规范化后）。未经改写的请求没有该头，回退根路径。
+ * 供 canonical / OG url 使用——它们必须是访客看到的地址，不是 /p/{slug}。
+ */
+export function resolveTenantPath(headers: Headers): string {
+  return headers.get(TENANT_PATH_HEADER) || "/";
 }
 
 /** 是否为 app 自身域名（含其子域名）。未配置 appHostname 时返回 false。 */

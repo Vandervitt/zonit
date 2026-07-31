@@ -20,7 +20,11 @@ export interface LandingPageRow {
 export type ClientLandingPageRow = Omit<LandingPageRow, "preview_secret" | "published_data">;
 
 /** 列表行：额外带当前绑定的已验证域名（无绑定为 null），供列表展示与线上预览链接。 */
-export type LandingPageListRow = ClientLandingPageRow & { bound_domain: string | null };
+export type LandingPageListRow = ClientLandingPageRow & {
+  bound_domain: string | null;
+  /** 该页在域名下的发布路径（多路径发布）；未绑定时为 null。 */
+  bound_path: string | null;
+};
 
 /** 从 DB 行剥离 preview_secret / published_data，用于任何要经 API 返回给客户端的落地页数据。 */
 function toClient(row: LandingPageRow): ClientLandingPageRow {
@@ -54,10 +58,10 @@ export async function createLandingPage(
 
 export async function listLandingPages(userId: string): Promise<LandingPageListRow[]> {
   const result = await pool.query(
-    `SELECT lp.*, d.domain AS bound_domain
+    `SELECT lp.*, d.domain AS bound_domain, d.path AS bound_path
        FROM landing_pages lp
        LEFT JOIN LATERAL (
-         SELECT dom.domain
+         SELECT dom.domain, r.path
            FROM domain_routes r
            JOIN domains dom ON dom.id = r.domain_id
           WHERE r.landing_page_id = lp.id AND dom.enabled = true AND dom.verified = true
@@ -66,7 +70,11 @@ export async function listLandingPages(userId: string): Promise<LandingPageListR
      WHERE lp.user_id = $1 ORDER BY lp.updated_at DESC`,
     [userId],
   );
-  return result.rows.map((row) => ({ ...toClient(row), bound_domain: row.bound_domain ?? null }));
+  return result.rows.map((row) => ({
+    ...toClient(row),
+    bound_domain: row.bound_domain ?? null,
+    bound_path: row.bound_path ?? null,
+  }));
 }
 
 export async function getLandingPage(id: string, userId: string): Promise<ClientLandingPageRow | null> {

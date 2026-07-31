@@ -24,10 +24,15 @@ export function landingFaqJsonLd(data: LandingPageDraft): Record<string, unknown
   };
 }
 
-/** Organization：租户品牌实体（品牌名 + 自有域名 + 可选 logo/邮箱）；无品牌名则返回 null。 */
+/**
+ * Organization：租户品牌实体（品牌名 + 页面地址 + 可选 logo/邮箱）；无品牌名则返回 null。
+ *
+ * `pageUrl` 传该页的 canonical，而非域名根：多路径发布后客户可能只发了
+ * /invisalign 而没发根路径，把 Organization.url 指向根就是指向一个 404。
+ */
 export function landingOrganizationJsonLd(
   data: LandingPageDraft,
-  hostname: string,
+  pageUrl: string,
 ): Record<string, unknown> | null {
   const name = data.footer.brandName?.trim();
   if (!name) return null;
@@ -35,7 +40,7 @@ export function landingOrganizationJsonLd(
     "@context": "https://schema.org",
     "@type": "Organization",
     name,
-    url: `https://${hostname}/`,
+    url: pageUrl,
   };
   const logo = data.branding?.logo ?? data.branding?.favicon;
   if (logo) org.logo = logo;

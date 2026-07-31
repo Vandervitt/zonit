@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { resolveTenantRoute } from "@/lib/domains-db";
-import { normalizeRoutePath, ROOT_PATH } from "@/lib/domains/route-path";
-import { hostnameOf, isCustomDomain, TENANT_HOST_HEADER } from "@/lib/host";
+import { isReservedRoutePath, normalizeRoutePath } from "@/lib/domains/route-path";
+import { hostnameOf, isCustomDomain, TENANT_HOST_HEADER, TENANT_PATH_HEADER } from "@/lib/host";
 
 // 这些公开元数据路由按 host 自行生成（app/robots.ts、app/sitemap.ts、
 // app/llms.txt），不能被改写到 /p/{slug}，否则会返回落地页 HTML 而非
@@ -26,21 +26,22 @@ export async function handleTenancy(req: NextRequest) {
   if (isCustomDomain(hostname)) {
     const path = normalizeRoutePath(req.nextUrl.pathname);
 
-    // P1：解析依据已换成 domain_routes（域名 + 路径），但仍只开放根路径，对外行为不变。
-    // 其余路径必须 404：页面只存在于根路径，返回落地页会造成无限重复内容（见 PR #136）。
-    // P2 开放多路径时，删掉这一行即可——解析层已经按路径查了。
-    // 放行名单（/_next、元数据路由、访客 API）已在上方先行返回。
-    if (path !== ROOT_PATH) {
+    // 形状不合法（超长、非法字符、超过 2 段）的路径不可能有绑定，直接 404，不查库。
+    // 保留路径同理：即使客户绕过发布校验写进了库，也不允许它遮蔽平台自有路由。
+    if (!path || isReservedRoutePath(path)) {
       return new NextResponse("Not Found", { status: 404 });
     }
 
-    // 自定义域名 + 路径 → 已发布落地页
+    // 自定义域名 + 路径 → 已发布落地页。未绑定的路径 404（不 fallback 到根页，
+    // 见设计决策 D6：静默 fallback 会让每个错误路径都变成一份重复内容）。
     const landingSlug = await resolveTenantRoute(hostname, path);
     if (landingSlug) {
-      // 改写后下游的 host 会变成 app 主域，这里把真实客户域名透传给页面/metadata，
-      // 使租户判定与 canonical 不依赖改写后被污染的 host。
+      // 改写后下游的 host 会变成 app 主域、pathname 会变成 /p/{slug}，
+      // 这里把真实客户域名与原始路径透传给页面/metadata，
+      // 使租户判定与 canonical 不依赖被改写污染的 host / path。
       const requestHeaders = new Headers(req.headers);
       requestHeaders.set(TENANT_HOST_HEADER, hostname);
+      requestHeaders.set(TENANT_PATH_HEADER, path);
       return NextResponse.rewrite(new URL(`/p/${landingSlug}`, req.url), {
         request: { headers: requestHeaders },
       });

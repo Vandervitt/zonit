@@ -1,7 +1,7 @@
 // 规范化规则必须与 migrations/036 的 domain_routes_path_shape CHECK 约束一致：
 // 任何被此函数接受的路径，都要能写进库；任何被库拒绝的形态，这里也要拒绝。
 import { describe, it, expect } from "vitest";
-import { normalizeRoutePath, ROOT_PATH } from "./route-path";
+import { isReservedRoutePath, normalizeRoutePath, ROOT_PATH } from "./route-path";
 
 describe("normalizeRoutePath 规范化", () => {
   it("根路径原样返回", () => {
@@ -44,4 +44,31 @@ describe("normalizeRoutePath 规范化", () => {
       expect(normalizeRoutePath(normalizeRoutePath(p)!)).toBe(p);
     }
   });
+});
+
+describe("isReservedRoutePath 平台保留路径", () => {
+  it.each(["/api", "/api/leads", "/api/track", "/api/landing-pages"])(
+    "%s 保留（/api 是唯一既形状合法又必须保留的前缀）",
+    (path) => expect(isReservedRoutePath(path)).toBe(true),
+  );
+
+  it.each(["/_next", "/_next/static/x.js", "/.well-known", "/.well-known/acme"])(
+    "%s 保留",
+    (path) => expect(isReservedRoutePath(path)).toBe(true),
+  );
+
+  it.each(["/robots.txt", "/sitemap.xml", "/llms.txt", "/favicon.ico"])(
+    "%s 保留",
+    (path) => expect(isReservedRoutePath(path)).toBe(true),
+  );
+
+  it("大小写不敏感", () => {
+    expect(isReservedRoutePath("/API/Leads")).toBe(true);
+    expect(isReservedRoutePath("/Robots.txt")).toBe(true);
+  });
+
+  it.each(["/", "/services", "/api-guide", "/apixyz", "/well-known", "/next"])(
+    "%s 不保留（前缀相近但不同段，不得误伤）",
+    (path) => expect(isReservedRoutePath(path)).toBe(false),
+  );
 });

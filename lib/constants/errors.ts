@@ -18,6 +18,8 @@ export const ApiErrors = {
   VALIDATION_FAILED: 'validation_failed',
   DOMAIN_REQUIRED: 'domain_required',
   DOMAIN_NOT_VERIFIED: 'domain_not_verified',
+  PATH_INVALID: 'path_invalid',
+  PATH_RESERVED: 'path_reserved',
   BAD_REQUEST: 'bad_request',
   AI_QUOTA_EXHAUSTED: 'ai_quota_exhausted',
   AI_GENERATION_FAILED: 'ai_generation_failed',

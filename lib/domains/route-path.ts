@@ -26,3 +26,20 @@ export function normalizeRoutePath(input: string): string | null {
   if (path === ROOT_PATH) return ROOT_PATH;
   return SHAPE.test(path) ? path : null;
 }
+
+// 平台自有路由，租户不得占用。
+//
+// 这些在 proxy 里先于租户解析返回（放行名单或 /api 收敛），客户即使发布成功
+// 也永远打不开——必须在写入时挡掉，而不是留到运行期变成「发布了但 404」的悬案。
+//
+// 注意：除 /api 外，其余项的形状本就过不了 normalizeRoutePath（下划线、点号
+// 都不在字符集内）。仍显式列出是纵深防御：日后若放宽字符集，这层不会跟着失守。
+const RESERVED_PREFIXES = ["/api", "/_next", "/.well-known"];
+const RESERVED_EXACT = new Set(["/robots.txt", "/sitemap.xml", "/llms.txt", "/favicon.ico"]);
+
+/** 该路径是否为平台保留。入参应为 normalizeRoutePath 的输出或原始路径。 */
+export function isReservedRoutePath(path: string): boolean {
+  const p = path.toLowerCase();
+  if (RESERVED_EXACT.has(p)) return true;
+  return RESERVED_PREFIXES.some((prefix) => p === prefix || p.startsWith(`${prefix}/`));
+}

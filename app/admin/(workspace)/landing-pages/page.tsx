@@ -28,6 +28,7 @@ interface PageRow {
   updated_at: string;
   published_at: string | null;
   bound_domain: string | null;
+  bound_path: string | null;
 }
 
 /** 已发布页的草稿是否领先线上快照（发布快照语义下的「有未发布修改」）。 */
@@ -154,20 +155,23 @@ export default function LandingPagesPage() {
                 {hasUnpublishedChanges(r) && <Tag color="orange">有未发布修改</Tag>}
               </Space>
             ) },
-          { title: "域名", dataIndex: "bound_domain", width: 180, ellipsis: true,
-            render: (d: string | null) => d ?? <Typography.Text type="secondary">—</Typography.Text> },
+          { title: "线上地址", dataIndex: "bound_domain", width: 220, ellipsis: true,
+            // 多路径发布后只显示域名会有歧义（同域名可能挂着好几张页），故连路径一起显示。
+            render: (d: string | null, r: PageRow) =>
+              d ? `${d}${r.bound_path && r.bound_path !== "/" ? r.bound_path : "/"}`
+                : <Typography.Text type="secondary">—</Typography.Text> },
           { title: "更新时间", dataIndex: "updated_at", width: 200, render: (t: string) => new Date(t).toLocaleString() },
           { title: "操作", width: 300, render: (_: unknown, r: PageRow) => (
             <Space size="middle">
               <Link href={landingEditorPath(r.id)}>编辑</Link>
               <a onClick={() => duplicate(r.id)}>复制</a>
               {r.status === "published" && r.bound_domain && (
-                <a href={`https://${r.bound_domain}/`} target="_blank" rel="noreferrer">线上查看</a>
+                <a href={`https://${r.bound_domain}${r.bound_path ?? "/"}`} target="_blank" rel="noreferrer">线上查看</a>
               )}
               {r.status === "published" && (
                 <Popconfirm
                   title="确定取消发布？"
-                  description={r.bound_domain ? `线上页面将立即从 ${r.bound_domain} 下线，若有广告在投请先确认。` : "线上页面将立即下线。"}
+                  description={r.bound_domain ? `线上页面将立即从 ${r.bound_domain}${r.bound_path ?? "/"} 下线，若有广告在投请先确认。` : "线上页面将立即下线。"}
                   okText="取消发布"
                   okButtonProps={{ danger: true }}
                   onConfirm={() => unpublish(r.id, r.name)}
