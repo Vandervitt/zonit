@@ -57,7 +57,12 @@ DNS 指向 Vercel 两种形态：域名在 Vercel 购买（nameserver 委托 Ver
    - 子域 `www.example.com` → `CNAME www cname.vercel-dns.com`
    - Cloudflare 必须**灰云（仅 DNS，关代理）**，否则拦截证书签发与回源。
 
-4. **Vercel 敏感环境变量无法回读**：`DATABASE_URL` / `VERCEL_PROJECT_ID` / `VERCEL_API_TOKEN` / `AUTH_SECRET` 等 `type=sensitive`，`vercel env pull` 与 API `decrypt=true` 都返回**空**——这是掩码不是缺失，别据此判断「未配置」。
+4. **Vercel 敏感环境变量无法回读**：`DATABASE_URL` / `VERCEL_PROJECT_ID` / `VERCEL_API_TOKEN` / `AUTH_SECRET` / `CRON_SECRET` / `NEXTAUTH_URL` / `NEXT_PUBLIC_APP_URL` 等 `type=sensitive`，`vercel env pull` 与 API `decrypt=true` 都返回**空**——这是掩码不是缺失，别据此判断「未配置」；确认是否配置要用 `vercel env ls`（列得出 key 即已配置）。
+   → 推论：**无法在本地取值手动触发生产 cron**，只能用 Vercel 面板 Cron Jobs 的 Run 按钮（它自行注入鉴权头）。另：`vercel env pull` 默认写 `.env.local`，会覆盖本地指向 dev 库的配置，务必显式指定输出路径。
+
+5. **Vercel 部署域名不是租户域名**：Vercel 触发 cron 用的是部署 URL（`project-xxx.vercel.app`），不是 `NEXT_PUBLIC_APP_URL` 里的品牌域名。`*.vercel.app` 必须由 `isAppHost` 认领，否则落进 `isCustomDomain` → 查不到绑定落地页 → `handleTenancy` 直接 404，**整个 app 在部署 URL 上全线不可用**。生产 cron 曾因此静默停摆五周（2026-06-26 上线 ~ 07-31 发现，PR #140 修复）。
+   → 新增任何**平台自身**的无 UI 端点（cron、webhook 回调、健康检查）前，先问「它会不会从非品牌域名进来」。`handleTenancy` 在 `proxy.ts` 最前面，非放行名单的路径在租户域一律 404，很容易被静默吞掉。
+   → **排查手法**：同一路由换 Host 对比。品牌域返回 401/200 而部署 URL 返回 404，基本就是租户改写拦的；Vercel 面板 trace 会明确标 `Middleware` 而非函数。
 
 5. **在 Vercel 后台买域名 ≠ 挂进项目**：账号层拥有 ≠ 项目服务。必须走应用「添加域名」流程，或 `vercel domains add <domain> <project> --scope <team>`。
 
