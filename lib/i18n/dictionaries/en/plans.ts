@@ -69,7 +69,7 @@ export const plans = {
       "1 landing page",
       "The full lead-gen template library",
       "Visual content editor",
-      "Online preview (publishing needs a paid plan and domain)",
+      "Publish on a platform-provided address (watermarked); your own brand domain needs a paid plan",
     ],
     starter: [
       "5 landing pages, each on its own path under one domain",

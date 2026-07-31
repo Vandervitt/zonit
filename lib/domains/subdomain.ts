@@ -9,8 +9,25 @@
 //
 // 本模块刻意不读环境变量、不碰 IO：root 一律由调用方传入，便于穷举边界。
 
+import { customAlphabet } from "nanoid";
+
 /** DNS label 长度上限。 */
 const MAX_LABEL_LENGTH = 63;
+
+/**
+ * 子域随机串的字母表。
+ *
+ * 刻意不用 nanoid 默认字母表：它含 `_` 与 `-`，实测约 13% 的 4 位结果会带上，
+ * 而 `_` 不是合法的 DNS label 字符、`-` 还可能落在首尾。限定小写字母数字，
+ * 从源头保证拼出来的 host 一定合法。
+ */
+const SUBDOMAIN_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+/** 冲突重试时追加的短后缀（如 acme-x7k2）。 */
+export const subdomainSuffix = customAlphabet(SUBDOMAIN_ALPHABET, 4);
+
+/** 标题转不出 slug 时的兜底随机串（如 page-a1b2c3）。 */
+export const subdomainFallbackId = customAlphabet(SUBDOMAIN_ALPHABET, 6);
 
 /**
  * 不允许分配给用户的子域名。

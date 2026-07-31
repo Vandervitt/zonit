@@ -11,6 +11,8 @@ import {
   buildPlatformSubdomain,
   isReservedSubdomain,
   slugifyForSubdomain,
+  subdomainFallbackId,
+  subdomainSuffix,
 } from "@/lib/domains/subdomain";
 
 /** 平台子域根域（如 zapbridge.site）。未配置则该功能整体关闭。 */
@@ -63,8 +65,8 @@ export async function POST(request: Request) {
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     // 首次用干净的 slug；冲突后追加短随机后缀
     const slug = seed
-      ? (attempt === 0 ? seed : `${seed}-${nanoid(4).toLowerCase()}`)
-      : `${FALLBACK_PREFIX}-${nanoid(6).toLowerCase()}`;
+      ? (attempt === 0 ? seed : `${seed}-${subdomainSuffix()}`)
+      : `${FALLBACK_PREFIX}-${subdomainFallbackId()}`;
 
     const host = buildPlatformSubdomain(slug, SUBDOMAIN_ROOT);
     if (!host || isReservedSubdomain(slug)) continue;

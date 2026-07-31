@@ -5,6 +5,8 @@ import {
   isPlatformSubdomainHost,
   isReservedSubdomain,
   slugifyForSubdomain,
+  subdomainFallbackId,
+  subdomainSuffix,
 } from "./subdomain";
 
 const ROOT = "zapbridge.site";
@@ -42,6 +44,22 @@ describe("slugifyForSubdomain", () => {
 
   it("保留数字，且不以数字以外的字符结尾", () => {
     expect(slugifyForSubdomain("Clinic 2026")).toBe("clinic-2026");
+  });
+});
+
+describe("随机串字母表", () => {
+  // nanoid 默认字母表含 `_` 与 `-`（实测 4 位结果约 13% 会带上），拼进域名就是
+  // 非法 DNS label。这条用足量采样把缺陷钉死，不靠单次随机撞上。
+  it("只产出小写字母与数字，绝不出现 _ 或首尾连字符", () => {
+    for (let i = 0; i < 500; i++) {
+      expect(subdomainSuffix()).toMatch(/^[a-z0-9]{4}$/);
+      expect(subdomainFallbackId()).toMatch(/^[a-z0-9]{6}$/);
+    }
+  });
+
+  it("拼成的 host 能被 slug 规范化原样接受（即本身已合法）", () => {
+    const slug = `acme-${subdomainSuffix()}`;
+    expect(slugifyForSubdomain(slug)).toBe(slug);
   });
 });
 

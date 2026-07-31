@@ -51,6 +51,16 @@ describe("帮助中心文案守卫", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("不得再宣称平台不提供子域托管", () => {
+    // 平台子域（PR #145）上线后，「必须自有域名 / 不提供公共子域名托管」已是错误描述：
+    // 试用期用户正是靠它在不碰 DNS 的情况下跑通「发布 → 收线索」。
+    // 这是第三次同类事故（前两次：一域名一页、写死 30+ 模板），故一并纳入守卫。
+    const offenders = ALL_TEXTS.filter(({ text }) =>
+      /不提供公共子域|不提供子域|必须用自有域名|必须自有域名|只能发布到你自己/.test(text),
+    ).map(({ c, text }) => `${c.slug}: ${text.slice(0, 60)}`);
+    expect(offenders).toEqual([]);
+  });
+
   it("占位符不得出现在 title / summary —— 概览页不做替换，会把 {templates} 原样显示给客户", () => {
     const offenders = HELP_CHAPTERS.filter(
       (c) => /\{templates\}|\{industries\}/.test(c.title + c.summary),
