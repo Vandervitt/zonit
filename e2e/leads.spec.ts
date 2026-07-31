@@ -44,13 +44,19 @@ test.describe("线索闭环", () => {
 
   test("公开提交入库 + 校验反例", async () => {
     const api = await pwRequest.newContext();
-    // 正常提交（有 whatsapp 联系方式）
+    // 正常提交（whatsapp 为表单拼好的 E.164）
     const ok = await api.post(`${BASE}/api/leads`, {
-      data: { pageId, channel: "form", fields: { name: "Tom", whatsapp: "+1 555 0100", message: "hi" }, utm: { utm_source: "fb" } },
+      data: { pageId, channel: "form", fields: { name: "Tom", whatsapp: "+15550100999", message: "hi" }, utm: { utm_source: "fb" } },
     });
     expect(ok.status()).toBe(204);
+    // 缺国码 / 带格式符的号码 → 400（表单强制携带国码，落库一律 E.164）
+    const noDial = await api.post(`${BASE}/api/leads`, { data: { pageId, fields: { whatsapp: "555 0100" } } });
+    expect(noDial.status()).toBe(400);
+    // Telegram 填手机号 → 400（t.me 跳不了手机号）
+    const badTg = await api.post(`${BASE}/api/leads`, { data: { pageId, fields: { telegram: "13800138000" } } });
+    expect(badTg.status()).toBe(400);
     // honeypot 命中 → 静默 204 但不入库
-    await api.post(`${BASE}/api/leads`, { data: { pageId, fields: { whatsapp: "+1 999" }, company_url: "bot" } });
+    await api.post(`${BASE}/api/leads`, { data: { pageId, fields: { whatsapp: "+15559990000" }, company_url: "bot" } });
     // 无联系方式 → 400
     const bad = await api.post(`${BASE}/api/leads`, { data: { pageId, fields: { name: "NoContact" } } });
     expect(bad.status()).toBe(400);

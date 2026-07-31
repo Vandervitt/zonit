@@ -1,6 +1,7 @@
 // landing-renderer/LandingPage.tsx
 // 渲染器入口：按页面 branding 派生主题（换肤）+ Logo 透传 + sections + 页脚 + 留资表单 + 悬浮按钮。
 import type { LandingPageDraft } from "@/types/schema.draft";
+import type { DialCode } from "@/lib/leads/dial-codes";
 import { resolveTheme, type RendererTheme } from "./theme";
 import { Hero } from "./sections/Hero";
 import { Footer } from "./sections/Footer";
@@ -15,12 +16,14 @@ export function LandingPage({
   pageId = "",
   variant = IDENTITY_VARIANT,
   preview = false,
+  defaultDial,
 }: {
   page: LandingPageDraft;
   theme?: RendererTheme; // 显式覆盖；默认按 branding 派生
   pageId?: string;
   variant?: PageVariant; // 反同质化变体；缺省恒等（输出不变）
   preview?: boolean; // 预览渲染：留资表单停用提交；不完整 CTA 按钮显示占位标注而非隐藏
+  defaultDial?: DialCode; // 按访客 IP 解析的默认国码；预览态不传，用组件内兜底
 }) {
   const resolved = theme ?? resolveTheme(page.branding?.theme);
   const logo = page.branding?.logo;
@@ -28,7 +31,7 @@ export function LandingPage({
     <div className="min-h-screen bg-white font-sans text-slate-900">
       <Hero data={page.hero} theme={resolved} logo={logo} layout={variant.heroLayout} preview={preview} />
       {page.sections.map((section, i) => renderSection(section, resolved, i, variant, preview))}
-      {page.leadForm?.enabled ? <LeadForm data={page.leadForm} pageId={pageId} theme={resolved} preview={preview} /> : null}
+      {page.leadForm?.enabled ? <LeadForm data={page.leadForm} pageId={pageId} theme={resolved} preview={preview} defaultDial={defaultDial} /> : null}
       <Footer data={page.footer} theme={resolved} logo={logo} />
       {page.floatingButton && <FloatingButton data={page.floatingButton} theme={resolved} preview={preview} />}
     </div>

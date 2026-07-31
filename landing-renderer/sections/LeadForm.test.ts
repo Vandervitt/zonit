@@ -60,6 +60,37 @@ describe("LeadForm 字段标签", () => {
   });
 });
 
+describe("LeadForm 国码选择器", () => {
+  const withPhone = data({ phone: on(), whatsapp: on() });
+
+  it("phone / whatsapp 各带一个国码选择器，且没有空选项（国码不可移除）", () => {
+    const out = html(withPhone);
+    expect(out.match(/<select/g)?.length).toBe(2);
+    expect(out).not.toContain("<option value=\"\"");
+  });
+
+  it("默认国码来自服务端按访客 IP 解析的结果", () => {
+    const out = renderToStaticMarkup(
+      createElement(LeadForm, {
+        data: withPhone,
+        pageId: "p1",
+        theme,
+        preview: true,
+        defaultDial: { iso: "BR", dial: "+55", name: "Brazil" },
+      }),
+    );
+    expect(out).toContain("+55");
+    expect(out).not.toContain("+1</option>");
+  });
+
+  it("首屏 HTML 只含被选中的那一个国码，全量表不进关键路径", () => {
+    const out = html(withPhone);
+    // 每个选择器只渲染 1 个 option；全表（200+ 项）由客户端 idle 时 import() 拉取
+    expect(out.match(/<option/g)?.length).toBe(2);
+    expect(out).not.toContain("Zimbabwe");
+  });
+});
+
 describe("LeadForm 锚点", () => {
   it("渲染出稳定锚点 id，供 CTA 以 #lead-form 直达", () => {
     expect(LEAD_FORM_ANCHOR_ID).toBe("lead-form");

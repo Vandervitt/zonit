@@ -1,6 +1,7 @@
 // lib/leads/validate.ts
 // 线索提交校验（纯函数）：截断 + 至少一个联系方式 + 联系方式基本格式。
 import { LEAD_CONTACT_FIELDS } from "@/types/schema.draft";
+import { isE164, normalizeTelegram } from "./contact-format";
 
 export interface LeadPayload {
   name?: string;
@@ -31,8 +32,15 @@ export function validateLeadSubmission(input: Record<string, unknown>): Validate
   // 至少一个联系方式
   const hasContact = LEAD_CONTACT_FIELDS.some((f) => payload[f]);
   if (!hasContact) return { ok: false, error: "need_contact" };
-  // 基本格式
+  // 基本格式。号码一律要求 E.164——表单侧强制携带国码（见 landing-renderer 的
+  // CountryDialSelect），缺国码的号码后台既拼不出 wa.me 也未必打得通，等于半条废线索。
   if (payload.email && !payload.email.includes("@")) return { ok: false, error: "bad_email" };
-  if (payload.phone && !/^[+\d\s-]+$/.test(payload.phone)) return { ok: false, error: "bad_phone" };
+  if (payload.phone && !isE164(payload.phone)) return { ok: false, error: "bad_phone" };
+  if (payload.whatsapp && !isE164(payload.whatsapp)) return { ok: false, error: "bad_whatsapp" };
+  if (payload.telegram) {
+    const username = normalizeTelegram(payload.telegram);
+    if (!username) return { ok: false, error: "bad_telegram" };
+    payload.telegram = username; // 归一存裸用户名，后台直接拼 t.me/<username>
+  }
   return { ok: true, payload };
 }

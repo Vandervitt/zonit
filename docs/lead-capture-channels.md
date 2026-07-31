@@ -32,6 +32,21 @@
 - **旁路环节**（里程碑、CAPI、通知）失败不阻塞 204，但一律 `console.error` + `Sentry.captureException`，禁止空 catch。`/api/track` 同规则：埋点失败不阻塞响应，但非坏 pageId 一律上报。
 - **埋点上报走同源相对路径**（`TRACK_PATH`，`landing-renderer/tracking/sinks.ts`）：租户自有域名下 `/api/track` 由 tenant-proxy 白名单直通。改回绝对 URL 会退化成跨源请求，历史上两次故障（308 重定向、`ERR_CONNECTION_RESET`）都由此而来。
 
+## 联系方式格式（国码强制携带）
+
+访客手填的号码普遍省略国码——本地人填本地号从不写国码。这类号码进库后既拼不出 `wa.me` 链接，客户也未必打得通，等于半条废线索。故**在写入时保证格式，而不是在读取时猜**：
+
+| 环节 | 规则 |
+|---|---|
+| 默认国码 | `app/p/[slug]/page.tsx` 按 `x-vercel-ip-country`（与 `euVisitor` 同一来源）解析，经 `defaultDial` 透传给渲染器 |
+| 表单控件 | phone / whatsapp 前置国码 `<select>`，**只能改选、不能清空**，无空选项 |
+| 提交 | `composeE164` 拼成 E.164，顺带处理格式符、本地中继前缀 `0`、访客重复输入国码三种情况 |
+| 服务端校验 | phone / whatsapp 必须 `^\+[1-9]\d{6,14}$`；telegram 归一为裸用户名（`normalizeTelegram`），跳不了 `t.me` 的输入一律拒 |
+
+**首屏预算**：全量国码表（229 项）**禁止在落地页客户端组件里静态 import**。服务端静态 import 只进服务端 bundle；客户端由 `LeadForm` 在 `requestIdleCallback` 里 `import()`，落到独立 chunk。首屏 HTML 里每个选择器只渲染被选中的那一个 `<option>`——这条由 `LeadForm.test.ts` 断言守住，改动别把它破坏了。
+
+校验收紧意味着 400 变多，故 `LeadForm` 把错误码映射成访客可读提示（`ERROR_MESSAGES`），不再一律回落到 "Something went wrong"。新增错误码时两边要同步。
+
 ## 表单文案的语言
 
 生成页面向海外访客，故渲染器的字段缺省标签为**英文**（`Name / Email / Phone / WhatsApp / Telegram / Message`），访客可见的状态文案（提交中、失败、预览提示）同样为英文。
