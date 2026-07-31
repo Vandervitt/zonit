@@ -40,8 +40,15 @@ test.describe("线索闭环", () => {
     pageId = p.rows[0].id;
   });
 
+  // 限频已改为落库计数（跨实例共享）。e2e 的请求全部来自同一 IP，
+  // 不清理会让后面的用例撞上 429——这正说明限频真的生效了。
+  test.beforeEach(async () => {
+    await pool.query(`DELETE FROM rate_limit_hits`);
+  });
+
   test.afterAll(async () => {
     if (devUserId) await pool.query(`DELETE FROM landing_pages WHERE user_id = $1`, [devUserId]);
+    await pool.query(`DELETE FROM rate_limit_hits`);
     await pool.end();
     await appPool.end(); // 应用侧连接池（未读提醒用例用）同样要关，否则进程不退出
   });
@@ -124,6 +131,40 @@ test.describe("线索闭环", () => {
     await expect(row.getByText("已读", { exact: true })).toBeVisible({ timeout: 15_000 });
   });
 
+  test("来源校验：别人的 Origin 灌线索 → 403，自己的域名与无 Origin 放行", async () => {
+    const api = await pwRequest.newContext();
+
+    // 冒充别人的站点向本页灌线索
+    const forged = await api.post(`${BASE}/api/leads`, {
+      headers: { origin: "https://attacker.example" },
+      data: { pageId, fields: { whatsapp: "+15550001111" } },
+    });
+    expect(forged.status()).toBe(403);
+    expect(forged.headers()["access-control-allow-origin"]).toBeUndefined(); // 不再回 *
+
+    // 平台主域（预览/编辑器/本地开发都从这里发起）
+    const own = await api.post(`${BASE}/api/leads`, {
+      headers: { origin: BASE },
+      data: { pageId, fields: { whatsapp: "+15550002222" } },
+    });
+    expect(own.status()).toBe(204);
+
+    // 无 Origin（curl / 服务端调用）：浏览器跨源必带 Origin，拦它没意义，放行
+    const noOrigin = await api.post(`${BASE}/api/leads`, {
+      data: { pageId, fields: { whatsapp: "+15550003333" } },
+    });
+    expect(noOrigin.status()).toBe(204);
+
+    // 埋点同口径
+    const forgedTrack = await api.post(`${BASE}/api/track`, {
+      headers: { origin: "https://attacker.example" },
+      data: { pageId, event: "page_view" },
+    });
+    expect(forgedTrack.status()).toBe(403);
+
+    await api.dispose();
+  });
+
   test("通知送达可见性：邮件结果回写到线索并在后台可见", async ({ page }) => {
     const api = await pwRequest.newContext();
     const res = await api.post(`${BASE}/api/leads`, {
@@ -181,6 +222,8 @@ test.describe("线索闭环", () => {
     expect(mine).toBeDefined();
     expect(mine!.leadIds).toEqual([stale]);
     expect(mine!.leads[0]).toMatchObject({ pageName: "Lead 测试页", contact: "Stale · +15550000001" });
-    expect(mine!.leads[0].waitedHours).toBeGreaterThanOrEqual(72);
+    // 取整 + 库时钟与进程时钟的毫秒级差异，72h 会落在 71~72 之间，不做精确断言
+    expect(mine!.leads[0].waitedHours).toBeGreaterThanOrEqual(71);
+    expect(mine!.leads[0].waitedHours).toBeLessThan(73);
   });
 });

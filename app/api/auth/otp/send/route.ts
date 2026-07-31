@@ -2,11 +2,12 @@ import { NextRequest, NextResponse, after } from "next/server";
 import { ApiErrors } from "@/lib/constants";
 import { isValidEmailFormat } from "@/lib/auth/trusted-email";
 import { issueOtp, normalizeEmail } from "@/lib/auth/otp";
-import { createRateLimiter } from "@/lib/leads/rate-limit";
+import { allowRequest, bucketKey } from "@/lib/rate-limit-db";
 import { sendOtpEmail } from "@/lib/email";
 
-// 内存限流第一层：每 IP 每分钟最多 5 次发码请求（跨实例可靠性由 DB 冷却兜底）。
-const ipRateLimiter = createRateLimiter({ windowMs: 60_000, max: 5 });
+// 每 IP 每分钟最多 5 次发码请求。原为进程内内存实现，serverless 下每实例各算各的，
+// 已随留资接口一起改为落库计数（另有 DB 冷却作为第二层）。
+const OTP_RATE_LIMIT = { windowMs: 60_000, max: 5 };
 
 function clientIp(request: NextRequest): string {
   const fwd = request.headers.get("x-forwarded-for");
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: ApiErrors.EMAIL_INVALID }, { status: 400 });
   }
 
-  if (!ipRateLimiter.allow(clientIp(request))) {
+  if (!(await allowRequest(bucketKey("otp", clientIp(request)), OTP_RATE_LIMIT))) {
     // 429：请求过于频繁，前端提示稍后再试。
     return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
   }

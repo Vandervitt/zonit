@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { replaySpooledLeads } from "@/lib/leads/spool";
 import { computeLeadNudges, markNudged } from "@/lib/leads/nudge";
+import { pruneRateLimitHits } from "@/lib/rate-limit-db";
 import { getRetryableEvents } from "@/lib/capi/events-store";
 import { flushEvents } from "@/lib/capi/dispatch";
 import { getRetryableDeliveries } from "@/lib/webhooks/deliveries-store";
@@ -13,7 +14,7 @@ import { Routes } from "@/lib/constants";
 /**
  * 每日 cron 编排器（Vercel Hobby 计划 cron 数量有限，多任务合并为一条）：
  * ① 线索兜底重投 ② CAPI 兜底重发 ③ 线索 webhook 兜底重投 ④ 未读线索提醒
- * ⑤ 周报摘要（仅周一实际发送，?digest=force 可强制）。
+ * ⑤ 限频计数清理 ⑥ 周报摘要（仅周一实际发送，?digest=force 可强制）。
  * 各任务相互隔离：任一失败不影响其余任务。鉴权用 CRON_SECRET。
  */
 export async function GET(request: NextRequest) {
@@ -77,6 +78,14 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error("cron/daily lead-nudge failed:", err);
     result.leadNudgeError = true;
+  }
+
+  // 限频计数行清理：留 24 小时足够任何窗口回看，再久只是占空间。
+  try {
+    result.rateLimitPruned = await pruneRateLimitHits();
+  } catch (err) {
+    console.error("cron/daily rate-limit-prune failed:", err);
+    result.rateLimitPruneError = true;
   }
 
   const isMonday = now.getUTCDay() === 1;
