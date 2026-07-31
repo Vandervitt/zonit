@@ -21,7 +21,9 @@ if (!process.env.AUTH_GOOGLE_ID || !process.env.AUTH_GOOGLE_SECRET) {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  debug: true,
+  // 仅开发环境开：debug 会把 session/JWT 内容、provider 响应与回调 URL 打进日志
+  // （Auth.js 的 debug-enabled 警告即为此），生产开着等于把用户敏感信息写进 Vercel 日志。
+  debug: process.env.NODE_ENV !== "production",
   // adapter: PostgresAdapter(pool),
   // 免密 OTP 为主，会话保持 30 天并每日滑动续期：活跃用户几乎无需重复收码。
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60, updateAge: 24 * 60 * 60 },
