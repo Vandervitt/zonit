@@ -85,4 +85,38 @@ test.describe("线索闭环", () => {
     // 且操作列文案翻转为「标未读」，进一步确认状态确实切换
     await expect(row.getByText("标未读", { exact: true })).toBeVisible();
   });
+
+  test("一键联系：渠道链接可点 + 点击即自动标已读", async ({ page }) => {
+    // 独立线索（用 utm_source 认行，避免和前面用例的线索混淆）
+    const api = await pwRequest.newContext();
+    const res = await api.post(`${BASE}/api/leads`, {
+      data: {
+        pageId,
+        channel: "form",
+        fields: { name: "Contact Test", email: "contact@example.com", whatsapp: "+8613800138000" },
+        utm: { utm_source: "e2e-contact" },
+      },
+    });
+    expect(res.status()).toBe(204);
+    await api.dispose();
+
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Dev Login/i }).click();
+    await page.waitForURL("**/admin", { timeout: 30_000 });
+    await page.goto("/admin/leads");
+
+    const row = page.getByRole("row").filter({ hasText: "e2e-contact" });
+    await expect(row).toBeVisible({ timeout: 15_000 });
+
+    // WhatsApp 链接指向 wa.me 且号码去掉了 +（E.164 由表单侧保证）
+    await expect(row.getByRole("link", { name: "WhatsApp" })).toHaveAttribute("href", "https://wa.me/8613800138000");
+    // 邮件走 mailto（同标签页，点击不会跳外站，适合在 e2e 里验证副作用）
+    const mail = row.getByRole("link", { name: "邮件" });
+    await expect(mail).toHaveAttribute("href", "mailto:contact@example.com");
+
+    // 点开渠道即视为已跟进 → 状态自动翻为已读，无需再手动标
+    await expect(row.getByText("未读", { exact: true })).toBeVisible();
+    await mail.click();
+    await expect(row.getByText("已读", { exact: true })).toBeVisible({ timeout: 15_000 });
+  });
 });
