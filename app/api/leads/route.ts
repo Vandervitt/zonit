@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { validateLeadSubmission } from "@/lib/leads/validate";
 import { leadRateLimiter } from "@/lib/leads/rate-limit";
+import { isBadPageIdError } from "@/lib/db-errors";
 import { insertLead, listLeads } from "@/lib/leads/store";
+import { spoolLead } from "@/lib/leads/spool";
 import { enqueueCapiEvents } from "@/lib/capi/dispatch";
 import { notifyNewLead } from "@/lib/leads/notify";
 import { recordFirstLeadMilestone } from "@/lib/platform-milestones";
@@ -43,16 +46,36 @@ export async function POST(request: NextRequest) {
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400, headers: CORS });
 
   const utm = (body.utm && typeof body.utm === "object" ? body.utm : {}) as Record<string, unknown>;
+  const attr = {
+    channel: cap(body.channel, 32) ?? "form",
+    utm_source: cap(utm.utm_source, 128),
+    utm_medium: cap(utm.utm_medium, 128),
+    utm_campaign: cap(utm.utm_campaign, 128),
+  };
   try {
-    await insertLead(pageId, result.payload, {
-      channel: cap(body.channel, 32) ?? "form",
-      utm_source: cap(utm.utm_source, 128),
-      utm_medium: cap(utm.utm_medium, 128),
-      utm_campaign: cap(utm.utm_campaign, 128),
-    });
+    await insertLead(pageId, result.payload, attr);
+  } catch (err) {
+    // 坏 page_id：线索无处可归，重投也永远失败 → 保持静默丢弃。
+    if (isBadPageIdError(err)) return new NextResponse(null, { status: 204, headers: CORS });
+    // 其余（连接中断、池打满、超时……）是真实故障：留证据、进兜底、让访客看到失败可重试，
+    // 绝不再返回假成功——客户已经为这次点击付过广告费。
+    console.error("[api/leads] 落库失败:", err);
+    Sentry.captureException(err, { tags: { route: "api/leads", stage: "insert" }, extra: { pageId } });
+    try {
+      await spoolLead({ pageId, payload: result.payload, attr, spooledAt: new Date().toISOString() });
+    } catch (spoolErr) {
+      console.error("[api/leads] 兜底留存失败:", spoolErr);
+      Sentry.captureException(spoolErr, { tags: { route: "api/leads", stage: "spool" }, extra: { pageId } });
+    }
+    return NextResponse.json({ error: "lead_store_failed" }, { status: 503, headers: CORS });
+  }
+
+  // 里程碑：线索已落库，此处失败不得影响提交结果
+  try {
     await recordFirstLeadMilestone(pageId);
-  } catch {
-    // 坏 page_id 等 FK 错误：best-effort 忽略
+  } catch (err) {
+    console.error("[api/leads] 里程碑记录失败:", err);
+    Sentry.captureException(err, { tags: { route: "api/leads", stage: "milestone" }, extra: { pageId } });
   }
 
   // CAPI：表单转化服务端回传（失败不影响 lead 提交）
@@ -70,8 +93,10 @@ export async function POST(request: NextRequest) {
       sourceUrl: cap(body.source_url, 512) ?? undefined,
       consent: body.consent !== false, // 默认允许；客户端显式 false 才跳过
     });
-  } catch {
-    // CAPI 入队失败：best-effort 忽略，不影响线索提交
+  } catch (err) {
+    // CAPI 入队失败：不影响线索提交，但必须留下证据（历史上这里是全空 catch）
+    console.error("[api/leads] CAPI 入队失败:", err);
+    Sentry.captureException(err, { tags: { route: "api/leads", stage: "capi" }, extra: { pageId } });
   }
 
   // 线索通知（邮件 + webhook）：best-effort，失败不影响线索提交
@@ -85,8 +110,10 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       dashboardUrl: `${origin}/admin/leads`,
     });
-  } catch {
-    // 通知失败：忽略，不阻塞 204
+  } catch (err) {
+    // 通知失败：不阻塞 204（线索已落库），但必须留下证据
+    console.error("[api/leads] 线索通知失败:", err);
+    Sentry.captureException(err, { tags: { route: "api/leads", stage: "notify" }, extra: { pageId } });
   }
 
   return new NextResponse(null, { status: 204, headers: CORS });

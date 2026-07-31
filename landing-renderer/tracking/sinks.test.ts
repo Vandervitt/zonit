@@ -1,5 +1,7 @@
-// BeaconSink 上报 URL 回归：NEXT_PUBLIC_APP_URL 尾部带斜杠时不得产生 `//api/track`
-//（生产曾因此每个事件都吃一次 308 重定向，sendBeacon 跟随重定向存在丢数据风险）。
+// BeaconSink 上报 URL 回归：必须是同源相对路径。
+// 历史两次故障都源于打绝对 URL——base 尾斜杠导致每个事件吃一次 308（sendBeacon
+// 跟随重定向有丢数据风险），以及跨源请求被拦截器掐断成 ERR_CONNECTION_RESET。
+// 租户自有域名下 /api/track 由 tenant-proxy 白名单直通，相对路径始终可达。
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BeaconSink } from "./sinks";
 
@@ -21,15 +23,9 @@ afterEach(() => {
 });
 
 describe("BeaconSink 上报 URL", () => {
-  it("base 尾部带斜杠：归一化为单斜杠", () => {
-    expect(trackWithBase("https://zapbridge.tech/")).toBe("https://zapbridge.tech/api/track");
-  });
-
-  it("base 不带斜杠：原样拼接", () => {
-    expect(trackWithBase("https://zapbridge.tech")).toBe("https://zapbridge.tech/api/track");
-  });
-
-  it("base 为空：退化为相对路径", () => {
+  it("不受 NEXT_PUBLIC_APP_URL 影响，恒为同源相对路径", () => {
+    expect(trackWithBase("https://zapbridge.tech/")).toBe("/api/track");
+    expect(trackWithBase("https://zapbridge.tech")).toBe("/api/track");
     expect(trackWithBase("")).toBe("/api/track");
   });
 });
