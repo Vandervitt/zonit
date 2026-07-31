@@ -53,6 +53,40 @@ describe("handleTenancy 租户改写既有行为", () => {
   });
 });
 
+// 回归背景：改写只用 host 查 slug，pathname 未参与 URL 构造，导致租户域名下
+// 任意路径都返回同一张落地页 HTML 200（soft-404），对搜索引擎是无限重复内容。
+// 「一域名一页」的语义是根路径提供页面，其余路径本就不存在，应为 404。
+describe("handleTenancy 非根路径不提供落地页（回归：soft-404 重复内容）", () => {
+  it.each(["/pricing", "/asdf", "/a/b/c", "/index.html"])(
+    "自定义域名 %s → 404，不返回落地页",
+    async (pathname) => {
+      const res = await handleTenancy(makeReq("tenant.example", pathname));
+      expect(res?.status).toBe(404);
+      expect(rewriteTarget(res)).toBeNull();
+    },
+  );
+
+  it("根路径不受影响，仍改写到 /p/{slug}", async () => {
+    const res = await handleTenancy(makeReq("tenant.example", "/"));
+    expect(rewriteTarget(res)).toContain("/p/solar-page");
+  });
+
+  it("公开 API 与 /_next 的放行优先于路径收敛", async () => {
+    expect(
+      await handleTenancy(makeReq("tenant.example", "/api/leads", "POST")),
+    ).toBeNull();
+    expect(
+      await handleTenancy(makeReq("tenant.example", "/_next/static/x.js")),
+    ).toBeNull();
+  });
+
+  it("robots/sitemap/llms 等元数据路由仍由各自路由处理", async () => {
+    for (const p of ["/robots.txt", "/sitemap.xml", "/llms.txt"]) {
+      expect(await handleTenancy(makeReq("tenant.example", p))).toBeNull();
+    }
+  });
+});
+
 describe("handleTenancy 放行访客公开 API（回归：留资静默丢失）", () => {
   it("自定义域名 POST /api/leads 放行到路由（不改写成落地页）", async () => {
     expect(
@@ -78,10 +112,14 @@ describe("handleTenancy 放行访客公开 API（回归：留资静默丢失）"
     ).toBeNull();
   });
 
-  it("其余 /api 路径不放行，仍走租户改写（面保持最小）", async () => {
+  // 意图仍是「暴露面保持最小」：租户域名不得触达平台内部 API。
+  // 实现从「改写成落地页」收敛为「404」——后者更直接，且不再产生
+  // /api/* 返回落地页 HTML 200 这种既怪异又利于爬虫抓取的响应。
+  it("其余 /api 路径不放行，按非根路径收敛为 404（面保持最小）", async () => {
     const res = await handleTenancy(
       makeReq("tenant.example", "/api/landing-pages"),
     );
-    expect(rewriteTarget(res)).toContain("/p/solar-page");
+    expect(res?.status).toBe(404);
+    expect(rewriteTarget(res)).toBeNull();
   });
 });
