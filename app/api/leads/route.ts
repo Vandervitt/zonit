@@ -4,7 +4,8 @@ import * as Sentry from "@sentry/nextjs";
 import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { validateLeadSubmission } from "@/lib/leads/validate";
-import { leadRateLimiter } from "@/lib/leads/rate-limit";
+import { allowRequest, bucketKey } from "@/lib/rate-limit-db";
+import { checkPublicOrigin } from "@/lib/leads/origin-guard";
 import { isBadPageIdError } from "@/lib/db-errors";
 import { insertLead, listLeads } from "@/lib/leads/store";
 import { spoolLead } from "@/lib/leads/spool";
@@ -15,10 +16,24 @@ import { recordFirstLeadMilestone } from "@/lib/platform-milestones";
 const cap = (v: unknown, n: number): string | null =>
   typeof v === "string" && v.length > 0 ? v.slice(0, n) : null;
 
-const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type" };
+/** 访客留资限频：同 IP 每分钟 5 条。落库计数，跨实例共享（见 lib/rate-limit-db.ts）。 */
+const RATE_LIMIT = { windowMs: 60_000, max: 5 };
 
-export function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS });
+/**
+ * CORS 头。通过来源校验时**回显该来源**而不再是 `*`——
+ * `*` 等于允许任意页面向任意 pageId 灌线索。
+ * echo 为 null 时不下发 ACAO（同源请求本就不需要）。
+ */
+const cors = (echo: string | null): Record<string, string> => ({
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  Vary: "Origin",
+  ...(echo ? { "Access-Control-Allow-Origin": echo } : {}),
+});
+
+/** 预检拿不到请求体，无从判定 pageId，故只回显来源；真正的授权在 POST 里做。 */
+export function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: cors(request.headers.get("origin")) });
 }
 
 /** 公开提交（无登录）。 */
@@ -27,23 +42,30 @@ export async function POST(request: NextRequest) {
   try {
     body = JSON.parse(await request.text());
   } catch {
-    return NextResponse.json({ error: "bad_json" }, { status: 400, headers: CORS });
+    return NextResponse.json({ error: "bad_json" }, { status: 400, headers: cors(null) });
   }
   // honeypot：机器人填了隐藏字段 → 静默丢弃
   if (typeof body.company_url === "string" && body.company_url.trim() !== "") {
-    return new NextResponse(null, { status: 204, headers: CORS });
+    return new NextResponse(null, { status: 204, headers: cors(null) });
   }
-  // 频率限制（同 IP）
+  // 频率限制（同 IP，跨实例）
   const ip = (request.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
-  if (!leadRateLimiter.allow(ip)) {
-    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: CORS });
+  if (!(await allowRequest(bucketKey("leads", ip), RATE_LIMIT))) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: cors(null) });
   }
   const pageId = typeof body.pageId === "string" ? body.pageId : "";
-  if (!pageId) return NextResponse.json({ error: "bad_payload" }, { status: 400, headers: CORS });
+  if (!pageId) return NextResponse.json({ error: "bad_payload" }, { status: 400, headers: cors(null) });
+
+  // 来源校验：Origin 存在但不属于这个页面 → 拒。挡的是「向别人的页面灌线索」。
+  const originCheck = await checkPublicOrigin(pageId, request.headers.get("origin"));
+  if (!originCheck.allowed) {
+    return NextResponse.json({ error: "forbidden_origin" }, { status: 403, headers: cors(null) });
+  }
+  const echo = originCheck.echo;
 
   const fields = (body.fields && typeof body.fields === "object" ? body.fields : {}) as Record<string, unknown>;
   const result = validateLeadSubmission(fields);
-  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400, headers: CORS });
+  if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400, headers: cors(null) });
 
   const utm = (body.utm && typeof body.utm === "object" ? body.utm : {}) as Record<string, unknown>;
   const attr = {
@@ -57,7 +79,7 @@ export async function POST(request: NextRequest) {
     leadId = await insertLead(pageId, result.payload, attr);
   } catch (err) {
     // 坏 page_id：线索无处可归，重投也永远失败 → 保持静默丢弃。
-    if (isBadPageIdError(err)) return new NextResponse(null, { status: 204, headers: CORS });
+    if (isBadPageIdError(err)) return new NextResponse(null, { status: 204, headers: cors(echo) });
     // 其余（连接中断、池打满、超时……）是真实故障：留证据、进兜底、让访客看到失败可重试，
     // 绝不再返回假成功——客户已经为这次点击付过广告费。
     console.error("[api/leads] 落库失败:", err);
@@ -68,7 +90,7 @@ export async function POST(request: NextRequest) {
       console.error("[api/leads] 兜底留存失败:", spoolErr);
       Sentry.captureException(spoolErr, { tags: { route: "api/leads", stage: "spool" }, extra: { pageId } });
     }
-    return NextResponse.json({ error: "lead_store_failed" }, { status: 503, headers: CORS });
+    return NextResponse.json({ error: "lead_store_failed" }, { status: 503, headers: cors(echo) });
   }
 
   // 里程碑：线索已落库，此处失败不得影响提交结果
@@ -118,7 +140,7 @@ export async function POST(request: NextRequest) {
     Sentry.captureException(err, { tags: { route: "api/leads", stage: "notify" }, extra: { pageId } });
   }
 
-  return new NextResponse(null, { status: 204, headers: CORS });
+  return new NextResponse(null, { status: 204, headers: cors(echo) });
 }
 
 /** 后台列表（登录）。 */
