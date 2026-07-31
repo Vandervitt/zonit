@@ -39,7 +39,7 @@
 | 环节 | 规则 |
 |---|---|
 | 默认国码 | `app/p/[slug]/page.tsx` 按 `x-vercel-ip-country`（与 `euVisitor` 同一来源）解析，经 `defaultDial` 透传给渲染器 |
-| 表单控件 | phone / whatsapp 前置国码 `<select>`，**只能改选、不能清空**，无空选项 |
+| 表单控件 | phone / whatsapp 前置国码 `<select>`，**只能改选、不能清空**，无空选项。被选中项只渲染国码（原生 select 收起态显示的就是它，带国名会被截断成 `+1 United Sta…`），其余项显示全称便于按国名查找；`aria-label` 恒为全称，屏幕阅读器不丢国家信息 |
 | 提交 | `composeE164` 拼成 E.164，顺带处理格式符、本地中继前缀 `0`、访客重复输入国码三种情况 |
 | 服务端校验 | phone / whatsapp 必须 `^\+[1-9]\d{6,14}$`；telegram 归一为裸用户名（`normalizeTelegram`），跳不了 `t.me` 的输入一律拒 |
 
