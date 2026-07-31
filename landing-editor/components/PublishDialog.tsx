@@ -15,13 +15,15 @@ interface DomainRow {
   domain: string;
   enabled: boolean;
   verified: boolean;
+  /** 平台分配的子域：免 DNS 配置，供试用期先跑通链路。 */
+  is_platform_subdomain?: boolean;
   landing_page_id?: string | null;
   landing_page_name?: string;
   routes?: RouteInfo[];
 }
 
 export function PublishDialog({ onClose }: { onClose: () => void }) {
-  const { pageId, setStatus, setPublishedDirty, flushSaveRef } = useMeta();
+  const { pageId, name, setStatus, setPublishedDirty, flushSaveRef } = useMeta();
   // domains === null 表示仍在加载：与「确认没有可用域名」区分，避免闪现空态。
   const [domains, setDomains] = useState<DomainRow[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -31,6 +33,8 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [liveUrl, setLiveUrl] = useState("");
+  // 平台子域分配中：这是没有自有域名的用户唯一的发布出口，失败必须让他看到原因。
+  const [claiming, setClaiming] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -108,14 +112,52 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
 
   function domainLabel(d: DomainRow): string {
     const used = d.routes?.length ?? 0;
-    if (!used) return d.domain;
-    return `${d.domain}（已用 ${used} 个路径）`;
+    const suffix = d.is_platform_subdomain ? "（平台提供）" : "";
+    if (!used) return `${d.domain}${suffix}`;
+    return `${d.domain}${suffix}（已用 ${used} 个路径）`;
+  }
+
+  /**
+   * 领取平台子域：没有自有域名的用户由此拿到一个可立即发布的地址，
+   * 不必先去买域名、改 DNS、等验证。领取后重新拉列表并预选它。
+   */
+  async function claimSubdomain() {
+    if (claiming) return;
+    setClaiming(true);
+    setError("");
+    try {
+      const res = await fetch("/api/domains/platform-subdomain", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ fromTitle: name ?? "" }),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok) {
+        setError(
+          json?.error === "subdomain_unavailable"
+            ? "平台地址暂时无法分配，请稍后重试或绑定自有域名。"
+            : "领取失败，请稍后重试。",
+        );
+        return;
+      }
+      const listRes = await fetch("/api/domains");
+      if (!listRes.ok) throw new Error(`HTTP ${listRes.status}`);
+      const all: DomainRow[] = await listRes.json();
+      const usable = all.filter((d) => d.enabled && d.verified);
+      setDomains(usable);
+      const mine = usable.find((d) => d.id === json?.id) ?? usable[0];
+      if (mine) setDomainId(mine.id);
+    } catch {
+      setError("领取失败，请检查网络后重试。");
+    } finally {
+      setClaiming(false);
+    }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
       <div className="w-[420px] rounded-xl bg-panel p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-base font-semibold text-ink">发布到自有域名</h2>
+        <h2 className="text-base font-semibold text-ink">发布页面</h2>
 
         {liveUrl ? (
           <div className="mt-4 space-y-3 text-sm">
@@ -132,8 +174,22 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
           <p className="mt-4 text-sm text-ink-soft">正在加载域名…</p>
         ) : domains.length === 0 ? (
           <div className="mt-4 space-y-3 text-sm text-ink-soft">
-            <p>你还没有已验证的自有域名。请先到「Domains」绑定并验证一个域名，再回来发布。</p>
-            <a href={Routes.Domains} className="inline-block rounded-md border border-edge px-3 py-1.5 text-ink hover:bg-canvas">去绑定域名</a>
+            <p>你还没有可发布的域名。可以先用平台提供的地址把页面发出去，收到线索后再换成自己的品牌域名。</p>
+            <button
+              onClick={() => void claimSubdomain()}
+              disabled={claiming}
+              className="w-full rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            >
+              {claiming ? "正在分配…" : "用平台提供的地址发布"}
+            </button>
+            {error && <p className="text-sm text-red-500">{error}</p>}
+            <p className="text-xs text-ink-soft">
+              平台会按页面名分配一个专属地址，无需配置 DNS，立即可用。
+              页面随时可以改发到自有域名。
+            </p>
+            <a href={Routes.Domains} className="inline-block rounded-md border border-edge px-3 py-1.5 text-ink hover:bg-canvas">
+              绑定自有域名
+            </a>
           </div>
         ) : (
           <div className="mt-4 space-y-3">

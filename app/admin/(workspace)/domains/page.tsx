@@ -29,6 +29,8 @@ interface Domain {
   landing_page_name?: string;
   enabled: boolean;
   verified: boolean;
+  /** 平台分配的子域：免 DNS 配置，不占 domainsLimit。 */
+  is_platform_subdomain?: boolean;
   created_at: string;
   routes?: DomainRoute[];
 }
@@ -43,11 +45,17 @@ export default function DomainsPage() {
 
   const domainsQuery = useSWR<Domain[]>(ApiRoutes.Domains);
   const domains = domainsQuery.data ?? [];
-  const enabledCount = domains.filter(d => d.enabled).length;
+  // 与后端 getEnabledDomainCount 同口径：平台子域是平台资源，不占客户的域名槽位
+  // （Free 的 domainsLimit 是 0，算进去会让刚领到子域的用户显示超限）。
+  const enabledCount = domains.filter(d => d.enabled && !d.is_platform_subdomain).length;
 
   // 已验证域名的 DNS 配置健康（所有权验证通过 ≠ A/CNAME 已指向本平台）：
   // 列表加载后拉取一次，misconfigured 时在验证状态列亮橙标。
-  const verifiedIds = domains.filter(d => d.verified).map(d => d.id);
+  // 排除平台子域：它们的 DNS 是平台自己的通配符记录，健康检查没有意义，
+  // 查了反而会因为解析目标不是客户自有 A/CNAME 而误亮「未指向本平台」橙标。
+  const verifiedIds = domains
+    .filter(d => d.verified && !d.is_platform_subdomain)
+    .map(d => d.id);
   const healthQuery = useSWR<Record<string, string>>(
     verifiedIds.length > 0 ? [ApiRoutes.Domains, "health", verifiedIds.join(",")] : null,
     async () => {

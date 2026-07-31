@@ -14,6 +14,10 @@ export const ApiErrors = {
   INVALID_DOMAIN: 'invalid_domain',
   DOMAIN_TLD_BLOCKED: 'domain_tld_blocked',
   DOMAIN_TAKEN: 'domain_taken',
+  /** 平台子域根域未配置，或连续重试后仍未分配到可用 slug。 */
+  SUBDOMAIN_UNAVAILABLE: 'subdomain_unavailable',
+  /** 用户试图手动添加平台自有域名后缀（只能经平台分配入口获得）。 */
+  DOMAIN_RESERVED_SUFFIX: 'domain_reserved_suffix',
   VERCEL_API_ERROR: 'vercel_api_error',
   VALIDATION_FAILED: 'validation_failed',
   DOMAIN_REQUIRED: 'domain_required',

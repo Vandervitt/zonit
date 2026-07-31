@@ -17,6 +17,8 @@ export interface DomainRow {
   domain: string;
   enabled: boolean;
   verified: boolean;
+  /** 平台分配的子域（如 acme.zapbridge.site）：免 DNS 验证，且不占 domainsLimit。 */
+  is_platform_subdomain: boolean;
   created_at: string;
   landing_page_name?: string;
 }
@@ -51,12 +53,28 @@ export async function getUserDomains(userId: string): Promise<DomainRow[]> {
   return result.rows;
 }
 
+/**
+ * 计入 domainsLimit 的域名数。
+ *
+ * 刻意排除平台子域：它是平台资源而非客户的域名槽位，且 Free 的 domainsLimit 是 0
+ * ——算进去的话，一分配子域用户就超限，试用期零门槛发布无从谈起。
+ */
 export async function getEnabledDomainCount(userId: string): Promise<number> {
   const result = await pool.query(
-    "SELECT COUNT(*) FROM domains WHERE user_id = $1 AND enabled = true",
+    `SELECT COUNT(*) FROM domains
+      WHERE user_id = $1 AND enabled = true AND is_platform_subdomain = false`,
     [userId]
   );
   return Number(result.rows[0].count);
+}
+
+/** 该用户已分配的平台子域（每用户至多一个，由唯一索引保证）。 */
+export async function getPlatformSubdomain(userId: string): Promise<DomainRow | null> {
+  const result = await pool.query(
+    "SELECT * FROM domains WHERE user_id = $1 AND is_platform_subdomain = true",
+    [userId],
+  );
+  return result.rows[0] ?? null;
 }
 
 export async function getDomainById(id: string, userId: string): Promise<DomainRow | null> {
@@ -80,12 +98,15 @@ export async function insertDomain(params: {
   userId: string;
   landingPageId?: string | null;
   domain: string;
+  /** 平台子域：域名本就是平台的，故由调用方直接置 verified/enabled，无需 DNS 验证。 */
+  isPlatformSubdomain?: boolean;
 }): Promise<DomainRow> {
+  const isPlatform = params.isPlatformSubdomain === true;
   const result = await pool.query(
-    `INSERT INTO domains (id, user_id, landing_page_id, domain)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO domains (id, user_id, landing_page_id, domain, is_platform_subdomain, verified, enabled)
+     VALUES ($1, $2, $3, $4, $5, $5, $5)
      RETURNING *`,
-    [params.id, params.userId, params.landingPageId ?? null, params.domain],
+    [params.id, params.userId, params.landingPageId ?? null, params.domain, isPlatform],
   );
   return result.rows[0];
 }
