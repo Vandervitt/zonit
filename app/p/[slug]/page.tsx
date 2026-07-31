@@ -11,6 +11,7 @@ import { getUserPlan } from "@/lib/plans-db";
 import { hasWatermark, hasAntiBan } from "@/lib/plans";
 import { gateTrackingByPlan } from "@/lib/tracking/gate";
 import { isEeaCountry } from "@/lib/tracking/geo";
+import { dialCodeFor } from "@/lib/leads/dial-codes";
 import { deriveVariant, IDENTITY_VARIANT } from "@/landing-renderer/variant";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { landingFaqJsonLd, landingOrganizationJsonLd } from "@/lib/seo/landing-jsonld";
@@ -80,7 +81,13 @@ export default async function PublicLandingPage({
   const variant = hasAntiBan(plan) ? deriveVariant(page.data.variantSeed ?? page.id) : IDENTITY_VARIANT;
 
   // CMP 欧盟门控：按 Vercel 边缘 geo 头判定访客地区，欧盟/EEA 访客的第一方埋点随同意门控。
-  const euVisitor = isEeaCountry((await headers()).get("x-vercel-ip-country"));
+  const visitorCountry = (await headers()).get("x-vercel-ip-country");
+  const euVisitor = isEeaCountry(visitorCountry);
+
+  // 留资表单的默认国码同样按访客 IP 预选：访客手填的号码普遍省略国码，
+  // 强制携带才能保证线索落库即 E.164（后台一键联系与客户自己拨号都依赖它）。
+  // 全量国码表只在服务端 bundle，客户端由 LeadForm 按需 import()。
+  const defaultDial = dialCodeFor(visitorCountry);
 
   // 结构化数据（SEO 富媒体 + GEO）：注入租户品牌/域名实体，noindex 页不输出。
   const noindex = page.data.seo?.noindex === true;
@@ -93,7 +100,7 @@ export default async function PublicLandingPage({
       {faqJsonLd && <JsonLd data={faqJsonLd} />}
       {orgJsonLd && <JsonLd data={orgJsonLd} />}
       <TrackingProvider tracking={tracking} pageId={page.id} euVisitor={euVisitor}>
-        <LandingPage page={page.data} pageId={page.id} variant={variant} />
+        <LandingPage page={page.data} pageId={page.id} variant={variant} defaultDial={defaultDial} />
         {hasWatermark(plan) && <Watermark />}
       </TrackingProvider>
     </>

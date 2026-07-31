@@ -1,8 +1,10 @@
 "use client";
 // landing-renderer/sections/LeadForm.tsx
 // 兜底留资表单：按 fields 配置渲染输入，含 honeypot，提交 POST /api/leads。
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { LeadForm as LeadFormData } from "@/types/schema.draft";
+import type { DialCode } from "@/lib/leads/dial-codes";
+import { composeE164 } from "@/lib/leads/contact-format";
 import type { RendererTheme } from "../theme";
 import { parseUtm } from "../tracking/utm";
 
@@ -12,6 +14,29 @@ const FIELD_LABELS: Record<string, string> = {
   name: "Name", email: "Email", phone: "Phone", whatsapp: "WhatsApp", telegram: "Telegram", message: "Message",
 };
 const FIELD_ORDER = ["name", "email", "phone", "whatsapp", "telegram", "message"] as const;
+
+/** 带国码选择器的字段。国码强制携带，故这两个字段的值在提交前会被拼成 E.164。 */
+const DIAL_FIELDS = ["phone", "whatsapp"] as const;
+type DialField = (typeof DIAL_FIELDS)[number];
+const isDialField = (k: string): k is DialField => (DIAL_FIELDS as readonly string[]).includes(k);
+
+/** 访客 IP 无法判定国家时的兜底，与服务端 dial-codes 的默认值一致。 */
+const FALLBACK_DIAL: DialCode = { iso: "US", dial: "+1", name: "United States" };
+
+/**
+ * 服务端校验错误码 → 访客可读提示。
+ * 校验收紧后 400 会变多（缺国码的号码、跳不了 t.me 的 Telegram），
+ * 一律回落到「Something went wrong」会让访客不知道该改哪里。
+ */
+const ERROR_MESSAGES: Record<string, string> = {
+  need_contact: "Please leave at least one way to reach you.",
+  bad_email: "Please check your email address.",
+  bad_phone: "Please check your phone number.",
+  bad_whatsapp: "Please check your WhatsApp number.",
+  bad_telegram: "Please enter your Telegram username, e.g. @yourname.",
+  rate_limited: "Too many attempts. Please try again in a minute.",
+};
+const GENERIC_ERROR = "Something went wrong. Please try again.";
 
 /**
  * 留资表单锚点：CTA 以 `#lead-form` 直达表单，使表单能作为主转化路径。
@@ -41,10 +66,44 @@ function fireClientPixels(eventId: string): boolean {
   return fired;
 }
 
-export function LeadForm({ data, pageId, theme, preview = false }: { data: LeadFormData; pageId: string; theme: RendererTheme; preview?: boolean }) {
+export function LeadForm({ data, pageId, theme, preview = false, defaultDial = FALLBACK_DIAL }: {
+  data: LeadFormData;
+  pageId: string;
+  theme: RendererTheme;
+  preview?: boolean;
+  /** 服务端按访客 IP（x-vercel-ip-country）解析出的国码，作为选择器初值。 */
+  defaultDial?: DialCode;
+}) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [honey, setHoney] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState(GENERIC_ERROR);
+  // 首屏只揣着被选中的这一个国码；全表（200+ 项）在 idle 时按需拉取，见 loadDialCodes。
+  const [dialCodes, setDialCodes] = useState<DialCode[]>([defaultDial]);
+  const [dialIso, setDialIso] = useState<Record<DialField, string>>({ phone: defaultDial.iso, whatsapp: defaultDial.iso });
+  const loadedRef = useRef(false);
+
+  const loadDialCodes = useCallback(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = true;
+    // 动态 import：全量国码表落到独立 chunk，不进落地页首屏 bundle。
+    import("@/lib/leads/dial-codes").then((m) => setDialCodes(m.DIAL_CODES)).catch(() => { loadedRef.current = false; });
+  }, []);
+
+  const needsDial = DIAL_FIELDS.some((k) => data.fields[k].enabled);
+  useEffect(() => {
+    if (!needsDial) return;
+    // 空闲时预取，保证访客真正点开选择器时已经就绪；不占首屏关键路径。
+    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number; cancelIdleCallback?: (h: number) => void };
+    if (w.requestIdleCallback) {
+      const handle = w.requestIdleCallback(loadDialCodes);
+      return () => w.cancelIdleCallback?.(handle);
+    }
+    const timer = window.setTimeout(loadDialCodes, 1200);
+    return () => window.clearTimeout(timer);
+  }, [needsDial, loadDialCodes]);
+
+  const dialOf = (iso: string): string => dialCodes.find((c) => c.iso === iso)?.dial ?? defaultDial.dial;
 
   const active = FIELD_ORDER.filter((k) => data.fields[k].enabled);
 
@@ -53,6 +112,11 @@ export function LeadForm({ data, pageId, theme, preview = false }: { data: LeadF
     if (preview) return; // 预览模式：不写入真实线索
     setStatus("sending");
     try {
+      // 号码在提交前拼成 E.164，落库即可直接用于 wa.me / 拨号，无需事后猜国码。
+      const fields: Record<string, string> = { ...values };
+      for (const k of DIAL_FIELDS) {
+        if (fields[k]) fields[k] = composeE164(dialOf(dialIso[k]), fields[k]);
+      }
       const utm = typeof window !== "undefined" ? parseUtm(window.location.search) : {};
       const eventId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       const consent = fireClientPixels(eventId); // 同时作为"追踪是否允许"信号
@@ -60,7 +124,7 @@ export function LeadForm({ data, pageId, theme, preview = false }: { data: LeadF
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pageId, channel: "form", fields: values, utm, company_url: honey,
+          pageId, channel: "form", fields, utm, company_url: honey,
           event_id: eventId,
           fbp: readCookie("_fbp"),
           fbc: readCookie("_fbc"),
@@ -70,10 +134,16 @@ export function LeadForm({ data, pageId, theme, preview = false }: { data: LeadF
           consent,
         }),
       });
-      if (!res.ok && res.status !== 204) { setStatus("error"); return; }
+      if (!res.ok && res.status !== 204) {
+        const code = await res.json().then((d) => (typeof d?.error === "string" ? d.error : "")).catch(() => "");
+        setErrorMsg(ERROR_MESSAGES[code] ?? GENERIC_ERROR);
+        setStatus("error");
+        return;
+      }
       setStatus("done");
       setValues({});
     } catch {
+      setErrorMsg(GENERIC_ERROR);
       setStatus("error");
     }
   };
@@ -105,10 +175,34 @@ export function LeadForm({ data, pageId, theme, preview = false }: { data: LeadF
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
                   rows={3}
                 />
+              ) : isDialField(k) ? (
+                // 国码与本地号是一个整体控件：国码只能改选，不能清空，提交时拼成 E.164。
+                <div className="flex gap-2">
+                  <select
+                    aria-label={`${data.fields[k].label?.trim() || FIELD_LABELS[k]} country code`}
+                    value={dialIso[k]}
+                    onChange={(e) => setDialIso((d) => ({ ...d, [k]: e.target.value }))}
+                    onFocus={loadDialCodes}
+                    className="w-32 shrink-0 rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm focus:border-slate-500 focus:outline-none"
+                  >
+                    {dialCodes.map((c) => (
+                      <option key={c.iso} value={c.iso}>{`${c.dial} ${c.name}`}</option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    required={data.fields[k].required}
+                    value={values[k] ?? ""}
+                    onChange={(e) => setValues((v) => ({ ...v, [k]: e.target.value }))}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
+                  />
+                </div>
               ) : (
                 <input
                   type={k === "email" ? "email" : "text"}
                   required={data.fields[k].required}
+                  placeholder={k === "telegram" ? "@yourname" : undefined}
                   value={values[k] ?? ""}
                   onChange={(e) => setValues((v) => ({ ...v, [k]: e.target.value }))}
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none"
@@ -135,7 +229,7 @@ export function LeadForm({ data, pageId, theme, preview = false }: { data: LeadF
             {preview ? "Preview only" : status === "sending" ? "Sending…" : data.submitText}
           </button>
           {preview ? <p className="text-center text-xs text-slate-500">Preview mode — submissions are disabled until the page is published.</p> : null}
-          {status === "error" ? <p className="text-center text-sm text-red-600">Something went wrong. Please try again.</p> : null}
+          {status === "error" ? <p className="text-center text-sm text-red-600">{errorMsg}</p> : null}
         </form>
       </div>
     </section>
