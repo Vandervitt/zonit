@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
 import { RegisterView } from "@/components/auth/RegisterView";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { registerMetadata } from "@/lib/seo/auth-metadata";
 
-export const metadata: Metadata = { title: getDictionary("zh").auth.register.metaTitle };
+export const metadata = registerMetadata("zh");
 
 export default function Page() {
   return <RegisterView locale="zh" />;

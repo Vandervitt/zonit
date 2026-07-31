@@ -1,6 +1,8 @@
 export const auth = {
   login: {
     metaTitle: "Log in | Zap Bridge",
+    metaDescription:
+      "Log in to Zap Bridge to edit your landing pages, follow up on new leads, and manage the domains you've published.",
     title: "Welcome back",
     subtitle: "Enter your email to get a verification code and sign in",
     google: "Sign in with Google",
@@ -13,6 +15,8 @@ export const auth = {
   },
   register: {
     metaTitle: "Sign up | Zap Bridge",
+    metaDescription:
+      "Create a free Zap Bridge account and get 7 days of full Pro. Publish your first lead-gen landing page on your own domain in minutes.",
     title: "Create your account",
     subtitle: "Enter your email to get a code — every sign-up gets 7 days of full Pro",
     invited: "Invitation benefits applied",

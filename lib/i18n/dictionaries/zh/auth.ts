@@ -1,6 +1,8 @@
 export const auth = {
   login: {
     metaTitle: "登录 | Zap Bridge",
+    metaDescription:
+      "登录 Zap Bridge，编辑落地页、跟进新线索、管理已发布的自有域名。",
     title: "欢迎回来",
     subtitle: "输入邮箱获取验证码即可登录",
     google: "Google 登录",
@@ -13,6 +15,8 @@ export const auth = {
   },
   register: {
     metaTitle: "注册 | Zap Bridge",
+    metaDescription:
+      "免费注册 Zap Bridge，即赠 Pro 全功能试用 7 天。几分钟发布第一张留资落地页到自有品牌域名。",
     title: "创建账号",
     subtitle: "输入邮箱获取验证码，注册即赠 Pro 全功能试用 7 天",
     invited: "专属邀请权益已应用",
