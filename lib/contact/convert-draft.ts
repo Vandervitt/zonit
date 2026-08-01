@@ -7,13 +7,36 @@
 import type { CtaTarget, LandingPageDraft, LeadChannel, PageContact } from "@/types/schema.draft";
 import type { LegacyCtaButton, LegacyDraft } from "./cta-inventory";
 
-/** 从旧 link 反推渠道与规范化后的值；识别不了返回 null。 */
-export function parseLegacyLink(link: string): { channel: LeadChannel; value: string } | null {
+/**
+ * 解码 URL 组件；解不开就原样返回。
+ * 存量数据里的 ?text= 理论上都是合法编码，但迁移绝不能因为一个坏字符串就整批中止
+ * —— 原样保留至少不会让链接变得更糟。
+ */
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * 从旧 link 反推渠道、规范化后的值，以及 WhatsApp 的预填消息；识别不了返回 null。
+ *
+ * 模板里全部 46 个 wa.me 链接都带 ?text= 预填（没有一个是纯号码），
+ * 所以这个分支不是边界情况而是主路径——漏掉它等于对最重要的渠道白转一场。
+ */
+export function parseLegacyLink(link: string): { channel: LeadChannel; value: string; prefill?: string } | null {
   const v = link.trim();
   if (!v) return null;
   if (v === "#lead-form") return { channel: "form", value: "" };
-  const wa = v.match(/^https:\/\/wa\.me\/(\d{7,15})$/i);
-  if (wa) return { channel: "whatsapp", value: `+${wa[1]}` };
+  const wa = v.match(/^https:\/\/wa\.me\/(\d{7,15})(?:\?text=(.*))?$/i);
+  if (wa) {
+    // ?text= 是 URL 编码的；解码存进 schema，渲染时再编回去。
+    // 存解码后的原文，是为了阶段 2 用户能在面板里直接读和改这句话。
+    const prefill = wa[2] ? safeDecode(wa[2]) : undefined;
+    return { channel: "whatsapp", value: `+${wa[1]}`, ...(prefill ? { prefill } : {}) };
+  }
   const tel = v.match(/^tel:\+?([\d\s()-]{7,20})$/i);
   if (tel) return { channel: "phone", value: `+${tel[1].replace(/\D/g, "")}` };
   const mail = v.match(/^mailto:(.+@.+)$/i);
@@ -54,7 +77,9 @@ export function convertDraft(legacy: LegacyDraft): LandingPageDraft {
 
   // ① 主渠道：以 hero.cta.link 为准，空链接走上面的兜底
   const heroParsed = parseLegacyLink(legacy.hero.cta?.link ?? "");
-  const contact: PageContact = { primary: heroParsed?.channel ?? inferBlankedChannel(legacy) };
+  // 被置空的落点该挂到哪个深链渠道上（恒非 form）。主渠道推断与空落点回填共用它。
+  const blankedChannel = inferBlankedChannel(legacy);
+  const contact: PageContact = { primary: heroParsed?.channel ?? blankedChannel };
   if (heroParsed && heroParsed.channel !== "form") {
     contact[heroParsed.channel] = heroParsed.value;
   }
@@ -66,14 +91,28 @@ export function convertDraft(legacy: LegacyDraft): LandingPageDraft {
   // ③ 逐个落点转引用：只有与已收录渠道的值完全一致才转成引用，
   //    否则原样保留为 url —— 这就是「不强行归一」那条硬规则的落点
   const toTarget = (link: string): CtaTarget => {
+    // 空链接是 blankPrimaryCtaLinks 置空的结果。不能转成空 url —— 那是永久死链，
+    // 用户以后在联系方式面板里填了号码它也不会活过来。转成渠道引用后当前同样
+    // 解析为 null（值还没填），但一填就自动生效。
+    //
+    // 注意必须挂到**非表单**渠道上：主渠道是表单时，{kind:"primary"} 会解析成
+    // #lead-form，而原值是空 —— 那就把一个空按钮变成了能点的按钮，行为变了。
+    // 置空只作用于非锚点链接，所以被置空的位置原本一定是深链，挂深链渠道才是对的。
+    if (!link.trim()) {
+      return contact.primary === "form"
+        ? { kind: "channel", channel: blankedChannel }
+        : { kind: "primary" };
+    }
     const parsed = parseLegacyLink(link);
     if (!parsed) return { kind: "url", url: link };
     if (parsed.channel !== "form" && contact[parsed.channel] !== parsed.value) {
       return { kind: "url", url: link };
     }
+    // 预填消息跟着 CTA 走：同页每个按钮问的事不一样，这是 wa.me 深链最有价值的部分
+    const prefill = parsed.prefill ? { prefill: parsed.prefill } : {};
     return parsed.channel === contact.primary
-      ? { kind: "primary" }
-      : { kind: "channel", channel: parsed.channel };
+      ? { kind: "primary", ...prefill }
+      : { kind: "channel", channel: parsed.channel, ...prefill };
   };
 
   const convertCta = (cta: LegacyCtaButton) => ({ text: cta.text, target: toTarget(cta.link) });

@@ -16,15 +16,22 @@ export interface ChannelHref {
   external: boolean;
 }
 
-export function channelHref(channel: LeadChannel, value: string): ChannelHref | null {
+/**
+ * @param prefill 点开聊天时预填进输入框的消息，仅 WhatsApp 支持（wa.me 的 ?text= 参数）。
+ *   其他渠道忽略：tel: / mailto: 各有自己的语义，t.me 不支持预填。
+ */
+export function channelHref(channel: LeadChannel, value: string, prefill?: string): ChannelHref | null {
   switch (channel) {
     case "form":
       // 表单是页内锚点，与 value 无关。表单是否启用由校验层负责——
       // 这里判断了也没用：拼装器不该知道页面结构。
       return { href: `#${LEAD_FORM_ANCHOR_ID}`, external: false };
-    case "whatsapp":
+    case "whatsapp": {
       // wa.me 只吃纯数字，须去掉 E.164 的 `+`
-      return isE164(value) ? { href: `https://wa.me/${value.slice(1)}`, external: true } : null;
+      if (!isE164(value)) return null;
+      const query = prefill?.trim() ? `?text=${encodeURIComponent(prefill)}` : "";
+      return { href: `https://wa.me/${value.slice(1)}${query}`, external: true };
+    }
     case "phone":
       return isE164(value) ? { href: `tel:${value}`, external: false } : null;
     case "email":

@@ -56,6 +56,16 @@ describe("convertDraft", () => {
     expect(out.contact.whatsapp).toBeUndefined();
   });
 
+  // 空 url 是永久死链——用户填了号码也活不过来。等价性判据两边都是 null，抓不到这个 bug。
+  it("被置空的 CTA 转成 primary 引用，而不是空 url", () => {
+    const out = convertDraft(draft({
+      hero: { cta: { text: "Chat", link: "" } },
+      floatingButton: { text: "F", link: "" },
+    }));
+    expect(out.hero.cta.target).toEqual({ kind: "primary" });
+    expect(out.floatingButton?.target).toEqual({ kind: "primary" });
+  });
+
   it("空链接时从残留链接推断渠道类型", () => {
     const out = convertDraft(draft({
       hero: { cta: { text: "C", link: "" } },
@@ -63,6 +73,24 @@ describe("convertDraft", () => {
     }));
     expect(out.contact.primary).toBe("phone");
     expect(out.contact.phone).toBeUndefined();
+  });
+
+  // 模板里 46 个 wa.me 链接全部带 ?text=，没有一个是纯号码——这是主路径不是边界。
+  it("WhatsApp 预填消息解码后跟着 CTA 保留", () => {
+    const out = convertDraft(draft({
+      hero: { cta: { text: "Book", link: "https://wa.me/15557654321?text=Hi%20Lumora%2C%20book%20me" } },
+    }));
+    expect(out.contact.whatsapp).toBe("+15557654321");
+    expect(out.hero.cta.target).toEqual({ kind: "primary", prefill: "Hi Lumora, book me" });
+  });
+
+  it("同页不同 CTA 各自保留自己的预填", () => {
+    const out = convertDraft(draft({
+      hero: { cta: { text: "Book", link: "https://wa.me/15557654321?text=book" } },
+      floatingButton: { text: "Ask", link: "https://wa.me/15557654321?text=question" },
+    }));
+    expect(out.hero.cta.target).toEqual({ kind: "primary", prefill: "book" });
+    expect(out.floatingButton?.target).toEqual({ kind: "primary", prefill: "question" });
   });
 
   it("sections 里的嵌套 CTA 一并转换，link 字段删除", () => {

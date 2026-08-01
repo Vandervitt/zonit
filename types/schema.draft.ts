@@ -34,9 +34,14 @@ export const INSTANT_CHANNELS: LeadChannel[] = ["whatsapp", "phone", "telegram"]
  * 这样换一次号码，全页所有按钮同步生效。
  */
 export type CtaTarget =
-  | { kind: 'primary' }                         // 跟随页面主渠道（绝大多数落点）
-  | { kind: 'channel'; channel: LeadChannel }   // 钉死某渠道（如悬浮按钮常驻 WhatsApp）
-  | { kind: 'url'; url: string };               // 二级外链（Instagram / 官网等）
+  | { kind: 'primary'; prefill?: string }                        // 跟随页面主渠道（绝大多数落点）
+  | { kind: 'channel'; channel: LeadChannel; prefill?: string }  // 钉死某渠道（如悬浮按钮常驻 WhatsApp）
+  | { kind: 'url'; url: string };                                // 二级外链（Instagram / 官网等）
+
+// prefill：点开聊天时预先填进输入框的消息（仅 WhatsApp 支持）。
+// 它必须留在 CTA 上而不是 contact 里 —— 同一张页面上每个按钮问的是不同的事：
+// 首屏「我想预约免费评估」、套餐区「我想了解隐形矫正」、悬浮「我有个问题」。
+// 商家一眼就知道访客要什么，这是 wa.me 深链最有价值的部分，不能为了归一号码丢掉。
 
 /** 行动按钮（CTA）：文案 + 落点引用 */
 export interface CtaButton {

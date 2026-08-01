@@ -18,9 +18,9 @@ export function resolveCtaHref(target: CtaTarget, contact: PageContact): Channel
       // 格式合法性由编辑期的 validateLink 负责，渲染期不重复判断。
       return target.url.trim() ? { href: target.url, external: true } : null;
     case "primary":
-      return channelHref(contact.primary, channelValue(contact, contact.primary));
+      return channelHref(contact.primary, channelValue(contact, contact.primary), target.prefill);
     case "channel":
-      return channelHref(target.channel, channelValue(contact, target.channel));
+      return channelHref(target.channel, channelValue(contact, target.channel), target.prefill);
   }
 }
 
