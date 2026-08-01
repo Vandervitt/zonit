@@ -21,7 +21,7 @@ import { collectFieldIssues } from "../lib/validate";
 
 /**
  * 模板实例化后的草稿——与用户真正拿到的一致。
- * 注意 loadTemplateDraft 会把非锚点的主 CTA 置空（逼用户填自己的联系方式），
+ * 注意 loadTemplateDraft 会清空全部渠道值（逼用户填自己的联系方式），
  * 故本文件不断言主 CTA 链接非空，只断言结构、格式与元数据一致性。
  */
 async function instantiated(id: string): Promise<LandingPageDraft> {
@@ -53,8 +53,9 @@ describe("模板库结构完整性", () => {
       expect(collectFieldIssues(draft), `${id} 存在字段格式问题`).toEqual([]);
 
       // 3) 页脚合规字段
+      // 注：联系方式不在此断言——loadTemplateDraft 会清空全部渠道值（模板里的号码
+      // 和邮箱都是虚构的），「必须填」是发布门槛的职责，不是模板的。
       expect(draft.footer.brandName, `${id} 页脚缺品牌名`).toBeTruthy();
-      expect(draft.contact.email, `${id} 缺联系邮箱`).toBeTruthy();
       expect(draft.footer.privacyPolicy, `${id} 页脚缺隐私政策`).toBeTruthy();
       expect(draft.footer.termsOfService, `${id} 页脚缺服务条款`).toBeTruthy();
 
@@ -82,7 +83,7 @@ describe("模板库结构完整性", () => {
   });
 
   it("表单主转化的模板：实例化后锚点 CTA 仍指向留资表单", async () => {
-    // 表单主转化的模板开箱即用：blankPrimaryCtaLinks 只清联系方式值，
+    // 表单主转化的模板开箱即用：blankTemplateContacts 只清渠道值，
     // 而表单没有「用户自己的值」可填，所以主 CTA 一建出来就是活的——
     // 否则用户还会被发布门槛要求填一个他根本不需要的联系方式。
     const anchored = TEMPLATES.filter((t) => t.tags.conversion[0] === "form");

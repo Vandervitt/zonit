@@ -102,8 +102,7 @@ function walkFieldIssues(node: unknown, label: string, target: IssueTarget, out:
 /** 聚合整页字段级格式错误（按文案去重），每项带编辑器跳转落点。 */
 export function collectFieldIssueItems(draft: LandingPageDraft): PublishIssue[] {
   const out: PublishIssue[] = [];
-  // 联系方式暂落在 hero 面板上——阶段 2 的「联系方式」面板上线后改指向它
-  walkFieldIssues(draft.contact, "联系方式", { kind: "fixed", id: "hero" }, out);
+  walkFieldIssues(draft.contact, "联系方式", { kind: "fixed", id: "contact" }, out);
   walkFieldIssues(draft.hero, "首屏", { kind: "fixed", id: "hero" }, out);
   draft.sections.forEach((s, index) =>
     walkFieldIssues(s.data, SECTION_REGISTRY[s.type]?.label ?? s.type, { kind: "section", index }, out),

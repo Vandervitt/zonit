@@ -1,7 +1,7 @@
 // 发布门槛的联系方式校验。改造后号码只存在 contact 一处，故断言从「链接是否为空」
 // 变成「引用的渠道有没有值」——意图不变：访客点了 CTA 必须能联系到人。
 import { describe, it, expect } from "vitest";
-import { collectContactIssues, collectContactIssueItems, blankPrimaryCtaLinks } from "./contactIssues";
+import { collectContactIssues, collectContactIssueItems, blankTemplateContacts } from "./contactIssues";
 import type { LandingPageDraft, PageContact } from "@/types/schema.draft";
 
 const draft = (contact: PageContact, extra: Record<string, unknown> = {}) =>
@@ -17,21 +17,6 @@ const REAL: PageContact = { primary: "whatsapp", whatsapp: "+8613800138000" };
 describe("collectContactIssues", () => {
   it("主渠道为真实号码、无占位 → 无问题", () => {
     expect(collectContactIssues(draft(REAL))).toEqual([]);
-  });
-
-  it("含模板占位号 15551234567 → 报占位问题", () => {
-    const r = collectContactIssues(draft({ primary: "whatsapp", whatsapp: "+15551234567" }));
-    expect(r.some((m) => m.includes("占位"))).toBe(true);
-  });
-
-  it("其他通道用同一占位号（电话）也检出", () => {
-    const r = collectContactIssues(draft({ primary: "phone", phone: "+15557654321" }));
-    expect(r.some((m) => m.includes("占位"))).toBe(true);
-  });
-
-  it("占位号出现在非主渠道也检出", () => {
-    const r = collectContactIssues(draft({ ...REAL, phone: "+15553219876" }));
-    expect(r.some((m) => m.includes("占位"))).toBe(true);
   });
 
   it("主渠道未填值 → 报无法联系问题", () => {
@@ -52,7 +37,8 @@ describe("collectContactIssues", () => {
     const d = draft(REAL, { floatingButton: { text: "Chat", target: { kind: "channel", channel: "telegram" } } });
     const hit = collectContactIssueItems(d).find((i) => i.message.includes("悬浮按钮指向"));
     expect(hit).toBeDefined();
-    expect(hit?.target).toEqual({ kind: "fixed", id: "floatingButton" });
+    // 落点指向联系方式面板：用户要改的是号码，不是按钮本身
+    expect(hit?.target).toEqual({ kind: "fixed", id: "contact" });
   });
 
   it("无悬浮按钮 → 不报悬浮相关问题", () => {
@@ -81,31 +67,31 @@ describe("collectContactIssues", () => {
   });
 });
 
-describe("blankPrimaryCtaLinks", () => {
-  it("只清主渠道的值；其余渠道与文案不动", () => {
-    const out = blankPrimaryCtaLinks(
+describe("blankTemplateContacts", () => {
+  it("清空全部渠道值；primary 与文案保留", () => {
+    const out = blankTemplateContacts(
       draft({ primary: "whatsapp", whatsapp: "+15551234567", email: "a@b.com", telegram: "brandsupport" }),
     );
     expect(out.contact.whatsapp).toBeUndefined();
-    // 页脚业务邮箱与备用渠道改造前从不清空，这里也不能顺手清掉
-    expect(out.contact.email).toBe("a@b.com");
-    expect(out.contact.telegram).toBe("brandsupport");
+    expect(out.contact.email).toBeUndefined();
+    expect(out.contact.telegram).toBeUndefined();
+    // primary 是模板对「这个行业通常怎么接客户」的建议，保留作默认值
+    expect(out.contact.primary).toBe("whatsapp");
     expect(out.hero.cta.text).toBe("Go");
   });
 
-  it("即便主渠道是真实号码，模板实例化时也置空（模板默认非用户的联系方式）", () => {
-    expect(blankPrimaryCtaLinks(draft(REAL)).contact.whatsapp).toBeUndefined();
-  });
-
-  it("主渠道是表单时不清任何值——表单没有「用户自己的值」可填，开箱即用", () => {
-    const out = blankPrimaryCtaLinks(draft({ primary: "form", email: "a@b.com" }));
+  it("主渠道是表单时也清掉备用渠道的假号码", () => {
+    // b2b-sourcing 就是这种：主渠道是表单，但悬浮按钮钉在 whatsapp 上，
+    // 只清主渠道的话那个按钮会指着模板占位号
+    const out = blankTemplateContacts(draft({ primary: "form", whatsapp: "+15551234567", email: "a@b.com" }));
     expect(out.contact.primary).toBe("form");
-    expect(out.contact.email).toBe("a@b.com");
+    expect(out.contact.whatsapp).toBeUndefined();
+    expect(out.contact.email).toBeUndefined();
   });
 
   it("不改动原对象（深拷贝）", () => {
     const d = draft({ primary: "whatsapp", whatsapp: "+15551234567" });
-    blankPrimaryCtaLinks(d);
+    blankTemplateContacts(d);
     expect(d.contact.whatsapp).toBe("+15551234567");
   });
 });

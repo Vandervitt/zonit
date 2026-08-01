@@ -51,10 +51,10 @@ describe("collectPublishIssueItems 结构化校验项", () => {
     expect(items.find((i) => i.message.startsWith("悬浮按钮"))?.target).toEqual({ kind: "fixed", id: "floatingButton" });
   });
 
-  it("主渠道未填值（联系方式校验）→ target 指向 hero", () => {
+  it("主渠道未填值（联系方式校验）→ target 指向联系方式面板", () => {
     const items = collectPublishIssueItems(base({ contact: { primary: "whatsapp" } } as never));
     const hit = items.find((i) => i.message.includes("无法联系你"));
-    expect(hit?.target).toEqual({ kind: "fixed", id: "hero" });
+    expect(hit?.target).toEqual({ kind: "fixed", id: "contact" });
   });
 
   it("结构类问题（缺必须模块）无 target", () => {

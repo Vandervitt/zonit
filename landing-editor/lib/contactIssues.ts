@@ -1,30 +1,30 @@
 // landing-editor/lib/contactIssues.ts
-// 联系方式可达性：主 CTA 若指向假号 / 为空，访客点了没人收、线索静默流失。两道防线：
-//  1) 新建 / AI 生成模板时 blankPrimaryCtaLinks 把主联系 CTA（首屏主按钮 + 悬浮按钮）置空
-//     —— 渠道无关（不看具体值），用户开局即被迫填自己的真实联系方式；二级 / 社交 / 锚点链接不动；
-//  2) 发布门槛 collectContactIssues 校验首屏主 CTA 非空（格式由 validate.ts 的 validateLink 负责），
-//     并兜底扫模板占位号（覆盖遗留页，或 section 级残留）。
+// 联系方式可达性：CTA 若指向假号 / 空值，访客点了没人收、线索静默流失。两道防线：
+//  1) 模板实例化时 blankTemplateContacts 清空全部渠道值——模板里的号码和邮箱都是
+//     虚构的，用户在联系方式面板里看到空输入框自然会填自己的；
+//  2) 发布门槛 collectContactIssues 校验主渠道有值、且各 CTA 引用的渠道都能解析出链接。
+//
+// 占位号全文扫描（PLACEHOLDER_CONTACTS）已删除：号码只存在 contact 一处且实例化即清空，
+// 占位号无处可藏，那道兜底扫描没有对象可拦了。
 import type { CtaTarget, LandingPageDraft } from "@/types/schema.draft";
 import type { PublishIssue } from "./validate";
 
-// 模板样例反复出现的占位假号（US 格式 1555…，故意不可拨打）。仅用于发布兜底扫描。
-export const PLACEHOLDER_CONTACTS = ["15551234567", "15553219876", "15557654321"];
-
 /**
- * 模板实例化时清空联系方式值，逼用户填自己的真实号码。深拷贝，不改原对象。
+ * 模板实例化时清空全部渠道值。深拷贝，不改原对象。
  *
- * 改造前是逐个置空 hero.cta.link / floatingButton.link；现在号码只存在 contact 一处，
- * 清一次即可，且覆盖全部落点——改造前有 13 处模板占位号漏在 sections 里没被清掉。
+ * 清全部而不只是主渠道：模板里的号码和邮箱都是虚构的（wa.me/1555…、
+ * hello@lumora-dental.com），留着任何一个都可能被原样发布出去。典型的坑是
+ * b2b-sourcing——主渠道是表单，但悬浮按钮钉在 whatsapp 上，只清主渠道的话
+ * 那个按钮就指着假号码。
  *
- * 表单不清：它没有「用户自己的值」可填，主渠道是表单时页面开箱即用。
- * 阶段 2 本函数整体删除，改由「新建页面默认选中联系方式面板 + 发布门槛」承接。
+ * primary 本身保留：它是模板对「这个行业通常怎么接客户」的建议，
+ * 用户可以在面板里改，但不该一上来就没有默认值。
  */
-export function blankPrimaryCtaLinks(draft: LandingPageDraft): LandingPageDraft {
+export function blankTemplateContacts(draft: LandingPageDraft): LandingPageDraft {
   const clone = JSON.parse(JSON.stringify(draft)) as LandingPageDraft;
-  // 只清主渠道，与改造前「只置空主 CTA 链接」一一对应。
-  // 其余渠道（典型是页脚业务邮箱）改造前从不清空，这里也不能顺手清掉。
-  // 表单不清：它没有「用户自己的值」可填，主渠道是表单的模板开箱即用。
-  if (clone.contact.primary !== "form") delete clone.contact[clone.contact.primary];
+  for (const channel of ["whatsapp", "phone", "email", "telegram"] as const) {
+    delete clone.contact[channel];
+  }
   return clone;
 }
 
@@ -58,16 +58,16 @@ function targetIssue(target: CtaTarget, draft: LandingPageDraft, what: string): 
 }
 
 /**
- * 发布门槛（结构化）：主联系 CTA（首屏主按钮 + 悬浮按钮）链接与文案均不得为空
- * （与 blankPrimaryCtaLinks 置空的范围一一对应，置空即强制填回）；
- * 占位号兜底扫全文（无固定落点）。悬浮按钮可选，不存在则不校验。
+ * 发布门槛（结构化）：主渠道必须有值、各 CTA 引用的渠道必须能解析出链接、文案不得为空。
+ * 悬浮按钮可选，不存在则不校验。
  */
 export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[] {
   const issues: PublishIssue[] = [];
 
   const heroIssue = draft.hero?.cta ? targetIssue(draft.hero.cta.target, draft, "首屏 CTA 按钮") : null;
   if (heroIssue) {
-    issues.push({ message: heroIssue, target: { kind: "fixed", id: "hero" } });
+    // 落点指向联系方式面板而不是 hero：用户要改的是号码，不是按钮本身
+    issues.push({ message: heroIssue, target: { kind: "fixed", id: "contact" } });
   }
   if (!draft.hero?.cta?.text?.trim()) {
     issues.push({
@@ -85,14 +85,8 @@ export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[
     }
     const floatIssue = targetIssue(draft.floatingButton.target, draft, "悬浮按钮");
     if (floatIssue) {
-      issues.push({ message: floatIssue, target: { kind: "fixed", id: "floatingButton" } });
+      issues.push({ message: floatIssue, target: { kind: "fixed", id: "contact" } });
     }
-  }
-
-  if (PLACEHOLDER_CONTACTS.some((n) => JSON.stringify(draft).includes(n))) {
-    issues.push({
-      message: "联系方式仍是模板占位号码（如 WhatsApp wa.me/1555…），请改成你的真实号码，否则收不到线索",
-    });
   }
 
   return issues;

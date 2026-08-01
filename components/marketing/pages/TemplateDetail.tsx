@@ -30,7 +30,7 @@ import type { Locale } from "@/lib/i18n/config";
  */
 function toDisplayDraft(draft: LandingPageDraft): LandingPageDraft {
   const d = structuredClone(draft);
-  // 模板详情页是公开展示样稿，联系方式已被 blankPrimaryCtaLinks 清空——
+  // 模板详情页是公开展示样稿，联系方式已被 blankTemplateContacts 清空——
   // 补一个占位号码，让按钮照常渲染出来（观众看的是版式，不会真去点）。
   // 号码用 E.164 占位段，点了也拨不通，不会误导成真实商家号码。
   for (const channel of ["whatsapp", "phone", "telegram"] as const) {
