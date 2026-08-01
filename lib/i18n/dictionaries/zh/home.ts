@@ -20,9 +20,11 @@ export const home = {
     ctaSecondary: "查看套餐",
     note: "注册即赠 Pro 全功能 7 天 · 无需信用卡 · 无需写一行代码",
   },
+  // 首屏示意图上的两枚浮动徽标。与 hero.subtitle 同一条约束：首屏只讲结果，
+  // 不出现 Pixel / CAPI / UTM 这类机制术语。归因能力留到下方追踪区展开。
   editorMock: {
-    pixelBadge: "Meta Pixel · 已触发",
-    leadBadge: "Lead 转化 +1",
+    sourceBadge: "来源 · Instagram",
+    leadBadge: "新线索 · +1",
   },
   marquee: {
     heading: "支持接入这些投放与分析工具",
@@ -38,7 +40,10 @@ export const home = {
   steps: {
     kicker: "三步上线",
     title: "从选模板到页面上线，只需三步",
-    desc: "页面制作全程可视化，不用写一行代码，也不用等开发排期。创建、编辑与预览完全免费；发布到自有域名为付费套餐权益。",
+    // Free 能真发布（平台分配地址，不碰 DNS），只是拿不到自有域名槽位——
+    // 见 lib/i18n/dictionaries/*/plans.ts 的 customDomain.freeValue。
+    // 这里不能写成「免费只能预览」：那会把刚打通的激活路径重新藏起来。
+    desc: "页面制作全程可视化，不用写一行代码，也不用等开发排期。免费就能用平台提供的地址发布上线；发布到自有品牌域名为付费套餐权益。",
     items: [
       {
         title: "选一套获客模板",
@@ -112,15 +117,15 @@ export const home = {
   },
   pricing: {
     kicker: "简单透明的定价",
-    title: "先免费完成第一版，准备上线时再升级",
-    desc: "Free 可创建、保存和在线预览；升级后绑定自有域名，并按套餐解锁更多页面、追踪与 AI 额度。",
+    title: "免费就能上线，想用自有域名时再升级",
+    desc: "Free 就能用平台提供的地址把页面真正发布出去——不用买域名，也不用改 DNS。升级后绑定自有品牌域名，并按套餐解锁更多页面、追踪与 AI 额度。",
     ctaFree: "免费开始",
     ctaPaid: "注册后升级",
   },
   finalCta: {
     titleLine1: "你的下一次获客",
     titleLine2: "值得一张真的能转化的页面",
-    desc: "现在就能创建、编辑并预览，无需信用卡；准备好了再升级，发布到你自己的品牌域名。",
+    desc: "现在就能做出第一张页面并发布上线，不用域名，也不用信用卡；想换到自己的品牌域名时再升级。",
     ctaPrimary: "免费开始",
     ctaSecondary: "已有账号，登录",
   },
