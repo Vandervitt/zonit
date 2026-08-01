@@ -29,11 +29,11 @@ export function LandingPage({
   const logo = page.branding?.logo;
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
-      <Hero data={page.hero} theme={resolved} logo={logo} layout={variant.heroLayout} preview={preview} />
-      {page.sections.map((section, i) => renderSection(section, resolved, i, variant, preview))}
+      <Hero data={page.hero} contact={page.contact} theme={resolved} logo={logo} layout={variant.heroLayout} preview={preview} />
+      {page.sections.map((section, i) => renderSection(section, page.contact, resolved, i, variant, preview))}
       {page.leadForm?.enabled ? <LeadForm data={page.leadForm} pageId={pageId} theme={resolved} preview={preview} defaultDial={defaultDial} /> : null}
-      <Footer data={page.footer} theme={resolved} logo={logo} />
-      {page.floatingButton && <FloatingButton data={page.floatingButton} theme={resolved} preview={preview} />}
+      <Footer data={page.footer} contact={page.contact} theme={resolved} logo={logo} />
+      {page.floatingButton && <FloatingButton data={page.floatingButton} contact={page.contact} theme={resolved} preview={preview} />}
     </div>
   );
 }

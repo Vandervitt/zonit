@@ -1,7 +1,7 @@
 // landing-renderer/sections/index.tsx
 // 按 section.type 分发到对应区块组件。switch 为穷尽匹配：
 // 新增 LandingSectionType 而未在此补 case 时，assertNever 会触发编译错误。
-import type { LandingSection } from "@/types/schema.draft";
+import type { LandingSection, PageContact } from "@/types/schema.draft";
 import type { RendererTheme } from "../theme";
 import { Stats } from "./Stats";
 import { Plans } from "./Plans";
@@ -22,10 +22,10 @@ function assertNever(x: never): null {
   return null;
 }
 
-function renderInner(section: LandingSection, theme: RendererTheme, key: number, preview: boolean) {
+function renderInner(section: LandingSection, contact: PageContact, theme: RendererTheme, key: number, preview: boolean) {
   switch (section.type) {
     case "stats":       return <Stats key={key} data={section.data} theme={theme} />;
-    case "plans":       return <Plans key={key} data={section.data} theme={theme} preview={preview} />;
+    case "plans":       return <Plans key={key} data={section.data} contact={contact} theme={theme} preview={preview} />;
     case "products":    return <Products key={key} data={section.data} />;
     case "beforeAfter": return <BeforeAfter key={key} data={section.data} theme={theme} />;
     case "process":     return <Process key={key} data={section.data} theme={theme} />;
@@ -42,12 +42,14 @@ function renderInner(section: LandingSection, theme: RendererTheme, key: number,
 
 export function renderSection(
   section: LandingSection,
+  /** 页面联系方式：只有 plans 用得上，但由入口统一透传，避免各 section 各拿一套。 */
+  contact: PageContact,
   theme: RendererTheme,
   key: number,
   variant: PageVariant = IDENTITY_VARIANT,
   preview = false,
 ) {
-  const el = renderInner(section, theme, key, preview);
+  const el = renderInner(section, contact, theme, key, preview);
   const w = sectionWrap(variant, key);
   if (w.tag === "none") return el;
   const attrs: Record<string, string> = {};

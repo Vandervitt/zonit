@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Hero } from "./sections/Hero";
 import { defaultTheme } from "./theme";
-import type { HeroSection } from "@/types/schema.draft";
+import type { HeroSection, PageContact } from "@/types/schema.draft";
 import type { HeroLayout } from "./variant";
 
 const data: HeroSection = {
@@ -11,14 +11,16 @@ const data: HeroSection = {
   badge: { emoji: "✨", text: "Badge" },
   title: "Hero Title Here",
   subtitle: "Hero subtitle here",
-  cta: { text: "Get started", link: "https://wa.me/1" },
-  secondaryCta: { text: "Learn more", link: "https://example.com" },
+  cta: { text: "Get started", target: { kind: "primary" as const } },
+  secondaryCta: { text: "Learn more", target: { kind: "url" as const, url: "https://example.com" } },
   endorsementText: "Trusted widely",
   showcase: { type: "image", src: "https://x/show.jpg", alt: "show" },
 };
 
+const contact: PageContact = { primary: "whatsapp", whatsapp: "+8613800138000" };
+
 const render = (layout?: HeroLayout) =>
-  renderToStaticMarkup(createElement(Hero, { data, theme: defaultTheme, layout }));
+  renderToStaticMarkup(createElement(Hero, { data, contact, theme: defaultTheme, layout }));
 
 const LAYOUTS: HeroLayout[] = ["background", "split-right", "split-left", "centered"];
 

@@ -1,16 +1,23 @@
 // landing-renderer/sections/FloatingButton.test.ts
-// 空链接 / 空文案守卫：悬浮按钮常驻右下角，内容不完整时必须整体不渲染，
+// 落点解析不出 / 空文案守卫：悬浮按钮常驻右下角，内容不完整时必须整体不渲染，
 // 否则线上出现点了回页顶的死按钮（覆盖发布校验上线前的存量已发布页）。
 import { describe, it, expect } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { FloatingButton } from "./FloatingButton";
 import type { RendererTheme } from "../theme";
+import type { PageContact } from "@/types/schema.draft";
 
 const theme = { accentGradient: "bg-a", accentShadow: "shadow-c" } as RendererTheme;
 
-const html = (text: string, link: string, preview?: boolean) =>
-  renderToStaticMarkup(createElement(FloatingButton, { data: { text, link }, theme, preview }));
+// 同 Cta.test.ts：由 helper 从链接反推等价的 contact + target，断言不改。
+const html = (text: string, link: string, preview?: boolean) => {
+  const wa = link.match(/wa\.me\/(\d+)/);
+  const contact: PageContact = wa ? { primary: "whatsapp", whatsapp: `+${wa[1]}` } : { primary: "whatsapp" };
+  return renderToStaticMarkup(
+    createElement(FloatingButton, { data: { text, target: { kind: "primary" } }, contact, theme, preview }),
+  );
+};
 
 describe("FloatingButton 空内容守卫", () => {
   it("链接为空 → 不渲染", () => {
@@ -33,7 +40,7 @@ describe("FloatingButton 预览占位态", () => {
     const out = html("Chat", "", true);
     expect(out).not.toContain("<a");
     expect(out).toContain("Chat");
-    expect(out).toContain("链接未填");
+    expect(out).toContain("联系方式未填");
     expect(out).toContain("线上不显示");
   });
 
