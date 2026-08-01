@@ -17,12 +17,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：主转化落点。 */
-const FORM = "#lead-form";
 
-const WHATSAPP =
-  "https://wa.me/15557712048?text=Hi%20Northlane%2C%20I%27d%20like%20to%20speak%20to%20a%20course%20advisor";
 
 export const onlineSkillsDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    whatsapp: "+15557712048",
+    email: "advisors@northlane-skills.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1516321318423-f06f85e504b3", 1600),
@@ -32,8 +34,8 @@ export const onlineSkillsDraft: LandingPageDraft = {
     title: "Change careers without quitting your job first",
     subtitle:
       "Talk to an advisor about where you're starting from. You'll get an honest view of which track fits your background, how many hours a week it really takes, and what the job market looks like for it.",
-    cta: { text: "Talk to a course advisor", link: FORM },
-    secondaryCta: { text: "See the curriculum", link: "https://example.com/northlane-curriculum" },
+    cta: { text: "Talk to a course advisor", target: { kind: "primary" } },
+    secondaryCta: { text: "See the curriculum", target: { kind: "url", url: "https://example.com/northlane-curriculum" } },
     endorsementText: "9,400+ learners · Mentors working in the field today",
     showcase: {
       type: "image",
@@ -260,7 +262,6 @@ export const onlineSkillsDraft: LandingPageDraft = {
   footer: {
     brandName: "Northlane Skills Academy",
     copyrightYear: "2026",
-    contactEmail: "advisors@northlane-skills.example",
     privacyPolicy:
       "We collect only the background and contact details you provide in order to recommend a track and arrange your advisor call. Your information is not sold, is not shared with employers without your consent, and can be deleted on request.",
     termsOfService:
@@ -269,6 +270,6 @@ export const onlineSkillsDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Ask an advisor",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Northlane, I'd like to speak to a course advisor" },
   },
 };

@@ -16,13 +16,15 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15556604392?text=Hi%20Sparkpath%2C%20I%27d%20like%20a%20free%20assessment%20for%20my%20child";
 
 /** 页内留资表单锚点：第二落点。 */
-const FORM = "#lead-form";
 
 export const k12TutoringDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15556604392",
+    email: "families@sparkpath-tutoring.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1580582932707-520aed937b7b", 1600),
@@ -32,8 +34,8 @@ export const k12TutoringDraft: LandingPageDraft = {
     title: "Find out where the gap actually started",
     subtitle:
       "Most struggles in Year 9 began two years earlier. Book a free assessment and we'll show you which topics are missing, then match a tutor who teaches the way your child learns.",
-    cta: { text: "Book a free assessment", link: WHATSAPP },
-    secondaryCta: { text: "Send details instead", link: FORM },
+    cta: { text: "Book a free assessment", target: { kind: "primary", prefill: "Hi Sparkpath, I'd like a free assessment for my child" } },
+    secondaryCta: { text: "Send details instead", target: { kind: "channel", channel: "form" } },
     endorsementText: "6,800+ families · Background-checked tutors",
     showcase: {
       type: "image",
@@ -235,7 +237,6 @@ export const k12TutoringDraft: LandingPageDraft = {
   footer: {
     brandName: "Sparkpath Tutoring",
     copyrightYear: "2026",
-    contactEmail: "families@sparkpath-tutoring.example",
     privacyPolicy:
       "Enquiries are submitted by a parent or guardian. We collect only the contact details and school information needed to arrange an assessment and match a tutor. Information about a child is shared only with the assigned tutor and coordinator, is never used for advertising, and is deleted on request.",
     termsOfService:
@@ -244,6 +245,6 @@ export const k12TutoringDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Book a free assessment",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Sparkpath, I'd like a free assessment for my child" },
   },
 };

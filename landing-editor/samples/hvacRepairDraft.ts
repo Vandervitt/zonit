@@ -14,12 +14,15 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 紧急需求走电话直拨。 */
-const PHONE = "tel:+15559034180";
 
 /** 页内留资表单锚点：第二落点（非紧急咨询）。 */
-const FORM = "#lead-form";
 
 export const hvacRepairDraft: LandingPageDraft = {
+  contact: {
+    primary: "phone",
+    phone: "+15559034180",
+    email: "service@northaire-hvac.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1621905251189-08b45d6a269e", 1600),
@@ -29,8 +32,8 @@ export const hvacRepairDraft: LandingPageDraft = {
     title: "No heat? No cooling? We'll be there today",
     subtitle:
       "Call and speak to a technician, not a call centre. Same-day slots in most of the area, a diagnosis before any work starts, and a written price you approve first.",
-    cta: { text: "Call now for same-day service", link: PHONE },
-    secondaryCta: { text: "Book a service visit", link: FORM },
+    cta: { text: "Call now for same-day service", target: { kind: "primary" } },
+    secondaryCta: { text: "Book a service visit", target: { kind: "channel", channel: "form" } },
     endorsementText: "31,000+ callouts · Licensed and insured",
     showcase: {
       type: "image",
@@ -231,7 +234,6 @@ export const hvacRepairDraft: LandingPageDraft = {
   footer: {
     brandName: "Northaire Heating & Cooling",
     copyrightYear: "2026",
-    contactEmail: "service@northaire-hvac.example",
     privacyPolicy:
       "We collect only the contact and property details needed to schedule your visit and diagnose your system. Service records are kept for warranty purposes, are never sold, and can be deleted on request.",
     termsOfService:
@@ -240,6 +242,6 @@ export const hvacRepairDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "📞 Call for same-day service",
-    link: PHONE,
+    target: { kind: "channel", channel: "phone" },
   },
 };

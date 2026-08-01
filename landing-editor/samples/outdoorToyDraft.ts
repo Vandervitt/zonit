@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Romp%2C%20I%27d%20like%20a%20free%20outdoor%20toy%20match";
 
 export const outdoorToyDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@romp-outdoor.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1502086223501-7ea6ecd79368", 1600),
@@ -25,8 +28,8 @@ export const outdoorToyDraft: LandingPageDraft = {
     title: "Outdoor toys that get kids off the screen",
     subtitle:
       "Tell us your kids' ages and your space. We send a free, age-matched outdoor play guide over WhatsApp — active, durable, screen-free fun.",
-    cta: { text: "Get my free play match", link: WHATSAPP },
-    secondaryCta: { text: "See play ideas", link: "https://instagram.com/romp.outdoor" },
+    cta: { text: "Get my free play match", target: { kind: "primary", prefill: "Hi Romp, I'd like a free outdoor toy match" } },
+    secondaryCta: { text: "See play ideas", target: { kind: "url", url: "https://instagram.com/romp.outdoor" } },
     endorsementText: "Trusted by 100,000+ active families worldwide",
     showcase: {
       type: "image",
@@ -185,7 +188,6 @@ export const outdoorToyDraft: LandingPageDraft = {
   footer: {
     brandName: "Romp",
     copyrightYear: "2026",
-    contactEmail: "hello@romp-outdoor.com",
     privacyPolicy:
       "We use the details you share about your family only to provide your play match. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -194,6 +196,6 @@ export const outdoorToyDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "⚽ Free play match",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Romp, I'd like a free outdoor toy match" },
   },
 };

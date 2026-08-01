@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Vitae%2C%20I%27d%20like%20a%20free%20nutrition%20check";
 
 export const vitaminsDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@vitae-health.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1577563908411-5077b6dc7624", 1600),
@@ -26,8 +29,8 @@ export const vitaminsDraft: LandingPageDraft = {
     title: "Supplements that fit your body — not the hype",
     subtitle:
       "Get a free, personalized nutrition check over WhatsApp. Our advisors help you cut through the noise and focus on what your routine actually needs.",
-    cta: { text: "Get my free nutrition check", link: WHATSAPP },
-    secondaryCta: { text: "How it works", link: "https://instagram.com/vitae.health" },
+    cta: { text: "Get my free nutrition check", target: { kind: "primary", prefill: "Hi Vitae, I'd like a free nutrition check" } },
+    secondaryCta: { text: "How it works", target: { kind: "url", url: "https://instagram.com/vitae.health" } },
     endorsementText: "Trusted by 95,000+ people building healthier habits",
     showcase: {
       type: "image",
@@ -215,7 +218,6 @@ export const vitaminsDraft: LandingPageDraft = {
   footer: {
     brandName: "Vitae",
     copyrightYear: "2026",
-    contactEmail: "hello@vitae-health.com",
     privacyPolicy:
       "We use the health and lifestyle details you share only to provide your nutrition check. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -224,6 +226,6 @@ export const vitaminsDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🌱 Free nutrition check",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Vitae, I'd like a free nutrition check" },
   },
 };

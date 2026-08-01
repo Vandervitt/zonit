@@ -14,11 +14,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-/** WhatsApp 主转化（占位号码 + 预填咨询语）。 */
-const WHATSAPP =
-  "https://wa.me/15557654321?text=Hi%20Northbridge%2C%20I%27d%20like%20a%20free%20study%20plan";
 
 export const studyAbroadDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15557654321",
+    email: "advisors@northbridge-education.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1562774053-701939374585", 1600),
@@ -28,8 +30,8 @@ export const studyAbroadDraft: LandingPageDraft = {
     title: "Find the course that actually fits you",
     subtitle:
       "Talk to an advisor on WhatsApp and get a free, personalised study plan — course shortlist, entry requirements, and a realistic timeline.",
-    cta: { text: "Get my free study plan", link: WHATSAPP },
-    secondaryCta: { text: "Read student stories", link: "#lead-form" },
+    cta: { text: "Get my free study plan", target: { kind: "primary", prefill: "Hi Northbridge, I'd like a free study plan" } },
+    secondaryCta: { text: "Read student stories", target: { kind: "channel", channel: "form" } },
     endorsementText: "9,000+ students advised across 20+ destinations",
     showcase: {
       type: "image",
@@ -105,7 +107,7 @@ export const studyAbroadDraft: LandingPageDraft = {
               "Entry requirements and language scores explained",
               "Realistic timeline back from your intake date",
             ],
-            cta: { text: "Ask about this", link: WHATSAPP },
+            cta: { text: "Ask about this", target: { kind: "primary", prefill: "Hi Northbridge, I'd like a free study plan" } },
           },
           {
             name: "Full application support",
@@ -116,7 +118,7 @@ export const studyAbroadDraft: LandingPageDraft = {
               "Personal statement and document review",
               "Deadline tracking through to decision",
             ],
-            cta: { text: "Ask about this", link: WHATSAPP },
+            cta: { text: "Ask about this", target: { kind: "primary", prefill: "Hi Northbridge, I'd like a free study plan" } },
           },
           {
             name: "Language preparation",
@@ -126,7 +128,7 @@ export const studyAbroadDraft: LandingPageDraft = {
               "Study plan targeting the score you need",
               "Progress check-ins with your advisor",
             ],
-            cta: { text: "Ask about this", link: WHATSAPP },
+            cta: { text: "Ask about this", target: { kind: "primary", prefill: "Hi Northbridge, I'd like a free study plan" } },
           },
         ],
       },
@@ -293,7 +295,6 @@ export const studyAbroadDraft: LandingPageDraft = {
   footer: {
     brandName: "Northbridge Education",
     copyrightYear: "2026",
-    contactEmail: "advisors@northbridge-education.example",
     privacyPolicy:
       "We collect only the academic and contact details you share in order to prepare your study plan. Transcripts and personal statements are treated as confidential, are never shared with an institution without your consent, and can be deleted on request.",
     termsOfService:
@@ -302,6 +303,6 @@ export const studyAbroadDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Chat with an advisor",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Northbridge, I'd like a free study plan" },
   },
 };

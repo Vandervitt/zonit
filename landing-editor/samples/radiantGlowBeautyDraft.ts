@@ -9,11 +9,12 @@
 // 12 种区块全部填充。转化全程经 WhatsApp，无任何下单 / 结账 / 订阅语义。
 import type { LandingPageDraft } from "@/types/schema.draft";
 
-/** WhatsApp 咨询链接（占位号码 15551234567 + 预填咨询语，提取自源 CTA 的 prefilledMessage）。 */
-const wa = (message: string) =>
-  `https://wa.me/15551234567?text=${encodeURIComponent(message)}`;
-
 export const radiantGlowBeautyDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "support@radiantglowbeauty.com",
+  },
   hero: {
     backgroundImage: {
       src: "https://images.unsplash.com/photo-1519084278803-b94f11e1c63b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
@@ -25,9 +26,9 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
       "Get expert skincare guidance tailored to your unique needs. Our certified beauty consultants help you achieve radiant, glowing skin.",
     cta: {
       text: "Start Free Consultation",
-      link: wa("Hi! I'd like to book a free beauty consultation."),
+      target: { kind: "primary", prefill: "Hi! I'd like to book a free beauty consultation." },
     },
-    secondaryCta: { text: "See Success Stories", link: "#reviews" },
+    secondaryCta: { text: "See Success Stories", target: { kind: "url", url: "#reviews" } },
     endorsementText: "✓ Reply within 10 minutes · Free skin analysis",
     showcase: {
       type: "image",
@@ -105,7 +106,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
             countdown: { endsAt: "2026-05-15T23:59:59-07:00" },
             cta: {
               text: "Book Free Consultation",
-              link: wa("I want to book a free consultation"),
+              target: { kind: "primary", prefill: "I want to book a free consultation" },
             },
           },
           {
@@ -120,7 +121,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
             ],
             cta: {
               text: "Get Premium Assessment",
-              link: wa("I'm interested in the Premium Assessment"),
+              target: { kind: "primary", prefill: "I'm interested in the Premium Assessment" },
             },
           },
           {
@@ -134,7 +135,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
             ],
             cta: {
               text: "Chat Now",
-              link: wa("Hi! I have a quick question about skincare"),
+              target: { kind: "primary", prefill: "Hi! I have a quick question about skincare" },
             },
           },
         ],
@@ -498,7 +499,6 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
   footer: {
     brandName: "RadiantGlow Beauty",
     copyrightYear: "2026",
-    contactEmail: "support@radiantglowbeauty.com",
     privacyPolicy:
       "We respect your privacy and are committed to protecting your personal information. Any information shared during consultations is kept strictly confidential.",
     termsOfService:
@@ -507,6 +507,6 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "Chat on WhatsApp",
-    link: wa("Hi! I'm interested in a beauty consultation."),
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi! I'm interested in a beauty consultation." },
   },
 };

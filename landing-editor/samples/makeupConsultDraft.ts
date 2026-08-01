@@ -13,11 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-/** WhatsApp 咨询链接（占位号码 + 预填咨询语）。 */
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Velvet%2C%20I%27d%20like%20a%20free%20shade%20%26%20makeup%20consult";
 
 export const makeupConsultDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@velvet-studio.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1596462502278-27bfdc403348", 1600),
@@ -27,8 +29,8 @@ export const makeupConsultDraft: LandingPageDraft = {
     title: "Find your perfect shade — without the guesswork",
     subtitle:
       "Get a free shade-match and everyday makeup plan from our artists over WhatsApp. Built for your skin tone, features, and routine.",
-    cta: { text: "Get my free shade match", link: WHATSAPP },
-    secondaryCta: { text: "See real looks", link: "https://instagram.com/velvet.studio" },
+    cta: { text: "Get my free shade match", target: { kind: "primary", prefill: "Hi Velvet, I'd like a free shade & makeup consult" } },
+    secondaryCta: { text: "See real looks", target: { kind: "url", url: "https://instagram.com/velvet.studio" } },
     endorsementText: "Loved by 50,000+ makeup lovers worldwide",
     showcase: {
       type: "image",
@@ -244,7 +246,6 @@ export const makeupConsultDraft: LandingPageDraft = {
   footer: {
     brandName: "Velvet Studio",
     copyrightYear: "2026",
-    contactEmail: "hello@velvet-studio.com",
     privacyPolicy:
       "We use the photos and preferences you share only to provide your makeup consultation. Your data is kept confidential, never sold, and can be deleted on request.",
     termsOfService:
@@ -253,6 +254,6 @@ export const makeupConsultDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💄 Free shade match",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Velvet, I'd like a free shade & makeup consult" },
   },
 };

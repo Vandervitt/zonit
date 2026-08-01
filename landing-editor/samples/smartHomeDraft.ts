@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Nestly%2C%20I%27d%20like%20a%20free%20smart-home%20plan";
 
 export const smartHomeDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "help@nestly-home.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1558002038-1055907df827", 1600),
@@ -25,8 +28,8 @@ export const smartHomeDraft: LandingPageDraft = {
     title: "Smart home, set up the right way",
     subtitle:
       "Tell us your home and which ecosystem you use. We send a free setup plan over WhatsApp — compatible devices, reliable Wi-Fi, no half-working gadgets.",
-    cta: { text: "Get my free setup plan", link: WHATSAPP },
-    secondaryCta: { text: "See sample setups", link: "https://youtube.com/@nestly.home" },
+    cta: { text: "Get my free setup plan", target: { kind: "primary", prefill: "Hi Nestly, I'd like a free smart-home plan" } },
+    secondaryCta: { text: "See sample setups", target: { kind: "url", url: "https://youtube.com/@nestly.home" } },
     endorsementText: "Trusted by 95,000+ smart homes worldwide",
     showcase: {
       type: "image",
@@ -200,7 +203,6 @@ export const smartHomeDraft: LandingPageDraft = {
   footer: {
     brandName: "Nestly",
     copyrightYear: "2026",
-    contactEmail: "help@nestly-home.com",
     privacyPolicy:
       "We use the home and device details you share only to build your setup plan. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -209,6 +211,6 @@ export const smartHomeDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🏠 Free setup plan",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Nestly, I'd like a free smart-home plan" },
   },
 };

@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Sienne%2C%20I%27d%20like%20a%20free%20fit%20consult";
 
 export const shapewearDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "fit@sienne.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1469334031218-e382a71b716b", 1600),
@@ -26,8 +29,8 @@ export const shapewearDraft: LandingPageDraft = {
     title: "Smooth confidence under everything you wear",
     subtitle:
       "Get a free fit consult over WhatsApp. We help you choose comfortable, breathable shaping that suits your shape and the outfit you have in mind.",
-    cta: { text: "Get my free fit consult", link: WHATSAPP },
-    secondaryCta: { text: "See the range", link: "https://instagram.com/sienne.fit" },
+    cta: { text: "Get my free fit consult", target: { kind: "primary", prefill: "Hi Sienne, I'd like a free fit consult" } },
+    secondaryCta: { text: "See the range", target: { kind: "url", url: "https://instagram.com/sienne.fit" } },
     endorsementText: "Trusted by 100,000+ for everyday comfort",
     showcase: {
       type: "image",
@@ -199,7 +202,6 @@ export const shapewearDraft: LandingPageDraft = {
   footer: {
     brandName: "Sienne",
     copyrightYear: "2026",
-    contactEmail: "fit@sienne.com",
     privacyPolicy:
       "We use the measurements you share only to provide your fit consult. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -208,6 +210,6 @@ export const shapewearDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🤍 Free fit consult",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Sienne, I'd like a free fit consult" },
   },
 };

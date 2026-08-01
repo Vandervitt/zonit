@@ -14,12 +14,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：主转化落点。 */
-const FORM = "#lead-form";
 
-const WHATSAPP =
-  "https://wa.me/15553219876?text=Hi%20Kraftline%2C%20I%27d%20like%20a%20packaging%20quote";
 
 export const packagingCustomDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    whatsapp: "+15553219876",
+    email: "studio@kraftline-packaging.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1607166452427-7e4477079cb9", 1600),
@@ -29,8 +31,8 @@ export const packagingCustomDraft: LandingPageDraft = {
     title: "Packaging that survives the trip and sells on the shelf",
     subtitle:
       "Send your dimensions, material, and artwork. You get a structural mock-up, a printed sample, and a written spec — before you commit to a run.",
-    cta: { text: "Request a sample & quote", link: FORM },
-    secondaryCta: { text: "See material options", link: "https://example.com/kraftline-materials" },
+    cta: { text: "Request a sample & quote", target: { kind: "primary" } },
+    secondaryCta: { text: "See material options", target: { kind: "url", url: "https://example.com/kraftline-materials" } },
     endorsementText: "Trusted by 900+ DTC and retail brands",
     showcase: {
       type: "image",
@@ -257,7 +259,6 @@ export const packagingCustomDraft: LandingPageDraft = {
   footer: {
     brandName: "Kraftline Packaging",
     copyrightYear: "2026",
-    contactEmail: "studio@kraftline-packaging.example",
     privacyPolicy:
       "We collect only the specifications and artwork you share in order to prepare your mock-up and quote. Artwork is treated as confidential, is never reused or published as our own work, and can be deleted on request.",
     termsOfService:
@@ -266,6 +267,6 @@ export const packagingCustomDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Ask about materials",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Kraftline, I'd like a packaging quote" },
   },
 };

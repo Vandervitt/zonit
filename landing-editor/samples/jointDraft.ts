@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Mobil%2C%20I%27d%20like%20a%20free%20mobility%20check";
 
 export const jointDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@mobil-health.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1538805060514-97d9cc17730c", 1600),
@@ -26,8 +29,8 @@ export const jointDraft: LandingPageDraft = {
     title: "Support for joints that keep you moving",
     subtitle:
       "Get a free mobility check over WhatsApp. Our advisors help you build gentle movement habits and routines — with honest guidance on supportive nutrition.",
-    cta: { text: "Get my free mobility check", link: WHATSAPP },
-    secondaryCta: { text: "Our approach", link: "https://instagram.com/mobil.health" },
+    cta: { text: "Get my free mobility check", target: { kind: "primary", prefill: "Hi Mobil, I'd like a free mobility check" } },
+    secondaryCta: { text: "Our approach", target: { kind: "url", url: "https://instagram.com/mobil.health" } },
     endorsementText: "Trusted by 70,000+ people staying active",
     showcase: {
       type: "image",
@@ -215,7 +218,6 @@ export const jointDraft: LandingPageDraft = {
   footer: {
     brandName: "Mobil",
     copyrightYear: "2026",
-    contactEmail: "hello@mobil-health.com",
     privacyPolicy:
       "We use the health and activity details you share only to provide your mobility check. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -224,6 +226,6 @@ export const jointDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🦵 Free mobility check",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Mobil, I'd like a free mobility check" },
   },
 };

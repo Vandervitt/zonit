@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Rooted%2C%20I%27d%20like%20a%20free%20scalp%20assessment";
 
 export const hairGrowthDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@rooted-care.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1522337660859-02fbefca4702", 1600),
@@ -26,8 +29,8 @@ export const hairGrowthDraft: LandingPageDraft = {
     title: "Thinning hair? Start with your scalp",
     subtitle:
       "Get a free, personalized scalp assessment and care routine over WhatsApp — built around your hair type, shedding pattern, and goals.",
-    cta: { text: "Get my free scalp check", link: WHATSAPP },
-    secondaryCta: { text: "See real journeys", link: "https://instagram.com/rooted.care" },
+    cta: { text: "Get my free scalp check", target: { kind: "primary", prefill: "Hi Rooted, I'd like a free scalp assessment" } },
+    secondaryCta: { text: "See real journeys", target: { kind: "url", url: "https://instagram.com/rooted.care" } },
     endorsementText: "Trusted by 60,000+ people on their hair journey",
     showcase: {
       type: "image",
@@ -231,7 +234,6 @@ export const hairGrowthDraft: LandingPageDraft = {
   footer: {
     brandName: "Rooted",
     copyrightYear: "2026",
-    contactEmail: "hello@rooted-care.com",
     privacyPolicy:
       "We use the photos and details you share only to provide your scalp assessment. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -240,6 +242,6 @@ export const hairGrowthDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🌱 Free scalp check",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Rooted, I'd like a free scalp assessment" },
   },
 };

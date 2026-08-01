@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Balance%2C%20I%27d%20like%20a%20free%20habit%20check";
 
 export const weightMgmtDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@balance-wellness.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1490645935967-10de6ba17061", 1600),
@@ -26,8 +29,8 @@ export const weightMgmtDraft: LandingPageDraft = {
     title: "A healthier weight, the sustainable way",
     subtitle:
       "Get a free habit check over WhatsApp. Our coaches help you build realistic nutrition and movement routines — no crash diets, no impossible promises.",
-    cta: { text: "Get my free habit check", link: WHATSAPP },
-    secondaryCta: { text: "Our approach", link: "https://instagram.com/balance.wellness" },
+    cta: { text: "Get my free habit check", target: { kind: "primary", prefill: "Hi Balance, I'd like a free habit check" } },
+    secondaryCta: { text: "Our approach", target: { kind: "url", url: "https://instagram.com/balance.wellness" } },
     endorsementText: "Trusted by 80,000+ people building lasting habits",
     showcase: {
       type: "image",
@@ -203,7 +206,6 @@ export const weightMgmtDraft: LandingPageDraft = {
   footer: {
     brandName: "Balance",
     copyrightYear: "2026",
-    contactEmail: "hello@balance-wellness.com",
     privacyPolicy:
       "We use the health and lifestyle details you share only to provide your habit check. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -212,6 +214,6 @@ export const weightMgmtDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "⚖️ Free habit check",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Balance, I'd like a free habit check" },
   },
 };

@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Curvana%2C%20I%27d%20like%20a%20free%20fit%20%26%20style%20consult";
 
 export const plusSizeDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "style@curvana.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1485462537746-965f33f7f6a7", 1600),
@@ -25,8 +28,8 @@ export const plusSizeDraft: LandingPageDraft = {
     title: "Clothes that fit you — not the other way around",
     subtitle:
       "Get a free fit-and-style consult over WhatsApp. Our stylists know plus-size proportions and help you find pieces that flatter and feel great.",
-    cta: { text: "Get my free fit consult", link: WHATSAPP },
-    secondaryCta: { text: "See real fits", link: "https://instagram.com/curvana" },
+    cta: { text: "Get my free fit consult", target: { kind: "primary", prefill: "Hi Curvana, I'd like a free fit & style consult" } },
+    secondaryCta: { text: "See real fits", target: { kind: "url", url: "https://instagram.com/curvana" } },
     endorsementText: "Trusted by 90,000+ in the plus-size community",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const plusSizeDraft: LandingPageDraft = {
   footer: {
     brandName: "Curvana",
     copyrightYear: "2026",
-    contactEmail: "style@curvana.com",
     privacyPolicy:
       "We use the measurements and style details you share only to provide your fit consult. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const plusSizeDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💖 Free fit consult",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Curvana, I'd like a free fit & style consult" },
   },
 };

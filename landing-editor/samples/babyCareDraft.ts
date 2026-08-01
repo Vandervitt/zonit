@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Nido%2C%20I%27d%20like%20free%20baby%20gear%20advice";
 
 export const babyCareDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@nido-baby.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1515488042361-ee00e0ddd4e4", 1600),
@@ -26,8 +29,8 @@ export const babyCareDraft: LandingPageDraft = {
     title: "The right baby essentials, without the overwhelm",
     subtitle:
       "New parent or expecting? Tell us your stage and we'll send a free, no-fluff essentials guide over WhatsApp — safe, practical gear matched to your baby.",
-    cta: { text: "Get my free essentials guide", link: WHATSAPP },
-    secondaryCta: { text: "See our checklist", link: "https://instagram.com/nido.baby" },
+    cta: { text: "Get my free essentials guide", target: { kind: "primary", prefill: "Hi Nido, I'd like free baby gear advice" } },
+    secondaryCta: { text: "See our checklist", target: { kind: "url", url: "https://instagram.com/nido.baby" } },
     endorsementText: "Trusted by 120,000+ parents worldwide",
     showcase: {
       type: "image",
@@ -200,7 +203,6 @@ export const babyCareDraft: LandingPageDraft = {
   footer: {
     brandName: "Nido",
     copyrightYear: "2026",
-    contactEmail: "hello@nido-baby.com",
     privacyPolicy:
       "We use the details you share about your family only to provide your essentials guide. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -209,6 +211,6 @@ export const babyCareDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🍼 Free essentials guide",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Nido, I'd like free baby gear advice" },
   },
 };

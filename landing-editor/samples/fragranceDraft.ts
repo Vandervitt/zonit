@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Maison%20Brume%2C%20I%27d%20like%20a%20free%20scent%20match";
 
 export const fragranceDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@maison-brume.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1541643600914-78b084683601", 1600),
@@ -25,8 +28,8 @@ export const fragranceDraft: LandingPageDraft = {
     title: "Find a fragrance that feels like you",
     subtitle:
       "Tell us your taste and the moments you want it for. Our scent advisors send a free, personalized fragrance profile over WhatsApp — no scrolling endless bottles.",
-    cta: { text: "Get my free scent match", link: WHATSAPP },
-    secondaryCta: { text: "Explore scent families", link: "https://instagram.com/maison.brume" },
+    cta: { text: "Get my free scent match", target: { kind: "primary", prefill: "Hi Maison Brume, I'd like a free scent match" } },
+    secondaryCta: { text: "Explore scent families", target: { kind: "url", url: "https://instagram.com/maison.brume" } },
     endorsementText: "Trusted by 45,000+ fragrance lovers worldwide",
     showcase: {
       type: "image",
@@ -229,7 +232,6 @@ export const fragranceDraft: LandingPageDraft = {
   footer: {
     brandName: "Maison Brume",
     copyrightYear: "2026",
-    contactEmail: "hello@maison-brume.com",
     privacyPolicy:
       "We use the preferences you share only to build your scent profile. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -238,6 +240,6 @@ export const fragranceDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🌸 Free scent match",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Maison Brume, I'd like a free scent match" },
   },
 };

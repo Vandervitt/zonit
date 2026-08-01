@@ -14,11 +14,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-/** WhatsApp 预约链接（占位号码 + 预填咨询语）。 */
-const WHATSAPP =
-  "https://wa.me/15553219876?text=Hi%20Solterra%2C%20I%27d%20like%20a%20free%20home%20solar%20assessment";
 
 export const solarHomeDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15553219876",
+    email: "hello@solterra-home.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1509391366360-2e959784a276", 1600),
@@ -28,8 +30,8 @@ export const solarHomeDraft: LandingPageDraft = {
     title: "Power your home with the sun — and cut your bills",
     subtitle:
       "Book a free home assessment and get a personalized savings estimate from our solar advisors over WhatsApp. No obligation, no hard sell.",
-    cta: { text: "Get my free solar assessment", link: WHATSAPP },
-    secondaryCta: { text: "See real installations", link: "https://instagram.com/solterra.home" },
+    cta: { text: "Get my free solar assessment", target: { kind: "primary", prefill: "Hi Solterra, I'd like a free home solar assessment" } },
+    secondaryCta: { text: "See real installations", target: { kind: "url", url: "https://instagram.com/solterra.home" } },
     endorsementText: "Trusted by 12,000+ homeowners across 15+ regions",
     showcase: {
       type: "image",
@@ -281,7 +283,6 @@ export const solarHomeDraft: LandingPageDraft = {
   footer: {
     brandName: "Solterra Home Solar",
     copyrightYear: "2026",
-    contactEmail: "hello@solterra-home.com",
     privacyPolicy:
       "We collect only the home and energy information you share with us to prepare your assessment. Your data is kept confidential, never sold, and you can request its deletion at any time.",
     termsOfService:
@@ -290,6 +291,6 @@ export const solarHomeDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Free solar assessment",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Solterra, I'd like a free home solar assessment" },
   },
 };

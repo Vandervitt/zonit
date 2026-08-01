@@ -14,12 +14,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：主转化落点。 */
-const FORM = "#lead-form";
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Axelon%2C%20I%27d%20like%20help%20selecting%20a%20machine";
 
 export const industrialEquipmentDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    whatsapp: "+15551234567",
+    email: "engineering@axelon-machinery.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1565043666747-69f6646db940", 1600),
@@ -29,8 +31,8 @@ export const industrialEquipmentDraft: LandingPageDraft = {
     title: "Pick the right machine the first time",
     subtitle:
       "Send us your output target, material, and floor space. An application engineer comes back with a recommended configuration, throughput figures, and a sample-run plan.",
-    cta: { text: "Get a configuration proposal", link: FORM },
-    secondaryCta: { text: "Watch a line in operation", link: "https://example.com/axelon-line-video" },
+    cta: { text: "Get a configuration proposal", target: { kind: "primary" } },
+    secondaryCta: { text: "Watch a line in operation", target: { kind: "url", url: "https://example.com/axelon-line-video" } },
     endorsementText: "1,200+ lines commissioned across 45 countries",
     showcase: {
       type: "image",
@@ -261,7 +263,6 @@ export const industrialEquipmentDraft: LandingPageDraft = {
   footer: {
     brandName: "Axelon Machinery",
     copyrightYear: "2026",
-    contactEmail: "engineering@axelon-machinery.example",
     privacyPolicy:
       "We collect only the production details you share in order to prepare your configuration proposal. Product samples and specifications are treated as confidential, are never shared outside the project team, and can be returned or destroyed on request.",
     termsOfService:
@@ -270,6 +271,6 @@ export const industrialEquipmentDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Ask an engineer",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Axelon, I'd like help selecting a machine" },
   },
 };

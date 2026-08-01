@@ -14,13 +14,15 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15557654321?text=Hi%20Portway%2C%20I%27d%20like%20a%20freight%20quote";
 
 /** 页内留资表单锚点：第二落点。 */
-const FORM = "#lead-form";
 
 export const freightForwardingDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15557654321",
+    email: "rates@portway-freight.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1494412574643-ff11b0a5c1c3", 1600),
@@ -30,8 +32,8 @@ export const freightForwardingDraft: LandingPageDraft = {
     title: "Know your landed cost before you book",
     subtitle:
       "Message us with your route, volume, and cargo type. You get current rates, realistic transit times, and the customs documents you'll need — in one reply.",
-    cta: { text: "Get a freight quote", link: WHATSAPP },
-    secondaryCta: { text: "Send cargo details instead", link: FORM },
+    cta: { text: "Get a freight quote", target: { kind: "primary", prefill: "Hi Portway, I'd like a freight quote" } },
+    secondaryCta: { text: "Send cargo details instead", target: { kind: "channel", channel: "form" } },
     endorsementText: "38,000+ shipments handled · Licensed and bonded",
     showcase: {
       type: "image",
@@ -232,7 +234,6 @@ export const freightForwardingDraft: LandingPageDraft = {
   footer: {
     brandName: "Portway Freight",
     copyrightYear: "2026",
-    contactEmail: "rates@portway-freight.example",
     privacyPolicy:
       "We collect only the shipment and contact details you provide in order to quote and arrange your freight. Commercial details are treated as confidential, are shared only with the carriers and authorities required to move your cargo, and can be deleted on request.",
     termsOfService:
@@ -241,6 +242,6 @@ export const freightForwardingDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Get a freight quote",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Portway, I'd like a freight quote" },
   },
 };

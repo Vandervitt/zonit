@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Aria%2C%20I%27d%20like%20a%20free%20wellness%20check";
 
 export const womensHealthDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@aria-wellness.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1512290923902-8a9f81dc236c", 1600),
@@ -26,8 +29,8 @@ export const womensHealthDraft: LandingPageDraft = {
     title: "Feel supported through every cycle and stage",
     subtitle:
       "Get a free wellness check over WhatsApp. Our advisors offer honest, personalized guidance on nutrition and habits for energy, cycle comfort, and balance.",
-    cta: { text: "Get my free wellness check", link: WHATSAPP },
-    secondaryCta: { text: "Our approach", link: "https://instagram.com/aria.wellness" },
+    cta: { text: "Get my free wellness check", target: { kind: "primary", prefill: "Hi Aria, I'd like a free wellness check" } },
+    secondaryCta: { text: "Our approach", target: { kind: "url", url: "https://instagram.com/aria.wellness" } },
     endorsementText: "Trusted by 100,000+ women building healthier routines",
     showcase: {
       type: "image",
@@ -203,7 +206,6 @@ export const womensHealthDraft: LandingPageDraft = {
   footer: {
     brandName: "Aria",
     copyrightYear: "2026",
-    contactEmail: "hello@aria-wellness.com",
     privacyPolicy:
       "We use the health and lifestyle details you share only to provide your wellness check. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -212,6 +214,6 @@ export const womensHealthDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🌸 Free wellness check",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Aria, I'd like a free wellness check" },
   },
 };

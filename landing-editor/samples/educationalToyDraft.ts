@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Sprout%2C%20I%27d%20like%20a%20free%20toy%20recommendation";
 
 export const educationalToyDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@sprout-play.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1545558014-8692077e9b5c", 1600),
@@ -25,8 +28,8 @@ export const educationalToyDraft: LandingPageDraft = {
     title: "The right toys for your child's stage",
     subtitle:
       "Tell us your child's age and interests. Our play advisors send a free, age-matched toy guide over WhatsApp — built around real developmental milestones.",
-    cta: { text: "Get my free toy guide", link: WHATSAPP },
-    secondaryCta: { text: "See play ideas", link: "https://instagram.com/sprout.play" },
+    cta: { text: "Get my free toy guide", target: { kind: "primary", prefill: "Hi Sprout, I'd like a free toy recommendation" } },
+    secondaryCta: { text: "See play ideas", target: { kind: "url", url: "https://instagram.com/sprout.play" } },
     endorsementText: "Trusted by 110,000+ parents and educators",
     showcase: {
       type: "image",
@@ -199,7 +202,6 @@ export const educationalToyDraft: LandingPageDraft = {
   footer: {
     brandName: "Sprout",
     copyrightYear: "2026",
-    contactEmail: "hello@sprout-play.com",
     privacyPolicy:
       "We use the details you share about your child only to provide your toy guide. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -208,6 +210,6 @@ export const educationalToyDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🧩 Free toy guide",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Sprout, I'd like a free toy recommendation" },
   },
 };

@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Shieldly%2C%20I%27d%20like%20a%20free%20case%20match";
 
 export const phoneCaseDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "help@shieldly.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1601784551446-20c9e07cdbdb", 1600),
@@ -25,8 +28,8 @@ export const phoneCaseDraft: LandingPageDraft = {
     title: "The right case for your exact phone",
     subtitle:
       "Tell us your model and how you use your phone. We send a free match over WhatsApp — drop protection, MagSafe, and slim options that actually fit.",
-    cta: { text: "Get my free case match", link: WHATSAPP },
-    secondaryCta: { text: "See drop tests", link: "https://youtube.com/@shieldly" },
+    cta: { text: "Get my free case match", target: { kind: "primary", prefill: "Hi Shieldly, I'd like a free case match" } },
+    secondaryCta: { text: "See drop tests", target: { kind: "url", url: "https://youtube.com/@shieldly" } },
     endorsementText: "Trusted by 200,000+ phone owners worldwide",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const phoneCaseDraft: LandingPageDraft = {
   footer: {
     brandName: "Shieldly",
     copyrightYear: "2026",
-    contactEmail: "help@shieldly.com",
     privacyPolicy:
       "We use the device details you share only to provide your case match. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const phoneCaseDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "📱 Free case match",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Shieldly, I'd like a free case match" },
   },
 };

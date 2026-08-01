@@ -19,13 +19,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：本模板以表单为主转化路径。 */
-const FORM_ANCHOR = "#lead-form";
 
-/** WhatsApp 次级通道（占位号码 + 预填咨询语）。 */
-const WHATSAPP =
-  "https://wa.me/15557654321?text=Hi%20Aurelle%2C%20I%27d%20like%20to%20ask%20about%20a%20consultation";
 
 export const medicalAestheticsDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    whatsapp: "+15557654321",
+    email: "consultations@aurelle-clinic.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1519494026892-80bbd2d6fd0d", 1600),
@@ -35,8 +36,8 @@ export const medicalAestheticsDraft: LandingPageDraft = {
     title: "Start with a consultation, not a treatment menu",
     subtitle:
       "Tell us what bothers you when you look in the mirror. A doctor assesses your face as a whole and tells you what would actually help — including when the answer is nothing at all.",
-    cta: { text: "Request my consultation", link: FORM_ANCHOR },
-    secondaryCta: { text: "Ask a question on WhatsApp", link: WHATSAPP },
+    cta: { text: "Request my consultation", target: { kind: "primary" } },
+    secondaryCta: { text: "Ask a question on WhatsApp", target: { kind: "channel", channel: "whatsapp", prefill: "Hi Aurelle, I'd like to ask about a consultation" } },
     endorsementText: "Doctor-led since 2014 · 12,000+ consultations",
     showcase: {
       type: "image",
@@ -293,7 +294,6 @@ export const medicalAestheticsDraft: LandingPageDraft = {
   footer: {
     brandName: "Aurelle Aesthetic Medicine",
     copyrightYear: "2026",
-    contactEmail: "consultations@aurelle-clinic.example",
     privacyPolicy:
       "We collect only the information you provide in order to arrange and prepare your consultation. Medical history and photographs are held as confidential medical records, are never sold or shared without your written consent, and can be deleted on request.",
     termsOfService:
@@ -302,6 +302,6 @@ export const medicalAestheticsDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🗓️ Request a consultation",
-    link: FORM_ANCHOR,
+    target: { kind: "primary" },
   },
 };

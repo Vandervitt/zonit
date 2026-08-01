@@ -13,11 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-/** WhatsApp 咨询链接（占位号码 + 预填咨询语）。 */
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Aurae%2C%20I%27d%20like%20a%20free%20skin%20consultation";
 
 export const skincareConsultDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@aurae-skin.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1612817288484-6f916006741a", 1600),
@@ -27,8 +29,8 @@ export const skincareConsultDraft: LandingPageDraft = {
     title: "Skincare that actually fits your skin",
     subtitle:
       "Get a free, personalized skin analysis from our advisors over WhatsApp — no guesswork, no generic routines.",
-    cta: { text: "Get my free skin consult", link: WHATSAPP },
-    secondaryCta: { text: "See before & afters", link: "https://instagram.com/aurae.skin" },
+    cta: { text: "Get my free skin consult", target: { kind: "primary", prefill: "Hi Aurae, I'd like a free skin consultation" } },
+    secondaryCta: { text: "See before & afters", target: { kind: "url", url: "https://instagram.com/aurae.skin" } },
     endorsementText: "Trusted by 30,000+ people in 30+ countries",
     showcase: {
       type: "image",
@@ -267,7 +269,6 @@ export const skincareConsultDraft: LandingPageDraft = {
   footer: {
     brandName: "Aurae Skincare",
     copyrightYear: "2026",
-    contactEmail: "hello@aurae-skin.com",
     privacyPolicy:
       "We collect only the skin information you share with us to provide your consultation. Your data is kept confidential, never sold, and you can request its deletion at any time.",
     termsOfService:
@@ -276,6 +277,6 @@ export const skincareConsultDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Free skin consult",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Aurae, I'd like a free skin consultation" },
   },
 };

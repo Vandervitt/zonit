@@ -19,13 +19,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：本模板以表单为主转化路径。 */
-const FORM_ANCHOR = "#lead-form";
 
-/** WhatsApp 次级通道（占位号码 + 预填咨询语）。 */
-const WHATSAPP =
-  "https://wa.me/15557654321?text=Hi%20Meridian%2C%20I%27d%20like%20to%20ask%20about%20a%20hair%20assessment";
 
 export const hairTransplantDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    whatsapp: "+15557654321",
+    email: "assessments@meridian-hair.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1519494026892-80bbd2d6fd0d", 1600),
@@ -35,8 +36,8 @@ export const hairTransplantDraft: LandingPageDraft = {
     title: "Find out what's actually possible for your hairline",
     subtitle:
       "Send a few photos and our surgeons will send back a written assessment — your graft range, the technique that suits you, and an honest answer if surgery isn't the right call yet.",
-    cta: { text: "Get my free assessment", link: FORM_ANCHOR },
-    secondaryCta: { text: "Ask a question on WhatsApp", link: WHATSAPP },
+    cta: { text: "Get my free assessment", target: { kind: "primary" } },
+    secondaryCta: { text: "Ask a question on WhatsApp", target: { kind: "channel", channel: "whatsapp", prefill: "Hi Meridian, I'd like to ask about a hair assessment" } },
     endorsementText: "9,400+ assessments reviewed by our surgical team",
     showcase: {
       type: "image",
@@ -322,7 +323,6 @@ export const hairTransplantDraft: LandingPageDraft = {
   footer: {
     brandName: "Meridian Hair Restoration",
     copyrightYear: "2026",
-    contactEmail: "assessments@meridian-hair.example",
     privacyPolicy:
       "We collect only the photos and health information you submit in order to prepare your assessment. Case photos are treated as medical data, are never sold or shared without your written consent, and can be deleted on request at any time.",
     termsOfService:
@@ -331,6 +331,6 @@ export const hairTransplantDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "📄 Free written assessment",
-    link: FORM_ANCHOR,
+    target: { kind: "primary" },
   },
 };

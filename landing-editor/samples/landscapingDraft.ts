@@ -14,12 +14,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：主转化落点。 */
-const FORM = "#lead-form";
 
-const WHATSAPP =
-  "https://wa.me/15558129046?text=Hi%20Fernhill%2C%20I%27d%20like%20to%20talk%20about%20my%20garden";
 
 export const landscapingDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    whatsapp: "+15558129046",
+    email: "studio@fernhill-landscapes.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1558904541-efa843a96f01", 1600),
@@ -29,8 +31,8 @@ export const landscapingDraft: LandingPageDraft = {
     title: "A garden you'll actually use, not just look at",
     subtitle:
       "Book a site visit and we'll walk the space with you — sun, drainage, soil, and how you want to use it. You'll get a concept plan and a realistic phasing plan before any planting starts.",
-    cta: { text: "Book a free site visit", link: FORM },
-    secondaryCta: { text: "Ask about maintenance", link: WHATSAPP },
+    cta: { text: "Book a free site visit", target: { kind: "primary" } },
+    secondaryCta: { text: "Ask about maintenance", target: { kind: "channel", channel: "whatsapp", prefill: "Hi Fernhill, I'd like to talk about my garden" } },
     endorsementText: "2,300+ gardens designed & built · Qualified horticulturists",
     showcase: {
       type: "image",
@@ -257,7 +259,6 @@ export const landscapingDraft: LandingPageDraft = {
   footer: {
     brandName: "Fernhill Landscapes",
     copyrightYear: "2026",
-    contactEmail: "studio@fernhill-landscapes.example",
     privacyPolicy:
       "We collect only the property and contact details needed to arrange your site visit and prepare a concept plan. Photographs of your garden are used for design purposes and are never published without your written permission. Your details can be deleted on request.",
     termsOfService:
@@ -266,6 +267,6 @@ export const landscapingDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Ask about maintenance",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Fernhill, I'd like to talk about my garden" },
   },
 };

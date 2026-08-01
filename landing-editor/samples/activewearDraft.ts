@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Strlive%2C%20I%27d%20like%20a%20free%20activewear%20fit%20guide";
 
 export const activewearDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "fit@strive-move.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1518611012118-696072aa579a", 1600),
@@ -25,8 +28,8 @@ export const activewearDraft: LandingPageDraft = {
     title: "Activewear that moves the way you do",
     subtitle:
       "Tell us how you train and we'll send a free fit-and-fabric guide over WhatsApp — the right support, squat-proof confidence, and pieces that last.",
-    cta: { text: "Get my free fit guide", link: WHATSAPP },
-    secondaryCta: { text: "See the collection", link: "https://instagram.com/strive.move" },
+    cta: { text: "Get my free fit guide", target: { kind: "primary", prefill: "Hi Strlive, I'd like a free activewear fit guide" } },
+    secondaryCta: { text: "See the collection", target: { kind: "url", url: "https://instagram.com/strive.move" } },
     endorsementText: "Trusted by 120,000+ athletes and movers",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const activewearDraft: LandingPageDraft = {
   footer: {
     brandName: "Strive",
     copyrightYear: "2026",
-    contactEmail: "fit@strive-move.com",
     privacyPolicy:
       "We use the training and size details you share only to provide your fit guide. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const activewearDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🏃‍♀️ Free fit guide",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Strlive, I'd like a free activewear fit guide" },
   },
 };
