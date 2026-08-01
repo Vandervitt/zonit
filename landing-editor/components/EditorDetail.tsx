@@ -3,8 +3,9 @@
 // 右栏：渲染当前选中节点的表单。
 import type { ReactNode } from "react";
 import { SECTION_REGISTRY } from "@/types/schema.draft";
-import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID, BRANDING_ID, SEO_ID } from "../store/editorStore";
+import { useEditorState, useEditorDispatch, CONTACT_ID, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID, BRANDING_ID, SEO_ID } from "../store/editorStore";
 import { HeroForm } from "../forms/HeroForm";
+import { ContactForm, floatingChannelOf } from "../forms/ContactForm";
 import { BrandingForm } from "../forms/BrandingForm";
 import { SeoForm } from "../forms/SeoForm";
 import { FooterForm } from "../forms/FooterForm";
@@ -20,7 +21,25 @@ export function EditorDetail() {
   let title = "";
   let body: ReactNode = null;
 
-  if (id === HERO_ID) {
+  if (id === CONTACT_ID) {
+    title = "联系方式";
+    body = (
+      <ContactForm
+        value={state.contact}
+        leadFormEnabled={Boolean(state.leadForm?.enabled)}
+        floatingChannel={floatingChannelOf({ floatingButton: state.floatingButton ?? undefined, contact: state.contact })}
+        onPrimaryChange={(channel) => dispatch({ kind: "switchPrimaryChannel", channel })}
+        onValueChange={(v) => dispatch({ kind: "updateContact", value: v })}
+        onFloatingChannelChange={(channel) =>
+          state.floatingButton &&
+          dispatch({
+            kind: "updateFloating",
+            value: { ...state.floatingButton, target: { kind: "channel", channel } },
+          })
+        }
+      />
+    );
+  } else if (id === HERO_ID) {
     title = "首屏 Hero";
     body = <HeroForm value={state.hero} onChange={(v) => dispatch({ kind: "updateHero", value: v })} />;
   } else if (id === FOOTER_ID) {
