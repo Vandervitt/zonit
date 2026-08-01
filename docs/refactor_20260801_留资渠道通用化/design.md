@@ -23,7 +23,20 @@
 
 ### 1.2 现有补丁只覆盖两处
 
-`landing-editor/lib/contactIssues.ts` 的 `blankPrimaryCtaLinks()` 在模板实例化时置空 `hero.cta.link` 与 `floatingButton.link`，逼用户填自己的联系方式。但剩下约 86 处对模板占位号的引用原样留在新页面里 —— 用户填完首屏 CTA，`plans` 区块的按钮可能还指着 `+1555…`。发布门槛的 `PLACEHOLDER_CONTACTS` 全文扫描会拦住不让发，但用户得逐个手工改。
+`landing-editor/lib/contactIssues.ts` 的 `blankPrimaryCtaLinks()` 在模板实例化时置空 `hero.cta.link` 与 `floatingButton.link`，逼用户填自己的联系方式。
+
+实测实例化后的 draft（`test/fixtures/drafts-pre-contact.json`，165 个落点）：
+
+| 落点状态 | 数量 |
+|---|---|
+| 已置空 | 87 |
+| 其他 URL（Instagram 等二级链接） | 37 |
+| `#lead-form` 锚点（`isPageAnchor` 跳过置空） | 28 |
+| **保留模板占位号（whatsapp 11 + tel 2）** | **13** |
+
+那 13 处是漏网：用户填完首屏 CTA，某些区块的按钮仍指着 `+1555…`。发布门槛的 `PLACEHOLDER_CONTACTS` 全文扫描会拦住不让发，但用户得逐个手工找出来改。
+
+> 注：早期评估曾按源码里的 `link: WHATSAPP` 常量引用数估为「约 86 处漏网」，那个口径高估了一个量级 —— 多数落点在实例化时已被置空。以本表为准。
 
 ### 1.3 模板主转化的分布只是症状
 
@@ -222,10 +235,14 @@ WhatsApp 那条代价必须写出来。它就是平台的测量不对称（只�
 | `hero.cta.link` = `#lead-form` | `primary: "form"` |
 | = `wa.me/<num>` | `primary: "whatsapp"`，`contact.whatsapp = +<num>` |
 | = `tel:` / `mailto:` / `t.me/` | 同理 |
-| = `""`（新建未填的草稿） | `primary = leadForm.enabled ? "form" : "whatsapp"`，值留空 |
+| = `""`（被 `blankPrimaryCtaLinks` 置空，39 套） | 见下方「空链接的兜底」 |
 | `footer.contactEmail` | → `contact.email` |
 
 各 CTA 的 `link` → `target`：与主渠道 href 相同 → `{kind:"primary"}`；与其他已收录渠道相同 → `{kind:"channel"}`；**其余一律 `{kind:"url"}` 原样保留**。
+
+**空链接的兜底**：`blankPrimaryCtaLinks` 只清非锚点链接（`isPageAnchor` 跳过 `#lead-form`），所以**空链接必然原本是 WhatsApp / tel 这类深链，绝不可能是表单**。若按「空 → 看 `leadForm.enabled`」兜底会推出 `primary: "form"` —— 而 PR #144 之后 52 套模板全部启用了表单，那会把原本解析为空的 CTA 变成 `#lead-form`，直接破坏等价性。
+
+正确规则：空链接时 `primary` 取一个**值为空**的渠道（解析结果同样是 `null`，等价成立）。渠道类型从该 draft 内残留的其他渠道链接推断（如仍有 `tel:` 则取 `phone`），推不出则默认 `whatsapp`。用户在阶段 2 的面板里再填真实值。
 
 > **硬规则**：同一页面出现两个不同 WhatsApp 号是可能的（用户手改过其中一个），迁移**不得强行归一** —— 那会静默改变线上页面行为。识别不了的原样搬成 `url`，宁可留一个未接入新模型的落点，也不能改掉客户正在投放的页面。
 

@@ -686,12 +686,22 @@ describe("convertDraft", () => {
     expect(out.floatingButton?.target).toEqual({ kind: "url", url: "https://wa.me/8618900000000" });
   });
 
-  it("hero.cta.link 为空（新建未填的草稿）时按表单启用与否兜底，值留空", () => {
+  // blankPrimaryCtaLinks 跳过锚点，故空链接必然原本是深链，绝不可能是表单。
+  // 若兜底成 form 会解析出 #lead-form（原本是空），等价性立刻破。
+  it("hero.cta.link 为空时兜底为值为空的渠道，绝不兜成 form", () => {
     const out = convertDraft({ ...base, hero: { cta: { text: "C", link: "" } }, leadForm: { enabled: true } } as LegacyDraft);
-    expect(out.contact.primary).toBe("form");
-    const out2 = convertDraft({ ...base, hero: { cta: { text: "C", link: "" } } } as LegacyDraft);
-    expect(out2.contact.primary).toBe("whatsapp");
-    expect(out2.contact.whatsapp).toBeUndefined();
+    expect(out.contact.primary).toBe("whatsapp");
+    expect(out.contact.whatsapp).toBeUndefined();
+  });
+
+  it("空链接时从残留链接推断渠道类型", () => {
+    const out = convertDraft({
+      ...base,
+      hero: { cta: { text: "C", link: "" } },
+      sections: [{ type: "plans", data: { items: [{ cta: { text: "Call", link: "tel:+15551234567" } }] } }],
+    } as unknown as LegacyDraft);
+    expect(out.contact.primary).toBe("phone");
+    expect(out.contact.phone).toBeUndefined();
   });
 });
 ```
@@ -729,16 +739,35 @@ export function parseLegacyLink(link: string): { channel: LeadChannel; value: st
   return null;
 }
 
+/**
+ * hero 链接被置空时，猜这张页面原本用的是哪个渠道。
+ * 从 draft 里残留的其他深链推断（置空只清 hero 与 floating 两处）；推不出则默认
+ * whatsapp —— 52 套模板里 39 套被置空的原本都是它。
+ * 注意：无论猜成哪个，值都留空，故解析结果恒为 null，等价性不受影响。
+ */
+function inferBlankedChannel(legacy: LegacyDraft): LeadChannel {
+  let found: LeadChannel | null = null;
+  JSON.stringify(legacy, (k, v) => {
+    if (k === "link" && typeof v === "string" && !found) {
+      const parsed = parseLegacyLink(v);
+      if (parsed && parsed.channel !== "form") found = parsed.channel;
+    }
+    return v;
+  });
+  return found ?? "whatsapp";
+}
+
 export function convertDraft(legacy: LegacyDraft): LandingPageDraft {
   const clone = JSON.parse(JSON.stringify(legacy)) as Record<string, never>;
 
-  // ① 主渠道：以 hero.cta.link 为准。空链接（新建未填的草稿）按表单启用与否兜底，
-  //    值留空 —— 这类草稿本来就过不了发布门槛，不影响任何线上页面。
+  // ① 主渠道：以 hero.cta.link 为准。
+  //    空链接是 blankPrimaryCtaLinks 置空的结果，而它跳过锚点，所以空链接必然
+  //    原本是深链、绝不可能是表单 —— 兜成 form 会解析出 #lead-form 而原值是空，
+  //    等价性立刻破。故兜底为「值为空的渠道」，解析结果同样是 null。
   const heroLink = (legacy.hero.cta?.link ?? "").trim();
   const heroParsed = parseLegacyLink(heroLink);
-  const leadFormEnabled = Boolean((legacy as { leadForm?: { enabled?: boolean } }).leadForm?.enabled);
   const contact: PageContact = {
-    primary: heroParsed?.channel ?? (leadFormEnabled ? "form" : "whatsapp"),
+    primary: heroParsed?.channel ?? inferBlankedChannel(legacy),
   };
   if (heroParsed && heroParsed.channel !== "form") {
     contact[heroParsed.channel] = heroParsed.value;
