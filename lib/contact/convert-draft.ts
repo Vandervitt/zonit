@@ -5,6 +5,7 @@
 // 同页出现第二个不同的 WhatsApp 号是合法状态（用户手改过其一），绝不归一 ——
 // 那会静默改变客户正在投放的页面。宁可留一个没接入新模型的落点。
 import type { CtaTarget, LandingPageDraft, LeadChannel, PageContact } from "@/types/schema.draft";
+import { channelHref } from "./channel-href";
 import type { LegacyCtaButton, LegacyDraft } from "./cta-inventory";
 
 /**
@@ -68,7 +69,16 @@ function inferBlankedChannel(legacy: LegacyDraft): LeadChannel {
   return found ?? "whatsapp";
 }
 
+/** 已经转换过的 draft（有 contact、CTA 已是 target）。重复转换会读到 undefined 的 link 而崩。 */
+export function isConverted(draft: unknown): boolean {
+  return Boolean(draft && typeof draft === "object" && "contact" in draft);
+}
+
 export function convertDraft(legacy: LegacyDraft): LandingPageDraft {
+  // 幂等：已转换的原样返回。迁移正常只跑一次（pgmigrations 表保证），
+  // 但回滚记录后重跑、或对同一份数据跑两遍脚本时不该炸。
+  if (isConverted(legacy)) return legacy as unknown as LandingPageDraft;
+
   const out = JSON.parse(JSON.stringify(legacy)) as Record<string, unknown> & {
     hero: Record<string, unknown>;
     footer: Record<string, unknown>;
@@ -108,6 +118,12 @@ export function convertDraft(legacy: LegacyDraft): LandingPageDraft {
     if (parsed.channel !== "form" && contact[parsed.channel] !== parsed.value) {
       return { kind: "url", url: link };
     }
+    // 往返兜底：转成引用后再解析回来，若与原链接不是逐字节一致，就原样保留为 url。
+    // 编码差异（%27 vs '）这类情况已由 channelHref 的严格编码处理，但生产数据里
+    // 可能有手写的、编码方式不同的链接——那时宁可留一个未接入新模型的落点，
+    // 也不要让一条奇怪的链接把整次部署卡死在等价性校验上。
+    const roundTrip = channelHref(parsed.channel, parsed.value, parsed.prefill);
+    if (roundTrip?.href !== link) return { kind: "url", url: link };
     // 预填消息跟着 CTA 走：同页每个按钮问的事不一样，这是 wa.me 深链最有价值的部分
     const prefill = parsed.prefill ? { prefill: parsed.prefill } : {};
     return parsed.channel === contact.primary
@@ -115,7 +131,7 @@ export function convertDraft(legacy: LegacyDraft): LandingPageDraft {
       : { kind: "channel", channel: parsed.channel, ...prefill };
   };
 
-  const convertCta = (cta: LegacyCtaButton) => ({ text: cta.text, target: toTarget(cta.link) });
+  const convertCta = (cta: LegacyCtaButton) => ({ text: cta.text, target: toTarget(cta.link ?? "") });
 
   // sections 里的 CTA 就地改写：加 target、删 link
   const visit = (node: unknown) => {

@@ -10,6 +10,20 @@ import { isE164, normalizeTelegram } from "@/lib/leads/contact-format";
 import { LEAD_FORM_ANCHOR_ID } from "@/landing-renderer/sections/LeadForm";
 import type { LeadChannel } from "@/types/schema.draft";
 
+/**
+ * 严格的 URI 组件编码：在 encodeURIComponent 基础上补上 `!'()*`。
+ *
+ * encodeURIComponent 不转义这几个字符，但既有模板里的 ?text= 是按 RFC 3986 编的
+ * （`I'd` 存成 `I%27d`）。若用宽松编码回写，解码-编码往返就不是逐字节一致，
+ * 迁移的等价性判据会当场判定「链接变了」而中止部署——这不是理论风险，实测发生过。
+ */
+function encodeText(value: string): string {
+  return encodeURIComponent(value).replace(
+    /[!'()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
 export interface ChannelHref {
   href: string;
   /** 外链需新开标签页；mailto / tel / 页内锚点交给浏览器处理，不开新窗。 */
@@ -29,7 +43,7 @@ export function channelHref(channel: LeadChannel, value: string, prefill?: strin
     case "whatsapp": {
       // wa.me 只吃纯数字，须去掉 E.164 的 `+`
       if (!isE164(value)) return null;
-      const query = prefill?.trim() ? `?text=${encodeURIComponent(prefill)}` : "";
+      const query = prefill?.trim() ? `?text=${encodeText(prefill)}` : "";
       return { href: `https://wa.me/${value.slice(1)}${query}`, external: true };
     }
     case "phone":
