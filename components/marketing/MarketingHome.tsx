@@ -209,7 +209,7 @@ function EditorMock({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
           <Radar className="h-4 w-4 text-aqua-500" />
-          {t.editorMock.pixelBadge}
+          {t.editorMock.sourceBadge}
           <Check className="h-3.5 w-3.5 text-emerald-500" />
         </motion.div>
         <motion.div

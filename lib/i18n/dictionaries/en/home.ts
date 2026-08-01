@@ -22,9 +22,12 @@ export const home = {
     ctaSecondary: "See pricing",
     note: "7 days of full Pro on sign-up · No credit card · No code",
   },
+  // 首屏示意图上的两枚浮动徽标。与 hero.subtitle 同一条约束：首屏只讲结果，
+  // 不出现 Pixel / CAPI / UTM 这类机制术语——非投放用户看到会直接判定
+  // 「这是给广告专家用的」。归因能力留到下方追踪区展开。
   editorMock: {
-    pixelBadge: "Meta Pixel · fired",
-    leadBadge: "Lead +1",
+    sourceBadge: "Source · Instagram",
+    leadBadge: "New lead · +1",
   },
   marquee: {
     heading: "Works with your ad and analytics stack",
@@ -40,7 +43,10 @@ export const home = {
   steps: {
     kicker: "Three steps to live",
     title: "From template to live page in three steps",
-    desc: "The whole build is visual — no code, no dev queue. Create, edit, and preview for free; publishing on your own domain comes with the paid plans.",
+    // Free 能真发布（平台分配地址，不碰 DNS），只是拿不到自有域名槽位——
+    // 见 lib/i18n/dictionaries/*/plans.ts 的 customDomain.freeValue。
+    // 这里不能写成「免费只能预览」：那会把刚打通的激活路径重新藏起来。
+    desc: "The whole build is visual — no code, no dev queue. Publish free on a platform-provided address; your own brand domain comes with the paid plans.",
     items: [
       {
         title: "Pick a lead-gen template",
@@ -114,15 +120,15 @@ export const home = {
   },
   pricing: {
     kicker: "Simple, transparent pricing",
-    title: "Ship your first version free, upgrade when you go live",
-    desc: "Free lets you create, save, and preview online. Upgrade to connect your own domain and unlock more pages, tracking, and AI credits by plan.",
+    title: "Go live free, upgrade when you want your own domain",
+    desc: "Free publishes a real, working page on a platform-provided address — no domain to buy, no DNS to touch. Upgrade to connect your own brand domain and unlock more pages, tracking, and AI credits by plan.",
     ctaFree: "Start free",
     ctaPaid: "Sign up to upgrade",
   },
   finalCta: {
     titleLine1: "Your next campaign",
     titleLine2: "deserves a page that converts",
-    desc: "Create, edit, and preview right now — no credit card. Upgrade when you are ready to publish to your own brand domain.",
+    desc: "Build and publish your first page right now — no domain, no credit card. Upgrade when you want it on your own brand domain.",
     ctaPrimary: "Start free",
     ctaSecondary: "Already have an account? Log in",
   },
