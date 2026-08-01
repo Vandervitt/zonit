@@ -29,13 +29,9 @@ export function CtaButtonField({
         </Field>
         <RewriteButton field="按钮文案" currentText={value.text} onApply={(t) => onChange({ ...value, text: t })} />
       </div>
-      <Field label="按钮链接" error={validateLink(value.link)}>
-        <TextInput
-          value={value.link}
-          onChange={(e) => onChange({ ...value, link: e.target.value })}
-          placeholder="https://… / tel: / mailto:"
-        />
-      </Field>
+      {/* 阶段 1：链接已改由页面级 contact 统一决定，不再逐个编辑。
+          阶段 2 上线「联系方式」面板后，这行提示替换为指向该面板的入口。 */}
+      <p className="text-xs text-slate-500">按钮链接由页面的「联系方式」统一决定，不在此单独设置。</p>
     </div>
   );
 }

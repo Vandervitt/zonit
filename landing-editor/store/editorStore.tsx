@@ -11,6 +11,7 @@ import {
 } from "react";
 import type {
   HeroSection,
+  PageContact,
   FooterSection,
   FloatingButton,
   LeadForm,
@@ -40,6 +41,8 @@ export const BRANDING_ID = "branding";
 export const SEO_ID = "seo";
 
 export interface EditorState {
+  /** 页面联系方式：全页 CTA 落点的单一真源（阶段 2 由「联系方式」面板编辑）。 */
+  contact: PageContact;
   hero: HeroSection;
   footer: FooterSection;
   floatingButton: FloatingButton | null;
@@ -176,6 +179,7 @@ export function reducer(state: EditorState, action: EditorAction): EditorState {
     case "replaceDraft": {
       const d = action.draft;
       return {
+        contact: d.contact,
         hero: d.hero,
         footer: d.footer,
         floatingButton: d.floatingButton ?? null,
@@ -301,6 +305,7 @@ export function useEditorDispatch(): Dispatch<HistoryAction> {
 /** 产出干净的 LandingPageDraft（剥离 _key）。 */
 export function toDraft(state: EditorState): LandingPageDraft {
   const draft: LandingPageDraft = {
+    contact: state.contact,
     hero: state.hero,
     sections: state.sections.map((s) => ({ type: s.type, data: s.data }) as LandingSection),
     footer: state.footer,

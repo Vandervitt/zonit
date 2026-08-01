@@ -44,7 +44,7 @@ export function landingOrganizationJsonLd(
   };
   const logo = data.branding?.logo ?? data.branding?.favicon;
   if (logo) org.logo = logo;
-  const email = data.footer.contactEmail?.trim();
+  const email = data.contact.email?.trim();
   if (email) org.email = email;
   return org;
 }

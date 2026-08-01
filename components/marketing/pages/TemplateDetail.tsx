@@ -30,9 +30,13 @@ import type { Locale } from "@/lib/i18n/config";
  */
 function toDisplayDraft(draft: LandingPageDraft): LandingPageDraft {
   const d = structuredClone(draft);
-  if (d.hero.cta && !d.hero.cta.link) d.hero.cta.link = "#";
-  if (d.hero.secondaryCta && !d.hero.secondaryCta.link) d.hero.secondaryCta.link = "#";
-  if (d.floatingButton && !d.floatingButton.link) d.floatingButton.link = "#";
+  // 模板详情页是公开展示样稿，联系方式已被 blankPrimaryCtaLinks 清空——
+  // 补一个占位号码，让按钮照常渲染出来（观众看的是版式，不会真去点）。
+  // 号码用 E.164 占位段，点了也拨不通，不会误导成真实商家号码。
+  for (const channel of ["whatsapp", "phone", "telegram"] as const) {
+    if (!d.contact[channel]) d.contact[channel] = "+10000000000";
+  }
+  if (!d.contact.email) d.contact.email = "preview@example.com";
   return d;
 }
 

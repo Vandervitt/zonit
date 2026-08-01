@@ -98,7 +98,7 @@ describe("convertDraft", () => {
       hero: { cta: { text: "C", link: "https://wa.me/8613800138000" } },
       sections: [{ type: "plans", data: { items: [{ cta: { text: "Buy", link: "https://wa.me/8613800138000" } }] } }],
     }));
-    const cta = (out.sections[0] as { data: { items: { cta: Record<string, unknown> }[] } }).data.items[0].cta;
+    const cta = (out.sections[0] as unknown as { data: { items: { cta: Record<string, unknown> }[] } }).data.items[0].cta;
     expect(cta.target).toEqual({ kind: "primary" });
     expect("link" in cta).toBe(false);
   });

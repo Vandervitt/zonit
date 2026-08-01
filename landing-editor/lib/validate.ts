@@ -72,11 +72,14 @@ export function validateEmail(value: string): string | undefined {
 }
 
 // 字段键名 → 校验器映射，与各表单的行内校验保持一致：
-// link（CtaButton / FloatingButton）、src（ImageRef / Media）、contactEmail（Footer）。
+// url（CtaTarget 的二级外链）、src（ImageRef / Media）、email（PageContact）。
+//
+// ⚠️ 键名就是这份校验的全部依据：CTA 的 link 改名成 target.url 之后，若不同步改这里，
+// validateLink 会静默地什么都不再校验——连「交易语义链接」这条硬红线也一起失效。
 const FIELD_VALIDATORS: Record<string, (v: string) => string | undefined> = {
-  link: validateLink,
+  url: validateLink,
   src: validateMediaUrl,
-  contactEmail: validateEmail,
+  email: validateEmail,
 };
 
 /** 递归收集 node 内所有字段格式错误，统一冠以区块标签前缀并挂上跳转落点。 */
@@ -99,6 +102,8 @@ function walkFieldIssues(node: unknown, label: string, target: IssueTarget, out:
 /** 聚合整页字段级格式错误（按文案去重），每项带编辑器跳转落点。 */
 export function collectFieldIssueItems(draft: LandingPageDraft): PublishIssue[] {
   const out: PublishIssue[] = [];
+  // 联系方式暂落在 hero 面板上——阶段 2 的「联系方式」面板上线后改指向它
+  walkFieldIssues(draft.contact, "联系方式", { kind: "fixed", id: "hero" }, out);
   walkFieldIssues(draft.hero, "首屏", { kind: "fixed", id: "hero" }, out);
   draft.sections.forEach((s, index) =>
     walkFieldIssues(s.data, SECTION_REGISTRY[s.type]?.label ?? s.type, { kind: "section", index }, out),

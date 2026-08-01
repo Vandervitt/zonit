@@ -4,19 +4,20 @@ import { fromDraft } from "../sampleDraft";
 import type { LandingPageDraft } from "@/types/schema.draft";
 
 const oldDraft: LandingPageDraft = {
-  hero: { title: "Old Headline", cta: { text: "C", link: "https://wa.me/1" } },
+  contact: { primary: "whatsapp" as const, whatsapp: "+8613800138000" },
+    hero: { title: "Old Headline", cta: { text: "C", target: { kind: "primary" as const } } },
   sections: [],
   footer: {
     brandName: "Old",
     copyrightYear: "2026",
-    contactEmail: "hi@old.com",
     privacyPolicy: "p",
     termsOfService: "t",
   },
 };
 
 const newDraft: LandingPageDraft = {
-  hero: { title: "New Headline", cta: { text: "Go", link: "https://wa.me/2" } },
+  contact: { primary: "whatsapp" as const, whatsapp: "+8613800138000" },
+    hero: { title: "New Headline", cta: { text: "Go", target: { kind: "primary" as const } } },
   sections: [
     { type: "features", data: { title: "A", items: [] } },
     { type: "trust", data: { title: "B", items: [] } },
@@ -24,7 +25,6 @@ const newDraft: LandingPageDraft = {
   footer: {
     brandName: "New",
     copyrightYear: "2026",
-    contactEmail: "hi@new.com",
     privacyPolicy: "p",
     termsOfService: "t",
   },

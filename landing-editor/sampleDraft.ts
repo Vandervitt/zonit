@@ -10,6 +10,7 @@ import { createTracking, createBranding, createSeo } from "./store/defaults";
 /** 把干净的 LandingPageDraft 适配为编辑器状态（为可排序区块补 _key）。 */
 export function fromDraft(draft: LandingPageDraft): EditorState {
   return {
+    contact: draft.contact,
     hero: draft.hero,
     footer: draft.footer,
     floatingButton: draft.floatingButton ?? null,

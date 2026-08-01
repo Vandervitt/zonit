@@ -23,7 +23,9 @@ import type {
 
 export const createFloatingButton = (): FloatingButton => ({
   text: "立即咨询",
-  link: "",
+  // 钉死主渠道的同一渠道会更啰嗦，这里直接跟随主渠道；
+  // 用户想让悬浮按钮独立于主渠道，在联系方式面板里改（阶段 2）。
+  target: { kind: "primary" },
 });
 
 export const createLeadForm = (): LeadForm => ({
@@ -88,7 +90,7 @@ export const createPlanItem = (): PlanItem => ({
   name: "",
   description: "",
   valueProps: [],
-  cta: { text: "", link: "" },
+  cta: { text: "", target: { kind: "primary" } },
 });
 export const createProductItem = (): ProductItem => ({ name: "", description: "" });
 export const createBeforeAfterItem = (): BeforeAfterItem => ({
