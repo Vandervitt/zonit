@@ -2,6 +2,7 @@
 // landing-renderer/sections/LeadForm.tsx
 // 兜底留资表单：按 fields 配置渲染输入，含 honeypot，提交 POST /api/leads。
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LEAD_FORM_ANCHOR_ID } from "./leadFormAnchor";
 import type { LeadForm as LeadFormData } from "@/types/schema.draft";
 import type { DialCode } from "@/lib/leads/dial-codes";
 import { composeE164 } from "@/lib/leads/contact-format";
@@ -44,7 +45,10 @@ const GENERIC_ERROR = "Something went wrong. Please try again.";
  * schema 保证每页至多一个 leadForm，故固定 id 不会重复。
  * 校验与发布门槛引用同一常量，见 landing-editor/lib/contactIssues.ts。
  */
-export const LEAD_FORM_ANCHOR_ID = "lead-form";
+// 锚点 id 的定义已移到 leadFormAnchor.ts —— 本文件是 "use client"，
+// 服务端若从这里 import 常量会拿到客户端引用代理而非字符串值。
+// 保留再导出仅为兼容既有 import；服务端代码请直接引 leadFormAnchor。
+export { LEAD_FORM_ANCHOR_ID };
 
 function readCookie(name: string): string | undefined {
   if (typeof document === "undefined") return undefined;

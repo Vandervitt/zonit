@@ -113,4 +113,27 @@ describe("模板库结构完整性", () => {
       .map(([photo, ids]) => `${photo} 被 ${ids.join(" / ")} 共用`);
     expect(duplicated).toEqual([]);
   });
+
+  describe("渠道模型", () => {
+    it.each(TEMPLATES.map((t) => t.id))("%s 有 contact 且主渠道合法", async (id) => {
+      const draft = await loadTemplateDraft(id);
+      expect(draft.contact, `${id} 缺 contact`).toBeDefined();
+      const { primary } = draft.contact;
+      // 主渠道是表单时页面开箱即用（表单没有「用户自己的值」可填）
+      if (primary === "form") expect(draft.leadForm?.enabled, `${id} 主渠道是表单但表单未启用`).toBe(true);
+      else expect(["whatsapp", "phone", "email", "telegram"], `${id} 主渠道非法`).toContain(primary);
+    });
+
+    it.each(TEMPLATES.map((t) => t.id))("%s 的 CTA 不再出现渠道类裸 URL", async (id) => {
+      // 漏网检查：转换后仍以 url 落点指向 wa.me / tel: / mailto: / t.me 的，
+      // 说明批量转换没覆盖到——那个按钮会永远指向模板占位号，用户改了 contact 也无效。
+      const draft = await loadTemplateDraft(id);
+      const offenders: string[] = [];
+      JSON.stringify(draft, (k, v) => {
+        if (k === "target" && v?.kind === "url" && /wa\.me|^tel:|^mailto:|t\.me/i.test(v.url)) offenders.push(v.url);
+        return v;
+      });
+      expect(offenders, `${id} 存在未接入渠道模型的落点`).toEqual([]);
+    });
+  });
 });

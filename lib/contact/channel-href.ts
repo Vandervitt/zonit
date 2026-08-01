@@ -7,7 +7,8 @@
 // 拼不出可靠链接一律返回 null —— 宁可不渲染这个按钮，也不要给访客一个拨错的号，
 // 或者一个点了原地不动的 href=""。
 import { isE164, normalizeTelegram } from "@/lib/leads/contact-format";
-import { LEAD_FORM_ANCHOR_ID } from "@/landing-renderer/sections/LeadForm";
+// 从独立模块引入，绝不能改回 LeadForm.tsx —— 那是客户端模块，服务端会拿到引用代理
+import { LEAD_FORM_ANCHOR_ID } from "@/landing-renderer/sections/leadFormAnchor";
 import type { LeadChannel } from "@/types/schema.draft";
 
 /**
