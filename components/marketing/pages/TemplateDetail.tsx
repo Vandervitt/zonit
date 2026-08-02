@@ -8,16 +8,18 @@ import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 import { conversionLabel, archetypeLabel } from "@/landing-editor/samples/templateFilter";
 import { LandingPage } from "@/landing-renderer/LandingPage";
 import { IDENTITY_VARIANT } from "@/landing-renderer/variant";
-import { Routes, templateDetailPath } from "@/lib/constants";
+import { Routes, templateDetailPath, templateIndustryPath } from "@/lib/constants";
 import type { LandingPageDraft } from "@/types/schema.draft";
 import { marketingMetadata } from "@/lib/seo/site";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildTemplateSeoContent,
   conversionText,
+  subIndustryLabel,
   templateBreadcrumbJsonLd,
   templateFaqJsonLd,
 } from "@/lib/seo/template-content";
+import { industryLabel } from "@/lib/seo/industry-content";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import { buildUnsplashImageSources } from "@/lib/images/unsplash";
@@ -81,9 +83,17 @@ export async function TemplateDetailView({ slug, locale }: { slug: string; local
       <JsonLd data={templateFaqJsonLd(seo.faqs)} />
       <SiteNav fonts={fonts} locale={locale} />
       <main className="mx-auto max-w-6xl px-6 pb-24 pt-32">
+        {/* 三层面包屑：模板库 → 行业 → 模板，与 templateBreadcrumbJsonLd 保持一致。 */}
         <nav className={`text-xs text-muted-foreground ${fonts.mono}`}>
           <Link href={localePath(locale, Routes.Templates)} className="hover:text-aqua-700">
             {dict.detail.breadcrumbRoot}
+          </Link>
+          <span className="mx-2">/</span>
+          <Link
+            href={localePath(locale, templateIndustryPath(t.tags.category))}
+            className="hover:text-aqua-700"
+          >
+            {industryLabel(t.tags.category, locale)}
           </Link>
           <span className="mx-2">/</span>
           <span className="text-foreground">{t.name}</span>
@@ -92,10 +102,9 @@ export async function TemplateDetailView({ slug, locale }: { slug: string; local
         <header className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <h1 className={`text-3xl font-bold tracking-tight text-foreground sm:text-4xl ${fonts.display}`}>
-              {t.name}
-              <span className="ml-3 align-middle text-sm font-normal text-muted-foreground">
-                {t.industry[locale]}
-              </span>
+              {dict.detail.h1
+                .replace("{name}", t.name)
+                .replace("{industry}", subIndustryLabel(t, locale))}
             </h1>
             <p className="mt-3 text-base leading-relaxed text-muted-foreground">{t.tagline[locale]}</p>
             <div className="mt-4 flex flex-wrap gap-1.5">

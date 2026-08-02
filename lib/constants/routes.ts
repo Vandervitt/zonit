@@ -45,6 +45,9 @@ export enum ApiRoutes {
 }
 
 export const templateDetailPath = (id: string) => `/templates/${id}`;
+// 行业中间层。静态段 `industry` 比 /templates/[slug] 更具体，Next 优先匹配它，
+// 两者不会撞车（[slug] 的 dynamicParams=false，slug="industry" 本就 404）。
+export const templateIndustryPath = (category: string) => `/templates/industry/${category}`;
 export const guideDetailPath = (slug: string) => `/guides/${slug}`;
 
 export const apiMediaPath = (id: string) => `/api/media/${id}`;

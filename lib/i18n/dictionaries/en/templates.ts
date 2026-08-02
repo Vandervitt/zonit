@@ -25,6 +25,12 @@ export const templates = {
     thumbnailAlt: "{name} template preview",
   },
   detail: {
+    /**
+     * 详情页 h1。此前 h1 只有虚构品牌名（"Aurae Skincare"）——页面上最强的标签位
+     * 给了一个零搜索量的词，且与含关键词的 title 不一致。`{industry}` 取细分行业名
+     * （"Skincare" 而非 "Beauty / Skincare"，见 subIndustryLabel）。
+     */
+    h1: "{name} — {industry} landing page template",
     backToGallery: "← All templates",
     useTemplate: "Start with this template",
     includedHeading: "What's inside",

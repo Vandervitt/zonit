@@ -7,8 +7,9 @@ import type { TemplateMeta } from "@/landing-editor/samples/registry";
 import type { LandingPageDraft, LandingSectionType } from "@/types/schema.draft";
 import { SECTION_REGISTRY } from "@/types/schema.draft";
 import { conversionLabel, archetypeLabel } from "@/landing-editor/samples/templateFilter";
-import { Routes, templateDetailPath } from "@/lib/constants";
+import { Routes, templateDetailPath, templateIndustryPath } from "@/lib/constants";
 import { absoluteUrl } from "@/lib/seo/site";
+import { industryLabel } from "@/lib/seo/industry-content";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import type { Locale } from "@/lib/i18n/config";
@@ -34,6 +35,16 @@ export interface TemplateSeoContent {
 /** 把 `{key}` 占位符替换为实际值。 */
 function fill(tpl: string, vars: Record<string, string>): string {
   return tpl.replace(/\{(\w+)\}/g, (m, k) => vars[k] ?? m);
+}
+
+/**
+ * 细分行业名：industry 字段形如 "Beauty / Skincare"，取斜杠后的细分段。
+ * h1 用细分名而非大类名——搜索者搜的是 "skincare landing page template"，
+ * 「Beauty / Skincare landing page template」既啰嗦又把词冲散了。
+ */
+export function subIndustryLabel(t: TemplateMeta, locale: Locale): string {
+  const parts = t.industry[locale].split("/").map((s) => s.trim()).filter(Boolean);
+  return parts[parts.length - 1] ?? t.industry[locale];
 }
 
 /** 转化方式短语，如 "WhatsApp / Form"。 */
@@ -91,9 +102,10 @@ export function buildTemplateSeoContent(
 }
 
 /**
- * BreadcrumbList 结构化数据（与页面面包屑一致）。
- * 只保留有真实 URL 的层级：行业没有独立落地页，作为无 item 的中间层会被
- * Search Console 判为「未填写字段 item」，故不进面包屑（行业文案仍展示在 h1 旁）。
+ * BreadcrumbList 结构化数据（与页面面包屑一致）：模板库 → 行业 → 模板。
+ * 中间层原先被摘掉是因为「行业没有独立落地页」，无 item 的层级会被 Search Console
+ * 判为「未填写字段 item」；行业页上线后该层有了真实 URL，故补回——三层面包屑
+ * 同时把行业页的权重接进详情页，是这次中间层改造的主要内链通道之一。
  */
 export function templateBreadcrumbJsonLd(t: TemplateMeta, locale: Locale): Record<string, unknown> {
   return {
@@ -109,6 +121,12 @@ export function templateBreadcrumbJsonLd(t: TemplateMeta, locale: Locale): Recor
       {
         "@type": "ListItem",
         position: 2,
+        name: industryLabel(t.tags.category, locale),
+        item: absoluteUrl(localePath(locale, templateIndustryPath(t.tags.category))),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
         name: t.name,
         item: absoluteUrl(localePath(locale, templateDetailPath(t.id))),
       },

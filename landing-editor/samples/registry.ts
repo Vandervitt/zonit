@@ -660,7 +660,7 @@ export const TEMPLATES: TemplateMeta[] = [
   {
     id: "moving",
     name: "Cartwell Movers",
-    industry: { en: "Local service / Moving", zh: "本地服务 / 搬家搬迁" },
+    industry: { en: "Local services / Moving", zh: "本地服务 / 搬家搬迁" },
     tagline: { en: "Moving quote page — customers send a video walk-through and get a fixed quote.", zh: "搬家报价落地页，访客发房屋视频获取固定报价与档期。" },
     seoIntro: {
       en: "Cartwell Movers is a quote-enquiry template for removal companies, converting mobile traffic into bookings through WhatsApp with an on-page form as a second landing point. A fixed quote from a video walk-through, goods-in-transit cover, and free date changes target the two things that lose movers business: hourly-rate creep and property chains that slip. Built for local and long-distance removal firms running area-targeted campaigns that need addresses, property size, and dates rather than anonymous price enquiries.",
@@ -673,7 +673,7 @@ export const TEMPLATES: TemplateMeta[] = [
   {
     id: "hvac",
     name: "Northaire Heating & Cooling",
-    industry: { en: "Local service / HVAC repair", zh: "本地服务 / 暖通空调维修" },
+    industry: { en: "Local services / HVAC repair", zh: "本地服务 / 暖通空调维修" },
     tagline: { en: "Emergency HVAC page — same-day callouts converted by a direct phone CTA.", zh: "空调暖通急修落地页，电话直拨承接同日上门需求。" },
     seoIntro: {
       en: "Northaire Heating & Cooling is an emergency-callout template for HVAC contractors, converting urgent traffic with a direct phone CTA and an on-page form for non-urgent maintenance enquiries. Diagnosis before work, a written price approved up front, and a stated preference for repair over replacement counter the overselling this trade is best known for. Made for heating and air conditioning contractors running seasonal campaigns where a visitor with a failed system needs to reach a technician immediately, not fill in a form.",
@@ -686,7 +686,7 @@ export const TEMPLATES: TemplateMeta[] = [
   {
     id: "roofing",
     name: "Ridgeway Roofing & Exteriors",
-    industry: { en: "Local service / Roofing & exteriors", zh: "本地服务 / 屋顶外墙翻新" },
+    industry: { en: "Local services / Roofing & exteriors", zh: "本地服务 / 屋顶外墙翻新" },
     tagline: { en: "Roof inspection page — homeowners book a free inspection and get a photo report.", zh: "屋顶翻新落地页，业主预约免费检查并获取带照片的检查报告。" },
     seoIntro: {
       en: "Ridgeway Roofing & Exteriors is an inspection-booking template for roofing and exterior contractors, turning homeowner traffic into surveyed leads through an on-page form, with a phone CTA for active leaks. Photo evidence of every defect, a stated willingness to recommend repair over replacement, and insurance-claim documentation address the fear of being oversold that dominates this category. Built for roofing, siding, and gutter contractors running storm-season and neighbourhood campaigns that need property details before a truck is dispatched.",
@@ -699,7 +699,7 @@ export const TEMPLATES: TemplateMeta[] = [
   {
     id: "landscaping",
     name: "Fernhill Landscapes",
-    industry: { en: "Local service / Landscaping", zh: "本地服务 / 园艺景观" },
+    industry: { en: "Local services / Landscaping", zh: "本地服务 / 园艺景观" },
     tagline: { en: "Garden design page — clients book a free site visit and receive a concept plan.", zh: "园艺景观落地页，客户预约免费看场并获取设计概念方案。" },
     seoIntro: {
       en: "Fernhill Landscapes is a site-visit enquiry template for garden design, build, and maintenance firms, converting homeowner traffic into design consultations through an on-page form. Surveying sun, drainage, and soil before proposing anything, planting chosen to survive rather than to render well, and phased builds across seasons answer why so many expensive gardens fail in year two. Made for landscapers and garden designers running local campaigns that need plot size, aspiration, and usage before a designer's time is committed.",

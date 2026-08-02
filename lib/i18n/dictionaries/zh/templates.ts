@@ -24,6 +24,7 @@ export const templates = {
     thumbnailAlt: "{name} 模板预览图",
   },
   detail: {
+    h1: "{name} — {industry}落地页模板",
     backToGallery: "← 返回模板库",
     useTemplate: "用这个模板开始",
     includedHeading: "包含哪些板块",
