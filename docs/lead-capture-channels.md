@@ -53,8 +53,11 @@ hero.secondaryCta      = { kind: "url", url: "https://ig.com/…" } 二级外链
 | `landing-editor/lib/validate.ts` 的 `FIELD_VALIDATORS` | 字段**键名** | 交易语义红线彻底不校验 |
 | `lib/ai/slots.ts` 的 `NON_TEXT_KEYS` | 字段**键名** | AI 开始改写联系方式、URL、枚举 |
 | `channel-href.ts` 引入锚点常量 | **模块路径**（客户端/服务端边界） | 表单按钮 href 变成报错文本 |
+| `validate.ts` 遇到 `textByChannel` | 字段**键名** | 把按钮文案 `email: "Email Us"` 当邮箱地址拦下 |
 
-改字段名后请全仓 grep 这三处，并跑一次真机走查——单元测试不覆盖 RSC 边界。
+第四处的成因略有不同：`textByChannel` 的键是**渠道名**而非字段名，故按键名工作的校验器必须整棵子树跳过（见 `CHANNEL_KEYED_CONTAINERS`）。将来若再加「以渠道为键」的容器，记得同步登记。
+
+改字段名后请全仓 grep 这几处，并跑一次真机走查——单元测试不覆盖 RSC 边界。
 
 ## 提交失败的处理（不得假成功）
 
