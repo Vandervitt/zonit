@@ -9,8 +9,8 @@
 //
 // 英文面受众是全球中小企业。行业页是分众入口，跨境场景可以并且应该写清楚——
 // 只是不能写进受众定义位（"templates for X going global" 会筛掉本土客户）。
-// 完整口径见 lib/i18n/dictionaries/en/home.ts 顶部注释。
-// 注：本文件当前 12 个行业均未展开跨境场景，属已知缺口，随 seoIntro 去重一并补。
+// 完整口径见 lib/i18n/dictionaries/en/home.ts 顶部注释。跨境场景写在 crossBorder 字段，
+// 只给跨境真实成立的行业（纯本地行业留空即不渲染）。
 
 export interface IndustryFaq {
   q: string;
@@ -28,6 +28,13 @@ export interface IndustryCopy {
   whoFor: string;
   /** 该行业的线索通常怎么进来。 */
   leadsArrive: string;
+  /**
+   * 跨境场景段。只给跨境真实成立的行业写——注意方向有两种：
+   * 卖家跨境出去（实体商品、B2B 采购），以及客户跨境进来（留学、医疗旅游、移民）。
+   * 纯本地行业（local-service / home-improvement）不写，留空即不渲染。
+   * 这里是「场景描述位」，与受众定义位的区别见 en/home.ts 顶部注释。
+   */
+  crossBorder?: string;
   faqs: IndustryFaq[];
 }
 
@@ -40,6 +47,7 @@ export const templateIndustry = {
     templatesHeading: "Templates in this industry",
     whoForHeading: "Who it's for",
     leadsHeading: "How inquiries come in",
+    crossBorderHeading: "Selling across borders",
     faqHeading: "Common questions",
     otherIndustriesHeading: "Other industries",
     cta: "Start free · 7 days of Pro on sign-up",
@@ -61,6 +69,8 @@ export const templateIndustry = {
         "DTC beauty and personal care brands, clinics and salons that consult before recommending, distributors looking for stockists, and agencies running beauty accounts.",
       leadsArrive:
         "Chat dominates this category — a visitor who wants a routine recommendation would rather send a photo than fill a form, so most of these templates are set up for WhatsApp out of the box. Forms work better when you need structured input first (skin type, concern, budget), and you can switch any template between form, WhatsApp, phone, email, or Telegram in one click after picking it.",
+      crossBorder:
+        "Beauty is one of the categories where selling into another market is the normal case rather than the exception, and it changes what the page has to do. Your buyer is in a different time zone, has no local number to call, and often defaults to WhatsApp rather than email — so the reply channel matters more than the checkout ever would. Shade, skin type, and climate all shift by market too, which is exactly why an assessment offer travels better across borders than a discount does.",
       faqs: [
         {
           q: "Can visitors buy a product from these pages?",
@@ -91,6 +101,8 @@ export const templateIndustry = {
         "Independent clinics and practices, multi-location groups running a page per procedure, medical tourism coordinators, and agencies handling clinic accounts.",
       leadsArrive:
         "Phone and form dominate — patients booking a procedure want either an immediate call or a considered form they can complete privately, so these templates ship with a prominent call button and a form that collects the case detail your front desk needs. WhatsApp is worth switching on for markets where it is the default channel, and for coordinating with patients travelling from abroad.",
+      crossBorder:
+        "Medical travel is a real segment for several of these procedures, and it changes the page's job. A patient flying in needs to know what the trip involves — how many days, how many visits, what happens if a revision is needed once they are home — and none of that fits in a treatment description. Clinics serving international patients also tend to need a chat channel rather than a phone number, because a call across time zones is the one thing an anxious patient will not initiate.",
       faqs: [
         {
           q: "Should the page show prices?",
@@ -151,6 +163,8 @@ export const templateIndustry = {
         "Manufacturers and OEM suppliers, industrial equipment vendors, packaging and logistics providers, wholesale distributors seeking stockists, and B2B SaaS teams booking demos.",
       leadsArrive:
         "Forms carry this category, because a serious buyer expects to state a specification and would rather write it once than repeat it on a call. Email matters as a fallback for buyers who want an attachment or a paper trail, and WhatsApp is common in sourcing and freight, where quotes get negotiated in chat. Pro and Agency plans can POST each inquiry straight into your CRM so it lands in the pipeline instead of an inbox.",
+      crossBorder:
+        "B2B is cross-border by default: a sourcing, packaging, or freight enquiry usually starts in one country and ends in another. That is why destination belongs in the RFQ alongside specification and volume — it determines certification, documentation, duties, and lead time, and a quote without it is a guess. Time zones also make the channel decision for you: a form that captures everything at once beats a chat that needs three rounds spread over three days.",
       faqs: [
         {
           q: "Should the page state MOQ and pricing?",
@@ -181,6 +195,8 @@ export const templateIndustry = {
         "Study abroad and admissions consultancies, language schools, online course and bootcamp operators, tutoring centres, and agencies running education accounts.",
       leadsArrive:
         "Forms lead, because the follow-up depends on context a form collects best — target country, current level, the student's age, an intake date. WhatsApp is the strong second in most education markets and often becomes the whole counselling relationship, so several templates are set up for it. Phone matters most for parent-facing tutoring, where a decision-maker wants to hear a person.",
+      crossBorder:
+        "Education runs cross-border in the opposite direction to product categories — the student is abroad, or wants to be. Study abroad is the obvious case, but online courses and language training both routinely enrol from other countries, which makes intake dates, time zones for live classes, and whether qualifications are recognised locally into conversion questions rather than admin details. WhatsApp dominates precisely because the counselling relationship spans time zones for months.",
       faqs: [
         {
           q: "What should the low-commitment first step be?",
@@ -211,6 +227,8 @@ export const templateIndustry = {
         "Supplement and nutrition brands, practitioners recommending protocols, distributors seeking stockists, and agencies running health accounts that need a compliance-aware page structure.",
       leadsArrive:
         "Form and WhatsApp both work, and the split follows the product: a considered protocol benefits from a form that captures the visitor's goal and situation, while a simpler product converts better on a chat where questions get answered as they come up. Whichever you choose, the follow-up channel matters more here than in most categories — the qualification conversation is where the sale is actually made.",
+      crossBorder:
+        "Supplements are the category where selling into another market is a regulatory question before it is a marketing one. Permitted claims, ingredient restrictions, and labelling requirements differ by country, and a page that is compliant at home can be unlawful one border away. The consultation structure helps here for a practical reason as well as a legal one: it keeps the specific claims in a reply you control rather than on a public page a foreign regulator may read.",
       faqs: [
         {
           q: "What claims should I keep off the page?",
@@ -241,6 +259,8 @@ export const templateIndustry = {
         "Fashion and footwear brands with a fit or sizing problem to solve, plus-size and shapewear labels, activewear brands, and wholesale suppliers looking for stockists and distributors.",
       leadsArrive:
         "WhatsApp suits the fit conversation better than anything else — visitors send measurements and photos, and a sizing question resolves in one exchange instead of a lost visit. Forms fit waitlists, launch registration, and wholesale inquiries where you need structured information such as store name, volume, and territory before replying.",
+      crossBorder:
+        "Apparel is where cross-border selling hurts most, because sizing conventions differ market to market and a size chart cannot absorb that. A fit conversation can: asking what the visitor currently wears, and in which brand, gives you a reference point that survives the border. This is also why chat outperforms forms here — a buyer several time zones away would rather send measurements once than wait a day for a follow-up question.",
       faqs: [
         {
           q: "Can visitors place an order through the page?",
@@ -271,6 +291,8 @@ export const templateIndustry = {
         "Hardware and accessory brands, smart home vendors, teams running a pre-launch waitlist, and suppliers looking for distributors and retail partners.",
       leadsArrive:
         "Forms suit waitlists and distributor inquiries, where you want an email you can announce to or a business you can qualify. WhatsApp works for the pre-purchase question — compatibility, specification, availability — that a visitor would otherwise resolve by leaving. For hardware sold into channel, the inquiry usually needs to reach a CRM rather than an inbox, which the Pro and Agency plans handle.",
+      crossBorder:
+        "Consumer tech sells across borders on compatibility and support, not on price. Plug standards, network bands, warranty reach, and who handles a return from another country are the questions that stop a purchase, and a page that leaves them unanswered loses to a local seller charging more. Distributor enquiries follow the same logic in reverse — a retail buyer abroad is assessing whether you can supply and support their market at all.",
       faqs: [
         {
           q: "Can I use these pages for a product that hasn't launched?",
@@ -301,6 +323,8 @@ export const templateIndustry = {
         "Home and living brands, furnishing and storage specialists, pet and garden product sellers, and suppliers looking for retail or hospitality accounts.",
       leadsArrive:
         "Chat handles the fit-and-match questions that a home purchase turns on, and visitors send photos of the actual room — which is usually the fastest route to a confident answer. Forms are the better fit for anything you need to price or plan, such as a bulk or trade inquiry where quantities and specifications have to be recorded before a reply.",
+      crossBorder:
+        "Home and living products sell into other markets on dimensions and voltage as much as on design. A visitor measuring in inches when your page speaks in centimetres, or checking whether a plug fits, is one unanswered question away from leaving — which is why the chat-first structure works here. Trade and hospitality enquiries from abroad add lead time and freight to the same conversation.",
       faqs: [
         {
           q: "Can these pages take orders?",
@@ -331,6 +355,8 @@ export const templateIndustry = {
         "Toy and baby product brands, maternity and feeding brands, educational play specialists, and suppliers seeking retail or nursery accounts.",
       leadsArrive:
         "Forms do well when age, stage, or a gifting occasion determines the recommendation, since that context makes the follow-up specific. WhatsApp suits the safety and suitability questions parents want answered before committing — material, certification, whether it suits a particular child — which often resolve in a single exchange.",
+      crossBorder:
+        "Toy and baby products face different safety standards in every market, and parents abroad check for the certification they recognise, not the one you hold. Naming the standard explicitly — and which market it applies to — resolves in one line what would otherwise cost you the cautious buyer. Institutional and retail enquiries from abroad turn on the same documentation.",
       faqs: [
         {
           q: "What safety information belongs on the page?",
@@ -391,6 +417,8 @@ export const templateIndustry = {
         "Immigration consultancies and law firms, solo practitioners and small practices, and agencies running legal lead generation.",
       leadsArrive:
         "Forms lead, because case facts need to be written down and a visitor discussing a sensitive situation would rather type it than say it. WhatsApp is common in immigration work where clients are in another country and time zone, and phone matters for firms whose intake runs through a person.",
+      crossBorder:
+        "Immigration work is cross-border by definition: the client is in one country and the outcome is in another. That shapes everything practical about the page — the client cannot walk in, the time difference makes phone intake unreliable, and case facts often need to arrive as documents rather than conversation. It is also why the written assessment converts better here than a callback offer would.",
       faqs: [
         {
           q: "Can the page assess whether someone qualifies?",

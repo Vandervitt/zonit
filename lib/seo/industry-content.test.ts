@@ -159,3 +159,36 @@ describe("结构化数据", () => {
     for (const it of en) expect(it.url).not.toMatch(/\/zh\//);
   });
 });
+
+describe("跨境场景段", () => {
+  // 跨境有两个方向：卖家出去（实体商品 / B2B）与客户进来（留学 / 医疗旅游 / 移民）。
+  // 纯本地行业不写——给屋顶工写「跨境场景」是噪音。
+  const LOCAL_ONLY = ["local-service", "home-improvement"];
+
+  it.each(locales)("%s 非纯本地行业都写了跨境场景，纯本地行业留空", (locale) => {
+    const copy = getDictionary(locale).templateIndustry.byCategory as Record<
+      string,
+      { crossBorder?: string }
+    >;
+    for (const category of industryCategories()) {
+      const hasIt = Boolean(copy[category]?.crossBorder?.trim());
+      expect(hasIt, `${category} 跨境段落`).toBe(!LOCAL_ONLY.includes(category));
+    }
+  });
+
+  it.each(locales)("%s 跨境段落跨行业不重复", (locale) => {
+    const copy = getDictionary(locale).templateIndustry.byCategory as Record<
+      string,
+      { crossBorder?: string }
+    >;
+    const texts = Object.values(copy)
+      .map((c) => c.crossBorder)
+      .filter((x): x is string => Boolean(x));
+    expect(new Set(texts).size).toBe(texts.length);
+  });
+
+  it("buildIndustrySeoContent 透出跨境段落并替换占位符", () => {
+    expect(buildIndustrySeoContent("beauty", "en")!.crossBorder).toContain("time zone");
+    expect(buildIndustrySeoContent("local-service", "en")!.crossBorder).toBeUndefined();
+  });
+});

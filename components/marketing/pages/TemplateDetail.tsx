@@ -76,11 +76,13 @@ export async function TemplateDetailView({ slug, locale }: { slug: string; local
   const related = TEMPLATES.filter((x) => x.tags.category === t.tags.category && x.id !== t.id).slice(0, 3);
   const startHref = `${Routes.LandingPages}?template=${t.id}`;
   const seo = buildTemplateSeoContent(t, draft, locale);
+  const faqJsonLd = templateFaqJsonLd(seo.uniqueFaqs);
 
   return (
     <div className={`min-h-screen bg-background ${fonts.body}`}>
       <JsonLd data={templateBreadcrumbJsonLd(t, locale)} />
-      <JsonLd data={templateFaqJsonLd(seo.faqs)} />
+      {/* 只把模板级独有问答喂给 FAQPage；通用条目仍在页面上可见，但不进结构化数据。 */}
+      {faqJsonLd && <JsonLd data={faqJsonLd} />}
       <SiteNav fonts={fonts} locale={locale} />
       <main className="mx-auto max-w-6xl px-6 pb-24 pt-32">
         {/* 三层面包屑：模板库 → 行业 → 模板，与 templateBreadcrumbJsonLd 保持一致。 */}

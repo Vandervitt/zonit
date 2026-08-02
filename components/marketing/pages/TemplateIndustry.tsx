@@ -61,12 +61,14 @@ export async function TemplateIndustryView({
   const gallery = dict.templates.gallery;
   const items = templatesInIndustry(category);
   const others = industryCategories().filter((c) => c !== category);
+  const faqJsonLd = templateFaqJsonLd(seo.faqs);
 
   return (
     <div className={`min-h-screen bg-background ${fonts.body}`}>
       <JsonLd data={industryBreadcrumbJsonLd(category, locale)!} />
       <JsonLd data={industryItemListJsonLd(category, locale)!} />
-      <JsonLd data={templateFaqJsonLd(seo.faqs)} />
+      {/* 行业 FAQ 本身就是每行业独有的，恒满足门槛；护栏在此仅作兜底。 */}
+      {faqJsonLd && <JsonLd data={faqJsonLd} />}
       <SiteNav fonts={fonts} locale={locale} />
       <main className="mx-auto max-w-6xl px-6 pb-24 pt-32">
         <nav className={`text-xs text-muted-foreground ${fonts.mono}`}>
@@ -113,6 +115,15 @@ export async function TemplateIndustryView({
             </div>
           </aside>
         </section>
+
+        {seo.crossBorder && (
+          <section className="mt-14 max-w-3xl rounded-2xl border border-aqua-100 bg-aqua-50/40 p-6">
+            <h2 className={`text-base font-bold tracking-tight text-foreground ${fonts.display}`}>
+              {t.crossBorderHeading}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{seo.crossBorder}</p>
+          </section>
+        )}
 
         <section className="mt-16">
           <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>

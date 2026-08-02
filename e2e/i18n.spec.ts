@@ -163,13 +163,30 @@ test.describe("营销站双语", () => {
     );
   });
 
-  test("模板详情页：seoIntro 与派生 FAQ 各出对应语言", async ({ page }) => {
+  test("模板详情页：seoIntro、模板级 FAQ 与通用 FAQ 各出对应语言", async ({ page }) => {
     await page.goto("/templates/vitamins");
-    await expect(page.getByText(/Vitae Nutrition is a discovery-capture template/)).toBeVisible();
+    // seoIntro 正文（已去掉适用人群末句，末句改由侧栏 whoFor 承载）。
+    await expect(page.getByText(/the fastest-converting copy is also the copy that gets accounts restricted/)).toBeVisible();
+    // 模板级独有 FAQ——只有这批进 FAQPage 结构化数据。
+    await expect(page.getByText(/Where exactly are the compliance disclaimers in this template/)).toBeVisible();
+    // 通用 FAQ 仍然可见（讲产品流程），只是不进 schema。
     await expect(page.getByText(/Can I change anything in the Vitae Nutrition template/)).toBeVisible();
+
     await page.goto("/zh/templates/vitamins");
-    await expect(page.getByText(/Vitae Nutrition 是面向膳食补充剂出海/)).toBeVisible();
+    await expect(page.getByText(/保健品里转化最快的写法/)).toBeVisible();
+    await expect(page.getByText(/这套模板的合规声明具体在哪几处/)).toBeVisible();
     await expect(page.getByText(/Vitae Nutrition 模板可以随意修改吗/)).toBeVisible();
+  });
+
+  test("模板详情页的 FAQPage 结构化数据只含模板级独有问答", async ({ page }) => {
+    await page.goto("/templates/vitamins");
+    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const faqPage = blocks.map((b) => JSON.parse(b)).find((j) => j["@type"] === "FAQPage");
+    expect(faqPage, "详情页应输出 FAQPage").toBeTruthy();
+    const names: string[] = faqPage.mainEntity.map((q: { name: string }) => q.name);
+    expect(names).toContain("Where exactly are the compliance disclaimers in this template?");
+    // 通用问答曾在 104 个页面上重复声明同一组 FAQPage，现已被挡在 schema 之外。
+    expect(names.join(" ")).not.toContain("Can I change anything in");
   });
 
   test("模板详情页面包屑随语言变化", async ({ page }) => {
