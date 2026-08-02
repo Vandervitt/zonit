@@ -17,7 +17,10 @@ export const SITE_URL = (
 export const SITE_NAME = "Zap Bridge";
 
 // 营销站默认英文，中文版走 /zh 前缀。
-// 英文面受众是全球中小企业，故不出现 overseas（该表述只在出海语境成立）；中文面保留海外获客叙事。
+// 英文面受众是全球中小企业。siteDescription 是全客群必经的站点级描述，故跨境表述
+// 不进受众定义位（写成 "for brands going global" 会把本土客户挡在门外）；这不等于
+// 禁用 overseas——完整口径与分层见 lib/i18n/dictionaries/en/home.ts 顶部注释。
+// 中文面保留海外获客叙事。
 // 模板数量由 fillCounts 按注册表替换，避免文案与模板库口径长期脱节。
 export const siteDescription: Record<Locale, string> = {
   en: fillCounts(

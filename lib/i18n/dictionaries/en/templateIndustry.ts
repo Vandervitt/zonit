@@ -7,7 +7,10 @@
 // 红线：本项目生成的落地页非交易。行业文案一律用咨询 / 询盘 / 预约 / 留资措辞，
 // 不得出现下单、结账、购物车、订单、订阅等交易语义（对电商类行业尤其容易写飘）。
 //
-// 英文面受众是全球中小企业，不写 overseas / going global（那只在出海语境成立）。
+// 英文面受众是全球中小企业。行业页是分众入口，跨境场景可以并且应该写清楚——
+// 只是不能写进受众定义位（"templates for X going global" 会筛掉本土客户）。
+// 完整口径见 lib/i18n/dictionaries/en/home.ts 顶部注释。
+// 注：本文件当前 12 个行业均未展开跨境场景，属已知缺口，随 seoIntro 去重一并补。
 
 export interface IndustryFaq {
   q: string;
