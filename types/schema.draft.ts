@@ -325,7 +325,13 @@ export interface LeadFormFieldConfig {
   label?: string;
 }
 
-/** 兜底留资表单（页面级可选件，默认关；转化优先走深链）。 */
+/**
+ * 页内留资表单（页面级可选件）。
+ *
+ * 不是「兜底」——它与深链渠道对等，由用户在联系方式面板里选择谁当主转化
+ * （contact.primary === "form" 即表单主转化）。旧注释写的「默认关、转化优先走深链」
+ * 是渠道由模板决定时代的说法，已不成立。
+ */
 export interface LeadForm {
   enabled: boolean;
   title: string;
@@ -388,7 +394,7 @@ export interface LandingPageDraft {
   sections: LandingSection[];      // 中部模块，可自由排序；必须性由下方注册表 + 校验保证
   footer: FooterSection;           // 必填，固定页脚
   floatingButton?: FloatingButton; // 悬浮按钮（可选）
-  leadForm?: LeadForm;             // 兜底留资表单（可选）
+  leadForm?: LeadForm;             // 页内留资表单（可选；contact.primary 为 form 时是主转化）
   tracking?: PageTracking;         // 页面级追踪配置（缺省视为无 pixel）
   branding?: Branding;             // 页面品牌化（主题 / Logo / favicon）
   seo?: PageSeo;                   // SEO 覆盖（留空回退首屏派生）
