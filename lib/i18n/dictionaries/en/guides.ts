@@ -23,6 +23,7 @@ export const guides = {
     /** `{templates}` 与 `{industries}` 会被替换为实际数量。 */
     ctaDesc:
       "Start from {templates} lead-gen templates across {industries} industries, swap the content, connect your domain, set up attribution, and publish your own landing page in minutes.",
+    ctaAntiBan: "See how anti-duplication works",
     ctaTemplates: "Browse templates",
     /** `{industry}` 为行业展示名。 */
     ctaIndustryTemplates: "See {industry} templates",

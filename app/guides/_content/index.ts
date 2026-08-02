@@ -8,6 +8,16 @@ import { landingPageConversionAttribution as attrZh } from "./articles/landing-p
 import { landingPageConversionAttribution as attrEn } from "./articles/landing-page-conversion-attribution/en";
 import { crossBorderLeadGeneration as xbZh } from "./articles/cross-border-lead-generation/zh";
 import { crossBorderLeadGeneration as xbEn } from "./articles/cross-border-lead-generation/en";
+import { landingPageDuplicateDetection as dupZh } from "./articles/landing-page-duplicate-detection/zh";
+import { landingPageDuplicateDetection as dupEn } from "./articles/landing-page-duplicate-detection/en";
+import { adAccountBanLandingPageAudit as banZh } from "./articles/ad-account-ban-landing-page-audit/zh";
+import { adAccountBanLandingPageAudit as banEn } from "./articles/ad-account-ban-landing-page-audit/en";
+import { tiktokLandingPageCompliance as ttZh } from "./articles/tiktok-landing-page-compliance/zh";
+import { tiktokLandingPageCompliance as ttEn } from "./articles/tiktok-landing-page-compliance/en";
+import { googleAdsLandingPagePolicy as gadsZh } from "./articles/google-ads-landing-page-policy/zh";
+import { googleAdsLandingPagePolicy as gadsEn } from "./articles/google-ads-landing-page-policy/en";
+import { landingPagePrivacyPolicyFooter as privZh } from "./articles/landing-page-privacy-policy-footer/zh";
+import { landingPagePrivacyPolicyFooter as privEn } from "./articles/landing-page-privacy-policy-footer/en";
 import { beautyBrandLeadGeneration as beautyZh } from "./articles/beauty-brand-lead-generation/zh";
 import { beautyBrandLeadGeneration as beautyEn } from "./articles/beauty-brand-lead-generation/en";
 import { clinicPatientLeadGeneration as clinicZh } from "./articles/clinic-patient-lead-generation/zh";
@@ -39,8 +49,8 @@ import { localServiceLeadGeneration as localEn } from "./articles/local-service-
  * 两种语言共用同一 slug，使 hreflang 配对无需额外映射表。
  */
 const GUIDES_BY_LOCALE: Record<Locale, GuideArticle[]> = {
-  en: [beautyEn, clinicEn, solarEn, apparelEn, gadgetEn, homeEn, suppEn, toysEn, b2bEn, eduEn, legalEn, localEn, xbEn, fbEn, waEn, attrEn],
-  zh: [beautyZh, clinicZh, solarZh, apparelZh, gadgetZh, homeZh, suppZh, toysZh, b2bZh, eduZh, legalZh, localZh, xbZh, fbZh, waZh, attrZh],
+  en: [dupEn, banEn, ttEn, gadsEn, privEn, beautyEn, clinicEn, solarEn, apparelEn, gadgetEn, homeEn, suppEn, toysEn, b2bEn, eduEn, legalEn, localEn, xbEn, fbEn, waEn, attrEn],
+  zh: [dupZh, banZh, ttZh, gadsZh, privZh, beautyZh, clinicZh, solarZh, apparelZh, gadgetZh, homeZh, suppZh, toysZh, b2bZh, eduZh, legalZh, localZh, xbZh, fbZh, waZh, attrZh],
 };
 
 export function getGuides(locale: Locale): GuideArticle[] {
