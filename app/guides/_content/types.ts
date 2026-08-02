@@ -31,6 +31,12 @@ export interface GuideArticle {
    * 值必须是注册表里真实存在的行业，由 guides-industry.test.ts 守护。
    */
   industry?: string;
+  /**
+   * 文末主 CTA 落点覆盖。缺省行为：有 industry 则指向该行业页，否则指向模板库。
+   * 投放合规簇（簇 A）面向的是投手与代运营，他们读完要找的是反同质化能力，
+   * 把他们丢进模板库是折损一次转化——故这类文章显式指向 /anti-ban。
+   */
+  ctaTarget?: "anti-ban";
   /** ISO 日期，用于 Article 结构化数据与展示 */
   datePublished: string;
   dateModified?: string;

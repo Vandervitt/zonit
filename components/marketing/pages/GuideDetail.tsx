@@ -136,13 +136,19 @@ export function GuideDetailView({ slug, locale }: { slug: string; locale: Locale
             <Link
               href={localePath(
                 locale,
-                g.industry ? templateIndustryPath(g.industry) : Routes.Templates,
+                g.ctaTarget === "anti-ban"
+                  ? Routes.AntiBan
+                  : g.industry
+                    ? templateIndustryPath(g.industry)
+                    : Routes.Templates,
               )}
               className="rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-5 py-2.5 text-sm font-medium text-white shadow-sm shadow-aqua-600/25 transition-all hover:brightness-105"
             >
-              {g.industry
-                ? t.ctaIndustryTemplates.replace("{industry}", industryLabel(g.industry, locale))
-                : t.ctaTemplates}
+              {g.ctaTarget === "anti-ban"
+                ? t.ctaAntiBan
+                : g.industry
+                  ? t.ctaIndustryTemplates.replace("{industry}", industryLabel(g.industry, locale))
+                  : t.ctaTemplates}
             </Link>
             <Link
               href={localePath(locale, Routes.Register)}

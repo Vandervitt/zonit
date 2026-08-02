@@ -75,3 +75,38 @@ describe("行业获客文内容质量", () => {
     for (const slug of GUIDE_SLUGS) expect(slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
   });
 });
+
+// ---- 投放合规簇（簇 A）----
+// 这一簇面向投手与代运营，不属于任何行业，落点是 /anti-ban 而非行业页。
+// 它与行业文是两条互斥的 CTA 路径，混淆会把读完防封文的人丢进模板库。
+describe("投放合规簇的 CTA 落点", () => {
+  it("合规簇文章不挂 industry，且显式指向 anti-ban", () => {
+    for (const locale of locales) {
+      const compliance = getGuides(locale).filter((g) => g.ctaTarget === "anti-ban");
+      expect(compliance.length, `${locale} 合规簇文章数`).toBeGreaterThanOrEqual(5);
+      for (const g of compliance) {
+        expect(g.industry, `${g.slug} 不应同时挂 industry`).toBeUndefined();
+      }
+    }
+  });
+
+  it("industry 与 ctaTarget 互斥——同时设置会让落点无从判断", () => {
+    for (const locale of locales) {
+      for (const g of getGuides(locale)) {
+        expect(
+          Boolean(g.industry) && Boolean(g.ctaTarget),
+          `${g.slug} 同时设置了 industry 与 ctaTarget`,
+        ).toBe(false);
+      }
+    }
+  });
+
+  it.each(locales)("%s 合规簇每篇都带经核实的官方政策来源", (locale) => {
+    for (const g of getGuides(locale).filter((x) => x.ctaTarget === "anti-ban")) {
+      expect(g.references?.length, `${g.slug} 缺参考资料`).toBeGreaterThanOrEqual(2);
+      for (const r of g.references ?? []) {
+        expect(r.url, `${g.slug} 的来源须为 https 官方地址`).toMatch(/^https:\/\//);
+      }
+    }
+  });
+});
