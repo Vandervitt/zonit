@@ -20,6 +20,18 @@ import { consumerTechLeadGeneration as gadgetZh } from "./articles/consumer-tech
 import { consumerTechLeadGeneration as gadgetEn } from "./articles/consumer-tech-lead-generation/en";
 import { homeGoodsLeadGeneration as homeZh } from "./articles/home-goods-lead-generation/zh";
 import { homeGoodsLeadGeneration as homeEn } from "./articles/home-goods-lead-generation/en";
+import { supplementLeadGenerationCompliance as suppZh } from "./articles/supplement-lead-generation-compliance/zh";
+import { supplementLeadGenerationCompliance as suppEn } from "./articles/supplement-lead-generation-compliance/en";
+import { babyToyLeadGeneration as toysZh } from "./articles/baby-toy-lead-generation/zh";
+import { babyToyLeadGeneration as toysEn } from "./articles/baby-toy-lead-generation/en";
+import { b2bRfqLeadGeneration as b2bZh } from "./articles/b2b-rfq-lead-generation/zh";
+import { b2bRfqLeadGeneration as b2bEn } from "./articles/b2b-rfq-lead-generation/en";
+import { educationEnrolmentLeadGeneration as eduZh } from "./articles/education-enrolment-lead-generation/zh";
+import { educationEnrolmentLeadGeneration as eduEn } from "./articles/education-enrolment-lead-generation/en";
+import { immigrationFirmLeadGeneration as legalZh } from "./articles/immigration-firm-lead-generation/zh";
+import { immigrationFirmLeadGeneration as legalEn } from "./articles/immigration-firm-lead-generation/en";
+import { localServiceLeadGeneration as localZh } from "./articles/local-service-lead-generation/zh";
+import { localServiceLeadGeneration as localEn } from "./articles/local-service-lead-generation/en";
 
 /**
  * 列表顺序即展示顺序（新文放前，突出新鲜度）。
@@ -27,8 +39,8 @@ import { homeGoodsLeadGeneration as homeEn } from "./articles/home-goods-lead-ge
  * 两种语言共用同一 slug，使 hreflang 配对无需额外映射表。
  */
 const GUIDES_BY_LOCALE: Record<Locale, GuideArticle[]> = {
-  en: [beautyEn, clinicEn, solarEn, apparelEn, gadgetEn, homeEn, xbEn, fbEn, waEn, attrEn],
-  zh: [beautyZh, clinicZh, solarZh, apparelZh, gadgetZh, homeZh, xbZh, fbZh, waZh, attrZh],
+  en: [beautyEn, clinicEn, solarEn, apparelEn, gadgetEn, homeEn, suppEn, toysEn, b2bEn, eduEn, legalEn, localEn, xbEn, fbEn, waEn, attrEn],
+  zh: [beautyZh, clinicZh, solarZh, apparelZh, gadgetZh, homeZh, suppZh, toysZh, b2bZh, eduZh, legalZh, localZh, xbZh, fbZh, waZh, attrZh],
 };
 
 export function getGuides(locale: Locale): GuideArticle[] {
