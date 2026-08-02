@@ -23,10 +23,37 @@ export interface Badge {
   text: string;
 }
 
-/** 行动按钮（CTA）：文案 + 链接 */
+/** 留资渠道。form = 页内表单，其余 = 外部深链。 */
+export type LeadChannel = "form" | "whatsapp" | "phone" | "email" | "telegram";
+
+/** 即时通讯类渠道：悬浮按钮默认值的候选集（顺序即优先级）。 */
+export const INSTANT_CHANNELS: LeadChannel[] = ["whatsapp", "phone", "telegram"];
+
+/**
+ * CTA 落点。渠道类落点不再存 URL，只存引用，渲染期由 resolveCtaHref 解析。
+ * 这样换一次号码，全页所有按钮同步生效。
+ */
+export type CtaTarget =
+  | { kind: 'primary'; prefill?: string }                        // 跟随页面主渠道（绝大多数落点）
+  | { kind: 'channel'; channel: LeadChannel; prefill?: string }  // 钉死某渠道（如悬浮按钮常驻 WhatsApp）
+  | { kind: 'url'; url: string };                                // 二级外链（Instagram / 官网等）
+
+// prefill：点开聊天时预先填进输入框的消息（仅 WhatsApp 支持）。
+// 它必须留在 CTA 上而不是 contact 里 —— 同一张页面上每个按钮问的是不同的事：
+// 首屏「我想预约免费评估」、套餐区「我想了解隐形矫正」、悬浮「我有个问题」。
+// 商家一眼就知道访客要什么，这是 wa.me 深链最有价值的部分，不能为了归一号码丢掉。
+
+/** 行动按钮（CTA）：文案 + 落点引用 */
 export interface CtaButton {
-  text: string; // 按钮文案
-  link: string; // 按钮链接
+  text: string;                                          // 按钮文案
+  /**
+   * 按渠道的文案。切主渠道时由编辑器写进 text，渲染器不参与解析
+   * —— 所见即所得，快照存的就是最终显示的字符串。
+   */
+  textByChannel?: Partial<Record<LeadChannel, string>>;
+  /** 用户手改过文案则为 true，之后切渠道不再覆盖。 */
+  textEdited?: boolean;
+  target: CtaTarget;                                     // 按钮落点
 }
 
 /** 带图标的标题：icon + 文案 */
@@ -229,7 +256,8 @@ export interface GuaranteeSection {
 export interface FooterSection {
   brandName: string;           // 品牌名称
   copyrightYear: string;       // 版权年份
-  contactEmail: string;        // 联系邮箱
+  // contactEmail 已删除：它是 contact.email 的重复表达，正属本次要消灭的分散真源。
+  // 页脚改为渲染 contact 中所有已填、且未在主 CTA / 悬浮按钮出现过的渠道。
   privacyPolicy: string;       // 隐私政策
   termsOfService: string;      // 服务条款
 }
@@ -238,7 +266,7 @@ export interface FooterSection {
 
 export interface FloatingButton {
   text: string;                // 按钮文案
-  link: string;                // 按钮链接
+  target: CtaTarget;           // 按钮落点（通常钉死某即时渠道，不跟随主渠道）
 }
 
 // ============ 页面级追踪（Pixel / UTM / 同意）============
@@ -318,6 +346,23 @@ export interface LeadForm {
 export type LeadContactField = "email" | "phone" | "whatsapp" | "telegram";
 export const LEAD_CONTACT_FIELDS: LeadContactField[] = ["email", "phone", "whatsapp", "telegram"];
 
+/**
+ * 页面联系方式：全页 CTA 的单一真源。
+ *
+ * 刻意扁平不嵌套 —— 形状与 lib/leads 的 LeadPayload 一致，可直接喂给 channelHref。
+ * 表单的启用状态不在此重复表达，仍由 leadForm.enabled 负责：同一件事只能有一个
+ * 地方能声明，否则两者迟早不一致。
+ */
+export interface PageContact {
+  /** 主转化渠道。hero 主 CTA 与所有 target:"primary" 的 CTA 都指向它。 */
+  primary: LeadChannel;
+  /** 外部渠道的值。格式与线索侧同一套：号码 E.164、telegram 裸用户名。 */
+  whatsapp?: string;
+  phone?: string;
+  email?: string;
+  telegram?: string;
+}
+
 /** 预设品牌主题 id（单一真源，渲染器 theme.ts 引用本类型）。 */
 export type ThemeId = "teal" | "blue" | "rose" | "amber" | "violet" | "slate";
 
@@ -338,6 +383,7 @@ export interface PageSeo {
 
 // 方案 A：首屏 / 页脚为顶层必填字段（编译期保证），且不在 sections[] 中 → 天然固定、不可排序。
 export interface LandingPageDraft {
+  contact: PageContact;            // 必填，全页 CTA 的单一真源（置于 hero 之前：它是所有 CTA 的上游）
   hero: HeroSection;               // 必填，固定首屏
   sections: LandingSection[];      // 中部模块，可自由排序；必须性由下方注册表 + 校验保证
   footer: FooterSection;           // 必填，固定页脚

@@ -4,13 +4,14 @@
 // 用 IntersectionObserver 观察页面首个 <section>（恒为 hero）；在预览 iframe 内经 ownerDocument
 // 绑定到 iframe 文档，故编辑器实时预览与真实页面行为一致。
 import { useEffect, useRef, useState } from "react";
-import type { FloatingButton as FloatingButtonData } from "@/types/schema.draft";
+import type { FloatingButton as FloatingButtonData, PageContact } from "@/types/schema.draft";
 import type { RendererTheme } from "../theme";
-import { inferChannel } from "../tracking/events";
 import { missingCtaLabel } from "../primitives/Cta";
+import { resolveCtaHref, resolveCtaChannel } from "../lib/resolveCta";
 
-export function FloatingButton({ data, theme, preview = false }: { data: FloatingButtonData; theme: RendererTheme; preview?: boolean }) {
-  const complete = Boolean(data.link?.trim() && data.text?.trim());
+export function FloatingButton({ data, contact, theme, preview = false }: { data: FloatingButtonData; contact: PageContact; theme: RendererTheme; preview?: boolean }) {
+  const resolved = resolveCtaHref(data.target, contact);
+  const complete = Boolean(resolved && data.text?.trim());
   const ref = useRef<HTMLAnchorElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -27,14 +28,14 @@ export function FloatingButton({ data, theme, preview = false }: { data: Floatin
     return () => io.disconnect();
   }, []);
 
-  // 链接或文案为空：线上整体不渲染（空链接会成为点了回页顶的死按钮，存量已发布页兜底）；
+  // 落点解析不出或文案为空：线上整体不渲染（空链接会成为点了回页顶的死按钮）；
   // 预览渲染常驻右下角的虚线占位，让用户知道「未填完整、发布后不会出现」。守卫在 hooks 之后，遵守 hooks 规则。
   if (!complete) {
     if (!preview) return null;
     return (
       <span className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full border-2 border-dashed border-amber-400 bg-amber-50 px-5 py-3 text-sm font-bold text-amber-700">
         {data.text?.trim() || "悬浮按钮"}
-        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium">{missingCtaLabel(data)}</span>
+        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium">{missingCtaLabel(data, contact)}</span>
       </span>
     );
   }
@@ -42,8 +43,8 @@ export function FloatingButton({ data, theme, preview = false }: { data: Floatin
   return (
     <a
       ref={ref}
-      href={data.link}
-      data-cta={inferChannel(data.link)}
+      href={resolved!.href}
+      data-cta={resolveCtaChannel(data.target, contact)}
       aria-hidden={!visible}
       tabIndex={visible ? undefined : -1}
       className={`fixed bottom-5 right-5 z-50 inline-flex items-center rounded-full px-5 py-3 text-sm font-bold text-white transition-opacity duration-300 ${theme.accentGradient} ${theme.accentShadow} ${visible ? "opacity-100" : "pointer-events-none opacity-0"}`}

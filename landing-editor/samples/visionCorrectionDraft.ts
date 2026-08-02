@@ -23,13 +23,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：三个方案的 CTA 与主 CTA 全部指向它。 */
-const FORM_ANCHOR = "#lead-form";
 
-/** WhatsApp 次级通道（占位号码 + 预填咨询语）。 */
-const WHATSAPP =
-  "https://wa.me/15557654321?text=Hi%20Clearview%2C%20I%27d%20like%20to%20ask%20which%20procedure%20suits%20me";
 
 export const visionCorrectionDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    whatsapp: "+15557654321",
+    email: "assessments@clearview-vision.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1579684385127-1ef15d508118", 1600),
@@ -39,8 +40,8 @@ export const visionCorrectionDraft: LandingPageDraft = {
     title: "Three procedures. Only one of them is right for your eyes.",
     subtitle:
       "LASIK, SMILE, and lens implants each suit a different cornea, prescription, and lifestyle. Compare them honestly below — then let a surgeon confirm which one your eyes actually qualify for.",
-    cta: { text: "Check which procedure suits me", link: FORM_ANCHOR },
-    secondaryCta: { text: "Ask a question on WhatsApp", link: WHATSAPP },
+    cta: { text: "Check which procedure suits me", target: { kind: "primary" } },
+    secondaryCta: { text: "Ask a question on WhatsApp", target: { kind: "channel", channel: "whatsapp", prefill: "Hi Clearview, I'd like to ask which procedure suits me" } },
     endorsementText: "31,000+ suitability assessments · 1 in 5 advised against surgery",
     showcase: {
       type: "image",
@@ -85,7 +86,7 @@ export const visionCorrectionDraft: LandingPageDraft = {
               "Trade-off: the flap remains a permanent structural feature of the cornea",
               "Not for you if: your cornea is thin, or you box, wrestle, or do contact sports",
             ],
-            cta: { text: "See if LASIK suits me", link: FORM_ANCHOR },
+            cta: { text: "See if LASIK suits me", target: { kind: "primary" } },
           },
           {
             name: "SMILE",
@@ -98,7 +99,7 @@ export const visionCorrectionDraft: LandingPageDraft = {
               "Trade-off: fewer surgeons are trained in it, and enhancement is more complex",
               "Not for you if: you are long-sighted, or your prescription falls outside its treatable range",
             ],
-            cta: { text: "See if SMILE suits me", link: FORM_ANCHOR },
+            cta: { text: "See if SMILE suits me", target: { kind: "primary" } },
           },
           {
             name: "Implantable lens",
@@ -111,7 +112,7 @@ export const visionCorrectionDraft: LandingPageDraft = {
               "Trade-off: intraocular surgery carries a different risk profile from laser treatment",
               "Not for you if: your anterior chamber is too shallow or you have certain eye conditions",
             ],
-            cta: { text: "See if a lens implant suits me", link: FORM_ANCHOR },
+            cta: { text: "See if a lens implant suits me", target: { kind: "primary" } },
           },
         ],
       },
@@ -298,7 +299,6 @@ export const visionCorrectionDraft: LandingPageDraft = {
   footer: {
     brandName: "Clearview Vision Centre",
     copyrightYear: "2026",
-    contactEmail: "assessments@clearview-vision.example",
     privacyPolicy:
       "We collect only the prescription and health information you provide in order to assess your suitability. Diagnostic scans are held as confidential medical records, are never sold or shared without your written consent, and can be deleted on request.",
     termsOfService:
@@ -307,6 +307,6 @@ export const visionCorrectionDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "👁️ Check my suitability",
-    link: FORM_ANCHOR,
+    target: { kind: "primary" },
   },
 };

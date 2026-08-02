@@ -13,13 +13,15 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15554417720?text=Hi%20Cartwell%2C%20I%27d%20like%20a%20moving%20quote";
 
 /** 页内留资表单锚点：第二落点。 */
-const FORM = "#lead-form";
 
 export const movingServiceDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15554417720",
+    email: "moves@cartwell-movers.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1600518464441-9154a4dea21b", 1600),
@@ -29,8 +31,8 @@ export const movingServiceDraft: LandingPageDraft = {
     title: "A moving quote that doesn't change on the day",
     subtitle:
       "Send a short video walk-through of your place. You'll get a fixed written quote, a crew size, and an arrival window — not an hourly rate that drifts.",
-    cta: { text: "Get my moving quote", link: WHATSAPP },
-    secondaryCta: { text: "Send move details instead", link: FORM },
+    cta: { text: "Get my moving quote", target: { kind: "primary", prefill: "Hi Cartwell, I'd like a moving quote" } },
+    secondaryCta: { text: "Send move details instead", target: { kind: "channel", channel: "form" } },
     endorsementText: "22,000+ moves completed · Goods-in-transit insured",
     showcase: {
       type: "image",
@@ -231,7 +233,6 @@ export const movingServiceDraft: LandingPageDraft = {
   footer: {
     brandName: "Cartwell Movers",
     copyrightYear: "2026",
-    contactEmail: "moves@cartwell-movers.example",
     privacyPolicy:
       "We collect only the addresses, contact details, and property information needed to quote and schedule your move. Videos and photos you send are used solely for quoting, are never published, and are deleted once the move is complete.",
     termsOfService:
@@ -240,6 +241,6 @@ export const movingServiceDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Get a moving quote",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Cartwell, I'd like a moving quote" },
   },
 };

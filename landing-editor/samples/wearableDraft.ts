@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Pulse%2C%20I%27d%20like%20a%20free%20smartwatch%20match";
 
 export const wearableDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "help@pulse-wear.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1523275335684-37898b6baf30", 1600),
@@ -26,8 +29,8 @@ export const wearableDraft: LandingPageDraft = {
     title: "The right smartwatch for how you live",
     subtitle:
       "Tell us your phone, your goals, and your budget. Our advisors send a free match over WhatsApp — battery, fitness tracking, and compatibility sorted.",
-    cta: { text: "Get my free watch match", link: WHATSAPP },
-    secondaryCta: { text: "Compare models", link: "https://youtube.com/@pulse.wear" },
+    cta: { text: "Get my free watch match", target: { kind: "primary", prefill: "Hi Pulse, I'd like a free smartwatch match" } },
+    secondaryCta: { text: "Compare models", target: { kind: "url", url: "https://youtube.com/@pulse.wear" } },
     endorsementText: "Trusted by 140,000+ active users worldwide",
     showcase: {
       type: "image",
@@ -213,7 +216,6 @@ export const wearableDraft: LandingPageDraft = {
   footer: {
     brandName: "Pulse",
     copyrightYear: "2026",
-    contactEmail: "help@pulse-wear.com",
     privacyPolicy:
       "We use the details you share only to provide your wearable match. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -222,6 +224,6 @@ export const wearableDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "⌚ Free watch match",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Pulse, I'd like a free smartwatch match" },
   },
 };

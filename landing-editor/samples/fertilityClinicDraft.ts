@@ -19,12 +19,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：本模板以表单为主转化路径。 */
-const FORM_ANCHOR = "#lead-form";
 
-/** 电话次级通道（占位号码）。 */
-const PHONE = "tel:+15550100142";
 
 export const fertilityClinicDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    phone: "+15550100142",
+    email: "care@willowbrook-fertility.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1606811841689-23dfddce3e95", 1600),
@@ -34,8 +36,8 @@ export const fertilityClinicDraft: LandingPageDraft = {
     title: "Before anything else, you deserve to know where you stand",
     subtitle:
       "A first consultation is about understanding your situation — what the tests show, what your realistic options are, and what each one would ask of you. Treatment is a decision that comes later, if at all.",
-    cta: { text: "Request a first consultation", link: FORM_ANCHOR },
-    secondaryCta: { text: "Speak to our care team", link: PHONE },
+    cta: { text: "Request a first consultation", target: { kind: "primary" } },
+    secondaryCta: { text: "Speak to our care team", target: { kind: "channel", channel: "phone" } },
     endorsementText: "Regulated fertility centre · Consultant-led since 2009",
     showcase: {
       type: "image",
@@ -292,7 +294,6 @@ export const fertilityClinicDraft: LandingPageDraft = {
   footer: {
     brandName: "Willowbrook Fertility Centre",
     copyrightYear: "2026",
-    contactEmail: "care@willowbrook-fertility.example",
     privacyPolicy:
       "We collect only the information you choose to share in order to arrange your consultation and provide care. Fertility records are held as sensitive medical data under strict confidentiality, are never sold or shared without your written consent, and can be deleted on request.",
     termsOfService:
@@ -301,6 +302,6 @@ export const fertilityClinicDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🌱 Request a consultation",
-    link: FORM_ANCHOR,
+    target: { kind: "primary" },
   },
 };

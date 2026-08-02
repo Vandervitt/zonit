@@ -1,5 +1,5 @@
 // landing-renderer/sections/Hero.tsx
-import type { HeroSection } from "@/types/schema.draft";
+import type { PageContact, HeroSection } from "@/types/schema.draft";
 import type { RendererTheme } from "../theme";
 import type { HeroLayout } from "../variant";
 import { Img } from "../primitives/Img";
@@ -9,21 +9,23 @@ import { Cta } from "../primitives/Cta";
 
 interface HeroProps {
   data: HeroSection;
+  /** 页面联系方式：CTA 落点的解析依据（渲染器是服务端组件树，用不了 context，故透传）。 */
+  contact: PageContact;
   theme: RendererTheme;
   logo?: string;
   layout?: HeroLayout; // 反同质化布局变体；缺省 background（与改造前一致）
   preview?: boolean;   // 预览渲染：不完整 CTA 显示占位而非隐藏
 }
 
-export function Hero({ data, theme, logo, layout = "background", preview }: HeroProps) {
-  if (layout === "centered") return <HeroCentered data={data} theme={theme} logo={logo} preview={preview} />;
+export function Hero({ data, contact, theme, logo, layout = "background", preview }: HeroProps) {
+  if (layout === "centered") return <HeroCentered data={data} contact={contact} theme={theme} logo={logo} preview={preview} />;
   if (layout === "split-right" || layout === "split-left")
-    return <HeroSplit data={data} theme={theme} logo={logo} preview={preview} side={layout === "split-left" ? "left" : "right"} />;
-  return <HeroBackground data={data} theme={theme} logo={logo} preview={preview} />;
+    return <HeroSplit data={data} contact={contact} theme={theme} logo={logo} preview={preview} side={layout === "split-left" ? "left" : "right"} />;
+  return <HeroBackground data={data} contact={contact} theme={theme} logo={logo} preview={preview} />;
 }
 
 /** 原始布局：淡背景图 + 左对齐堆叠，展示图在下（改造前逐字节一致，守零回归）。 */
-function HeroBackground({ data, theme, logo, preview }: { data: HeroSection; theme: RendererTheme; logo?: string; preview?: boolean }) {
+function HeroBackground({ data, contact, theme, logo, preview }: { data: HeroSection; contact: PageContact; theme: RendererTheme; logo?: string; preview?: boolean }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white">
       {data.backgroundImage && (
@@ -40,8 +42,8 @@ function HeroBackground({ data, theme, logo, preview }: { data: HeroSection; the
         </h1>
         {data.subtitle && <p className="mt-4 max-w-xl text-base text-slate-600 sm:text-lg">{data.subtitle}</p>}
         <div className="mt-7 flex flex-wrap gap-3">
-          <Cta cta={data.cta} theme={theme} preview={preview} />
-          {data.secondaryCta && <Cta cta={data.secondaryCta} theme={theme} variant="secondary" preview={preview} />}
+          <Cta cta={data.cta} contact={contact} theme={theme} preview={preview} />
+          {data.secondaryCta && <Cta cta={data.secondaryCta} contact={contact} theme={theme} variant="secondary" preview={preview} />}
         </div>
         {data.endorsementText && <p className="mt-4 text-sm text-slate-500">{data.endorsementText}</p>}
         {data.showcase && <Media media={data.showcase} priority className="mt-10 w-full rounded-2xl object-cover shadow-xl" />}
@@ -53,12 +55,14 @@ function HeroBackground({ data, theme, logo, preview }: { data: HeroSection; the
 /** 分栏布局：文案一栏 + 展示图一栏；side 决定图在左/右（lg 以上）。 */
 function HeroSplit({
   data,
+  contact,
   theme,
   logo,
   side,
   preview,
 }: {
   data: HeroSection;
+  contact: PageContact;
   theme: RendererTheme;
   logo?: string;
   side: "left" | "right";
@@ -78,8 +82,8 @@ function HeroSplit({
           </h1>
           {data.subtitle && <p className="mt-4 text-base text-slate-600 sm:text-lg">{data.subtitle}</p>}
           <div className="mt-7 flex flex-wrap gap-3">
-            <Cta cta={data.cta} theme={theme} preview={preview} />
-            {data.secondaryCta && <Cta cta={data.secondaryCta} theme={theme} variant="secondary" preview={preview} />}
+            <Cta cta={data.cta} contact={contact} theme={theme} preview={preview} />
+            {data.secondaryCta && <Cta cta={data.secondaryCta} contact={contact} theme={theme} variant="secondary" preview={preview} />}
           </div>
           {data.endorsementText && <p className="mt-4 text-sm text-slate-500">{data.endorsementText}</p>}
         </div>
@@ -94,7 +98,7 @@ function HeroSplit({
 }
 
 /** 居中布局：文案居中，展示图在下居中。 */
-function HeroCentered({ data, theme, logo, preview }: { data: HeroSection; theme: RendererTheme; logo?: string; preview?: boolean }) {
+function HeroCentered({ data, contact, theme, logo, preview }: { data: HeroSection; contact: PageContact; theme: RendererTheme; logo?: string; preview?: boolean }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white">
       <div className="relative mx-auto max-w-3xl px-5 py-20 text-center sm:px-6">
@@ -108,8 +112,8 @@ function HeroCentered({ data, theme, logo, preview }: { data: HeroSection; theme
         </h1>
         {data.subtitle && <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 sm:text-lg">{data.subtitle}</p>}
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <Cta cta={data.cta} theme={theme} preview={preview} />
-          {data.secondaryCta && <Cta cta={data.secondaryCta} theme={theme} variant="secondary" preview={preview} />}
+          <Cta cta={data.cta} contact={contact} theme={theme} preview={preview} />
+          {data.secondaryCta && <Cta cta={data.secondaryCta} contact={contact} theme={theme} variant="secondary" preview={preview} />}
         </div>
         {data.endorsementText && <p className="mt-4 text-sm text-slate-500">{data.endorsementText}</p>}
         {data.showcase && (

@@ -13,11 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-/** WhatsApp 预约链接（占位号码 + 预填咨询语）。 */
-const WHATSAPP =
-  "https://wa.me/15557654321?text=Hi%20Lumora%2C%20I%27d%20like%20to%20book%20a%20free%20smile%20assessment";
 
 export const dentalClinicDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15557654321",
+    email: "hello@lumora-dental.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1606811841689-23dfddce3e95", 1600),
@@ -27,8 +29,8 @@ export const dentalClinicDraft: LandingPageDraft = {
     title: "A confident smile starts with a free assessment",
     subtitle:
       "Tell us what you'd like to improve and get a personalized smile plan from our dentists over WhatsApp — no pressure, no guesswork.",
-    cta: { text: "Book my free smile assessment", link: WHATSAPP },
-    secondaryCta: { text: "See smile transformations", link: "https://instagram.com/lumora.dental" },
+    cta: { text: "Book my free smile assessment", target: { kind: "primary", prefill: "Hi Lumora, I'd like to book a free smile assessment" } },
+    secondaryCta: { text: "See smile transformations", target: { kind: "url", url: "https://instagram.com/lumora.dental" } },
     endorsementText: "Trusted by 18,000+ patients across 20+ countries",
     showcase: {
       type: "image",
@@ -294,7 +296,6 @@ export const dentalClinicDraft: LandingPageDraft = {
   footer: {
     brandName: "Lumora Dental Studio",
     copyrightYear: "2026",
-    contactEmail: "hello@lumora-dental.com",
     privacyPolicy:
       "We collect only the photos and information you share with us to provide your smile assessment. Your data is kept confidential, never sold, and you can request its deletion at any time.",
     termsOfService:
@@ -303,6 +304,6 @@ export const dentalClinicDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Free smile assessment",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Lumora, I'd like to book a free smile assessment" },
   },
 };

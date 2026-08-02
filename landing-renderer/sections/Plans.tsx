@@ -1,12 +1,12 @@
 // landing-renderer/sections/Plans.tsx
-import type { PlansSection } from "@/types/schema.draft";
+import type { PageContact, PlansSection } from "@/types/schema.draft";
 import type { RendererTheme } from "../theme";
 import { SectionShell } from "../primitives/SectionShell";
 import { SectionHeading } from "../primitives/SectionHeading";
 import { Cta } from "../primitives/Cta";
 import { Countdown } from "../components/Countdown";
 
-export function Plans({ data, theme, preview }: { data: PlansSection; theme: RendererTheme; preview?: boolean }) {
+export function Plans({ data, contact, theme, preview }: { data: PlansSection; contact: PageContact; theme: RendererTheme; preview?: boolean }) {
   return (
     <SectionShell>
       <SectionHeading title={data.title} subtitle={data.subtitle} />
@@ -38,7 +38,7 @@ export function Plans({ data, theme, preview }: { data: PlansSection; theme: Ren
                 </div>
               )}
               <div className="mt-6 pt-2">
-                <Cta cta={p.cta} theme={theme} preview={preview} />
+                <Cta cta={p.cta} contact={contact} theme={theme} preview={preview} />
               </div>
             </div>
           ))}

@@ -5,12 +5,12 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 /** 结构合法的最小草稿（含一个 core-value 组区块），按需覆盖字段制造问题。 */
 const base = (over: Partial<LandingPageDraft> = {}): LandingPageDraft =>
   ({
-    hero: { title: "T", cta: { text: "Go", link: "https://wa.me/8613800138000" } },
+    contact: { primary: "whatsapp", whatsapp: "+8613800138000" },
+    hero: { title: "T", cta: { text: "Go", target: { kind: "primary" } } },
     sections: [{ type: "features", data: { title: "F", items: [] } }],
     footer: {
       brandName: "B",
       copyrightYear: "2026",
-      contactEmail: "hi@a.com",
       privacyPolicy: "p",
       termsOfService: "t",
     },
@@ -24,7 +24,7 @@ describe("collectPublishIssueItems 结构化校验项", () => {
 
   it("首屏字段格式错误 → target 指向 hero 固定面板", () => {
     const items = collectPublishIssueItems(
-      base({ hero: { title: "T", cta: { text: "Go", link: "not-a-url" } } } as never),
+      base({ hero: { title: "T", cta: { text: "Go", target: { kind: "url", url: "not-a-url" } } } } as never),
     );
     const hit = items.find((i) => i.message.startsWith("首屏"));
     expect(hit?.target).toEqual({ kind: "fixed", id: "hero" });
@@ -43,23 +43,18 @@ describe("collectPublishIssueItems 结构化校验项", () => {
     expect(hit?.target).toEqual({ kind: "section", index: 1 });
   });
 
-  it("页脚邮箱错误 → target 指向 footer；悬浮按钮错误 → 指向 floatingButton", () => {
+  // 页脚邮箱字段已并入 contact，页脚不再有可校验的联系方式；悬浮按钮落点校验照旧
+  it("悬浮按钮落点无效 → target 指向 floatingButton", () => {
     const items = collectPublishIssueItems(
-      base({
-        footer: { brandName: "B", copyrightYear: "2026", contactEmail: "bad", privacyPolicy: "p", termsOfService: "t" },
-        floatingButton: { link: "also-bad" },
-      } as never),
+      base({ floatingButton: { text: "Chat", target: { kind: "url", url: "also-bad" } } } as never),
     );
-    expect(items.find((i) => i.message.startsWith("页脚"))?.target).toEqual({ kind: "fixed", id: "footer" });
     expect(items.find((i) => i.message.startsWith("悬浮按钮"))?.target).toEqual({ kind: "fixed", id: "floatingButton" });
   });
 
-  it("首屏 CTA 为空（联系方式校验）→ target 指向 hero", () => {
-    const items = collectPublishIssueItems(
-      base({ hero: { title: "T", cta: { text: "Go", link: "" } } } as never),
-    );
-    const hit = items.find((i) => i.message.includes("CTA 按钮链接为空"));
-    expect(hit?.target).toEqual({ kind: "fixed", id: "hero" });
+  it("主渠道未填值（联系方式校验）→ target 指向联系方式面板", () => {
+    const items = collectPublishIssueItems(base({ contact: { primary: "whatsapp" } } as never));
+    const hit = items.find((i) => i.message.includes("无法联系你"));
+    expect(hit?.target).toEqual({ kind: "fixed", id: "contact" });
   });
 
   it("结构类问题（缺必须模块）无 target", () => {
@@ -71,7 +66,7 @@ describe("collectPublishIssueItems 结构化校验项", () => {
 
   it("与 collectPublishIssues 文案一一对应（同源保证）", async () => {
     const { collectPublishIssues } = await import("./publishIssues");
-    const draft = base({ hero: { title: "T", cta: { text: "Go", link: "not-a-url" } }, sections: [] } as never);
+    const draft = base({ hero: { title: "T", cta: { text: "Go", target: { kind: "url", url: "not-a-url" } } }, sections: [] } as never);
     expect(collectPublishIssueItems(draft).map((i) => i.message)).toEqual(collectPublishIssues(draft));
   });
 });

@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Atlas%2C%20I%27d%20like%20a%20free%20fit%20%26%20shoe%20consult";
 
 export const footwearDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "fit@atlas-footwear.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1460353581641-37baddab0fa2", 1600),
@@ -25,8 +28,8 @@ export const footwearDraft: LandingPageDraft = {
     title: "Shoes that fit your feet and your day",
     subtitle:
       "Tell us how you walk, work, and train. Our fit advisors send a free shoe-and-size guide over WhatsApp — comfort first, no more guessing sizes online.",
-    cta: { text: "Get my free fit consult", link: WHATSAPP },
-    secondaryCta: { text: "Browse styles", link: "https://instagram.com/atlas.footwear" },
+    cta: { text: "Get my free fit consult", target: { kind: "primary", prefill: "Hi Atlas, I'd like a free fit & shoe consult" } },
+    secondaryCta: { text: "Browse styles", target: { kind: "url", url: "https://instagram.com/atlas.footwear" } },
     endorsementText: "Trusted by 110,000+ across 40+ countries",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const footwearDraft: LandingPageDraft = {
   footer: {
     brandName: "Atlas Footwear",
     copyrightYear: "2026",
-    contactEmail: "fit@atlas-footwear.com",
     privacyPolicy:
       "We use the foot and size details you share only to provide your fit consult. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const footwearDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "👟 Free fit consult",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Atlas, I'd like a free fit & shoe consult" },
   },
 };

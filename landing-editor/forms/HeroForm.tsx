@@ -31,7 +31,7 @@ export function HeroForm({ value, onChange }: { value: HeroSection; onChange: (v
       <Optional
         label="副按钮"
         present={value.secondaryCta !== undefined}
-        onToggle={(on) => patch({ secondaryCta: on ? { text: "", link: "" } : undefined })}
+        onToggle={(on) => patch({ secondaryCta: on ? { text: "", target: { kind: "url" as const, url: "" } } : undefined })}
       >
         {value.secondaryCta ? (
           <CtaButtonField label="副按钮" value={value.secondaryCta} onChange={(v) => patch({ secondaryCta: v })} />

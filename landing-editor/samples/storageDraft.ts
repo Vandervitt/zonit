@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Tidely%2C%20I%27d%20like%20a%20free%20organizing%20plan";
 
 export const storageDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@tidely-home.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1558997519-83ea9252edf8", 1600),
@@ -25,8 +28,8 @@ export const storageDraft: LandingPageDraft = {
     title: "An organized home, without the overwhelm",
     subtitle:
       "Send us a photo of your messy space and get a free organizing plan over WhatsApp — the right bins, layout, and steps to finally keep it tidy.",
-    cta: { text: "Get my free organizing plan", link: WHATSAPP },
-    secondaryCta: { text: "See before & afters", link: "https://instagram.com/tidely.home" },
+    cta: { text: "Get my free organizing plan", target: { kind: "primary", prefill: "Hi Tidely, I'd like a free organizing plan" } },
+    secondaryCta: { text: "See before & afters", target: { kind: "url", url: "https://instagram.com/tidely.home" } },
     endorsementText: "Trusted by 85,000+ tidy homes worldwide",
     showcase: {
       type: "image",
@@ -201,7 +204,6 @@ export const storageDraft: LandingPageDraft = {
   footer: {
     brandName: "Tidely",
     copyrightYear: "2026",
-    contactEmail: "hello@tidely-home.com",
     privacyPolicy:
       "We use the photos and details you share only to provide your organizing plan. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -210,6 +212,6 @@ export const storageDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🧺 Free organizing plan",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Tidely, I'd like a free organizing plan" },
   },
 };

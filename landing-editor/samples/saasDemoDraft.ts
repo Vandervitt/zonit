@@ -15,12 +15,13 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：主转化落点。 */
-const FORM = "#lead-form";
 
-/** 邮件次通道（占位地址）。 */
-const MAILTO = "mailto:hello@flowlane.example?subject=Demo%20request";
 
 export const saasDemoDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    email: "hello@flowlane.example?subject=Demo%20request",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1497366754035-f200968a6e72", 1600),
@@ -30,8 +31,8 @@ export const saasDemoDraft: LandingPageDraft = {
     title: "See where every order actually stands",
     subtitle:
       "Book a 30-minute live demo with a product specialist. We'll walk through your workflow, not a canned slide deck.",
-    cta: { text: "Book a live demo", link: FORM },
-    secondaryCta: { text: "Take the product tour", link: "https://example.com/flowlane-tour" },
+    cta: { text: "Book a live demo", target: { kind: "primary" } },
+    secondaryCta: { text: "Take the product tour", target: { kind: "url", url: "https://example.com/flowlane-tour" } },
     endorsementText: "Used by operations teams in 40+ countries",
     showcase: {
       type: "image",
@@ -240,7 +241,6 @@ export const saasDemoDraft: LandingPageDraft = {
   footer: {
     brandName: "Flowlane",
     copyrightYear: "2026",
-    contactEmail: "hello@flowlane.example",
     privacyPolicy:
       "We collect only the contact and workflow details you share in order to schedule and prepare your demo. We do not sell your data, and you can ask us to delete it at any time.",
     termsOfService:
@@ -249,6 +249,6 @@ export const saasDemoDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "✉️ Email the team",
-    link: MAILTO,
+    target: { kind: "channel", channel: "email" },
   },
 };

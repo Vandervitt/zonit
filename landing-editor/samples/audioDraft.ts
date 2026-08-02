@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Sonara%2C%20I%27d%20like%20a%20free%20headphone%20match";
 
 export const audioDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "help@sonara-audio.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1505740420928-5e560c06d30e", 1600),
@@ -25,8 +28,8 @@ export const audioDraft: LandingPageDraft = {
     title: "Find headphones that fit your ears and your life",
     subtitle:
       "Tell us how and where you listen. Our audio advisors send a free match over WhatsApp — the right noise-cancelling, fit, and battery for you.",
-    cta: { text: "Get my free headphone match", link: WHATSAPP },
-    secondaryCta: { text: "Hear the difference", link: "https://youtube.com/@sonara.audio" },
+    cta: { text: "Get my free headphone match", target: { kind: "primary", prefill: "Hi Sonara, I'd like a free headphone match" } },
+    secondaryCta: { text: "Hear the difference", target: { kind: "url", url: "https://youtube.com/@sonara.audio" } },
     endorsementText: "Trusted by 130,000+ listeners worldwide",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const audioDraft: LandingPageDraft = {
   footer: {
     brandName: "Sonara",
     copyrightYear: "2026",
-    contactEmail: "help@sonara-audio.com",
     privacyPolicy:
       "We use the listening preferences you share only to provide your headphone match. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const audioDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🎧 Free headphone match",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Sonara, I'd like a free headphone match" },
   },
 };

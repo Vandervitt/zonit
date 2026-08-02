@@ -9,8 +9,11 @@ import {
   type Dispatch,
   type ReactNode,
 } from "react";
+import { switchPrimaryChannel } from "../lib/switchChannel";
 import type {
   HeroSection,
+  PageContact,
+  LeadChannel,
   FooterSection,
   FloatingButton,
   LeadForm,
@@ -32,6 +35,7 @@ import {
 
 export type EditorSection = LandingSection & { _key: string };
 
+export const CONTACT_ID = "contact";
 export const HERO_ID = "hero";
 export const FOOTER_ID = "footer";
 export const FLOATING_ID = "floatingButton";
@@ -40,6 +44,8 @@ export const BRANDING_ID = "branding";
 export const SEO_ID = "seo";
 
 export interface EditorState {
+  /** 页面联系方式：全页 CTA 落点的单一真源（阶段 2 由「联系方式」面板编辑）。 */
+  contact: PageContact;
   hero: HeroSection;
   footer: FooterSection;
   floatingButton: FloatingButton | null;
@@ -54,6 +60,10 @@ export interface EditorState {
 
 export type EditorAction =
   | { kind: "select"; id: string }
+  /** 只改联系方式的值（不动主渠道）。 */
+  | { kind: "updateContact"; value: PageContact }
+  /** 切主渠道：同时把跟随主渠道的 CTA 文案换成该渠道的版本。 */
+  | { kind: "switchPrimaryChannel"; channel: LeadChannel }
   | { kind: "updateHero"; value: HeroSection }
   | { kind: "updateFooter"; value: FooterSection }
   | { kind: "updateFloating"; value: FloatingButton }
@@ -85,6 +95,20 @@ export function reducer(state: EditorState, action: EditorAction): EditorState {
 
     case "updateHero":
       return { ...state, hero: action.value };
+    case "updateContact":
+      return { ...state, contact: action.value };
+    case "switchPrimaryChannel": {
+      // 文案跟随需要看到整份 draft（sections 里也有 CTA），故绕一圈 toDraft/fromDraft。
+      // 这样切渠道与撤销重做天然一致：它就是一次普通的整页更新。
+      const next = switchPrimaryChannel(toDraft(state), action.channel);
+      return {
+        ...state,
+        contact: next.contact,
+        hero: next.hero,
+        floatingButton: next.floatingButton ?? null,
+        sections: withKeys(next.sections),
+      };
+    }
 
     case "updateFooter":
       return { ...state, footer: action.value };
@@ -176,6 +200,7 @@ export function reducer(state: EditorState, action: EditorAction): EditorState {
     case "replaceDraft": {
       const d = action.draft;
       return {
+        contact: d.contact,
         hero: d.hero,
         footer: d.footer,
         floatingButton: d.floatingButton ?? null,
@@ -301,6 +326,7 @@ export function useEditorDispatch(): Dispatch<HistoryAction> {
 /** 产出干净的 LandingPageDraft（剥离 _key）。 */
 export function toDraft(state: EditorState): LandingPageDraft {
   const draft: LandingPageDraft = {
+    contact: state.contact,
     hero: state.hero,
     sections: state.sections.map((s) => ({ type: s.type, data: s.data }) as LandingSection),
     footer: state.footer,

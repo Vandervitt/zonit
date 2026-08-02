@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Bloom%2C%20I%27d%20like%20free%20pregnancy%20comfort%20advice";
 
 export const maternityDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@bloom-maternity.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1519689680058-324335c77eba", 1600),
@@ -26,8 +29,8 @@ export const maternityDraft: LandingPageDraft = {
     title: "Feel more comfortable through your pregnancy",
     subtitle:
       "Tell us your trimester and what's bothering you. We send free, trimester-matched comfort and gear advice over WhatsApp — practical support, honestly given.",
-    cta: { text: "Get my free comfort advice", link: WHATSAPP },
-    secondaryCta: { text: "Our approach", link: "https://instagram.com/bloom.maternity" },
+    cta: { text: "Get my free comfort advice", target: { kind: "primary", prefill: "Hi Bloom, I'd like free pregnancy comfort advice" } },
+    secondaryCta: { text: "Our approach", target: { kind: "url", url: "https://instagram.com/bloom.maternity" } },
     endorsementText: "Trusted by 85,000+ expecting parents worldwide",
     showcase: {
       type: "image",
@@ -200,7 +203,6 @@ export const maternityDraft: LandingPageDraft = {
   footer: {
     brandName: "Bloom",
     copyrightYear: "2026",
-    contactEmail: "hello@bloom-maternity.com",
     privacyPolicy:
       "We use the details you share only to provide your comfort advice. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -209,6 +211,6 @@ export const maternityDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🤰 Free comfort advice",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Bloom, I'd like free pregnancy comfort advice" },
   },
 };

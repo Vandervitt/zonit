@@ -15,13 +15,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：主转化落点。 */
-const FORM = "#lead-form";
 
-/** WhatsApp 次通道（占位号码 + 预填询价语）。 */
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Meridian%2C%20I%27d%20like%20to%20discuss%20an%20OEM%20order";
 
 export const b2bSourcingDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    whatsapp: "+15551234567",
+    email: "sales@meridian-sourcing.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1581091226825-a6a2a5aee158", 1600),
@@ -31,8 +32,8 @@ export const b2bSourcingDraft: LandingPageDraft = {
     title: "Your product, built to spec — without the sourcing headache",
     subtitle:
       "Send us your specs and target quantity. An engineer replies with materials, lead time, and a sample plan — usually within one business day.",
-    cta: { text: "Request a quote", link: FORM },
-    secondaryCta: { text: "See our capabilities", link: "https://example.com/meridian-capabilities" },
+    cta: { text: "Request a quote", target: { kind: "primary" } },
+    secondaryCta: { text: "See our capabilities", target: { kind: "url", url: "https://example.com/meridian-capabilities" } },
     endorsementText: "Trusted by 400+ brands across 30 countries",
     showcase: {
       type: "image",
@@ -275,7 +276,6 @@ export const b2bSourcingDraft: LandingPageDraft = {
   footer: {
     brandName: "Meridian Sourcing",
     copyrightYear: "2026",
-    contactEmail: "sales@meridian-sourcing.com",
     privacyPolicy:
       "We collect only the project details you share with us in order to prepare your quote. Drawings and specifications are treated as confidential, are never sold or shared outside the project team, and can be deleted on request.",
     termsOfService:
@@ -284,6 +284,6 @@ export const b2bSourcingDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Chat with an engineer",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Meridian, I'd like to discuss an OEM order" },
   },
 };

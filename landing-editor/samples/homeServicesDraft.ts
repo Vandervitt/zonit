@@ -14,14 +14,15 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-/** WhatsApp 主转化（占位号码 + 预填咨询语）。 */
-const WHATSAPP =
-  "https://wa.me/15553219876?text=Hi%20Brightline%2C%20I%27d%20like%20a%20free%20cleaning%20quote";
 
 /** 页内留资表单锚点：第二落点。 */
-const FORM = "#lead-form";
 
 export const homeServicesDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15553219876",
+    email: "hello@brightline-home.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1581578731548-c64695cc6952", 1600),
@@ -31,8 +32,8 @@ export const homeServicesDraft: LandingPageDraft = {
     title: "Come home to a place that's actually clean",
     subtitle:
       "Message us on WhatsApp with a couple of photos and your postcode. You'll get a clear quote and an available slot — usually within the hour.",
-    cta: { text: "Get my free quote", link: WHATSAPP },
-    secondaryCta: { text: "Request a callback instead", link: FORM },
+    cta: { text: "Get my free quote", target: { kind: "primary", prefill: "Hi Brightline, I'd like a free cleaning quote" } },
+    secondaryCta: { text: "Request a callback instead", target: { kind: "channel", channel: "form" } },
     endorsementText: "18,000+ homes cleaned · Fully insured teams",
     showcase: {
       type: "image",
@@ -241,7 +242,6 @@ export const homeServicesDraft: LandingPageDraft = {
   footer: {
     brandName: "Brightline Home Services",
     copyrightYear: "2026",
-    contactEmail: "hello@brightline-home.example",
     privacyPolicy:
       "We collect only the contact and property details you share in order to prepare your quote and arrange your visit. Photos of your home are used solely for quoting, are never published, and can be deleted on request.",
     termsOfService:
@@ -250,6 +250,6 @@ export const homeServicesDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Get a free quote",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Brightline, I'd like a free cleaning quote" },
   },
 };

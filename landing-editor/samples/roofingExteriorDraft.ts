@@ -16,12 +16,15 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：主转化落点。 */
-const FORM = "#lead-form";
 
 /** 漏水等紧急情况直拨。 */
-const PHONE = "tel:+15552467130";
 
 export const roofingExteriorDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    phone: "+15552467130",
+    email: "inspections@ridgeway-roofing.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1632759145351-1d592919f522", 1600),
@@ -31,8 +34,8 @@ export const roofingExteriorDraft: LandingPageDraft = {
     title: "Know what your roof actually needs before anyone quotes it",
     subtitle:
       "Book a free inspection and you'll get photos of every problem area, a written scope, and an honest answer on whether it's a repair or a replacement.",
-    cta: { text: "Book my free roof inspection", link: FORM },
-    secondaryCta: { text: "Call about an active leak", link: PHONE },
+    cta: { text: "Book my free roof inspection", target: { kind: "primary" } },
+    secondaryCta: { text: "Call about an active leak", target: { kind: "channel", channel: "phone" } },
     endorsementText: "11,500+ roofs inspected · Licensed and insured",
     showcase: {
       type: "image",
@@ -262,7 +265,6 @@ export const roofingExteriorDraft: LandingPageDraft = {
   footer: {
     brandName: "Ridgeway Roofing & Exteriors",
     copyrightYear: "2026",
-    contactEmail: "inspections@ridgeway-roofing.example",
     privacyPolicy:
       "We collect only the property and contact details needed to arrange your inspection and prepare a scope of work. Inspection photos are shared with you and, at your request, your insurer; they are never published without written permission and can be deleted on request.",
     termsOfService:
@@ -271,6 +273,6 @@ export const roofingExteriorDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "📞 Active leak? Call now",
-    link: PHONE,
+    target: { kind: "channel", channel: "phone" },
   },
 };

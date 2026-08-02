@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Cucina%2C%20I%27d%20like%20free%20kitchen%20gear%20advice";
 
 export const kitchenDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@cucina-kitchen.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1556910103-1c02745aae4d", 1600),
@@ -25,8 +28,8 @@ export const kitchenDraft: LandingPageDraft = {
     title: "The right kitchen tools for the way you cook",
     subtitle:
       "Tell us what you cook and the space you have. We send a free gear guide over WhatsApp — durable, genuinely useful tools, plus recipes to use them.",
-    cta: { text: "Get my free gear guide", link: WHATSAPP },
-    secondaryCta: { text: "See it in action", link: "https://youtube.com/@cucina.kitchen" },
+    cta: { text: "Get my free gear guide", target: { kind: "primary", prefill: "Hi Cucina, I'd like free kitchen gear advice" } },
+    secondaryCta: { text: "See it in action", target: { kind: "url", url: "https://youtube.com/@cucina.kitchen" } },
     endorsementText: "Trusted by 105,000+ home cooks worldwide",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const kitchenDraft: LandingPageDraft = {
   footer: {
     brandName: "Cucina",
     copyrightYear: "2026",
-    contactEmail: "hello@cucina-kitchen.com",
     privacyPolicy:
       "We use the cooking details you share only to provide your gear guide. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const kitchenDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🍳 Free gear guide",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Cucina, I'd like free kitchen gear advice" },
   },
 };

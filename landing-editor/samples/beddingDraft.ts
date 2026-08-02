@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Dwell%2C%20I%27d%20like%20free%20bedding%20advice";
 
 export const beddingDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@dwell-home.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1522771739844-6a9f6d5f14af", 1600),
@@ -25,8 +28,8 @@ export const beddingDraft: LandingPageDraft = {
     title: "Bedding matched to how you sleep",
     subtitle:
       "Tell us your climate, sleep style, and any sensitivities. We send a free recommendation over WhatsApp — the right fabric, weight, and weave for cooler, comfier nights.",
-    cta: { text: "Get my free bedding advice", link: WHATSAPP },
-    secondaryCta: { text: "Feel the fabrics", link: "https://instagram.com/dwell.home" },
+    cta: { text: "Get my free bedding advice", target: { kind: "primary", prefill: "Hi Dwell, I'd like free bedding advice" } },
+    secondaryCta: { text: "Feel the fabrics", target: { kind: "url", url: "https://instagram.com/dwell.home" } },
     endorsementText: "Trusted by 88,000+ better sleepers worldwide",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const beddingDraft: LandingPageDraft = {
   footer: {
     brandName: "Dwell",
     copyrightYear: "2026",
-    contactEmail: "hello@dwell-home.com",
     privacyPolicy:
       "We use the sleep and preference details you share only to provide your recommendation. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const beddingDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🛏️ Free bedding advice",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Dwell, I'd like free bedding advice" },
   },
 };

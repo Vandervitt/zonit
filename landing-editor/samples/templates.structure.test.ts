@@ -21,7 +21,7 @@ import { collectFieldIssues } from "../lib/validate";
 
 /**
  * 模板实例化后的草稿——与用户真正拿到的一致。
- * 注意 loadTemplateDraft 会把非锚点的主 CTA 置空（逼用户填自己的联系方式），
+ * 注意 loadTemplateDraft 会清空全部渠道值（逼用户填自己的联系方式），
  * 故本文件不断言主 CTA 链接非空，只断言结构、格式与元数据一致性。
  */
 async function instantiated(id: string): Promise<LandingPageDraft> {
@@ -53,8 +53,9 @@ describe("模板库结构完整性", () => {
       expect(collectFieldIssues(draft), `${id} 存在字段格式问题`).toEqual([]);
 
       // 3) 页脚合规字段
+      // 注：联系方式不在此断言——loadTemplateDraft 会清空全部渠道值（模板里的号码
+      // 和邮箱都是虚构的），「必须填」是发布门槛的职责，不是模板的。
       expect(draft.footer.brandName, `${id} 页脚缺品牌名`).toBeTruthy();
-      expect(draft.footer.contactEmail, `${id} 页脚缺联系邮箱`).toBeTruthy();
       expect(draft.footer.privacyPolicy, `${id} 页脚缺隐私政策`).toBeTruthy();
       expect(draft.footer.termsOfService, `${id} 页脚缺服务条款`).toBeTruthy();
 
@@ -82,13 +83,15 @@ describe("模板库结构完整性", () => {
   });
 
   it("表单主转化的模板：实例化后锚点 CTA 仍指向留资表单", async () => {
-    // 锚点不是用户的联系方式，不该被 blankPrimaryCtaLinks 清空——否则这类模板
-    // 一建出来主 CTA 就是死的，用户还会被发布门槛要求填一个不需要的联系方式。
+    // 表单主转化的模板开箱即用：blankTemplateContacts 只清渠道值，
+    // 而表单没有「用户自己的值」可填，所以主 CTA 一建出来就是活的——
+    // 否则用户还会被发布门槛要求填一个他根本不需要的联系方式。
     const anchored = TEMPLATES.filter((t) => t.tags.conversion[0] === "form");
     expect(anchored.length, "应至少有一套以表单为主转化的模板").toBeGreaterThan(0);
     for (const t of anchored) {
       const draft = await instantiated(t.id);
-      expect(draft.hero.cta.link, `${t.id} 的锚点主 CTA 被清空了`).toBe("#lead-form");
+      expect(draft.contact.primary, `${t.id} 主渠道应为表单`).toBe("form");
+      expect(draft.hero.cta.target, `${t.id} 主 CTA 应跟随主渠道`).toEqual({ kind: "primary" });
       expect(draft.leadForm?.enabled, `${t.id} 主 CTA 指向表单但表单未启用`).toBe(true);
     }
   });
@@ -110,5 +113,28 @@ describe("模板库结构完整性", () => {
       .filter(([, ids]) => ids.length > 1)
       .map(([photo, ids]) => `${photo} 被 ${ids.join(" / ")} 共用`);
     expect(duplicated).toEqual([]);
+  });
+
+  describe("渠道模型", () => {
+    it.each(TEMPLATES.map((t) => t.id))("%s 有 contact 且主渠道合法", async (id) => {
+      const draft = await loadTemplateDraft(id);
+      expect(draft.contact, `${id} 缺 contact`).toBeDefined();
+      const { primary } = draft.contact;
+      // 主渠道是表单时页面开箱即用（表单没有「用户自己的值」可填）
+      if (primary === "form") expect(draft.leadForm?.enabled, `${id} 主渠道是表单但表单未启用`).toBe(true);
+      else expect(["whatsapp", "phone", "email", "telegram"], `${id} 主渠道非法`).toContain(primary);
+    });
+
+    it.each(TEMPLATES.map((t) => t.id))("%s 的 CTA 不再出现渠道类裸 URL", async (id) => {
+      // 漏网检查：转换后仍以 url 落点指向 wa.me / tel: / mailto: / t.me 的，
+      // 说明批量转换没覆盖到——那个按钮会永远指向模板占位号，用户改了 contact 也无效。
+      const draft = await loadTemplateDraft(id);
+      const offenders: string[] = [];
+      JSON.stringify(draft, (k, v) => {
+        if (k === "target" && v?.kind === "url" && /wa\.me|^tel:|^mailto:|t\.me/i.test(v.url)) offenders.push(v.url);
+        return v;
+      });
+      expect(offenders, `${id} 存在未接入渠道模型的落点`).toEqual([]);
+    });
   });
 });

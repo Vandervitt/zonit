@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Pawsly%2C%20I%27d%20like%20free%20pet%20gear%20advice";
 
 export const petDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@pawsly.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1450778869180-41d0601e046e", 1600),
@@ -26,8 +29,8 @@ export const petDraft: LandingPageDraft = {
     title: "The right gear for your pet's needs",
     subtitle:
       "Tell us about your pet and what you're struggling with. We send a free recommendation over WhatsApp — gear and tips matched to their breed, age, and behavior.",
-    cta: { text: "Get my free pet advice", link: WHATSAPP },
-    secondaryCta: { text: "See happy tails", link: "https://instagram.com/pawsly" },
+    cta: { text: "Get my free pet advice", target: { kind: "primary", prefill: "Hi Pawsly, I'd like free pet gear advice" } },
+    secondaryCta: { text: "See happy tails", target: { kind: "url", url: "https://instagram.com/pawsly" } },
     endorsementText: "Trusted by 115,000+ pet parents worldwide",
     showcase: {
       type: "image",
@@ -188,7 +191,6 @@ export const petDraft: LandingPageDraft = {
   footer: {
     brandName: "Pawsly",
     copyrightYear: "2026",
-    contactEmail: "hello@pawsly.com",
     privacyPolicy:
       "We use the pet details you share only to provide your recommendation. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -197,6 +199,6 @@ export const petDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🐾 Free pet advice",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Pawsly, I'd like free pet gear advice" },
   },
 };

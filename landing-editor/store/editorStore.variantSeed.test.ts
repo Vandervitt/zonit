@@ -4,12 +4,12 @@ import { fromDraft } from "../sampleDraft";
 import type { LandingPageDraft } from "@/types/schema.draft";
 
 const baseDraft: LandingPageDraft = {
-  hero: { title: "T", cta: { text: "C", link: "https://wa.me/1" } },
+  contact: { primary: "whatsapp" as const, whatsapp: "+8613800138000" },
+    hero: { title: "T", cta: { text: "C", target: { kind: "primary" as const } } },
   sections: [],
   footer: {
     brandName: "B",
     copyrightYear: "2026",
-    contactEmail: "hi@b.com",
     privacyPolicy: "p",
     termsOfService: "t",
   },

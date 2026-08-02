@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Calmly%2C%20I%27d%20like%20a%20free%20fidget%20match";
 
 export const fidgetToyDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@calmly-sensory.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1516627145497-ae6968895b74", 1600),
@@ -25,8 +28,8 @@ export const fidgetToyDraft: LandingPageDraft = {
     title: "Fidget tools that actually help you focus",
     subtitle:
       "Tell us who they're for and what helps. We send a free match over WhatsApp — quiet, durable, classroom- and desk-friendly sensory tools.",
-    cta: { text: "Get my free fidget match", link: WHATSAPP },
-    secondaryCta: { text: "See the range", link: "https://instagram.com/calmly.sensory" },
+    cta: { text: "Get my free fidget match", target: { kind: "primary", prefill: "Hi Calmly, I'd like a free fidget match" } },
+    secondaryCta: { text: "See the range", target: { kind: "url", url: "https://instagram.com/calmly.sensory" } },
     endorsementText: "Trusted by 95,000+ focused minds worldwide",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const fidgetToyDraft: LandingPageDraft = {
   footer: {
     brandName: "Calmly",
     copyrightYear: "2026",
-    contactEmail: "hello@calmly-sensory.com",
     privacyPolicy:
       "We use the details you share only to provide your fidget match. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const fidgetToyDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🌀 Free fidget match",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Calmly, I'd like a free fidget match" },
   },
 };

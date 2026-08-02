@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Verda%2C%20I%27d%20like%20a%20free%20garden%20plan";
 
 export const gardenDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@verda-garden.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1466692476868-aef1dfb1e735", 1600),
@@ -25,8 +28,8 @@ export const gardenDraft: LandingPageDraft = {
     title: "Grow a garden that actually thrives",
     subtitle:
       "Tell us your space, climate, and how much time you have. We send a free garden plan over WhatsApp — the right plants, tools, and a season-by-season schedule.",
-    cta: { text: "Get my free garden plan", link: WHATSAPP },
-    secondaryCta: { text: "See garden makeovers", link: "https://instagram.com/verda.garden" },
+    cta: { text: "Get my free garden plan", target: { kind: "primary", prefill: "Hi Verda, I'd like a free garden plan" } },
+    secondaryCta: { text: "See garden makeovers", target: { kind: "url", url: "https://instagram.com/verda.garden" } },
     endorsementText: "Trusted by 75,000+ home gardeners worldwide",
     showcase: {
       type: "image",
@@ -200,7 +203,6 @@ export const gardenDraft: LandingPageDraft = {
   footer: {
     brandName: "Verda",
     copyrightYear: "2026",
-    contactEmail: "hello@verda-garden.com",
     privacyPolicy:
       "We use the location and garden details you share only to provide your plan. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -209,6 +211,6 @@ export const gardenDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🌿 Free garden plan",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Verda, I'd like a free garden plan" },
   },
 };

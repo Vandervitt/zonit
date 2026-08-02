@@ -17,12 +17,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：主转化落点。 */
-const FORM = "#lead-form";
 
-const WHATSAPP =
-  "https://wa.me/15558802411?text=Hi%20Lexicon%2C%20I%27d%20like%20a%20free%20level%20test";
 
 export const languageTrainingDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    whatsapp: "+15558802411",
+    email: "study@lexicon-lab.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1524178232363-1fb2b075b655", 1600),
@@ -32,8 +34,8 @@ export const languageTrainingDraft: LandingPageDraft = {
     title: "Find out exactly which band is holding you back",
     subtitle:
       "Take a free 30-minute level test with a certified examiner. You leave with your current band, the skill costing you the most marks, and a study plan built around your test date.",
-    cta: { text: "Book my free level test", link: FORM },
-    secondaryCta: { text: "Ask about class times", link: WHATSAPP },
+    cta: { text: "Book my free level test", target: { kind: "primary" } },
+    secondaryCta: { text: "Ask about class times", target: { kind: "channel", channel: "whatsapp", prefill: "Hi Lexicon, I'd like a free level test" } },
     endorsementText: "14,000+ students prepared · Ex-examiner teaching team",
     showcase: {
       type: "image",
@@ -235,7 +237,6 @@ export const languageTrainingDraft: LandingPageDraft = {
   footer: {
     brandName: "Lexicon Language Lab",
     copyrightYear: "2026",
-    contactEmail: "study@lexicon-lab.example",
     privacyPolicy:
       "We collect only the contact details and test information you provide in order to arrange your level test and prepare your study plan. Your test results are shared only with your assigned teacher and consultant, and can be deleted on request.",
     termsOfService:
@@ -244,6 +245,6 @@ export const languageTrainingDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💬 Ask about class times",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Lexicon, I'd like a free level test" },
   },
 };

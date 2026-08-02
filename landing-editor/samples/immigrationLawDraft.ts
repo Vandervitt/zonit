@@ -20,12 +20,14 @@ const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 /** 页内留资表单锚点：主转化落点。 */
-const FORM = "#lead-form";
 
-/** 电话次通道（占位号码）。 */
-const PHONE = "tel:+15551234567";
 
 export const immigrationLawDraft: LandingPageDraft = {
+  contact: {
+    primary: "form",
+    phone: "+15551234567",
+    email: "assessments@vantage-immigration.example",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1589829545856-d10d557cf95f", 1600),
@@ -35,8 +37,8 @@ export const immigrationLawDraft: LandingPageDraft = {
     title: "Know where your case really stands",
     subtitle:
       "Request a free case assessment. A registered practitioner reviews your situation and explains your realistic options — including when there aren't any.",
-    cta: { text: "Request a case assessment", link: FORM },
-    secondaryCta: { text: "How the assessment works", link: "#lead-form" },
+    cta: { text: "Request a case assessment", target: { kind: "primary" } },
+    secondaryCta: { text: "How the assessment works", target: { kind: "primary" } },
     endorsementText: "Advising applicants since 2009 · Regulated practitioners only",
     showcase: {
       type: "image",
@@ -275,7 +277,6 @@ export const immigrationLawDraft: LandingPageDraft = {
   footer: {
     brandName: "Vantage Immigration",
     copyrightYear: "2026",
-    contactEmail: "assessments@vantage-immigration.example",
     privacyPolicy:
       "We collect only the information you provide in order to assess your case. Case details are treated as confidential, are never shared with third parties without your written consent, and can be deleted on request at any time.",
     termsOfService:
@@ -284,6 +285,6 @@ export const immigrationLawDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "📞 Speak to a practitioner",
-    link: PHONE,
+    target: { kind: "channel", channel: "phone" },
   },
 };

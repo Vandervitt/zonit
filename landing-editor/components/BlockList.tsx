@@ -1,7 +1,7 @@
 "use client";
 // landing-editor/components/BlockList.tsx
 // 左栏：Hero 置顶、sections 可排序、Footer 置底、悬浮按钮开关。
-import { useEditorState, useEditorDispatch, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID, BRANDING_ID, SEO_ID } from "../store/editorStore";
+import { useEditorState, useEditorDispatch, CONTACT_ID, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID, BRANDING_ID, SEO_ID } from "../store/editorStore";
 import { SectionRow } from "./BlockListItem";
 import { AddSectionMenu } from "./AddSectionMenu";
 
@@ -40,6 +40,14 @@ export function BlockList() {
         <h2 className="text-sm font-semibold text-ink">页面结构</h2>
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto p-3">
+        {/* 置于 Hero 之上：它是全页 CTA 的上游，位置本身表达依赖关系 */}
+        <FixedRow
+          label="联系方式"
+          hint="客户怎么找你"
+          selected={state.selectedId === CONTACT_ID}
+          onSelect={() => dispatch({ kind: "select", id: CONTACT_ID })}
+        />
+
         <FixedRow
           label="首屏 Hero"
           hint="固定置顶"

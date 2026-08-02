@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Voltway%2C%20I%27d%20like%20a%20free%20charging%20setup%20plan";
 
 export const chargingDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "help@voltway.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1583863788434-e58a36330cf0", 1600),
@@ -25,8 +28,8 @@ export const chargingDraft: LandingPageDraft = {
     title: "Fast, safe charging for every device you own",
     subtitle:
       "List your devices and we'll send a free charging plan over WhatsApp — the right wattage, cables, and a tidy one-brick-for-everything setup.",
-    cta: { text: "Get my free charging plan", link: WHATSAPP },
-    secondaryCta: { text: "See the lineup", link: "https://youtube.com/@voltway" },
+    cta: { text: "Get my free charging plan", target: { kind: "primary", prefill: "Hi Voltway, I'd like a free charging setup plan" } },
+    secondaryCta: { text: "See the lineup", target: { kind: "url", url: "https://youtube.com/@voltway" } },
     endorsementText: "Trusted by 150,000+ households and travelers",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const chargingDraft: LandingPageDraft = {
   footer: {
     brandName: "Voltway",
     copyrightYear: "2026",
-    contactEmail: "help@voltway.com",
     privacyPolicy:
       "We use the device details you share only to build your charging plan. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const chargingDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🔌 Free charging plan",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Voltway, I'd like a free charging setup plan" },
   },
 };

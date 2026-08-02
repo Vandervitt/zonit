@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Lunela%2C%20I%27d%20like%20free%20styling%20advice";
 
 export const fastFashionDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "style@lunela.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1483985988355-763728e1935b", 1600),
@@ -25,8 +28,8 @@ export const fastFashionDraft: LandingPageDraft = {
     title: "Outfits that fit your body and your life",
     subtitle:
       "Tell us your style and size, and our stylists send a free capsule of looks over WhatsApp — plus first dibs on new arrivals.",
-    cta: { text: "Get free styling advice", link: WHATSAPP },
-    secondaryCta: { text: "See this season's looks", link: "https://instagram.com/lunela.style" },
+    cta: { text: "Get free styling advice", target: { kind: "primary", prefill: "Hi Lunela, I'd like free styling advice" } },
+    secondaryCta: { text: "See this season's looks", target: { kind: "url", url: "https://instagram.com/lunela.style" } },
     endorsementText: "Styled 70,000+ wardrobes across 40+ countries",
     showcase: {
       type: "image",
@@ -198,7 +201,6 @@ export const fastFashionDraft: LandingPageDraft = {
   footer: {
     brandName: "Lunela",
     copyrightYear: "2026",
-    contactEmail: "style@lunela.com",
     privacyPolicy:
       "We use the style and size details you share only to provide your styling advice. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -207,6 +209,6 @@ export const fastFashionDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "👗 Free styling advice",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Lunela, I'd like free styling advice" },
   },
 };

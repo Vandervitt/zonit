@@ -13,10 +13,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Lull%2C%20I%27d%20like%20a%20free%20sleep%20check";
 
 export const sleepDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "hello@lull-rest.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1455642305367-68834a1da7ab", 1600),
@@ -26,8 +29,8 @@ export const sleepDraft: LandingPageDraft = {
     title: "Wind down to deeper, calmer nights",
     subtitle:
       "Get a free sleep check over WhatsApp. Our advisors help you build a calming wind-down routine and habits — alongside any natural support that fits you.",
-    cta: { text: "Get my free sleep check", link: WHATSAPP },
-    secondaryCta: { text: "Our approach", link: "https://instagram.com/lull.rest" },
+    cta: { text: "Get my free sleep check", target: { kind: "primary", prefill: "Hi Lull, I'd like a free sleep check" } },
+    secondaryCta: { text: "Our approach", target: { kind: "url", url: "https://instagram.com/lull.rest" } },
     endorsementText: "Trusted by 90,000+ people sleeping better",
     showcase: {
       type: "image",
@@ -215,7 +218,6 @@ export const sleepDraft: LandingPageDraft = {
   footer: {
     brandName: "Lull",
     copyrightYear: "2026",
-    contactEmail: "hello@lull-rest.com",
     privacyPolicy:
       "We use the sleep and lifestyle details you share only to provide your sleep check. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -224,6 +226,6 @@ export const sleepDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "🌙 Free sleep check",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Lull, I'd like a free sleep check" },
   },
 };

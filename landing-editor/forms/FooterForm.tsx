@@ -17,14 +17,7 @@ export function FooterForm({ value, onChange }: { value: FooterSection; onChange
       <Field label="版权年份">
         <TextInput value={value.copyrightYear} onChange={(e) => patch({ copyrightYear: e.target.value })} placeholder="2026" />
       </Field>
-      <Field label="联系邮箱" error={validateEmail(value.contactEmail)}>
-        <TextInput
-          type="email"
-          value={value.contactEmail}
-          onChange={(e) => patch({ contactEmail: e.target.value })}
-          placeholder="contact@example.com"
-        />
-      </Field>
+      {/* 联系邮箱已并入页面级 contact.email，页脚不再单独存一份 */}
       <Field label="隐私政策">
         <TextArea rows={4} value={value.privacyPolicy} onChange={(e) => patch({ privacyPolicy: e.target.value })} />
       </Field>

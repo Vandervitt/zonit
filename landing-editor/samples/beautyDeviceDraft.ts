@@ -12,10 +12,13 @@ import type { LandingPageDraft } from "@/types/schema.draft";
 const img = (id: string, w = 1200) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
 
-const WHATSAPP =
-  "https://wa.me/15551234567?text=Hi%20Lumio%2C%20I%27d%20like%20a%20free%20skin-device%20plan";
 
 export const beautyDeviceDraft: LandingPageDraft = {
+  contact: {
+    primary: "whatsapp",
+    whatsapp: "+15551234567",
+    email: "care@lumio-skin.com",
+  },
   hero: {
     backgroundImage: {
       src: img("photo-1570172619644-dfd03ed5d881", 1600),
@@ -25,8 +28,8 @@ export const beautyDeviceDraft: LandingPageDraft = {
     title: "Smarter skin, from the comfort of home",
     subtitle:
       "Tell us your skin goals and get a free, personalized device-care plan over WhatsApp — the right routine, the right settings, the right pace.",
-    cta: { text: "Get my free care plan", link: WHATSAPP },
-    secondaryCta: { text: "See how it works", link: "https://youtube.com/@lumio.skin" },
+    cta: { text: "Get my free care plan", target: { kind: "primary", prefill: "Hi Lumio, I'd like a free skin-device plan" } },
+    secondaryCta: { text: "See how it works", target: { kind: "url", url: "https://youtube.com/@lumio.skin" } },
     endorsementText: "Trusted by 80,000+ at-home skincare users",
     showcase: {
       type: "image",
@@ -242,7 +245,6 @@ export const beautyDeviceDraft: LandingPageDraft = {
   footer: {
     brandName: "Lumio",
     copyrightYear: "2026",
-    contactEmail: "care@lumio-skin.com",
     privacyPolicy:
       "We use the skin information you share only to build your care plan. Your data stays confidential, is never sold, and can be deleted on request.",
     termsOfService:
@@ -251,6 +253,6 @@ export const beautyDeviceDraft: LandingPageDraft = {
 
   floatingButton: {
     text: "💡 Free care plan",
-    link: WHATSAPP,
+    target: { kind: "channel", channel: "whatsapp", prefill: "Hi Lumio, I'd like a free skin-device plan" },
   },
 };
