@@ -82,6 +82,13 @@ const FIELD_VALIDATORS: Record<string, (v: string) => string | undefined> = {
   email: validateEmail,
 };
 
+/**
+ * 这些容器里的键是**渠道名**而不是字段名，整棵子树跳过。
+ * 典型的 `textByChannel: { email: "Email Us" }`——那是按钮文案，不是邮箱地址，
+ * 按键名校验会把它当邮箱拦下来。
+ */
+const CHANNEL_KEYED_CONTAINERS = new Set(["textByChannel"]);
+
 /** 递归收集 node 内所有字段格式错误，统一冠以区块标签前缀并挂上跳转落点。 */
 function walkFieldIssues(node: unknown, label: string, target: IssueTarget, out: PublishIssue[]): void {
   if (Array.isArray(node)) {
@@ -90,6 +97,7 @@ function walkFieldIssues(node: unknown, label: string, target: IssueTarget, out:
   }
   if (!node || typeof node !== "object") return;
   for (const [key, val] of Object.entries(node)) {
+    if (CHANNEL_KEYED_CONTAINERS.has(key)) continue;
     if (typeof val === "string") {
       const msg = FIELD_VALIDATORS[key]?.(val);
       if (msg) out.push({ message: `${label}：${msg}`, target });

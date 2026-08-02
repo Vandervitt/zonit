@@ -32,7 +32,19 @@ export const hvacRepairDraft: LandingPageDraft = {
     title: "No heat? No cooling? We'll be there today",
     subtitle:
       "Call and speak to a technician, not a call centre. Same-day slots in most of the area, a diagnosis before any work starts, and a written price you approve first.",
-    cta: { text: "Call now for same-day service", target: { kind: "primary" } },
+    // 急单生意默认走电话，但用户可能改成表单收工单；文案必须跟着渠道走，
+    // 否则会出现「Call now」点开却是个表单的自相矛盾。
+    cta: {
+      text: "Call now for same-day service",
+      textByChannel: {
+        phone: "Call now for same-day service",
+        whatsapp: "Message us for same-day service",
+        telegram: "Message us for same-day service",
+        email: "Email us for same-day service",
+        form: "Request same-day service",
+      },
+      target: { kind: "primary" },
+    },
     secondaryCta: { text: "Book a service visit", target: { kind: "channel", channel: "form" } },
     endorsementText: "31,000+ callouts · Licensed and insured",
     showcase: {

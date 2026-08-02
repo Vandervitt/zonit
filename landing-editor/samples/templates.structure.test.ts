@@ -136,5 +136,27 @@ describe("模板库结构完整性", () => {
       });
       expect(offenders, `${id} 存在未接入渠道模型的落点`).toEqual([]);
     });
+
+    // 用户可以在联系方式面板把主渠道改成任意渠道。若 CTA 文案写死了渠道语境
+    // （"Chat Now" / "Call now"），切完就会出现「Call now」点开是个表单的自相矛盾。
+    // 实测 66 个跟随主渠道的落点里只有 2 条绑定渠道，其余本就中立——
+    // 故不要求全库都写 textByChannel，只要求「绑了渠道就必须给替换文案」。
+    it.each(TEMPLATES.map((t) => t.id))("%s 绑定渠道的 CTA 文案必须提供 textByChannel", async (id) => {
+      const draft = await loadTemplateDraft(id);
+      const CHANNEL_WORDS = /\bwhatsapp\b|\btelegram\b|\bcall\b|\bchat\b|\bdial\b|\bemail us\b|\btext us\b/i;
+      const offenders: string[] = [];
+      const visit = (node: unknown) => {
+        if (Array.isArray(node)) return node.forEach(visit);
+        if (!node || typeof node !== "object") return;
+        const o = node as Record<string, unknown>;
+        const target = o.target as { kind?: string } | undefined;
+        if (typeof o.text === "string" && target?.kind === "primary") {
+          if (CHANNEL_WORDS.test(o.text) && !o.textByChannel) offenders.push(o.text);
+        }
+        Object.values(o).forEach(visit);
+      };
+      visit(draft);
+      expect(offenders, `${id} 的 CTA 文案绑定了渠道却没给 textByChannel`).toEqual([]);
+    });
   });
 });

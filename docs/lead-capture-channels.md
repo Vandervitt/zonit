@@ -1,22 +1,63 @@
 # 留资渠道与主转化路径
 
-生成页的转化路径有两类：**外部深链**（WhatsApp / Telegram / 电话 / 邮件）与**页内留资表单**。本文说明表单作为主转化路径的实现约定与红线。
+生成页的转化路径有两类：**外部深链**（WhatsApp / Telegram / 电话 / 邮件）与**页内留资表单**。
+**渠道由页面拥有者选择，不由模板决定**——本文说明该模型的实现约定与红线。
 
-## 为什么需要表单主转化
+## 渠道是页面级的单一真源
 
-第一梯队（电商种草）29 套模板全部走 WhatsApp，这符合 COD 询单市场的习惯。但第二梯队的服务与 B2B 品类不同：采购方提 RFQ、SaaS 买家约 demo、移民申请人递案情，都需要一次性提交结构化信息，即时聊天反而是障碍。
+`LandingPageDraft.contact`（`PageContact`）持有主渠道与各渠道的值；所有 CTA 只存**引用**（`CtaTarget`），渲染期由 `resolveCtaHref` 解析成链接。改一次号码，全页所有落点同步生效。
 
-2026-07-30 之前平台**结构性地只支持 WhatsApp 优先**——`validateLink` 不接受页内锚点、`LeadForm` 无锚点 id、`blankPrimaryCtaLinks` 会清空主 CTA、发布门槛又要求主 CTA 非空。这四道限制叠加，导致表单永远做不成主转化。
+```
+contact: { primary: "whatsapp", whatsapp: "+86…", email: "…" }
+   ↑ 引用
+hero.cta.target        = { kind: "primary" }                    跟随主渠道
+floatingButton.target  = { kind: "channel", channel: "whatsapp" } 钉死某渠道
+hero.secondaryCta      = { kind: "url", url: "https://ig.com/…" } 二级外链
+```
 
-## 现在的约定
+| 模块 | 职责 |
+|---|---|
+| `lib/contact/channel-href.ts` | 渠道 + 值 → 链接。落地页与后台「一键联系」共用的**唯一**拼装点 |
+| `landing-renderer/lib/resolveCta.ts` | `CtaTarget` + `PageContact` → href；解析不出返回 `null`，调用方不渲染该按钮 |
+| `landing-editor/forms/ContactForm.tsx` | 「联系方式」面板：主渠道单选 + 各渠道值 + 悬浮按钮渠道 |
+| `landing-editor/lib/switchChannel.ts` | 切主渠道时同步 CTA 文案（`textByChannel`），用户手改过则不覆盖 |
+| `landing-editor/lib/channelGuidance.ts` | 每个渠道的适用场景与代价文案 |
+| `lib/ai/brief-contact.ts` | AI 成页向导的渠道多选 → `contact.primary` |
 
-**锚点常量是单一真源**：`LEAD_FORM_ANCHOR_ID`（`landing-renderer/sections/LeadForm.tsx`），值为 `lead-form`。schema 保证每页至多一个 `leadForm`，故固定 id 不会重复。CTA 指向 `#lead-form` 即可直达。
+**用户只做两个选择**：主渠道是什么、悬浮按钮挂哪个渠道。160 个 CTA 落点的连接由平台负责。
+
+### 为什么要给渠道配引导文案
+
+用户未必是专业投手（诊所老板、律所合伙人、装修队长）。只把选择权交出去而不解释，等于把难题原样丢回去。故每个渠道说明三件事：点了会发生什么、什么生意适合、代价是什么。
+
+**WhatsApp 那条代价必须写出来**：「聊天发生在你自己手机里，平台只能统计有多少人点了，帮不了你记录和提醒。」这是平台真实的测量不对称——只有表单线索能进收件箱、能导出、能推送 CRM。如实告知比藏着好，也是引导用户考虑「主推表单 + 悬浮 WhatsApp」组合的诚实理由。
+
+## 锚点常量
+
+`LEAD_FORM_ANCHOR_ID` 定义在 **`landing-renderer/sections/leadFormAnchor.ts`**（独立模块），值为 `lead-form`。schema 保证每页至多一个 `leadForm`，故固定 id 不会重复。
+
+> ⚠️ **绝不能挪回 `LeadForm.tsx`**：那是 `"use client"` 模块，服务端 import 它拿到的是**客户端引用代理**而不是字符串值，拼进 `href` 会变成一段 React 报错文本，表单按钮全是死的。这类问题跑在 Node 里的单元测试测不出来（没有 RSC 边界），只有真机走查能发现——已经踩过一次。
 
 | 环节 | 行为 |
 |---|---|
-| `validateLink` | 放行 `#片段` 形式的页内锚点；孤立的 `#` 不是落点，仍拦；锚点同样过交易语义检查 |
-| `blankPrimaryCtaLinks` | 跳过锚点链接——锚点不是用户的联系方式，没有强制重填的理由；非锚点主 CTA 照常清空 |
-| 发布门槛 `collectContactIssueItems` | CTA 指向 `#lead-form` 时**额外校验**表单确实已启用，否则报死链问题。这是收紧不是放行 |
+| `validateLink` | 只管 `{kind:"url"}` 的二级外链，继续拦交易语义链接（红线不放松）。渠道类落点不经过它 |
+| `blankTemplateContacts` | 模板实例化时清空**全部**渠道值——模板里的号码和邮箱都是虚构的，留任何一个都可能被原样发布出去 |
+| 发布门槛 `collectContactIssueItems` | 校验主渠道有值、各 CTA 引用的渠道能解析出链接、指向表单时表单确实启用 |
+
+### 改 schema 字段名时必读
+
+以下逻辑**按名字工作**，字段一改名就静默失效且测试全绿。渠道改造期间已经踩中三次：
+
+| 位置 | 依据 | 失效后果 |
+|---|---|---|
+| `landing-editor/lib/validate.ts` 的 `FIELD_VALIDATORS` | 字段**键名** | 交易语义红线彻底不校验 |
+| `lib/ai/slots.ts` 的 `NON_TEXT_KEYS` | 字段**键名** | AI 开始改写联系方式、URL、枚举 |
+| `channel-href.ts` 引入锚点常量 | **模块路径**（客户端/服务端边界） | 表单按钮 href 变成报错文本 |
+| `validate.ts` 遇到 `textByChannel` | 字段**键名** | 把按钮文案 `email: "Email Us"` 当邮箱地址拦下 |
+
+第四处的成因略有不同：`textByChannel` 的键是**渠道名**而非字段名，故按键名工作的校验器必须整棵子树跳过（见 `CHANNEL_KEYED_CONTAINERS`）。将来若再加「以渠道为键」的容器，记得同步登记。
+
+改字段名后请全仓 grep 这几处，并跑一次真机走查——单元测试不覆盖 RSC 边界。
 
 ## 提交失败的处理（不得假成功）
 
@@ -142,10 +183,12 @@
 
 - 表单只能收集轻量资格信息。至少启用一个可联系字段（email / phone / whatsapp / telegram）；只收 name 不构成有效线索。
 - 不得引入交易语义：不收付款信息，不做订单确认，`quote / estimate / assessment` 一律只是留资话术。
-- registry 的 `conversion` 标签必须与样稿实际一致——标了 `form` 就必须真有启用的 `leadForm`，否则画廊按「表单」筛选会筛出没有表单的模板。该一致性由 `landing-editor/samples/templates.structure.test.ts` 全库回归守住。
+- registry 的 `conversion` 标签语义是**默认推荐**而非事实声明——渠道最终由用户在联系方式面板决定。但标了 `form` 仍必须真有启用的 `leadForm`（否则画廊按「表单」筛选会筛出没有表单的模板），该一致性由 `landing-editor/samples/templates.structure.test.ts` 全库回归守住。
+- 模板样稿的 CTA **不得再出现指向 `wa.me` / `tel:` / `mailto:` / `t.me` 的 `{kind:"url"}` 落点**——那种按钮会永远指向模板占位号，用户改了 `contact` 也无效。同一测试文件有漏网检查。
 
 ## 新增模板时
 
+0. **先想清楚这个行业默认用什么渠道接客户**，写进 `contact.primary`；号码和邮箱填虚构值即可（实例化时会被 `blankTemplateContacts` 清空）。CTA 一律用 `target` 引用，不写死 URL。
 1. 样稿放 `landing-editor/samples/<name>Draft.ts`
 2. `registry.ts` 追加 `TemplateMeta`（含双语 `industry` / `tagline` / `seoIntro`）
 3. `registry.drafts.ts` 追加同 id 的动态加载器

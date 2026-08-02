@@ -134,7 +134,17 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
               "Available 24/7",
             ],
             cta: {
+              // 本套模板绝大多数 CTA 文案是渠道中立的（"Book my free consultation" 之类），
+              // 唯独这条「Chat Now」绑定了即时聊天语境，故提供按渠道的替换文案：
+              // 用户在联系方式面板切主渠道时，switchChannel 会把对应那条写进 text。
               text: "Chat Now",
+              textByChannel: {
+                whatsapp: "Chat Now",
+                telegram: "Chat Now",
+                phone: "Call Now",
+                email: "Email Us",
+                form: "Ask a Question",
+              },
               target: { kind: "primary", prefill: "Hi! I have a quick question about skincare" },
             },
           },
