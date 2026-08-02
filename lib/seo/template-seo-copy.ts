@@ -941,6 +941,51 @@ export const TEMPLATE_FAQS: Record<string, TemplateFaq[]> = {
     },
   ],
 
+  "windows-doors": [
+    {
+      q: {
+        en: "Why does this template refuse to quote from photos?",
+        zh: "为什么这套模板拒绝「看照片报价」？",
+      },
+      a: {
+        en: "Because a photo cannot show the state of the frame, the sill, or the reveal — and those decide whether the job is a swap or a rebuild. Quoting from images produces a number you have to revise on the day, which is the single fastest way to lose a homeowner who was ready to book.",
+        zh: "因为照片看不出框、窗台和洞口的实际状况，而这三样决定了这活儿是「换一扇」还是「重做一个洞」。看图报价产出的是一个装修当天必须修改的数字——这是让一个本来准备下单的业主流失最快的方式。",
+      },
+    },
+    {
+      q: {
+        en: "The page states a lead time but no price. Isn't that backwards?",
+        zh: "页面写了工期却不写价格，不是反了吗？",
+      },
+      a: {
+        en: "Lead time is a fact about your operation and it answers a real question. Price depends on the openings, the glazing spec, and the state of what is already there — publishing one number for all of that either loses you margin or loses you trust when it changes. The template publishes what is fixed and quotes what is not.",
+        zh: "工期是关于你自己经营的事实，而且回答的是一个真实问题。价格取决于开口数量、玻璃规格和现有窗的状况——为这些公布一个统一数字，要么损失利润，要么在改价时损失信任。模板的做法是：确定的公开，不确定的报价。",
+      },
+    },
+  ],
+  "family-law": [
+    {
+      q: {
+        en: "Why does the form ask people to write it out instead of offering a callback?",
+        zh: "为什么表单让人写下来，而不是直接给回拨？",
+      },
+      a: {
+        en: "Because most people contacting a family solicitor are not ready to say it out loud to a stranger, and a callback asks them to do exactly that. Writing it once also means the solicitor arrives at the conversation already knowing the facts, so the consultation is spent on options rather than on background.",
+        zh: "因为多数联系家事律师的人，还没准备好对一个陌生人开口讲这件事，而回拨恰恰是在要求他这么做。写一次也让律师在通话前就掌握了事实，于是那次咨询花在「有哪些选择」上，而不是花在复述背景上。",
+      },
+    },
+    {
+      q: {
+        en: "Doesn't saying 'we raise mediation first' cost you the bigger cases?",
+        zh: "写「我们先谈调解」不会把大案子推走吗？",
+      },
+      a: {
+        en: "It costs you some litigation work and buys the trust that makes the rest of the page believable. In a category where every competitor promises to fight for you, being the practice that says when a fight is disproportionate is the only differentiator that cannot be copied by writing better copy.",
+        zh: "它会让你损失一部分诉讼业务，换来的是让页面其余内容变得可信的那份信任。在一个人人都承诺「为你力争」的品类里，敢说「这一仗不值得打」的那家，是唯一一个靠改文案抄不走的差异点。",
+      },
+    },
+  ],
+
   // ---------- local-service ----------
   "home-cleaning": [
     {
