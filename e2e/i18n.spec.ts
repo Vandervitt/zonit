@@ -173,7 +173,8 @@ test.describe("营销站双语", () => {
     await expect(page.getByText(/Can I change anything in the Vitae Nutrition template/)).toBeVisible();
 
     await page.goto("/zh/templates/vitamins");
-    await expect(page.getByText(/保健品里转化最快的写法/)).toBeVisible();
+    // 中文正文含跨境场景（写在场景位，不写进适用人群末句）。
+    await expect(page.getByText(/先是监管问题、其次才是营销问题/)).toBeVisible();
     await expect(page.getByText(/这套模板的合规声明具体在哪几处/)).toBeVisible();
     await expect(page.getByText(/Vitae Nutrition 模板可以随意修改吗/)).toBeVisible();
   });

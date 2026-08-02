@@ -153,3 +153,39 @@ describe("seoIntro 去骨架化", () => {
     expect(n, `含 "turning ad traffic into" 的模板数 ${n}`).toBeLessThanOrEqual(12);
   });
 });
+
+// ---- 跨境口径守卫 ----
+// 这条规则已经被误读两次：第一次读成「禁词」把 32 处全删，第二次重写 seoIntro
+// 时又把中文侧从 32 冲到 3。规则本身管的是**位置**——跨境可以写、且应该写，
+// 但只能写在场景描述位，不能写进受众定义位。以下断言把两端都钉住。
+describe("跨境表述只出现在场景位，不出现在受众位", () => {
+  const AUDIENCE_SLOT =
+    /overseas|going global|cross-border|international campaign|patients travel|出海|跨境|海外/i;
+  const SCENARIO_ZH =
+    /出海|海外|跨境|跨市场|各国|各地|不同市场|另一个国家|多个市场|半球|当地/;
+
+  it.each(locales)("%s 适用人群末句不得用跨境限定受众", (locale) => {
+    for (const t of TEMPLATES) {
+      const whoFor = splitSeoIntro(t, locale).whoFor ?? "";
+      expect(
+        AUDIENCE_SLOT.test(whoFor),
+        `${t.id} 的 whoFor 把跨境写成了资格门槛：${whoFor}`,
+      ).toBe(false);
+    }
+  });
+
+  it("中文正文保留足量跨境场景（曾被重写误删至 3 条）", () => {
+    const n = TEMPLATES.filter((t) => SCENARIO_ZH.test(splitSeoIntro(t, "zh").body)).length;
+    expect(n, `中文 seoIntro 场景位跨境覆盖仅 ${n} 条`).toBeGreaterThanOrEqual(30);
+  });
+
+  it("跨境表述不得退化成同一句套话", () => {
+    const fragments = TEMPLATES.map((t) => {
+      const m = splitSeoIntro(t, "zh").body.match(
+        new RegExp(`[^。]*(?:${SCENARIO_ZH.source})[^。]*`),
+      );
+      return m?.[0].trim();
+    }).filter((x): x is string => Boolean(x));
+    expect(new Set(fragments).size, "存在逐字相同的跨境句").toBe(fragments.length);
+  });
+});
