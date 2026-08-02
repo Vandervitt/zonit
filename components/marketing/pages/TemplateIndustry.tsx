@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { fontBody, fontHead, fontMono } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { conversionLabel, archetypeLabel } from "@/landing-editor/samples/templateFilter";
-import { Routes, templateDetailPath, templateIndustryPath } from "@/lib/constants";
+import { Routes, templateDetailPath, templateIndustryPath, guideDetailPath } from "@/lib/constants";
+import { getGuideForIndustry } from "@/app/guides/_content";
 import { marketingMetadata } from "@/lib/seo/site";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -62,6 +63,7 @@ export async function TemplateIndustryView({
   const items = templatesInIndustry(category);
   const others = industryCategories().filter((c) => c !== category);
   const faqJsonLd = templateFaqJsonLd(seo.faqs);
+  const guide = getGuideForIndustry(locale, category);
 
   return (
     <div className={`min-h-screen bg-background ${fonts.body}`}>
@@ -185,6 +187,24 @@ export async function TemplateIndustryView({
             </Link>
           </p>
         </section>
+
+        {guide && (
+          <section className="mt-16 max-w-3xl">
+            <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>
+              {t.guideHeading}
+            </h2>
+            {/* 反向内链：行业页 ↔ 行业获客文互指，把「行业文 → 行业页 → 模板页」串成漏斗。 */}
+            <Link
+              href={localePath(locale, guideDetailPath(guide.slug))}
+              className="group mt-5 block rounded-2xl border border-border bg-white/60 p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-aqua-300 hover:shadow-md"
+            >
+              <h3 className="text-sm font-semibold leading-snug text-foreground group-hover:text-aqua-700">
+                {guide.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{guide.description}</p>
+            </Link>
+          </section>
+        )}
 
         <section className="mt-16">
           <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>
