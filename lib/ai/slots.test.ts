@@ -73,4 +73,44 @@ describe("deriveSlots / mergeSlots", () => {
     const found = deriveSlots(merged).find((s) => s.id === "hero.title");
     expect(found?.text).toBe(base.text); // 原文保留，键仍在
   });
+
+  // 这类「按键名工作的黑名单」在渠道改造中已被 schema 改名静默击穿过三次
+  // （validate.ts 的红线校验、LEAD_FORM_ANCHOR_ID 的 RSC 边界、本处）。
+  // 守住它：AI 只能改营销文案，绝不能碰落点、枚举与结构。
+  describe("渠道模型字段不得进入 AI 改写范围", () => {
+    const draft = {
+      contact: { primary: "whatsapp", whatsapp: "+8613800138000", email: "a@b.com" },
+      hero: {
+        title: "T",
+        cta: { text: "Chat", target: { kind: "primary", prefill: "Hi, I'd like a quote" } },
+        secondaryCta: { text: "IG", target: { kind: "url", url: "https://instagram.com/brand" } },
+      },
+      sections: [],
+      footer: { brandName: "B", copyrightYear: "2026", privacyPolicy: "p", termsOfService: "t" },
+    } as unknown as LandingPageDraft;
+
+    it("主渠道枚举不可被改写——LLM 返回任意句子会让全页 CTA 解析失败", () => {
+      expect(deriveSlots(draft).find((s) => s.id === "contact.primary")).toBeUndefined();
+    });
+
+    it("二级外链 URL 不可被改写", () => {
+      expect(deriveSlots(draft).find((s) => s.id.endsWith("target.url"))).toBeUndefined();
+    });
+
+    it("号码与邮箱不可被改写", () => {
+      const ids = deriveSlots(draft).map((s) => s.id);
+      expect(ids).not.toContain("contact.whatsapp");
+      expect(ids).not.toContain("contact.email");
+    });
+
+    it("prefill 反而应该被改写——它是给访客看的话术，本就该跟着 brief 走", () => {
+      expect(deriveSlots(draft).find((s) => s.id === "hero.cta.target.prefill")?.text).toBe(
+        "Hi, I'd like a quote",
+      );
+    });
+
+    it("CTA 文案照常可被改写", () => {
+      expect(deriveSlots(draft).find((s) => s.id === "hero.cta.text")?.text).toBe("Chat");
+    });
+  });
 });
