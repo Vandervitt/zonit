@@ -12,6 +12,7 @@ export const templateIndustry = {
     whoForHeading: "适合谁",
     leadsHeading: "线索怎么进来",
     crossBorderHeading: "跨境场景",
+    guideHeading: "这个行业怎么做获客",
     faqHeading: "常见问题",
     otherIndustriesHeading: "其他行业",
     cta: "免费开始 · 注册即送 7 天 Pro",

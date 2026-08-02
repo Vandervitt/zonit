@@ -25,6 +25,12 @@ export interface GuideArticle {
   description: string;
   /** 目标关键词（仅内部备注 / 可选 meta，不强依赖） */
   keywords?: string[];
+  /**
+   * 所属行业（= tags.category 的 slug）。填了它，本文与对应行业页互相内链：
+   * 文末 CTA 指向该行业页，行业页反向指回本文，形成「行业文 → 行业页 → 模板页」漏斗。
+   * 值必须是注册表里真实存在的行业，由 guides-industry.test.ts 守护。
+   */
+  industry?: string;
   /** ISO 日期，用于 Article 结构化数据与展示 */
   datePublished: string;
   dateModified?: string;

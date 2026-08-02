@@ -48,6 +48,7 @@ export const templateIndustry = {
     whoForHeading: "Who it's for",
     leadsHeading: "How inquiries come in",
     crossBorderHeading: "Selling across borders",
+    guideHeading: "Go deeper on this industry",
     faqHeading: "Common questions",
     otherIndustriesHeading: "Other industries",
     cta: "Start free · 7 days of Pro on sign-up",

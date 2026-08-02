@@ -8,6 +8,12 @@ import { landingPageConversionAttribution as attrZh } from "./articles/landing-p
 import { landingPageConversionAttribution as attrEn } from "./articles/landing-page-conversion-attribution/en";
 import { crossBorderLeadGeneration as xbZh } from "./articles/cross-border-lead-generation/zh";
 import { crossBorderLeadGeneration as xbEn } from "./articles/cross-border-lead-generation/en";
+import { beautyBrandLeadGeneration as beautyZh } from "./articles/beauty-brand-lead-generation/zh";
+import { beautyBrandLeadGeneration as beautyEn } from "./articles/beauty-brand-lead-generation/en";
+import { clinicPatientLeadGeneration as clinicZh } from "./articles/clinic-patient-lead-generation/zh";
+import { clinicPatientLeadGeneration as clinicEn } from "./articles/clinic-patient-lead-generation/en";
+import { solarInstallerLeadGeneration as solarZh } from "./articles/solar-installer-lead-generation/zh";
+import { solarInstallerLeadGeneration as solarEn } from "./articles/solar-installer-lead-generation/en";
 
 /**
  * 列表顺序即展示顺序（新文放前，突出新鲜度）。
@@ -15,8 +21,8 @@ import { crossBorderLeadGeneration as xbEn } from "./articles/cross-border-lead-
  * 两种语言共用同一 slug，使 hreflang 配对无需额外映射表。
  */
 const GUIDES_BY_LOCALE: Record<Locale, GuideArticle[]> = {
-  en: [xbEn, fbEn, waEn, attrEn],
-  zh: [xbZh, fbZh, waZh, attrZh],
+  en: [beautyEn, clinicEn, solarEn, xbEn, fbEn, waEn, attrEn],
+  zh: [beautyZh, clinicZh, solarZh, xbZh, fbZh, waZh, attrZh],
 };
 
 export function getGuides(locale: Locale): GuideArticle[] {
@@ -29,6 +35,11 @@ export function getGuide(locale: Locale, slug: string): GuideArticle | undefined
 
 /** slug 集合与语言无关（两种语言同 slug），供 generateStaticParams 与 sitemap 使用。 */
 export const GUIDE_SLUGS: string[] = GUIDES_BY_LOCALE.en.map((g) => g.slug);
+
+/** 该行业的获客指南（行业页反向内链用）；没有则返回 undefined。 */
+export function getGuideForIndustry(locale: Locale, industry: string): GuideArticle | undefined {
+  return GUIDES_BY_LOCALE[locale].find((g) => g.industry === industry);
+}
 
 /** 抽取文章内所有 faq 块的问答，供 FAQPage 结构化数据使用。 */
 export function guideFaqItems(article: GuideArticle): { q: string; a: string }[] {

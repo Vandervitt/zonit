@@ -24,6 +24,8 @@ export const guides = {
     ctaDesc:
       "Start from {templates} lead-gen templates across {industries} industries, swap the content, connect your domain, set up attribution, and publish your own landing page in minutes.",
     ctaTemplates: "Browse templates",
+    /** `{industry}` 为行业展示名。 */
+    ctaIndustryTemplates: "See {industry} templates",
     ctaRegister: "Start free",
     relatedHeading: "Related guides",
   },

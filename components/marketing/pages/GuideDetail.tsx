@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fontBody, fontHead, fontMono } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
-import { Routes, guideDetailPath } from "@/lib/constants";
+import { Routes, guideDetailPath, templateIndustryPath } from "@/lib/constants";
+import { industryLabel } from "@/lib/seo/industry-content";
 import { marketingMetadata, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/seo/site";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getGuides, getGuide, guideFaqItems, GUIDE_SLUGS } from "@/app/guides/_content";
@@ -130,11 +131,18 @@ export function GuideDetailView({ slug, locale }: { slug: string; locale: Locale
           <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>{t.ctaTitle}</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">{fillCounts(t.ctaDesc)}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
+            {/* 有所属行业时，主 CTA 指向该行业页而不是通用模板库——读完行业文的人
+                要找的是这个行业的模板，把他丢进 52 套的总列表是白白折损一次转化。 */}
             <Link
-              href={localePath(locale, Routes.Templates)}
+              href={localePath(
+                locale,
+                g.industry ? templateIndustryPath(g.industry) : Routes.Templates,
+              )}
               className="rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-5 py-2.5 text-sm font-medium text-white shadow-sm shadow-aqua-600/25 transition-all hover:brightness-105"
             >
-              {t.ctaTemplates}
+              {g.industry
+                ? t.ctaIndustryTemplates.replace("{industry}", industryLabel(g.industry, locale))
+                : t.ctaTemplates}
             </Link>
             <Link
               href={localePath(locale, Routes.Register)}
