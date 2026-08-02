@@ -2,7 +2,7 @@ export const templates = {
   meta: {
     title: "{templates} lead-gen landing page templates — pick by industry | Zap Bridge",
     description:
-      "Lead-gen landing page templates across {industries} industries — clinics, legal and immigration, education, home improvement and local services, B2B sourcing, plus beauty, apparel, home, and supplements. Form, WhatsApp, and phone capture patterns with a compliant footer out of the box.",
+      "Lead-gen landing page templates across {industries} industries — clinics, legal and immigration, education, home improvement and local services, B2B sourcing, plus beauty, apparel, home, and supplements. Capture leads by form, WhatsApp, phone, email, or Telegram — switch channel in one click, compliant footer out of the box.",
     ogTitle: "{templates} lead-gen landing page templates | Zap Bridge",
     ogDescription:
       "Pick a lead-gen template by industry, swap the content, connect your domain, and publish — no blank page to start from.",
@@ -12,10 +12,15 @@ export const templates = {
     title: "Lead-gen template library",
     /** `{templates}` 与 `{industries}` 会被替换为实际数量。 */
     subtitle:
-      "{templates} lead-capture templates across {industries} industries. All of them are inquiry and lead-capture patterns (form / WhatsApp / phone) with a compliant footer built in — pick one, swap the content, publish to your own domain.",
+      "{templates} lead-capture templates across {industries} industries, each with a compliant footer built in. Every template works with any channel — the tags below are just what each one is set up for, and you can switch to a form, WhatsApp, phone, email, or Telegram in one click after you pick it.",
     cta: "Start free · 7 days of Pro on sign-up",
-    /** 卡片上的转化标签，如 "WhatsApp capture"。`{channel}` 为渠道名。 */
-    captureTag: "{channel} capture",
+    /**
+     * 卡片上的转化标签，如 "Set up for WhatsApp"。`{channel}` 为渠道名。
+     * 措辞刻意强调「预设」而非「只能用」——渠道现在是页面级设置，选完模板
+     * 一键就能改（见 docs/lead-capture-channels.md）。旧文案「WhatsApp capture」
+     * 会让人以为选了这套模板就锁死了渠道。
+     */
+    captureTag: "Set up for {channel}",
     /** `{name}` 为模板名。 */
     thumbnailAlt: "{name} template preview",
   },

@@ -22,14 +22,14 @@ export const templateContent = {
   detailMeta: {
     title: "{name} — {industry} 获客落地页模板 | Zap Bridge",
     description:
-      "{tagline}{conversion} 留资、投放级结构、合规页脚开箱即用；改内容、绑定自有品牌域名，几分钟发布上线。",
+      "{tagline}预设「{conversion}」留资，一键可切成其他渠道；投放级结构、合规页脚开箱即用，改内容、绑定自有品牌域名，几分钟发布上线。",
   },
 
   introFallback:
-    "{name} 是一套面向「{industry}」的{archetype}落地页模板，访客通过 {conversion} 完成留资咨询。投放级结构、合规页脚开箱即用，选用后改内容、绑定你自己的品牌域名即可发布。",
+    "{name} 是一套面向「{industry}」的{archetype}落地页模板，开箱预设「{conversion}」留资——也可一键改成表单、WhatsApp、电话、邮箱或 Telegram。投放级结构、合规页脚开箱即用，选用后改内容、绑定你自己的品牌域名即可发布。",
 
   whoFor:
-    "适合做「{industry}」出海获客、以 {conversion} 承接线索的广告主与代运营团队；尤其契合{archetype}场景。",
+    "适合做「{industry}」出海获客的广告主与代运营团队——预设以「{conversion}」承接线索，也可切成任意渠道；尤其契合{archetype}场景。",
 
   howToUse: [
     {
@@ -53,7 +53,7 @@ export const templateContent = {
     },
     {
       q: "访客怎么联系我、怎么留资？",
-      a: "这套模板通过 {conversion} 收集线索：访客点击落地页上的 CTA 即发起 {conversion} 咨询或提交表单，线索会进入你的后台线索列表。",
+      a: "开箱预设「{conversion}」，但渠道是页面级设置，随时可改：在编辑器的「联系方式」面板选主渠道，整页 CTA 自动跟随。表单线索进你的后台线索列表；WhatsApp、电话、邮箱、Telegram 则打开访客自己的应用。",
     },
     {
       q: "发布到自己的域名复杂吗？",
