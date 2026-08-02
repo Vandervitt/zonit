@@ -103,9 +103,12 @@ describe("可索引门槛", () => {
     );
   });
 
-  it("当前至少存在一个薄行业被挡住（门槛真的在生效）", () => {
-    // 若将来所有行业都补齐到门槛以上，这条会红——那是好消息，届时删掉即可。
-    expect(indexableIndustryCategories().length).toBeLessThan(industryCategories().length);
+  // 曾有一条「当前至少存在一个薄行业被挡住」的断言，用于确认门槛真的在生效。
+  // legal 与 home-improvement 各补齐第二套模板后 12/12 全部可索引，该断言按其自身
+  // 注释的约定移除——门槛逻辑本身仍由上一条断言（逐行业比对模板数）守护。
+  it("全部行业当前均可索引；新增行业若只有一套模板会被自动挡住", () => {
+    expect(indexableIndustryCategories()).toEqual(industryCategories());
+    expect(isIndexableIndustry("no-such-industry")).toBe(false);
   });
 });
 

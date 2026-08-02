@@ -15,6 +15,8 @@ const loaders: Record<string, DraftLoader> = {
   skincare: () => import("./skincareConsultDraft").then((m) => m.skincareConsultDraft),
   dental: () => import("./dentalClinicDraft").then((m) => m.dentalClinicDraft),
   solar: () => import("./solarHomeDraft").then((m) => m.solarHomeDraft),
+  "windows-doors": () => import("./windowsDoorsDraft").then((m) => m.windowsDoorsDraft),
+  "family-law": () => import("./familyLawDraft").then((m) => m.familyLawDraft),
   radiantglow: () => import("./radiantGlowBeautyDraft").then((m) => m.radiantGlowBeautyDraft),
   // 第一梯队 · 美妆个护
   makeup: () => import("./makeupConsultDraft").then((m) => m.makeupConsultDraft),
