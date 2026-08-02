@@ -14,6 +14,12 @@ import { clinicPatientLeadGeneration as clinicZh } from "./articles/clinic-patie
 import { clinicPatientLeadGeneration as clinicEn } from "./articles/clinic-patient-lead-generation/en";
 import { solarInstallerLeadGeneration as solarZh } from "./articles/solar-installer-lead-generation/zh";
 import { solarInstallerLeadGeneration as solarEn } from "./articles/solar-installer-lead-generation/en";
+import { apparelFitLeadGeneration as apparelZh } from "./articles/apparel-fit-lead-generation/zh";
+import { apparelFitLeadGeneration as apparelEn } from "./articles/apparel-fit-lead-generation/en";
+import { consumerTechLeadGeneration as gadgetZh } from "./articles/consumer-tech-lead-generation/zh";
+import { consumerTechLeadGeneration as gadgetEn } from "./articles/consumer-tech-lead-generation/en";
+import { homeGoodsLeadGeneration as homeZh } from "./articles/home-goods-lead-generation/zh";
+import { homeGoodsLeadGeneration as homeEn } from "./articles/home-goods-lead-generation/en";
 
 /**
  * 列表顺序即展示顺序（新文放前，突出新鲜度）。
@@ -21,8 +27,8 @@ import { solarInstallerLeadGeneration as solarEn } from "./articles/solar-instal
  * 两种语言共用同一 slug，使 hreflang 配对无需额外映射表。
  */
 const GUIDES_BY_LOCALE: Record<Locale, GuideArticle[]> = {
-  en: [beautyEn, clinicEn, solarEn, xbEn, fbEn, waEn, attrEn],
-  zh: [beautyZh, clinicZh, solarZh, xbZh, fbZh, waZh, attrZh],
+  en: [beautyEn, clinicEn, solarEn, apparelEn, gadgetEn, homeEn, xbEn, fbEn, waEn, attrEn],
+  zh: [beautyZh, clinicZh, solarZh, apparelZh, gadgetZh, homeZh, xbZh, fbZh, waZh, attrZh],
 };
 
 export function getGuides(locale: Locale): GuideArticle[] {
