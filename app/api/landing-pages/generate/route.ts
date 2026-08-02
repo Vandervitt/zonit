@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import pool from "@/lib/db";
 import { ApiErrors } from "@/lib/constants";
 import { getTemplate } from "@/landing-editor/samples/registry";
+import { applyBriefChannels } from "@/lib/ai/brief-contact";
 import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
 import {
   createLandingPage,
@@ -87,6 +88,11 @@ export async function POST(request: Request) {
   } else {
     baseDraft = await loadTemplateDraft(body.templateId); // 草稿体按需加载
   }
+
+  // 向导里勾的「咨询渠道」落成结构化的 contact，而不只是喂 prompt 影响遣词——
+  // 用户明确选了电话，生成出来的页面主渠道就该是电话，而不是模板默认的 WhatsApp。
+  // 只定主渠道不填值：AI 编不出用户的真实号码，值由用户在联系方式面板里填。
+  baseDraft = applyBriefChannels(baseDraft, body.brief.ctaGoal);
 
   // 生成（失败不扣额度）
   const result = await generateDraftFromBrief(baseDraft, body.brief);

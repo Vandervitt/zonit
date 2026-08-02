@@ -18,6 +18,7 @@ import { adminTheme } from "@/lib/theme/antd-theme";
 import { handleSessionExpired } from "@/lib/auth-client";
 import { landingEditorPath } from "@/lib/constants";
 import type { LandingPageDraft } from "@/types/schema.draft";
+import { CHANNEL_LABELS } from "@/lib/ai/brief-contact";
 import { useEditorDispatch } from "../store/editorStore";
 import { useMeta } from "../MetaContext";
 
@@ -38,9 +39,10 @@ const LANGUAGES = [
 /** 语气预设（多选）：join 后作为 brief.tone 注入 prompt，指导整页文案调性。 */
 const TONE_OPTIONS = ["专业", "亲和", "可信赖", "高端", "活力", "紧迫感", "简洁真诚"];
 
-/** 咨询渠道预设（多选）：对齐编辑器 CTA + 留资表单实际支持的转化渠道
- *  —— WhatsApp/Telegram/电话/邮件深链 + 在线留资表单；join 后作为 brief.ctaGoal 注入 prompt。 */
-const CTA_CHANNELS = ["WhatsApp", "Telegram", "电话", "邮件", "在线留资表单"];
+/** 咨询渠道预设（多选）。标签由 lib/ai/brief-contact 的映射表派生——两处若各写一份，
+ *  改一个标签就会让「勾了渠道却不生效」重新发生（它只是不再报错而已）。
+ *  勾选结果既注入 prompt 影响遣词，也会落成结构化的 contact.primary（取第一个）。 */
+const CTA_CHANNELS = CHANNEL_LABELS;
 
 interface BriefForm {
   productName: string;
@@ -231,7 +233,7 @@ function BriefModal() {
             mode="multiple"
             allowClear
             placeholder="访客的咨询 / 转化渠道，可多选"
-            options={CTA_CHANNELS.map((c) => ({ value: c, label: c }))}
+            options={CTA_CHANNELS.map((c: string) => ({ value: c, label: c }))}
           />
         </Form.Item>
         <Form.Item label="生成语言" name="language">

@@ -4,9 +4,18 @@ import type { Slot, FilledSlot } from "./types";
 /**
  * 这些键不是营销文案，连同其子树一并跳过：图片/链接/枚举/标识/图标/时间。
  * `alt` 为图片辅助文字，随图片一起编辑，不开放 AI 单独改写。
+ *
+ * ⚠️ 本黑名单按**键名**工作，schema 改字段名时必须同步更新，否则 AI 会静默地
+ * 开始重写不该动的东西。`url` 就是这么加进来的：CTA 的 link 改名成 target.url 后，
+ * 二级外链一度被当成营销文案交给 LLM 重写。
+ *
+ * 例外：`prefill`（WhatsApp 预填语）**刻意不在此列**——它是给访客看的话术
+ * （"Hi Lumora, I'd like to book a free smile assessment"），本就该跟着 brief 改写。
+ *
+ * 另见 deriveSlots 里的 skipSubtree：contact 整棵子树不走键名黑名单，直接跳过。
  */
 const NON_TEXT_KEYS = new Set([
-  "src", "link", "poster", "id", "provider", "type",
+  "src", "link", "url", "poster", "id", "provider", "type",
   "endsAt", "alt", "icon", "emoji", "channel",
 ]);
 
@@ -14,7 +23,12 @@ const NON_TEXT_KEYS = new Set([
 export function deriveSlots(draft: LandingPageDraft): Slot[] {
   const slots: Slot[] = [];
 
+  // contact 整棵子树跳过：里面全是用户的真实联系方式与渠道枚举，
+  // 一个字都不该由 LLM 改。按键名逐个拉黑不可靠——将来加渠道必然漏。
+  const skipSubtree = (path: (string | number)[]) => path[0] === "contact";
+
   const walk = (value: unknown, path: (string | number)[]) => {
+    if (skipSubtree(path)) return;
     if (typeof value === "string") {
       const key = String(path[path.length - 1] ?? "");
       if (NON_TEXT_KEYS.has(key)) return;
