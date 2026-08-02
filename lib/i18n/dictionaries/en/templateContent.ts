@@ -25,14 +25,14 @@ export const templateContent = {
   detailMeta: {
     title: "{name} — {industry} lead-gen landing page template | Zap Bridge",
     description:
-      "{tagline} {conversion} capture, ad-ready structure, and a compliant footer out of the box — swap the content, connect your own brand domain, and publish in minutes.",
+      "{tagline} Set up for {conversion} capture — switch to any channel in one click. Ad-ready structure and a compliant footer out of the box; swap the content, connect your own brand domain, and publish in minutes.",
   },
 
   introFallback:
-    "{name} is a {archetype} landing page template for {industry}, where visitors complete their inquiry over {conversion}. Ad-ready structure and a compliant footer come out of the box — pick it, swap the content, connect your own brand domain, and publish.",
+    "{name} is a {archetype} landing page template for {industry}, set up out of the box for visitors to inquire over {conversion} — switch to a form, WhatsApp, phone, email, or Telegram in one click. Ad-ready structure and a compliant footer come out of the box; pick it, swap the content, connect your own brand domain, and publish.",
 
   whoFor:
-    "Built for advertisers and agencies running {industry} lead generation overseas and capturing inquiries over {conversion} — a particularly good fit for {archetype} campaigns.",
+    "Built for advertisers and agencies running {industry} lead generation and capturing inquiries over {conversion} or any other channel you switch it to — a particularly good fit for {archetype} campaigns.",
 
   howToUse: [
     {
@@ -58,7 +58,7 @@ export const templateContent = {
     },
     {
       q: "How do visitors reach me and leave their details?",
-      a: "This template captures leads over {conversion}: a visitor taps the CTA on the landing page to start a {conversion} conversation or submit the form, and the lead lands in your dashboard.",
+      a: "It comes set up for {conversion}, but the channel is a page-level setting you can change any time: pick your main channel in the editor's contact panel and every CTA on the page follows it. Form submissions land in your dashboard; WhatsApp, phone, email, and Telegram open the visitor's own app.",
     },
     {
       q: "Is publishing to my own domain complicated?",
