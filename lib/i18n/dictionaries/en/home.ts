@@ -1,5 +1,21 @@
-// 英文面受众是全球中小企业，不是「中国卖家出海」——故全篇不出现 overseas / going global 这类
-// 只在出海语境成立的表述（中文面保留「海外获客」叙事）。
+// 英文面受众是全球中小企业，不是「中国卖家出海」。
+//
+// ⚠️ 这条约定管的是**词出现在句子的哪个位置**，不是一张禁词表——本文件是该约定的
+// 事实源，lib/seo/site.ts 与 en/templateIndustry.ts 均指向此处，改口径先改这里。
+//
+//   ❌ 受众定义位：`landing pages for brands going global` / `for supplements
+//      going global`——overseas 在这里修饰的是「你得是谁」，等于给本土诊所、
+//      本地服务商、只做国内市场的品牌加了一道资格门槛，把人挡在门外。
+//   ✅ 场景描述位：`built for the case where buyers are in another time zone and
+//      WhatsApp is the default channel`——描述的是产品服务的一种场景，跨境卖家
+//      读到觉得被理解，本土卖家读到也不会觉得与己无关。
+//
+// 跨境获客是真实且重要的客群（见 docs/constraints/product-positioning.md），
+// 不能因为怕窄化受众就把它整个抹掉——那会让 overseas / cross-border 这类真实查询
+// 词在英文面无处承接。分层原则：
+//   · 首页 / siteDescription / 定价 / 导航——全客群必经，跨境表述不进受众定义位；
+//   · 行业页、模板 seoIntro、/guides——分众入口，可以并且应该写清跨境场景。
+// 中文面「海外获客」叙事完全不受本约定约束，那是准确且有搜索量的表述。
 // 数量一律用 {templates} / {industries} 占位符，由 lib/templates/stats.ts 按注册表实际内容替换。
 export const home = {
   meta: {

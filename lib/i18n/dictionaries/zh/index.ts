@@ -7,6 +7,7 @@ import { antiban } from "./antiban";
 import { auth } from "./auth";
 import { templates } from "./templates";
 import { templateContent } from "./templateContent";
+import { templateIndustry } from "./templateIndustry";
 import { guides } from "./guides";
 
-export const zh = { common, home, plans, pricing, antiban, auth, templates, templateContent, guides } satisfies Dictionary;
+export const zh = { common, home, plans, pricing, antiban, auth, templates, templateContent, templateIndustry, guides } satisfies Dictionary;

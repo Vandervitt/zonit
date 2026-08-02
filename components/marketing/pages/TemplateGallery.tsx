@@ -4,7 +4,7 @@ import { fontBody, fontHead, fontMono } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { categoryLabel, conversionLabel, archetypeLabel } from "@/landing-editor/samples/templateFilter";
-import { Routes, templateDetailPath } from "@/lib/constants";
+import { Routes, templateDetailPath, templateIndustryPath } from "@/lib/constants";
 import { marketingMetadata } from "@/lib/seo/site";
 import { fillCounts } from "@/lib/templates/stats";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -73,7 +73,15 @@ export function TemplateGalleryView({ locale }: { locale: Locale }) {
         {groups.map((g, groupIndex) => (
           // id 供首页「按行业选」chip 直接锚到本行业分组；scroll-mt 避开固定导航条。
           <section key={g.category} id={g.category} className="mt-16 scroll-mt-28">
-            <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>{g.label}</h2>
+            {/* 分组标题同时是行业页入口：画廊 → 行业 → 模板的 hub-and-spoke 主通道。 */}
+            <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>
+              <Link
+                href={localePath(locale, templateIndustryPath(g.category))}
+                className="transition-colors hover:text-aqua-700"
+              >
+                {g.label}
+              </Link>
+            </h2>
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {g.items.map((tpl, index) => {
                 const image = buildUnsplashImageSources(tpl.thumbnail);
