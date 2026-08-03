@@ -4,6 +4,11 @@
 // 仅使用 /admin/editor 各表单可见可编辑的字段，确保在编辑器中可完整复刻与调整。
 // 转化全程经 WhatsApp 咨询（免费配色 / 妆容方案），无任何下单 / 结账 / 订阅语义。
 //
+// 合规要点：
+// - 本模板刻意不含 beforeAfter 区块：样例无法提供真实且已授权的客户照片，
+//   拿库存肖像编造前后对比等于伪造效果证据，disclaimer 也兜不住。
+//   商家若有合规的真实案例，可在编辑器中自行添加该区块。
+//
 // 占位资源说明：
 // - 图片均为 Unsplash 在线地址（https），上线前可按需替换。
 // - WhatsApp 号码 15551234567 为占位号码，上线前替换为真实业务号码。
@@ -110,34 +115,6 @@ export const makeupConsultDraft: LandingPageDraft = {
           {
             title: "Practice with us",
             description: "Send progress photos anytime and we'll refine it together — free.",
-          },
-        ],
-      },
-    },
-
-    {
-      type: "beforeAfter",
-      data: {
-        title: "Everyday transformations",
-        subtitle: "Shared with permission from our community.",
-        disclaimer:
-          "Individual results vary. Makeup is a cosmetic routine — looks depend on products, lighting, and technique.",
-        items: [
-          {
-            crmName: "Lena, 27",
-            duration: "1 session",
-            caseDescription:
-              "Matched a warm-toned base and soft glam eye for an everyday office look.",
-            beforeImage: { src: img("photo-1487412720507-e7ab37603c6f", 800), alt: "Portrait before makeup" },
-            afterImage: { src: img("photo-1503104834685-7205e8607eb9", 800), alt: "Portrait after makeup" },
-          },
-          {
-            crmName: "Priya, 31",
-            duration: "1 session",
-            caseDescription:
-              "Found a true neutral foundation match and a no-makeup makeup routine for sensitive skin.",
-            beforeImage: { src: img("photo-1499651681375-8afc5a4db253", 800), alt: "Portrait before makeup" },
-            afterImage: { src: img("photo-1504703395950-b89145a5425b", 800), alt: "Portrait after makeup" },
           },
         ],
       },

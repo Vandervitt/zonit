@@ -114,18 +114,20 @@ describe("deriveImageSlots / mergeImages", () => {
 });
 
 describe("对比图与评价头像（before/after + avatar）", () => {
-  let dental: LandingPageDraft;
+  // 用 roofing 作夹具：实物前后对比（屋顶）是模板库长期保留的形态；
+  // 真人前后对比样例已全部移除，不能再当夹具。
+  let roofing: LandingPageDraft;
   beforeAll(async () => {
-    dental = await loadTemplateDraft("dental");
+    roofing = await loadTemplateDraft("roofing");
   });
 
   it("枚举含 before/after（成对、带 pairId）与 avatar，排除 content.image", () => {
-    const slots = deriveImageSlots(dental);
+    const slots = deriveImageSlots(roofing);
     const before = slots.filter((s) => s.kind === "before");
     const after = slots.filter((s) => s.kind === "after");
     const avatars = slots.filter((s) => s.kind === "avatar");
 
-    // dental 模板：2 组对比 + 3 个头像
+    // roofing 模板：2 组对比 + 3 个头像
     expect(before.length).toBe(2);
     expect(after.length).toBe(2);
     expect(avatars.length).toBe(3);
@@ -148,10 +150,10 @@ describe("对比图与评价头像（before/after + avatar）", () => {
   });
 
   it("成对安全截断：任意 limit 下 before/after 对要么整对进、要么都不进", () => {
-    const full = deriveImageSlots(dental);
+    const full = deriveImageSlots(roofing);
     const pairIds = [...new Set(full.filter((s) => s.pairId).map((s) => s.pairId!))];
     for (let limit = 1; limit <= full.length + 1; limit++) {
-      const capped = deriveImageSlots(dental, limit);
+      const capped = deriveImageSlots(roofing, limit);
       expect(capped.length).toBeLessThanOrEqual(limit);
       for (const pid of pairIds) {
         const fullCount = full.filter((s) => s.pairId === pid).length;

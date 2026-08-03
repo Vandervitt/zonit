@@ -3,10 +3,15 @@
 // RadiantGlow Beauty「美妆 / 护肤咨询」落地页样例（海外 leadgen，非交易）。
 // 文案与图片严格提取自 templates/template 的代码：
 //   - 顶层数据：templates/template/data/beauty-landing-page.ts
-//   - 组件内硬编码：StatsSection.tsx / ProductShowcase.tsx / BeforeAfter.tsx
+//   - 组件内硬编码：StatsSection.tsx / ProductShowcase.tsx
 // 仅保留 types/schema.draft.ts(LandingPageDraft) 定义的字段，源中多余结构
-//（analytics / tracking / primaryConversion / LogoWall / VideoTestimonials 等）按需丢弃；
-// 12 种区块全部填充。转化全程经 WhatsApp，无任何下单 / 结账 / 订阅语义。
+//（analytics / tracking / primaryConversion / LogoWall / VideoTestimonials 等）按需丢弃。
+// 转化全程经 WhatsApp，无任何下单 / 结账 / 订阅语义。
+//
+// 合规要点：
+// - 源码 BeforeAfter.tsx 的前后对比区块刻意未移植：它用不相干的库存肖像
+//   配上编造的姓名与「Photos are from real clients」这类字面为假的声明，
+//   等于伪造效果证据。商家若有合规的真实案例，可在编辑器中自行添加该区块。
 import type { LandingPageDraft } from "@/types/schema.draft";
 
 export const radiantGlowBeautyDraft: LandingPageDraft = {
@@ -195,59 +200,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
       },
     },
 
-    // 4. 前后对比（BeforeAfter.tsx 硬编码）
-    {
-      type: "beforeAfter",
-      data: {
-        title: "Real Results from Real People",
-        subtitle: "See the transformations our clients have achieved with personalized skincare guidance",
-        disclaimer:
-          "Individual results may vary. Photos are from real clients who followed our personalized skincare routines.",
-        items: [
-          {
-            crmName: "Sarah M.",
-            duration: "6 weeks",
-            caseDescription: "Acne & Dark Spots",
-            beforeImage: {
-              src: "https://images.unsplash.com/photo-1684014286330-ddbeb4a40c92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-              alt: "Sarah M. before",
-            },
-            afterImage: {
-              src: "https://images.unsplash.com/photo-1710196598595-7dcfd465bd77?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-              alt: "Sarah M. after",
-            },
-          },
-          {
-            crmName: "Jessica L.",
-            duration: "8 weeks",
-            caseDescription: "Dull Skin & Fine Lines",
-            beforeImage: {
-              src: "https://images.unsplash.com/photo-1733685373007-58f63acf3a60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-              alt: "Jessica L. before",
-            },
-            afterImage: {
-              src: "https://images.unsplash.com/photo-1760488029475-41ff1eaa904b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-              alt: "Jessica L. after",
-            },
-          },
-          {
-            crmName: "Emily R.",
-            duration: "4 weeks",
-            caseDescription: "Uneven Skin Tone",
-            beforeImage: {
-              src: "https://images.unsplash.com/photo-1733685372988-69a356984436?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-              alt: "Emily R. before",
-            },
-            afterImage: {
-              src: "https://images.unsplash.com/photo-1747324831504-5ee9aa8eec59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-              alt: "Emily R. after",
-            },
-          },
-        ],
-      },
-    },
-
-    // 5. 服务流程（howItWorks）
+    // 4. 服务流程（howItWorks）
     {
       type: "process",
       data: {
@@ -273,7 +226,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
       },
     },
 
-    // 6. 信任（TrustBanner block）
+    // 5. 信任（TrustBanner block）
     {
       type: "trust",
       data: {
@@ -286,7 +239,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
       },
     },
 
-    // 7. 特性（Features block，core-value 组）
+    // 6. 特性（Features block，core-value 组）
     {
       type: "features",
       data: {
@@ -333,7 +286,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
       },
     },
 
-    // 8. 评价（Reviews block）
+    // 7. 评价（Reviews block）
     {
       type: "reviews",
       data: {
@@ -397,7 +350,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
       },
     },
 
-    // 9. 产品故事（AuthorityStory block）
+    // 8. 产品故事（AuthorityStory block）
     {
       type: "story",
       data: {
@@ -414,7 +367,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
       },
     },
 
-    // 10. 倒计时（Countdown block）
+    // 9. 倒计时（Countdown block）
     {
       type: "countdown",
       data: {
@@ -424,7 +377,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
       },
     },
 
-    // 11. 常见问题（FAQ block）
+    // 10. 常见问题（FAQ block）
     {
       type: "faq",
       data: {
@@ -465,7 +418,7 @@ export const radiantGlowBeautyDraft: LandingPageDraft = {
       },
     },
 
-    // 12. 安全保障（Assurance block）
+    // 11. 安全保障（Assurance block）
     {
       type: "guarantee",
       data: {

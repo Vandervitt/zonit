@@ -4,6 +4,11 @@
 // 仅使用 /admin/editor 各表单可见可编辑的字段，确保在编辑器中可完整复刻与调整。
 // 转化全程经 WhatsApp 预约咨询，无任何下单 / 结账 / 报价付款语义。
 //
+// 合规要点：
+// - 本模板刻意不含 beforeAfter 区块：样例无法提供真实且已授权的患者照片，
+//   拿库存肖像充当疗效对比等于伪造医疗证据，disclaimer 也兜不住。
+//   诊所若有合规的真实案例，可在编辑器中自行添加该区块。
+//
 // 占位资源说明：
 // - 图片均为 Unsplash 在线地址（https），上线前可按需替换。
 // - WhatsApp 号码 15557654321 为占位号码，上线前替换为真实诊所号码。
@@ -145,36 +150,7 @@ export const dentalClinicDraft: LandingPageDraft = {
       },
     },
 
-    // 5. 前后对比（含免责声明，不保证疗效）
-    {
-      type: "beforeAfter",
-      data: {
-        title: "Real smiles, real journeys",
-        subtitle: "Shared with permission from our patients.",
-        disclaimer:
-          "Individual results vary. Dental treatment outcomes depend on each patient's condition and are determined only after an in-person clinical examination.",
-        items: [
-          {
-            crmName: "Lucía, 31",
-            duration: "Veneers · 3 visits",
-            caseDescription:
-              "Closed small gaps and brightened her smile with minimal-prep veneers.",
-            beforeImage: { src: img("photo-1499952127939-9bbf5af6c51c", 800), alt: "Portrait before treatment" },
-            afterImage: { src: img("photo-1573497019940-1c28c88b4f3e", 800), alt: "Portrait after treatment" },
-          },
-          {
-            crmName: "Omar, 38",
-            duration: "Aligners · 9 months",
-            caseDescription:
-              "Straightened crowded front teeth with discreet clear aligners.",
-            beforeImage: { src: img("photo-1500648767791-00dcc994a43e", 800), alt: "Portrait before treatment" },
-            afterImage: { src: img("photo-1506794778202-cad84cf45f1d", 800), alt: "Portrait after treatment" },
-          },
-        ],
-      },
-    },
-
-    // 6. 评价
+    // 5. 评价
     {
       type: "reviews",
       data: {
@@ -212,7 +188,7 @@ export const dentalClinicDraft: LandingPageDraft = {
       },
     },
 
-    // 7. 品牌故事
+    // 6. 品牌故事
     {
       type: "story",
       data: {
@@ -228,7 +204,7 @@ export const dentalClinicDraft: LandingPageDraft = {
       },
     },
 
-    // 8. 安全保障（非交易：资质 / 隐私 / 无推销 / 免费跟进）
+    // 7. 安全保障（非交易：资质 / 隐私 / 无推销 / 免费跟进）
     {
       type: "guarantee",
       data: {
@@ -243,7 +219,7 @@ export const dentalClinicDraft: LandingPageDraft = {
       },
     },
 
-    // 9. 常见问题
+    // 8. 常见问题
     {
       type: "faq",
       data: {
