@@ -175,7 +175,9 @@ export function buildFetchFailedReport(
     status: 0,
     bytes: 0,
     hops: chain.length,
-    findings: [{ id: `fetch_failed_${reason}`, level: "attention", data: { reason } }],
+    // ⚠️ id 稳定为 fetch_failed，具体原因走 data。id 同时是 i18n 键，
+    // 用 `fetch_failed_${reason}` 拼出来会让字典键随代码分支静默漂移。
+    findings: [{ id: "fetch_failed", level: "attention", data: { reason } }],
     browserVerified: false,
   };
 }

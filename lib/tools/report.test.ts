@@ -128,7 +128,9 @@ describe("特殊入口", () => {
 
   it("抓取失败时如实报告原因，不假装检查过了", () => {
     const r = buildFetchFailedReport("https://example.com/", "private_address", []);
-    expect(ids(r)).toEqual(["fetch_failed_private_address"]);
+    // id 必须稳定（它同时是 i18n 键），原因走 data
+    expect(ids(r)).toEqual(["fetch_failed"]);
+    expect(r.findings[0].data?.reason).toBe("private_address");
   });
 
   it("所有入口都标 browserVerified=false（实测只在登录侧发生）", () => {

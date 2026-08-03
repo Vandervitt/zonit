@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { replaySpooledLeads } from "@/lib/leads/spool";
 import { computeLeadNudges, markNudged } from "@/lib/leads/nudge";
 import { pruneRateLimitHits } from "@/lib/rate-limit-db";
+import { pruneExpiredReports } from "@/lib/tools/store";
 import { getRetryableEvents } from "@/lib/capi/events-store";
 import { flushEvents } from "@/lib/capi/dispatch";
 import { getRetryableDeliveries } from "@/lib/webhooks/deliveries-store";
@@ -96,6 +97,7 @@ export async function GET(request: NextRequest) {
   // 限频计数行清理：留 24 小时足够任何窗口回看，再久只是占空间。
   try {
     result.rateLimitPruned = await pruneRateLimitHits();
+    result.pageCheckReportsPruned = await pruneExpiredReports();
   } catch (err) {
     console.error("cron/daily rate-limit-prune failed:", err);
     result.rateLimitPruneError = true;
