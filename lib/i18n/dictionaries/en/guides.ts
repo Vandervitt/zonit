@@ -28,6 +28,9 @@ export const guides = {
     /** `{industry}` 为行业展示名。 */
     ctaIndustryTemplates: "See {industry} templates",
     ctaRegister: "Start free",
+    // 合规簇专用次 CTA。措辞受自检器同一条红线约束（见 dictionaries/*/tools.ts）：
+    // 不许承诺「会不会过审」，只说去看这张页面上有什么。
+    ctaPageCheck: "Check a page you already have",
     relatedHeading: "Related guides",
   },
 };

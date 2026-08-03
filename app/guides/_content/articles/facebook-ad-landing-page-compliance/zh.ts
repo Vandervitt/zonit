@@ -6,6 +6,8 @@ export const facebookAdLandingPageCompliance: GuideArticle = {
   description:
     "Facebook / Meta 广告落地页被拒审、限流怎么办？拆解 8 个最常见的合规问题——落地页与广告一致性、隐私政策、夸大功效、页面结构雷同判重——附上线前自查清单。",
   keywords: ["Facebook 广告落地页", "落地页拒审", "Meta 广告合规", "落地页限流"],
+  // 补登合规簇，与 en.ts 同步（原因见该文件注释）。
+  ctaTarget: "anti-ban",
   datePublished: "2026-07-26",
   intro:
     "投放海外广告时，落地页往往是被拒审、限流的重灾区——广告素材过审了，落地页却被判违规，导致整个广告组受限。这篇拆解 Meta 落地页最常见的 8 个合规问题，帮你在上线前排掉隐患。",

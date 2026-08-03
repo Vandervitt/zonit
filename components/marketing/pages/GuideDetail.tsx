@@ -150,11 +150,15 @@ export function GuideDetailView({ slug, locale }: { slug: string; locale: Locale
                   ? t.ctaIndustryTemplates.replace("{industry}", industryLabel(g.industry, locale))
                   : t.ctaTemplates}
             </Link>
+            {/* 合规簇（ctaTarget: anti-ban）的次 CTA 换成自检器：读完「审核会盯什么」
+                的人，下一步最自然的动作是「那我那张页现在什么样」，而不是注册开户。
+                主 CTA 仍指向 anti-ban，变现路径不让位；自检报告页本身再引导注册，
+                漏斗顺序比在这里直接要注册更顺。其余文章保持注册。 */}
             <Link
-              href={localePath(locale, Routes.Register)}
+              href={localePath(locale, g.ctaTarget === "anti-ban" ? Routes.PageCheck : Routes.Register)}
               className="rounded-xl border border-border px-5 py-2.5 text-sm text-muted-foreground transition-colors hover:border-aqua-300 hover:text-aqua-700"
             >
-              {t.ctaRegister}
+              {g.ctaTarget === "anti-ban" ? t.ctaPageCheck : t.ctaRegister}
             </Link>
           </div>
         </section>

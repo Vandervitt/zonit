@@ -9,6 +9,7 @@ export const common = {
   },
   footer: {
     templates: "模板库",
+    pageCheck: "落地页自检",
     antiBan: "反同质化",
     pricing: "套餐定价",
     privacy: "隐私政策",

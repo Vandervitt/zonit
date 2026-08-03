@@ -9,6 +9,7 @@ export const common = {
   },
   footer: {
     templates: "Templates",
+    pageCheck: "Landing page checker",
     antiBan: "Anti-duplication",
     pricing: "Pricing",
     privacy: "Privacy",

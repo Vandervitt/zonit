@@ -447,7 +447,7 @@ function Features({
  * 数据归因闭环
  * ------------------------------------------------------------------ */
 
-function TrackingShowcase({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
+function TrackingShowcase({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeDict }) {
   const funnel = (Object.keys(FUNNEL_ICONS) as (keyof typeof FUNNEL_ICONS)[]).map((key) => ({
     key,
     Icon: FUNNEL_ICONS[key],
@@ -501,6 +501,18 @@ function TrackingShowcase({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
               </motion.div>
             ))}
           </div>
+        </div>
+
+        {/* 自检器入口：归因区尾部一行小字，刻意不做成按钮或独立区块——理由见
+            各语言 home.ts 里 pageCheckTeaser 键上方的注释。 */}
+        <div className="mt-10 border-t border-border pt-6 text-center text-sm text-muted-foreground">
+          {t.pageCheckTeaser.text}{" "}
+          <Link
+            href={localePath(locale, Routes.PageCheck)}
+            className="font-medium text-aqua-700 underline-offset-4 transition-colors hover:underline"
+          >
+            {t.pageCheckTeaser.link}
+          </Link>
         </div>
       </div>
     </section>
@@ -669,7 +681,7 @@ export default function MarketingHome({
            * 放在追踪区之前，它的角色是归因能力的佐证，而不是产品的第一印象。
            */}
           <LogoMarquee fonts={fonts} t={t} />
-          <TrackingShowcase fonts={fonts} t={t} />
+          <TrackingShowcase fonts={fonts} locale={locale} t={t} />
           {/*
            * 反向定位排在定价正前方：读者已看完能力，正要判断「这适合我吗」，
            * 自我筛选恰好接住那个问题，也让走到定价区的人质量更高。

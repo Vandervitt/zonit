@@ -26,6 +26,9 @@ export const guides = {
     ctaIndustryTemplates: "查看{industry}模板",
     ctaTemplates: "浏览模板库",
     ctaRegister: "免费开始",
+    // 合规簇专用次 CTA。措辞受自检器同一条红线约束（见 dictionaries/*/tools.ts）：
+    // 不许承诺「会不会过审」，只说去看这张页面上有什么。
+    ctaPageCheck: "检查你现有的页面",
     relatedHeading: "相关指南",
   },
 };
