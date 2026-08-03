@@ -169,7 +169,7 @@ export const TEMPLATES: TemplateMeta[] = [
       en: "Nobody can smell a landing page, so Maison Brume sells the recommendation instead of the bottle. Note stories and occasion pairings let a visitor recognise themselves, and a personalised scent suggestion with sample picks turns that recognition into a conversation. Made for niche and salon fragrance lines and gift sets sold through DTC stores and creator marketing teams.",
       zh: "没人能闻到落地页，所以 Maison Brume 卖的是「推荐」而不是那瓶香水。香调故事与场景搭配让访客对号入座，再用个性化选香建议与小样推荐，把这份共鸣变成一段对话。跨市场经营时这条路径几乎是唯一解——含酒精香水的空运本就受限，先谈推荐、再谈怎么送到，顺序不能反。适合小众香、沙龙香与香氛礼盒类产品的独立站与红人营销团队。",
     },
-    thumbnail: "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=1600&q=80",
+    thumbnail: "https://images.unsplash.com/photo-1718466044521-d38654f3ba0a?auto=format&fit=crop&w=1600&q=80",
     tier: "t1",
     tags: { category: "beauty", subcategory: "fragrance", archetype: "seeding", conversion: ["whatsapp", "form"], risk: "low", tone: "emotional" },
   },

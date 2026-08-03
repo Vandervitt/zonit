@@ -21,8 +21,8 @@ export const fragranceDraft: LandingPageDraft = {
   },
   hero: {
     backgroundImage: {
-      src: img("photo-1541643600914-78b084683601", 1600),
-      alt: "Perfume bottles on a marble surface",
+      src: img("photo-1718466044521-d38654f3ba0a", 1600),
+      alt: "Unbranded perfume bottles in soft window light",
     },
     badge: { emoji: "🌸", text: "Your signature scent, discovered" },
     title: "Find a fragrance that feels like you",
@@ -33,7 +33,7 @@ export const fragranceDraft: LandingPageDraft = {
     endorsementText: "Trusted by 45,000+ fragrance lovers worldwide",
     showcase: {
       type: "image",
-      src: img("photo-1592945403244-b3fbafd7f539"),
+      src: img("photo-1564644411594-c9a40e2aa4da"),
       alt: "Amber perfume bottle in soft light",
     },
   },
@@ -158,7 +158,7 @@ export const fragranceDraft: LandingPageDraft = {
         subtitle: "Why we started Maison Brume.",
         body: "Choosing a fragrance online is overwhelming — thousands of bottles, no way to smell them. We built Maison Brume to bring back the feeling of a thoughtful advisor: someone who listens, understands your taste, and points you to scents worth sampling. No pressure, no upselling — just helping you find something that feels unmistakably yours.",
         backgroundImage: {
-          src: img("photo-1557170334-a9632e77c6e4", 1400),
+          src: img("photo-1716034348692-ddc6498732f7", 1400),
           alt: "Perfumer's desk with ingredients",
         },
         signatureName: "Camille Rousseau",
