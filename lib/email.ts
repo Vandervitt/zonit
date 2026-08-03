@@ -400,6 +400,69 @@ export async function sendPublishQuotaEmail(
   }
 }
 
+/**
+ * 试用 / 赠送到期序列：到期前 3 天、到期当天、到期次日挽回，各一封。
+ *
+ * 刻意不带用户成绩数据（已发布页数、线索数）：多两个聚合查询，
+ * 而这三封的作用是提醒与召回，不是汇报。
+ *
+ * 超额用户不会走到 expiry_day / win_back —— 那两封由 sendPublishQuotaEmail
+ * 的序列承担，它讲得更具体（几张页、还剩几天、哪几张会下线）。
+ */
+export async function sendTrialEmail(
+  to: string,
+  params: {
+    stage: "t_minus_3" | "expiry_day" | "win_back";
+    /** 即将/已经失效的赠送档（如 Pro）。 */
+    grantedPlanLabel: string;
+    /** 回落到的付费档（当前恒为 Free）。 */
+    fallbackPlanLabel: string;
+    daysLeft: number;
+    appUrl: string;
+  },
+) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const { stage, grantedPlanLabel, fallbackPlanLabel, daysLeft, appUrl } = params;
+  const billingUrl = `${appUrl}${Routes.Billing}`;
+  const pagesUrl = `${appUrl}${Routes.LandingPages}`;
+
+  const subject =
+    stage === "t_minus_3"
+      ? `还有 ${daysLeft} 天：你的 ${grantedPlanLabel} 权益即将到期`
+      : stage === "expiry_day"
+        ? `你的 ${grantedPlanLabel} 权益已到期`
+        : `继续用 ${grantedPlanLabel}？页面和线索都还在`;
+
+  const body =
+    stage === "t_minus_3"
+      ? `<p style="color:#666;margin:0 0 20px;">你的 <strong>${escapeHtml(grantedPlanLabel)}</strong> 权益将在 ${daysLeft} 天后到期，之后回落到 ${escapeHtml(fallbackPlanLabel)}。<br/>已上线的页面不会被删除，但额度会收紧；如果你正在投放，建议先确认要长期保留哪几张页。</p>`
+      : stage === "expiry_day"
+        ? `<p style="color:#666;margin:0 0 20px;">你的 <strong>${escapeHtml(grantedPlanLabel)}</strong> 权益已到期，当前按 ${escapeHtml(fallbackPlanLabel)} 计算额度。<br/><strong>页面内容和已收到的线索都还在</strong>，随时升级即可恢复。</p>`
+        : `<p style="color:#666;margin:0 0 20px;">你的 <strong>${escapeHtml(grantedPlanLabel)}</strong> 权益已经结束，账号仍在 ${escapeHtml(fallbackPlanLabel)} 上正常使用。<br/>页面、域名和线索都保留着——如果之前的投放有效果，升级后就能继续放开手脚。</p>`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 4px;">${escapeHtml(subject)}</h2>
+          ${body}
+          <p style="margin-top:24px;">
+            <a href="${billingUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">查看套餐</a>
+            <a href="${pagesUrl}" style="display:inline-block;margin-left:8px;color:${BRAND};padding:10px 0;text-decoration:none;">管理落地页</a>
+          </p>
+        </div>`,
+    });
+    if (error) { console.error("Failed to send trial email:", error); return { error }; }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send trial email:", error);
+    return { error };
+  }
+}
+
 export async function sendLeadNotificationEmail({
   to, pageName, fields, dashboardUrl,
 }: {

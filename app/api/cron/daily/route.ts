@@ -12,6 +12,7 @@ import { getRetryableDeliveries } from "@/lib/webhooks/deliveries-store";
 import { deliverMany } from "@/lib/webhooks/dispatch";
 import { computeWeeklyDigests, trendText } from "@/lib/digest";
 import { sweepPublishQuota } from "@/lib/publish-quota-sweep";
+import { sweepTrialEmails } from "@/lib/billing/trial-emails-sweep";
 import { sendWeeklyDigestEmail, sendLeadNudgeEmail } from "@/lib/email";
 import { Routes } from "@/lib/constants";
 
@@ -19,7 +20,7 @@ import { Routes } from "@/lib/constants";
  * 每日 cron 编排器（Vercel Hobby 计划 cron 数量有限，多任务合并为一条）：
  * ① 线索兜底重投 ② CAPI 兜底重发 ③ 线索 webhook 兜底重投 ④ 未读线索提醒
  * ⑤ 限频计数清理 ⑥ 周报摘要（仅周一实际发送，?digest=force 可强制）
- * ⑦ 发布配额对账与降档宽限。
+ * ⑦ 发布配额对账与降档宽限 ⑧ 试用/赠送到期邮件序列（排在 ⑦ 之后，与配额信互斥）。
  * 各任务相互隔离：任一失败不影响其余任务。鉴权用 CRON_SECRET。
  */
 export async function GET(request: NextRequest) {
@@ -94,6 +95,17 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error("cron/daily publish-quota sweep failed:", err);
     result.publishQuotaError = true;
+  }
+
+  // 试用/赠送到期邮件序列。必须排在配额对账之后：超额用户的到期叙事由上面那封
+  // 更具体的配额信承担，这里会跳过他们的到期信与挽回信（见 resolveTrialEmail），
+  // 避免同一天两封讲同一件事。
+  try {
+    const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+    result.trialEmails = await sweepTrialEmails(now, appUrl);
+  } catch (err) {
+    console.error("cron/daily trial-emails sweep failed:", err);
+    result.trialEmailsError = true;
   }
 
   // 限频计数行清理：留 24 小时足够任何窗口回看，再久只是占空间。
