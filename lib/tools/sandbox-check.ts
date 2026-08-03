@@ -92,3 +92,35 @@ export async function runSandboxCheck(url: string): Promise<SandboxCheckResult> 
     sandbox?.stop().catch(() => {});
   }
 }
+
+/**
+ * 快照保活。
+ *
+ * Vercel 的沙箱快照在**最后一次使用后 30 天**过期。工具若长期无人使用，
+ * 下一次实测就会退回 29.5s 冷启动——不报错，只是慢到没法用。
+ * 每日 cron 起一个沙箱再立刻停掉，即可把过期时间往后推。
+ *
+ * 成本可忽略：每天 1 次创建 + 1 分钟内存 ≈ 每月 30 次创建，
+ * 相对 Hobby 的 5,000 次额度是零头。但仍走预算守卫记账，
+ * 以免「保活本身」在额度紧张时把最后的余量吃掉。
+ */
+export async function touchSnapshot(): Promise<{ touched: boolean; reason?: string }> {
+  const snapshotId = process.env.AGENT_BROWSER_SNAPSHOT_ID;
+  if (!snapshotId) return { touched: false, reason: "snapshot_missing" };
+
+  let sandbox: Awaited<ReturnType<typeof Sandbox.create>> | null = null;
+  try {
+    // 只创建不执行任何命令——「被使用过」这件事本身就足以刷新过期时间。
+    sandbox = await Sandbox.create({
+      ...credentials(),
+      source: { type: "snapshot", snapshotId },
+      resources: { vcpus: 1 },
+      timeout: 60_000,
+    });
+    return { touched: true };
+  } catch (e) {
+    return { touched: false, reason: (e as Error).message.slice(0, 200) };
+  } finally {
+    sandbox?.stop().catch(() => {});
+  }
+}

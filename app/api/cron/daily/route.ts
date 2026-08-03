@@ -4,6 +4,8 @@ import { replaySpooledLeads } from "@/lib/leads/spool";
 import { computeLeadNudges, markNudged } from "@/lib/leads/nudge";
 import { pruneRateLimitHits } from "@/lib/rate-limit-db";
 import { pruneExpiredReports } from "@/lib/tools/store";
+import { touchSnapshot } from "@/lib/tools/sandbox-check";
+import { consumeSandboxBudget } from "@/lib/tools/sandbox-budget";
 import { getRetryableEvents } from "@/lib/capi/events-store";
 import { flushEvents } from "@/lib/capi/dispatch";
 import { getRetryableDeliveries } from "@/lib/webhooks/deliveries-store";
@@ -101,6 +103,24 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error("cron/daily rate-limit-prune failed:", err);
     result.rateLimitPruneError = true;
+  }
+
+  // 自检器快照保活：快照在最后一次使用后 30 天过期，长期无人使用会让下一次
+  // 实测退回 29.5s 冷启动。每天摸一次即可，成本约每月 30 次创建（额度 5,000）。
+  // 走预算守卫记账，避免「保活」在额度紧张时吃掉最后的余量。
+  try {
+    const budget = await consumeSandboxBudget();
+    if (budget.allowed) {
+      const r = await touchSnapshot();
+      result.snapshotTouched = r.touched;
+      if (!r.touched) result.snapshotTouchReason = r.reason;
+    } else {
+      result.snapshotTouched = false;
+      result.snapshotTouchReason = budget.reason;
+    }
+  } catch (err) {
+    console.error("cron/daily snapshot-touch failed:", err);
+    result.snapshotTouchError = true;
   }
 
   const isMonday = now.getUTCDay() === 1;
