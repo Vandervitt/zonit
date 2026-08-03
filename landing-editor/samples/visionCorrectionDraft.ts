@@ -164,7 +164,7 @@ export const visionCorrectionDraft: LandingPageDraft = {
             title: "Submit your prescription",
             description:
               "Send your current prescription and answer a short questionnaire about your eyes and lifestyle.",
-            image: { src: img("photo-1576091160399-112ba8d25d1d", 800), alt: "Clinical consultation" },
+            image: { src: img("photo-1666886573531-48d2e3c2b684", 800), alt: "Clinical consultation" },
           },
           {
             title: "Full diagnostic scan",

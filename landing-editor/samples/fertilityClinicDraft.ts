@@ -41,8 +41,8 @@ export const fertilityClinicDraft: LandingPageDraft = {
     endorsementText: "Regulated fertility centre · Consultant-led since 2009",
     showcase: {
       type: "image",
-      src: img("photo-1631217868264-e5b90bb7e133"),
-      alt: "Consultant meeting with patients",
+      src: img("photo-1685012107474-4f410308805f"),
+      alt: "Couple's hands resting on a baby bump",
     },
   },
 
@@ -114,7 +114,7 @@ export const fertilityClinicDraft: LandingPageDraft = {
             name: "Ovulation support & IUI",
             description:
               "Lower-intervention pathways that are appropriate more often than people expect.",
-            backgroundImage: { src: img("photo-1576091160399-112ba8d25d1d", 800), alt: "Clinical consultation" },
+            backgroundImage: { src: img("photo-1666886573531-48d2e3c2b684", 800), alt: "Clinical consultation" },
           },
           {
             name: "IVF & ICSI",

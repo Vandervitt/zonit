@@ -34,8 +34,8 @@ export const skincareConsultDraft: LandingPageDraft = {
     endorsementText: "Trusted by 30,000+ people in 30+ countries",
     showcase: {
       type: "image",
-      src: img("photo-1556228720-195a672e8a03"),
-      alt: "Skincare serum bottle held in hand",
+      src: img("photo-1748543669178-efd3de4e64e0"),
+      alt: "Serum textures swatched on a neutral surface",
     },
   },
 
