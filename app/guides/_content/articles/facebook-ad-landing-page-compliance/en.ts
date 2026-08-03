@@ -6,6 +6,9 @@ export const facebookAdLandingPageCompliance: GuideArticle = {
   description:
     "Facebook / Meta ad landing page rejected or throttled? This breaks down the eight most common compliance problems — ad-to-page consistency, privacy policy, exaggerated claims, duplicate page structure — with a pre-launch self-check list.",
   keywords: ["Facebook ad landing page", "landing page rejection", "Meta ad compliance", "ad throttling"],
+  // 补登合规簇：这篇与 google-ads / tiktok 两篇同题材，此前漏设 ctaTarget，
+  // 落点掉回通用模板库，也拿不到合规簇的自检器次 CTA。
+  ctaTarget: "anti-ban",
   datePublished: "2026-07-26",
   intro:
     "When you run ads overseas, the landing page is where rejections and throttling tend to originate — the creative passes review, the page is flagged, and the whole ad set gets restricted. This breaks down the eight most common compliance problems with Meta landing pages so you can clear them before going live.",

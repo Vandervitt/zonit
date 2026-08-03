@@ -232,6 +232,12 @@ export function SiteFooter({ fonts, locale }: { fonts: Fonts; locale: Locale }) 
           <Link href={localePath(locale, Routes.Templates)} className="transition-colors hover:text-aqua-700">
             {t.templates}
           </Link>
+          {/* 自检器只进页脚，不进主导航：主导航是全站最贵的位置，
+              「自检 / 体检」对不投放的访客是陌生动作，摆在顶部会把产品重新框成
+              诊断工具。页脚保证全站可达，真正的导流靠合规簇文章与首页归因区。 */}
+          <Link href={localePath(locale, Routes.PageCheck)} className="transition-colors hover:text-aqua-700">
+            {t.pageCheck}
+          </Link>
           <Link href={localePath(locale, Routes.AntiBan)} className="transition-colors hover:text-aqua-700">
             {t.antiBan}
           </Link>
