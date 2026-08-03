@@ -7,7 +7,10 @@
 //
 // 合规要点（risk: high）：
 // - 植发属医疗行为，效果因人而异，页面不得承诺成活率或具体发量结果。
-// - 前后对比区块必须带 disclaimer，说明结果个体差异且需面诊确认。
+// - 本模板刻意不含 beforeAfter 区块：样例无法提供真实且已授权的患者照片，
+//   拿库存肖像充当疗效对比等于伪造医疗证据，disclaimer 也兜不住；
+//   且与本模板「先出书面评估、不合适就劝退」的叙事相冲。
+//   诊所若有合规的真实案例，可在编辑器中自行添加该区块。
 //
 // 占位资源说明：
 // - 图片均为 Unsplash 在线地址（https），上线前可按需替换。
@@ -164,36 +167,7 @@ export const hairTransplantDraft: LandingPageDraft = {
       },
     },
 
-    // 5. 前后对比（医疗合规：必须声明个体差异）
-    {
-      type: "beforeAfter",
-      data: {
-        title: "Patient results",
-        subtitle: "Shared with written consent, at 12 months post-procedure.",
-        disclaimer:
-          "Individual results vary. Photographs show outcomes for specific patients and are not a prediction of your result. Graft survival, final density, and healing depend on donor characteristics, medical history, and aftercare, and can only be assessed in a clinical examination.",
-        items: [
-          {
-            crmName: "Andrés, 34",
-            duration: "FUE · 2,600 grafts · 12 months",
-            caseDescription:
-              "Frontal hairline rebuilt with a softened, age-appropriate design.",
-            beforeImage: { src: img("photo-1500648767791-00dcc994a43e", 800), alt: "Portrait before treatment" },
-            afterImage: { src: img("photo-1506794778202-cad84cf45f1d", 800), alt: "Portrait after treatment" },
-          },
-          {
-            crmName: "Kenji, 41",
-            duration: "DHI · 3,100 grafts · 14 months",
-            caseDescription:
-              "Crown coverage improved while keeping the donor area visually intact.",
-            beforeImage: { src: img("photo-1519085360753-af0119f7cbe7", 800), alt: "Portrait before treatment" },
-            afterImage: { src: img("photo-1507003211169-0a1dd7228f2d", 800), alt: "Portrait after treatment" },
-          },
-        ],
-      },
-    },
-
-    // 6. 评价
+    // 5. 评价
     {
       type: "reviews",
       data: {
@@ -231,7 +205,7 @@ export const hairTransplantDraft: LandingPageDraft = {
       },
     },
 
-    // 7. 品牌故事
+    // 6. 品牌故事
     {
       type: "story",
       data: {
@@ -247,7 +221,7 @@ export const hairTransplantDraft: LandingPageDraft = {
       },
     },
 
-    // 8. 安全保障（非交易：资质 / 隐私 / 无推销 / 术后跟进）
+    // 7. 安全保障（非交易：资质 / 隐私 / 无推销 / 术后跟进）
     {
       type: "guarantee",
       data: {
@@ -262,7 +236,7 @@ export const hairTransplantDraft: LandingPageDraft = {
       },
     },
 
-    // 9. 常见问题
+    // 8. 常见问题
     {
       type: "faq",
       data: {
