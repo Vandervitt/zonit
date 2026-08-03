@@ -134,6 +134,39 @@ export const home = {
       },
     },
   },
+  // 反向定位区。放在追踪区之后、定价之前：读者已经看完能力，正要判断「这适合我吗」,
+  // 此时给一份自我筛选恰好接住那个问题。往前挪到行业区后面会在讲清价值之前先劝退。
+  //
+  // ⚠️ 排除项一律按**这张页面要干什么**写，绝不按**客户是什么行业**写。
+  //   ❌ `If you sell physical products, use a store platform instead`
+  //      ——把整个电商客群推出门。美妆 / 服饰 / 家居 / 保健品模板全是电商行业的
+  //      询盘页，这些是真实客群，另见 industries.title 那句 "Whatever you sell"。
+  //   ✅ `The page itself has to take payment`——管的是页面用途。同一个 DTC 品牌，
+  //      收款页去店铺平台、批发询盘页留在这里，两句话同时成立。
+  // 与 docs/constraints/product-positioning.md 的非交易红线同源：红线禁的是生成页上的
+  // 交易行为，从不禁做电商生意的客户。这条区分曾被误读过，改文案前先读这段。
+  fit: {
+    kicker: "Is this for you",
+    title: "Built for one job — and honest about the rest",
+    desc: "Turning traffic into inquiries is the whole product. That makes it a strong fit for some jobs and a poor one for others. Here's the honest split, so you don't spend an afternoon finding out.",
+    good: {
+      heading: "This is built for you when",
+      items: [
+        "Your sale closes off the page — in a chat, on a call, at a consultation, or on site.",
+        "What you need back is the inquiry itself: a quote, a booking, a consult, a sample request.",
+        "You're sending paid or search traffic somewhere and want a page per campaign, not one more site.",
+        "You want every lead in one place, with the source that produced it still attached.",
+      ],
+    },
+    bad: {
+      heading: "Something else fits better when",
+      items: [
+        "The page itself has to take payment — carts, checkout, and order status belong on a store platform.",
+        "You need a full company site: many pages, navigation, a blog, a team page. A website builder does that better.",
+        "Nobody is being sent to the page. Nothing here creates demand — it converts the traffic you already have.",
+      ],
+    },
+  },
   pricing: {
     kicker: "Simple, transparent pricing",
     title: "Go live free, upgrade when you want your own domain",

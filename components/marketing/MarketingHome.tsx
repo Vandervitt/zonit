@@ -508,6 +508,55 @@ function TrackingShowcase({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
 }
 
 /* ------------------------------------------------------------------ *
+ * 反向定位（适合 / 不适合）
+ * ------------------------------------------------------------------ */
+
+// 两栏刻意等重：右栏用中性灰而不是红色警告色。这里不是「错误用法」清单，
+// 是把人分流到更合适的工具——用红叉会让读到自己那一条的人觉得被指责，
+// 而这一栏的价值恰恰在于被读到的人心平气和地离开，或者发现自己不在其中。
+function Fit({ fonts, t }: { fonts: Fonts; t: HomeDict }) {
+  const columns = [
+    { ...t.fit.good, Icon: Check, tone: "good" as const },
+    { ...t.fit.bad, Icon: ArrowRight, tone: "bad" as const },
+  ];
+  return (
+    <section className="relative px-6 py-24">
+      <SectionHead kicker={t.fit.kicker} title={t.fit.title} desc={t.fit.desc} fonts={fonts} />
+      <div className="mx-auto mt-14 grid max-w-5xl gap-6 lg:grid-cols-2">
+        {columns.map(({ heading, items, Icon, tone }, i) => (
+          <motion.div
+            key={heading}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, delay: i * 0.1, ease: "easeOut" }}
+            className={`p-8 ${glassCard}`}
+          >
+            <h3 className={`text-lg font-semibold text-foreground ${fonts.display}`}>{heading}</h3>
+            <ul className="mt-6 space-y-4">
+              {items.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-foreground/80">
+                  <span
+                    className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full ${
+                      tone === "good"
+                        ? "bg-aqua-50 text-aqua-600"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <Icon className="h-3 w-3" />
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ *
  * 定价（融合对比表，复用 PlanComparison 单一数据源）
  * ------------------------------------------------------------------ */
 
@@ -621,6 +670,12 @@ export default function MarketingHome({
            */}
           <LogoMarquee fonts={fonts} t={t} />
           <TrackingShowcase fonts={fonts} t={t} />
+          {/*
+           * 反向定位排在定价正前方：读者已看完能力，正要判断「这适合我吗」，
+           * 自我筛选恰好接住那个问题，也让走到定价区的人质量更高。
+           * 往前挪到行业区之后会在讲清价值之前先劝退。
+           */}
+          <Fit fonts={fonts} t={t} />
           <Pricing fonts={fonts} locale={locale} t={t} cnyRate={cnyRate} />
           <FinalCTA fonts={fonts} locale={locale} t={t} />
         </main>
