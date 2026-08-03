@@ -29,7 +29,7 @@ export const medicalAestheticsDraft: LandingPageDraft = {
   },
   hero: {
     backgroundImage: {
-      src: img("photo-1519494026892-80bbd2d6fd0d", 1600),
+      src: img("photo-1648775507324-b48dd3791fa5", 1600),
       alt: "Calm clinic reception area",
     },
     badge: { emoji: "🩺", text: "Doctor-led aesthetic medicine" },
@@ -126,7 +126,7 @@ export const medicalAestheticsDraft: LandingPageDraft = {
             name: "Medical skincare plans",
             description:
               "Often the right first step. Prescription-strength routines supervised over several months.",
-            backgroundImage: { src: img("photo-1556228720-195a672e8a03", 800), alt: "Skincare products on a clinical surface" },
+            backgroundImage: { src: img("photo-1688614585809-aeaf47389e12", 800), alt: "Skincare products on a clinical surface" },
           },
         ],
       },
@@ -143,7 +143,7 @@ export const medicalAestheticsDraft: LandingPageDraft = {
             title: "Tell us what's bothering you",
             description:
               "Submit the form with your concern, any previous treatments, and your medical history.",
-            image: { src: img("photo-1576091160399-112ba8d25d1d", 800), alt: "Medical consultation" },
+            image: { src: img("photo-1666886573531-48d2e3c2b684", 800), alt: "Medical consultation" },
           },
           {
             title: "Facial assessment with a doctor",
@@ -210,7 +210,7 @@ export const medicalAestheticsDraft: LandingPageDraft = {
         subtitle: "The practice behind the clinic.",
         body: "Aurelle started because too many patients were arriving having been treated from a menu — a syringe here, a device there, with no one looking at the face as a whole. Faces age in patterns, and treating a single line in isolation is how people end up looking done rather than well. So we consult first, always, and we treat conservatively. If you leave a consultation having decided not to have anything, we consider that a good outcome.",
         backgroundImage: {
-          src: img("photo-1631217868264-e5b90bb7e133", 1400),
+          src: img("photo-1758691461935-202e2ef6b69f", 1400),
           alt: "Doctor speaking with a patient",
         },
         signatureName: "Dr. Camille Roux",

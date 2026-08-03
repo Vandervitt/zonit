@@ -29,8 +29,8 @@ export const hairTransplantDraft: LandingPageDraft = {
   },
   hero: {
     backgroundImage: {
-      src: img("photo-1519494026892-80bbd2d6fd0d", 1600),
-      alt: "Clinic reception area",
+      src: img("photo-1626383120723-2a941488860d", 1600),
+      alt: "Quiet consultation corner at the clinic",
     },
     badge: { emoji: "🩺", text: "Surgeon-led hair restoration" },
     title: "Find out what's actually possible for your hairline",
@@ -41,8 +41,8 @@ export const hairTransplantDraft: LandingPageDraft = {
     endorsementText: "9,400+ assessments reviewed by our surgical team",
     showcase: {
       type: "image",
-      src: img("photo-1622253692010-333f2da6031d"),
-      alt: "Surgeon in scrubs at the clinic",
+      src: img("photo-1758691463198-dc663b8a64e4"),
+      alt: "Doctor writing an assessment during a consultation",
     },
   },
 
@@ -120,7 +120,7 @@ export const hairTransplantDraft: LandingPageDraft = {
             name: "Beard & eyebrow restoration",
             description:
               "The same follicle-by-follicle approach applied to facial hair and brow reconstruction.",
-            backgroundImage: { src: img("photo-1621605815971-fbc98d665033", 800), alt: "Grooming tools laid out" },
+            backgroundImage: { src: img("photo-1625038032200-648fbcd800d0", 800), alt: "Grooming tools laid out" },
           },
           {
             name: "Medical maintenance plan",
@@ -143,7 +143,7 @@ export const hairTransplantDraft: LandingPageDraft = {
             title: "Send photos through the form",
             description:
               "Front, top, crown, and both sides in natural light. The form tells you exactly what to capture.",
-            image: { src: img("photo-1576091160399-112ba8d25d1d", 800), alt: "Medical consultation" },
+            image: { src: img("photo-1666886573531-48d2e3c2b684", 800), alt: "Medical consultation" },
           },
           {
             title: "A surgeon reviews your case",
@@ -239,8 +239,8 @@ export const hairTransplantDraft: LandingPageDraft = {
         subtitle: "The practice behind the clinic.",
         body: "Meridian was founded by surgeons who kept meeting patients who had been sold a procedure they weren't ready for — operated on mid-progression, or given a hairline that would look wrong in fifteen years. We built the practice around the assessment instead of the booking: photos first, an honest written read second, and surgery only when it's genuinely the right step. Some of the assessments we're proudest of ended with us telling someone not to have surgery.",
         backgroundImage: {
-          src: img("photo-1631217868264-e5b90bb7e133", 1400),
-          alt: "Doctor speaking with a patient",
+          src: img("photo-1758691461990-03b49d969495", 1400),
+          alt: "Doctor completing a written assessment with a patient",
         },
         signatureName: "Dr. Elif Kaya",
         signatureRole: "Lead Surgeon & Founder",
