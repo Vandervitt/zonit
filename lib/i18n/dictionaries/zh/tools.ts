@@ -58,6 +58,24 @@ export const tools = {
     ctaTemplates: "浏览模板",
     ctaAntiBan: "了解反同质化怎么做",
     readMore: "延伸阅读",
+    verify: {
+      heading: "想要确定，而不是怀疑？",
+      bodyAnon:
+        "上面关于追踪的那条，是从 HTML 推断出来的。真实浏览器检查会打开你的页面，实测同意之前到底发出了什么。登录后即可运行。",
+      bodyUser:
+        "跑一次真实浏览器检查：我们用真实浏览器打开你的页面，记录在任何同意交互之前实际发出的请求。",
+      cta: "运行真实浏览器检查",
+      running: "正在用真实浏览器打开你的页面…",
+      signIn: "登录后实测",
+      done: "已实测——查看更新后的报告。",
+      errors: {
+        rate_limited: "你刚跑过几次实测，稍后再试。",
+        budget_exhausted: "实测暂时不可用。上面的静态结论依然成立。",
+        verify_failed: "浏览器检查没能完成。上面的静态结论依然成立。",
+        url_not_allowed: "这个页面已经无法被安全访问。",
+        generic: "出了点问题。",
+      },
+    },
   },
 
   /**
@@ -118,6 +136,15 @@ export const tools = {
       title: "初始 HTML 中没有追踪代码",
       why: "这不代表页面没有追踪。由 JavaScript 在加载后注入的像素，静态读取根本看不到——只有真实浏览器检查才能确认。",
       guide: "landing-page-duplicate-detection",
+    },
+    pixel_before_consent_verified: {
+      title: "实测：追踪在同意前已触发（{pixels}）",
+      why: "真实浏览器打开了你的页面，这些请求在任何同意动作之前就发了出去。在欧盟与英国，这既是合规问题也是归因问题——这样采集到的事件在当地可能本就不该被采集。",
+      guide: "landing-page-privacy-policy-footer",
+    },
+    pixel_no_fire_before_consent_verified: {
+      title: "实测：同意前没有追踪请求发出",
+      why: "真实浏览器打开了你的页面，在任何同意交互之前没有观察到已知的追踪请求。",
     },
     page_heavy: {
       title: "页面体积 {bytes} 字节",

@@ -62,6 +62,24 @@ export const tools = {
     ctaAntiBan: "See how anti-duplication works",
     /** 深入阅读：finding 指向对应的合规文章。 */
     readMore: "Read more",
+    verify: {
+      heading: "Want certainty instead of a suspicion?",
+      bodyAnon:
+        "The tracking finding above is inferred from the HTML. A real browser check opens your page and measures what actually goes out before consent. Sign in to run one.",
+      bodyUser:
+        "Run a real browser check: we open your page in a real browser and record what actually goes out before any consent interaction.",
+      cta: "Run a real browser check",
+      running: "Opening your page in a real browser…",
+      signIn: "Sign in to verify",
+      done: "Measured — see the updated report.",
+      errors: {
+        rate_limited: "You've run a few verifications recently. Try again later.",
+        budget_exhausted: "Verification is temporarily unavailable. The static findings above still stand.",
+        verify_failed: "The browser check couldn't complete. The static findings above still stand.",
+        url_not_allowed: "That page can no longer be reached safely.",
+        generic: "Something went wrong.",
+      },
+    },
   },
 
   /**
@@ -124,6 +142,15 @@ export const tools = {
       title: "No tracking code in the initial HTML",
       why: "This does not mean the page has no tracking. Pixels injected by JavaScript after load are invisible to a static read — a real browser check is the only way to know.",
       guide: "landing-page-duplicate-detection",
+    },
+    pixel_before_consent_verified: {
+      title: "Measured: tracking fired before consent ({pixels})",
+      why: "A real browser opened your page and these requests went out before anything was accepted. In the EU and UK that is both a compliance problem and an attribution problem — events collected this way may not be lawfully collected there.",
+      guide: "landing-page-privacy-policy-footer",
+    },
+    pixel_no_fire_before_consent_verified: {
+      title: "Measured: no tracking fired before consent",
+      why: "A real browser opened your page and no known tracking request went out before any consent interaction.",
     },
     page_heavy: {
       title: "Page weighs {bytes} bytes",

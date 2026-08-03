@@ -7,6 +7,8 @@ import { Routes, guideDetailPath } from "@/lib/constants";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import { getReport } from "@/lib/tools/store";
+import { auth } from "@/auth";
+import { PageCheckVerify } from "./PageCheckVerify";
 import type { Locale } from "@/lib/i18n/config";
 import type { FindingLevel } from "@/lib/tools/report";
 
@@ -57,6 +59,7 @@ export async function PageCheckReportView({ id, locale }: { id: string; locale: 
   const report = await getReport(id);
   if (!report) notFound();
 
+  const session = await auth();
   const dict = getDictionary(locale);
   const t = dict.tools.report;
   const copy = dict.tools.findings as Record<
@@ -140,6 +143,16 @@ export async function PageCheckReportView({ id, locale }: { id: string; locale: 
             );
           })}
         </section>
+
+        {/* 实测入口：已实测的报告不再展示（结论已经在上面了）。 */}
+        {!report.browserVerified && (
+          <PageCheckVerify
+            reportId={report.id}
+            signedIn={Boolean(session?.user?.id)}
+            copy={t.verify}
+            locale={locale}
+          />
+        )}
 
         {/* 明示可分享性：链接本就设计成「持有即可见」，不能让用户以为它是私密的。 */}
         <p className="mt-8 text-xs leading-relaxed text-muted-foreground">{t.shareNotice}</p>

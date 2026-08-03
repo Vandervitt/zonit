@@ -182,6 +182,36 @@ export function buildFetchFailedReport(
   };
 }
 
+/**
+ * 把 B 档实测结果并入报告：移除静态阶段的「疑似 / 判断不了」条目，
+ * 换成实测结论。实测过的报告 browserVerified=true，报告页据此改变措辞。
+ */
+export function applyBrowserVerification(
+  report: PageCheckReport,
+  fired: string[],
+): PageCheckReport {
+  // 静态阶段关于像素的三条结论全部作废——实测优先，且不能与实测结论并列展示，
+  // 否则用户会同时看到「疑似」和「实测」两种说法。
+  const STATIC_PIXEL_IDS = new Set([
+    "pixel_before_consent_suspected",
+    "pixel_with_cmp",
+    "pixel_not_found_in_html",
+  ]);
+  const kept = report.findings.filter((f) => !STATIC_PIXEL_IDS.has(f.id));
+  const verdict: Finding = fired.length
+    ? {
+        id: "pixel_before_consent_verified",
+        level: "attention",
+        data: { pixels: fired.join(", ") },
+      }
+    : { id: "pixel_no_fire_before_consent_verified", level: "info" };
+  return {
+    ...report,
+    findings: sortFindings([...kept, verdict]),
+    browserVerified: true,
+  };
+}
+
 /** attention 在前、unknown 次之、info 最后；同级保持插入顺序。 */
 function sortFindings(findings: Finding[]): Finding[] {
   const rank: Record<FindingLevel, number> = { attention: 0, unknown: 1, info: 2 };

@@ -33,6 +33,7 @@
     "@sentry/nextjs": "^10.65.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.3.3",
+    "@vercel/sandbox": "^2.9.2",
     "@vercel/speed-insights": "^2.0.0",
     "antd": "^5.29.3",
     "bcryptjs": "^3.0.3",
