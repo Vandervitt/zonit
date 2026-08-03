@@ -14,6 +14,9 @@ export const PUBLIC_PATHS = [
   "/api/auth",
   "/api/templates",
   "/api/track", // 公开采集端点：访客在租户域名匿名回传，无需登录
+  // 落地页自检器：匿名可用是这个工具的全部意义（报告要能被转发传播）。
+  // 安全性不靠登录态，靠 lib/tools/url-guard.ts 的 SSRF 闸门 + 双桶限频。
+  "/api/tools",
   "/api/cron", // Vercel Cron 端点：由各路由的 CRON_SECRET Bearer 自行鉴权
   "/api/webhooks", // 支付渠道回调（Dodo/Creem）：服务器到服务器无登录态，靠各路由 standardwebhooks 签名验签鉴权
 ];

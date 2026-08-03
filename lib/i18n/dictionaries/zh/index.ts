@@ -9,5 +9,6 @@ import { templates } from "./templates";
 import { templateContent } from "./templateContent";
 import { templateIndustry } from "./templateIndustry";
 import { guides } from "./guides";
+import { tools } from "./tools";
 
-export const zh = { common, home, plans, pricing, antiban, auth, templates, templateContent, templateIndustry, guides } satisfies Dictionary;
+export const zh = { common, home, plans, pricing, antiban, auth, templates, templateContent, templateIndustry, guides, tools } satisfies Dictionary;

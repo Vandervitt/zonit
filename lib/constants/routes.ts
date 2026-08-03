@@ -11,6 +11,7 @@ export enum Routes {
   AntiBan = '/anti-ban',            // 反同质化叙事页（公开）
   Templates = '/templates',         // 公开模板画廊（SEO 获客页）
   Guides = '/guides',               // 公开获客指南（SEO 内容营销）
+  PageCheck = '/tools/landing-page-check', // 落地页自检器（公开工具，匿名可用）
   Privacy = '/privacy',             // 隐私政策（公开）
   Terms = '/terms',                 // 服务条款（公开）
   LandingPages = '/admin/landing-pages',
@@ -49,6 +50,8 @@ export const templateDetailPath = (id: string) => `/templates/${id}`;
 // 两者不会撞车（[slug] 的 dynamicParams=false，slug="industry" 本就 404）。
 export const templateIndustryPath = (category: string) => `/templates/industry/${category}`;
 export const guideDetailPath = (slug: string) => `/guides/${slug}`;
+/** 自检报告页。id 不可猜测，页面 noindex——报告是他人页面的检查结果。 */
+export const pageCheckReportPath = (id: string) => `/tools/landing-page-check/r/${id}`;
 
 export const apiMediaPath = (id: string) => `/api/media/${id}`;
 
