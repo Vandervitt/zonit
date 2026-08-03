@@ -4,6 +4,11 @@
 // 仅使用 /admin/editor 各表单可见可编辑的字段，确保在编辑器中可完整复刻与调整。
 // 转化全程经 WhatsApp 咨询，无任何下单 / 结账 / 订阅语义。
 //
+// 合规要点：
+// - 本模板刻意不含 beforeAfter 区块：样例无法提供真实且已授权的客户照片，
+//   拿库存肖像编造前后对比等于伪造效果证据，disclaimer 也兜不住。
+//   商家若有合规的真实案例，可在编辑器中自行添加该区块。
+//
 // 占位资源说明：
 // - 图片均为 Unsplash 在线地址（https），上线前可按需替换。
 // - WhatsApp 号码 15551234567 为占位号码，上线前替换为真实业务号码。
@@ -30,7 +35,7 @@ export const skincareConsultDraft: LandingPageDraft = {
     subtitle:
       "Get a free, personalized skin analysis from our advisors over WhatsApp — no guesswork, no generic routines.",
     cta: { text: "Get my free skin consult", target: { kind: "primary", prefill: "Hi Aurae, I'd like a free skin consultation" } },
-    secondaryCta: { text: "See before & afters", target: { kind: "url", url: "https://instagram.com/aurae.skin" } },
+    secondaryCta: { text: "See our routines on Instagram", target: { kind: "url", url: "https://instagram.com/aurae.skin" } },
     endorsementText: "Trusted by 30,000+ people in 30+ countries",
     showcase: {
       type: "image",
@@ -118,36 +123,7 @@ export const skincareConsultDraft: LandingPageDraft = {
       },
     },
 
-    // 4. 前后对比（含免责声明，不保证疗效）
-    {
-      type: "beforeAfter",
-      data: {
-        title: "Real skin, real journeys",
-        subtitle: "Shared with permission from our community.",
-        disclaimer:
-          "Individual results vary. Skincare is a cosmetic routine, not a medical treatment — outcomes depend on skin type, consistency, and lifestyle.",
-        items: [
-          {
-            crmName: "Maya, 29",
-            duration: "8 weeks",
-            caseDescription:
-              "Targeted a dull, uneven tone with a gentle vitamin C and barrier-support routine.",
-            beforeImage: { src: img("photo-1498842812179-c81beecf902c", 800), alt: "Portrait before routine" },
-            afterImage: { src: img("photo-1531123897727-8f129e1688ce", 800), alt: "Portrait after routine" },
-          },
-          {
-            crmName: "Daniel, 34",
-            duration: "12 weeks",
-            caseDescription:
-              "Calmed recurring redness with a minimalist, fragrance-free routine.",
-            beforeImage: { src: img("photo-1500648767791-00dcc994a43e", 800), alt: "Portrait before routine" },
-            afterImage: { src: img("photo-1506794778202-cad84cf45f1d", 800), alt: "Portrait after routine" },
-          },
-        ],
-      },
-    },
-
-    // 5. 评价
+    // 4. 评价
     {
       type: "reviews",
       data: {
@@ -185,7 +161,7 @@ export const skincareConsultDraft: LandingPageDraft = {
       },
     },
 
-    // 6. 品牌故事
+    // 5. 品牌故事
     {
       type: "story",
       data: {
@@ -201,7 +177,7 @@ export const skincareConsultDraft: LandingPageDraft = {
       },
     },
 
-    // 7. 安全保障（非交易：隐私 / 成分 / 无推销 / 免费跟进）
+    // 6. 安全保障（非交易：隐私 / 成分 / 无推销 / 免费跟进）
     {
       type: "guarantee",
       data: {
@@ -216,7 +192,7 @@ export const skincareConsultDraft: LandingPageDraft = {
       },
     },
 
-    // 8. 常见问题
+    // 7. 常见问题
     {
       type: "faq",
       data: {

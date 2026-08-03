@@ -4,6 +4,11 @@
 // 仅使用 /admin/editor 各表单可见可编辑的字段，确保在编辑器中可完整复刻与调整。
 // 转化全程经 WhatsApp 领取免费护理方案，无任何下单 / 结账 / 订阅语义。
 //
+// 合规要点：
+// - 本模板刻意不含 beforeAfter 区块：样例无法提供真实且已授权的客户照片，
+//   拿库存肖像编造前后对比等于伪造效果证据，disclaimer 也兜不住。
+//   商家若有合规的真实案例，可在编辑器中自行添加该区块。
+//
 // 占位资源说明：
 // - 图片均为 Unsplash 在线地址（https），上线前可按需替换。
 // - WhatsApp 号码 15551234567 为占位号码，上线前替换为真实业务号码。
@@ -109,34 +114,6 @@ export const beautyDeviceDraft: LandingPageDraft = {
           {
             title: "Adjust as you progress",
             description: "Share how your skin responds and we fine-tune the plan — free.",
-          },
-        ],
-      },
-    },
-
-    {
-      type: "beforeAfter",
-      data: {
-        title: "Consistency, visualized",
-        subtitle: "Shared with permission from our community.",
-        disclaimer:
-          "Individual results vary. At-home beauty devices are cosmetic, not medical, treatments — outcomes depend on skin type, settings, and consistency. This is not medical advice.",
-        items: [
-          {
-            crmName: "Naomi, 38",
-            duration: "10 weeks",
-            caseDescription:
-              "Followed a gentle firming cadence focused on the jawline and cheeks.",
-            beforeImage: { src: img("photo-1508214751196-bcfd4ca60f91", 800), alt: "Portrait before plan" },
-            afterImage: { src: img("photo-1531123897727-8f129e1688ce", 800), alt: "Portrait after plan" },
-          },
-          {
-            crmName: "Yuki, 33",
-            duration: "8 weeks",
-            caseDescription:
-              "Built a low-intensity texture routine suited to reactive skin.",
-            beforeImage: { src: img("photo-1500648767791-00dcc994a43e", 800), alt: "Portrait before plan" },
-            afterImage: { src: img("photo-1506794778202-cad84cf45f1d", 800), alt: "Portrait after plan" },
           },
         ],
       },

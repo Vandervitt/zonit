@@ -5,6 +5,11 @@
 // 转化全程经 WhatsApp 领取免费头皮评估，无任何下单 / 结账 / 订阅语义。
 // 高合规风险：功效相关表述均配 disclaimer，避免承诺确定疗效。
 //
+// 合规要点：
+// - 本模板刻意不含 beforeAfter 区块：样例无法提供真实且已授权的客户照片，
+//   拿库存肖像编造前后对比等于伪造效果证据，disclaimer 也兜不住。
+//   商家若有合规的真实案例，可在编辑器中自行添加该区块。
+//
 // 占位资源说明：
 // - 图片均为 Unsplash 在线地址（https），上线前可按需替换。
 // - WhatsApp 号码 15551234567 为占位号码，上线前替换为真实业务号码。
@@ -98,34 +103,6 @@ export const hairGrowthDraft: LandingPageDraft = {
             title: "Ongoing WhatsApp coaching",
             description:
               "Monthly check-ins to keep you consistent and adjust as your scalp responds.",
-          },
-        ],
-      },
-    },
-
-    {
-      type: "beforeAfter",
-      data: {
-        title: "Real journeys, real consistency",
-        subtitle: "Shared with permission from our community.",
-        disclaimer:
-          "Individual results vary significantly and are not guaranteed. Hair care is a cosmetic routine, not a medical treatment. Persistent or sudden hair loss can have medical causes — please consult a qualified doctor or dermatologist.",
-        items: [
-          {
-            crmName: "Anthony, 41",
-            duration: "6 months",
-            caseDescription:
-              "Focused on scalp health and a consistent gentle routine for diffuse thinning.",
-            beforeImage: { src: img("photo-1500648767791-00dcc994a43e", 800), alt: "Scalp before routine" },
-            afterImage: { src: img("photo-1506794778202-cad84cf45f1d", 800), alt: "Scalp after routine" },
-          },
-          {
-            crmName: "Renee, 36",
-            duration: "5 months",
-            caseDescription:
-              "Built a calming post-partum shedding routine with realistic milestones.",
-            beforeImage: { src: img("photo-1487412720507-e7ab37603c6f", 800), alt: "Hair before routine" },
-            afterImage: { src: img("photo-1503104834685-7205e8607eb9", 800), alt: "Hair after routine" },
           },
         ],
       },
