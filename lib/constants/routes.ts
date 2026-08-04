@@ -33,6 +33,8 @@ export enum ApiRoutes {
   AiUsage = '/api/ai/usage',
   Milestones = '/api/milestones',
   Analytics = '/api/analytics',
+  /** 多页横向对比（哪张在跑、哪张在空转）。 */
+  AnalyticsPages = '/api/analytics/pages',
   Templates = '/api/templates',
   OtpSend = '/api/auth/otp/send',
   BillingCheckout = '/api/billing/checkout',
@@ -72,7 +74,14 @@ export const apiLandingDuplicatePath = (id: string) => `/api/landing-pages/${id}
 export const apiLandingCheckPath = (id: string) => `/api/landing-pages/${id}/check`;
 
 export const apiLeadPath = (id: string) => `/api/leads/${id}`;
-export const apiLeadsExportPath = () => `/api/leads/export`;
+/** CSV 导出。带上列表当前的筛选，导出结果与所见一致。 */
+export const apiLeadsExportPath = (filter: { pageId?: string; unreadOnly?: boolean } = {}) => {
+  const q = new URLSearchParams();
+  if (filter.pageId) q.set("pageId", filter.pageId);
+  if (filter.unreadOnly) q.set("unreadOnly", "1");
+  const qs = q.toString();
+  return `/api/leads/export${qs ? `?${qs}` : ""}`;
+};
 
 export const apiCapiCredentialsPath = (pageId: string) => `/api/capi-credentials?pageId=${encodeURIComponent(pageId)}`;
 

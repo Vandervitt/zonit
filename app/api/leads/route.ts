@@ -7,7 +7,7 @@ import { validateLeadSubmission } from "@/lib/leads/validate";
 import { allowRequest, bucketKey } from "@/lib/rate-limit-db";
 import { checkPublicOrigin } from "@/lib/leads/origin-guard";
 import { isBadPageIdError } from "@/lib/db-errors";
-import { insertLead, listLeads } from "@/lib/leads/store";
+import { insertLead, listLeads, countLeads } from "@/lib/leads/store";
 import { spoolLead } from "@/lib/leads/spool";
 import { enqueueCapiEvents } from "@/lib/capi/dispatch";
 import { notifyNewLead } from "@/lib/leads/notify";
@@ -156,6 +156,13 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const pageId = searchParams.get("pageId") ?? undefined;
   const unreadOnly = searchParams.get("unreadOnly") === "1";
-  const rows = await listLeads(session.user.id, { pageId, unreadOnly });
-  return NextResponse.json(rows);
+  // 分页是必需的而不是优化：线索只增不减，跑久了的账号一次全量拉取会拖垮列表。
+  const limit = Math.min(Math.max(Number(searchParams.get("limit") ?? 50) || 50, 1), 200);
+  const offset = Math.max(Number(searchParams.get("offset") ?? 0) || 0, 0);
+  const filter = { pageId, unreadOnly };
+  const [rows, total] = await Promise.all([
+    listLeads(session.user.id, { ...filter, limit, offset }),
+    countLeads(session.user.id, filter),
+  ]);
+  return NextResponse.json({ rows, total });
 }

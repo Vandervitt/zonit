@@ -85,15 +85,46 @@ export async function setLeadWebhookDelivery(leadId: string, deliveryId: string)
   }
 }
 
-/** 列出本租户线索（经 page 关联隔离）。 */
-export async function listLeads(
-  userId: string,
-  opts: { pageId?: string; unreadOnly?: boolean } = {},
-): Promise<LeadRow[]> {
+export interface LeadFilter {
+  pageId?: string;
+  unreadOnly?: boolean;
+  /** 不传即不分页（CSV 导出要全量）。 */
+  limit?: number;
+  offset?: number;
+}
+
+/** 筛选条件 → WHERE 片段与参数。列表与计数必须同源，否则总数和页数对不上。 */
+function buildLeadFilter(userId: string, opts: LeadFilter): { where: string; vals: unknown[] } {
   const conds = ["p.user_id = $1"];
   const vals: unknown[] = [userId];
   if (opts.pageId) { vals.push(opts.pageId); conds.push(`l.page_id = $${vals.length}`); }
   if (opts.unreadOnly) conds.push(`l.is_read = false`);
+  return { where: conds.join(" AND "), vals };
+}
+
+/** 满足筛选条件的线索总数（分页器用）。 */
+export async function countLeads(userId: string, opts: LeadFilter = {}): Promise<number> {
+  const { where, vals } = buildLeadFilter(userId, opts);
+  const res = await pool.query(
+    `SELECT count(*)::int AS n FROM leads l JOIN landing_pages p ON p.id = l.page_id WHERE ${where}`,
+    vals,
+  );
+  return Number(res.rows[0]?.n ?? 0);
+}
+
+/** 列出本租户线索（经 page 关联隔离）。 */
+export async function listLeads(
+  userId: string,
+  opts: LeadFilter = {},
+): Promise<LeadRow[]> {
+  const { where: whereSql, vals } = buildLeadFilter(userId, opts);
+  const conds = [whereSql];
+  let paging = "";
+  if (opts.limit !== undefined) {
+    vals.push(opts.limit);
+    paging = ` LIMIT $${vals.length}`;
+    if (opts.offset) { vals.push(opts.offset); paging += ` OFFSET $${vals.length}`; }
+  }
   const res = await pool.query(
     `SELECT l.*, p.name AS page_name,
             d.status AS notify_webhook_status, d.last_error AS notify_webhook_error
@@ -101,7 +132,7 @@ export async function listLeads(
        JOIN landing_pages p ON p.id = l.page_id
        LEFT JOIN webhook_deliveries d ON d.id = l.notify_webhook_delivery_id
       WHERE ${conds.join(" AND ")}
-      ORDER BY l.created_at DESC`,
+      ORDER BY l.created_at DESC${paging}`,
     vals,
   );
   return res.rows;

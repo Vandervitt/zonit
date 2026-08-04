@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import useSWR from "swr";
-import { Table, Typography, Tag, Space, Button, Popconfirm, App, Tooltip } from "antd";
+import { Table, Typography, Tag, Space, Button, Popconfirm, App, Tooltip, Select, Segmented } from "antd";
 import { WhatsAppOutlined, PhoneOutlined, MailOutlined, SendOutlined } from "@ant-design/icons";
 import { ApiRoutes, apiLeadPath, apiLeadsExportPath } from "@/lib/constants";
 import { contactLinks, type ContactKind } from "@/lib/leads/contact-links";
@@ -130,9 +131,37 @@ function AttributionDetail({ row }: { row: LeadRow }) {
   );
 }
 
+/** 分页与筛选走服务端：线索只增不减，一次全量拉取跑久了必然拖垮列表。 */
+const PAGE_SIZE = 50;
+
+interface LeadsResponse { rows: LeadRow[]; total: number }
+
 export default function LeadsPage() {
   const { message } = App.useApp();
-  const { data, error, mutate, isLoading } = useSWR<LeadRow[]>(ApiRoutes.Leads);
+  const [pageId, setPageId] = useState<string>("all");
+  const [unreadOnly, setUnreadOnly] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const pages = useSWR<{ id: string; name: string }[]>(ApiRoutes.LandingPages);
+  const query = new URLSearchParams({
+    limit: String(PAGE_SIZE),
+    offset: String((page - 1) * PAGE_SIZE),
+    ...(pageId !== "all" ? { pageId } : {}),
+    ...(unreadOnly ? { unreadOnly: "1" } : {}),
+  });
+  const { data, error, mutate, isLoading } = useSWR<LeadsResponse>(`${ApiRoutes.Leads}?${query}`);
+  const rows = data?.rows ?? [];
+
+  const pageOptions = [
+    { value: "all", label: "全部落地页" },
+    ...(pages.data ?? []).map((p) => ({ value: p.id, label: p.name })),
+  ];
+
+  /** 换筛选条件必须回到第一页，否则会停在一个新结果集里不存在的页码上。 */
+  function changeFilter(fn: () => void) {
+    fn();
+    setPage(1);
+  }
 
   async function setRead(id: string, isRead: boolean) {
     await fetch(apiLeadPath(id), { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ isRead }) });
@@ -151,16 +180,45 @@ export default function LeadsPage() {
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <Typography.Title level={3} style={{ margin: 0 }}>线索</Typography.Title>
-        <Button href={apiLeadsExportPath()} target="_blank">导出 CSV</Button>
+        <Space wrap>
+          <Select
+            value={pageId}
+            onChange={(v) => changeFilter(() => setPageId(v))}
+            options={pageOptions}
+            style={{ minWidth: 180 }}
+            aria-label="按落地页筛选"
+          />
+          <Segmented
+            value={unreadOnly ? "unread" : "all"}
+            onChange={(v) => changeFilter(() => setUnreadOnly(v === "unread"))}
+            options={[{ label: "全部", value: "all" }, { label: "只看未读", value: "unread" }]}
+          />
+          <Button
+            href={apiLeadsExportPath({ pageId: pageId === "all" ? undefined : pageId, unreadOnly })}
+            target="_blank"
+          >
+            导出 CSV
+          </Button>
+        </Space>
       </div>
       <LoadErrorAlert error={error} onRetry={() => void mutate()} label="线索列表" />
       <Table<LeadRow>
         rowKey="id"
         loading={isLoading}
-        dataSource={data ?? []}
-        locale={{ emptyText: "还没有线索。访客通过落地页表单留资后会显示在这里" }}
+        dataSource={rows}
+        pagination={{
+          current: page,
+          pageSize: PAGE_SIZE,
+          total: data?.total ?? 0,
+          showSizeChanger: false,
+          onChange: setPage,
+          showTotal: (t) => `共 ${t} 条`,
+        }}
+        locale={{ emptyText: unreadOnly || pageId !== "all"
+          ? "当前筛选条件下没有线索"
+          : "还没有线索。访客通过落地页表单留资后会显示在这里" }}
         expandable={{
           expandedRowRender: (r) => (
             <Space direction="vertical" size={10}>

@@ -30,6 +30,59 @@ export interface AnalyticsResult {
   dimension: AttributionDimension;
 }
 
+/** 一张落地页在区间内的表现（多页横向对比用）。 */
+export interface PagePerformanceRow {
+  pageId: string;
+  name: string;
+  views: number;
+  clicks: number;
+  leads: number;
+  cvr: number;
+}
+
+/**
+ * 名下所有落地页的横向对比。
+ *
+ * 为什么单独一条查询而不是复用 getAnalytics：后者的入参是「一张页或全部」，
+ * 回答不了「这十张页里哪张在跑、哪张在空转」——而这正是同时管多个客户时
+ * 每天都要看的第一眼。
+ */
+export async function getPagePerformance(userId: string, days: number): Promise<PagePerformanceRow[]> {
+  const since = `now() - ($2 || ' days')::interval`;
+  const res = await pool.query(
+    `SELECT lp.id AS page_id, lp.name,
+            COALESCE(e.views, 0)::int  AS views,
+            COALESCE(e.clicks, 0)::int AS clicks,
+            COALESCE(l.leads, 0)::int  AS leads
+       FROM landing_pages lp
+       LEFT JOIN LATERAL (
+         SELECT count(*) FILTER (WHERE event='page_view') AS views,
+                count(*) FILTER (WHERE event='cta_click') AS clicks
+           FROM analytics_events
+          WHERE page_id = lp.id AND created_at >= ${since}
+       ) e ON true
+       LEFT JOIN LATERAL (
+         SELECT count(*) AS leads FROM leads
+          WHERE page_id = lp.id AND created_at >= ${since}
+       ) l ON true
+      WHERE lp.user_id = $1`,
+    [userId, days],
+  );
+  return res.rows
+    .map((r) => {
+      const views = Number(r.views);
+      const leads = Number(r.leads);
+      return {
+        pageId: r.page_id as string,
+        name: r.name as string,
+        views, clicks: Number(r.clicks), leads,
+        cvr: views > 0 ? leads / views : 0,
+      };
+    })
+    // 有线索的排前面，其次按曝光——空转的页沉底，正是要一眼看出来的那批。
+    .sort((a, b) => b.leads - a.leads || b.views - a.views);
+}
+
 export function summarize(views: number, clicks: number, leads: number): Totals {
   return {
     views, clicks, leads,

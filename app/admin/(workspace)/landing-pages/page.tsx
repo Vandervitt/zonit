@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Table, Button, Tag, Space, Popconfirm, Typography, Tooltip, App } from "antd";
+import { Table, Button, Tag, Space, Popconfirm, Typography, Tooltip, Input, Segmented, App } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { FeedbackModal } from "@/components/admin/FeedbackModal";
@@ -93,6 +93,18 @@ export default function LandingPagesPage() {
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   /** 正在自检的页 id——自检要抓取外站，慢到必须给反馈。 */
   const [checking, setChecking] = useState<string | null>(null);
+  // 一人管多客户时列表会长到几十行，靠肉眼滚是不可行的。
+  // 数据量不大（受套餐额度约束），故筛选放在前端，切换零延迟。
+  const [keyword, setKeyword] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
+
+  const visibleRows = (data ?? []).filter((r) => {
+    if (statusFilter !== "all" && r.status !== statusFilter) return false;
+    if (!keyword.trim()) return true;
+    const kw = keyword.trim().toLowerCase();
+    // 域名也参与匹配：多客户场景下「这个客户的页」往往是按域名回忆的。
+    return r.name.toLowerCase().includes(kw) || (r.bound_domain ?? "").toLowerCase().includes(kw);
+  });
 
   async function unpublish(id: string, name: string) {
     const res = await fetch(apiLandingUnpublishPath(id), { method: "POST" });
@@ -161,13 +173,34 @@ export default function LandingPagesPage() {
       <Suspense fallback={null}>
         <TemplateDeepLink />
       </Suspense>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <Typography.Title level={3} style={{ margin: 0 }}>落地页</Typography.Title>
-        <TemplatePickerDialog><Button type="primary" icon={<PlusOutlined />}>新建</Button></TemplatePickerDialog>
+        <Space wrap>
+          <Input.Search
+            allowClear
+            placeholder="搜索名称或域名"
+            aria-label="搜索落地页"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            style={{ width: 220 }}
+          />
+          <Segmented
+            value={statusFilter}
+            onChange={(v) => setStatusFilter(v as typeof statusFilter)}
+            options={[
+              { label: "全部", value: "all" },
+              { label: "已发布", value: "published" },
+              { label: "草稿", value: "draft" },
+            ]}
+          />
+          <TemplatePickerDialog><Button type="primary" icon={<PlusOutlined />}>新建</Button></TemplatePickerDialog>
+        </Space>
       </div>
       <LoadErrorAlert error={error} onRetry={() => void mutate()} label="落地页列表" />
-      <Table<PageRow> rowKey="id" loading={isLoading} dataSource={data ?? []}
-        locale={{ emptyText: "还没有落地页，点「新建」从模板开始" }}
+      <Table<PageRow> rowKey="id" loading={isLoading} dataSource={visibleRows}
+        locale={{ emptyText: (data ?? []).length > 0
+          ? "当前筛选条件下没有落地页"
+          : "还没有落地页，点「新建」从模板开始" }}
         columns={[
           { title: "名称", dataIndex: "name", ellipsis: true,
             render: (name: string, r: PageRow) => (

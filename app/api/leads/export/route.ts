@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { listLeads } from "@/lib/leads/store";
 import { leadsToCsv, type LeadCsvRow } from "@/lib/leads/csv";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: ApiErrors.UNAUTHORIZED }, { status: 401 });
-  const leads = await listLeads(session.user.id);
+  // 导出跟随列表当前的筛选：筛完再导出却拿到全量，是「导出」这个动作最容易出的意外。
+  // 刻意不分页——导出的用途就是拿全量去对账。
+  const { searchParams } = request.nextUrl;
+  const leads = await listLeads(session.user.id, {
+    pageId: searchParams.get("pageId") ?? undefined,
+    unreadOnly: searchParams.get("unreadOnly") === "1",
+  });
   const rows: LeadCsvRow[] = leads.map((l) => ({
     page_name: l.page_name,
     name: l.payload.name ?? "",
