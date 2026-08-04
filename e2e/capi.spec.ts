@@ -5,6 +5,9 @@ import { test, expect, request as pwRequest } from "@playwright/test";
 import { Pool } from "pg";
 import { createHash } from "node:crypto";
 import { config as loadEnv } from "dotenv";
+// 两级凭据的解析顺序全在 SQL 里，直接用应用侧实现对真实库跑一次。
+import { getCredentials, listConfiguredProviders } from "@/lib/capi/credentials";
+import appPool from "@/lib/db";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -44,6 +47,7 @@ test.describe("CAPI 服务端回传", () => {
   test.afterAll(async () => {
     if (devUserId) await pool.query(`DELETE FROM landing_pages WHERE user_id = $1`, [devUserId]);
     await pool.end();
+    await appPool.end(); // 应用侧连接池（凭据解析用例用）同样要关，否则进程不退出
   });
 
   test("lead 提交带 event_id → capi_events 落库（哈希 PII）", async () => {
@@ -69,6 +73,61 @@ test.describe("CAPI 服务端回传", () => {
     const expectHash = createHash("sha256").update("tom@example.com").digest("hex");
     expect(row!.payload.emailHash).toBe(expectHash);
     await api.dispose();
+  });
+
+  // 两级凭据的解析顺序只在 SQL 里，单测断言不到；配错方向的后果是「以为在回传，
+  // 其实一条没发」或「用了别的客户的 Dataset」，必须在真实库上验一次。
+  test("账号级凭据：未覆盖的页继承账号级，页级覆盖仍然优先", async () => {
+    // 该页只配了 meta（页级）。账号级同时配 meta 与 tiktok。
+    await pool.query(
+      `INSERT INTO user_capi_credentials (user_id, provider, access_token, external_id)
+       VALUES ($1,'meta','acct-tok','acct-ds'), ($1,'tiktok','tt-tok','tt-code')
+       ON CONFLICT (user_id, provider) DO UPDATE SET external_id = EXCLUDED.external_id`,
+      [devUserId],
+    );
+
+    const creds = await getCredentials(pageId);
+    const byProvider = Object.fromEntries(creds.map((c) => [c.provider, c.externalId]));
+    // meta 有页级覆盖 → 用页级的 ds1，不是账号级的 acct-ds
+    expect(byProvider.meta).toBe("ds1");
+    // tiktok 页级没配 → 继承账号级
+    expect(byProvider.tiktok).toBe("tt-code");
+
+    // 前端要能分辨来源，否则用户不知道删除会影响一张页还是全部页
+    const scopes = await listConfiguredProviders(pageId);
+    expect(scopes).toContainEqual({ provider: "meta", scope: "page" });
+    expect(scopes).toContainEqual({ provider: "tiktok", scope: "account" });
+
+    await pool.query(`DELETE FROM user_capi_credentials WHERE user_id = $1`, [devUserId]);
+  });
+
+  test("回传健康度：后台能看到已送达/失败与失败原因", async ({ page }) => {
+    await pool.query(`DELETE FROM capi_events WHERE page_id = $1`, [pageId]);
+    await pool.query(
+      `INSERT INTO capi_events (page_id, provider, event_name, event_id, payload, status, attempts, last_error)
+       VALUES ($1,'meta','Lead','e1','{}'::jsonb,'sent',1,NULL),
+              ($1,'meta','Lead','e2','{}'::jsonb,'failed',5,'OAuthException: Invalid OAuth access token'),
+              ($1,'meta','Lead','e3','{}'::jsonb,'pending',1,NULL)`,
+      [pageId],
+    );
+
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Dev Login/i }).click();
+    await page.waitForURL("**/admin", { timeout: 30_000 });
+
+    const res = await page.request.get("/api/capi/health?days=30");
+    expect(res.status()).toBe(200);
+    const body = await res.json();
+    // 1 送达 / 1 失败 → 送达率恰好 50%，判 degraded（低于 50% 才升级为 failing）
+    expect(body.summary).toMatchObject({ sent: 1, failed: 1, pending: 1, verdict: "degraded" });
+    expect(body.providers[0].lastError).toContain("Invalid OAuth access token");
+
+    // 面板上要把原始报错翻成能动手修的说法
+    await page.goto("/admin/analytics");
+    await expect(page.getByText("服务端回传（CAPI）")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/Access Token 无效或已过期/)).toBeVisible();
+
+    await pool.query(`DELETE FROM capi_events WHERE page_id = $1`, [pageId]);
   });
 
   test("cron 端点无 secret → 401", async () => {

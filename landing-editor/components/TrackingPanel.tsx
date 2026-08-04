@@ -9,19 +9,29 @@ import { apiCapiCredentialsPath } from "@/lib/constants";
 import { Field } from "../ui/Field";
 import { TextInput } from "../ui/TextInput";
 
-/** 单 provider 的 CAPI 配置行：启用开关 + 凭据写入（token 不回显）。 */
+/**
+ * 单 provider 的 CAPI 配置行：启用开关 + 凭据写入（token 不回显）。
+ *
+ * 凭据有两级：账号级（设置页配一次，全部页共用）与页级（这一张页的覆盖）。
+ * 本行必须把两者分辨出来——否则用户看到「已配置 ✓」却不知道删除会影响一张页
+ * 还是名下全部页。
+ */
 function CapiRow({ pageId, provider, label }: { pageId: string; provider: "meta" | "tiktok"; label: string }) {
-  const [configured, setConfigured] = useState(false);
+  const [scope, setScope] = useState<"page" | "account" | null>(null);
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [externalId, setExternalId] = useState("");
+  const configured = scope !== null;
 
   useEffect(() => {
     let active = true;
     fetch(apiCapiCredentialsPath(pageId))
       .then((r) => (r.ok ? r.json() : []))
-      .then((list: { provider: string }[]) => {
-        if (active) { const c = list.some((x) => x.provider === provider); setConfigured(c); setOpen(c); }
+      .then((list: { provider: string; scope?: "page" | "account" }[]) => {
+        if (!active) return;
+        const hit = list.find((x) => x.provider === provider);
+        setScope(hit ? hit.scope ?? "page" : null);
+        setOpen(Boolean(hit));
       })
       .catch(() => {});
     return () => { active = false; };
@@ -33,11 +43,15 @@ function CapiRow({ pageId, provider, label }: { pageId: string; provider: "meta"
       method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pageId, provider, accessToken: token.trim(), externalId: externalId.trim() }),
     });
-    if (r.ok) { setConfigured(true); setToken(""); }
+    if (r.ok) { setScope("page"); setToken(""); }
   };
+  /**
+   * 只删页级覆盖。账号级凭据在设置页管理——从单张页删掉全账号的凭据
+   * 会让名下其它页一起静默停止回传，这类副作用不该藏在一个复选框后面。
+   */
   const disable = async () => {
     await fetch(`/api/capi-credentials?pageId=${encodeURIComponent(pageId)}&provider=${provider}`, { method: "DELETE" });
-    setConfigured(false); setOpen(false); setToken(""); setExternalId("");
+    setScope(null); setOpen(false); setToken(""); setExternalId("");
   };
 
   return (
@@ -46,11 +60,20 @@ function CapiRow({ pageId, provider, label }: { pageId: string; provider: "meta"
         <input
           type="checkbox"
           checked={open}
+          // 继承账号级时不给关：那不是这张页的配置，取消勾选无从下手。
+          // 要停就去设置页删账号级，或在这里填一份页级覆盖。
+          disabled={scope === "account"}
           onChange={(e) => (e.target.checked ? setOpen(true) : disable())}
-          className="h-3.5 w-3.5 rounded border-edge-strong text-brand-600 focus:ring-brand-500/30"
+          className="h-3.5 w-3.5 rounded border-edge-strong text-brand-600 focus:ring-brand-500/30 disabled:opacity-50"
         />
-        启用服务端回传（CAPI · {label}）{configured ? " · 已配置 ✓" : ""}
+        启用服务端回传（CAPI · {label}）
+        {scope === "page" ? " · 本页已配置 ✓" : scope === "account" ? " · 继承账号级 ✓" : ""}
       </label>
+      {scope === "account" && (
+        <p className="mt-1 text-xs text-ink-muted">
+          正在使用设置里的账号级凭据。只想让这一张页用别的 Dataset，在下面填一份覆盖即可。
+        </p>
+      )}
       {open && (
         <div className="mt-2 space-y-2">
           <Field label={provider === "meta" ? "Dataset ID" : "Pixel Code"}>
@@ -59,7 +82,9 @@ function CapiRow({ pageId, provider, label }: { pageId: string; provider: "meta"
           <Field label="Access Token">
             <TextInput value={token} onChange={(e) => setToken(e.target.value)} placeholder={configured ? "重填以覆盖（不回显已存）" : "粘贴 Access Token"} />
           </Field>
-          <button type="button" onClick={save} className="rounded-md bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700">保存凭据</button>
+          <button type="button" onClick={save} className="rounded-md bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700">
+            {scope === "account" ? "保存为本页覆盖" : "保存凭据"}
+          </button>
         </div>
       )}
     </div>
