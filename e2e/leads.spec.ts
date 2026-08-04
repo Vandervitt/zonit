@@ -1,12 +1,13 @@
 // e2e/leads.spec.ts
 // 线索闭环：公开提交入库 → 后台收件箱可见 → 标记已读；honeypot/无联系方式反例。
 // Dev Login 建会话；直接 POST /api/leads（dev 同源）验证公开提交，避免依赖真实自有域名路由。
-import { test, expect, request as pwRequest } from "@playwright/test";
+import { request as pwRequest } from "@playwright/test";
+// test/expect 走本地扩展：应用侧连接池由 worker 级 fixture 统一收尾（见该文件说明）。
+import { test, expect } from "./helpers/app-pool";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
 // 提醒的筛选口径全在 SQL 里，直接用应用侧实现对真实库跑一次（单测只能断言参数）。
 import { computeLeadNudges } from "@/lib/leads/nudge";
-import appPool from "@/lib/db";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -50,7 +51,6 @@ test.describe("线索闭环", () => {
     if (devUserId) await pool.query(`DELETE FROM landing_pages WHERE user_id = $1`, [devUserId]);
     await pool.query(`DELETE FROM rate_limit_hits`);
     await pool.end();
-    await appPool.end(); // 应用侧连接池（未读提醒用例用）同样要关，否则进程不退出
   });
 
   test("公开提交入库 + 校验反例", async () => {
@@ -333,6 +333,52 @@ test.describe("线索闭环", () => {
     expect(csv).not.toContain("Other0");
 
     await pool.query(`DELETE FROM landing_pages WHERE id = $1`, [otherPageId]);
+    await pool.query(`DELETE FROM leads WHERE page_id = $1`, [pageId]);
+  });
+
+  // 环比与自定义区间的边界（半开区间、上一段等长紧邻）只在 SQL 与真实时间上成立，
+  // 单测只能验纯函数。错了的后果是数字看着对但归属错段，比报错更难发现。
+  test("环比与自定义区间：本段与上一段不重不漏", async ({ page }) => {
+    await pool.query(`DELETE FROM analytics_events WHERE page_id = $1`, [pageId]);
+    await pool.query(`DELETE FROM leads WHERE page_id = $1`, [pageId]);
+
+    // 本段（近 7 天）：2 次曝光 + 1 条线索；上一段（第 8–14 天）：4 次曝光 + 2 条线索
+    const seedEvent = (daysAgo: number) => pool.query(
+      `INSERT INTO analytics_events (page_id, event, created_at)
+       VALUES ($1,'page_view', NOW() - ($2 || ' days')::interval)`, [pageId, String(daysAgo)]);
+    const seedLead = (daysAgo: number) => pool.query(
+      `INSERT INTO leads (page_id, payload, channel, created_at)
+       VALUES ($1, '{"name":"R"}'::jsonb, 'form', NOW() - ($2 || ' days')::interval)`, [pageId, String(daysAgo)]);
+
+    await Promise.all([seedEvent(1), seedEvent(2), seedLead(1)]);
+    await Promise.all([seedEvent(8), seedEvent(9), seedEvent(10), seedEvent(11), seedLead(8), seedLead(9)]);
+
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Dev Login/i }).click();
+    await page.waitForURL("**/admin", { timeout: 30_000 });
+
+    const res = await page.request.get("/api/analytics?pageId=all&days=7");
+    const data = await res.json();
+    expect(data.totals).toMatchObject({ views: 2, leads: 1 });
+    // 上一段是紧邻的等长 7 天，不该把本段的数据算进去，也不该漏掉第 8–14 天的
+    expect(data.comparison.previous).toMatchObject({ views: 4, leads: 2 });
+    // 曝光 2 vs 4 → -50%
+    expect(data.comparison.change.views).toBeCloseTo(-0.5);
+
+    // 自定义区间：只框住上一段那几天，本段的数据必须落在框外
+    const today = new Date();
+    const day = (n: number) => new Date(today.getTime() - n * 86_400_000).toISOString().slice(0, 10);
+    const custom = await page.request.get(`/api/analytics?pageId=all&from=${day(11)}&to=${day(8)}`);
+    const customData = await custom.json();
+    expect(customData.totals).toMatchObject({ views: 4, leads: 2 });
+    expect(customData.range.days).toBe(4);
+
+    // 非法自定义区间回落预设，而不是整页报错
+    const bogus = await page.request.get("/api/analytics?pageId=all&from=2026-12-31&to=2026-01-01");
+    expect(bogus.status()).toBe(200);
+    expect((await bogus.json()).range.days).toBe(30);
+
+    await pool.query(`DELETE FROM analytics_events WHERE page_id = $1`, [pageId]);
     await pool.query(`DELETE FROM leads WHERE page_id = $1`, [pageId]);
   });
 

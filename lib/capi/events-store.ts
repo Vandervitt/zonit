@@ -57,7 +57,7 @@ export async function getRetryableEvents(limit = 100): Promise<CapiEventRow[]> {
  * 不暴露状态的话，token 过期、Dataset 填错这类问题会一直静默失败，
  * 而用户是靠广告后台的转化数变少才发现的——那时已经烧掉几周预算。
  */
-export async function getCapiHealth(userId: string, days: number): Promise<CapiProviderHealth[]> {
+export async function getCapiHealth(userId: string, range: { from: string; to: string }): Promise<CapiProviderHealth[]> {
   const res = await pool.query(
     `SELECT e.provider,
             count(*) FILTER (WHERE e.status='sent')::int    AS sent,
@@ -68,10 +68,10 @@ export async function getCapiHealth(userId: string, days: number): Promise<CapiP
             MAX(e.updated_at) FILTER (WHERE e.last_error IS NOT NULL) AS last_error_at
        FROM capi_events e
        JOIN landing_pages p ON p.id = e.page_id
-      WHERE p.user_id = $1 AND e.created_at >= now() - ($2 || ' days')::interval
+      WHERE p.user_id = $1 AND e.created_at >= $2 AND e.created_at < $3
       GROUP BY e.provider
       ORDER BY e.provider`,
-    [userId, days],
+    [userId, range.from, range.to],
   );
   return res.rows.map((r) => ({
     provider: r.provider as CapiProviderId,

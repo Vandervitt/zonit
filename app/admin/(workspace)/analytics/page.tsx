@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { Row, Col, Card, Statistic, Segmented, Select, Table, Tag, Typography, Space, Empty, Spin } from "antd";
-import { EyeOutlined, AimOutlined, PercentageOutlined, ContactsOutlined } from "@ant-design/icons";
+import { Row, Col, Card, Statistic, Segmented, Select, Table, Tag, Typography, Space, Empty, Spin, DatePicker } from "antd";
+import {
+  EyeOutlined, AimOutlined, PercentageOutlined, ContactsOutlined, ArrowUpOutlined, ArrowDownOutlined,
+} from "@ant-design/icons";
+import dayjs, { type Dayjs } from "dayjs";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ApiRoutes } from "@/lib/constants";
 import type { AnalyticsResult } from "@/lib/analytics/queries";
@@ -28,14 +31,39 @@ const DIMENSION_PARAM: Record<AttributionDimension, string> = {
 const DIMENSION_OPTIONS = (Object.keys(DIMENSION_LABEL) as AttributionDimension[])
   .map((k) => ({ label: DIMENSION_LABEL[k], value: k }));
 
+/** 环比角标：涨绿跌红，上一段为 0 时给「新增」而不是编一个百分比。 */
+function ChangeBadge({ change }: { change: number | null }) {
+  if (change === null) {
+    return <Typography.Text type="secondary" style={{ fontSize: 12 }}>较上一段：新增</Typography.Text>;
+  }
+  if (change === 0) {
+    return <Typography.Text type="secondary" style={{ fontSize: 12 }}>较上一段：持平</Typography.Text>;
+  }
+  const up = change > 0;
+  return (
+    <Typography.Text style={{ fontSize: 12, color: up ? "#3f8600" : "#cf1322" }}>
+      {up ? <ArrowUpOutlined /> : <ArrowDownOutlined />} {Math.abs(change * 100).toFixed(1)}%
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}> 较上一段</Typography.Text>
+    </Typography.Text>
+  );
+}
+
 export default function AnalyticsPage() {
   const [pageId, setPageId] = useState("all");
   const [days, setDays] = useState(30);
   const [dimension, setDimension] = useState<AttributionDimension>(DEFAULT_DIMENSION);
+  /** 自定义区间；为 null 时用上面的 days 预设。 */
+  const [custom, setCustom] = useState<[Dayjs, Dayjs] | null>(null);
+
+  // 自定义区间与预设互斥：同时生效时用户无从判断当前看的是哪一段。
+  const rangeQuery = custom
+    ? `from=${custom[0].format("YYYY-MM-DD")}&to=${custom[1].format("YYYY-MM-DD")}`
+    : `days=${days}`;
 
   const pages = useSWR<PageRow[]>(ApiRoutes.LandingPages);
-  const data = useSWR<AnalyticsResult>(`${ApiRoutes.Analytics}?pageId=${pageId}&days=${days}&dimension=${dimension}`);
+  const data = useSWR<AnalyticsResult>(`${ApiRoutes.Analytics}?pageId=${pageId}&${rangeQuery}&dimension=${dimension}`);
   const a = data.data;
+  const cmp = a?.comparison;
 
   const pageOptions = [
     { value: "all", label: "全部落地页" },
@@ -49,10 +77,21 @@ export default function AnalyticsPage() {
     <Space direction="vertical" size={20} style={{ width: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
         <Typography.Title level={3} style={{ margin: 0 }}>投放分析</Typography.Title>
-        <Space>
+        <Space wrap>
           <Select value={pageId} onChange={setPageId} options={pageOptions} style={{ minWidth: 180 }} />
-          <Segmented value={days} onChange={(v) => setDays(v as number)}
-            options={[{ label: "近 7 天", value: 7 }, { label: "近 30 天", value: 30 }, { label: "近 90 天", value: 90 }]} />
+          <Segmented
+            value={custom ? "" : days}
+            onChange={(v) => { setDays(v as number); setCustom(null); }}
+            options={[{ label: "近 7 天", value: 7 }, { label: "近 30 天", value: 30 }, { label: "近 90 天", value: 90 }]}
+          />
+          <DatePicker.RangePicker
+            value={custom}
+            onChange={(v) => setCustom(v && v[0] && v[1] ? [v[0], v[1]] : null)}
+            allowClear
+            // 未来没有数据，选了只会得到空报表
+            disabledDate={(d) => d.isAfter(dayjs(), "day")}
+            placeholder={["自定义开始", "结束"]}
+          />
         </Space>
       </div>
 
@@ -60,14 +99,40 @@ export default function AnalyticsPage() {
       <LoadErrorAlert error={pages.error} onRetry={() => void pages.mutate()} label="落地页筛选列表" />
 
       <Row gutter={16}>
-        <Col xs={12} sm={6}><Card><Statistic title="访问量 (PV)" value={a?.totals.views ?? 0} prefix={<EyeOutlined />} /></Card></Col>
-        <Col xs={12} sm={6}><Card><Statistic title="CTA 点击" value={a?.totals.clicks ?? 0} prefix={<AimOutlined />} /></Card></Col>
-        <Col xs={12} sm={6}><Card><Statistic title="线索" value={a?.totals.leads ?? 0} prefix={<ContactsOutlined />} /></Card></Col>
-        <Col xs={12} sm={6}><Card><Statistic title="点击率" value={((a?.totals.ctr ?? 0) * 100)} precision={2} suffix="%" prefix={<PercentageOutlined />} /></Card></Col>
+        <Col xs={12} sm={6}>
+          <Card>
+            <Statistic title="访问量 (PV)" value={a?.totals.views ?? 0} prefix={<EyeOutlined />} />
+            {cmp && <ChangeBadge change={cmp.change.views} />}
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card>
+            <Statistic title="CTA 点击" value={a?.totals.clicks ?? 0} prefix={<AimOutlined />} />
+            {cmp && <ChangeBadge change={cmp.change.clicks} />}
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card>
+            <Statistic title="线索" value={a?.totals.leads ?? 0} prefix={<ContactsOutlined />} />
+            {cmp && <ChangeBadge change={cmp.change.leads} />}
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card>
+            <Statistic title="点击率" value={((a?.totals.ctr ?? 0) * 100)} precision={2} suffix="%" prefix={<PercentageOutlined />} />
+          </Card>
+        </Col>
       </Row>
 
+      {cmp && (
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          环比对照的是紧邻的等长上一段（曝光 {cmp.previous.views} · 点击 {cmp.previous.clicks} · 线索 {cmp.previous.leads}）。
+          用等长紧邻段而不是「上月同期」，因为投放按投放周期走，不按自然月。
+        </Typography.Text>
+      )}
+
       {/* 先给「哪张页在跑」，再往下钻单页细节——多客户场景的第一眼 */}
-      <PageComparison days={days} selectedPageId={pageId} onSelect={setPageId} />
+      <PageComparison rangeQuery={rangeQuery} selectedPageId={pageId} onSelect={setPageId} />
 
       <Card title="转化漏斗">
         {data.isLoading ? <div style={{ height: 180, display: "grid", placeItems: "center" }}><Spin /></div>
@@ -181,7 +246,7 @@ export default function AnalyticsPage() {
       </Card>
 
       {/* 回传健康度按账号统计，不随落地页筛选变化（凭据本身可能是账号级的）。 */}
-      <CapiHealthCard days={days} />
+      <CapiHealthCard rangeQuery={rangeQuery} />
 
       <Card title="CTA 渠道分布">
         <Table rowKey="channel" size="small" pagination={false} dataSource={a?.channels ?? []}

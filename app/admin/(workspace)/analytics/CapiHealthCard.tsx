@@ -26,8 +26,8 @@ const VERDICT: Record<CapiVerdict, { color: string; text: string }> = {
   failing: { color: "red", text: "大量失败" },
 };
 
-export function CapiHealthCard({ days }: { days: number }) {
-  const { data } = useSWR<HealthResponse>(`${ApiRoutes.CapiHealth}?days=${days}`);
+export function CapiHealthCard({ rangeQuery }: { rangeQuery: string }) {
+  const { data } = useSWR<HealthResponse>(`${ApiRoutes.CapiHealth}?${rangeQuery}`);
   const summary = data?.summary;
   const providers = data?.providers ?? [];
   const verdict = summary?.verdict ?? "idle";

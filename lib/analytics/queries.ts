@@ -4,7 +4,10 @@ import {
   type AttributionDimension, type AttributionRow,
 } from "./dimensions";
 
+import { previousRange, changeRate, datesInRange, type DateRange } from "./range";
+
 export * from "./dimensions";
+export * from "./range";
 
 export interface Totals { views: number; clicks: number; leads: number; ctr: number; cvr: number; }
 export interface SeriesPoint { date: string; views: number; clicks: number; }
@@ -28,6 +31,15 @@ export interface AnalyticsResult {
   /** 当前下钻维度下的归因明细（按线索数降序，其次曝光）。 */
   attribution: AttributionRow[];
   dimension: AttributionDimension;
+  /** 紧邻等长上一段的核心指标 + 环比变化率（上一段为 0 时为 null）。 */
+  comparison: Comparison;
+  range: DateRange;
+}
+
+export interface Comparison {
+  previous: { views: number; clicks: number; leads: number };
+  /** 变化率；上一段为 0 的指标为 null——「从 0 到 5」不是「增长 100%」。 */
+  change: { views: number | null; clicks: number | null; leads: number | null };
 }
 
 /** 一张落地页在区间内的表现（多页横向对比用）。 */
@@ -47,8 +59,8 @@ export interface PagePerformanceRow {
  * 回答不了「这十张页里哪张在跑、哪张在空转」——而这正是同时管多个客户时
  * 每天都要看的第一眼。
  */
-export async function getPagePerformance(userId: string, days: number): Promise<PagePerformanceRow[]> {
-  const since = `now() - ($2 || ' days')::interval`;
+export async function getPagePerformance(userId: string, range: DateRange): Promise<PagePerformanceRow[]> {
+  const window = `created_at >= $2 AND created_at < $3`;
   const res = await pool.query(
     `SELECT lp.id AS page_id, lp.name,
             COALESCE(e.views, 0)::int  AS views,
@@ -59,14 +71,14 @@ export async function getPagePerformance(userId: string, days: number): Promise<
          SELECT count(*) FILTER (WHERE event='page_view') AS views,
                 count(*) FILTER (WHERE event='cta_click') AS clicks
            FROM analytics_events
-          WHERE page_id = lp.id AND created_at >= ${since}
+          WHERE page_id = lp.id AND ${window}
        ) e ON true
        LEFT JOIN LATERAL (
          SELECT count(*) AS leads FROM leads
-          WHERE page_id = lp.id AND created_at >= ${since}
+          WHERE page_id = lp.id AND ${window}
        ) l ON true
       WHERE lp.user_id = $1`,
-    [userId, days],
+    [userId, range.from, range.to],
   );
   return res.rows
     .map((r) => {
@@ -125,23 +137,14 @@ export function buildSeries(
   return dates.map((d) => map.get(d) ?? { date: d, views: 0, clicks: 0 });
 }
 
-export function lastNDates(days: number): string[] {
-  const out: string[] = [];
-  const today = new Date();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - i));
-    out.push(d.toISOString().slice(0, 10));
-  }
-  return out;
-}
-
 export async function getAnalytics(
   userId: string,
   pageId: string,
-  days: number,
+  range: DateRange,
   dimension: AttributionDimension = DEFAULT_DIMENSION,
 ): Promise<AnalyticsResult> {
   const dimCol = ATTRIBUTION_DIMENSIONS[dimension];
+  const prev = previousRange(range);
   const scope =
     pageId === "all"
       ? { sql: `SELECT id FROM landing_pages WHERE user_id = $1`, params: [userId] as unknown[] }
@@ -151,38 +154,54 @@ export async function getAnalytics(
   if (ids.length === 0) {
     return {
       totals: summarize(0, 0, 0), funnel: buildFunnel(0, 0, 0), formFunnel: buildFormFunnel(0, 0, []),
-      series: buildSeries([], lastNDates(days)), channels: [], attribution: [], dimension,
+      series: buildSeries([], datesInRange(range)), channels: [], attribution: [], dimension,
+      comparison: buildComparison({ views: 0, clicks: 0, leads: 0 }, { views: 0, clicks: 0, leads: 0 }),
+      range,
     };
   }
-  const since = `now() - ($2 || ' days')::interval`;
-  const base = `FROM analytics_events WHERE page_id = ANY($1) AND created_at >= ${since}`;
+  // 半开区间 [from, to)：闭区间会让边界那天在两段里各计一次。
+  // $2/$3 为区间端点，$4/$5 为上一段端点（环比）。
+  const window = `created_at >= $2 AND created_at < $3`;
+  const base = `FROM analytics_events WHERE page_id = ANY($1) AND ${window}`;
+  const args = [ids, range.from, range.to];
+  const prevArgs = [ids, prev.from, prev.to];
 
-  const [totalsRes, seriesRes, channelsRes, attrEventsRes, attrLeadsRes, leadsRes, formErrorsRes] = await Promise.all([
+  const [
+    totalsRes, seriesRes, channelsRes, attrEventsRes, attrLeadsRes, leadsRes, formErrorsRes,
+    prevEventsRes, prevLeadsRes,
+  ] = await Promise.all([
     pool.query(`SELECT
         count(*) FILTER (WHERE event='page_view')::int   AS views,
         count(*) FILTER (WHERE event='cta_click')::int   AS clicks,
         count(*) FILTER (WHERE event='form_start')::int  AS form_starts,
         count(*) FILTER (WHERE event='form_submit')::int AS form_submits
-       ${base}`, [ids, days]),
+       ${base}`, args),
     pool.query(`SELECT to_char(date_trunc('day', created_at), 'YYYY-MM-DD') AS date,
         count(*) FILTER (WHERE event='page_view')::int AS views,
         count(*) FILTER (WHERE event='cta_click')::int AS clicks
-       ${base} GROUP BY 1 ORDER BY 1`, [ids, days]),
+       ${base} GROUP BY 1 ORDER BY 1`, args),
     pool.query(`SELECT COALESCE(channel,'external') AS channel, count(*)::int AS clicks
-       ${base} AND event='cta_click' GROUP BY 1 ORDER BY clicks DESC`, [ids, days]),
+       ${base} AND event='cta_click' GROUP BY 1 ORDER BY clicks DESC`, args),
     // 归因下钻（曝光/点击侧）。dimCol 来自 ATTRIBUTION_DIMENSIONS 白名单，非用户输入。
-    pool.query(`SELECT COALESCE(${dimCol},$3) AS value,
+    pool.query(`SELECT COALESCE(${dimCol},$4) AS value,
         count(*) FILTER (WHERE event='page_view')::int AS views,
         count(*) FILTER (WHERE event='cta_click')::int AS clicks
-       ${base} AND event IN ('page_view','cta_click') GROUP BY 1`, [ids, days, UNLABELED]),
+       ${base} AND event IN ('page_view','cta_click') GROUP BY 1`, [...args, UNLABELED]),
     // 归因下钻（线索侧）：leads 表独立统计，与曝光侧在 mergeAttribution 里合并。
-    pool.query(`SELECT COALESCE(${dimCol},$3) AS value, count(*)::int AS leads
-       FROM leads WHERE page_id = ANY($1) AND created_at >= ${since} GROUP BY 1`, [ids, days, UNLABELED]),
+    pool.query(`SELECT COALESCE(${dimCol},$4) AS value, count(*)::int AS leads
+       FROM leads WHERE page_id = ANY($1) AND ${window} GROUP BY 1`, [...args, UNLABELED]),
     // 线索来自独立的 leads 表（含 PII），与无 PII 的 analytics_events 分开统计。
     pool.query(`SELECT count(*)::int AS leads
-       FROM leads WHERE page_id = ANY($1) AND created_at >= ${since}`, [ids, days]),
+       FROM leads WHERE page_id = ANY($1) AND ${window}`, args),
     pool.query(`SELECT COALESCE(detail,'unknown') AS detail, count(*)::int AS count
-       ${base} AND event='form_error' GROUP BY 1 ORDER BY count DESC`, [ids, days]),
+       ${base} AND event='form_error' GROUP BY 1 ORDER BY count DESC`, args),
+    // 环比：紧邻等长上一段，只取三个核心指标（其余维度的环比没人逐个看）
+    pool.query(`SELECT
+        count(*) FILTER (WHERE event='page_view')::int AS views,
+        count(*) FILTER (WHERE event='cta_click')::int AS clicks
+       ${base}`, prevArgs),
+    pool.query(`SELECT count(*)::int AS leads
+       FROM leads WHERE page_id = ANY($1) AND ${window}`, prevArgs),
   ]);
 
   const v = Number(totalsRes.rows[0]?.views ?? 0);
@@ -198,7 +217,7 @@ export async function getAnalytics(
     ),
     series: buildSeries(
       seriesRes.rows.map((r) => ({ date: r.date as string, views: Number(r.views), clicks: Number(r.clicks) })),
-      lastNDates(days),
+      datesInRange(range),
     ),
     channels: channelsRes.rows.map((r) => ({ channel: r.channel as string, clicks: Number(r.clicks) })),
     attribution: mergeAttribution(
@@ -206,5 +225,28 @@ export async function getAnalytics(
       attrLeadsRes.rows.map((r) => ({ value: r.value as string, leads: Number(r.leads) })),
     ),
     dimension,
+    comparison: buildComparison(
+      { views: v, clicks: c, leads: l },
+      {
+        views: Number(prevEventsRes.rows[0]?.views ?? 0),
+        clicks: Number(prevEventsRes.rows[0]?.clicks ?? 0),
+        leads: Number(prevLeadsRes.rows[0]?.leads ?? 0),
+      },
+    ),
+    range,
+  };
+}
+
+export function buildComparison(
+  current: { views: number; clicks: number; leads: number },
+  previous: { views: number; clicks: number; leads: number },
+): Comparison {
+  return {
+    previous,
+    change: {
+      views: changeRate(current.views, previous.views),
+      clicks: changeRate(current.clicks, previous.clicks),
+      leads: changeRate(current.leads, previous.leads),
+    },
   };
 }
