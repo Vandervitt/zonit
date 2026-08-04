@@ -13,6 +13,12 @@ export interface LeadRow {
   utm_source: string | null;
   utm_medium: string | null;
   utm_campaign: string | null;
+  utm_term: string | null;
+  utm_content: string | null;
+  /** 平台点击 ID：用于把这条线索拿回广告后台逐条对账。 */
+  gclid: string | null;
+  fbclid: string | null;
+  ttclid: string | null;
   is_read: boolean;
   created_at: string;
   /** 通知送达可见性：邮件为平台侧发送结果，webhook 状态由投递表联查。 */
@@ -27,18 +33,30 @@ export interface LeadAttribution {
   utm_source?: string | null;
   utm_medium?: string | null;
   utm_campaign?: string | null;
+  utm_term?: string | null;
+  utm_content?: string | null;
+  gclid?: string | null;
+  fbclid?: string | null;
+  ttclid?: string | null;
 }
+
+/** INSERT 的归因列顺序——插入语句与兜底重投共用，避免两处各写一份错位。 */
+const ATTR_COLUMNS = [
+  "channel", "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid", "ttclid",
+] as const;
 
 /**
  * 公开提交入库。坏 page_id 直接抛出交调用方丢弃；其余失败重试一次
  * （Neon 瞬断与连接池抖动占多数），仍失败则抛给调用方走兜底留存。
  */
 export async function insertLead(pageId: string, payload: LeadPayload, attr: LeadAttribution): Promise<string> {
+  // $1 page_id、$2 payload，其后按 ATTR_COLUMNS 顺序展开归因列。
+  const placeholders = ATTR_COLUMNS.map((_, i) => `$${i + 3}`).join(", ");
   const run = () =>
     pool.query(
-      `INSERT INTO leads (page_id, payload, channel, utm_source, utm_medium, utm_campaign)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-      [pageId, JSON.stringify(payload), attr.channel ?? null, attr.utm_source ?? null, attr.utm_medium ?? null, attr.utm_campaign ?? null],
+      `INSERT INTO leads (page_id, payload, ${ATTR_COLUMNS.join(", ")})
+       VALUES ($1, $2, ${placeholders}) RETURNING id`,
+      [pageId, JSON.stringify(payload), ...ATTR_COLUMNS.map((c) => attr[c] ?? null)],
     );
   try {
     return (await run()).rows[0].id;

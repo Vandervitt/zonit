@@ -18,6 +18,13 @@ export async function GET() {
     message: l.payload.message ?? "",
     channel: l.channel ?? "",
     utm_source: l.utm_source ?? "",
+    utm_medium: l.utm_medium ?? "",
+    utm_campaign: l.utm_campaign ?? "",
+    utm_content: l.utm_content ?? "",
+    utm_term: l.utm_term ?? "",
+    gclid: l.gclid ?? "",
+    fbclid: l.fbclid ?? "",
+    ttclid: l.ttclid ?? "",
     created_at: l.created_at,
   }));
   const csv = leadsToCsv(rows);

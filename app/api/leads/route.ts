@@ -73,6 +73,12 @@ export async function POST(request: NextRequest) {
     utm_source: cap(utm.utm_source, 128),
     utm_medium: cap(utm.utm_medium, 128),
     utm_campaign: cap(utm.utm_campaign, 128),
+    utm_term: cap(utm.utm_term, 128),
+    utm_content: cap(utm.utm_content, 128),
+    // 点击 ID 比 UTM 长得多（gclid 常超 100 字符），单独放宽上限，截断即失去对账价值。
+    gclid: cap(utm.gclid, 512),
+    fbclid: cap(utm.fbclid, 512),
+    ttclid: cap(utm.ttclid, 512),
   };
   let leadId: string;
   try {
@@ -130,7 +136,7 @@ export async function POST(request: NextRequest) {
       leadId,
       fields: result.payload as unknown as Record<string, unknown>,
       channel: cap(body.channel, 32) ?? "form",
-      utm: { utm_source: cap(utm.utm_source, 128), utm_medium: cap(utm.utm_medium, 128), utm_campaign: cap(utm.utm_campaign, 128) },
+      utm: attr,
       createdAt: new Date().toISOString(),
       dashboardUrl: `${origin}/admin/leads`,
     });

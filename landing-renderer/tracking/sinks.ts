@@ -82,6 +82,10 @@ export class BeaconSink implements EventSink {
       utm_source: params.utm_source,
       utm_medium: params.utm_medium,
       utm_campaign: params.utm_campaign,
+      // term/content 是「哪个创意、哪个关键词」那一层，缺了它归因只能到渠道级。
+      // 点击 ID 刻意不随曝光流水上报（见 migrations/043 的取舍说明）。
+      utm_term: params.utm_term,
+      utm_content: params.utm_content,
     });
     try {
       const blob = new Blob([payload], { type: "text/plain" });
