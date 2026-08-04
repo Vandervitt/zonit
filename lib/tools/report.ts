@@ -18,6 +18,7 @@ import {
   findPolicyLinks,
   detectContact,
   detectTrackers,
+  detectViewport,
   countBlockingScripts,
   findCopyrightYear,
 } from "./checks";
@@ -124,6 +125,17 @@ export function assembleReport(input: AssembleInput): PageCheckReport {
     });
   } else if (!trackers.pixels.length) {
     findings.push({ id: "pixel_not_found_in_html", level: "unknown" });
+  }
+
+  // —— 移动端可读性 ——
+  // 只报 viewport 这一项客观事实，不猜字号（见 detectViewport 注释）。
+  const viewport = detectViewport(html);
+  if (!viewport.present) {
+    findings.push({ id: "viewport_missing", level: "attention" });
+  } else if (viewport.zoomBlocked) {
+    findings.push({ id: "viewport_zoom_blocked", level: "attention" });
+  } else {
+    findings.push({ id: "viewport_ok", level: "info" });
   }
 
   // —— 体积与阻塞资源 ——

@@ -9,6 +9,7 @@ import {
   detectContact,
   detectTrackers,
   countBlockingScripts,
+  detectViewport,
   findCopyrightYear,
 } from "./checks";
 
@@ -170,5 +171,39 @@ describe("findCopyrightYear", () => {
 
   it("不把无关的四位数字当年份", () => {
     expect(findCopyrightYear(`<p>Suite 2026, Main St</p>`)).toBeNull();
+  });
+});
+
+describe("detectViewport", () => {
+  it("标准 viewport：存在且允许缩放", () => {
+    expect(detectViewport(`<meta name="viewport" content="width=device-width, initial-scale=1">`))
+      .toEqual({ present: true, zoomBlocked: false });
+  });
+
+  it("没有 viewport 标签", () => {
+    expect(detectViewport(`<meta name="description" content="x">`))
+      .toEqual({ present: false, zoomBlocked: false });
+  });
+
+  it("user-scalable=no 视为禁止缩放", () => {
+    expect(detectViewport(`<meta name="viewport" content="width=device-width, user-scalable=no">`).zoomBlocked).toBe(true);
+  });
+
+  it("maximum-scale=1 同样是禁止缩放（等于把放大这条退路堵死）", () => {
+    expect(detectViewport(`<meta name="viewport" content="width=device-width, maximum-scale=1.0">`).zoomBlocked).toBe(true);
+  });
+
+  it("maximum-scale=5 不算禁止", () => {
+    expect(detectViewport(`<meta name="viewport" content="width=device-width, maximum-scale=5">`).zoomBlocked).toBe(false);
+  });
+
+  it("属性顺序与引号形式不影响判定", () => {
+    expect(detectViewport(`<meta content='width=device-width, initial-scale=1' name='viewport' />`))
+      .toEqual({ present: true, zoomBlocked: false });
+  });
+
+  it("大小写不敏感", () => {
+    expect(detectViewport(`<META NAME="VIEWPORT" CONTENT="width=device-width, USER-SCALABLE=NO">`))
+      .toEqual({ present: true, zoomBlocked: true });
   });
 });

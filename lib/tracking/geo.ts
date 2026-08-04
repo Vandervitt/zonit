@@ -30,3 +30,21 @@ export function isEeaCountry(code?: string | null): boolean {
 export function shouldCollectFirstParty(euVisitor: boolean, consented: boolean): boolean {
   return !euVisitor || consented;
 }
+
+/**
+ * 是否真的需要向访客征求同意（决定同意条要不要出现）。
+ *
+ * consent.enabled 缺省为 true，而绝大多数生成页一个 pixel 都没配 —— 原先这让每张页
+ * 都顶着一条同意条，可它并没有第三方 cookie 要征求同意（第一方 beacon 对非欧盟访客
+ * 本就是匿名无 cookie 采集）。既是无意义的干扰，也让页面更像广告。
+ *
+ * 有第三方 pixel → 需要；欧盟/EEA 访客 → 需要（第一方采集也随同意门控，
+ * 见 shouldCollectFirstParty）。两者皆无则不弹。
+ */
+export function needsConsentBar(
+  consentEnabled: boolean,
+  enabledPixelCount: number,
+  euVisitor: boolean,
+): boolean {
+  return consentEnabled && (enabledPixelCount > 0 || euVisitor);
+}
