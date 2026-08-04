@@ -17,6 +17,8 @@ export interface LeadCsvRow {
   gclid: string;
   fbclid: string;
   ttclid: string;
+  note: string;
+  tags: string;
   created_at: string;
 }
 
@@ -24,7 +26,7 @@ export interface LeadCsvRow {
 const COLUMNS: (keyof LeadCsvRow)[] = [
   "page_name", "name", "email", "phone", "whatsapp", "telegram", "message",
   "channel", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
-  "gclid", "fbclid", "ttclid", "created_at",
+  "gclid", "fbclid", "ttclid", "note", "tags", "created_at",
 ];
 
 const esc = (v: string): string =>

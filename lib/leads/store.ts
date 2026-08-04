@@ -4,6 +4,9 @@ import pool from "@/lib/db";
 import { isBadPageIdError } from "@/lib/db-errors";
 import type { LeadPayload } from "./validate";
 
+// 常量与规整逻辑在 follow-up.ts（客户端也要用，不能从本文件引——本文件 import 了 pg 池）。
+export * from "./follow-up";
+
 export interface LeadRow {
   id: string;
   page_id: string;
@@ -20,6 +23,11 @@ export interface LeadRow {
   fbclid: string | null;
   ttclid: string | null;
   is_read: boolean;
+  /** 跟进备注（「这个客户说下周再聊」这类信息此前无处可记）。 */
+  note: string | null;
+  tags: string[];
+  /** 归档时间；归档的线索从默认视图收起，但从不删除——线索是花钱买来的。 */
+  archived_at: string | null;
   created_at: string;
   /** 通知送达可见性：邮件为平台侧发送结果，webhook 状态由投递表联查。 */
   notify_email: "off" | "sent" | "failed" | null;
@@ -88,6 +96,10 @@ export async function setLeadWebhookDelivery(leadId: string, deliveryId: string)
 export interface LeadFilter {
   pageId?: string;
   unreadOnly?: boolean;
+  /** 单个标签筛选。 */
+  tag?: string;
+  /** 默认只看未归档；true 时只看已归档（归档区是独立视图，不与默认视图混在一起）。 */
+  archived?: boolean;
   /** 不传即不分页（CSV 导出要全量）。 */
   limit?: number;
   offset?: number;
@@ -99,7 +111,47 @@ function buildLeadFilter(userId: string, opts: LeadFilter): { where: string; val
   const vals: unknown[] = [userId];
   if (opts.pageId) { vals.push(opts.pageId); conds.push(`l.page_id = $${vals.length}`); }
   if (opts.unreadOnly) conds.push(`l.is_read = false`);
+  if (opts.tag) { vals.push([opts.tag]); conds.push(`l.tags @> $${vals.length}`); }
+  // 归档与未归档互斥且必须显式二选一：把已处理的线索混进默认视图，
+  // 归档这个动作就没有意义了。
+  conds.push(opts.archived ? `l.archived_at IS NOT NULL` : `l.archived_at IS NULL`);
   return { where: conds.join(" AND "), vals };
+}
+
+/** 更新备注 / 标签 / 归档状态（按 user 隔离）。字段未传即不改动。 */
+export async function updateLeadFollowUp(
+  id: string,
+  userId: string,
+  fields: { note?: string | null; tags?: string[]; archived?: boolean },
+): Promise<LeadRow | null> {
+  const set: string[] = [];
+  const vals: unknown[] = [id, userId];
+  if (fields.note !== undefined) { vals.push(fields.note); set.push(`note = $${vals.length}`); }
+  if (fields.tags !== undefined) { vals.push(fields.tags); set.push(`tags = $${vals.length}`); }
+  if (fields.archived !== undefined) {
+    set.push(`archived_at = ${fields.archived ? "NOW()" : "NULL"}`);
+  }
+  if (set.length === 0) return null;
+  const res = await pool.query(
+    `UPDATE leads l SET ${set.join(", ")}
+       FROM landing_pages p
+      WHERE l.id = $1 AND p.id = l.page_id AND p.user_id = $2
+      RETURNING l.*, p.name AS page_name`,
+    vals,
+  );
+  return res.rows[0] ?? null;
+}
+
+/** 本租户用过的全部标签（筛选器的候选项）。 */
+export async function listLeadTags(userId: string): Promise<string[]> {
+  const res = await pool.query(
+    `SELECT DISTINCT unnest(l.tags) AS tag
+       FROM leads l JOIN landing_pages p ON p.id = l.page_id
+      WHERE p.user_id = $1
+      ORDER BY tag`,
+    [userId],
+  );
+  return res.rows.map((r) => r.tag as string);
 }
 
 /** 满足筛选条件的线索总数（分页器用）。 */
