@@ -13,6 +13,7 @@ import {
   type AttributionDimension, type AttributionRow,
 } from "@/lib/analytics/dimensions";
 import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
+import { CapiHealthCard } from "./CapiHealthCard";
 
 interface PageRow { id: string; name: string; }
 
@@ -174,6 +175,9 @@ export default function AnalyticsPage() {
           广告链接上带 {DIMENSION_PARAM[dimension]} 才会在这里分组，未带的归入「{UNLABELED}」。
         </Typography.Text>
       </Card>
+
+      {/* 回传健康度按账号统计，不随落地页筛选变化（凭据本身可能是账号级的）。 */}
+      <CapiHealthCard days={days} />
 
       <Card title="CTA 渠道分布">
         <Table rowKey="channel" size="small" pagination={false} dataSource={a?.channels ?? []}

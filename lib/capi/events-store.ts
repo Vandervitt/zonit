@@ -2,6 +2,7 @@
 // capi_events 读写 + 状态机。
 import pool from "@/lib/db";
 import type { CapiProviderId } from "./types";
+import type { CapiProviderHealth } from "./health";
 
 export const MAX_ATTEMPTS = 5;
 
@@ -47,6 +48,37 @@ export async function getRetryableEvents(limit = 100): Promise<CapiEventRow[]> {
     [MAX_ATTEMPTS, limit],
   );
   return res.rows;
+}
+
+/**
+ * 租户维度的回传健康度（后台面板用）。
+ *
+ * 为什么必须给出来：CAPI 配好之后是纯服务端行为，页面上看不出任何迹象。
+ * 不暴露状态的话，token 过期、Dataset 填错这类问题会一直静默失败，
+ * 而用户是靠广告后台的转化数变少才发现的——那时已经烧掉几周预算。
+ */
+export async function getCapiHealth(userId: string, days: number): Promise<CapiProviderHealth[]> {
+  const res = await pool.query(
+    `SELECT e.provider,
+            count(*) FILTER (WHERE e.status='sent')::int    AS sent,
+            count(*) FILTER (WHERE e.status='pending')::int AS pending,
+            count(*) FILTER (WHERE e.status='failed')::int  AS failed,
+            (ARRAY_AGG(e.last_error ORDER BY e.updated_at DESC)
+               FILTER (WHERE e.last_error IS NOT NULL))[1]  AS last_error,
+            MAX(e.updated_at) FILTER (WHERE e.last_error IS NOT NULL) AS last_error_at
+       FROM capi_events e
+       JOIN landing_pages p ON p.id = e.page_id
+      WHERE p.user_id = $1 AND e.created_at >= now() - ($2 || ' days')::interval
+      GROUP BY e.provider
+      ORDER BY e.provider`,
+    [userId, days],
+  );
+  return res.rows.map((r) => ({
+    provider: r.provider as CapiProviderId,
+    sent: Number(r.sent), pending: Number(r.pending), failed: Number(r.failed),
+    lastError: r.last_error ?? null,
+    lastErrorAt: r.last_error_at ? new Date(r.last_error_at).toISOString() : null,
+  }));
 }
 
 export async function markSent(id: string): Promise<void> {

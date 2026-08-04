@@ -42,6 +42,9 @@ export enum ApiRoutes {
   BillingCredits = '/api/billing/credits',
   FxUsdCny = '/api/fx/usd-cny',
   CompanyProfiles = '/api/company-profiles',
+  /** 账号级 CAPI 凭据（页级凭据仍走 apiCapiCredentialsPath）。 */
+  CapiAccountCredentials = '/api/capi-credentials/account',
+  CapiHealth = '/api/capi/health',
   AdminTemplates = '/api/admin/templates',
   AdminInvite = '/api/admin/invite',
 }

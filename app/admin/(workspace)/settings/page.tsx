@@ -7,6 +7,7 @@ import { Routes } from "@/lib/constants";
 import { PLANS, type PlanId } from "@/lib/plans";
 import { LeadNotificationSettings } from "./LeadNotificationSettings";
 import { CompanyProfiles } from "./CompanyProfiles";
+import { CapiCredentials } from "./CapiCredentials";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -24,6 +25,7 @@ export default function SettingsPage() {
         <Space><span>当前套餐</span><Tag color={plan === "free" ? "default" : "blue"}>{PLANS[plan].label}</Tag></Space>
       </Card>
       <CompanyProfiles />
+      <CapiCredentials />
       <LeadNotificationSettings />
     </Space>
   );

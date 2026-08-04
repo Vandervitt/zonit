@@ -26,6 +26,8 @@ export const ApiErrors = {
   PATH_RESERVED: 'path_reserved',
   PUBLISH_QUOTA_EXCEEDED: 'publish_quota_exceeded',
   BAD_REQUEST: 'bad_request',
+  /** 当前套餐不含该能力（如服务端回传属高级追踪）。 */
+  PLAN_REQUIRED: 'plan_required',
   AI_QUOTA_EXHAUSTED: 'ai_quota_exhausted',
   AI_GENERATION_FAILED: 'ai_generation_failed',
   /** 经营主体缺法律实体名（唯一必填项）。 */
