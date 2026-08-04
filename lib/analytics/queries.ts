@@ -1,9 +1,14 @@
 import pool from "@/lib/db";
+import {
+  ATTRIBUTION_DIMENSIONS, DEFAULT_DIMENSION, UNLABELED, mergeAttribution,
+  type AttributionDimension, type AttributionRow,
+} from "./dimensions";
+
+export * from "./dimensions";
 
 export interface Totals { views: number; clicks: number; leads: number; ctr: number; cvr: number; }
 export interface SeriesPoint { date: string; views: number; clicks: number; }
 export interface ChannelRow { channel: string; clicks: number; }
-export interface SourceRow { utm_source: string; views: number; }
 export interface FunnelStep { key: "views" | "clicks" | "leads"; label: string; count: number; rate: number; pct: number; }
 /** 表单漏斗：开始填 → 提交成功；errors 为提交被拒次数，errorBreakdown 按错误码分布。 */
 export interface FormFunnel {
@@ -20,7 +25,9 @@ export interface AnalyticsResult {
   formFunnel: FormFunnel;
   series: SeriesPoint[];
   channels: ChannelRow[];
-  sources: SourceRow[];
+  /** 当前下钻维度下的归因明细（按线索数降序，其次曝光）。 */
+  attribution: AttributionRow[];
+  dimension: AttributionDimension;
 }
 
 export function summarize(views: number, clicks: number, leads: number): Totals {
@@ -75,7 +82,13 @@ export function lastNDates(days: number): string[] {
   return out;
 }
 
-export async function getAnalytics(userId: string, pageId: string, days: number): Promise<AnalyticsResult> {
+export async function getAnalytics(
+  userId: string,
+  pageId: string,
+  days: number,
+  dimension: AttributionDimension = DEFAULT_DIMENSION,
+): Promise<AnalyticsResult> {
+  const dimCol = ATTRIBUTION_DIMENSIONS[dimension];
   const scope =
     pageId === "all"
       ? { sql: `SELECT id FROM landing_pages WHERE user_id = $1`, params: [userId] as unknown[] }
@@ -85,13 +98,13 @@ export async function getAnalytics(userId: string, pageId: string, days: number)
   if (ids.length === 0) {
     return {
       totals: summarize(0, 0, 0), funnel: buildFunnel(0, 0, 0), formFunnel: buildFormFunnel(0, 0, []),
-      series: buildSeries([], lastNDates(days)), channels: [], sources: [],
+      series: buildSeries([], lastNDates(days)), channels: [], attribution: [], dimension,
     };
   }
   const since = `now() - ($2 || ' days')::interval`;
   const base = `FROM analytics_events WHERE page_id = ANY($1) AND created_at >= ${since}`;
 
-  const [totalsRes, seriesRes, channelsRes, sourcesRes, leadsRes, formErrorsRes] = await Promise.all([
+  const [totalsRes, seriesRes, channelsRes, attrEventsRes, attrLeadsRes, leadsRes, formErrorsRes] = await Promise.all([
     pool.query(`SELECT
         count(*) FILTER (WHERE event='page_view')::int   AS views,
         count(*) FILTER (WHERE event='cta_click')::int   AS clicks,
@@ -104,8 +117,14 @@ export async function getAnalytics(userId: string, pageId: string, days: number)
        ${base} GROUP BY 1 ORDER BY 1`, [ids, days]),
     pool.query(`SELECT COALESCE(channel,'external') AS channel, count(*)::int AS clicks
        ${base} AND event='cta_click' GROUP BY 1 ORDER BY clicks DESC`, [ids, days]),
-    pool.query(`SELECT COALESCE(utm_source,'(直接/未知)') AS utm_source, count(*)::int AS views
-       ${base} AND event='page_view' GROUP BY 1 ORDER BY views DESC LIMIT 20`, [ids, days]),
+    // 归因下钻（曝光/点击侧）。dimCol 来自 ATTRIBUTION_DIMENSIONS 白名单，非用户输入。
+    pool.query(`SELECT COALESCE(${dimCol},$3) AS value,
+        count(*) FILTER (WHERE event='page_view')::int AS views,
+        count(*) FILTER (WHERE event='cta_click')::int AS clicks
+       ${base} AND event IN ('page_view','cta_click') GROUP BY 1`, [ids, days, UNLABELED]),
+    // 归因下钻（线索侧）：leads 表独立统计，与曝光侧在 mergeAttribution 里合并。
+    pool.query(`SELECT COALESCE(${dimCol},$3) AS value, count(*)::int AS leads
+       FROM leads WHERE page_id = ANY($1) AND created_at >= ${since} GROUP BY 1`, [ids, days, UNLABELED]),
     // 线索来自独立的 leads 表（含 PII），与无 PII 的 analytics_events 分开统计。
     pool.query(`SELECT count(*)::int AS leads
        FROM leads WHERE page_id = ANY($1) AND created_at >= ${since}`, [ids, days]),
@@ -129,6 +148,10 @@ export async function getAnalytics(userId: string, pageId: string, days: number)
       lastNDates(days),
     ),
     channels: channelsRes.rows.map((r) => ({ channel: r.channel as string, clicks: Number(r.clicks) })),
-    sources: sourcesRes.rows.map((r) => ({ utm_source: r.utm_source as string, views: Number(r.views) })),
+    attribution: mergeAttribution(
+      attrEventsRes.rows.map((r) => ({ value: r.value as string, views: Number(r.views), clicks: Number(r.clicks) })),
+      attrLeadsRes.rows.map((r) => ({ value: r.value as string, leads: Number(r.leads) })),
+    ),
+    dimension,
   };
 }

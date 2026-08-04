@@ -10,11 +10,21 @@ export interface LeadCsvRow {
   message: string;
   channel: string;
   utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_content: string;
+  utm_term: string;
+  gclid: string;
+  fbclid: string;
+  ttclid: string;
   created_at: string;
 }
 
+// 归因列全量导出：导出的主要用途就是拿去和广告后台对账，缺一列就得回后台逐条点开。
 const COLUMNS: (keyof LeadCsvRow)[] = [
-  "page_name", "name", "email", "phone", "whatsapp", "telegram", "message", "channel", "utm_source", "created_at",
+  "page_name", "name", "email", "phone", "whatsapp", "telegram", "message",
+  "channel", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
+  "gclid", "fbclid", "ttclid", "created_at",
 ];
 
 const esc = (v: string): string =>

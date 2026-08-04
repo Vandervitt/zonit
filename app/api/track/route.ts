@@ -41,9 +41,10 @@ export async function POST(request: Request) {
   }
   try {
     await pool.query(
-      `INSERT INTO analytics_events (page_id, event, channel, utm_source, utm_medium, utm_campaign, detail)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      `INSERT INTO analytics_events (page_id, event, channel, utm_source, utm_medium, utm_campaign, utm_term, utm_content, detail)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [pageId, event, cap(body.channel, 32), cap(body.utm_source, 128), cap(body.utm_medium, 128), cap(body.utm_campaign, 128),
+       cap(body.utm_term, 128), cap(body.utm_content, 128),
        event === "form_error" ? cap(body.detail, 64) : null],
     );
   } catch (err) {

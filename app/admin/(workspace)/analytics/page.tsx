@@ -7,16 +7,32 @@ import { EyeOutlined, AimOutlined, PercentageOutlined, ContactsOutlined } from "
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ApiRoutes } from "@/lib/constants";
 import type { AnalyticsResult } from "@/lib/analytics/queries";
+// 常量从 dimensions.ts 引，不能从 queries.ts——后者 import 了 pg 连接池。
+import {
+  DEFAULT_DIMENSION, UNLABELED,
+  type AttributionDimension, type AttributionRow,
+} from "@/lib/analytics/dimensions";
 import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
 
 interface PageRow { id: string; name: string; }
 
+/** 维度的展示名与它对应的链接参数——报表里必须让人一眼知道该往广告链接上加什么。 */
+const DIMENSION_LABEL: Record<AttributionDimension, string> = {
+  source: "来源", medium: "媒介", campaign: "广告系列", content: "广告 / 创意", term: "关键词",
+};
+const DIMENSION_PARAM: Record<AttributionDimension, string> = {
+  source: "utm_source", medium: "utm_medium", campaign: "utm_campaign", content: "utm_content", term: "utm_term",
+};
+const DIMENSION_OPTIONS = (Object.keys(DIMENSION_LABEL) as AttributionDimension[])
+  .map((k) => ({ label: DIMENSION_LABEL[k], value: k }));
+
 export default function AnalyticsPage() {
   const [pageId, setPageId] = useState("all");
   const [days, setDays] = useState(30);
+  const [dimension, setDimension] = useState<AttributionDimension>(DEFAULT_DIMENSION);
 
   const pages = useSWR<PageRow[]>(ApiRoutes.LandingPages);
-  const data = useSWR<AnalyticsResult>(`${ApiRoutes.Analytics}?pageId=${pageId}&days=${days}`);
+  const data = useSWR<AnalyticsResult>(`${ApiRoutes.Analytics}?pageId=${pageId}&days=${days}&dimension=${dimension}`);
   const a = data.data;
 
   const pageOptions = [
@@ -125,22 +141,45 @@ export default function AnalyticsPage() {
         )}
       </Card>
 
-      <Row gutter={16}>
-        <Col xs={24} lg={12}>
-          <Card title="CTA 渠道分布">
-            <Table rowKey="channel" size="small" pagination={false} dataSource={a?.channels ?? []}
-              locale={{ emptyText: "暂无点击" }}
-              columns={[{ title: "渠道", dataIndex: "channel" }, { title: "点击数", dataIndex: "clicks", width: 120 }]} />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="UTM 来源">
-            <Table rowKey="utm_source" size="small" pagination={false} dataSource={a?.sources ?? []}
-              locale={{ emptyText: "暂无来源数据" }}
-              columns={[{ title: "来源", dataIndex: "utm_source" }, { title: "访问量", dataIndex: "views", width: 120 }]} />
-          </Card>
-        </Col>
-      </Row>
+      <Card
+        title="归因下钻"
+        extra={
+          <Segmented
+            value={dimension}
+            onChange={(v) => setDimension(v as AttributionDimension)}
+            options={DIMENSION_OPTIONS}
+          />
+        }
+      >
+        <Table<AttributionRow>
+          rowKey="value"
+          size="small"
+          pagination={false}
+          dataSource={a?.attribution ?? []}
+          locale={{ emptyText: `该区间没有带 ${DIMENSION_PARAM[dimension]} 的流量` }}
+          columns={[
+            { title: DIMENSION_LABEL[dimension], dataIndex: "value", ellipsis: true },
+            { title: "曝光", dataIndex: "views", width: 100, sorter: (x, y) => x.views - y.views },
+            { title: "CTA 点击", dataIndex: "clicks", width: 110, sorter: (x, y) => x.clicks - y.clicks },
+            { title: "线索", dataIndex: "leads", width: 90, sorter: (x, y) => x.leads - y.leads },
+            {
+              title: "线索转化率", dataIndex: "cvr", width: 120,
+              sorter: (x, y) => x.cvr - y.cvr,
+              render: (v: number) => pctText(v),
+            },
+          ]}
+        />
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          按线索数排序。线索只统计页内表单提交；WhatsApp / 电话只计入 CTA 点击。
+          广告链接上带 {DIMENSION_PARAM[dimension]} 才会在这里分组，未带的归入「{UNLABELED}」。
+        </Typography.Text>
+      </Card>
+
+      <Card title="CTA 渠道分布">
+        <Table rowKey="channel" size="small" pagination={false} dataSource={a?.channels ?? []}
+          locale={{ emptyText: "暂无点击" }}
+          columns={[{ title: "渠道", dataIndex: "channel" }, { title: "点击数", dataIndex: "clicks", width: 120 }]} />
+      </Card>
     </Space>
   );
 }

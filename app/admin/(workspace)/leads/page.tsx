@@ -14,6 +14,13 @@ interface LeadRow {
   payload: { name?: string; email?: string; phone?: string; whatsapp?: string; telegram?: string; message?: string };
   channel: string | null;
   utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_term: string | null;
+  utm_content: string | null;
+  gclid: string | null;
+  fbclid: string | null;
+  ttclid: string | null;
   is_read: boolean;
   created_at: string;
   notify_email: "off" | "sent" | "failed" | null;
@@ -90,6 +97,39 @@ function ContactCell({ row, onContacted }: { row: LeadRow; onContacted: () => vo
   );
 }
 
+/** 展开行里的完整归因：列表列只放得下渠道与广告系列，对账要的粒度在这里。 */
+const ATTRIBUTION_FIELDS: { key: keyof LeadRow; label: string }[] = [
+  { key: "utm_source", label: "来源 utm_source" },
+  { key: "utm_medium", label: "媒介 utm_medium" },
+  { key: "utm_campaign", label: "广告系列 utm_campaign" },
+  { key: "utm_content", label: "广告 / 创意 utm_content" },
+  { key: "utm_term", label: "关键词 utm_term" },
+  { key: "gclid", label: "Google 点击 ID" },
+  { key: "fbclid", label: "Meta 点击 ID" },
+  { key: "ttclid", label: "TikTok 点击 ID" },
+];
+
+function AttributionDetail({ row }: { row: LeadRow }) {
+  const present = ATTRIBUTION_FIELDS.filter((f) => row[f.key]);
+  if (present.length === 0) {
+    return (
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+        这条线索没带任何 UTM 或点击 ID——广告链接上没加参数时就会这样。
+      </Typography.Text>
+    );
+  }
+  return (
+    <Space direction="vertical" size={2}>
+      {present.map((f) => (
+        <span key={f.key} style={{ fontSize: 12 }}>
+          <Typography.Text type="secondary">{f.label}：</Typography.Text>
+          <Typography.Text copyable={{ text: String(row[f.key]) }}>{String(row[f.key])}</Typography.Text>
+        </span>
+      ))}
+    </Space>
+  );
+}
+
 export default function LeadsPage() {
   const { message } = App.useApp();
   const { data, error, mutate, isLoading } = useSWR<LeadRow[]>(ApiRoutes.Leads);
@@ -123,17 +163,22 @@ export default function LeadsPage() {
         locale={{ emptyText: "还没有线索。访客通过落地页表单留资后会显示在这里" }}
         expandable={{
           expandedRowRender: (r) => (
-            <Space direction="vertical" size={4}>
-              {(["name", "email", "phone", "whatsapp", "telegram", "message"] as const).map((k) =>
-                r.payload[k] ? <span key={k}><b>{k}:</b> {r.payload[k]}</span> : null,
-              )}
+            <Space direction="vertical" size={10}>
+              <Space direction="vertical" size={4}>
+                {(["name", "email", "phone", "whatsapp", "telegram", "message"] as const).map((k) =>
+                  r.payload[k] ? <span key={k}><b>{k}:</b> {r.payload[k]}</span> : null,
+                )}
+              </Space>
+              <AttributionDetail row={r} />
             </Space>
           ),
         }}
         columns={[
           { title: "页面", dataIndex: "page_name", ellipsis: true },
           { title: "联系方式", render: (_: unknown, r: LeadRow) => <ContactCell row={r} onContacted={() => void markContacted(r)} />, ellipsis: true },
-          { title: "来源", render: (_: unknown, r: LeadRow) => [r.channel, r.utm_source].filter(Boolean).join(" / ") || "—", width: 140 },
+          // 列表只给渠道 / 来源 / 广告系列三层；创意、关键词与点击 ID 在展开行里。
+          { title: "来源", width: 200, ellipsis: true,
+            render: (_: unknown, r: LeadRow) => [r.channel, r.utm_source, r.utm_campaign].filter(Boolean).join(" / ") || "—" },
           { title: "通知", width: 160, render: (_: unknown, r: LeadRow) => <NotifyCell row={r} /> },
           { title: "时间", dataIndex: "created_at", width: 180, render: (t: string) => new Date(t).toLocaleString() },
           { title: "状态", dataIndex: "is_read", width: 90, render: (v: boolean) => <Tag color={v ? "default" : "blue"}>{v ? "已读" : "未读"}</Tag> },

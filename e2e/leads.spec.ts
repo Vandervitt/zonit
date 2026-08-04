@@ -217,6 +217,64 @@ test.describe("线索闭环", () => {
     await expect(row.getByText(/^邮件 (已发送|失败|关)$/)).toBeVisible();
   });
 
+  // 归因的价值全在「端到端不掉字段」：前端捕获 → API → 落库 → 报表分组，
+  // 任何一环丢了 utm_content，投放侧就回到只能看渠道级。单测覆盖不到这条链路。
+  test("归因下钻：全套 UTM 与点击 ID 落库，并按广告系列在报表里分组", async ({ page }) => {
+    const api = await pwRequest.newContext();
+    await pool.query(`DELETE FROM leads WHERE page_id = $1`, [pageId]);
+    await pool.query(`DELETE FROM analytics_events WHERE page_id = $1`, [pageId]);
+
+    const utm = {
+      utm_source: "google", utm_medium: "cpc", utm_campaign: "e2e-attr-camp",
+      utm_content: "creative_b", utm_term: "dental implant bangkok",
+      gclid: "Cj0KCQjw-e2e-click-id", fbclid: "fb.1.e2e", ttclid: "tt.e2e",
+    };
+    // 曝光两次、点击一次，均带同一套 UTM
+    for (const event of ["page_view", "page_view", "cta_click"]) {
+      const r = await api.post(`${BASE}/api/track`, { data: { pageId, event, channel: "whatsapp", ...utm } });
+      expect(r.status()).toBe(204);
+    }
+    const lead = await api.post(`${BASE}/api/leads`, {
+      data: { pageId, channel: "form", fields: { name: "Attr Test", email: "attr@example.com" }, utm },
+    });
+    expect(lead.status()).toBe(204);
+    await api.dispose();
+
+    // 线索侧：五个 UTM 维度 + 三个点击 ID 一个都不能丢
+    const row = await pool.query(
+      `SELECT utm_source, utm_medium, utm_campaign, utm_content, utm_term, gclid, fbclid, ttclid
+         FROM leads WHERE page_id = $1`, [pageId]);
+    expect(row.rows[0]).toEqual(utm);
+
+    // 曝光侧：term/content 同样入库（点击 ID 刻意不入流水表，见 migrations/043）
+    const ev = await pool.query(
+      `SELECT utm_content, utm_term FROM analytics_events WHERE page_id = $1 AND event = 'page_view' LIMIT 1`, [pageId]);
+    expect(ev.rows[0]).toEqual({ utm_content: "creative_b", utm_term: "dental implant bangkok" });
+
+    // 报表侧：按广告系列分组，曝光/点击/线索三列都要对上
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Dev Login/i }).click();
+    await page.waitForURL("**/admin", { timeout: 30_000 });
+
+    const res = await page.request.get("/api/analytics?pageId=all&days=7&dimension=campaign");
+    expect(res.status()).toBe(200);
+    const data = await res.json();
+    expect(data.dimension).toBe("campaign");
+    expect(data.attribution).toContainEqual(
+      expect.objectContaining({ value: "e2e-attr-camp", views: 2, clicks: 1, leads: 1 }),
+    );
+
+    // 切到创意维度同样分得开——这是「哪条创意带来的线索」那一层
+    const byContent = await page.request.get("/api/analytics?pageId=all&days=7&dimension=content");
+    const contentRows = (await byContent.json()).attribution;
+    expect(contentRows).toContainEqual(expect.objectContaining({ value: "creative_b", leads: 1 }));
+
+    // 非法维度不得拼进 SQL：回落默认维度而不是报错或执行
+    const bogus = await page.request.get("/api/analytics?pageId=all&days=7&dimension=id;DROP TABLE leads");
+    expect(bogus.status()).toBe(200);
+    expect((await bogus.json()).dimension).toBe("campaign");
+  });
+
   // 提醒的筛选口径全在 SQL 里，单测只能断言参数，故在真实库上验一次。
   test("未读提醒：只挑静置超 48h、未读、未提醒过、且不早于 30 天的线索", async () => {
     const seed = async (payload: object, hoursAgo: number, isRead = false, nudged = false) => {
