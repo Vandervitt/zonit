@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Table, Button, Tag, Space, Popconfirm, Typography, App } from "antd";
+import { Table, Button, Tag, Space, Popconfirm, Typography, Tooltip, App } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { FeedbackModal } from "@/components/admin/FeedbackModal";
@@ -14,6 +14,8 @@ import {
   apiLandingUnpublishPath,
   apiLandingPagePath,
   apiLandingDuplicatePath,
+  apiLandingCheckPath,
+  pageCheckReportPath,
   ApiRoutes,
   Routes,
 } from "@/lib/constants";
@@ -89,6 +91,8 @@ export default function LandingPagesPage() {
   const { message } = App.useApp();
   const { data, error, mutate, isLoading } = useSWR<PageRow[]>(ApiRoutes.LandingPages);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+  /** 正在自检的页 id——自检要抓取外站，慢到必须给反馈。 */
+  const [checking, setChecking] = useState<string | null>(null);
 
   async function unpublish(id: string, name: string) {
     const res = await fetch(apiLandingUnpublishPath(id), { method: "POST" });
@@ -115,6 +119,29 @@ export default function LandingPagesPage() {
     message.success("已复制为草稿");
     void mutate();
   }
+  /**
+   * 对已发布页跑一次自检，结果直接打开公开报告页。
+   *
+   * 用同一套检查逻辑而不是另写一份后台版：两处结论必须一致，
+   * 否则后台说没问题、营销站的自检器说有问题，用户谁也不信。
+   */
+  async function runCheck(id: string) {
+    setChecking(id);
+    try {
+      const res = await fetch(apiLandingCheckPath(id), { method: "POST" });
+      if (res.status === 429) { message.warning("自检次数已达上限，请稍后再试"); return; }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        message.error(body.error === "check_failed" ? "抓取页面失败，请确认线上地址可访问" : "自检失败，请稍后重试");
+        return;
+      }
+      const { id: reportId } = await res.json();
+      window.open(pageCheckReportPath(reportId), "_blank", "noopener");
+    } finally {
+      setChecking(null);
+    }
+  }
+
   async function rename(id: string, name: string) {
     const trimmed = name.trim();
     if (!trimmed) { message.error("名称不能为空"); void mutate(); return; }
@@ -167,6 +194,12 @@ export default function LandingPagesPage() {
               <a onClick={() => duplicate(r.id)}>复制</a>
               {r.status === "published" && r.bound_domain && (
                 <a href={`https://${r.bound_domain}${r.bound_path ?? "/"}`} target="_blank" rel="noreferrer">线上查看</a>
+              )}
+              {/* 自检只对已发布页开放：检查的必须是访客真正看到的那张页 */}
+              {r.status === "published" && r.bound_domain && (
+                <Tooltip title="按投放平台常盯的项检查这张线上页，结果在新标签打开">
+                  <a onClick={() => runCheck(r.id)}>{checking === r.id ? "自检中…" : "自检"}</a>
+                </Tooltip>
               )}
               {r.status === "published" && (
                 <Popconfirm

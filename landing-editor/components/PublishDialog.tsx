@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useMeta } from "../MetaContext";
-import { apiLandingPublishPath, Routes } from "@/lib/constants";
+import { apiLandingPublishPath, apiLandingCheckPath, pageCheckReportPath, Routes } from "@/lib/constants";
 
 interface RouteInfo {
   path: string;
@@ -35,6 +35,33 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
   const [liveUrl, setLiveUrl] = useState("");
   // 平台子域分配中：这是没有自有域名的用户唯一的发布出口，失败必须让他看到原因。
   const [claiming, setClaiming] = useState(false);
+  // 发布后的自检（抓取线上页，慢，必须有进行中反馈）
+  const [checking, setChecking] = useState(false);
+  const [checkError, setCheckError] = useState("");
+
+  /** 对刚发布的这张页跑一次自检，报告在新标签打开。 */
+  async function runCheck() {
+    setChecking(true);
+    setCheckError("");
+    try {
+      const res = await fetch(apiLandingCheckPath(pageId), { method: "POST" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setCheckError(
+          res.status === 429 ? "自检次数已达上限，请稍后再试"
+            : body.error === "check_failed" ? "抓取页面失败，请确认线上地址已生效"
+            : "自检失败，请稍后重试",
+        );
+        return;
+      }
+      const { id } = await res.json();
+      window.open(pageCheckReportPath(id), "_blank", "noopener");
+    } catch {
+      setCheckError("自检失败，请检查网络后重试。");
+    } finally {
+      setChecking(false);
+    }
+  }
 
   useEffect(() => {
     void (async () => {
@@ -163,7 +190,19 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
           <div className="mt-4 space-y-3 text-sm">
             <p className="text-ink-soft">已发布，对外链接：</p>
             <a href={liveUrl} target="_blank" className="block break-all text-brand-600 hover:underline">{liveUrl}</a>
-            <button onClick={onClose} className="mt-2 rounded-md bg-brand-600 px-3 py-1.5 text-sm text-white">完成</button>
+            {/* 刚上线、还没开始投是自检最该发生的时刻，故把入口放在这里而不是只留在列表页 */}
+            <p className="text-xs text-ink-muted">投放前先跑一次自检，看看审核常盯的几项在这张页上是什么情况。</p>
+            <div className="mt-2 flex items-center gap-2">
+              <button
+                onClick={() => void runCheck()}
+                disabled={checking}
+                className="rounded-md bg-brand-600 px-3 py-1.5 text-sm text-white hover:bg-brand-700 disabled:opacity-60"
+              >
+                {checking ? "自检中…" : "投放前自检"}
+              </button>
+              <button onClick={onClose} className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink hover:bg-canvas">完成</button>
+            </div>
+            {checkError && <p className="text-sm text-red-500">{checkError}</p>}
           </div>
         ) : loadFailed ? (
           <div className="mt-4 space-y-3 text-sm text-ink-soft">
