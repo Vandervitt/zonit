@@ -275,6 +275,67 @@ test.describe("线索闭环", () => {
     expect((await bogus.json()).dimension).toBe("campaign");
   });
 
+  // 一人管多客户时列表会长到几十行。筛选与分页错位的后果是「看到别的客户的线索」
+  // 或「翻页翻不到」，单测断言不到 SQL 真实行为，故在真实库上验一次。
+  test("线索筛选与分页：按页筛、只看未读、分页不重不漏", async ({ page }) => {
+    await pool.query(`DELETE FROM leads WHERE page_id = $1`, [pageId]);
+    const other = await pool.query(
+      `INSERT INTO landing_pages (user_id, name, data) VALUES ($1, '另一张页', '{}'::jsonb) RETURNING id`,
+      [devUserId],
+    );
+    const otherPageId = other.rows[0].id as string;
+
+    // 本页 3 条（其中 1 条已读），另一页 2 条
+    for (let i = 0; i < 3; i++) {
+      await pool.query(
+        `INSERT INTO leads (page_id, payload, channel, is_read) VALUES ($1, $2, 'form', $3)`,
+        [pageId, JSON.stringify({ name: `Mine${i}`, whatsapp: `+1555000100${i}` }), i === 0],
+      );
+    }
+    for (let i = 0; i < 2; i++) {
+      await pool.query(
+        `INSERT INTO leads (page_id, payload, channel) VALUES ($1, $2, 'form')`,
+        [otherPageId, JSON.stringify({ name: `Other${i}`, whatsapp: `+1555000200${i}` })],
+      );
+    }
+
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Dev Login/i }).click();
+    await page.waitForURL("**/admin", { timeout: 30_000 });
+
+    // 不筛：5 条
+    const all = await (await page.request.get("/api/leads?limit=50&offset=0")).json();
+    expect(all.total).toBe(5);
+    expect(all.rows).toHaveLength(5);
+
+    // 按页筛：只看得到自己那张页的 3 条（跨客户串数据是这里最不能出的错）
+    const mine = await (await page.request.get(`/api/leads?pageId=${pageId}&limit=50&offset=0`)).json();
+    expect(mine.total).toBe(3);
+    expect(mine.rows.every((r: { page_id: string }) => r.page_id === pageId)).toBe(true);
+
+    // 只看未读：本页 3 条里有 1 条已读
+    const unread = await (await page.request.get(`/api/leads?pageId=${pageId}&unreadOnly=1&limit=50&offset=0`)).json();
+    expect(unread.total).toBe(2);
+
+    // 分页：总数不随分页变化，两页取到的 id 不重叠且合起来是全集
+    const p1 = await (await page.request.get("/api/leads?limit=3&offset=0")).json();
+    const p2 = await (await page.request.get("/api/leads?limit=3&offset=3")).json();
+    expect(p1.total).toBe(5);
+    expect(p2.total).toBe(5);
+    expect(p1.rows).toHaveLength(3);
+    expect(p2.rows).toHaveLength(2);
+    const ids = [...p1.rows, ...p2.rows].map((r: { id: string }) => r.id);
+    expect(new Set(ids).size).toBe(5);
+
+    // 导出跟随筛选：筛完再导出却拿到全量是最容易出的意外
+    const csv = await (await page.request.get(`/api/leads/export?pageId=${pageId}`)).text();
+    expect(csv.trim().split("\n")).toHaveLength(4); // 表头 + 3 行
+    expect(csv).not.toContain("Other0");
+
+    await pool.query(`DELETE FROM landing_pages WHERE id = $1`, [otherPageId]);
+    await pool.query(`DELETE FROM leads WHERE page_id = $1`, [pageId]);
+  });
+
   // 提醒的筛选口径全在 SQL 里，单测只能断言参数，故在真实库上验一次。
   test("未读提醒：只挑静置超 48h、未读、未提醒过、且不早于 30 天的线索", async () => {
     const seed = async (payload: object, hoursAgo: number, isRead = false, nudged = false) => {

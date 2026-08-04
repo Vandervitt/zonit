@@ -14,6 +14,7 @@ import {
 } from "@/lib/analytics/dimensions";
 import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
 import { CapiHealthCard } from "./CapiHealthCard";
+import { PageComparison } from "./PageComparison";
 
 interface PageRow { id: string; name: string; }
 
@@ -64,6 +65,9 @@ export default function AnalyticsPage() {
         <Col xs={12} sm={6}><Card><Statistic title="线索" value={a?.totals.leads ?? 0} prefix={<ContactsOutlined />} /></Card></Col>
         <Col xs={12} sm={6}><Card><Statistic title="点击率" value={((a?.totals.ctr ?? 0) * 100)} precision={2} suffix="%" prefix={<PercentageOutlined />} /></Card></Col>
       </Row>
+
+      {/* 先给「哪张页在跑」，再往下钻单页细节——多客户场景的第一眼 */}
+      <PageComparison days={days} selectedPageId={pageId} onSelect={setPageId} />
 
       <Card title="转化漏斗">
         {data.isLoading ? <div style={{ height: 180, display: "grid", placeItems: "center" }}><Spin /></div>
