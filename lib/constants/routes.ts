@@ -47,6 +47,8 @@ export enum ApiRoutes {
   /** 账号级 CAPI 凭据（页级凭据仍走 apiCapiCredentialsPath）。 */
   CapiAccountCredentials = '/api/capi-credentials/account',
   CapiHealth = '/api/capi/health',
+  /** 已发布页的骨架重复读数（判重风险依据）。 */
+  AntiBanSimilarity = '/api/antiban/similarity',
   AdminTemplates = '/api/admin/templates',
   AdminInvite = '/api/admin/invite',
 }
