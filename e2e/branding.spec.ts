@@ -3,6 +3,7 @@
 import { test, expect } from "@playwright/test";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
+import { createPageFromTemplate, devLogin } from "./helpers/editor";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -53,13 +54,8 @@ test.describe("品牌主题", () => {
       return isExternalImage ? route.abort() : route.continue();
     });
 
-    await page.goto("/login");
-    await page.getByRole("button", { name: /Dev Login/i }).click();
-    await page.waitForURL("**/admin", { timeout: 30_000 });
-
-    await page.goto("/admin/editor", { waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: "空白开始" }).first().click();
-    await page.waitForURL(/\/admin\/editor\/[^/]+$/, { timeout: 30_000, waitUntil: "domcontentloaded" });
+    await devLogin(page);
+    await createPageFromTemplate(page);
 
     // 打开「品牌主题」面板：左栏 BlockList 的常驻入口（button，含「配色 / Logo」副标，
     // 故可访问名为「品牌主题配色 / Logo」，用子串匹配；role=button 与右栏面板的 h2 标题区分）。

@@ -49,7 +49,9 @@ test.describe("CAPI 服务端回传", () => {
   test("lead 提交带 event_id → capi_events 落库（哈希 PII）", async () => {
     const api = await pwRequest.newContext();
     const res = await api.post(`${BASE}/api/leads`, {
-      data: { pageId, channel: "form", fields: { email: "Tom@Example.com", whatsapp: "+1 555 0100" },
+      // ⚠️ 号码必须是严格 E.164（无空格）：/api/leads 在国码改造（PR#125）后对
+      // 非 E.164 直接 400，本用例原来的 "+1 555 0100" 从那时起就一直红着。
+      data: { pageId, channel: "form", fields: { email: "Tom@Example.com", whatsapp: "+15550100" },
               event_id: "evt-capi-1", consent: true },
     });
     expect(res.status()).toBe(204);

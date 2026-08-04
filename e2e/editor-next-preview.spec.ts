@@ -79,6 +79,9 @@ test.describe('editor 实时预览', () => {
     await expect(frame.getByRole('heading', { name: /Skincare that actually fits/i })).toBeVisible();
 
     // 5) 中栏 Hero 主标题输入框：填入新标题
+    // ⚠️ 新建页默认选中的是「联系方式」面板（留资渠道通用化之后的默认落点），
+    // 不先切到首屏面板就取不到「主标题」输入框——本用例从那时起一直红着。
+    await page.getByRole('button', { name: /首屏 Hero/ }).click();
     const titleInput = page.getByLabel('主标题');
     await titleInput.fill('Brand new hero headline');
 
