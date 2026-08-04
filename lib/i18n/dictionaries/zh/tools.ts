@@ -146,6 +146,17 @@ export const tools = {
       title: "实测：同意前没有追踪请求发出",
       why: "真实浏览器打开了你的页面，在任何同意交互之前没有观察到已知的追踪请求。",
     },
+    viewport_missing: {
+      title: "没有声明移动端 viewport",
+      why: "没有 viewport 标签，手机会按桌面宽度渲染再整体缩小，正文小到必须双指放大才看得清。TikTok 要求页面在移动端不放大就能读，Google 也把移动端可用性算进着陆页体验。",
+      guide: "google-ads-landing-page-policy",
+    },
+    viewport_zoom_blocked: {
+      title: "移动端禁止了缩放",
+      why: "viewport 标签里禁掉了双指缩放（user-scalable=no 或 maximum-scale=1）。一旦页面上有小字号文本，访客连放大这条退路都没有——这既是审核问题，也是无障碍问题。",
+      guide: "google-ads-landing-page-policy",
+    },
+    viewport_ok: { title: "已声明移动端 viewport，且允许缩放", why: "" },
     page_heavy: {
       title: "页面体积 {bytes} 字节",
       why: "体积进的是着陆页体验而不是政策：后果是排名更低、单次点击更贵，而且没有任何通知。",

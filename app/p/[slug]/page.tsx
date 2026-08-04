@@ -13,6 +13,7 @@ import { gateTrackingByPlan } from "@/lib/tracking/gate";
 import { isEeaCountry } from "@/lib/tracking/geo";
 import { dialCodeFor } from "@/lib/leads/dial-codes";
 import { deriveVariant, IDENTITY_VARIANT } from "@/landing-renderer/variant";
+import { resolveCompanyInfo } from "@/lib/company-profiles/resolve";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { landingFaqJsonLd, landingOrganizationJsonLd } from "@/lib/seo/landing-jsonld";
 
@@ -98,12 +99,25 @@ export default async function PublicLandingPage({
   const faqJsonLd = noindex ? null : landingFaqJsonLd(page.data);
   const orgJsonLd = noindex ? null : landingOrganizationJsonLd(page.data, pageUrl);
 
+  // 政策子页挂在落地页所在路径下（/privacy、/invisalign/privacy）；页脚与表单据此出链。
+  const policyBase = resolveTenantPath(h);
+  // 页脚的经营主体信息：账号级真源，按 footer.companyProfileId 现查现渲染，
+  // 故客户改一次主体信息，所有引用它的已发布页立即跟上（不需要逐页重发）。
+  const companyInfo = await resolveCompanyInfo(page.data.footer.companyProfileId, page.user_id);
+
   return (
     <>
       {faqJsonLd && <JsonLd data={faqJsonLd} />}
       {orgJsonLd && <JsonLd data={orgJsonLd} />}
       <TrackingProvider tracking={tracking} pageId={page.id} euVisitor={euVisitor}>
-        <LandingPage page={page.data} pageId={page.id} variant={variant} defaultDial={defaultDial} />
+        <LandingPage
+          page={page.data}
+          pageId={page.id}
+          variant={variant}
+          defaultDial={defaultDial}
+          policyBase={policyBase}
+          companyInfo={companyInfo}
+        />
         {hasWatermark(plan) && <Watermark />}
       </TrackingProvider>
     </>

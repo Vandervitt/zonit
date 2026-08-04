@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isEeaCountry, shouldCollectFirstParty } from "./geo";
+import { isEeaCountry, needsConsentBar, shouldCollectFirstParty } from "./geo";
 
 describe("isEeaCountry", () => {
   it("欧盟成员国判定为真（大小写不敏感）", () => {
@@ -33,5 +33,23 @@ describe("shouldCollectFirstParty", () => {
   it("欧盟访客仅在已同意后采集", () => {
     expect(shouldCollectFirstParty(true, false)).toBe(false);
     expect(shouldCollectFirstParty(true, true)).toBe(true);
+  });
+});
+
+describe("needsConsentBar", () => {
+  it("有第三方 pixel → 需要同意条", () => {
+    expect(needsConsentBar(true, 1, false)).toBe(true);
+  });
+
+  it("无 pixel 且非欧盟访客 → 不弹（没有东西要征求同意）", () => {
+    expect(needsConsentBar(true, 0, false)).toBe(false);
+  });
+
+  it("无 pixel 但欧盟访客 → 仍需要（第一方采集也受门控）", () => {
+    expect(needsConsentBar(true, 0, true)).toBe(true);
+  });
+
+  it("页面显式关掉同意条 → 一律不弹", () => {
+    expect(needsConsentBar(false, 3, true)).toBe(false);
   });
 });

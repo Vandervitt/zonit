@@ -5,6 +5,7 @@ import { useMeta } from "../MetaContext";
 import { useEditorState, useEditorDispatch, useEditorHistory, toDraft } from "../store/editorStore";
 import { collectPublishIssues } from "../lib/publishIssues";
 import { ValidationBar } from "./ValidationBar";
+import { ComplianceHintsBar } from "./ComplianceHintsBar";
 import { PublishDialog } from "./PublishDialog";
 import { TrackingPanel } from "./TrackingPanel";
 import { AntiBanPanel } from "./AntiBanPanel";
@@ -154,6 +155,7 @@ export function EditorToolbar() {
       )}
       <div className="flex-1" />
       <ValidationBar />
+      <ComplianceHintsBar />
       <div className="relative">
         <button
           onClick={() => setRegenOpen((v) => !v)}

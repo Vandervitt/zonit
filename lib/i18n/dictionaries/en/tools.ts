@@ -152,6 +152,17 @@ export const tools = {
       title: "Measured: no tracking fired before consent",
       why: "A real browser opened your page and no known tracking request went out before any consent interaction.",
     },
+    viewport_missing: {
+      title: "No mobile viewport declared",
+      why: "Without a viewport tag phones render the page at desktop width and scale it down, so body text needs pinch-zoom to read. TikTok asks for pages that are readable on mobile without zooming, and Google folds mobile usability into landing page experience.",
+      guide: "google-ads-landing-page-policy",
+    },
+    viewport_zoom_blocked: {
+      title: "Zooming is disabled on mobile",
+      why: "The viewport tag blocks pinch-zoom (user-scalable=no or maximum-scale=1). If any text is small, visitors have no way to enlarge it — an accessibility problem as much as a review one.",
+      guide: "google-ads-landing-page-policy",
+    },
+    viewport_ok: { title: "Mobile viewport declared, zooming allowed", why: "" },
     page_heavy: {
       title: "Page weighs {bytes} bytes",
       why: "Weight feeds landing page experience rather than policy: the effect is lower rank and higher cost per click, with no notification.",

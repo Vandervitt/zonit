@@ -5,6 +5,8 @@ import { getLandingPage } from "@/lib/landing-pages/store";
 import { getUserPlan } from "@/lib/plans-db";
 import { hasAntiBan } from "@/lib/plans";
 import { deriveVariant, IDENTITY_VARIANT } from "@/landing-renderer/variant";
+import { resolveCompanyInfo } from "@/lib/company-profiles/resolve";
+import { landingPreviewPath } from "@/lib/constants";
 
 export default async function PreviewPage({
   params,
@@ -22,5 +24,15 @@ export default async function PreviewPage({
   const plan = await getUserPlan(page.user_id);
   const variant = hasAntiBan(plan) ? deriveVariant(page.data.variantSeed ?? page.id) : IDENTITY_VARIANT;
 
-  return <LandingPage page={page.data} variant={variant} preview />;
+  // 政策链接指向本预览自己的政策子页；主体信息按引用解析，与发布后一致。
+  const companyInfo = await resolveCompanyInfo(page.data.footer.companyProfileId, page.user_id);
+  return (
+    <LandingPage
+      page={page.data}
+      variant={variant}
+      preview
+      policyBase={landingPreviewPath(id)}
+      companyInfo={companyInfo}
+    />
+  );
 }

@@ -28,4 +28,8 @@ export const ApiErrors = {
   BAD_REQUEST: 'bad_request',
   AI_QUOTA_EXHAUSTED: 'ai_quota_exhausted',
   AI_GENERATION_FAILED: 'ai_generation_failed',
+  /** 经营主体缺法律实体名（唯一必填项）。 */
+  COMPANY_LEGAL_NAME_REQUIRED: 'company_legal_name_required',
+  /** 该经营主体仍被落地页引用，删除会让那些页的页脚当场少掉公司信息。 */
+  COMPANY_PROFILE_IN_USE: 'company_profile_in_use',
 } as const;

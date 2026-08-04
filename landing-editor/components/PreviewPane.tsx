@@ -6,6 +6,9 @@
 // 投影 + 内部滚动），iframe 以 390 宽渲染，命中纯移动端断面；保留桌面切换以查看宽屏版式。
 import { useState } from "react";
 import { useEditorState, toDraft } from "../store/editorStore";
+import { useMeta } from "../MetaContext";
+import { useCompanyInfo } from "../lib/useCompanyInfo";
+import { landingPreviewPath } from "@/lib/constants";
 import { LandingPage } from "@/landing-renderer/LandingPage";
 import { PreviewFrame } from "./PreviewFrame";
 
@@ -15,7 +18,11 @@ const DEVICE_WIDTH: Record<Device, number> = { mobile: 390, desktop: 1280 };
 export function PreviewPane() {
   const state = useEditorState();
   const draft = toDraft(state);
+  const { pageId } = useMeta();
   const [device, setDevice] = useState<Device>("mobile");
+  // 预览要和发布后一致：政策链接落到编辑器自己的预览政策页（点开真能看内容），
+  // 经营主体信息按当前选中的那一份现算 —— 用户在页脚面板换一份就该当场看到变化。
+  const companyInfo = useCompanyInfo(draft.footer.companyProfileId);
 
   const tab = (d: Device, label: string) => (
     <button
@@ -32,7 +39,7 @@ export function PreviewPane() {
 
   const preview = (
     <PreviewFrame virtualWidth={DEVICE_WIDTH[device]}>
-      <LandingPage page={draft} pageId="preview" preview />
+      <LandingPage page={draft} pageId="preview" preview policyBase={landingPreviewPath(pageId)} companyInfo={companyInfo} />
     </PreviewFrame>
   );
 

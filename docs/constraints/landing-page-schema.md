@@ -18,6 +18,10 @@
 - `locale` may be optional and should fall back to English when runtime detection is unavailable.
 - Generic contact URLs should be modeled as lead-oriented consultation links only, and must not point to purchase, checkout, cart, order, subscription, refund, or payment pages.
 - The footer must include at least one compliance link or inline policy entry.
+- Footer privacy and terms text is also the source for the page's `/privacy` and `/terms` subpages; keep it substantive prose, not a placeholder title.
+- Company info is account-level (`company_profiles`), not page content: `footer.companyProfileId` holds a reference and the renderer receives an already-composed line. Do not add company name, address, or licence fields to the page schema.
+- Renderer components must not read company info from the draft or query the database; page routes resolve it and pass it in.
+- See `docs/landing-page-compliance.md` for the full footer compliance model and its traceability to platform policy.
 - Trust and compliance structures should support reviews, trust badges, authority story, FAQ, assurance, privacy policy, and disclaimers.
 - Result proof, before/after, health, beauty, finance, or other high-risk claims should support disclaimers and avoid guaranteed outcomes.
 - Assurance content must avoid transaction semantics such as refund guarantees or payment protection unless product scope explicitly changes.

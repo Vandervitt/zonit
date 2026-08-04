@@ -7,7 +7,7 @@ import { parseUtm, mergeUtmIntoUrl } from "./utm";
 import { PixelSink, BeaconSink, type EventSink } from "./sinks";
 import { inferChannel, type FormEvent } from "./events";
 import { ConsentBar } from "./ConsentBar";
-import { shouldCollectFirstParty } from "@/lib/tracking/geo";
+import { needsConsentBar, shouldCollectFirstParty } from "@/lib/tracking/geo";
 
 const CONSENT_KEY = "lp_consent";
 const UTM_KEY = "lp_utm";
@@ -33,6 +33,9 @@ export function TrackingProvider({ tracking, pageId, euVisitor = false, children
 
   const enabledPixels = (tracking?.pixels ?? []).filter((p) => p.enabled && p.id.trim());
 
+  // 是否真的有东西要征求同意（判据与理由见 needsConsentBar）。
+  const needsConsent = needsConsentBar(consentEnabled, enabledPixels.length, euVisitor);
+
   // 捕获 UTM（一次）
   useEffect(() => {
     const utm = parseUtm(window.location.search);
@@ -55,13 +58,13 @@ export function TrackingProvider({ tracking, pageId, euVisitor = false, children
     beaconRef.current?.track("page_view", { ...utmRef.current });
   }, [collect]);
 
-  // 读已存同意（仅客户端）：未启用同意条则视为已同意；否则按 localStorage 校正。
+  // 读已存同意（仅客户端）：无需征求同意时视为已同意；否则按 localStorage 校正。
   useEffect(() => {
-    if (!consentEnabled) { setConsented(true); return; }
+    if (!needsConsent) { setConsented(true); return; }
     const v = localStorage.getItem(CONSENT_KEY);
     if (v === "accepted") setConsented(true);
     else if (v === "declined") setDeclined(true);
-  }, [consentEnabled]);
+  }, [needsConsent]);
 
   // 同意后：建 sink，待第三方 SDK（next/script 异步注入）就绪再 init + 发 page_view。
   // 轮询避免 effect 早于注入脚本执行导致首个 page_view 丢失；最长约 5s 兜底。
@@ -112,7 +115,7 @@ export function TrackingProvider({ tracking, pageId, euVisitor = false, children
     <div onClickCapture={onClickCapture}>
       {consented && enabledPixels.map((p) => <PixelScript key={p.provider} provider={p.provider} id={p.id} />)}
       <FormTrackingContext.Provider value={trackForm}>{children}</FormTrackingContext.Provider>
-      {consentEnabled && !consented && !declined && (
+      {needsConsent && !consented && !declined && (
         <ConsentBar text={tracking?.consent.text} onAccept={accept} onDecline={decline} />
       )}
     </div>

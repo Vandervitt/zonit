@@ -231,6 +231,19 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
             {pathShapeOk && pathReserved && (
               <p className="text-sm text-red-500">该路径为平台保留，请换一个。</p>
             )}
+            {/*
+              域名一致性：Google 与 LinkedIn 都要求广告的展示 URL 域名与最终落地域名
+              一致。用平台子域发布本身没问题（展示 URL 就是这个子域），但客户很容易
+              在广告里把展示 URL 填成自己的品牌域 —— 那是直接违规，而且被拒时给出的
+              理由通常看不出是这个原因。发布前说一句，比事后猜三次便宜。
+            */}
+            {selected?.is_platform_subdomain && (
+              <p className="rounded-md bg-sky-50 px-3 py-2 text-xs text-sky-800">
+                这是平台提供的地址。在 Google Ads 与 LinkedIn 投放时，广告的展示 URL
+                域名必须与实际落地域名一致 —— 填成自己的品牌域会违规。要在广告里露出品牌域，
+                请先绑定自有域名再发布。
+              </p>
+            )}
             {rebinding && (
               <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-700">
                 {selected?.domain}{targetPath === "/" ? "" : targetPath} 当前正在服务「{occupied?.landingPageName ?? "其他页面"}」。继续发布会把这个位置改为本页面，原页面将立即从该位置下线（若有广告在投请先确认）。

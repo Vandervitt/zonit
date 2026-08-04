@@ -260,6 +260,18 @@ export interface FooterSection {
   // 页脚改为渲染 contact 中所有已填、且未在主 CTA / 悬浮按钮出现过的渠道。
   privacyPolicy: string;       // 隐私政策
   termsOfService: string;      // 服务条款
+  /**
+   * 经营主体（company_profiles）的引用。TikTok 对电商与金融类页面明确要求页脚
+   * 展示公司信息与执照，Meta / LinkedIn 的「真实身份」也吃这一项。
+   *
+   * 存 id 而非文案快照：主体信息是**账号级**的，一个账号可以有多份（不同实体 /
+   * 不同市场），同一份被多张页引用。改一次主体信息，所有引用它的已发布页跟着更新
+   * ——快照做不到这点，且会立刻分裂成 N 份互相矛盾的主体信息。
+   *
+   * 渲染端不从 draft 读文案：由页面路由按 id 查库并把成文的一行传给渲染器
+   * （见 lib/company-profiles）。id 失效（主体被删）时页脚就是不展示，不留残影。
+   */
+  companyProfileId?: string;
 }
 
 // ============ 15. 悬浮按钮 ============

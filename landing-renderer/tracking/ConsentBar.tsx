@@ -1,7 +1,11 @@
 // landing-renderer/tracking/ConsentBar.tsx
 "use client";
 
-const DEFAULT_TEXT = "我们使用 Cookie 与第三方分析像素来改善投放效果。点击「接受」即表示同意。";
+// 缺省文案为英文：生成页面向海外访客（52 套模板全为英文），而同意的前提是访客
+// 读得懂 —— 原先这里硬编码中文，欧盟访客拿到的是一条看不懂的中文同意条，既谈不上
+// 有效同意，观感也直接崩。需要其它语言时由 tracking.consent.text 逐页覆盖。
+const DEFAULT_TEXT =
+  "We use cookies and third-party analytics to measure how this page performs. Click “Accept” to agree.";
 
 export function ConsentBar({ text, onAccept, onDecline }: { text?: string; onAccept: () => void; onDecline: () => void }) {
   return (
@@ -9,8 +13,8 @@ export function ConsentBar({ text, onAccept, onDecline }: { text?: string; onAcc
       <div className="mx-auto flex max-w-4xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-600">{text || DEFAULT_TEXT}</p>
         <div className="flex shrink-0 gap-2">
-          <button onClick={onDecline} className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">拒绝</button>
-          <button onClick={onAccept} className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700">接受</button>
+          <button onClick={onDecline} className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">Decline</button>
+          <button onClick={onAccept} className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700">Accept</button>
         </div>
       </div>
     </div>

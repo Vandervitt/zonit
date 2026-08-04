@@ -16,6 +16,7 @@ const ALL_FINDING_IDS = [
   "contact_missing", "contact_ok",
   "pixel_before_consent_suspected", "pixel_with_cmp", "pixel_not_found_in_html",
   "pixel_before_consent_verified", "pixel_no_fire_before_consent_verified",
+  "viewport_missing", "viewport_zoom_blocked", "viewport_ok",
   "page_heavy", "blocking_scripts", "copyright_stale",
   "robots_disallows_check", "fetch_failed",
 ];

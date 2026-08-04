@@ -71,13 +71,15 @@ function fireClientPixels(eventId: string): boolean {
   return fired;
 }
 
-export function LeadForm({ data, pageId, theme, preview = false, defaultDial = FALLBACK_DIAL }: {
+export function LeadForm({ data, pageId, theme, preview = false, defaultDial = FALLBACK_DIAL, privacyHref }: {
   data: LeadFormData;
   pageId: string;
   theme: RendererTheme;
   preview?: boolean;
   /** 服务端按访客 IP（x-vercel-ip-country）解析出的国码，作为选择器初值。 */
   defaultDial?: DialCode;
+  /** 隐私政策子页地址；缺省不渲染表单旁的告知行（见渲染处注释）。 */
+  privacyHref?: string;
 }) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [honey, setHoney] = useState("");
@@ -254,6 +256,17 @@ export function LeadForm({ data, pageId, theme, preview = false, defaultDial = F
           >
             {preview ? "Preview only" : status === "sending" ? "Sending…" : data.submitText}
           </button>
+          {/*
+            收集点告知：GDPR 要求在采集处（而非只在页脚）说明去向，Meta / TikTok
+            的线索类广告也常因此被拒。只在拿得到政策链接时渲染 —— 没有链接的
+            「见隐私政策」是空口承诺，比不写更糟。
+          */}
+          {privacyHref ? (
+            <p className="text-center text-xs text-slate-500">
+              By submitting this form you agree to our{" "}
+              <a href={privacyHref} className="underline underline-offset-2 hover:text-slate-700">Privacy Policy</a>.
+            </p>
+          ) : null}
           {preview ? <p className="text-center text-xs text-slate-500">Preview mode — submissions are disabled until the page is published.</p> : null}
           {status === "error" ? <p className="text-center text-sm text-red-600">{errorMsg}</p> : null}
         </form>

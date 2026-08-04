@@ -126,6 +126,39 @@ export function detectTrackers(html: string): TrackerDetection {
   };
 }
 
+/**
+ * 移动端可读性：viewport 声明。
+ *
+ * 只判这一项，因为它是**静态 HTML 里唯一客观可核实**的移动端事实。字号要靠
+ * 渲染后计算样式才算得准（外链 CSS、Tailwind 类名都在这一层之外），静态猜字号
+ * 只会造出一条不可靠的检查项 —— 报告的全部价值在于每一条都追溯到可核实的事实。
+ *
+ * 判据来自平台明文：TikTok 要求页面在移动端不放大就能读；Google 的着陆页体验
+ * 同样按移动端可用性判。没有 viewport 的页在手机上会以桌面宽度缩放渲染，
+ * 正文小到必须双指放大；`user-scalable=no` / `maximum-scale=1` 则是反过来
+ * 把放大这条退路也堵死（同时也是无障碍问题）。
+ */
+export interface ViewportDetection {
+  /** 是否有 viewport meta。 */
+  present: boolean;
+  /** 是否禁止了缩放（user-scalable=no 或 maximum-scale<=1）。 */
+  zoomBlocked: boolean;
+}
+
+const VIEWPORT_RE = /<meta\b[^>]*\bname=["']viewport["'][^>]*>/i;
+const CONTENT_RE = /\bcontent=["']([^"']*)["']/i;
+
+export function detectViewport(html: string): ViewportDetection {
+  const tag = html.match(VIEWPORT_RE)?.[0];
+  if (!tag) return { present: false, zoomBlocked: false };
+  const content = (tag.match(CONTENT_RE)?.[1] ?? "").toLowerCase();
+  const maxScale = Number(content.match(/maximum-scale\s*=\s*([\d.]+)/)?.[1]);
+  const zoomBlocked =
+    /user-scalable\s*=\s*(no|0)\b/.test(content) ||
+    (Number.isFinite(maxScale) && maxScale <= 1);
+  return { present: true, zoomBlocked };
+}
+
 const SCRIPT_SRC_RE = /<script\b([^>]*)\bsrc=["'][^"']+["']([^>]*)>/gi;
 
 /** 会阻塞渲染的同步外链脚本数量（带 async / defer 的不算）。 */
