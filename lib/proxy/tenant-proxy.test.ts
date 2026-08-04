@@ -59,6 +59,50 @@ describe("handleTenancy 租户改写既有行为", () => {
   });
 });
 
+// 政策子页：四家平台都会点开落地页的隐私政策与条款，故它必须是真地址而非页脚文本。
+describe("handleTenancy 政策子页", () => {
+  it("/privacy → 根页的政策页", async () => {
+    const res = await handleTenancy(makeReq("tenant.example", "/privacy"));
+    expect(rewriteTarget(res)).toContain("/p/solar-page/privacy");
+  });
+
+  it("/terms → 根页的条款页", async () => {
+    const res = await handleTenancy(makeReq("tenant.example", "/terms"));
+    expect(rewriteTarget(res)).toContain("/p/solar-page/terms");
+  });
+
+  it("子路径页的政策挂在自己路径下，不串到根页", async () => {
+    const res = await handleTenancy(makeReq("tenant.example", "/invisalign/privacy"));
+    expect(rewriteTarget(res)).toContain("/p/dental-page/privacy");
+  });
+
+  it("透传的是落地页所在路径（政策页据此生成返回链接）", async () => {
+    const res = await handleTenancy(makeReq("tenant.example", "/invisalign/terms"));
+    expect(res?.headers.get("x-middleware-request-x-tenant-path")).toBe("/invisalign");
+  });
+
+  it("落地页所在路径未绑定时，其政策路径同样 404", async () => {
+    const res = await handleTenancy(makeReq("tenant.example", "/whitening/privacy"));
+    expect(res?.status).toBe(404);
+  });
+
+  it("客户真把某张页发布在 /privacy 时，那张页优先（精确绑定先于政策兜底）", async () => {
+    ROUTES["/privacy"] = "custom-privacy-page";
+    try {
+      const res = await handleTenancy(makeReq("tenant.example", "/privacy"));
+      expect(rewriteTarget(res)).toContain("/p/custom-privacy-page");
+      expect(rewriteTarget(res)).not.toContain("/privacy/privacy");
+    } finally {
+      delete ROUTES["/privacy"];
+    }
+  });
+
+  it("形近路径不被当成政策页", async () => {
+    const res = await handleTenancy(makeReq("tenant.example", "/privacy-policy"));
+    expect(res?.status).toBe(404);
+  });
+});
+
 describe("handleTenancy 多路径解析", () => {
   it("根路径 → 根页", async () => {
     const res = await handleTenancy(makeReq("tenant.example", "/"));
