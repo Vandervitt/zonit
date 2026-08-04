@@ -18,15 +18,16 @@ export interface PagePerformanceRow {
 }
 
 export function PageComparison({
-  days,
+  rangeQuery,
   selectedPageId,
   onSelect,
 }: {
-  days: number;
+  /** 已拼好的区间参数（days=30 或 from=..&to=..），与主报表共用同一段。 */
+  rangeQuery: string;
   selectedPageId: string;
   onSelect: (pageId: string) => void;
 }) {
-  const { data, isLoading } = useSWR<PagePerformanceRow[]>(`${ApiRoutes.AnalyticsPages}?days=${days}`);
+  const { data, isLoading } = useSWR<PagePerformanceRow[]>(`${ApiRoutes.AnalyticsPages}?${rangeQuery}`);
   const rows = data ?? [];
   const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 

@@ -1,13 +1,13 @@
 // e2e/capi.spec.ts
 // CAPI：配了凭据 + lead 提交（带 event_id, consent=true）→ capi_events 落库并(经 fake)标记 sent；payload 中 email 为哈希非明文。
 // 直接 POST /api/leads（dev 同源）；凭据用 pg 直插（绕过登录态的凭据写接口）。
-import { test, expect, request as pwRequest } from "@playwright/test";
+import { request as pwRequest } from "@playwright/test";
+import { test, expect } from "./helpers/app-pool";
 import { Pool } from "pg";
 import { createHash } from "node:crypto";
 import { config as loadEnv } from "dotenv";
 // 两级凭据的解析顺序全在 SQL 里，直接用应用侧实现对真实库跑一次。
 import { getCredentials, listConfiguredProviders } from "@/lib/capi/credentials";
-import appPool from "@/lib/db";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -47,7 +47,6 @@ test.describe("CAPI 服务端回传", () => {
   test.afterAll(async () => {
     if (devUserId) await pool.query(`DELETE FROM landing_pages WHERE user_id = $1`, [devUserId]);
     await pool.end();
-    await appPool.end(); // 应用侧连接池（凭据解析用例用）同样要关，否则进程不退出
   });
 
   test("lead 提交带 event_id → capi_events 落库（哈希 PII）", async () => {
