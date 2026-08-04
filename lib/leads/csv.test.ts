@@ -5,14 +5,15 @@ const rows: LeadCsvRow[] = [
   {
     page_name: "页面A", name: "Tom", email: "t@x.com", phone: "", whatsapp: "", telegram: "", message: "hi, there",
     channel: "form", utm_source: "fb", utm_medium: "cpc", utm_campaign: "jul", utm_content: "video_a", utm_term: "",
-    gclid: "", fbclid: "fb.1.abc", ttclid: "", created_at: "2026-06-23T00:00:00Z",
+    gclid: "", fbclid: "fb.1.abc", ttclid: "", note: "下周再联系", tags: "已报价|VIP",
+    created_at: "2026-06-23T00:00:00Z",
   },
 ];
 
 describe("leadsToCsv", () => {
   it("导出全部归因列——导出的用途就是拿去和广告后台对账", () => {
     const header = leadsToCsv(rows).split("\n")[0];
-    for (const col of ["utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid", "fbclid", "ttclid"]) {
+    for (const col of ["utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid", "fbclid", "ttclid", "note", "tags"]) {
       expect(header).toContain(col);
     }
   });

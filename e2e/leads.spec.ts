@@ -382,6 +382,80 @@ test.describe("线索闭环", () => {
     await pool.query(`DELETE FROM leads WHERE page_id = $1`, [pageId]);
   });
 
+  // 备注/标签/归档的价值全在「记下的东西还在」。单测只断言 SQL 形状，
+  // 落库、隔离与默认视图的真实行为要在库上验。
+  test("跟进四件套：备注与标签落库、归档从默认视图收起、导出带上", async ({ page }) => {
+    await pool.query(`DELETE FROM leads WHERE page_id = $1`, [pageId]);
+    const ins = await pool.query(
+      `INSERT INTO leads (page_id, payload, channel) VALUES
+         ($1, '{"name":"Keep","whatsapp":"+15550000101"}'::jsonb, 'form'),
+         ($1, '{"name":"Done","whatsapp":"+15550000102"}'::jsonb, 'form')
+       RETURNING id`, [pageId]);
+    const [keepId, doneId] = ins.rows.map((r) => r.id as string);
+
+    await page.goto("/login");
+    await page.getByRole("button", { name: /Dev Login/i }).click();
+    await page.waitForURL("**/admin", { timeout: 30_000 });
+
+    // 写备注与标签；标签的重复项与空白项由服务端规整掉
+    const patched = await page.request.patch(`/api/leads/${keepId}`, {
+      data: { note: "  下周一再联系  ", tags: [" 已报价 ", "已报价", "", "VIP"] },
+    });
+    expect(patched.status()).toBe(200);
+    const saved = await patched.json();
+    expect(saved.note).toBe("下周一再联系");
+    expect(saved.tags).toEqual(["已报价", "VIP"]);
+
+    // 改备注不该顺手清空标签
+    await page.request.patch(`/api/leads/${keepId}`, { data: { note: "改了备注" } });
+    const afterNote = await (await page.request.get(`/api/leads?limit=50&offset=0`)).json();
+    const keepRow = afterNote.rows.find((r: { id: string }) => r.id === keepId);
+    expect(keepRow.tags).toEqual(["已报价", "VIP"]);
+    expect(keepRow.note).toBe("改了备注");
+
+    // 标签候选来自本租户用过的标签
+    const tagList = await (await page.request.get("/api/leads/tags")).json();
+    expect(tagList).toEqual(expect.arrayContaining(["VIP", "已报价"]));
+
+    // 按标签筛选
+    const byTag = await (await page.request.get("/api/leads?tag=VIP&limit=50&offset=0")).json();
+    expect(byTag.total).toBe(1);
+    expect(byTag.rows[0].id).toBe(keepId);
+
+    // 归档：从默认视图收起，但进得了归档视图（线索是花钱买来的，从不删除）
+    await page.request.patch(`/api/leads/${doneId}`, { data: { archived: true } });
+    const active = await (await page.request.get("/api/leads?limit=50&offset=0")).json();
+    expect(active.rows.map((r: { id: string }) => r.id)).toEqual([keepId]);
+    const archived = await (await page.request.get("/api/leads?archived=1&limit=50&offset=0")).json();
+    expect(archived.rows.map((r: { id: string }) => r.id)).toEqual([doneId]);
+
+    // 取消归档后回到默认视图
+    await page.request.patch(`/api/leads/${doneId}`, { data: { archived: false } });
+    expect((await (await page.request.get("/api/leads?limit=50&offset=0")).json()).total).toBe(2);
+
+    // 导出带上备注与标签（标签用 | 分隔，避免被 CSV 的逗号转义搅成一团）
+    const csv = await (await page.request.get(`/api/leads/export?pageId=${pageId}`)).text();
+    expect(csv.split("\n")[0]).toContain("note");
+    expect(csv).toContain("改了备注");
+    expect(csv).toContain("已报价|VIP");
+
+    // 别人的线索改不了
+    const other = await pool.query(
+      `INSERT INTO users (email, name, plan) VALUES ('other-note@localhost','Other','free')
+       ON CONFLICT (email) DO UPDATE SET plan='free' RETURNING id`);
+    const theirPage = await pool.query(
+      `INSERT INTO landing_pages (user_id, name, data) VALUES ($1,'别人的页','{}'::jsonb) RETURNING id`,
+      [other.rows[0].id]);
+    const theirLead = await pool.query(
+      `INSERT INTO leads (page_id, payload, channel) VALUES ($1,'{"name":"X","whatsapp":"+15550000999"}'::jsonb,'form') RETURNING id`,
+      [theirPage.rows[0].id]);
+    const forbidden = await page.request.patch(`/api/leads/${theirLead.rows[0].id}`, { data: { note: "越权" } });
+    expect(forbidden.status()).toBe(404);
+    await pool.query(`DELETE FROM users WHERE id = $1`, [other.rows[0].id]);
+
+    await pool.query(`DELETE FROM leads WHERE page_id = $1`, [pageId]);
+  });
+
   // 提醒的筛选口径全在 SQL 里，单测只能断言参数，故在真实库上验一次。
   test("未读提醒：只挑静置超 48h、未读、未提醒过、且不早于 30 天的线索", async () => {
     const seed = async (payload: object, hoursAgo: number, isRead = false, nudged = false) => {

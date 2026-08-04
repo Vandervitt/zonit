@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
   const leads = await listLeads(session.user.id, {
     pageId: searchParams.get("pageId") ?? undefined,
     unreadOnly: searchParams.get("unreadOnly") === "1",
+    tag: searchParams.get("tag") ?? undefined,
+    archived: searchParams.get("archived") === "1",
   });
   const rows: LeadCsvRow[] = leads.map((l) => ({
     page_name: l.page_name,
@@ -32,6 +34,9 @@ export async function GET(request: NextRequest) {
     gclid: l.gclid ?? "",
     fbclid: l.fbclid ?? "",
     ttclid: l.ttclid ?? "",
+    note: l.note ?? "",
+    // 标签在单元格里用「|」分隔：逗号会被 CSV 转义成引号包裹，看着像一个长字符串
+    tags: (l.tags ?? []).join("|"),
     created_at: l.created_at,
   }));
   const csv = leadsToCsv(rows);

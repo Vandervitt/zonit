@@ -29,6 +29,8 @@ export enum ApiRoutes {
   UnsplashSearch = '/api/unsplash/search',
   LandingPages = '/api/landing-pages',
   Leads = '/api/leads',
+  /** 本租户用过的线索标签（筛选器候选）。 */
+  LeadTags = '/api/leads/tags',
   Feedback = '/api/feedback',
   AiUsage = '/api/ai/usage',
   Milestones = '/api/milestones',
@@ -77,10 +79,14 @@ export const apiLandingCheckPath = (id: string) => `/api/landing-pages/${id}/che
 
 export const apiLeadPath = (id: string) => `/api/leads/${id}`;
 /** CSV 导出。带上列表当前的筛选，导出结果与所见一致。 */
-export const apiLeadsExportPath = (filter: { pageId?: string; unreadOnly?: boolean } = {}) => {
+export const apiLeadsExportPath = (
+  filter: { pageId?: string; unreadOnly?: boolean; tag?: string; archived?: boolean } = {},
+) => {
   const q = new URLSearchParams();
   if (filter.pageId) q.set("pageId", filter.pageId);
   if (filter.unreadOnly) q.set("unreadOnly", "1");
+  if (filter.tag) q.set("tag", filter.tag);
+  if (filter.archived) q.set("archived", "1");
   const qs = q.toString();
   return `/api/leads/export${qs ? `?${qs}` : ""}`;
 };

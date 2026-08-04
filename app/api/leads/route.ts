@@ -159,7 +159,11 @@ export async function GET(request: NextRequest) {
   // 分页是必需的而不是优化：线索只增不减，跑久了的账号一次全量拉取会拖垮列表。
   const limit = Math.min(Math.max(Number(searchParams.get("limit") ?? 50) || 50, 1), 200);
   const offset = Math.max(Number(searchParams.get("offset") ?? 0) || 0, 0);
-  const filter = { pageId, unreadOnly };
+  const filter = {
+    pageId, unreadOnly,
+    tag: searchParams.get("tag") ?? undefined,
+    archived: searchParams.get("archived") === "1",
+  };
   const [rows, total] = await Promise.all([
     listLeads(session.user.id, { ...filter, limit, offset }),
     countLeads(session.user.id, filter),
