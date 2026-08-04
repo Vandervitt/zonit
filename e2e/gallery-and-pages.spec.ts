@@ -39,21 +39,38 @@ test.describe("画廊筛选 + 落地页复制/改名", () => {
     await pool.end();
   });
 
-  test("画廊三维筛选 + 搜索", async ({ page }) => {
+  // 打开「新建」模板弹窗。按钮在 hydration 完成前就已可点，过早点击会静默丢失，
+  // 故重试「点击 + 断言弹窗已开」而不是赌固定等待。
+  async function openTemplateDialog(page: import("@playwright/test").Page) {
+    await page.goto("/admin/landing-pages");
+    const dialog = page.getByRole("dialog");
+    await expect(async () => {
+      await page.getByRole("button", { name: "新建" }).click();
+      await expect(dialog).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    return dialog;
+  }
+
+  test("模板弹窗内搜索筛选", async ({ page }) => {
     await page.goto("/login");
     await page.getByRole("button", { name: /Dev Login/i }).click();
     await page.waitForURL("**/admin", { timeout: 30_000 });
 
-    await page.goto("/admin/editor");
+    // ⚠️ 模板画廊已不是独立路由：原来的 /admin/editor 画廊页早已移除（现在只有
+    // /admin/editor/[id]），画廊改为落地页列表「新建」唤起的弹窗。本用例曾长期
+    // 因为访问那条已删路由而红着。
+    const dialog = await openTemplateDialog(page);
+
     // 初始全量：至少能看到 Aurae Skincare
-    await expect(page.getByText("Aurae Skincare")).toBeVisible();
+    await expect(dialog.getByText("Aurae Skincare")).toBeVisible();
     // 搜索 footwear → 命中 Atlas Footwear，Aurae 消失
-    await page.getByPlaceholder("搜索模板名称…").fill("footwear");
-    await expect(page.getByText("Atlas Footwear")).toBeVisible();
-    await expect(page.getByText("Aurae Skincare")).toHaveCount(0);
+    const search = dialog.getByRole("searchbox", { name: "搜索模板名称" });
+    await search.fill("footwear");
+    await expect(dialog.getByText("Atlas Footwear")).toBeVisible();
+    await expect(dialog.getByText("Aurae Skincare")).toHaveCount(0);
     // 清空搜索框后恢复
-    await page.getByPlaceholder("搜索模板名称…").fill("");
-    await expect(page.getByText("Aurae Skincare")).toBeVisible();
+    await search.fill("");
+    await expect(dialog.getByText("Aurae Skincare")).toBeVisible();
   });
 
   test("复制为草稿 + 行内改名", async ({ page }) => {
@@ -61,9 +78,10 @@ test.describe("画廊筛选 + 落地页复制/改名", () => {
     await page.getByRole("button", { name: /Dev Login/i }).click();
     await page.waitForURL("**/admin", { timeout: 30_000 });
 
-    // 先建一页（画廊首张「空白开始」）
-    await page.goto("/admin/editor");
-    await page.getByRole("button", { name: "空白开始" }).first().click();
+    // 先建一页（模板弹窗「直接编辑」；「空白开始」入口已随画廊页一并移除）
+    const dialog = await openTemplateDialog(page);
+    await dialog.getByRole("searchbox", { name: "搜索模板名称" }).fill("Aurae Skincare");
+    await dialog.getByRole("button", { name: "直接编辑" }).first().click();
     await page.waitForURL(/\/admin\/editor\/[^/]+$/, { timeout: 30_000 });
 
     // 列表：复制 → 出现「副本」草稿

@@ -5,6 +5,7 @@
 import { test, expect } from "@playwright/test";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -57,14 +58,19 @@ test.describe("邮箱验证码免密登录", () => {
   test("新邮箱首次验证码登录即建号并进入后台", async ({ page }) => {
     await page.goto(`${BASE}/login`);
 
-    await page.getByLabel("邮箱").first().fill(UI_EMAIL);
-    await page.getByRole("button", { name: "发送验证码" }).click();
+    // ⚠️ 文案从字典取，不写死中文：登录页国际化（PR#115）后 /login 默认是**英文**面，
+    // 原用例的中文 label 从那时起就再也匹配不上。字典是唯一事实源，改文案不会再让
+    // 这条用例悄悄失效。
+    const otp = getDictionary("en").auth.otp;
+
+    await page.getByLabel(otp.emailLabel).first().fill(UI_EMAIL);
+    await page.getByRole("button", { name: otp.sendCode }).click();
 
     // dev 环境后端回传验证码，前端自动回填到验证码输入框。
-    const codeInput = page.getByLabel("验证码");
+    const codeInput = page.getByLabel(otp.codeLabel);
     await expect(codeInput).toHaveValue(/^\d{6}$/, { timeout: 10_000 });
 
-    await page.getByRole("button", { name: "登录 / 注册" }).click();
+    await page.getByRole("button", { name: otp.submit }).click();
 
     await page.waitForURL(/\/admin/, { timeout: 15_000 });
 

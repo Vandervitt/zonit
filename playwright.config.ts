@@ -13,6 +13,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: 1,
+  // 单条用例 60s。默认 30s 在**全量**跑时不够：webServer 是 next dev，每条用例第一次
+  // 访问某路由都要现编译，排在后面的用例常被编译耗时吃掉整个预算 —— 单独跑绿、全量跑红
+  // 的假失败就是这么来的（2026-08-04 修既有失败时定位）。个别更重的用例仍可自行 setTimeout。
+  timeout: 60_000,
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:3001',

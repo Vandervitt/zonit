@@ -59,23 +59,35 @@ test.describe("素材库 Unsplash 导入", () => {
         },
       }),
     );
-    await page.route("**/api/media/unsplash", (route) =>
-      route.fulfill({
-        status: 201,
-        json: {
-          id: "mnew",
-          userId: devUserId,
-          url: "https://blob.example/new.jpg",
-          filename: "unsplash-x.jpg",
-          type: "image",
-          size: 3,
-          source: "unsplash",
-          creditName: "E2E Author",
-          creditUrl: "https://unsplash.com/@e2e?utm_source=zap_bridge&utm_medium=referral",
-          createdAt: new Date().toISOString(),
-        },
-      }),
+    // ⚠️ 必须同时 stub 列表接口：素材库用 SWR 的 mutate(optimistic) 更新网格，随后会
+    // **重新拉取** /api/media。只 stub POST 的话，导入项在 revalidate 后被真实（空）
+    // 列表覆盖 —— 断言时有时无，全量跑时最容易踩到。这里用一个本地数组充当服务端状态：
+    // GET 读它，POST 往里塞，行为与真实后端一致，断言才是确定的。
+    const serverMedia: unknown[] = [];
+    const imported = {
+      id: "mnew",
+      userId: devUserId,
+      url: "https://blob.example/new.jpg",
+      filename: "unsplash-x.jpg",
+      type: "image",
+      size: 3,
+      source: "unsplash",
+      creditName: "E2E Author",
+      creditUrl: "https://unsplash.com/@e2e?utm_source=zap_bridge&utm_medium=referral",
+      createdAt: new Date().toISOString(),
+    };
+    await page.route("**/api/media?**", (route) =>
+      route.fulfill({ json: serverMedia }),
     );
+    await page.route("**/api/media", (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({ json: serverMedia })
+        : route.continue(),
+    );
+    await page.route("**/api/media/unsplash", (route) => {
+      serverMedia.unshift(imported);
+      return route.fulfill({ status: 201, json: imported });
+    });
 
     // 登录
     await page.goto("/login");
@@ -91,7 +103,8 @@ test.describe("素材库 Unsplash 导入", () => {
     // 点击导入（stub 返回单张，署名 E2E Author）
     await page.getByRole("button", { name: /添加 Unsplash 图片 by E2E Author/ }).click();
 
-    // 关闭弹窗，仅剩网格；网格署名角标是带 creditUrl 的链接，可唯一定位
+    // 导入成功提示出现后再关弹窗，避免在请求飞行中按 Escape 打断导入。
+    await expect(page.getByText("已添加到素材库")).toBeVisible({ timeout: 10_000 });
     await page.keyboard.press("Escape");
     await expect(page.getByRole("link", { name: "E2E Author" })).toBeVisible({ timeout: 10_000 });
   });

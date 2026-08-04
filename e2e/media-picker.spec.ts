@@ -5,6 +5,7 @@
 import { test, expect } from "@playwright/test";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
+import { createPageFromTemplate, devLogin, selectPanel } from "./helpers/editor";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -41,14 +42,11 @@ test.describe("编辑器选图体验", () => {
   });
 
   test("选图弹窗三 Tab + Unsplash demo 提示", async ({ page }) => {
-    await page.goto("/login");
-    await page.getByRole("button", { name: /Dev Login/i }).click();
-    await page.waitForURL("**/admin", { timeout: 30_000 });
+    await devLogin(page);
+    await createPageFromTemplate(page);
 
-    // 建一页并进编辑器
-    await page.goto("/admin/editor");
-    await page.getByRole("button", { name: "空白开始" }).first().click();
-    await page.waitForURL(/\/admin\/editor\/[^/]+$/, { timeout: 30_000 });
+    // 新建页默认选中「联系方式」面板，先切到首屏才有背景图字段。
+    await selectPanel(page, /首屏 Hero/);
 
     // Hero 背景图字段默认折叠（Optional 开关关闭），先勾选启用以露出「选图」按钮。
     // 参考 HeroForm.tsx：背景图字段 label 为「背景图（缺省用主题色兜底）」。
@@ -64,10 +62,17 @@ test.describe("编辑器选图体验", () => {
     await expect(page.getByRole("button", { name: "上传" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Unsplash" })).toBeVisible();
 
-    // 切 Unsplash，搜索 → 本地无 key 应返回 demo 并显示「未配置 Unsplash」提示
+    // 切 Unsplash 并搜索。
+    // ⚠️ 断言必须覆盖两种落点：配了 UNSPLASH key 的机器会返回真实结果，没配的返回
+    // demo 提示。原来只断言「未配置 Unsplash」，于是在**有** key 的开发机上必红
+    // ——这是环境依赖，不是产品缺陷。这里只要求搜索有确定结果、且不是失败态。
     await page.getByRole("button", { name: "Unsplash" }).click();
     await page.getByPlaceholder(/搜索 Unsplash/).fill("beach");
     await page.getByRole("button", { name: "搜索" }).click();
-    await expect(page.getByText(/未配置 Unsplash/)).toBeVisible({ timeout: 15_000 });
+    const settled = page
+      .getByText(/未配置 Unsplash/)
+      .or(page.getByRole("button", { name: /添加 Unsplash 图片/ }).first());
+    await expect(settled.first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("搜索失败，请重试")).toHaveCount(0);
   });
 });

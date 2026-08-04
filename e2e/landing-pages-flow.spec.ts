@@ -64,10 +64,20 @@ test.describe('落地页多租户：发布渲染与取消发布', () => {
     landingPageId = lp.rows[0].id;
 
     // 3) 绑定一条已启用、已验证的自定义域名到该落地页。
-    await pool.query(
+    const domain = await pool.query(
       `INSERT INTO domains (user_id, domain, enabled, verified, landing_page_id)
-       VALUES ($1, $2, true, true, $3)`,
+       VALUES ($1, $2, true, true, $3)
+       RETURNING id`,
       [E2E_USER_ID, CUSTOM_DOMAIN, landingPageId],
+    );
+
+    // 4) 发布位置写进 domain_routes。
+    // ⚠️ 多路径发布（迁移 036）之后，租户解析只认这张表 —— domains.landing_page_id
+    // 仍在双写但已不参与 resolveTenantRoute。只插 domains 的 fixture 会稳定 404，
+    // 本用例曾因此长期红着。
+    await pool.query(
+      `INSERT INTO domain_routes (domain_id, path, landing_page_id) VALUES ($1, '/', $2)`,
+      [domain.rows[0].id, landingPageId],
     );
   });
 

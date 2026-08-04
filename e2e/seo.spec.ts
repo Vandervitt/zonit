@@ -43,10 +43,15 @@ test.describe("SEO 元数据（自有域）", () => {
       [E2E_USER_ID, SLUG, SLUG, JSON.stringify(draftWithSeo)],
     );
     landingPageId = lp.rows[0].id;
-    await pool.query(
+    const domain = await pool.query(
       `INSERT INTO domains (user_id, domain, enabled, verified, landing_page_id)
-       VALUES ($1, $2, true, true, $3)`,
+       VALUES ($1, $2, true, true, $3) RETURNING id`,
       [E2E_USER_ID, CUSTOM_DOMAIN, landingPageId],
+    );
+    // 发布位置必须写进 domain_routes：多路径发布（迁移 036）后租户解析只认这张表。
+    await pool.query(
+      `INSERT INTO domain_routes (domain_id, path, landing_page_id) VALUES ($1, '/', $2)`,
+      [domain.rows[0].id, landingPageId],
     );
   });
 
