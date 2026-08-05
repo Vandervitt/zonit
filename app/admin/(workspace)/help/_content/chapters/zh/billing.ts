@@ -1,4 +1,4 @@
-import type { HelpChapterData } from "../types";
+import type { HelpChapterData } from "../../types";
 
 export const billing: HelpChapterData = {
   slug: "billing",
@@ -13,13 +13,14 @@ export const billing: HelpChapterData = {
           t: "table",
           head: ["权益", "Free（$0）", "Starter（$5.99/月）", "Pro（$19.99/月）", "Agency（$49.99/月）"],
           rows: [
-            ["落地页数量", "1", "3", "20", "无限"],
+            ["落地页数量", "1", "5", "20", "无限"],
             ["自定义域名", "0", "1", "5", "无限"],
             ["AI 整页生成 / 月", "3", "15", "80", "300"],
             ["AI 文案改写 / 月", "10", "100", "无限", "无限"],
             ["全量行业模板", "✓", "✓", "✓", "✓"],
             ["可视化编辑器 + 自动保存", "✓", "✓", "✓", "✓"],
             ["基础追踪（1× Meta Pixel）", "✓", "✓", "✓", "✓"],
+            ["平台地址发布（免 DNS）", "✓", "✓", "✓", "✓"],
             ["发布到自有域名", "—", "✓", "✓", "✓"],
             ["去品牌水印", "—", "—", "✓", "✓"],
             ["多平台追踪（Meta/TikTok/Google）+ CAPI", "—", "—", "✓", "✓"],
@@ -32,6 +33,7 @@ export const billing: HelpChapterData = {
           items: [
             "新注册账号自动获得 Pro 全功能试用 7 天，到期自动回到 Free（无需信用卡，页面与数据保留）。",
             "Free / Starter 套餐的页面底部会显示平台水印，Pro 及以上自动移除。",
+            "Free 也能发布——用平台分配的地址即可，只是不能挂自己的品牌域名。",
             "怎么选：单页试水选 Starter；正经投放（需要 CAPI 归因与线索自动化）选 Pro；多客户 / 多页面矩阵或需要反同质化选 Agency。",
           ],
         },

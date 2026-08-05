@@ -37,4 +37,12 @@ export const shell = {
     failed: "Could not submit your feedback. Please try again shortly.",
     networkFailed: "Could not submit your feedback. Check your connection and try again.",
   },
+
+  help: {
+    title: "Help centre",
+    intro:
+      "The complete guide, from building a page to collecting leads. New here? Start with “Getting started” and read the main path (the first six chapters) in order.",
+    overview: "Help home",
+    noAnswer: "Didn't find your answer? Email support@zapbridge.tech with the page link and a screenshot of the problem, and we'll come back to you as soon as we can.",
+  },
 };

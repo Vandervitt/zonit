@@ -1,4 +1,4 @@
-import type { HelpChapterData } from "../types";
+import type { HelpChapterData } from "../../types";
 
 export const account: HelpChapterData = {
   slug: "account",
@@ -31,6 +31,7 @@ export const account: HelpChapterData = {
             ["线索邮件通知", "设置 → 线索通知", "新线索实时发送到注册邮箱，开关即生效"],
             ["每周获客周报", "设置 → 线索通知", "每周一汇总各页曝光 / CTA 点击 / 线索（默认开启，可关闭）"],
             ["线索 Webhook", "设置 → 线索通知", "Pro 及以上；配置详见「线索管理」章"],
+            ["界面语言", "设置 → 语言", "切换后台界面与平台发给你的邮件的语言（中文 / English）"],
             ["套餐与订阅", "账户与计费", "升级、发票、取消订阅"],
           ],
         },

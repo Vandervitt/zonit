@@ -1,4 +1,4 @@
-import type { HelpChapterData } from "../types";
+import type { HelpChapterData } from "../../types";
 
 export const editor: HelpChapterData = {
   slug: "editor",
@@ -175,7 +175,7 @@ export const editor: HelpChapterData = {
       blocks: [
         {
           t: "p",
-          text: "顶栏「分享预览」生成一条草稿预览链接，可发给同事或客户在发布前查看效果。预览链接不等于发布：对外正式上线仍需绑定域名后点「发布」。",
+          text: "顶栏「分享预览」生成一条草稿预览链接，可发给同事或客户在发布前查看效果。预览链接不等于发布：对外正式上线仍需点「发布」（绑定自有域名，或直接用平台提供的地址）。",
         },
       ],
     },

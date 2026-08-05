@@ -1,4 +1,4 @@
-import type { HelpChapterData } from "../types";
+import type { HelpChapterData } from "../../types";
 
 export const gettingStarted: HelpChapterData = {
   slug: "getting-started",
@@ -24,7 +24,7 @@ export const gettingStarted: HelpChapterData = {
         {
           t: "callout",
           tone: "info",
-          text: "新注册账号自动获得 Pro 全功能试用 7 天（含发布、CAPI、去水印），可完整跑通上线与收线索；试用到期回到 Free 后，发布需要升级到含域名额度的套餐（Starter 及以上）。概览页的「4 步上线」清单会跟着你的进度打勾。",
+          text: "新注册账号自动获得 Pro 全功能试用 7 天（含发布、CAPI、去水印），可完整跑通上线与收线索；试用到期回到 Free 后，发布到自有域名需要含域名额度的套餐（Starter 及以上），平台地址仍可继续用。概览页的「4 步上线」清单会跟着你的进度打勾。",
         },
       ],
     },
@@ -61,8 +61,8 @@ export const gettingStarted: HelpChapterData = {
           t: "table",
           head: ["关键差异", "Free", "Starter", "Pro", "Agency"],
           rows: [
-            ["落地页数量", "1", "3", "20", "无限"],
-            ["自定义域名（发布必需）", "0（仅预览）", "1", "5", "无限"],
+            ["落地页数量", "1", "5", "20", "无限"],
+            ["自定义域名", "0（仅平台地址）", "1", "5", "无限"],
             ["AI 整页生成 / 月", "3", "15", "80", "300"],
             ["去品牌水印", "—", "—", "✓", "✓"],
             ["多平台追踪 + 服务端回传", "—", "—", "✓", "✓"],
