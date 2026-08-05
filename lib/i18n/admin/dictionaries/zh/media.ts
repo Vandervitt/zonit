@@ -7,6 +7,14 @@ export const media = {
   emptyHint: "还没有素材，点击 上传素材 开始",
 
   upload: { button: "上传素材", uploading: "上传中…", failed: "上传失败，请重试" },
+  uploadErrors: {
+    media_url_invalid: "非法的素材地址",
+    media_filename_invalid: "文件名无效",
+    media_type_unsupported: "仅支持图片和视频文件",
+    media_too_large: "文件超过大小上限",
+    media_upload_auth_failed: "上传授权失败",
+    media_unsplash_download_failed: "下载 Unsplash 图片失败",
+  },
   deleteConfirm: {
     title: (filename: string) => `确认删除"${filename}"？`,
     ok: "删除",

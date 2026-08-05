@@ -11,6 +11,37 @@ import {
 } from "@/lib/media-constraints";
 import type { MediaItem } from "@/lib/media-db";
 
+/**
+ * 把 uploadMedia / importUnsplashMedia 抛出的错误码翻成可展示文案。
+ *
+ * 未知码（或解析失败时的空串）一律走 fallback：与其把 media_url_invalid
+ * 这种内部标识丢给用户，不如给一句他能看懂的通用失败提示。
+ */
+export function uploadErrorText(
+  err: unknown,
+  fallback: string,
+  dict: Record<string, string>,
+): string {
+  const code = err instanceof Error ? err.message : "";
+  return dict[code] ?? fallback;
+}
+
+/**
+ * 取后端错误码（不是可展示文案）。
+ *
+ * 此前这里直接把服务端返回的中文原样抛给用户，等于把 UI 文案写在了 API 里——
+ * 后台改成双语后那些串永远是中文。现在服务端只回 ApiErrors 的码，
+ * 翻译交给调用点（它们已经拿得到字典）。解析失败时回空串，由调用点用兜底文案。
+ */
+async function errorCode(res: Response): Promise<string> {
+  try {
+    const data = await res.json();
+    return typeof data?.error === "string" ? data.error : "";
+  } catch {
+    return "";
+  }
+}
+
 export async function uploadMedia(file: File): Promise<MediaItem> {
   const kind = kindForContentType(file.type);
   if (!kind) {
@@ -38,16 +69,7 @@ export async function uploadMedia(file: File): Promise<MediaItem> {
       size: file.size,
     }),
   });
-  if (!res.ok) {
-    let msg = "上传失败";
-    try {
-      const data = await res.json();
-      if (data?.error) msg = data.error;
-    } catch {
-      // 忽略解析失败，用默认文案
-    }
-    throw new Error(msg);
-  }
+  if (!res.ok) throw new Error(await errorCode(res));
   return (await res.json()) as MediaItem;
 }
 
@@ -65,15 +87,6 @@ export async function importUnsplashMedia(input: UnsplashImportInput): Promise<M
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
-  if (!res.ok) {
-    let msg = "从 Unsplash 添加失败";
-    try {
-      const data = await res.json();
-      if (data?.error) msg = data.error;
-    } catch {
-      // 忽略解析失败，用默认文案
-    }
-    throw new Error(msg);
-  }
+  if (!res.ok) throw new Error(await errorCode(res));
   return (await res.json()) as MediaItem;
 }

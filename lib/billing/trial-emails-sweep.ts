@@ -41,6 +41,7 @@ export async function sweepTrialEmails(
         fallbackPlanLabel: PLANS[c.fallbackPlan].label,
         daysLeft: Math.max(1, Math.ceil((c.expiresAt.getTime() - now.getTime()) / DAY_MS)),
         appUrl,
+        locale: c.locale,
       });
       // 发送失败不标记：下次跑批仍在窗口内就会重试，出了窗口就作罢。
       // 宁可漏发也不要标记成功后无人再管。

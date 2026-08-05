@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
   const provider = await getActiveProvider();
   if (!provider.isConfigured()) {
-    return NextResponse.json({ error: "收款渠道未配置，请联系管理员" }, { status: 503 });
+    return NextResponse.json({ error: ApiErrors.BILLING_NOT_CONFIGURED }, { status: 503 });
   }
 
   const baseUrl = new URL(request.url).origin;

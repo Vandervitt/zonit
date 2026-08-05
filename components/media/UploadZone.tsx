@@ -1,5 +1,6 @@
 "use client";
 
+import { uploadErrorText } from "@/lib/media-upload";
 import { useRef, useState } from "react";
 import { Button, App } from "antd";
 import { UploadOutlined, LoadingOutlined } from "@ant-design/icons";
@@ -28,7 +29,7 @@ export function UploadZone({ onUploaded, compact = false, accept = "all" }: Uplo
       const item = await uploadMedia(file);
       onUploaded(item);
     } catch (e) {
-      void message.error(e instanceof Error ? e.message : t.upload.failed);
+      void message.error(uploadErrorText(e, t.upload.failed, t.uploadErrors));
     } finally {
       setUploading(false);
     }

@@ -10,13 +10,13 @@ import { setLeadEmailNotify, setLeadWebhookDelivery } from "./store";
 import { enqueueAndFlush } from "@/lib/webhooks/dispatch";
 
 interface OwnerCtx {
-  userId: string; email: string | null; pageName: string;
+  userId: string; email: string | null; locale: string | null; pageName: string;
   email_enabled: boolean; webhook_enabled: boolean; webhook_url: string | null;
 }
 
 async function getOwnerCtx(pageId: string): Promise<OwnerCtx | null> {
   const res = await pool.query(
-    `SELECT p.user_id, p.name AS page_name, u.email,
+    `SELECT p.user_id, p.name AS page_name, u.email, u.locale,
             COALESCE(s.email_enabled, TRUE) AS email_enabled,
             COALESCE(s.webhook_enabled, FALSE) AS webhook_enabled,
             s.webhook_url
@@ -29,7 +29,7 @@ async function getOwnerCtx(pageId: string): Promise<OwnerCtx | null> {
   const r = res.rows[0];
   if (!r) return null;
   return {
-    userId: r.user_id, email: r.email, pageName: r.page_name,
+    userId: r.user_id, email: r.email, locale: r.locale, pageName: r.page_name,
     email_enabled: r.email_enabled, webhook_enabled: r.webhook_enabled, webhook_url: r.webhook_url,
   };
 }
@@ -80,10 +80,11 @@ export async function notifyNewLead(input: NewLeadInput): Promise<void> {
 
   if (decision.email && ctx.email) {
     const to = ctx.email;
+    const locale = ctx.locale;
     // 邮件在响应之后发（不占访客等待），故结果也在这里回写。
     after(async () => {
       const r = await sendLeadNotificationEmail({
-        to, pageName: ctx.pageName, fields: input.fields, dashboardUrl: input.dashboardUrl,
+        to, pageName: ctx.pageName, fields: input.fields, dashboardUrl: input.dashboardUrl, locale,
       });
       if (!leadId) return;
       const ok = "success" in r && r.success;

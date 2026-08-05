@@ -34,4 +34,13 @@ export const ApiErrors = {
   COMPANY_LEGAL_NAME_REQUIRED: 'company_legal_name_required',
   /** 该经营主体仍被落地页引用，删除会让那些页的页脚当场少掉公司信息。 */
   COMPANY_PROFILE_IN_USE: 'company_profile_in_use',
+  /* ---- 素材上传 ---- */
+  MEDIA_URL_INVALID: 'media_url_invalid',
+  MEDIA_FILENAME_INVALID: 'media_filename_invalid',
+  MEDIA_TYPE_UNSUPPORTED: 'media_type_unsupported',
+  MEDIA_TOO_LARGE: 'media_too_large',
+  MEDIA_UPLOAD_AUTH_FAILED: 'media_upload_auth_failed',
+  MEDIA_UNSPLASH_DOWNLOAD_FAILED: 'media_unsplash_download_failed',
+  /** 收款渠道未配置（缺 env），属部署问题而非用户错误。 */
+  BILLING_NOT_CONFIGURED: 'billing_not_configured',
 } as const;

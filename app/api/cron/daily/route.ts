@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
         totalCount: n.totalCount,
         dashboardUrl: `${appUrl}${Routes.Leads}`,
         settingsUrl: `${appUrl}${Routes.Settings}`,
+        locale: n.locale,
       });
       if ("success" in r && r.success) {
         await markNudged(n.leadIds);
@@ -156,6 +157,7 @@ export async function GET(request: NextRequest) {
           })),
           dashboardUrl: `${appUrl}${Routes.Analytics}`,
           settingsUrl: `${appUrl}${Routes.Settings}`,
+          locale: d.locale,
         });
         if ("success" in r && r.success) sent += 1;
       }

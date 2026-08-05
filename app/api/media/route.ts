@@ -36,24 +36,24 @@ export async function POST(req: NextRequest) {
   const size: unknown = body?.size;
 
   if (typeof url !== "string" || !isVercelBlobUrl(url)) {
-    return NextResponse.json({ error: "非法的素材地址" }, { status: 400 });
+    return NextResponse.json({ error: ApiErrors.MEDIA_URL_INVALID }, { status: 400 });
   }
   if (typeof filename !== "string" || filename.length === 0 || filename.length > 255) {
-    return NextResponse.json({ error: "文件名无效" }, { status: 400 });
+    return NextResponse.json({ error: ApiErrors.MEDIA_FILENAME_INVALID }, { status: 400 });
   }
   if (typeof contentType !== "string") {
-    return NextResponse.json({ error: "仅支持图片和视频文件" }, { status: 400 });
+    return NextResponse.json({ error: ApiErrors.MEDIA_TYPE_UNSUPPORTED }, { status: 400 });
   }
 
   const kind = kindForContentType(contentType);
   if (!kind) {
-    return NextResponse.json({ error: "仅支持图片和视频文件" }, { status: 400 });
+    return NextResponse.json({ error: ApiErrors.MEDIA_TYPE_UNSUPPORTED }, { status: 400 });
   }
 
   // 体积二次兜底：token 侧已限，此处防止元数据被伪造出异常值。
   const bytes = typeof size === "number" && Number.isFinite(size) && size >= 0 ? size : 0;
   if (bytes > maxBytesForKind(kind)) {
-    return NextResponse.json({ error: "文件超过大小上限" }, { status: 400 });
+    return NextResponse.json({ error: ApiErrors.MEDIA_TOO_LARGE }, { status: 400 });
   }
 
   const item = await insertMedia(session.user.id, url, filename, kind, bytes);

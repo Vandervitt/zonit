@@ -8,6 +8,8 @@ const DAY_MS = 86_400_000;
 export interface TrialEmailCandidate {
   userId: string;
   email: string;
+  /** 收件人界面语言（users.locale）；邮件在 cron 里异步发，读不到请求上下文。 */
+  locale: string | null;
   expiresAt: Date;
   /** 即将/已经失效的赠送档。 */
   grantedPlan: PlanId;
@@ -33,6 +35,7 @@ export async function listTrialEmailCandidates(now: Date): Promise<TrialEmailCan
   const res = await pool.query(
     `SELECT u.id    AS user_id,
             u.email,
+            u.locale,
             u.plan,
             u.comp_plan,
             u.comp_plan_expires_at,
@@ -57,6 +60,7 @@ export async function listTrialEmailCandidates(now: Date): Promise<TrialEmailCan
     return {
       userId: r.user_id,
       email: r.email,
+      locale: r.locale,
       expiresAt: new Date(r.comp_plan_expires_at),
       grantedPlan: (r.comp_plan ?? "pro") as PlanId,
       fallbackPlan,

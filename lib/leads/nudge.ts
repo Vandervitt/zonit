@@ -25,6 +25,8 @@ export interface StaleLead {
 export interface UserNudge {
   userId: string;
   email: string;
+  /** 收件人界面语言（users.locale）；邮件在 cron 里异步发。 */
+  locale: string | null;
   /** 列进邮件的线索（至多 MAX_LEADS_PER_EMAIL 条）。 */
   leads: StaleLead[];
   /** 该租户待提醒线索总数（可能多于 leads.length）。 */
@@ -48,7 +50,7 @@ export async function computeLeadNudges(now: Date): Promise<UserNudge[]> {
   const notOlderThan = new Date(now.getTime() - NUDGE_MAX_AGE_DAYS * 86_400_000);
 
   const res = await pool.query(
-    `SELECT l.id, l.payload, l.created_at, p.name AS page_name, p.user_id, u.email
+    `SELECT l.id, l.payload, l.created_at, p.name AS page_name, p.user_id, u.email, u.locale
        FROM leads l
        JOIN landing_pages p ON p.id = l.page_id
        JOIN users u ON u.id = p.user_id
@@ -68,7 +70,7 @@ export async function computeLeadNudges(now: Date): Promise<UserNudge[]> {
   for (const r of res.rows) {
     let entry = byUser.get(r.user_id);
     if (!entry) {
-      entry = { userId: r.user_id, email: r.email, leads: [], totalCount: 0, leadIds: [] };
+      entry = { userId: r.user_id, email: r.email, locale: r.locale, leads: [], totalCount: 0, leadIds: [] };
       byUser.set(r.user_id, entry);
     }
     entry.totalCount += 1;

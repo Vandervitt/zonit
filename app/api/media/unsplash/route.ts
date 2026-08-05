@@ -24,6 +24,6 @@ export async function POST(req: Request) {
     return NextResponse.json(out.item, { status: 201 });
   } catch {
     // 下载 / Blob 失败 → 502，沿用原文案。
-    return NextResponse.json({ error: "下载 Unsplash 图片失败" }, { status: 502 });
+    return NextResponse.json({ error: ApiErrors.MEDIA_UNSPLASH_DOWNLOAD_FAILED }, { status: 502 });
   }
 }
