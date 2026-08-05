@@ -2,19 +2,12 @@
 // landing-editor/forms/LeadFormForm.tsx
 // 留资表单页面级配置面板。固定字段集，各字段开关 + 必填 + 前台标签。
 // 左侧中文是后台的字段名（给运营看），label 输入框填的是访客在落地页上看到的文案。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import type { LeadForm, LeadFormFieldConfig } from "@/types/schema.draft";
 import { LEAD_CONTACT_FIELDS } from "@/types/schema.draft";
 import { Field } from "../ui/Field";
 import { TextInput } from "../ui/TextInput";
 
-const FIELD_LABELS: Record<string, string> = {
-  name: "姓名",
-  email: "邮箱",
-  phone: "电话",
-  whatsapp: "WhatsApp",
-  telegram: "Telegram",
-  message: "留言",
-};
 /** 访客在落地页上看到的缺省标签，与渲染器保持一致，仅用于输入框占位提示。 */
 const FRONT_LABEL_DEFAULTS: Record<string, string> = {
   name: "Name",
@@ -27,6 +20,16 @@ const FRONT_LABEL_DEFAULTS: Record<string, string> = {
 const FIELD_ORDER = ["name", "email", "phone", "whatsapp", "telegram", "message"] as const;
 
 export function LeadFormForm({ value, onChange }: { value: LeadForm; onChange: (v: LeadForm) => void }) {
+  const t = useAdminT().editor.forms.leadForm;
+  /** 编辑器里各字段行的显示名（不是访客看到的标签，那个见 FRONT_LABEL_DEFAULTS）。 */
+  const fieldLabels: Record<string, string> = {
+    name: t.name,
+    email: t.email,
+    phone: t.phone,
+    whatsapp: "WhatsApp",
+    telegram: "Telegram",
+    message: t.message,
+  };
   const patch = (p: Partial<LeadForm>) => onChange({ ...value, ...p });
   const patchField = (k: (typeof FIELD_ORDER)[number], p: Partial<LeadFormFieldConfig>) =>
     onChange({ ...value, fields: { ...value.fields, [k]: { ...value.fields[k], ...p } } });
@@ -35,26 +38,26 @@ export function LeadFormForm({ value, onChange }: { value: LeadForm; onChange: (
 
   return (
     <div className="space-y-3">
-      <Field label="表单标题">
-        <TextInput value={value.title} onChange={(e) => patch({ title: e.target.value })} placeholder="留下联系方式" />
+      <Field label={t.title}>
+        <TextInput value={value.title} onChange={(e) => patch({ title: e.target.value })} placeholder={t.titlePlaceholder} />
       </Field>
-      <Field label="描述（选填）">
+      <Field label={t.desc}>
         <TextInput value={value.description ?? ""} onChange={(e) => patch({ description: e.target.value })} />
       </Field>
-      <Field label="提交按钮文案">
-        <TextInput value={value.submitText} onChange={(e) => patch({ submitText: e.target.value })} placeholder="提交" />
+      <Field label={t.submitText}>
+        <TextInput value={value.submitText} onChange={(e) => patch({ submitText: e.target.value })} placeholder={t.submitPlaceholder} />
       </Field>
-      <Field label="成功提示">
+      <Field label={t.successText}>
         <TextInput value={value.successMessage} onChange={(e) => patch({ successMessage: e.target.value })} />
       </Field>
 
       <div className="rounded-lg border border-edge p-2.5">
-        <div className="mb-2 text-xs font-medium text-ink-soft">字段（至少启用一个联系方式）</div>
+        <div className="mb-2 text-xs font-medium text-ink-soft">{t.fields}</div>
         <div className="space-y-1.5">
           {FIELD_ORDER.map((k) => (
             <div key={k} className="space-y-1.5">
               <div className="flex items-center justify-between gap-2 text-sm">
-                <span className="text-ink">{FIELD_LABELS[k]}</span>
+                <span className="text-ink">{fieldLabels[k]}</span>
                 <div className="flex items-center gap-3 text-xs text-ink-soft">
                   <label className="flex items-center gap-1">
                     <input
@@ -62,7 +65,7 @@ export function LeadFormForm({ value, onChange }: { value: LeadForm; onChange: (
                       checked={value.fields[k].enabled}
                       onChange={(e) => patchField(k, { enabled: e.target.checked })}
                     />
-                    启用
+                    {t.enable}
                   </label>
                   <label className="flex items-center gap-1">
                     <input
@@ -71,7 +74,7 @@ export function LeadFormForm({ value, onChange }: { value: LeadForm; onChange: (
                       disabled={!value.fields[k].enabled}
                       onChange={(e) => patchField(k, { required: e.target.checked })}
                     />
-                    必填
+                    {t.required}
                   </label>
                 </div>
               </div>
@@ -79,14 +82,14 @@ export function LeadFormForm({ value, onChange }: { value: LeadForm; onChange: (
                 <TextInput
                   value={value.fields[k].label ?? ""}
                   onChange={(e) => patchField(k, { label: e.target.value })}
-                  placeholder={`前台标签（留空用 ${FRONT_LABEL_DEFAULTS[k]}）`}
+                  placeholder={t.frontLabelPlaceholder(FRONT_LABEL_DEFAULTS[k])}
                 />
               ) : null}
             </div>
           ))}
         </div>
         {!hasContact ? (
-          <p className="mt-2 text-xs text-red-600">建议至少启用一个联系方式（邮箱/电话/WhatsApp/Telegram）</p>
+          <p className="mt-2 text-xs text-red-600">{t.fieldsHint}</p>
         ) : null}
       </div>
     </div>

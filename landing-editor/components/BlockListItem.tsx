@@ -22,7 +22,8 @@ export function SectionRow({
   index: number;
   selected: boolean;
 }) {
-  const t = useAdminT().editor.ui;
+  const d = useAdminT().editor;
+  const t = d.ui;
   const dispatch = useEditorDispatch();
 
   const [, drop] = useDrop<DragItem>({
@@ -60,7 +61,7 @@ export function SectionRow({
         onClick={() => dispatch({ kind: "select", id: section._key })}
         className="flex-1 truncate text-left text-sm text-ink-soft"
       >
-        {SECTION_REGISTRY[section.type].label}
+        {d.issues.sections[section.type]}
       </button>
       <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
         <Button variant="ghost" onClick={() => dispatch({ kind: "moveSection", key: section._key, dir: -1 })} aria-label={t.moveUp}>

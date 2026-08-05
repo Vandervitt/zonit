@@ -1,6 +1,7 @@
 "use client";
 // landing-editor/forms/fields.tsx
 // 按 schema 形状封装的复合字段，建立在通用 ui 原子之上。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import type { ReactNode } from "react";
 import type { CtaButton, ImageRef, Badge, Media, IconHeading } from "@/types/schema.draft";
 import { Field } from "../ui/Field";
@@ -12,7 +13,7 @@ import { validateLink, validateMediaUrl } from "../lib/validate";
 import { RewriteButton } from "@/components/ai/RewriteButton";
 
 export function CtaButtonField({
-  label = "CTA 按钮",
+  label,
   value,
   onChange,
 }: {
@@ -20,24 +21,28 @@ export function CtaButtonField({
   value: CtaButton;
   onChange: (v: CtaButton) => void;
 }) {
+  const d = useAdminT().editor;
+  const t = d.fieldKit;
+  const f = d.fields;
+  const issuesT = d.issues;
   return (
     <div className="space-y-2 rounded-lg border border-edge p-2.5">
-      <div className="text-xs font-medium text-ink-soft">{label}</div>
+      <div className="text-xs font-medium text-ink-soft">{label ?? t.ctaButton}</div>
       <div className="space-y-1">
-        <Field label="按钮文案">
-          <TextInput value={value.text} onChange={(e) => onChange({ ...value, text: e.target.value })} placeholder="立即咨询" />
+        <Field label={f.buttonText}>
+          <TextInput value={value.text} onChange={(e) => onChange({ ...value, text: e.target.value })} placeholder={t.ctaPlaceholder} />
         </Field>
-        <RewriteButton field="按钮文案" currentText={value.text} onApply={(t) => onChange({ ...value, text: t })} />
+        <RewriteButton field={f.buttonText} currentText={value.text} onApply={(t) => onChange({ ...value, text: t })} />
       </div>
       {/* 阶段 1：链接已改由页面级 contact 统一决定，不再逐个编辑。
           阶段 2 上线「联系方式」面板后，这行提示替换为指向该面板的入口。 */}
-      <p className="text-xs text-slate-500">按钮链接由页面的「联系方式」统一决定，不在此单独设置。</p>
+      <p className="text-xs text-slate-500">{t.linkManagedNote}</p>
     </div>
   );
 }
 
 export function ImageRefField({
-  label = "图片",
+  label,
   value,
   onChange,
 }: {
@@ -45,21 +50,25 @@ export function ImageRefField({
   value: ImageRef;
   onChange: (v: ImageRef) => void;
 }) {
+  const d = useAdminT().editor;
+  const t = d.fieldKit;
+  const f = d.fields;
+  const issuesT = d.issues;
   return (
     <div className="space-y-2 rounded-lg border border-dashed border-edge p-2.5">
-      <div className="text-xs font-medium text-ink-soft">{label}</div>
-      <Field label="图片资源" error={validateMediaUrl(value.src)}>
+      <div className="text-xs font-medium text-ink-soft">{label ?? f.image}</div>
+      <Field label={t.imageSource} error={validateMediaUrl(value.src, issuesT)}>
         <MediaPicker
           value={value.src}
           accept="image"
           onChange={(src, alt) => onChange({ ...value, src, ...(alt !== undefined ? { alt } : {}) })}
         />
       </Field>
-      <Field label="Alt 文本">
+      <Field label={f.altText}>
         <TextInput
           value={value.alt ?? ""}
           onChange={(e) => onChange({ ...value, alt: e.target.value })}
-          placeholder="图片描述（SEO / 无障碍）"
+          placeholder={t.altPlaceholder}
         />
       </Field>
     </div>
@@ -67,20 +76,24 @@ export function ImageRefField({
 }
 
 export function BadgeField({ value, onChange }: { value: Badge; onChange: (v: Badge) => void }) {
+  const d = useAdminT().editor;
+  const t = d.fieldKit;
+  const f = d.fields;
+  const issuesT = d.issues;
   return (
     <div className="grid grid-cols-[7rem_1fr] gap-2">
       <Field label="Emoji">
         <EmojiInput value={value.emoji ?? ""} onChange={(emoji) => onChange({ ...value, emoji })} placeholder="🎁" />
       </Field>
-      <Field label="标签文案">
-        <TextInput value={value.text} onChange={(e) => onChange({ ...value, text: e.target.value })} placeholder="限时优惠" />
+      <Field label={f.badgeText}>
+        <TextInput value={value.text} onChange={(e) => onChange({ ...value, text: e.target.value })} placeholder={t.badgePlaceholder} />
       </Field>
     </div>
   );
 }
 
 export function IconHeadingField({
-  label = "主标题文案",
+  label,
   value,
   onChange,
 }: {
@@ -88,12 +101,16 @@ export function IconHeadingField({
   value: IconHeading;
   onChange: (v: IconHeading) => void;
 }) {
+  const d = useAdminT().editor;
+  const t = d.fieldKit;
+  const f = d.fields;
+  const issuesT = d.issues;
   return (
     <div className="grid grid-cols-[7rem_1fr] gap-2">
-      <Field label="图标">
+      <Field label={f.icon}>
         <EmojiInput value={value.icon ?? ""} onChange={(icon) => onChange({ ...value, icon })} placeholder="⏰" />
       </Field>
-      <Field label={label}>
+      <Field label={label ?? t.headlineCopy}>
         <TextInput value={value.text} onChange={(e) => onChange({ ...value, text: e.target.value })} />
       </Field>
     </div>
@@ -101,9 +118,13 @@ export function IconHeadingField({
 }
 
 export function MediaField({ value, onChange }: { value: Media; onChange: (v: Media) => void }) {
+  const d = useAdminT().editor;
+  const t = d.fieldKit;
+  const f = d.fields;
+  const issuesT = d.issues;
   return (
     <div className="space-y-2 rounded-lg border border-dashed border-edge p-2.5">
-      <Field label="媒体类型">
+      <Field label={t.mediaType}>
         <Select
           value={value.type}
           onChange={(e) => {
@@ -111,11 +132,11 @@ export function MediaField({ value, onChange }: { value: Media; onChange: (v: Me
             onChange(type === "image" ? { type, src: value.src, alt: "" } : { type, src: value.src, poster: "" });
           }}
         >
-          <option value="image">图片</option>
-          <option value="video">视频</option>
+          <option value="image">{f.image}</option>
+          <option value="video">{f.video}</option>
         </Select>
       </Field>
-      <Field label="资源" error={validateMediaUrl(value.src)}>
+      <Field label={t.source} error={validateMediaUrl(value.src, issuesT)}>
         <MediaPicker
           value={value.src}
           accept={value.type}
@@ -123,11 +144,11 @@ export function MediaField({ value, onChange }: { value: Media; onChange: (v: Me
         />
       </Field>
       {value.type === "image" ? (
-        <Field label="Alt 文本">
+        <Field label={f.altText}>
           <TextInput value={value.alt ?? ""} onChange={(e) => onChange({ ...value, alt: e.target.value })} />
         </Field>
       ) : (
-        <Field label="视频封面 URL">
+        <Field label={t.videoPoster}>
           <TextInput value={value.poster ?? ""} onChange={(e) => onChange({ ...value, poster: e.target.value })} />
         </Field>
       )}
@@ -171,23 +192,27 @@ export function TitleSubtitleFields<T extends { title: string; subtitle?: string
   value: T;
   patch: (p: Partial<T>) => void;
 }) {
+  const d = useAdminT().editor;
+  const t = d.fieldKit;
+  const f = d.fields;
+  const issuesT = d.issues;
   return (
     <>
       <div className="space-y-1">
-        <Field label="主标题">
+        <Field label={f.title}>
           <TextInput value={value.title} onChange={(e) => patch({ title: e.target.value } as Partial<T>)} />
         </Field>
-        <RewriteButton field="主标题" currentText={value.title} onApply={(t) => patch({ title: t } as Partial<T>)} />
+        <RewriteButton field={f.title} currentText={value.title} onApply={(t) => patch({ title: t } as Partial<T>)} />
       </div>
       <div className="space-y-1">
-        <Field label="副标题">
+        <Field label={f.subtitle}>
           <TextInput
             value={value.subtitle ?? ""}
             onChange={(e) => patch({ subtitle: e.target.value || undefined } as Partial<T>)}
           />
         </Field>
         <RewriteButton
-          field="副标题"
+          field={f.subtitle}
           currentText={value.subtitle ?? ""}
           onApply={(t) => patch({ subtitle: t || undefined } as Partial<T>)}
         />

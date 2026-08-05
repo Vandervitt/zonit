@@ -306,6 +306,9 @@ export const editor = {
       email: "邮箱",
       phone: "电话",
       message: "留言",
+      enable: "启用",
+      required: "必填",
+      frontLabelPlaceholder: (frontDefault: string) => `前台标签（留空用 ${frontDefault}）`,
     },
     contact: { primary: "主要联系方式", floatingChannel: "悬浮按钮挂哪个渠道" },
     branding: {
@@ -463,4 +466,58 @@ export const editor = {
     blockList: { add: "+ 添加区块", singletonHint: "该区块只能存在一个" },
     autoSave: { nameTaken: "页面名称已被使用，请换一个名称" },
   },
+
+  issues: {
+    linkInvalid: "请输入合法链接（https://…、tel:/mailto:/whatsapp:，或 #lead-form 这样的页内锚点）",
+    linkTransactional: "链接疑似交易页（结账/购物车/支付/订单/订阅/退款），落地页不允许",
+    mediaInvalid: "请输入合法资源 URL（https://… 或 / 开头的站内路径）",
+    emailInvalid: "请输入合法邮箱地址",
+    blocks: { contact: "联系方式", hero: "首屏", footer: "页脚", floatingButton: "悬浮按钮" },
+    channels: { phone: "电话", email: "邮箱", form: "留资表单" },
+    heroCta: "首屏 CTA 按钮",
+    labelSep: "：",
+    sections: {
+      stats: "数据展示", plans: "套餐", products: "产品", beforeAfter: "前后对比",
+      process: "服务流程", trust: "信任", features: "特性", reviews: "评价",
+      story: "产品故事", countdown: "倒计时", faq: "常见问题", guarantee: "安全保障",
+    },
+    emptyLink: (what: string) => `${what}链接为空，访客点击不会有任何反应`,
+    formNotEnabled: (what: string) =>
+      `${what}指向留资表单，但该页的留资表单未启用，访客点击不会有任何反应——请启用留资表单，或改用其他联系方式`,
+    channelMissing: (what: string, channel: string) => `${what}指向${channel}，但你还没填这个联系方式，访客点击无法联系你`,
+    heroCtaTextEmpty: "首屏 CTA 按钮文案为空，请填写行动引导语（如 Chat on WhatsApp）",
+    floatingTextEmpty: "悬浮按钮文案为空，请填写行动引导语，或关闭该按钮",
+    coreValue: "套餐 或 特性",
+    needAtLeastOne: (group: string) => `需至少一个：${group}`,
+    duplicatedSingleton: (label: string) => `「${label}」应唯一，出现多次`,
+    missingRequired: (label: string) => `缺少必须模块「${label}」`,
+    pixelIdWhitespace: (provider: string) => `${provider}：ID 不应包含空格`,
+    compliance: {
+      noCompanyProfile:
+        "页脚没有经营主体信息。投 TikTok 的电商 / 金融类页面按其政策必须展示公司信息与执照（设置 · 经营主体信息里填一次，所有页面可选用）",
+      privacyTooShort: "隐私政策文字过短，说明不了你收集哪些信息、用于什么。四家平台都会点开这一页",
+      termsTooShort: "服务条款文字过短，看不出你提供什么服务、边界在哪",
+      noVerifiableContact:
+        "页面上没有邮箱或电话。即时通讯链接不计入可核实联系方式，Google 的着陆页体验与 TikTok 的页脚要求都按这一项判",
+    },
+  },
+
+  blockList: {
+    title: "页面结构",
+    contact: "联系方式",
+    contactHint: "客户怎么找你",
+    hero: "首屏 Hero",
+    heroHint: "固定置顶",
+    empty: "暂无中部区块",
+    footer: "页脚 Footer",
+    footerHint: "固定置底",
+    branding: "品牌主题",
+    brandingHint: "配色 / Logo",
+    seoHint: "标题 / 描述 / 分享图",
+    floatingButton: "悬浮按钮",
+    editFloatingButton: "编辑悬浮按钮",
+    leadForm: "留资表单",
+    editLeadForm: "编辑留资表单",
+  },
+
 };

@@ -15,7 +15,8 @@ import { LeadFormForm } from "../forms/LeadFormForm";
 import { renderSectionForm } from "../registry/sectionForms";
 
 export function EditorDetail() {
-  const t = useAdminT().editor.panels.detail;
+  const d = useAdminT().editor;
+  const t = d.panels.detail;
   const state = useEditorState();
   const dispatch = useEditorDispatch();
   const id = state.selectedId;
@@ -66,7 +67,7 @@ export function EditorDetail() {
   } else {
     const section = state.sections.find((s) => s._key === id);
     if (section) {
-      title = SECTION_REGISTRY[section.type].label;
+      title = d.issues.sections[section.type];
       body = renderSectionForm(section, (data) =>
         dispatch({ kind: "updateSection", key: section._key, data }),
       );

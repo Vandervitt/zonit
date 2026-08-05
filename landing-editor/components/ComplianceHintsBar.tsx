@@ -10,9 +10,10 @@ import type { IssueTarget } from "../lib/publishIssues";
 
 export function ComplianceHintsBar() {
   const t = useAdminT().editor.panels.compliance;
+  const issuesT = useAdminT().editor.issues;
   const state = useEditorState();
   const dispatch = useEditorDispatch();
-  const hints = collectComplianceHints(toDraft(state));
+  const hints = collectComplianceHints(toDraft(state), issuesT);
   const [open, setOpen] = useState(false);
 
   if (hints.length === 0) return null;

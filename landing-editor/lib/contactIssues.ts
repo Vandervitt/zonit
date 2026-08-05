@@ -6,6 +6,7 @@
 //
 // 占位号全文扫描（PLACEHOLDER_CONTACTS）已删除：号码只存在 contact 一处且实例化即清空，
 // 占位号无处可藏，那道兜底扫描没有对象可拦了。
+import { defaultIssuesDict, type IssuesDict } from "./validate";
 import type { CtaTarget, LandingPageDraft } from "@/types/schema.draft";
 import type { PublishIssue } from "./validate";
 
@@ -28,50 +29,50 @@ export function blankTemplateContacts(draft: LandingPageDraft): LandingPageDraft
   return clone;
 }
 
-/** 渠道展示名（发布门槛提示用）。 */
-const CHANNEL_LABELS: Record<string, string> = {
-  whatsapp: "WhatsApp",
-  phone: "电话",
-  email: "邮箱",
-  telegram: "Telegram",
-  form: "留资表单",
-};
+/**
+ * 渠道展示名。WhatsApp / Telegram 是产品名不译；其余取字典（editor.issues.channels）。
+ */
+function channelLabel(channel: string, t: IssuesDict): string {
+  if (channel === "whatsapp") return "WhatsApp";
+  if (channel === "telegram") return "Telegram";
+  return t.channels[channel as keyof IssuesDict["channels"]] ?? channel;
+}
 
 /**
  * 落点可达性：该 CTA 引用的渠道有没有值。
  * 指向表单时表单必须真的启用，否则访客点了原地不动。
  * 返回 issue 文案；落点有效则返回 null。
  */
-function targetIssue(target: CtaTarget, draft: LandingPageDraft, what: string): string | null {
+function targetIssue(target: CtaTarget, draft: LandingPageDraft, what: string, t: IssuesDict): string | null {
   if (target.kind === "url") {
-    return target.url.trim() ? null : `${what}链接为空，访客点击不会有任何反应`;
+    return target.url.trim() ? null : t.emptyLink(what);
   }
   const channel = target.kind === "primary" ? draft.contact.primary : target.channel;
   if (channel === "form") {
     return draft.leadForm?.enabled
       ? null
-      : `${what}指向留资表单，但该页的留资表单未启用，访客点击不会有任何反应——请启用留资表单，或改用其他联系方式`;
+      : t.formNotEnabled(what);
   }
   return draft.contact[channel]?.trim()
     ? null
-    : `${what}指向${CHANNEL_LABELS[channel]}，但你还没填这个联系方式，访客点击无法联系你`;
+    : t.channelMissing(what, channelLabel(channel, t));
 }
 
 /**
  * 发布门槛（结构化）：主渠道必须有值、各 CTA 引用的渠道必须能解析出链接、文案不得为空。
  * 悬浮按钮可选，不存在则不校验。
  */
-export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[] {
+export function collectContactIssueItems(draft: LandingPageDraft, t: IssuesDict = defaultIssuesDict): PublishIssue[] {
   const issues: PublishIssue[] = [];
 
-  const heroIssue = draft.hero?.cta ? targetIssue(draft.hero.cta.target, draft, "首屏 CTA 按钮") : null;
+  const heroIssue = draft.hero?.cta ? targetIssue(draft.hero.cta.target, draft, t.heroCta, t) : null;
   if (heroIssue) {
     // 落点指向联系方式面板而不是 hero：用户要改的是号码，不是按钮本身
     issues.push({ message: heroIssue, target: { kind: "fixed", id: "contact" } });
   }
   if (!draft.hero?.cta?.text?.trim()) {
     issues.push({
-      message: "首屏 CTA 按钮文案为空，请填写行动引导语（如 Chat on WhatsApp）",
+      message: t.heroCtaTextEmpty,
       target: { kind: "fixed", id: "hero" },
     });
   }
@@ -79,11 +80,11 @@ export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[
   if (draft.floatingButton) {
     if (!draft.floatingButton.text?.trim()) {
       issues.push({
-        message: "悬浮按钮文案为空，请填写行动引导语，或关闭该按钮",
+        message: t.floatingTextEmpty,
         target: { kind: "fixed", id: "floatingButton" },
       });
     }
-    const floatIssue = targetIssue(draft.floatingButton.target, draft, "悬浮按钮");
+    const floatIssue = targetIssue(draft.floatingButton.target, draft, t.blocks.floatingButton, t);
     if (floatIssue) {
       issues.push({ message: floatIssue, target: { kind: "fixed", id: "contact" } });
     }
@@ -93,6 +94,6 @@ export function collectContactIssueItems(draft: LandingPageDraft): PublishIssue[
 }
 
 /** 发布门槛：同 collectContactIssueItems，仅返回文案（服务端与既有消费方使用）。 */
-export function collectContactIssues(draft: LandingPageDraft): string[] {
-  return collectContactIssueItems(draft).map((i) => i.message);
+export function collectContactIssues(draft: LandingPageDraft, t: IssuesDict = defaultIssuesDict): string[] {
+  return collectContactIssueItems(draft, t).map((i) => i.message);
 }

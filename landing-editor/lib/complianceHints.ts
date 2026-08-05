@@ -9,6 +9,7 @@
 //
 // 每条提示都必须能追溯到一条平台明文要求，且判据是页面上可核实的客观事实
 // （与 lib/tools/checks.ts 的「只报事实、不给评分」同一条原则）。
+import { defaultIssuesDict, type IssuesDict } from "./validate";
 import type { LandingPageDraft } from "@/types/schema.draft";
 import type { PublishIssue } from "./validate";
 
@@ -18,7 +19,7 @@ import type { PublishIssue } from "./validate";
  */
 const MIN_POLICY_LENGTH = 60;
 
-export function collectComplianceHints(draft: LandingPageDraft): PublishIssue[] {
+export function collectComplianceHints(draft: LandingPageDraft, t: IssuesDict = defaultIssuesDict): PublishIssue[] {
   const hints: PublishIssue[] = [];
   const footerTarget = { kind: "fixed", id: "footer" } as const;
 
@@ -26,20 +27,20 @@ export function collectComplianceHints(draft: LandingPageDraft): PublishIssue[] 
   // Meta / LinkedIn 也会核对页面身份是否真实。平台无从代填，只能提示。
   if (!draft.footer.companyProfileId) {
     hints.push({
-      message: "页脚没有经营主体信息。投 TikTok 的电商 / 金融类页面按其政策必须展示公司信息与执照（设置 · 经营主体信息里填一次，所有页面可选用）",
+      message: t.compliance.noCompanyProfile,
       target: footerTarget,
     });
   }
 
   if (draft.footer.privacyPolicy.trim().length < MIN_POLICY_LENGTH) {
     hints.push({
-      message: "隐私政策文字过短，说明不了你收集哪些信息、用于什么。四家平台都会点开这一页",
+      message: t.compliance.privacyTooShort,
       target: footerTarget,
     });
   }
   if (draft.footer.termsOfService.trim().length < MIN_POLICY_LENGTH) {
     hints.push({
-      message: "服务条款文字过短，看不出你提供什么服务、边界在哪",
+      message: t.compliance.termsTooShort,
       target: footerTarget,
     });
   }
@@ -50,7 +51,7 @@ export function collectComplianceHints(draft: LandingPageDraft): PublishIssue[] 
   const hasVerifiableContact = !!(draft.contact.email?.trim() || draft.contact.phone?.trim());
   if (!hasVerifiableContact) {
     hints.push({
-      message: "页面上没有邮箱或电话。即时通讯链接不计入可核实联系方式，Google 的着陆页体验与 TikTok 的页脚要求都按这一项判",
+      message: t.compliance.noVerifiableContact,
       target: { kind: "fixed", id: "contact" },
     });
   }

@@ -1,3 +1,5 @@
+import type { LandingSectionType } from "@/types/schema.draft";
+
 // 落地页编辑器（landing-editor/）。
 //
 // ⚠️ 只放**编辑器界面**的文案。用户正在编辑的页面内容（草稿字段值、模板样例文案）
@@ -330,6 +332,10 @@ export const editor = {
       email: "Email",
       phone: "Phone",
       message: "Message",
+      enable: "On",
+      required: "Required",
+      /** frontDefault 取自 landing-renderer 的 FIELD_LABELS，恒为英文，不随界面语言变。 */
+      frontLabelPlaceholder: (frontDefault: string) => `Visitor-facing label (blank uses ${frontDefault})`,
     },
     contact: { primary: "Primary contact method", floatingChannel: "Channel for the floating button" },
     branding: {
@@ -490,4 +496,70 @@ export const editor = {
     blockList: { add: "+ Add section", singletonHint: "This section can only appear once" },
     autoSave: { nameTaken: "That page name is taken — pick another" },
   },
+
+  /**
+   * 校验 / 合规 / 发布门槛的提示文案。
+   *
+   * 产出这些串的是 landing-editor/lib 下的纯函数，它们同时被服务端发布门槛调用——
+   * 但服务端只数条目个数（`collectPublishIssues(...).length > 0`），不展示文案，
+   * 故让这些函数接一份字典切片是安全的。
+   */
+  issues: {
+    linkInvalid: "Enter a valid link (https://…, tel:/mailto:/whatsapp:, or an in-page anchor like #lead-form)",
+    linkTransactional: "This link looks like a transaction page (checkout / cart / payment / order / subscription / refund), which landing pages don't allow",
+    mediaInvalid: "Enter a valid resource URL (https://… or a site path starting with /)",
+    emailInvalid: "Enter a valid email address",
+    blocks: { contact: "Contact", hero: "Hero", footer: "Footer", floatingButton: "Floating button" },
+    channels: { phone: "phone", email: "email", form: "lead form" },
+    heroCta: "Hero CTA button",
+    /** 区块标签与错误之间的分隔符，中英标点不同。 */
+    labelSep: ": ",
+    /** 区块类型的展示名。数据侧的类型键在 types/schema.draft.ts 的 SECTION_REGISTRY，
+     *  那里的 label 只作为无字典时的兜底（如 lib/seo 的服务端场景）。 */
+    sections: {
+      stats: "Stats", plans: "Plans", products: "Products", beforeAfter: "Before / after",
+      process: "Process", trust: "Trust", features: "Features", reviews: "Reviews",
+      story: "Story", countdown: "Countdown", faq: "FAQ", guarantee: "Guarantee",
+    } satisfies Record<LandingSectionType, string>,
+    emptyLink: (what: string) => `${what} has an empty link — tapping it does nothing`,
+    formNotEnabled: (what: string) =>
+      `${what} points at the lead form, but this page's lead form isn't enabled, so tapping it does nothing — enable the lead form, or switch to another contact method.`,
+    channelMissing: (what: string, channel: string) =>
+      `${what} points at ${channel}, but you haven't filled that contact method in, so visitors can't reach you`,
+    heroCtaTextEmpty: "The hero CTA button has no text — write a call to action (e.g. Chat on WhatsApp)",
+    floatingTextEmpty: "The floating button has no text — write a call to action, or turn the button off",
+    coreValue: "Plans or Features",
+    needAtLeastOne: (group: string) => `Need at least one: ${group}`,
+    duplicatedSingleton: (label: string) => `“${label}” must be unique but appears more than once`,
+    missingRequired: (label: string) => `Missing required section “${label}”`,
+    pixelIdWhitespace: (provider: string) => `${provider}: the ID shouldn't contain spaces`,
+    compliance: {
+      noCompanyProfile:
+        "No business entity in the footer. TikTok policy requires ecommerce and finance pages to show company details and licence (fill it in once under Settings · Business entity and any page can use it)",
+      privacyTooShort:
+        "The privacy policy is too short to explain what you collect and what you use it for. All four platforms open this page",
+      termsTooShort: "The terms of service are too short to show what you provide and where the limits are",
+      noVerifiableContact:
+        "No email or phone on the page. Messaging links don't count as verifiable contact details — Google's landing page experience and TikTok's footer requirement both judge on this",
+    },
+  },
+
+  blockList: {
+    title: "Page structure",
+    contact: "Contact",
+    contactHint: "How customers reach you",
+    hero: "Hero",
+    heroHint: "Pinned to top",
+    empty: "No middle sections yet",
+    footer: "Footer",
+    footerHint: "Pinned to bottom",
+    branding: "Brand theme",
+    brandingHint: "Colours / logo",
+    seoHint: "Title / description / share image",
+    floatingButton: "Floating button",
+    editFloatingButton: "Edit floating button",
+    leadForm: "Lead form",
+    editLeadForm: "Edit lead form",
+  },
+
 };

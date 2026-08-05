@@ -15,6 +15,7 @@ import { useAdminT } from "@/lib/i18n/admin/context";
 
 export function EditorToolbar() {
   const t = useAdminT().editor.toolbar;
+  const issuesT = useAdminT().editor.issues;
   // 保存态文案：idle 不显示任何字（刚进页面就出现「已保存」会让人以为刚发生过写入）。
   const saveLabel: Record<string, string> = { idle: "", saving: t.saving, saved: t.saved };
   const { pageId, name, setName, saveState, saveError, status, publishedDirty, setGenerateOpen, flushSaveRef } = useMeta();
@@ -68,7 +69,7 @@ export function EditorToolbar() {
   }, [dispatch]);
 
   function handlePublish() {
-    const issues = collectPublishIssues(toDraft(state));
+    const issues = collectPublishIssues(toDraft(state), issuesT);
     if (issues.length > 0) {
       setBlockers(issues);
       return;

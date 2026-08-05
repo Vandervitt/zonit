@@ -7,9 +7,10 @@ import { collectPublishIssueItems, type IssueTarget } from "../lib/publishIssues
 
 export function ValidationBar() {
   const t = useAdminT().editor.panels.validation;
+  const issuesT = useAdminT().editor.issues;
   const state = useEditorState();
   const dispatch = useEditorDispatch();
-  const issues = collectPublishIssueItems(toDraft(state));
+  const issues = collectPublishIssueItems(toDraft(state), issuesT);
   const [open, setOpen] = useState(false);
 
   /** 把校验项落点换算成编辑器 selectedId（section 按序号取 _key）。 */

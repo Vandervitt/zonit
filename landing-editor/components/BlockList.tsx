@@ -1,6 +1,7 @@
 "use client";
 // landing-editor/components/BlockList.tsx
 // 左栏：Hero 置顶、sections 可排序、Footer 置底、悬浮按钮开关。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useEditorState, useEditorDispatch, CONTACT_ID, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID, BRANDING_ID, SEO_ID } from "../store/editorStore";
 import { SectionRow } from "./BlockListItem";
 import { AddSectionMenu } from "./AddSectionMenu";
@@ -31,26 +32,27 @@ function FixedRow({
 }
 
 export function BlockList() {
+  const t = useAdminT().editor.blockList;
   const state = useEditorState();
   const dispatch = useEditorDispatch();
 
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0 border-b border-edge px-4 py-3">
-        <h2 className="text-sm font-semibold text-ink">页面结构</h2>
+        <h2 className="text-sm font-semibold text-ink">{t.title}</h2>
       </div>
       <div className="flex-1 space-y-3 overflow-y-auto p-3">
         {/* 置于 Hero 之上：它是全页 CTA 的上游，位置本身表达依赖关系 */}
         <FixedRow
-          label="联系方式"
-          hint="客户怎么找你"
+          label={t.contact}
+          hint={t.contactHint}
           selected={state.selectedId === CONTACT_ID}
           onSelect={() => dispatch({ kind: "select", id: CONTACT_ID })}
         />
 
         <FixedRow
-          label="首屏 Hero"
-          hint="固定置顶"
+          label={t.hero}
+          hint={t.heroHint}
           selected={state.selectedId === HERO_ID}
           onSelect={() => dispatch({ kind: "select", id: HERO_ID })}
         />
@@ -66,7 +68,7 @@ export function BlockList() {
           ))}
           {state.sections.length === 0 ? (
             <div className="rounded-lg border border-dashed border-edge py-4 text-center text-xs text-ink-muted">
-              暂无中部区块
+              {t.empty}
             </div>
           ) : null}
         </div>
@@ -74,22 +76,22 @@ export function BlockList() {
         <AddSectionMenu />
 
         <FixedRow
-          label="页脚 Footer"
-          hint="固定置底"
+          label={t.footer}
+          hint={t.footerHint}
           selected={state.selectedId === FOOTER_ID}
           onSelect={() => dispatch({ kind: "select", id: FOOTER_ID })}
         />
 
         <FixedRow
-          label="品牌主题"
-          hint="配色 / Logo"
+          label={t.branding}
+          hint={t.brandingHint}
           selected={state.selectedId === BRANDING_ID}
           onSelect={() => dispatch({ kind: "select", id: BRANDING_ID })}
         />
 
         <FixedRow
           label="SEO"
-          hint="标题 / 描述 / 分享图"
+          hint={t.seoHint}
           selected={state.selectedId === SEO_ID}
           onSelect={() => dispatch({ kind: "select", id: SEO_ID })}
         />
@@ -102,7 +104,7 @@ export function BlockList() {
               onChange={(e) => dispatch({ kind: "toggleFloating", on: e.target.checked })}
               className="h-3.5 w-3.5 rounded border-edge-strong text-brand-600 focus:ring-brand-500/30"
             />
-            悬浮按钮
+            {t.floatingButton}
           </label>
           {state.floatingButton !== null ? (
             <button
@@ -114,7 +116,7 @@ export function BlockList() {
                   : "border-edge text-ink-soft hover:border-edge-strong"
               }`}
             >
-              编辑悬浮按钮
+              {t.editFloatingButton}
             </button>
           ) : null}
         </div>
@@ -127,7 +129,7 @@ export function BlockList() {
               onChange={(e) => dispatch({ kind: "toggleLeadForm", on: e.target.checked })}
               className="h-3.5 w-3.5 rounded border-edge-strong text-brand-600 focus:ring-brand-500/30"
             />
-            留资表单
+            {t.leadForm}
           </label>
           {state.leadForm !== null ? (
             <button
@@ -139,7 +141,7 @@ export function BlockList() {
                   : "border-edge text-ink-soft hover:border-edge-strong"
               }`}
             >
-              编辑留资表单
+              {t.editLeadForm}
             </button>
           ) : null}
         </div>
