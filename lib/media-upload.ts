@@ -3,7 +3,7 @@
 // 受限一次性 token），绕过 Vercel Function 4.5MB 请求体上限；上传完成后再以小 JSON
 // 请求把结果元数据落库（POST /api/media）。供后台 UploadZone 与编辑器 MediaPicker 共用。
 import { upload } from "@vercel/blob/client";
-import { ApiRoutes } from "@/lib/constants";
+import { ApiRoutes, ApiErrors } from "@/lib/constants";
 import {
   kindForContentType,
   maxBytesForKind,
@@ -20,10 +20,16 @@ import type { MediaItem } from "@/lib/media-db";
 export function uploadErrorText(
   err: unknown,
   fallback: string,
-  dict: Record<string, string>,
+  dict: Record<string, string | ((arg: string) => string)>,
 ): string {
-  const code = err instanceof Error ? err.message : "";
-  return dict[code] ?? fallback;
+  // 形如 `media_too_large:10 MB`：冒号后是给文案用的参数（此处为体积上限）。
+  const raw = err instanceof Error ? err.message : "";
+  const sep = raw.indexOf(":");
+  const code = sep === -1 ? raw : raw.slice(0, sep);
+  const arg = sep === -1 ? "" : raw.slice(sep + 1);
+  const entry = dict[code];
+  if (typeof entry === "function") return entry(arg);
+  return entry ?? fallback;
 }
 
 /**
@@ -43,13 +49,14 @@ async function errorCode(res: Response): Promise<string> {
 }
 
 export async function uploadMedia(file: File): Promise<MediaItem> {
+  // 前端预校验也抛错误码（与服务端同一套 ApiErrors），由调用点按字典翻译。
   const kind = kindForContentType(file.type);
   if (!kind) {
-    throw new Error("仅支持图片和视频文件（不含 SVG）");
+    throw new Error(ApiErrors.MEDIA_TYPE_UNSUPPORTED);
   }
   // 前端即时提示：避免大文件先传满再被 Blob 拒，浪费带宽与等待。
   if (file.size > maxBytesForKind(kind)) {
-    throw new Error(`文件超过大小上限（${kind === "video" ? "视频" : "图片"}最大 ${humanMaxForKind(kind)}）`);
+    throw new Error(`${ApiErrors.MEDIA_TOO_LARGE}:${humanMaxForKind(kind)}`);
   }
 
   const blob = await upload(file.name, file, {

@@ -4,6 +4,7 @@
 import { test, expect } from "@playwright/test";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
+import { t } from "./helpers/i18n";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -45,7 +46,7 @@ test.describe("画廊筛选 + 落地页复制/改名", () => {
     await page.goto("/admin/landing-pages");
     const dialog = page.getByRole("dialog");
     await expect(async () => {
-      await page.getByRole("button", { name: "新建" }).click();
+      await page.getByRole("button", { name: t.pages.create }).click();
       await expect(dialog).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 30_000 });
     return dialog;
@@ -64,7 +65,7 @@ test.describe("画廊筛选 + 落地页复制/改名", () => {
     // 初始全量：至少能看到 Aurae Skincare
     await expect(dialog.getByText("Aurae Skincare")).toBeVisible();
     // 搜索 footwear → 命中 Atlas Footwear，Aurae 消失
-    const search = dialog.getByRole("searchbox", { name: "搜索模板名称" });
+    const search = dialog.getByRole("searchbox", { name: t.editor.templatePicker.searchAria });
     await search.fill("footwear");
     await expect(dialog.getByText("Atlas Footwear")).toBeVisible();
     await expect(dialog.getByText("Aurae Skincare")).toHaveCount(0);
@@ -80,14 +81,14 @@ test.describe("画廊筛选 + 落地页复制/改名", () => {
 
     // 先建一页（模板弹窗「直接编辑」；「空白开始」入口已随画廊页一并移除）
     const dialog = await openTemplateDialog(page);
-    await dialog.getByRole("searchbox", { name: "搜索模板名称" }).fill("Aurae Skincare");
-    await dialog.getByRole("button", { name: "直接编辑" }).first().click();
+    await dialog.getByRole("searchbox", { name: t.editor.templatePicker.searchAria }).fill("Aurae Skincare");
+    await dialog.getByRole("button", { name: t.editor.templatePicker.edit }).first().click();
     await page.waitForURL(/\/admin\/editor\/[^/]+$/, { timeout: 30_000 });
 
     // 列表：复制 → 出现「副本」草稿
     await page.goto("/admin/landing-pages");
-    await page.getByText("复制", { exact: true }).first().click();
-    await expect(page.getByText(/副本/)).toBeVisible({ timeout: 15_000 });
+    await page.getByText(t.pages.actions.duplicate, { exact: true }).first().click();
+    await expect(page.getByText(new RegExp(t.pages.toast.copySuffix))).toBeVisible({ timeout: 15_000 });
 
     // 行内改名：把第一行名称改为唯一串
     // antd 5 Typography.Text editable 渲染一个 .ant-typography-edit 触发按钮，

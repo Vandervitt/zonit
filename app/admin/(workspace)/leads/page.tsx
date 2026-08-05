@@ -85,6 +85,7 @@ const KIND_ICON: Record<ContactKind, React.ReactNode> = {
  * 点击本身就是信号，不需要客户再手动录一次状态。
  */
 function ContactCell({ row, onContacted }: { row: LeadRow; onContacted: () => void }) {
+  const t = useAdminT().leads;
   const { links, plain } = contactLinks(row.payload);
   if (links.length === 0 && plain.length === 0) return <>—</>;
   return (
@@ -99,7 +100,7 @@ function ContactCell({ row, onContacted }: { row: LeadRow; onContacted: () => vo
             rel={l.external ? "noopener noreferrer" : undefined}
             onClick={onContacted}
           >
-            {l.label}
+            {t.contactKinds[l.kind]}
           </Button>
         </Tooltip>
       ))}

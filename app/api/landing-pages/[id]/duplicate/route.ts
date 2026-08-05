@@ -1,7 +1,10 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
+import { LOCALE_COOKIE } from "@/lib/i18n/config";
+import { getAdminDictionary, resolveAdminLocale } from "@/lib/i18n/admin";
 import { duplicateLandingPage, listLandingPages } from "@/lib/landing-pages/store";
 import { getUserPlan } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
@@ -21,7 +24,10 @@ export async function POST(_req: NextRequest, ctx: RouteContext<"/api/landing-pa
   }
 
   const { id } = await ctx.params;
-  const row = await duplicateLandingPage(id, session.user.id);
+  // 副本后缀跟随用户的后台语言：页面名是后台内部标识，不对外展示。
+  const locale = resolveAdminLocale(session.user.locale, (await cookies()).get(LOCALE_COOKIE)?.value);
+  const copySuffix = getAdminDictionary(locale).pages.toast.copySuffix;
+  const row = await duplicateLandingPage(id, session.user.id, copySuffix);
   if (!row) return NextResponse.json({ error: ApiErrors.NOT_FOUND }, { status: 404 });
   return NextResponse.json(row, { status: 201 });
 }

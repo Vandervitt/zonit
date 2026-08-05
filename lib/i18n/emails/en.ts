@@ -49,6 +49,7 @@ export const emails = {
     heading: "Your week in leads",
     intro: "How your published pages did over the last 7 days (compared with the week before):",
     columns: { page: "Page", views: "Views", clicks: "CTA clicks", leads: "Leads" },
+    trend: { new: "new", flat: "flat", none: "—" },
     cta: "Open analytics",
     unsubscribePrefix: "Don't want the weekly report? Turn it off under ",
     unsubscribeLink: "Settings → Lead notifications",

@@ -367,7 +367,7 @@ export const editor = {
       media_url_invalid: "非法的素材地址",
       media_filename_invalid: "文件名无效",
       media_type_unsupported: "仅支持图片和视频文件",
-      media_too_large: "文件超过大小上限",
+      media_too_large: (max: string) => `文件超过大小上限（最大 ${max}）`,
     media_upload_auth_failed: "上传授权失败",
     media_unsplash_download_failed: "下载 Unsplash 图片失败",
     },

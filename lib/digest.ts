@@ -91,10 +91,17 @@ export async function computeWeeklyDigests(now: Date): Promise<UserDigest[]> {
   return [...byUser.values()].filter((d) => !d.pages.every(allZero));
 }
 
-/** 环比文案：上周 0 时不给百分比（避免除零/无意义暴涨）。 */
-export function trendText(current: number, prev: number): string {
-  if (prev === 0) return current > 0 ? "新增" : "—";
+/**
+ * 环比文案：上周 0 时不给百分比（避免除零/无意义暴涨）。
+ * 文案随收件人语言变化，故由调用方传入（周报 cron 已按人取字典）。
+ */
+export function trendText(
+  current: number,
+  prev: number,
+  t: { new: string; flat: string; none: string },
+): string {
+  if (prev === 0) return current > 0 ? t.new : t.none;
   const pct = Math.round(((current - prev) / prev) * 100);
-  if (pct === 0) return "持平";
+  if (pct === 0) return t.flat;
   return pct > 0 ? `↑${pct}%` : `↓${Math.abs(pct)}%`;
 }

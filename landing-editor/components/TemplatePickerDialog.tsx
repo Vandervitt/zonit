@@ -184,6 +184,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
   const t = useAdminT().editor.templatePicker;
   const locale = useAdminLocale();
   const [loading, setLoading] = useState(false);
+  const sessionExpiredMsg = useAdminT().common.sessionExpired;
 
   // 两个按钮都先建库并进编辑器；AI 走 ?ai=1，编辑器内默认弹出「AI 一键成页」资料表单。
   async function create(withAi: boolean) {
@@ -195,7 +196,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ templateId: template.id }),
       });
-      if (handleSessionExpired(res, router)) return;
+      if (handleSessionExpired(res, router, sessionExpiredMsg)) return;
       if (res.status === 403) {
         toast.error(t.quotaReached);
         router.push(Routes.Billing);

@@ -4,6 +4,7 @@ import { test, expect } from "@playwright/test";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
 import { createPageFromTemplate, devLogin } from "./helpers/editor";
+import { t } from "./helpers/i18n";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -59,10 +60,10 @@ test.describe("品牌主题", () => {
 
     // 打开「品牌主题」面板：左栏 BlockList 的常驻入口（button，含「配色 / Logo」副标，
     // 故可访问名为「品牌主题配色 / Logo」，用子串匹配；role=button 与右栏面板的 h2 标题区分）。
-    await page.getByRole("button", { name: /品牌主题/ }).click();
+    await page.getByRole("button", { name: new RegExp(t.editor.blockList.branding) }).click();
 
     // 右栏面板容器：以「品牌主题」标题所在的 <main> 为 scope（避免 Hero 等其他面板的 MediaPicker 误命中）
-    const panel = page.locator("main", { has: page.getByRole("heading", { name: "品牌主题" }) });
+    const panel = page.locator("main", { has: page.getByRole("heading", { name: t.editor.blockList.branding }) });
     await expect(panel).toBeVisible();
 
     // 点「玫红」色卡 → 切到 rose 主题（exact 避免与其它色卡按钮的累积可访问名歧义）

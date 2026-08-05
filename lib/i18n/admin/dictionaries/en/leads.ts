@@ -37,6 +37,9 @@ export const leads = {
     pending: "sending",
     off: "off",
   },
+  /** 一键联系按钮的渠道名。WhatsApp / Telegram 是产品名，不译。 */
+  contactKinds: { whatsapp: "WhatsApp", phone: "Call", email: "Email", telegram: "Telegram" },
+
   attribution: {
     none: "This lead carried no UTM or click ID — that's what happens when the ad link has no parameters.",
     utm_source: "Source utm_source",

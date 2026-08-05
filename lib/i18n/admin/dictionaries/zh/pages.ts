@@ -47,6 +47,7 @@ export const pages = {
     deleted: "已删除",
     duplicateFailed: "复制失败",
     duplicated: "已复制为草稿",
+    copySuffix: "副本",
     checkRateLimited: "自检次数已达上限，请稍后再试",
     checkFetchFailed: "抓取页面失败，请确认线上地址可访问",
     checkFailed: "自检失败，请稍后重试",

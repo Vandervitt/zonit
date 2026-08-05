@@ -46,6 +46,7 @@ export const emails = {
     heading: "本周获客周报",
     intro: "过去 7 天你的已发布落地页表现（对比再上一周）：",
     columns: { page: "落地页", views: "曝光", clicks: "CTA 点击", leads: "线索" },
+    trend: { new: "新增", flat: "持平", none: "—" },
     cta: "查看投放分析",
     unsubscribePrefix: "不想收周报？可在",
     unsubscribeLink: "「设置 → 线索通知」",

@@ -39,11 +39,22 @@ describe("summarizeCapiHealth", () => {
 });
 
 describe("explainCapiError", () => {
-  it("把平台原始报错翻成可动手修的说法", () => {
-    expect(explainCapiError("missing_credential")).toContain("凭据");
-    expect(explainCapiError("OAuthException: Invalid OAuth access token")).toContain("过期");
-    expect(explainCapiError("(#200) Permissions error")).toContain("权限");
-    expect(explainCapiError("429 Too Many Requests")).toContain("限流");
+  // 只回原因键，文案在字典（分析页按界面语言展示）——这样这条断言也不再随文案改动而碎。
+  it("把平台原始报错归到可动手修的原因", () => {
+    expect(explainCapiError("missing_credential")).toBe("missingCredential");
+    expect(explainCapiError("OAuthException: Invalid OAuth access token")).toBe("invalidToken");
+    expect(explainCapiError("(#200) Permissions error")).toBe("insufficientScope");
+    expect(explainCapiError("429 Too Many Requests")).toBe("rateLimited");
+    expect(explainCapiError("404 dataset not found")).toBe("wrongDataset");
+  });
+
+  it("每个原因键在两种语言里都有文案", async () => {
+    const { getAdminDictionary } = await import("@/lib/i18n/admin");
+    const keys = ["missingCredential", "invalidToken", "insufficientScope", "wrongDataset", "rateLimited"] as const;
+    for (const locale of ["en", "zh"] as const) {
+      const reasons = getAdminDictionary(locale).analytics.capiHealth.reasons;
+      for (const k of keys) expect(reasons[k], `${locale}.${k}`).toBeTruthy();
+    }
   });
 
   it("认不出的报错返回 null——由 UI 原样展示平台返回，不编造解释", () => {

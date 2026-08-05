@@ -49,13 +49,26 @@ export function summarizeCapiHealth(rows: CapiProviderHealth[]): CapiHealthSumma
   return { verdict, deliveryRate, sent, pending, failed };
 }
 
-/** 失败原因 → 给投放侧看的人话。missing_credential 是最常见的一种。 */
-export function explainCapiError(error: string | null): string | null {
+/** 可解释的失败原因。文案在字典的 analytics.capiHealth.reasons（同名键）。 */
+export type CapiErrorReason =
+  | "missingCredential"
+  | "invalidToken"
+  | "insufficientScope"
+  | "wrongDataset"
+  | "rateLimited";
+
+/**
+ * 平台返回的原始错误 → 可解释的原因键。
+ *
+ * 只回键不回文案：这段结论要显示在分析页上，随后台界面语言变化。
+ * 认不出的错误回 null，由展示层只显示平台原文——编一句可能不准的解释更糟。
+ */
+export function explainCapiError(error: string | null): CapiErrorReason | null {
   if (!error) return null;
-  if (error === "missing_credential") return "找不到凭据：页级与账号级都没有配置，或配置后被删除";
-  if (/401|invalid[_ ]?(access[_ ]?)?token|oauth/i.test(error)) return "Access Token 无效或已过期，需要在平台重新生成";
-  if (/permission|scope|forbidden|403/i.test(error)) return "Token 权限不足：缺少该 Dataset / Pixel 的写入权限";
-  if (/not[_ ]?found|404|invalid.*(dataset|pixel)/i.test(error)) return "Dataset ID / Pixel Code 填错或已删除";
-  if (/rate|429|too many/i.test(error)) return "被平台限流，通常会在重试中自行恢复";
+  if (error === "missing_credential") return "missingCredential";
+  if (/401|invalid[_ ]?(access[_ ]?)?token|oauth/i.test(error)) return "invalidToken";
+  if (/permission|scope|forbidden|403/i.test(error)) return "insufficientScope";
+  if (/not[_ ]?found|404|invalid.*(dataset|pixel)/i.test(error)) return "wrongDataset";
+  if (/rate|429|too many/i.test(error)) return "rateLimited";
   return null;
 }
