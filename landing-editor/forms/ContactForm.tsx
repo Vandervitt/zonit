@@ -6,7 +6,8 @@
 // 「客户怎么找我」，160 个落点的连接由平台负责。每个选项带适用场景与代价说明——
 // 用户未必是专业投手，把选择权交出去而不解释等于把难题原样丢回去。
 import type { LandingPageDraft, LeadChannel, PageContact } from "@/types/schema.draft";
-import { CHANNEL_GUIDANCE, CHANNEL_INTRO, CHANNEL_ORDER } from "../lib/channelGuidance";
+import { CHANNEL_ORDER, type ChannelGuidance } from "../lib/channelGuidance";
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { Field } from "../ui/Field";
 import { TextInput } from "../ui/TextInput";
 
@@ -30,19 +31,22 @@ export function ContactForm({
   onValueChange: (next: PageContact) => void;
   onFloatingChannelChange: (channel: LeadChannel) => void;
 }) {
+  const d = useAdminT().editor;
+  const t = d.channels;
+  const form = d.forms.contact;
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-edge bg-panel-soft p-3 text-xs leading-relaxed text-ink-soft">
-        <p className="font-medium text-ink">{CHANNEL_INTRO.question}</p>
-        <p className="mt-1.5">{CHANNEL_INTRO.needInfo}</p>
-        <p>{CHANNEL_INTRO.noInfo}</p>
-        <p className="mt-1.5 text-ink-muted">{CHANNEL_INTRO.both}</p>
+        <p className="font-medium text-ink">{t.intro.question}</p>
+        <p className="mt-1.5">{t.intro.needInfo}</p>
+        <p>{t.intro.noInfo}</p>
+        <p className="mt-1.5 text-ink-muted">{t.intro.both}</p>
       </div>
 
       <fieldset className="space-y-2">
-        <legend className="mb-2 text-xs font-medium text-ink-soft">主要联系方式</legend>
+        <legend className="mb-2 text-xs font-medium text-ink-soft">{form.primary}</legend>
         {CHANNEL_ORDER.map((channel) => {
-          const g = CHANNEL_GUIDANCE[channel];
+          const g: ChannelGuidance = t[channel];
           const selected = value.primary === channel;
           return (
             <div
@@ -63,7 +67,7 @@ export function ContactForm({
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-medium text-ink">{g.label}</span>
                   <span className="mt-1 block text-xs leading-relaxed text-ink-soft">{g.what}</span>
-                  <span className="mt-1 block text-xs leading-relaxed text-ink-muted">适合：{g.fitFor}</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-ink-muted">{t.fitForPrefix}{g.fitFor}</span>
                   {g.tradeoff ? (
                     <span className="mt-1 block text-xs leading-relaxed text-amber-700">⚠ {g.tradeoff}</span>
                   ) : null}
@@ -73,12 +77,12 @@ export function ContactForm({
               {channel === "form" ? (
                 selected && !leadFormEnabled ? (
                   <p className="mt-2 rounded-md bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-                    请先在左栏打开「留资表单」，否则访客点击主按钮不会有任何反应。
+                    {t.enableFormFirst}
                   </p>
                 ) : null
               ) : (
                 <div className="mt-2.5">
-                  <Field label={`你的 ${g.label}`}>
+                  <Field label={t.yourChannel(g.label)}>
                     <TextInput
                       value={value[channel] ?? ""}
                       onChange={(e) => onValueChange({ ...value, [channel]: e.target.value })}
@@ -94,7 +98,7 @@ export function ContactForm({
 
       {floatingChannel !== null ? (
         <div className="rounded-lg border border-edge bg-panel p-3">
-          <Field label="悬浮按钮挂哪个渠道">
+          <Field label={form.floatingChannel}>
             <select
               value={floatingChannel}
               onChange={(e) => onFloatingChannelChange(e.target.value as LeadChannel)}
@@ -102,14 +106,13 @@ export function ContactForm({
             >
               {FLOATING_CHANNELS.map((c) => (
                 <option key={c} value={c}>
-                  {CHANNEL_GUIDANCE[c].label}
+                  {t[c].label}
                 </option>
               ))}
             </select>
           </Field>
           <p className="mt-1.5 text-xs leading-relaxed text-ink-muted">
-            右下角常驻的小按钮，可以和主按钮不同。主按钮用表单时，这里挂 WhatsApp
-            可以同时接住想直接问一句的访客。
+            {t.floatingHint}
           </p>
         </div>
       ) : null}

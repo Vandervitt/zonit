@@ -340,6 +340,12 @@ export const editor = {
 
   ui: {
     addItem: "添加一项",
+    emptyList: "暂无条目",
+    clear: "清除",
+    uploadImage: "上传图片",
+    uploadVideo: "上传视频",
+    unsplashNotConfigured: "未配置 Unsplash，可用「媒体库 / 上传」，或直接在上方填写图片 URL。",
+    unsplashAddAria: (author: string) => `添加 Unsplash 图片 by ${author}`,
     moveUp: "上移",
     moveDown: "下移",
     delete: "删除",
@@ -371,5 +377,46 @@ export const editor = {
     rewriting: "改写中…",
     button: "AI 改写",
     hint: "点击「AI 改写」生成候选文案",
+  },
+
+  channels: {
+    form: {
+      label: "留资表单",
+      what: "访客填写姓名和联系方式，你在后台收到完整线索。",
+      fitFor: "需要先了解情况才能报价的生意——装修、B2B 采购、留学咨询、医美面诊。",
+      tradeoff: "访客要多花半分钟，但你拿到的信息更完整，而且能导出、能推送到 CRM。",
+    },
+    whatsapp: {
+      label: "WhatsApp",
+      what: "访客点一下直接和你聊天。",
+      fitFor: "东南亚、中东、拉美等 WhatsApp 普及的市场，或者一两句话就能问清楚的生意。",
+      tradeoff: "聊天发生在你自己手机里，平台只能统计有多少人点了，帮不了你记录和提醒。",
+    },
+    phone: {
+      label: "电话",
+      what: "访客点一下直接拨号。",
+      fitFor: "急单生意——管道漏水、开锁、搬家、空调抢修。客户当下就要人来。",
+    },
+    email: {
+      label: "邮箱",
+      what: "访客点一下打开邮件客户端。",
+      fitFor: "正式的 B2B 询盘往来，对方习惯留存书面记录。",
+    },
+    telegram: {
+      label: "Telegram",
+      what: "访客点一下跳到你的 Telegram。",
+      fitFor: "部分东欧、中亚市场与跨境行业。",
+      placeholder: "yourbrand（不用填 @ 和 t.me/）",
+    },
+    intro: {
+      question: "不确定选哪个？先问自己：客户第一次联系你时，你需要先知道些什么才能报价？",
+      needInfo: "需要 → 选留资表单。",
+      noInfo: "不需要，聊两句就能谈 → 选 WhatsApp 或电话。",
+      both: "两个都想要也可以：主按钮用表单，悬浮按钮挂 WhatsApp。",
+    },
+    fitForPrefix: "适合：",
+    yourChannel: (channel: string) => `你的 ${channel}`,
+    enableFormFirst: "请先在左栏打开「留资表单」，否则访客点击主按钮不会有任何反应。",
+    floatingHint: "右下角常驻的小按钮，可以和主按钮不同。主按钮用表单时，这里挂 WhatsApp 可以同时接住想直接问一句的访客。",
   },
 };

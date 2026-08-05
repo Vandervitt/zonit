@@ -1,5 +1,6 @@
 // landing-editor/ui/RepeatableList.tsx
 // 通用可重复列表：增 / 删 / 上下移；每项内容由 renderItem 渲染 prop 决定。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import type { ReactNode } from "react";
 import { Button } from "./Button";
 import { Group } from "./Field";
@@ -18,9 +19,10 @@ export function RepeatableList<T>({
   items,
   onChange,
   create,
-  addLabel = "添加一项",
+  addLabel,
   renderItem,
 }: RepeatableListProps<T>) {
+  const t = useAdminT().editor.ui;
   const update = (i: number, next: T) => onChange(items.map((it, idx) => (idx === i ? next : it)));
   const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i));
   const move = (i: number, dir: -1 | 1) => {
@@ -42,7 +44,7 @@ export function RepeatableList<T>({
     >
       {items.length === 0 ? (
         <div className="rounded-lg border border-dashed border-edge py-4 text-center text-xs text-ink-muted">
-          暂无条目
+          {t.emptyList}
         </div>
       ) : (
         <div className="space-y-2">
@@ -51,18 +53,18 @@ export function RepeatableList<T>({
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-[11px] font-medium text-ink-muted">#{i + 1}</span>
                 <div className="flex items-center gap-0.5">
-                  <Button variant="ghost" onClick={() => move(i, -1)} disabled={i === 0} aria-label="上移">
+                  <Button variant="ghost" onClick={() => move(i, -1)} disabled={i === 0} aria-label={t.moveUp}>
                     ↑
                   </Button>
                   <Button
                     variant="ghost"
                     onClick={() => move(i, 1)}
                     disabled={i === items.length - 1}
-                    aria-label="下移"
+                    aria-label={t.moveDown}
                   >
                     ↓
                   </Button>
-                  <Button variant="danger" onClick={() => remove(i)} aria-label="删除">
+                  <Button variant="danger" onClick={() => remove(i)} aria-label={t.delete}>
                     ✕
                   </Button>
                 </div>

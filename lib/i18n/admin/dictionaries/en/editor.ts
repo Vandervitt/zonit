@@ -364,6 +364,12 @@ export const editor = {
 
   ui: {
     addItem: "Add an item",
+    emptyList: "No items yet",
+    clear: "Clear",
+    uploadImage: "Upload image",
+    uploadVideo: "Upload video",
+    unsplashNotConfigured: "Unsplash isn't configured — use “Media library / Upload”, or paste an image URL above.",
+    unsplashAddAria: (author: string) => `Add Unsplash image by ${author}`,
     moveUp: "Move up",
     moveDown: "Move down",
     delete: "Delete",
@@ -395,5 +401,49 @@ export const editor = {
     rewriting: "Rewriting…",
     button: "AI rewrite",
     hint: "Hit “AI rewrite” to generate alternatives",
+  },
+
+  /** 渠道选择引导（channelGuidance.ts 的展示文案；label 供各处复用）。 */
+  channels: {
+    form: {
+      label: "Lead form",
+      what: "Visitors fill in their name and contact details, and you get the full lead in your dashboard.",
+      fitFor: "Businesses that need to understand the job before quoting — renovation, B2B sourcing, study-abroad consulting, aesthetic consultations.",
+      tradeoff: "It costs the visitor an extra thirty seconds, but you get complete information you can export and push to a CRM.",
+    },
+    whatsapp: {
+      label: "WhatsApp",
+      what: "Visitors tap once and start chatting with you.",
+      fitFor: "Markets where WhatsApp is everywhere — Southeast Asia, the Middle East, Latin America — or businesses where a sentence or two settles it.",
+      tradeoff: "The conversation happens on your own phone. The platform can only count taps; it can't record or remind you.",
+    },
+    phone: {
+      label: "Phone",
+      what: "Visitors tap once to dial.",
+      fitFor: "Urgent jobs — burst pipes, lockouts, removals, emergency AC repair. The customer wants someone now.",
+    },
+    email: {
+      label: "Email",
+      what: "Visitors tap once to open their mail client.",
+      fitFor: "Formal B2B enquiry threads, where the other side expects a written record.",
+    },
+    telegram: {
+      label: "Telegram",
+      what: "Visitors tap once to jump to your Telegram.",
+      fitFor: "Parts of Eastern Europe and Central Asia, and some cross-border trades.",
+      placeholder: "yourbrand (no @ or t.me/ needed)",
+    },
+    intro: {
+      question:
+        "Not sure which to pick? Start here: the first time a customer contacts you, what do you need to know before you can quote?",
+      needInfo: "You need details → choose the lead form.",
+      noInfo: "You don't, a quick chat settles it → choose WhatsApp or phone.",
+      both: "You can have both: form on the primary button, WhatsApp on the floating one.",
+    },
+    fitForPrefix: "Good for: ",
+    yourChannel: (channel: string) => `Your ${channel}`,
+    enableFormFirst: "Turn on “Lead form” in the left panel first, or the primary button won't do anything when visitors tap it.",
+    floatingHint:
+      "The small button pinned to the bottom-right corner; it can differ from the primary button. When the primary button is a form, putting WhatsApp here also catches visitors who just want to ask one thing.",
   },
 };
