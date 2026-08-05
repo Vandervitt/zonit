@@ -5,6 +5,7 @@
 // 注意：本文件是编辑器工具链中唯一允许动态行内样式的地方——缩放比例 / iframe 宽高
 // 均为运行时计算值，无法用静态 Tailwind class 表达，故对 iframe 与外层容器使用
 // 动态 style（transform/width/height）。此豁免仅限预览 chrome，不影响落地页 Tailwind-only。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
@@ -22,6 +23,7 @@ function syncHeadStyles(doc: Document) {
 }
 
 export function PreviewFrame({ virtualWidth, children }: { virtualWidth: number; children: ReactNode }) {
+  const t = useAdminT().editor.panels.preview;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const outerRef = useRef<HTMLDivElement>(null);
   const [body, setBody] = useState<HTMLElement | null>(null);
@@ -83,7 +85,7 @@ export function PreviewFrame({ virtualWidth, children }: { virtualWidth: number;
       <iframe
         ref={iframeRef}
         onLoad={handleLoad}
-        title="落地页实时预览"
+        title={t.frameTitle}
         className="border-0 bg-white"
         style={{
           width: virtualWidth,

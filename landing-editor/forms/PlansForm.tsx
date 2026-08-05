@@ -1,6 +1,7 @@
 "use client";
 // landing-editor/forms/PlansForm.tsx
 // 套餐：name / desc / badge / label（展示文案，非价格）/ 价值点 / 倒计时 / CTA。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import type { PlansSection, PlanItem } from "@/types/schema.draft";
 import { Field } from "../ui/Field";
 import { TextInput } from "../ui/TextInput";
@@ -10,47 +11,51 @@ import { TitleSubtitleFields, CtaButtonField, Optional } from "./fields";
 import { createPlanItem } from "../store/defaults";
 
 export function PlansForm({ value, onChange }: { value: PlansSection; onChange: (v: PlansSection) => void }) {
+  const d = useAdminT().editor;
+  const t = d.forms.plans;
+  const f = d.fields;
+  const cd = d.forms.countdown;
   const patch = (p: Partial<PlansSection>) => onChange({ ...value, ...p });
   return (
     <div className="space-y-3">
       <TitleSubtitleFields value={value} patch={patch} />
       <RepeatableList<PlanItem>
-        label="套餐项"
-        addLabel="添加套餐"
+        label={t.items}
+        addLabel={t.add}
         items={value.items}
         onChange={(items) => patch({ items })}
         create={createPlanItem}
         renderItem={(item, set) => (
           <>
-            <Field label="名称">
+            <Field label={f.name}>
               <TextInput value={item.name} onChange={(e) => set({ ...item, name: e.target.value })} />
             </Field>
-            <Field label="描述">
+            <Field label={f.description}>
               <TextArea value={item.description} onChange={(e) => set({ ...item, description: e.target.value })} />
             </Field>
             <div className="grid grid-cols-2 gap-2">
-              <Field label="角标 Badge">
-                <TextInput value={item.badge ?? ""} onChange={(e) => set({ ...item, badge: e.target.value || undefined })} placeholder="推荐" />
+              <Field label={t.badge}>
+                <TextInput value={item.badge ?? ""} onChange={(e) => set({ ...item, badge: e.target.value || undefined })} placeholder={t.badgePlaceholder} />
               </Field>
-              <Field label="标签文案">
-                <TextInput value={item.label ?? ""} onChange={(e) => set({ ...item, label: e.target.value || undefined })} placeholder="非价格展示文案" />
+              <Field label={f.badgeText}>
+                <TextInput value={item.label ?? ""} onChange={(e) => set({ ...item, label: e.target.value || undefined })} placeholder={t.nonPriceText} />
               </Field>
             </div>
             <RepeatableList<string>
-              label="价值点"
-              addLabel="添加价值点"
+              label={t.benefits}
+              addLabel={t.addBenefit}
               items={item.valueProps}
               onChange={(valueProps) => set({ ...item, valueProps })}
               create={() => ""}
               renderItem={(line, setLine) => <TextInput value={line} onChange={(e) => setLine(e.target.value)} />}
             />
             <Optional
-              label="倒计时"
+              label={cd.title}
               present={item.countdown !== undefined}
               onToggle={(on) => set({ ...item, countdown: on ? { endsAt: "" } : undefined })}
             >
               {item.countdown ? (
-                <Field label="截止时间（带时区 ISO）">
+                <Field label={t.deadline}>
                   <TextInput
                     value={item.countdown.endsAt}
                     onChange={(e) => set({ ...item, countdown: { endsAt: e.target.value } })}

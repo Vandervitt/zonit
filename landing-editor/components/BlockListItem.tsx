@@ -1,6 +1,7 @@
 "use client";
 // landing-editor/components/BlockListItem.tsx
 // 可拖拽排序的 section 行（react-dnd）。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useDrag, useDrop } from "react-dnd";
 import { SECTION_REGISTRY } from "@/types/schema.draft";
 import { useEditorDispatch, type EditorSection } from "../store/editorStore";
@@ -21,6 +22,7 @@ export function SectionRow({
   index: number;
   selected: boolean;
 }) {
+  const t = useAdminT().editor.ui;
   const dispatch = useEditorDispatch();
 
   const [, drop] = useDrop<DragItem>({
@@ -61,17 +63,17 @@ export function SectionRow({
         {SECTION_REGISTRY[section.type].label}
       </button>
       <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-        <Button variant="ghost" onClick={() => dispatch({ kind: "moveSection", key: section._key, dir: -1 })} aria-label="上移">
+        <Button variant="ghost" onClick={() => dispatch({ kind: "moveSection", key: section._key, dir: -1 })} aria-label={t.moveUp}>
           ↑
         </Button>
         <Button
           variant="ghost"
           onClick={() => dispatch({ kind: "moveSection", key: section._key, dir: 1 })}
-          aria-label="下移"
+          aria-label={t.moveDown}
         >
           ↓
         </Button>
-        <Button variant="danger" onClick={() => dispatch({ kind: "removeSection", key: section._key })} aria-label="删除">
+        <Button variant="danger" onClick={() => dispatch({ kind: "removeSection", key: section._key })} aria-label={t.delete}>
           ✕
         </Button>
       </div>

@@ -14,23 +14,25 @@ export function MediaLibraryTab({
 }) {
   const t = useAdminT().editor.ui;
   const [items, setItems] = useState<MediaItem[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // 存错误**种类**而非已翻译的文案：在 effect 里翻译会把当时的语言固化下来，
+  // 且会让 t 成为 effect 依赖，语言一变就重新拉一次媒体库。
+  const [error, setError] = useState<"unauthorized" | "failed" | null>(null);
 
   useEffect(() => {
     let active = true;
     fetch(`/api/media?type=${accept}`)
       .then((res) => {
-        if (!res.ok) throw new Error(res.status === 401 ? t.unauthorized : `HTTP ${res.status}`);
+        if (!res.ok) throw new Error(res.status === 401 ? "unauthorized" : "failed");
         return res.json() as Promise<MediaItem[]>;
       })
       .then((data) => active && setItems(data))
-      .catch((e) => active && setError(e instanceof Error ? e.message : t.loadFailed));
+      .catch((e) => active && setError(e instanceof Error && e.message === "unauthorized" ? "unauthorized" : "failed"));
     return () => {
       active = false;
     };
   }, [accept]);
 
-  if (error) return <div className="py-10 text-center text-sm text-red-600">{error}</div>;
+  if (error) return <div className="py-10 text-center text-sm text-red-600">{error === "unauthorized" ? t.unauthorized : t.loadFailed}</div>;
   if (items === null) return <div className="py-10 text-center text-sm text-ink-muted">{t.loading}</div>;
   if (items.length === 0)
     return <div className="py-10 text-center text-sm text-ink-muted">{t.emptyLibrary}</div>;

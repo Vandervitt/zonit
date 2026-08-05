@@ -1,11 +1,13 @@
 "use client";
 // landing-editor/components/AddSectionMenu.tsx
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useState } from "react";
 import { SECTION_REGISTRY } from "@/types/schema.draft";
 import { useEditorState, useEditorDispatch } from "../store/editorStore";
 import { Button } from "../ui/Button";
 
 export function AddSectionMenu() {
+  const t = useAdminT().editor.panels.blockList;
   const state = useEditorState();
   const dispatch = useEditorDispatch();
   const [open, setOpen] = useState(false);
@@ -16,7 +18,7 @@ export function AddSectionMenu() {
   return (
     <div className="space-y-1.5">
       <Button variant="subtle" className="w-full" onClick={() => setOpen((o) => !o)}>
-        + 添加区块
+        {t.add}
       </Button>
       {open ? (
         <div className="grid grid-cols-2 gap-1.5 rounded-lg border border-edge bg-panel p-2">
@@ -27,7 +29,7 @@ export function AddSectionMenu() {
                 key={meta.type}
                 type="button"
                 disabled={disabled}
-                title={disabled ? "该区块只能存在一个" : undefined}
+                title={disabled ? t.singletonHint : undefined}
                 onClick={() => {
                   dispatch({ kind: "addSection", sectionType: meta.type });
                   setOpen(false);

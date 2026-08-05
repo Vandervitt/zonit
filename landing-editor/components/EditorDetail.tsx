@@ -1,6 +1,7 @@
 "use client";
 // landing-editor/components/EditorDetail.tsx
 // 右栏：渲染当前选中节点的表单。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import type { ReactNode } from "react";
 import { SECTION_REGISTRY } from "@/types/schema.draft";
 import { useEditorState, useEditorDispatch, CONTACT_ID, HERO_ID, FOOTER_ID, FLOATING_ID, LEADFORM_ID, BRANDING_ID, SEO_ID } from "../store/editorStore";
@@ -14,6 +15,7 @@ import { LeadFormForm } from "../forms/LeadFormForm";
 import { renderSectionForm } from "../registry/sectionForms";
 
 export function EditorDetail() {
+  const t = useAdminT().editor.panels.detail;
   const state = useEditorState();
   const dispatch = useEditorDispatch();
   const id = state.selectedId;
@@ -22,7 +24,7 @@ export function EditorDetail() {
   let body: ReactNode = null;
 
   if (id === CONTACT_ID) {
-    title = "联系方式";
+    title = t.contact;
     body = (
       <ContactForm
         value={state.contact}
@@ -40,23 +42,23 @@ export function EditorDetail() {
       />
     );
   } else if (id === HERO_ID) {
-    title = "首屏 Hero";
+    title = t.hero;
     body = <HeroForm value={state.hero} onChange={(v) => dispatch({ kind: "updateHero", value: v })} />;
   } else if (id === FOOTER_ID) {
-    title = "页脚 Footer";
+    title = t.footer;
     body = <FooterForm value={state.footer} onChange={(v) => dispatch({ kind: "updateFooter", value: v })} />;
   } else if (id === FLOATING_ID && state.floatingButton) {
-    title = "悬浮按钮";
+    title = t.floatingButton;
     body = (
       <FloatingButtonForm value={state.floatingButton} onChange={(v) => dispatch({ kind: "updateFloating", value: v })} />
     );
   } else if (id === LEADFORM_ID && state.leadForm) {
-    title = "留资表单";
+    title = t.leadForm;
     body = (
       <LeadFormForm value={state.leadForm} onChange={(v) => dispatch({ kind: "updateLeadForm", value: v })} />
     );
   } else if (id === BRANDING_ID) {
-    title = "品牌主题";
+    title = t.branding;
     body = <BrandingForm value={state.branding} onChange={(v) => dispatch({ kind: "updateBranding", value: v })} />;
   } else if (id === SEO_ID) {
     title = "SEO";
@@ -74,7 +76,7 @@ export function EditorDetail() {
   if (!body) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-ink-muted">
-        选择左侧区块开始编辑
+        {t.empty}
       </div>
     );
   }

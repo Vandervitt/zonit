@@ -346,6 +346,7 @@ export const editor = {
       defaultSuffix: " (default)",
       none: "Don't show",
       settingsLink: "Settings · Business entity",
+      noProfile: ["No business entity on your account yet. Add one in ", " and every page can use it."],
       privacy: "Privacy policy",
       privacyHint: "This text appears in the footer and also becomes the page's /privacy policy page.",
       terms: "Terms of service",
@@ -445,5 +446,48 @@ export const editor = {
     enableFormFirst: "Turn on “Lead form” in the left panel first, or the primary button won't do anything when visitors tap it.",
     floatingHint:
       "The small button pinned to the bottom-right corner; it can differ from the primary button. When the primary button is a form, putting WhatsApp here also catches visitors who just want to ask one thing.",
+  },
+
+  panels: {
+    share: {
+      title: "Share preview",
+      intro:
+        "Generate a shareable preview link so others can see the page without connecting a domain. The link carries a “Preview” watermark, isn't indexed by search engines, sends no campaign data, and expires after 7 days by default. For real campaigns, connect your own domain and publish.",
+      generate: "Create share link",
+      generating: "Creating…",
+      failed: "Could not create the link. Please try again.",
+      copy: "Copy",
+      copied: "Copied",
+      expiresAt: (time: string) => `Expires ${time}`,
+      reset: "Reset link (invalidates the one already shared)",
+      done: "Done",
+    },
+    detail: {
+      contact: "Contact",
+      hero: "Hero",
+      footer: "Footer",
+      floatingButton: "Floating button",
+      leadForm: "Lead form",
+      branding: "Brand theme",
+      empty: "Pick a section on the left to start editing",
+    },
+    compliance: {
+      tooltip: "Ad platform policy requirements; they don't block publishing",
+      count: (n: number) => `${n} compliance notes`,
+      title: "Ad platforms may look at this (doesn't block publishing)",
+      close: "Close",
+      jumpTooltip: "Click to jump to the section",
+      footnote: "These are items the platforms state in their policies — not our score, and not a prediction of whether you'll pass review.",
+    },
+    validation: {
+      pass: "All checks passed",
+      count: (n: number) => `${n} checks failed`,
+      title: (n: number) => `Resolve before publishing (${n})`,
+      close: "Close",
+      jumpTooltip: "Click to jump to the section",
+    },
+    preview: { live: "Live preview", mobile: "Mobile", desktop: "Desktop", frameTitle: "Landing page live preview" },
+    blockList: { add: "+ Add section", singletonHint: "This section can only appear once" },
+    autoSave: { nameTaken: "That page name is taken — pick another" },
   },
 };
