@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { fontBody, fontHead, fontMono } from "@/lib/fonts";
+import { fonts } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { categoryLabel, conversionLabel, archetypeLabel } from "@/landing-editor/samples/templateFilter";
@@ -12,7 +12,6 @@ import { localePath } from "@/lib/i18n/routes";
 import { buildUnsplashImageSources } from "@/lib/images/unsplash";
 import type { Locale } from "@/lib/i18n/config";
 
-const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
 
 export function templateGalleryMetadata(locale: Locale): Metadata {
   const t = getDictionary(locale).templates.meta;

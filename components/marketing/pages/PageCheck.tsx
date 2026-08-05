@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { fontBody, fontHead, fontMono } from "@/lib/fonts";
+import { fonts } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { Routes, guideDetailPath } from "@/lib/constants";
 import { marketingMetadata } from "@/lib/seo/site";
@@ -10,7 +10,6 @@ import { PageCheckForm } from "./PageCheckForm";
 import { getGuide } from "@/app/guides/_content";
 import type { Locale } from "@/lib/i18n/config";
 
-const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
 
 /** 工具页本身要可索引（它是获客入口）；报告页则 noindex，见 PageCheckReport。 */
 export function pageCheckMetadata(locale: Locale): Metadata {

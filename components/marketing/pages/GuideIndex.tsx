@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { fontBody, fontHead, fontMono } from "@/lib/fonts";
+import { fonts } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { Routes, guideDetailPath } from "@/lib/constants";
 import { marketingMetadata } from "@/lib/seo/site";
@@ -9,7 +9,6 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import type { Locale } from "@/lib/i18n/config";
 
-const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
 
 export function guideIndexMetadata(locale: Locale): Metadata {
   const t = getDictionary(locale).guides.meta;

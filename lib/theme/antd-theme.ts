@@ -23,8 +23,11 @@ export const adminTheme: ThemeConfig = {
     colorWarning: SEMANTIC.warning,
     colorError: SEMANTIC.error,
     borderRadius: 10,
+    // 跟随全站系统字体栈（--font-sans 由 styles/theme.css 定义）。
+    // 保留一段兜底：antd 的部分组件会把 token 写进 Shadow DOM 或内联样式，
+    // 那里取不到 Tailwind 主题变量时不至于掉回浏览器默认衬线体。
     fontFamily:
-      'var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+      'var(--font-sans, ui-sans-serif), system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif',
     colorBgLayout: "#f6fafb",
     colorTextBase: "#334155",
   },
