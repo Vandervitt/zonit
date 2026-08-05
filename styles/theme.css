@@ -126,9 +126,16 @@
   --color-glow-3: #9fe6fd;
 }
 
+/* 系统字体栈（不下载 Web 字体，理由见 lib/fonts.ts）。
+ * 中文字形显式列出：拉丁字体不含汉字，不写死则各平台的兜底顺序不一致，
+ * 常落到 Arial → 宋体这种观感很差的组合。 */
 @theme inline {
-  --font-sans: var(--font-body, ui-sans-serif, system-ui, sans-serif);
-  --font-display: var(--font-head, var(--font-body, ui-sans-serif, sans-serif));
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif;
+  /* 系统字体里没有各平台观感一致的展示体，标题与正文同栈；
+     层级仍由字重、字号与字距拉开。 */
+  --font-display: var(--font-sans);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);

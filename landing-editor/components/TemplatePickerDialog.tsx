@@ -27,7 +27,8 @@ import { categoryLabel, filterTemplates } from "../samples/templateFilter";
 // 编辑器属租户后台，不参与营销面国际化，固定取中文。
 const ADMIN_LOCALE = "zh" as const;
 
-const monoCls = "font-[family-name:var(--font-mono-app)]";
+// --font-mono-app 随 next/font 一起去掉了；font-mono 工具类直接解析到系统等宽栈。
+const monoCls = "font-mono";
 
 interface CategoryChip {
   value: string;

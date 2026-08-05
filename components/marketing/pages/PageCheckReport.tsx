@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { fontBody, fontHead, fontMono } from "@/lib/fonts";
+import { fonts } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { Routes, guideDetailPath } from "@/lib/constants";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -12,7 +12,6 @@ import { PageCheckVerify } from "./PageCheckVerify";
 import type { Locale } from "@/lib/i18n/config";
 import type { FindingLevel } from "@/lib/tools/report";
 
-const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
 
 /**
  * 报告页一律 noindex。

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { fontBody, fontHead, fontMono } from "@/lib/fonts";
+import { fonts } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { loadTemplateDraft } from "@/landing-editor/samples/registry.drafts";
@@ -42,7 +42,6 @@ function toDisplayDraft(draft: LandingPageDraft): LandingPageDraft {
   return d;
 }
 
-const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
 
 export function templateStaticParams() {
   return TEMPLATES.map((t) => ({ slug: t.id }));
