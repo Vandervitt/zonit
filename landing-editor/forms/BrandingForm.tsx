@@ -1,15 +1,19 @@
 "use client";
 // landing-editor/forms/BrandingForm.tsx
 // 品牌主题配置：6 套主题色卡选择 + Logo / favicon 上传。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import type { Branding } from "@/types/schema.draft";
 import { THEME_META } from "@/landing-renderer/theme";
 import { Field } from "../ui/Field";
 import { MediaPicker } from "../ui/MediaPicker";
 
 export function BrandingForm({ value, onChange }: { value: Branding; onChange: (v: Branding) => void }) {
+  const d = useAdminT().editor;
+  const t = d.forms.branding;
+  const f = d.fields;
   return (
     <div className="space-y-4">
-      <Field label="主题配色">
+      <Field label={t.theme}>
         <div className="grid grid-cols-3 gap-2">
           {THEME_META.map((m) => (
             <button
@@ -27,10 +31,10 @@ export function BrandingForm({ value, onChange }: { value: Branding; onChange: (
           ))}
         </div>
       </Field>
-      <Field label="品牌 Logo（宽图，显示在首屏与页脚）">
+      <Field label={t.logo}>
         <MediaPicker value={value.logo ?? ""} accept="image" onChange={(src) => onChange({ ...value, logo: src })} />
       </Field>
-      <Field label="Favicon（方形小图，浏览器标签图标）">
+      <Field label={t.favicon}>
         <MediaPicker value={value.favicon ?? ""} accept="image" onChange={(src) => onChange({ ...value, favicon: src })} />
       </Field>
     </div>

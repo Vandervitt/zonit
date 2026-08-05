@@ -1,5 +1,6 @@
 "use client";
 // landing-editor/forms/HeroForm.tsx
+import { useAdminT } from "@/lib/i18n/admin/context";
 import type { HeroSection } from "@/types/schema.draft";
 import { Field } from "../ui/Field";
 import { TextInput } from "../ui/TextInput";
@@ -7,57 +8,60 @@ import { TextArea } from "../ui/TextArea";
 import { BadgeField, CtaButtonField, ImageRefField, MediaField, Optional } from "./fields";
 
 export function HeroForm({ value, onChange }: { value: HeroSection; onChange: (v: HeroSection) => void }) {
+  const d = useAdminT().editor;
+  const t = d.forms.hero;
+  const f = d.fields;
   const patch = (p: Partial<HeroSection>) => onChange({ ...value, ...p });
 
   return (
     <div className="space-y-3">
-      <Field label="主标题">
+      <Field label={f.title}>
         <TextInput value={value.title} onChange={(e) => patch({ title: e.target.value })} />
       </Field>
-      <Field label="副标题">
+      <Field label={f.subtitle}>
         <TextArea value={value.subtitle ?? ""} onChange={(e) => patch({ subtitle: e.target.value || undefined })} />
       </Field>
 
       <Optional
-        label="顶部标签 Badge"
+        label={t.badge}
         present={value.badge !== undefined}
         onToggle={(on) => patch({ badge: on ? { text: "" } : undefined })}
       >
         {value.badge ? <BadgeField value={value.badge} onChange={(v) => patch({ badge: v })} /> : null}
       </Optional>
 
-      <CtaButtonField label="主按钮 CTA" value={value.cta} onChange={(v) => patch({ cta: v })} />
+      <CtaButtonField label={t.primaryCta} value={value.cta} onChange={(v) => patch({ cta: v })} />
 
       <Optional
-        label="副按钮"
+        label={t.secondaryCta}
         present={value.secondaryCta !== undefined}
         onToggle={(on) => patch({ secondaryCta: on ? { text: "", target: { kind: "url" as const, url: "" } } : undefined })}
       >
         {value.secondaryCta ? (
-          <CtaButtonField label="副按钮" value={value.secondaryCta} onChange={(v) => patch({ secondaryCta: v })} />
+          <CtaButtonField label={t.secondaryCta} value={value.secondaryCta} onChange={(v) => patch({ secondaryCta: v })} />
         ) : null}
       </Optional>
 
-      <Field label="背书文字">
+      <Field label={t.endorsement}>
         <TextInput
           value={value.endorsementText ?? ""}
           onChange={(e) => patch({ endorsementText: e.target.value || undefined })}
-          placeholder="如：10 分钟内回复"
+          placeholder={t.endorsementPlaceholder}
         />
       </Field>
 
       <Optional
-        label="背景图（缺省用主题色兜底）"
+        label={t.backgroundImage}
         present={value.backgroundImage !== undefined}
         onToggle={(on) => patch({ backgroundImage: on ? { src: "" } : undefined })}
       >
         {value.backgroundImage ? (
-          <ImageRefField label="背景图" value={value.backgroundImage} onChange={(v) => patch({ backgroundImage: v })} />
+          <ImageRefField label={f.backgroundImage} value={value.backgroundImage} onChange={(v) => patch({ backgroundImage: v })} />
         ) : null}
       </Optional>
 
       <Optional
-        label="产品展示（图片 / 视频）"
+        label={t.showcase}
         present={value.showcase !== undefined}
         onToggle={(on) => patch({ showcase: on ? { type: "image", src: "", alt: "" } : undefined })}
       >
