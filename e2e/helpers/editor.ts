@@ -6,6 +6,7 @@
 // 让它们同时长期红着。入口只应有一份描述。
 
 import { expect, type Page } from "@playwright/test";
+import { t } from "./i18n";
 
 /** Dev Login（仅 development 生效）建立会话并落到后台。 */
 export async function devLogin(page: Page): Promise<void> {
@@ -23,7 +24,7 @@ export async function openTemplateDialog(page: Page) {
   await page.goto("/admin/landing-pages");
   const dialog = page.getByRole("dialog");
   await expect(async () => {
-    await page.getByRole("button", { name: "新建" }).click();
+    await page.getByRole("button", { name: t.pages.create }).click();
     await expect(dialog).toBeVisible({ timeout: 2_000 });
   }).toPass({ timeout: 30_000 });
   return dialog;
@@ -36,12 +37,12 @@ export async function openTemplateDialog(page: Page) {
  */
 export async function createPageFromTemplate(page: Page, templateName = "Aurae Skincare"): Promise<void> {
   const dialog = await openTemplateDialog(page);
-  await dialog.getByRole("searchbox", { name: "搜索模板名称" }).fill(templateName);
-  await dialog.getByRole("button", { name: "直接编辑" }).first().click();
+  await dialog.getByRole("searchbox", { name: t.editor.templatePicker.searchAria }).fill(templateName);
+  await dialog.getByRole("button", { name: t.editor.templatePicker.edit }).first().click();
   await page.waitForURL(/\/admin\/editor\/[^/]+$/, { timeout: 30_000 });
 }
 
-/** 点左栏面板入口（名称按子串匹配，如 /首屏 Hero/、/品牌主题/、/页脚/）。 */
+/** 点左栏面板入口（名称按子串匹配；文案取自 t.editor.blockList / t.editor.panels.detail）。 */
 export async function selectPanel(page: Page, name: RegExp): Promise<void> {
   await page.getByRole("button", { name }).click();
 }

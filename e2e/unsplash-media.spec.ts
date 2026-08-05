@@ -5,6 +5,7 @@
 import { test, expect } from "@playwright/test";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
+import { t, rx } from "./helpers/i18n";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -96,15 +97,15 @@ test.describe("素材库 Unsplash 导入", () => {
 
     // 进素材库，打开 Unsplash 弹窗并搜索
     await page.goto("/admin/media");
-    await page.getByRole("button", { name: "从 Unsplash 添加" }).click();
-    await page.getByLabel("搜索 Unsplash 图片").fill("beach");
-    await page.getByLabel("搜索 Unsplash 图片").press("Enter");
+    await page.getByRole("button", { name: t.media.unsplash.open }).click();
+    await page.getByLabel(t.media.unsplash.searchAria).fill("beach");
+    await page.getByLabel(t.media.unsplash.searchAria).press("Enter");
 
     // 点击导入（stub 返回单张，署名 E2E Author）
-    await page.getByRole("button", { name: /添加 Unsplash 图片 by E2E Author/ }).click();
+    await page.getByRole("button", { name: rx(t.media.unsplash.addAria("E2E Author")) }).click();
 
     // 导入成功提示出现后再关弹窗，避免在请求飞行中按 Escape 打断导入。
-    await expect(page.getByText("已添加到素材库")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(t.media.unsplash.added)).toBeVisible({ timeout: 10_000 });
     await page.keyboard.press("Escape");
     await expect(page.getByRole("link", { name: "E2E Author" })).toBeVisible({ timeout: 10_000 });
   });

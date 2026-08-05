@@ -57,6 +57,7 @@ export async function sweepPublishQuota(now: Date, appUrl: string): Promise<Swee
             planLabel: c.planLabel,
             daysLeft: GRACE_DAYS,
             appUrl,
+            locale: c.locale,
           });
           break;
 
@@ -69,6 +70,7 @@ export async function sweepPublishQuota(now: Date, appUrl: string): Promise<Swee
             planLabel: c.planLabel,
             daysLeft: c.overQuotaSince ? daysLeftOf(c.overQuotaSince, now, GRACE_DAYS) : 1,
             appUrl,
+            locale: c.locale,
           });
           break;
 
@@ -91,6 +93,7 @@ export async function sweepPublishQuota(now: Date, appUrl: string): Promise<Swee
             daysLeft: 0,
             unpublishedCount: n,
             appUrl,
+            locale: c.locale,
           });
           break;
         }

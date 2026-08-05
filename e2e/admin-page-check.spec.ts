@@ -8,6 +8,7 @@ import { test, expect } from "@playwright/test";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
 import { devLogin } from "./helpers/editor";
+import { t } from "./helpers/i18n";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -109,8 +110,8 @@ test.describe("后台落地页自检", () => {
     // 列表页上，已发布行有自检入口、草稿行没有
     await page.goto("/admin/landing-pages");
     const pubRow = page.getByRole("row").filter({ hasText: "自检-已发布页" });
-    await expect(pubRow.getByText("自检", { exact: true })).toBeVisible({ timeout: 15_000 });
+    await expect(pubRow.getByText(t.pages.actions.check, { exact: true })).toBeVisible({ timeout: 15_000 });
     const draftRow = page.getByRole("row").filter({ hasText: "自检-草稿页" });
-    await expect(draftRow.getByText("自检", { exact: true })).toHaveCount(0);
+    await expect(draftRow.getByText(t.pages.actions.check, { exact: true })).toHaveCount(0);
   });
 });

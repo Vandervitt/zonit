@@ -6,6 +6,7 @@ import { test, expect } from "@playwright/test";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
 import { createPageFromTemplate, devLogin, selectPanel } from "./helpers/editor";
+import { t, rx } from "./helpers/i18n";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -50,16 +51,16 @@ test.describe("编辑器选图体验", () => {
 
     // Hero 背景图字段默认折叠（Optional 开关关闭），先勾选启用以露出「选图」按钮。
     // 参考 HeroForm.tsx：背景图字段 label 为「背景图（缺省用主题色兜底）」。
-    const bgToggle = page.getByRole("checkbox", { name: /背景图（缺省用主题色兜底）/ });
+    const bgToggle = page.getByRole("checkbox", { name: rx(t.editor.forms.hero.backgroundImage) });
     await expect(bgToggle).toBeVisible({ timeout: 30_000 });
     await bgToggle.check();
 
     // 点「选图」按钮打开弹窗
-    await page.getByRole("button", { name: "选图" }).first().click();
+    await page.getByRole("button", { name: t.editor.ui.pickImage }).first().click();
 
     // 三个 Tab 存在（图片字段：媒体库 / 上传 / Unsplash）
-    await expect(page.getByRole("button", { name: "媒体库" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "上传" })).toBeVisible();
+    await expect(page.getByRole("button", { name: t.editor.ui.mediaLibrary })).toBeVisible();
+    await expect(page.getByRole("button", { name: t.editor.ui.upload })).toBeVisible();
     await expect(page.getByRole("button", { name: "Unsplash" })).toBeVisible();
 
     // 切 Unsplash 并搜索。
@@ -67,11 +68,11 @@ test.describe("编辑器选图体验", () => {
     // demo 提示。原来只断言「未配置 Unsplash」，于是在**有** key 的开发机上必红
     // ——这是环境依赖，不是产品缺陷。这里只要求搜索有确定结果、且不是失败态。
     await page.getByRole("button", { name: "Unsplash" }).click();
-    await page.getByPlaceholder(/搜索 Unsplash/).fill("beach");
-    await page.getByRole("button", { name: "搜索" }).click();
+    await page.getByPlaceholder(rx(t.editor.ui.unsplashSearchPlaceholder)).fill("beach");
+    await page.getByRole("button", { name: t.editor.ui.unsplashSearch }).click();
     const settled = page
-      .getByText(/未配置 Unsplash/)
-      .or(page.getByRole("button", { name: /添加 Unsplash 图片/ }).first());
+      .getByText(rx(t.editor.ui.unsplashNotConfigured.slice(0, 14)))
+      .or(page.getByRole("button", { name: rx(t.editor.ui.unsplashAddAria("").trim()) }).first());
     await expect(settled.first()).toBeVisible({ timeout: 20_000 });
     await expect(page.getByText("搜索失败，请重试")).toHaveCount(0);
   });

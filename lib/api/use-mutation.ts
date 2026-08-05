@@ -88,5 +88,5 @@ export function useMutation<TArgs = void, TData = unknown>(
 function toApiError(err: unknown): ApiError {
   if (err instanceof ApiError) return err;
   if (err instanceof Error) return new ApiError(0, err.message);
-  return new ApiError(0, "未知错误");
+  return new ApiError(0, "unknown_error");
 }

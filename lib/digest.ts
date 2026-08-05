@@ -16,6 +16,8 @@ export interface DigestPageStats {
 export interface UserDigest {
   userId: string;
   email: string;
+  /** 收件人界面语言（users.locale）；邮件异步发送，读不到请求上下文。 */
+  locale: string | null;
   pages: DigestPageStats[];
 }
 
@@ -34,7 +36,7 @@ export async function computeWeeklyDigests(now: Date): Promise<UserDigest[]> {
 
   const [pagesRes, leadsRes] = await Promise.all([
     pool.query(
-      `SELECT p.user_id, p.id AS page_id, p.name, u.email,
+      `SELECT p.user_id, p.id AS page_id, p.name, u.email, u.locale,
               COUNT(*) FILTER (WHERE a.event = 'page_view' AND a.created_at >= $1)::int  AS views,
               COUNT(*) FILTER (WHERE a.event = 'cta_click' AND a.created_at >= $1)::int  AS cta_clicks,
               COUNT(*) FILTER (WHERE a.event = 'page_view' AND a.created_at <  $1)::int  AS prev_views,
@@ -47,7 +49,7 @@ export async function computeWeeklyDigests(now: Date): Promise<UserDigest[]> {
           AND u.disabled_at IS NULL
           AND u.email IS NOT NULL
           AND COALESCE(s.weekly_digest_enabled, TRUE)
-        GROUP BY p.user_id, p.id, p.name, u.email`,
+        GROUP BY p.user_id, p.id, p.name, u.email, u.locale`,
       [since, prevSince, now],
     ),
     pool.query(
@@ -80,7 +82,7 @@ export async function computeWeeklyDigests(now: Date): Promise<UserDigest[]> {
     };
     let d = byUser.get(r.user_id);
     if (!d) {
-      d = { userId: r.user_id, email: r.email, pages: [] };
+      d = { userId: r.user_id, email: r.email, locale: r.locale, pages: [] };
       byUser.set(r.user_id, d);
     }
     d.pages.push(stats);
@@ -89,10 +91,17 @@ export async function computeWeeklyDigests(now: Date): Promise<UserDigest[]> {
   return [...byUser.values()].filter((d) => !d.pages.every(allZero));
 }
 
-/** 环比文案：上周 0 时不给百分比（避免除零/无意义暴涨）。 */
-export function trendText(current: number, prev: number): string {
-  if (prev === 0) return current > 0 ? "新增" : "—";
+/**
+ * 环比文案：上周 0 时不给百分比（避免除零/无意义暴涨）。
+ * 文案随收件人语言变化，故由调用方传入（周报 cron 已按人取字典）。
+ */
+export function trendText(
+  current: number,
+  prev: number,
+  t: { new: string; flat: string; none: string },
+): string {
+  if (prev === 0) return current > 0 ? t.new : t.none;
   const pct = Math.round(((current - prev) / prev) * 100);
-  if (pct === 0) return "持平";
+  if (pct === 0) return t.flat;
   return pct > 0 ? `↑${pct}%` : `↓${Math.abs(pct)}%`;
 }

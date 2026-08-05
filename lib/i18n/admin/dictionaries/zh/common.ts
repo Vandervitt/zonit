@@ -8,6 +8,7 @@ export const common = {
   empty: "这里还没有内容",
   saved: "已保存",
   saveFailed: "保存失败，请重试",
+  sessionExpired: "登录状态已失效，请重新登录",
   retry: "重试",
   loadError: (label: string, status: number | null) =>
     `${label}加载失败${status === null ? "" : `（HTTP ${status}）`}，当前显示可能不完整`,

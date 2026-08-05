@@ -2,6 +2,7 @@
 // landing-editor/ui/media/UnsplashTab.tsx
 // Unsplash 搜索：GET /api/unsplash/search → 网格；点选即下载落库（importUnsplashMedia），
 // 回传 Blob url 作 src、alt_description 作 alt。后端无 key 时显示提示。
+import { uploadErrorText } from "@/lib/media-upload";
 import { useAdminT } from "@/lib/i18n/admin/context";
 import { useState } from "react";
 import { TextInput } from "../TextInput";
@@ -44,7 +45,7 @@ export function UnsplashTab({ onPick }: { onPick: (picked: { src: string; alt: s
       const item = await importUnsplashMedia(toImportInput(p));
       onPick({ src: item.url, alt: p.alt_description ?? "" });
     } catch (e) {
-      setImportError(e instanceof Error ? e.message : t.unsplashAddFailed);
+      setImportError(uploadErrorText(e, t.unsplashAddFailed, t.uploadErrors));
     } finally {
       setImportingId(null);
     }

@@ -6,6 +6,8 @@ import type { QuotaPage } from "@/lib/publish-quota";
 export interface QuotaCandidate {
   userId: string;
   email: string;
+  /** 收件人界面语言（users.locale）；配额邮件在 cron 里异步发。 */
+  locale: string | null;
   limit: number;
   planLabel: string;
   overQuotaSince: Date | null;
@@ -23,6 +25,7 @@ export async function listQuotaCandidates(now: Date): Promise<QuotaCandidate[]> 
   const res = await pool.query(
     `SELECT u.id                        AS user_id,
             u.email,
+            u.locale,
             u.plan,
             u.comp_plan,
             u.comp_plan_expires_at,
@@ -48,6 +51,7 @@ export async function listQuotaCandidates(now: Date): Promise<QuotaCandidate[]> 
     return {
       userId: r.user_id,
       email: r.email,
+      locale: r.locale,
       limit: PLANS[plan].landingPagesLimit,
       planLabel: PLANS[plan].label,
       overQuotaSince: r.publish_over_quota_since ? new Date(r.publish_over_quota_since) : null,

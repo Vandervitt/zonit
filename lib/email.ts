@@ -4,6 +4,7 @@ import { PLANS, planEntitlementLines, planPriceLabel, type PlanId } from '@/lib/
 import { getUsdToCnyRate } from '@/lib/pricing/fx-server';
 import { fillCounts } from '@/lib/templates/stats';
 import { Routes } from '@/lib/constants';
+import { getEmailDictionary } from '@/lib/i18n/emails';
 
 const resend = process.env.RESEND_API_KEY 
   ? new Resend(process.env.RESEND_API_KEY) 
@@ -22,12 +23,23 @@ export function escapeHtml(input: string): string {
 }
 
 /** 邀请链接有效期的人类可读描述：≥24h 且整天时按天说，否则按小时。 */
-export function formatLinkValidity(expiresAt: Date, now: Date = new Date()): string {
+export function formatLinkValidity(
+  expiresAt: Date,
+  now: Date = new Date(),
+  locale?: string | null,
+): string {
+  const t = getEmailDictionary(locale).invitation;
   const hours = Math.max(1, Math.round((expiresAt.getTime() - now.getTime()) / 3_600_000));
-  if (hours >= 24 && hours % 24 === 0) return `${hours / 24} 天`;
-  return `${hours} 小时`;
+  if (hours >= 24 && hours % 24 === 0) return t.days(hours / 24);
+  return t.hours(hours);
 }
 
+/**
+ * 邀请邮件。**刻意保持中文**，不接 locale：
+ * 由超管在后台手动发出，收件人此刻还没有账号（没有 users.locale 可查），
+ * 而发起人是中文用户。真要做多语言，得先给邀请记录加一列语言，
+ * 那是另一件事——不是这里漏了。
+ */
 export async function sendInvitationEmail({
   to,
   token,
@@ -128,25 +140,28 @@ export async function sendInvitationEmail({
 }
 
 export async function sendOtpEmail({
-  to, code,
+  to, code, locale,
 }: {
   to: string;
   code: string;
+  /** 收件人语言（users.locale）。注册流里此人可能还不存在，缺省即默认语言。 */
+  locale?: string | null;
 }) {
   if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const t = getEmailDictionary(locale).otp;
   try {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `Zap Bridge 登录验证码：${code}`,
+      subject: t.subject(code),
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
-          <h2 style="color:#111;margin:0 0 8px;">登录验证码</h2>
-          <p style="color:#555;margin:0 0 20px;">使用以下验证码登录 Zap Bridge。验证码 10 分钟内有效，请勿泄露给他人。</p>
+          <h2 style="color:#111;margin:0 0 8px;">${t.heading}</h2>
+          <p style="color:#555;margin:0 0 20px;">${t.intro}</p>
           <div style="background:#f7f9fc;padding:20px;border-radius:8px;text-align:center;margin:0 0 20px;">
             <span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:${BRAND};">${escapeHtml(code)}</span>
           </div>
-          <p style="font-size:13px;color:#888;margin:0;">如果你没有尝试登录，请忽略这封邮件，你的账号是安全的。</p>
+          <p style="font-size:13px;color:#888;margin:0;">${t.ignore}</p>
         </div>`,
     });
     // Resend SDK 不抛错，API 层错误经 error 字段返回：显式暴露，避免静默失败。
@@ -159,31 +174,33 @@ export async function sendOtpEmail({
 }
 
 export async function sendWelcomeEmail({
-  to, name, appUrl,
+  to, name, appUrl, locale,
 }: {
   to: string;
   name?: string | null;
   appUrl: string;
+  locale?: string | null;
 }) {
   if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
-  const greeting = name ? escapeHtml(name) : "你好";
+  const t = getEmailDictionary(locale).welcome;
+  const greeting = name ? escapeHtml(name) : t.fallbackGreeting;
   const startUrl = `${appUrl}/admin/landing-pages`;
   try {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `欢迎加入 Zap Bridge，3 步上线你的第一张获客落地页`,
+      subject: t.subject,
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
-          <h2 style="color:#111;margin:0 0 8px;">欢迎，${greeting} 👋</h2>
-          <p style="color:#555;margin:0 0 20px;">Zap Bridge 帮你不写代码、几分钟做出一张能跑广告、能收线索的出海落地页。三步就能跑通：</p>
+          <h2 style="color:#111;margin:0 0 8px;">${t.heading(greeting)}</h2>
+          <p style="color:#555;margin:0 0 20px;">${t.intro}</p>
           <div style="background:#f7f9fc;padding:16px 18px;border-radius:8px;margin:0 0 20px;">
-            <p style="margin:0 0 10px;color:#111;"><strong>1. 建页</strong> —— 选行业模板，或 AI 一句话生成整页</p>
-            <p style="margin:0 0 10px;color:#111;"><strong>2. 绑定域名</strong> —— 发布到你自己的品牌域名，投放更可信</p>
-            <p style="margin:0;color:#111;"><strong>3. 开投收客</strong> —— 配好像素，收 WhatsApp / 表单线索</p>
+            ${t.steps
+              .map(([label, desc], i) => `<p style="margin:0 0 ${i === t.steps.length - 1 ? "0" : "10px"};color:#111;"><strong>${label}</strong> —— ${desc}</p>`)
+              .join("")}
           </div>
-          <a href="${startUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">开始建页</a>
-          <p style="font-size:13px;color:#888;margin-top:28px;">遇到任何问题，直接回复这封邮件，或在后台侧边栏点「联系创始人」找我。祝出单顺利 🚀</p>
+          <a href="${startUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:12px 24px;text-decoration:none;border-radius:5px;font-weight:bold;">${t.cta}</a>
+          <p style="font-size:13px;color:#888;margin-top:28px;">${t.help}</p>
         </div>`,
     });
     // Resend SDK 不抛错，API 层错误经 error 字段返回：显式暴露，避免静默失败。
@@ -195,6 +212,9 @@ export async function sendWelcomeEmail({
   }
 }
 
+/**
+ * 用户反馈通知。**刻意保持中文**，不接 locale：收件人是创始人自己，不是客户。
+ */
 export async function sendFeedbackNotificationEmail({
   to, source, message, meta, dashboardUrl,
 }: {
@@ -240,14 +260,16 @@ export interface DigestEmailPage {
 }
 
 export async function sendWeeklyDigestEmail({
-  to, pages, dashboardUrl, settingsUrl,
+  to, pages, dashboardUrl, settingsUrl, locale,
 }: {
   to: string;
   pages: DigestEmailPage[];
   dashboardUrl: string;
   settingsUrl: string;
+  locale?: string | null;
 }) {
   if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const t = getEmailDictionary(locale).weeklyDigest;
   const totalLeads = pages.reduce((n, p) => n + p.leads, 0);
   const rows = pages
     .map(
@@ -263,22 +285,22 @@ export async function sendWeeklyDigestEmail({
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `📈 本周获客周报：${totalLeads} 条新线索`,
+      subject: t.subject(totalLeads),
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
-          <h2 style="color:#111;margin:0 0 4px;">本周获客周报</h2>
-          <p style="color:#666;margin:0 0 20px;">过去 7 天你的已发布落地页表现（对比再上一周）：</p>
+          <h2 style="color:#111;margin:0 0 4px;">${t.heading}</h2>
+          <p style="color:#666;margin:0 0 20px;">${t.intro}</p>
           <table style="border-collapse:collapse;width:100%;font-size:14px;">
             <tr>
-              <th style="padding:0 12px 8px 0;color:#666;text-align:left;font-weight:normal;">落地页</th>
-              <th style="padding:0 12px 8px;color:#666;text-align:right;font-weight:normal;">曝光</th>
-              <th style="padding:0 12px 8px;color:#666;text-align:right;font-weight:normal;">CTA 点击</th>
-              <th style="padding:0 0 8px 12px;color:#666;text-align:right;font-weight:normal;">线索</th>
+              <th style="padding:0 12px 8px 0;color:#666;text-align:left;font-weight:normal;">${t.columns.page}</th>
+              <th style="padding:0 12px 8px;color:#666;text-align:right;font-weight:normal;">${t.columns.views}</th>
+              <th style="padding:0 12px 8px;color:#666;text-align:right;font-weight:normal;">${t.columns.clicks}</th>
+              <th style="padding:0 0 8px 12px;color:#666;text-align:right;font-weight:normal;">${t.columns.leads}</th>
             </tr>
             ${rows}
           </table>
-          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">查看投放分析</a></p>
-          <p style="font-size:12px;color:#999;margin-top:24px;">不想收周报？可在<a href="${settingsUrl}" style="color:#999;">「设置 → 线索通知」</a>关闭。</p>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">${t.cta}</a></p>
+          <p style="font-size:12px;color:#999;margin-top:24px;">${t.unsubscribePrefix}<a href="${settingsUrl}" style="color:#999;">${t.unsubscribeLink}</a>${t.unsubscribeSuffix}</p>
         </div>`,
     });
     // Resend SDK 不抛错，API 层错误经 error 字段返回：显式暴露，避免静默失败。
@@ -301,38 +323,40 @@ export interface NudgeEmailLead {
  * 语气克制——这是提醒不是催促，且必须给关闭入口，否则提醒会变骚扰。
  */
 export async function sendLeadNudgeEmail({
-  to, leads, totalCount, dashboardUrl, settingsUrl,
+  to, leads, totalCount, dashboardUrl, settingsUrl, locale,
 }: {
   to: string;
   leads: NudgeEmailLead[];
   totalCount: number;
   dashboardUrl: string;
   settingsUrl: string;
+  locale?: string | null;
 }) {
   if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const t = getEmailDictionary(locale).leadNudge;
   const rows = leads
     .map(
       (l) => `<tr>
         <td style="padding:8px 12px 8px 0;color:#111;border-bottom:1px solid #f0f0f0;">${escapeHtml(l.contact)}</td>
         <td style="padding:8px 12px;color:#666;border-bottom:1px solid #f0f0f0;">${escapeHtml(l.pageName)}</td>
-        <td style="padding:8px 0 8px 12px;color:#111;text-align:right;border-bottom:1px solid #f0f0f0;">已等 ${l.waitedHours} 小时</td>
+        <td style="padding:8px 0 8px 12px;color:#111;text-align:right;border-bottom:1px solid #f0f0f0;">${t.waited(l.waitedHours)}</td>
       </tr>`,
     )
     .join("");
-  const more = totalCount > leads.length ? `<p style="color:#666;font-size:13px;margin:12px 0 0;">还有 ${totalCount - leads.length} 条未列出。</p>` : "";
+  const more = totalCount > leads.length ? `<p style="color:#666;font-size:13px;margin:12px 0 0;">${t.more(totalCount - leads.length)}</p>` : "";
   try {
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `⏰ ${totalCount} 条线索还没跟进`,
+      subject: t.subject(totalCount),
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
-          <h2 style="color:#111;margin:0 0 4px;">有线索还在等回复</h2>
-          <p style="color:#666;margin:0 0 20px;">这些线索留资已超过 48 小时，还没有被打开过。越早联系，成交率越高。</p>
+          <h2 style="color:#111;margin:0 0 4px;">${t.heading}</h2>
+          <p style="color:#666;margin:0 0 20px;">${t.intro}</p>
           <table style="border-collapse:collapse;width:100%;font-size:14px;">${rows}</table>
           ${more}
-          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">去跟进</a></p>
-          <p style="font-size:12px;color:#999;margin-top:24px;">每条线索只提醒一次。不想收提醒？可在<a href="${settingsUrl}" style="color:#999;">「设置 → 线索通知」</a>关闭。</p>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">${t.cta}</a></p>
+          <p style="font-size:12px;color:#999;margin-top:24px;">${t.onceOnly}<a href="${settingsUrl}" style="color:#999;">${t.unsubscribeLink}</a>${t.unsubscribeSuffix}</p>
         </div>`,
     });
     if (error) { console.error("Failed to send lead nudge email:", error); return { error }; }
@@ -358,24 +382,26 @@ export async function sendPublishQuotaEmail(
     daysLeft: number;
     unpublishedCount?: number;
     appUrl: string;
+    locale?: string | null;
   },
 ) {
   if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
-  const { stage, published, limit, planLabel, daysLeft, unpublishedCount = 0, appUrl } = params;
+  const { stage, published, limit, planLabel, daysLeft, unpublishedCount = 0, appUrl, locale } = params;
+  const t = getEmailDictionary(locale).publishQuota;
   const pagesUrl = `${appUrl}${Routes.LandingPages}`;
   const billingUrl = `${appUrl}${Routes.Billing}`;
 
   const subject =
     stage === "enforced"
-      ? `已有 ${unpublishedCount} 张落地页被取消发布`
+      ? t.subjectDone(unpublishedCount)
       : stage === "remind"
-        ? `还有 ${daysLeft} 天：超出的落地页将被取消发布`
-        : `已发布页数超出 ${planLabel} 套餐额度`;
+        ? t.subjectCountdown(daysLeft)
+        : t.subjectOver(planLabel);
 
   const body =
     stage === "enforced"
-      ? `<p style="color:#666;margin:0 0 20px;">宽限期已结束，我们取消发布了 ${unpublishedCount} 张超出额度的落地页，目前保留 ${published} 张在线。<br/><strong>页面内容没有删除</strong>，升级套餐后可以随时重新发布。</p>`
-      : `<p style="color:#666;margin:0 0 20px;">你当前有 <strong>${published}</strong> 张已发布落地页，${planLabel} 套餐的额度是 <strong>${limit}</strong> 张。<br/>已上线的页面不受影响，但暂时无法再发布新页面。<br/>如果 ${daysLeft} 天内仍未处理，我们会自动取消发布超出的部分（<strong>只是下线，内容不会删除</strong>），优先保留域名根路径与最早发布的页面。</p>`;
+      ? `<p style="color:#666;margin:0 0 20px;">${t.bodyDone(unpublishedCount, published)}<br/><strong>${t.bodyDoneSafe}</strong>${t.bodyDoneSafeSuffix}</p>`
+      : `<p style="color:#666;margin:0 0 20px;">${t.bodyCountdown(published, planLabel, limit, daysLeft)}</p>`;
 
   try {
     const { data, error } = await resend.emails.send({
@@ -387,8 +413,8 @@ export async function sendPublishQuotaEmail(
           <h2 style="color:#111;margin:0 0 4px;">${escapeHtml(subject)}</h2>
           ${body}
           <p style="margin-top:24px;">
-            <a href="${billingUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">升级套餐</a>
-            <a href="${pagesUrl}" style="display:inline-block;margin-left:8px;color:${BRAND};padding:10px 0;text-decoration:none;">管理落地页</a>
+            <a href="${billingUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">${t.ctaUpgrade}</a>
+            <a href="${pagesUrl}" style="display:inline-block;margin-left:8px;color:${BRAND};padding:10px 0;text-decoration:none;">${t.ctaPages}</a>
           </p>
         </div>`,
     });
@@ -419,26 +445,31 @@ export async function sendTrialEmail(
     fallbackPlanLabel: string;
     daysLeft: number;
     appUrl: string;
+    locale?: string | null;
   },
 ) {
   if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
-  const { stage, grantedPlanLabel, fallbackPlanLabel, daysLeft, appUrl } = params;
+  const { stage, grantedPlanLabel, fallbackPlanLabel, daysLeft, appUrl, locale } = params;
+  const t = getEmailDictionary(locale).trial;
   const billingUrl = `${appUrl}${Routes.Billing}`;
   const pagesUrl = `${appUrl}${Routes.LandingPages}`;
 
+  const granted = escapeHtml(grantedPlanLabel);
+  const fallback = escapeHtml(fallbackPlanLabel);
+
   const subject =
     stage === "t_minus_3"
-      ? `还有 ${daysLeft} 天：你的 ${grantedPlanLabel} 权益即将到期`
+      ? t.subjectCountdown(daysLeft, grantedPlanLabel)
       : stage === "expiry_day"
-        ? `你的 ${grantedPlanLabel} 权益已到期`
-        : `继续用 ${grantedPlanLabel}？页面和线索都还在`;
+        ? t.subjectExpired(grantedPlanLabel)
+        : t.subjectWinBack(grantedPlanLabel);
 
   const body =
     stage === "t_minus_3"
-      ? `<p style="color:#666;margin:0 0 20px;">你的 <strong>${escapeHtml(grantedPlanLabel)}</strong> 权益将在 ${daysLeft} 天后到期，之后回落到 ${escapeHtml(fallbackPlanLabel)}。<br/>已上线的页面不会被删除，但额度会收紧；如果你正在投放，建议先确认要长期保留哪几张页。</p>`
+      ? `<p style="color:#666;margin:0 0 20px;">${t.bodyCountdown(granted, daysLeft, fallback)}</p>`
       : stage === "expiry_day"
-        ? `<p style="color:#666;margin:0 0 20px;">你的 <strong>${escapeHtml(grantedPlanLabel)}</strong> 权益已到期，当前按 ${escapeHtml(fallbackPlanLabel)} 计算额度。<br/><strong>页面内容和已收到的线索都还在</strong>，随时升级即可恢复。</p>`
-        : `<p style="color:#666;margin:0 0 20px;">你的 <strong>${escapeHtml(grantedPlanLabel)}</strong> 权益已经结束，账号仍在 ${escapeHtml(fallbackPlanLabel)} 上正常使用。<br/>页面、域名和线索都保留着——如果之前的投放有效果，升级后就能继续放开手脚。</p>`;
+        ? `<p style="color:#666;margin:0 0 20px;">${t.bodyExpired(granted, fallback)}</p>`
+        : `<p style="color:#666;margin:0 0 20px;">${t.bodyWinBack(granted, fallback)}</p>`;
 
   try {
     const { data, error } = await resend.emails.send({
@@ -450,8 +481,8 @@ export async function sendTrialEmail(
           <h2 style="color:#111;margin:0 0 4px;">${escapeHtml(subject)}</h2>
           ${body}
           <p style="margin-top:24px;">
-            <a href="${billingUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">查看套餐</a>
-            <a href="${pagesUrl}" style="display:inline-block;margin-left:8px;color:${BRAND};padding:10px 0;text-decoration:none;">管理落地页</a>
+            <a href="${billingUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">${t.ctaBilling}</a>
+            <a href="${pagesUrl}" style="display:inline-block;margin-left:8px;color:${BRAND};padding:10px 0;text-decoration:none;">${t.ctaPages}</a>
           </p>
         </div>`,
     });
@@ -464,14 +495,16 @@ export async function sendTrialEmail(
 }
 
 export async function sendLeadNotificationEmail({
-  to, pageName, fields, dashboardUrl,
+  to, pageName, fields, dashboardUrl, locale,
 }: {
   to: string;
   pageName: string;
   fields: Record<string, unknown>;
   dashboardUrl: string;
+  locale?: string | null;
 }) {
   if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  const t = getEmailDictionary(locale).leadNotification;
   const rows = Object.entries(fields)
     .filter(([, v]) => typeof v === "string" && v)
     .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666;">${escapeHtml(k)}</td><td style="padding:4px 0;color:#111;">${escapeHtml(String(v))}</td></tr>`)
@@ -480,14 +513,14 @@ export async function sendLeadNotificationEmail({
     const data = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `🎯 新线索 · ${pageName}`,
+      subject: t.subject(pageName),
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #eee;border-radius:10px;">
-          <h2 style="color:#111;margin:0 0 4px;">收到一条新线索</h2>
-          <p style="color:#666;margin:0 0 16px;">来自落地页：<strong>${escapeHtml(pageName)}</strong></p>
-          <table style="border-collapse:collapse;font-size:14px;">${rows || '<tr><td style="color:#999;">（无字段）</td></tr>'}</table>
-          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在后台查看</a></p>
-          <p style="font-size:12px;color:#999;margin-top:24px;">你可在「设置 → 线索通知」关闭此邮件。</p>
+          <h2 style="color:#111;margin:0 0 4px;">${t.heading}</h2>
+          <p style="color:#666;margin:0 0 16px;">${t.fromPage}<strong>${escapeHtml(pageName)}</strong></p>
+          <table style="border-collapse:collapse;font-size:14px;">${rows || '<tr><td style="color:#999;">${t.noFields}</td></tr>'}</table>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">${t.cta}</a></p>
+          <p style="font-size:12px;color:#999;margin-top:24px;">${t.unsubscribe}</p>
         </div>`,
     });
     return { success: true, data };

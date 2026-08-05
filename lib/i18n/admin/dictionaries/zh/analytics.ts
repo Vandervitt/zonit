@@ -64,6 +64,13 @@ export const analytics = {
     failed: "失败",
     deliveryRate: "送达率",
     lastFailure: (provider: string) => `${provider} 最近一次失败`,
+    reasons: {
+      missingCredential: "找不到凭据：页级与账号级都没有配置，或配置后被删除",
+      invalidToken: "Access Token 无效或已过期，需要在平台重新生成",
+      insufficientScope: "Token 权限不足：缺少该 Dataset / Pixel 的写入权限",
+      wrongDataset: "Dataset ID / Pixel Code 填错或已删除",
+      rateLimited: "被平台限流，通常会在重试中自行恢复",
+    },
     platformReturned: "平台返回：",
     columns: { provider: "平台", sent: "已送达", pending: "重试中", failed: "失败", lastErrorAt: "最近失败时间" },
     note: "送达率 = 已送达 /（已送达 + 失败）。重试中的事件尚未定局，不计入分母；连续失败到上限（5 次）才计为失败。",

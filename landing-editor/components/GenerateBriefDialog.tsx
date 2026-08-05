@@ -109,6 +109,7 @@ export function GenerateBriefDialog() {
 function BriefModal() {
   const t = useAdminT().editor.generate;
   const router = useRouter();
+  const sessionExpiredMsg = useAdminT().common.sessionExpired;
   const dispatch = useEditorDispatch();
   // open 状态上抬到 MetaContext：首开来自 ?ai=1 深链，之后可由工具栏「AI 一键成页」按钮再次唤起。
   const { pageId, generateOpen: open, setGenerateOpen: setOpen } = useMeta();
@@ -153,7 +154,7 @@ function BriefModal() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pageId, brief }),
       });
-      if (handleSessionExpired(res, router)) return;
+      if (handleSessionExpired(res, router, sessionExpiredMsg)) return;
       const data = await res.json();
       if (!res.ok) {
         if (data.error === "ai_quota_exhausted")

@@ -4,7 +4,7 @@ import { contactLinks } from "./contact-links";
 describe("contactLinks", () => {
   it("email → mailto（站内协议，不开新窗）", () => {
     const { links } = contactLinks({ email: "ann@example.com" });
-    expect(links).toEqual([{ kind: "email", label: "邮件", href: "mailto:ann@example.com", external: false }]);
+    expect(links).toEqual([{ kind: "email", href: "mailto:ann@example.com", external: false }]);
   });
 
   it("whatsapp → wa.me（去掉 + 号，wa.me 只吃纯数字）", () => {

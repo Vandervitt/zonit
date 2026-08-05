@@ -8,6 +8,7 @@ import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
 // 提醒的筛选口径全在 SQL 里，直接用应用侧实现对真实库跑一次（单测只能断言参数）。
 import { computeLeadNudges } from "@/lib/leads/nudge";
+import { t } from "./helpers/i18n";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -88,13 +89,13 @@ test.describe("线索闭环", () => {
     const row = page.getByRole("row").filter({ hasText: "Lead 测试页" });
     await expect(row).toBeVisible({ timeout: 15_000 });
     // 状态列初始为「未读」（antd Tag 渲染为该行内的元素）
-    await expect(row.getByText("未读", { exact: true })).toBeVisible();
+    await expect(row.getByText(t.leads.read.unread, { exact: true })).toBeVisible();
     // 点击操作列的「标已读」（exact 区分于状态 Tag 的「已读」文案）
-    await row.getByText("标已读", { exact: true }).click();
+    await row.getByText(t.leads.actions.markRead, { exact: true }).click();
     // 标已读后状态列变「已读」
-    await expect(row.getByText("已读", { exact: true })).toBeVisible({ timeout: 15_000 });
+    await expect(row.getByText(t.leads.read.read, { exact: true })).toBeVisible({ timeout: 15_000 });
     // 且操作列文案翻转为「标未读」，进一步确认状态确实切换
-    await expect(row.getByText("标未读", { exact: true })).toBeVisible();
+    await expect(row.getByText(t.leads.actions.markUnread, { exact: true })).toBeVisible();
   });
 
   test("一键联系：渠道链接可点 + 点击即自动标已读", async ({ page }) => {
@@ -122,13 +123,13 @@ test.describe("线索闭环", () => {
     // WhatsApp 链接指向 wa.me 且号码去掉了 +（E.164 由表单侧保证）
     await expect(row.getByRole("link", { name: "WhatsApp" })).toHaveAttribute("href", "https://wa.me/8613800138000");
     // 邮件走 mailto（同标签页，点击不会跳外站，适合在 e2e 里验证副作用）
-    const mail = row.getByRole("link", { name: "邮件" });
+    const mail = row.getByRole("link", { name: t.leads.notify.email });
     await expect(mail).toHaveAttribute("href", "mailto:contact@example.com");
 
     // 点开渠道即视为已跟进 → 状态自动翻为已读，无需再手动标
-    await expect(row.getByText("未读", { exact: true })).toBeVisible();
+    await expect(row.getByText(t.leads.read.unread, { exact: true })).toBeVisible();
     await mail.click();
-    await expect(row.getByText("已读", { exact: true })).toBeVisible({ timeout: 15_000 });
+    await expect(row.getByText(t.leads.read.read, { exact: true })).toBeVisible({ timeout: 15_000 });
   });
 
   test("来源校验：别人的 Origin 灌线索 → 403，自己的域名与无 Origin 放行", async () => {

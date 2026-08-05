@@ -67,6 +67,13 @@ export const analytics = {
     failed: "Failed",
     deliveryRate: "Delivery rate",
     lastFailure: (provider: string) => `${provider}: most recent failure`,
+    reasons: {
+      missingCredential: "No credentials found: neither page-level nor account-level is configured, or they were deleted",
+      invalidToken: "The Access Token is invalid or expired — regenerate it on the platform",
+      insufficientScope: "The token lacks permission to write to that Dataset / Pixel",
+      wrongDataset: "The Dataset ID / Pixel Code is wrong or has been deleted",
+      rateLimited: "Rate-limited by the platform; this usually clears itself on retry",
+    },
     platformReturned: "Platform returned: ",
     columns: { provider: "Platform", sent: "Delivered", pending: "Retrying", failed: "Failed", lastErrorAt: "Last failure" },
     note: "Delivery rate = delivered / (delivered + failed). Events still retrying aren't settled yet and are excluded from the denominator; an event counts as failed only after hitting the retry limit (5).",

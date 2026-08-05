@@ -1,4 +1,4 @@
-import type { HelpChapterData } from "../types";
+import type { HelpChapterData } from "../../types";
 
 export const domainsPublishing: HelpChapterData = {
   slug: "domains-publishing",

@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { config as loadEnv } from "dotenv";
 // 两级凭据的解析顺序全在 SQL 里，直接用应用侧实现对真实库跑一次。
 import { getCredentials, listConfiguredProviders } from "@/lib/capi/credentials";
+import { t } from "./helpers/i18n";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -123,7 +124,7 @@ test.describe("CAPI 服务端回传", () => {
 
     // 面板上要把原始报错翻成能动手修的说法
     await page.goto("/admin/analytics");
-    await expect(page.getByText("服务端回传（CAPI）")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(t.analytics.capiHealth.title)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/Access Token 无效或已过期/)).toBeVisible();
 
     await pool.query(`DELETE FROM capi_events WHERE page_id = $1`, [pageId]);

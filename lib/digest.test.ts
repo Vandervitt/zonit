@@ -5,6 +5,10 @@ const { query } = vi.hoisted(() => ({ query: vi.fn() }));
 vi.mock("@/lib/db", () => ({ default: { query } }));
 
 import { computeWeeklyDigests, trendText } from "./digest";
+import { getEmailDictionary } from "@/lib/i18n/emails";
+
+// 断言认中文文案，故显式钉中文，不跟着 defaultLocale（英文）漂。
+const zhTrend = getEmailDictionary("zh").weeklyDigest.trend;
 
 // 注意要用大括号：箭头函数直接返回 mockReset() 会把 mock 自身当成 vitest 的 cleanup
 // 钩子，测试收尾时被无参调用，触发实现里的 sql.includes 报错。
@@ -72,12 +76,12 @@ describe("computeWeeklyDigests", () => {
 
 describe("trendText", () => {
   it("上周为 0：本周有量记「新增」，无量记「—」", () => {
-    expect(trendText(5, 0)).toBe("新增");
-    expect(trendText(0, 0)).toBe("—");
+    expect(trendText(5, 0, zhTrend)).toBe("新增");
+    expect(trendText(0, 0, zhTrend)).toBe("—");
   });
   it("正常环比：涨跌与持平", () => {
-    expect(trendText(15, 10)).toBe("↑50%");
-    expect(trendText(5, 10)).toBe("↓50%");
-    expect(trendText(10, 10)).toBe("持平");
+    expect(trendText(15, 10, zhTrend)).toBe("↑50%");
+    expect(trendText(5, 10, zhTrend)).toBe("↓50%");
+    expect(trendText(10, 10, zhTrend)).toBe("持平");
   });
 });

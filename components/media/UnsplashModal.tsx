@@ -1,5 +1,6 @@
 "use client";
 
+import { uploadErrorText } from "@/lib/media-upload";
 import { useState } from "react";
 import { Modal, Input, Spin, Empty, App } from "antd";
 import { ApiRoutes } from "@/lib/constants";
@@ -48,7 +49,7 @@ export function UnsplashModal({ open, onClose, onImported }: Props) {
       onImported(item);
       void message.success(t.unsplash.added);
     } catch (e) {
-      void message.error(e instanceof Error ? e.message : t.unsplash.addFailed);
+      void message.error(uploadErrorText(e, t.unsplash.addFailed, t.uploadErrors));
     } finally {
       setImportingId(null);
     }

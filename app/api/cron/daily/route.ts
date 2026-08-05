@@ -14,6 +14,7 @@ import { computeWeeklyDigests, trendText } from "@/lib/digest";
 import { sweepPublishQuota } from "@/lib/publish-quota-sweep";
 import { sweepTrialEmails } from "@/lib/billing/trial-emails-sweep";
 import { sendWeeklyDigestEmail, sendLeadNudgeEmail } from "@/lib/email";
+import { getEmailDictionary } from "@/lib/i18n/emails";
 import { Routes } from "@/lib/constants";
 
 /**
@@ -73,6 +74,7 @@ export async function GET(request: NextRequest) {
         totalCount: n.totalCount,
         dashboardUrl: `${appUrl}${Routes.Leads}`,
         settingsUrl: `${appUrl}${Routes.Settings}`,
+        locale: n.locale,
       });
       if ("success" in r && r.success) {
         await markNudged(n.leadIds);
@@ -143,6 +145,7 @@ export async function GET(request: NextRequest) {
       const digests = await computeWeeklyDigests(now);
       let sent = 0;
       for (const d of digests) {
+        const trend = getEmailDictionary(d.locale).weeklyDigest.trend;
         const r = await sendWeeklyDigestEmail({
           to: d.email,
           pages: d.pages.map((p) => ({
@@ -150,12 +153,13 @@ export async function GET(request: NextRequest) {
             views: p.views,
             ctaClicks: p.ctaClicks,
             leads: p.leads,
-            viewsTrend: trendText(p.views, p.prevViews),
-            ctaTrend: trendText(p.ctaClicks, p.prevCtaClicks),
-            leadsTrend: trendText(p.leads, p.prevLeads),
+            viewsTrend: trendText(p.views, p.prevViews, trend),
+            ctaTrend: trendText(p.ctaClicks, p.prevCtaClicks, trend),
+            leadsTrend: trendText(p.leads, p.prevLeads, trend),
           })),
           dashboardUrl: `${appUrl}${Routes.Analytics}`,
           settingsUrl: `${appUrl}${Routes.Settings}`,
+          locale: d.locale,
         });
         if ("success" in r && r.success) sent += 1;
       }

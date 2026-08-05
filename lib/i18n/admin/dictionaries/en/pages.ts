@@ -49,6 +49,8 @@ export const pages = {
     deleted: "Deleted",
     duplicateFailed: "Could not duplicate",
     duplicated: "Duplicated as a draft",
+    /** 复制出的页面名后缀，如 "My page (copy)"。 */
+    copySuffix: "(copy)",
     checkRateLimited: "You've run this check too many times — try again shortly",
     checkFetchFailed: "Could not fetch the page. Check that the live address is reachable.",
     checkFailed: "The check failed. Please try again shortly.",

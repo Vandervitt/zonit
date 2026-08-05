@@ -31,6 +31,8 @@ describe("sendWeeklyDigestEmail", () => {
       pages,
       dashboardUrl: "https://app.example/admin/analytics",
       settingsUrl: "https://app.example/admin/settings",
+      // 断言认中文文案，故显式钉语言，不跟着 defaultLocale 漂。
+      locale: "zh",
     });
     expect(r).toMatchObject({ success: true });
     const arg = sendMock.mock.calls[0][0];

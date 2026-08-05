@@ -1,6 +1,7 @@
 "use client";
 // landing-editor/ui/media/UploadTab.tsx
 // 上传 Tab：选文件 → uploadMedia → 成功回传新素材 url（壳负责选中并关闭）。
+import { uploadErrorText } from "@/lib/media-upload";
 import { useAdminT } from "@/lib/i18n/admin/context";
 import { useRef, useState } from "react";
 import { uploadMedia } from "@/lib/media-upload";
@@ -25,7 +26,7 @@ export function UploadTab({
       const item = await uploadMedia(file);
       onUploaded(item.url);
     } catch (e) {
-      setError(e instanceof Error ? e.message : t.uploadFailed);
+      setError(uploadErrorText(e, t.uploadFailed, t.uploadErrors));
     } finally {
       setUploading(false);
     }

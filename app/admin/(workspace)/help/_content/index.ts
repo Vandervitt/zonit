@@ -1,42 +1,32 @@
+import type { Locale } from "@/lib/i18n/config";
 import type { HelpChapterData } from "./types";
-import { gettingStarted } from "./chapters/getting-started";
-import { createPages } from "./chapters/create-pages";
-import { editor } from "./chapters/editor";
-import { domainsPublishing } from "./chapters/domains-publishing";
-import { tracking } from "./chapters/tracking";
-import { leads } from "./chapters/leads";
-import { analytics } from "./chapters/analytics";
-import { media } from "./chapters/media";
-import { billing } from "./chapters/billing";
-import { account } from "./chapters/account";
-import { compliance } from "./chapters/compliance";
-import { faq } from "./chapters/faq";
+import { ZH_CHAPTERS } from "./chapters/zh";
+import { EN_CHAPTERS } from "./chapters/en";
 
-/** 目录顺序即阅读顺序：主链路（上手→建页→编辑→发布→追踪→线索）在前。 */
-export const HELP_CHAPTERS: HelpChapterData[] = [
-  gettingStarted,
-  createPages,
-  editor,
-  domainsPublishing,
-  tracking,
-  leads,
-  analytics,
-  media,
-  billing,
-  account,
-  compliance,
-  faq,
-];
+/**
+ * 目录顺序即阅读顺序：主链路（上手→建页→编辑→发布→追踪→线索）在前。
+ * 两种语言必须逐章对应且同序——slug 是 URL 的一部分，切语言不该换页；
+ * 对齐由 content.test.ts 机械核对。
+ */
+const CHAPTERS: Record<Locale, HelpChapterData[]> = { en: EN_CHAPTERS, zh: ZH_CHAPTERS };
 
-export function getChapter(slug: string): HelpChapterData | undefined {
-  return HELP_CHAPTERS.find((c) => c.slug === slug);
+export function getHelpChapters(locale: Locale): HelpChapterData[] {
+  return CHAPTERS[locale];
 }
 
-export function getAdjacentChapters(slug: string): {
-  prev?: HelpChapterData;
-  next?: HelpChapterData;
-} {
-  const i = HELP_CHAPTERS.findIndex((c) => c.slug === slug);
+export function getChapter(slug: string, locale: Locale): HelpChapterData | undefined {
+  return CHAPTERS[locale].find((c) => c.slug === slug);
+}
+
+export function getAdjacentChapters(
+  slug: string,
+  locale: Locale,
+): { prev?: HelpChapterData; next?: HelpChapterData } {
+  const chapters = CHAPTERS[locale];
+  const i = chapters.findIndex((c) => c.slug === slug);
   if (i < 0) return {};
-  return { prev: HELP_CHAPTERS[i - 1], next: HELP_CHAPTERS[i + 1] };
+  return { prev: chapters[i - 1], next: chapters[i + 1] };
 }
+
+/** 章节 slug 清单（与语言无关，供 generateStaticParams 用）。 */
+export const HELP_SLUGS: string[] = ZH_CHAPTERS.map((c) => c.slug);

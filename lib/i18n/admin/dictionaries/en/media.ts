@@ -8,6 +8,15 @@ export const media = {
   emptyHint: "No media yet — hit Upload to add some",
 
   upload: { button: "Upload", uploading: "Uploading…", failed: "Upload failed. Please try again." },
+  /** 后端错误码 → 文案。键即 lib/constants/errors.ts 的 ApiErrors 取值。 */
+  uploadErrors: {
+    media_url_invalid: "That asset address isn't valid",
+    media_filename_invalid: "That filename isn't valid",
+    media_type_unsupported: "Only images and videos are supported",
+    media_too_large: (max: string) => `The file is over the size limit (max ${max})`,
+    media_upload_auth_failed: "Could not authorise the upload",
+    media_unsplash_download_failed: "Could not download that Unsplash image",
+  },
   deleteConfirm: {
     title: (filename: string) => `Delete “${filename}”?`,
     ok: "Delete",

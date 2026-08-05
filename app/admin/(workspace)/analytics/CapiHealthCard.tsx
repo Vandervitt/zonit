@@ -39,7 +39,7 @@ export function CapiHealthCard({ rangeQuery }: { rangeQuery: string }) {
 
   // 最近一条可解释的失败原因——比「失败 12 次」更能让人动手修。
   const explained = providers
-    .map((p) => ({ provider: p.provider, hint: explainCapiError(p.lastError), raw: p.lastError }))
+    .map((p) => ({ provider: p.provider, reason: explainCapiError(p.lastError), raw: p.lastError }))
     .find((p) => p.raw);
 
   return (
@@ -67,7 +67,7 @@ export function CapiHealthCard({ rangeQuery }: { rangeQuery: string }) {
               message={t.lastFailure(PROVIDER_LABEL[explained.provider] ?? explained.provider)}
               description={
                 <Space direction="vertical" size={2}>
-                  {explained.hint && <span>{explained.hint}</span>}
+                  {explained.reason && <span>{t.reasons[explained.reason]}</span>}
                   <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                     {t.platformReturned}<Typography.Text code>{explained.raw}</Typography.Text>
                   </Typography.Text>

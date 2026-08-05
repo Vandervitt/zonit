@@ -6,6 +6,7 @@ import { ArrowLeftOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { Routes } from "@/lib/constants";
 import type { HelpBlock, HelpChapterData, HelpSection } from "../_content/types";
 import { getAdjacentChapters } from "../_content";
+import { useAdminLocale } from "@/lib/i18n/admin/context";
 
 function BlockView({ block }: { block: HelpBlock }) {
   switch (block.t) {
@@ -85,7 +86,7 @@ function SectionView({ section }: { section: HelpSection }) {
 }
 
 export function HelpChapter({ chapter }: { chapter: HelpChapterData }) {
-  const { prev, next } = getAdjacentChapters(chapter.slug);
+  const { prev, next } = getAdjacentChapters(chapter.slug, useAdminLocale());
   return (
     <Space direction="vertical" size={16} style={{ width: "100%", maxWidth: 860 }}>
       <Card>

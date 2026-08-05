@@ -52,7 +52,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     });
     return NextResponse.json(jsonResponse);
   } catch (e) {
-    const message = e instanceof Error ? e.message : "上传授权失败";
+    const message = e instanceof Error ? e.message : ApiErrors.MEDIA_UPLOAD_AUTH_FAILED;
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

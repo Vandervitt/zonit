@@ -183,11 +183,21 @@ export async function getPublishedBySlug(slug: string): Promise<LandingPageRow |
   return { ...row, data: row.published_data ?? row.data };
 }
 
-/** 复制为新草稿：name 加「副本」（撞名自动追加序号），status/slug 走默认（draft / null），data 整体拷贝。 */
-export async function duplicateLandingPage(id: string, userId: string): Promise<ClientLandingPageRow | null> {
+/**
+ * 复制为新草稿：name 加副本后缀（撞名自动追加序号），status/slug 走默认（draft / null），
+ * data 整体拷贝。
+ *
+ * 后缀由调用方按界面语言传入——页面名是后台内部标识（帮助中心明说「不影响对外展示」），
+ * 故它跟随后台语言，而不是像落地页内容那样固定英文。
+ */
+export async function duplicateLandingPage(
+  id: string,
+  userId: string,
+  copySuffix: string,
+): Promise<ClientLandingPageRow | null> {
   const src = await getLandingPage(id, userId);
   if (!src) return null;
-  const name = await ensureUniqueName(userId, `${src.name} 副本`);
+  const name = await ensureUniqueName(userId, `${src.name} ${copySuffix}`);
   const result = await pool.query(
     `INSERT INTO landing_pages (user_id, name, data) VALUES ($1, $2, $3) RETURNING *`,
     [userId, name, JSON.stringify(src.data)],

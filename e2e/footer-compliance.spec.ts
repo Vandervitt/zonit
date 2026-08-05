@@ -13,6 +13,7 @@
 import { test, expect } from '@playwright/test';
 import { Pool } from 'pg';
 import { config as loadEnv } from 'dotenv';
+import { t } from "./helpers/i18n";
 
 loadEnv({ path: '.env.local' });
 loadEnv({ path: '.env' });
@@ -67,14 +68,14 @@ test.describe('页脚合规链路', () => {
     // 2) 设置页新建账号级经营主体
     await page.goto('/admin/settings');
     await expect(async () => {
-      await page.getByRole('button', { name: '新增主体' }).click();
+      await page.getByRole('button', { name: t.settings.companyProfiles.add }).click();
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 30_000 });
     const modal = page.getByRole('dialog');
-    await modal.getByRole('textbox', { name: '内部名称' }).fill(PROFILE_LABEL);
-    await modal.getByRole('textbox', { name: '法律实体名' }).fill(LEGAL_NAME);
-    await modal.getByRole('textbox', { name: '公司注册号' }).fill('99887766');
-    await modal.getByRole('button', { name: '保 存' }).click();
+    await modal.getByRole('textbox', { name: t.settings.companyProfiles.fields.label }).fill(PROFILE_LABEL);
+    await modal.getByRole('textbox', { name: t.settings.companyProfiles.fields.legalName }).fill(LEGAL_NAME);
+    await modal.getByRole('textbox', { name: t.settings.companyProfiles.fields.registrationNo }).fill('99887766');
+    await modal.getByRole('button', { name: /保\s*存/ }).click();
     // 列表里出现成文后的那一行（与页脚展示同一份 formatCompanyInfo 结果）
     await expect(page.getByText(`${LEGAL_NAME} · Company No. 99887766`)).toBeVisible();
 
@@ -82,11 +83,11 @@ test.describe('页脚合规链路', () => {
     await page.goto('/admin/landing-pages');
     const dialog = page.getByRole('dialog');
     await expect(async () => {
-      await page.getByRole('button', { name: '新建' }).click();
+      await page.getByRole('button', { name: t.pages.create }).click();
       await expect(dialog).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 30_000 });
-    await dialog.getByRole('searchbox', { name: '搜索模板名称' }).fill('Aurae Skincare');
-    await dialog.getByRole('button', { name: '直接编辑' }).first().click();
+    await dialog.getByRole('searchbox', { name: t.editor.templatePicker.searchAria }).fill('Aurae Skincare');
+    await dialog.getByRole('button', { name: t.editor.templatePicker.edit }).first().click();
     await page.waitForURL(/\/admin\/editor\/[^/]+$/, { timeout: 30_000 });
     const editorUrl = page.url();
 

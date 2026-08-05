@@ -2,6 +2,7 @@
 import { test, expect } from "@playwright/test";
 import { Pool } from "pg";
 import { config as loadEnv } from "dotenv";
+import { t } from "./helpers/i18n";
 
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
@@ -49,7 +50,7 @@ test.describe("草稿分享预览", () => {
     // 建页：概览页「新建落地页」唤起模板弹窗（已替代旧的独立 /admin/editor 画廊页），
     // 点首张模板卡的「直接编辑」建库并进编辑器。当前无「空白模板」，用首张模板承载分享预览流程即可。
     await page.goto("/admin");
-    const trigger = page.getByRole("button", { name: "新建落地页" });
+    const trigger = page.getByRole("button", { name: t.overview.quickActions.newPage });
     const dialog = page.getByRole("dialog");
     await trigger.click();
     // antd Button + Radix asChild 偶发首次点击不开弹窗，兜底重试一次。
@@ -59,13 +60,13 @@ test.describe("草稿分享预览", () => {
     await expect(dialog).toBeVisible({ timeout: 10_000 });
     // 模板卡的「直接编辑」为 hover 浮现按钮（桌面下默认 opacity-0），headless 无真实 hover，
     // 直接派发 click 触发其 onClick（建库并跳转），避免依赖不稳定的悬停可见性。
-    const createBtn = dialog.getByRole("button", { name: "直接编辑" }).first();
+    const createBtn = dialog.getByRole("button", { name: t.editor.templatePicker.edit }).first();
     await createBtn.waitFor({ state: "attached", timeout: 15_000 });
     await createBtn.dispatchEvent("click");
     await page.waitForURL(/\/admin\/editor\/[^/]+$/, { timeout: 30_000 });
 
-    await page.getByRole("button", { name: "分享预览" }).click();
-    await page.getByRole("button", { name: "生成分享链接" }).click();
+    await page.getByRole("button", { name: t.editor.toolbar.sharePreview }).click();
+    await page.getByRole("button", { name: t.editor.panels.share.generate }).click();
     const input = page.locator("input[readonly]");
     await expect(input).toHaveValue(/\/preview\//, { timeout: 15_000 });
     const firstUrl = await input.inputValue();
@@ -81,7 +82,7 @@ test.describe("草稿分享预览", () => {
     await expect(anonPage.getByText("Made with")).toBeVisible();
 
     // 重置链接 → 旧链接 404
-    await page.getByRole("button", { name: /重置链接/ }).click();
+    await page.getByRole("button", { name: new RegExp(t.editor.panels.share.reset.slice(0, 4)) }).click();
     await expect(input).not.toHaveValue(firstUrl, { timeout: 15_000 });
     const stalePage = await anon.newPage();
     const staleResp = await stalePage.goto(baseURL + firstPath);

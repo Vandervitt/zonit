@@ -9,9 +9,11 @@ import { Routes } from "@/lib/constants";
 export function handleSessionExpired(
   res: Response,
   router: { push: (href: string) => void },
+  /** 提示文案，由调用方从字典取（本模块在 lib 下，拿不到 React context）。 */
+  message: string,
 ): boolean {
   if (res.status !== 401) return false;
-  toast.error("登录状态已失效，请重新登录");
+  toast.error(message);
   router.push(Routes.Login);
   return true;
 }

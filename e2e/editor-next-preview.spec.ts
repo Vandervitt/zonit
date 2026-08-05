@@ -12,6 +12,7 @@
 import { test, expect } from '@playwright/test';
 import { Pool } from 'pg';
 import { config as loadEnv } from 'dotenv';
+import { t } from "./helpers/i18n";
 
 loadEnv({ path: '.env.local' });
 loadEnv({ path: '.env' });
@@ -64,14 +65,14 @@ test.describe('editor 实时预览', () => {
     await page.goto('/admin/landing-pages');
     const dialog = page.getByRole('dialog');
     await expect(async () => {
-      await page.getByRole('button', { name: '新建' }).click();
+      await page.getByRole('button', { name: t.pages.create }).click();
       await expect(dialog).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 30_000 });
 
     // 3) 搜到 Aurae Skincare 后点「直接编辑」建页 → 跳编辑器详情页
     // input[type=search] 的可访问角色是 searchbox（不是 textbox）
-    await dialog.getByRole('searchbox', { name: '搜索模板名称' }).fill('Aurae Skincare');
-    await dialog.getByRole('button', { name: '直接编辑' }).first().click();
+    await dialog.getByRole('searchbox', { name: t.editor.templatePicker.searchAria }).fill('Aurae Skincare');
+    await dialog.getByRole('button', { name: t.editor.templatePicker.edit }).first().click();
     await page.waitForURL(/\/admin\/editor\/[^/]+$/, { timeout: 30_000 });
 
     // 4) 右栏预览 iframe 存在，预览初始呈现该模板 Hero 标题
@@ -81,8 +82,8 @@ test.describe('editor 实时预览', () => {
     // 5) 中栏 Hero 主标题输入框：填入新标题
     // ⚠️ 新建页默认选中的是「联系方式」面板（留资渠道通用化之后的默认落点），
     // 不先切到首屏面板就取不到「主标题」输入框——本用例从那时起一直红着。
-    await page.getByRole('button', { name: /首屏 Hero/ }).click();
-    const titleInput = page.getByLabel('主标题');
+    await page.getByRole('button', { name: new RegExp(t.editor.blockList.hero) }).click();
+    const titleInput = page.getByLabel(t.editor.fields.title);
     await titleInput.fill('Brand new hero headline');
 
     // 6) 预览 iframe 实时更新为新标题，旧标题消失

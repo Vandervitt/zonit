@@ -92,6 +92,10 @@ export async function provisionUserByEmail(
       after(async () => {
         try {
           const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+          // 欢迎邮件不传 locale，走默认语言：新用户的 users.locale 恒为 NULL
+          // （建号路径刻意不写这一列，见 docs/feat_20260805_admin端国际化/design.md），
+          // 而这里在 after() 里跑，也读不到请求的 zb_locale cookie。
+          // 要按注册来源发欢迎邮件，得先把 locale 写进建号事务——那是另一件事。
           await sendWelcomeEmail({ to: u.email, name: u.name ?? null, appUrl });
         } catch (err) {
           console.error("welcome email (otp) failed:", err);

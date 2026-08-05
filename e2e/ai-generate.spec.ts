@@ -10,6 +10,7 @@
 import { test, expect } from '@playwright/test';
 import { Pool } from 'pg';
 import { config as loadEnv } from 'dotenv';
+import { t } from "./helpers/i18n";
 
 loadEnv({ path: '.env.local' });
 loadEnv({ path: '.env' });
@@ -59,19 +60,19 @@ test.describe('AI 一键成页', () => {
     await page.waitForURL('**/admin', { timeout: 30_000 });
 
     // 2) 概览页打开模板选择弹窗，点某张模板的「AI 一键成页」
-    await page.getByRole('button', { name: /新建落地页/ }).click();
-    await page.getByRole('button', { name: 'AI 一键成页' }).first().click();
+    await page.getByRole('button', { name: new RegExp(t.overview.quickActions.newPage) }).click();
+    await page.getByRole('button', { name: t.editor.templatePicker.aiGenerate }).first().click();
 
     // 3) 先建库并进入编辑器，URL 带 ?ai=1
     await page.waitForURL(/\/admin\/editor\/[^/?]+\?ai=1$/, { timeout: 30_000 });
 
     // 4) 编辑器内资料表单默认弹出：填写并提交
-    await page.getByLabel('产品 / 公司名').fill('Acme 出海咨询');
-    await page.getByLabel('它做什么 / 解决什么').fill('为出海企业提供本地化获客与合规咨询');
+    await page.getByLabel(t.editor.generate.name).fill('Acme 出海咨询');
+    await page.getByLabel(t.editor.generate.what).fill('为出海企业提供本地化获客与合规咨询');
     // ⚠️ 必须限定在弹窗内：getByRole 的 name 默认按**子串**匹配，裸用「一键成页」会
     // 同时命中工具栏那颗「AI 一键成页」（后来才加的），报 strict mode violation。
     const briefDialog = page.getByRole('dialog');
-    await briefDialog.getByRole('button', { name: '一键成页', exact: true }).click();
+    await briefDialog.getByRole('button', { name: t.editor.generate.ok, exact: true }).click();
 
     // 5) 生成成功：表单关闭、URL 去掉 ?ai，仍停在同一张落地页编辑器
     await page.waitForURL(/\/admin\/editor\/[^/?]+$/, { timeout: 30_000 });

@@ -35,6 +35,8 @@ export const leads = {
     pending: "投递中",
     off: "关",
   },
+  contactKinds: { whatsapp: "WhatsApp", phone: "拨号", email: "邮件", telegram: "Telegram" },
+
   attribution: {
     none: "这条线索没带任何 UTM 或点击 ID——广告链接上没加参数时就会这样。",
     utm_source: "来源 utm_source",
