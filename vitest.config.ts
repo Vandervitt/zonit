@@ -9,12 +9,15 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // .tsx 一并收：组件测试要包 Provider 时用 JSX 比 createElement 可读得多
+    // （createElement 传 children 会触发 react/no-children-prop）。
     include: [
-      "lib/**/*.test.ts",
-      "lib/**/__tests__/**/*.test.ts",
-      "landing-editor/**/*.test.ts",
-      "landing-renderer/**/*.test.ts",
-      "app/**/*.test.ts",
+      "lib/**/*.test.{ts,tsx}",
+      "lib/**/__tests__/**/*.test.{ts,tsx}",
+      "landing-editor/**/*.test.{ts,tsx}",
+      "landing-renderer/**/*.test.{ts,tsx}",
+      "app/**/*.test.{ts,tsx}",
+      "components/**/*.test.{ts,tsx}",
     ],
     exclude: ["e2e/**", "node_modules/**"],
   },

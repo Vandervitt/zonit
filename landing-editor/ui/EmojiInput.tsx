@@ -1,6 +1,7 @@
 "use client";
 // landing-editor/ui/EmojiInput.tsx
 // 文本输入 + 精选 emoji 快速选择器（无依赖）。点选即填入，仍可手动输入。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useState } from "react";
 
 // 落地页常用营销 emoji（信任 / 速度 / 价值 / 联系 / 庆祝）
@@ -20,6 +21,8 @@ export function EmojiInput({
   onChange: (v: string) => void;
   placeholder?: string;
 }) {
+  const t = useAdminT().editor.ui;
+  const f = useAdminT().editor.fields;
   const [open, setOpen] = useState(false);
 
   return (
@@ -34,7 +37,7 @@ export function EmojiInput({
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          aria-label="选择 emoji"
+          aria-label={t.pickEmoji}
           aria-expanded={open}
           className="shrink-0 rounded-md border border-edge px-2 py-1.5 text-sm transition-colors hover:border-brand-400"
         >
@@ -46,7 +49,7 @@ export function EmojiInput({
         <>
           <button
             type="button"
-            aria-label="关闭"
+            aria-label={f.close}
             className="fixed inset-0 z-10 cursor-default"
             onClick={() => setOpen(false)}
           />
@@ -75,7 +78,7 @@ export function EmojiInput({
                 }}
                 className="mt-1.5 w-full rounded-md px-2 py-1 text-xs text-ink-muted transition-colors hover:bg-brand-50"
               >
-                清除
+                {t.clear}
               </button>
             ) : null}
           </div>

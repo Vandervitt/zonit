@@ -7,6 +7,7 @@
 import useSWR from "swr";
 import { Card, Table, Typography, Tag } from "antd";
 import { ApiRoutes } from "@/lib/constants";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 export interface PagePerformanceRow {
   pageId: string;
@@ -27,14 +28,15 @@ export function PageComparison({
   selectedPageId: string;
   onSelect: (pageId: string) => void;
 }) {
+  const t = useAdminT().analytics.pageComparison;
   const { data, isLoading } = useSWR<PagePerformanceRow[]>(`${ApiRoutes.AnalyticsPages}?${rangeQuery}`);
   const rows = data ?? [];
   const pct = (n: number) => `${(n * 100).toFixed(1)}%`;
 
   return (
     <Card
-      title="落地页对比"
-      extra={<Typography.Text type="secondary" style={{ fontSize: 12 }}>点任一行可把下方全部图表筛到该页</Typography.Text>}
+      title={t.title}
+      extra={<Typography.Text type="secondary" style={{ fontSize: 12 }}>{t.hint}</Typography.Text>}
     >
       <Table<PagePerformanceRow>
         rowKey="pageId"
@@ -42,7 +44,7 @@ export function PageComparison({
         loading={isLoading}
         dataSource={rows}
         pagination={rows.length > 10 ? { pageSize: 10, showSizeChanger: false } : false}
-        locale={{ emptyText: "还没有落地页" }}
+        locale={{ emptyText: t.empty }}
         onRow={(r) => ({
           onClick: () => onSelect(selectedPageId === r.pageId ? "all" : r.pageId),
           style: { cursor: "pointer" },
@@ -50,21 +52,21 @@ export function PageComparison({
         rowClassName={(r) => (r.pageId === selectedPageId ? "ant-table-row-selected" : "")}
         columns={[
           {
-            title: "落地页", dataIndex: "name", ellipsis: true,
+            title: t.columns.page, dataIndex: "name", ellipsis: true,
             render: (name: string, r) => (
               <span>
                 {name}
                 {/* 有曝光却一条线索都没有，是最该被看见的一类：钱在花，回报为零 */}
-                {r.views > 0 && r.leads === 0 && <Tag color="orange" style={{ marginLeft: 8 }}>无线索</Tag>}
-                {r.views === 0 && <Tag style={{ marginLeft: 8 }}>无流量</Tag>}
+                {r.views > 0 && r.leads === 0 && <Tag color="orange" style={{ marginLeft: 8 }}>{t.noLeads}</Tag>}
+                {r.views === 0 && <Tag style={{ marginLeft: 8 }}>{t.noTraffic}</Tag>}
               </span>
             ),
           },
-          { title: "曝光", dataIndex: "views", width: 100, sorter: (a, b) => a.views - b.views },
-          { title: "CTA 点击", dataIndex: "clicks", width: 110, sorter: (a, b) => a.clicks - b.clicks },
-          { title: "线索", dataIndex: "leads", width: 90, sorter: (a, b) => a.leads - b.leads },
+          { title: t.columns.views, dataIndex: "views", width: 100, sorter: (a, b) => a.views - b.views },
+          { title: t.columns.clicks, dataIndex: "clicks", width: 110, sorter: (a, b) => a.clicks - b.clicks },
+          { title: t.columns.leads, dataIndex: "leads", width: 90, sorter: (a, b) => a.leads - b.leads },
           {
-            title: "线索转化率", dataIndex: "cvr", width: 120,
+            title: t.columns.cvr, dataIndex: "cvr", width: 120,
             sorter: (a, b) => a.cvr - b.cvr,
             render: (v: number) => pct(v),
           },

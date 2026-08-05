@@ -4,6 +4,12 @@ import { describe, it, expect } from "vitest";
 import { collectContactIssues, collectContactIssueItems, blankTemplateContacts } from "./contactIssues";
 import type { LandingPageDraft, PageContact } from "@/types/schema.draft";
 
+import { getAdminDictionary } from "@/lib/i18n/admin";
+
+// 这些断言认的是中文文案子串，故显式钉中文字典，不依赖 defaultLocale——
+// 后者是英文，且以后可能再变；测试要的是确定性，不是跟着默认值漂。
+const zh = getAdminDictionary("zh").editor.issues;
+
 const draft = (contact: PageContact, extra: Record<string, unknown> = {}) =>
   ({
     contact,
@@ -16,52 +22,52 @@ const REAL: PageContact = { primary: "whatsapp", whatsapp: "+8613800138000" };
 
 describe("collectContactIssues", () => {
   it("主渠道为真实号码、无占位 → 无问题", () => {
-    expect(collectContactIssues(draft(REAL))).toEqual([]);
+    expect(collectContactIssues(draft(REAL), zh)).toEqual([]);
   });
 
   it("主渠道未填值 → 报无法联系问题", () => {
-    const r = collectContactIssues(draft({ primary: "whatsapp" }));
+    const r = collectContactIssues(draft({ primary: "whatsapp" }), zh);
     expect(r.some((m) => m.includes("无法联系你"))).toBe(true);
   });
 
   it("主渠道是表单但表单未启用 → 报落点无效问题", () => {
-    const r = collectContactIssues(draft({ primary: "form" }));
+    const r = collectContactIssues(draft({ primary: "form" }), zh);
     expect(r.some((m) => m.includes("留资表单未启用"))).toBe(true);
   });
 
   it("主渠道是表单且表单已启用 → 无问题（开箱即用，无需填联系方式）", () => {
-    expect(collectContactIssues(draft({ primary: "form" }, { leadForm: { enabled: true } }))).toEqual([]);
+    expect(collectContactIssues(draft({ primary: "form" }, { leadForm: { enabled: true } }), zh)).toEqual([]);
   });
 
   it("悬浮按钮引用的渠道未填值 → 报问题，target 指向 floatingButton", () => {
     const d = draft(REAL, { floatingButton: { text: "Chat", target: { kind: "channel", channel: "telegram" } } });
-    const hit = collectContactIssueItems(d).find((i) => i.message.includes("悬浮按钮指向"));
+    const hit = collectContactIssueItems(d, zh).find((i) => i.message.includes("悬浮按钮指向"));
     expect(hit).toBeDefined();
     // 落点指向联系方式面板：用户要改的是号码，不是按钮本身
     expect(hit?.target).toEqual({ kind: "fixed", id: "contact" });
   });
 
   it("无悬浮按钮 → 不报悬浮相关问题", () => {
-    expect(collectContactIssues(draft(REAL)).some((m) => m.includes("悬浮"))).toBe(false);
+    expect(collectContactIssues(draft(REAL), zh).some((m) => m.includes("悬浮"))).toBe(false);
   });
 
   it("悬浮按钮引用的渠道已填且非占位 → 无问题", () => {
     const d = draft({ ...REAL, telegram: "brandsupport" }, {
       floatingButton: { text: "Chat", target: { kind: "channel", channel: "telegram" } },
     });
-    expect(collectContactIssues(d)).toEqual([]);
+    expect(collectContactIssues(d, zh)).toEqual([]);
   });
 
   it("首屏 CTA 文案为空 → 报文案问题，target 指向 hero", () => {
     const d = draft(REAL, { hero: { cta: { text: "  ", target: { kind: "primary" } } } });
-    const hit = collectContactIssueItems(d).find((i) => i.message.includes("首屏 CTA 按钮文案为空"));
+    const hit = collectContactIssueItems(d, zh).find((i) => i.message.includes("首屏 CTA 按钮文案为空"));
     expect(hit).toBeDefined();
     expect(hit?.target).toEqual({ kind: "fixed", id: "hero" });
   });
 
   it("悬浮按钮文案为空 → 报文案问题", () => {
     const d = draft(REAL, { floatingButton: { text: "", target: { kind: "primary" } } });
-    const hit = collectContactIssueItems(d).find((i) => i.message.includes("悬浮按钮文案为空"));
+    const hit = collectContactIssueItems(d, zh).find((i) => i.message.includes("悬浮按钮文案为空"));
     expect(hit).toBeDefined();
     expect(hit?.target).toEqual({ kind: "fixed", id: "floatingButton" });
   });

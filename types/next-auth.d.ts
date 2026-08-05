@@ -1,6 +1,7 @@
 import type { DefaultSession } from "next-auth";
 import type { PlanId } from "@/lib/plans";
 import type { UserRole } from "@/lib/constants/auth";
+import type { Locale } from "@/lib/i18n/config";
 
 declare module "next-auth" {
   interface Session {
@@ -18,6 +19,12 @@ declare module "next-auth" {
       compPlan: PlanId | null;
       /** 赠送到期时间（ISO）；永久赠送或无赠送为 null。 */
       compPlanExpiresAt: string | null;
+      /**
+       * 后台界面语言（users.locale）。null = 从未表过态，由 resolveAdminLocale
+       * 回退到注册来源 cookie。不要在这里就地回退成默认语言——那会抹掉
+       * "没选过"与"选了英文"的区别。
+       */
+      locale: Locale | null;
     };
   }
 }
@@ -31,5 +38,6 @@ declare module "next-auth/jwt" {
     paidPlan?: PlanId;
     compPlan?: PlanId | null;
     compPlanExpiresAt?: string | null;
+    locale?: Locale | null;
   }
 }

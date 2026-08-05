@@ -10,10 +10,12 @@ import { UploadZone } from "@/components/media/UploadZone";
 import { UnsplashModal } from "@/components/media/UnsplashModal";
 import type { MediaItem } from "@/lib/media-db";
 import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 type FilterTab = "all" | "image" | "video";
 
 export default function MediaPage() {
+  const t = useAdminT().media;
   const [filter, setFilter] = useState<FilterTab>("all");
   const [unsplashOpen, setUnsplashOpen] = useState(false);
 
@@ -32,9 +34,9 @@ export default function MediaPage() {
   };
 
   const segmentedOptions = [
-    { label: "全部", value: "all" },
-    { label: "图片", value: "image" },
-    { label: "视频", value: "video" },
+    { label: t.filter.all, value: "all" },
+    { label: t.filter.image, value: "image" },
+    { label: t.filter.video, value: "video" },
   ];
 
   return (
@@ -50,15 +52,15 @@ export default function MediaPage() {
       >
         <div>
           <Typography.Title level={3} style={{ margin: 0 }}>
-            素材库
+            {t.title}
           </Typography.Title>
           <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-            {items.length} 个素材
+            {t.count(items.length)}
           </Typography.Text>
         </div>
         <Space>
-          <Button icon={<PictureOutlined />} onClick={() => setUnsplashOpen(true)} aria-label="从 Unsplash 添加">
-            从 Unsplash 添加
+          <Button icon={<PictureOutlined />} onClick={() => setUnsplashOpen(true)} aria-label={t.unsplash.open}>
+            {t.unsplash.open}
           </Button>
           <UploadZone onUploaded={handleUploaded} />
         </Space>
@@ -75,13 +77,13 @@ export default function MediaPage() {
 
       {/* Grid */}
       <div style={{ flex: 1, padding: "0 24px 20px", overflow: "auto" }}>
-        <LoadErrorAlert error={error} onRetry={() => void mutate()} label="素材库" />
+        <LoadErrorAlert error={error} onRetry={() => void mutate()} label={t.loadErrorLabel} />
         {error ? null : !data ? (
           <div style={{ display: "flex", justifyContent: "center", paddingTop: 80 }}>
             <Spin size="large" />
           </div>
         ) : items.length === 0 ? (
-          <Empty description="还没有素材" style={{ paddingTop: 60 }} />
+          <Empty description={t.empty} style={{ paddingTop: 60 }} />
         ) : (
           <MediaGrid items={items} onDeleted={handleDeleted} />
         )}

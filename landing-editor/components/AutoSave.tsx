@@ -1,4 +1,5 @@
 "use client";
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useEffect, useRef } from "react";
 import { useEditorState, toDraft } from "../store/editorStore";
 import { useMeta } from "../MetaContext";
@@ -10,6 +11,7 @@ import { apiLandingPagePath } from "@/lib/constants";
  * 有未落库改动或保存失败时，拦截关闭/刷新（beforeunload）。
  */
 export function AutoSave() {
+  const t = useAdminT().editor.panels.autoSave;
   const state = useEditorState();
   const { pageId, name, setSaveState, setSaveError, status, setPublishedDirty, flushSaveRef, saveState } = useMeta();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -36,7 +38,7 @@ export function AutoSave() {
         if (res.ok) {
           setSaveError("");
         } else {
-          setSaveError(res.status === 409 ? "页面名称已被使用，请换一个名称" : "");
+          setSaveError(res.status === 409 ? t.nameTaken : "");
           pendingRef.current = pendingRef.current ?? payload; // 失败保留待保存，供重试/flush
         }
         return res.ok;

@@ -1,5 +1,6 @@
 // landing-editor/components/TrackingPanel.tsx
 "use client";
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useState, useEffect } from "react";
 import { useEditorState, useEditorDispatch } from "../store/editorStore";
 import { useMeta } from "../MetaContext";
@@ -17,6 +18,7 @@ import { TextInput } from "../ui/TextInput";
  * 还是名下全部页。
  */
 function CapiRow({ pageId, provider, label }: { pageId: string; provider: "meta" | "tiktok"; label: string }) {
+  const copy = useAdminT().editor.tracking;
   const [scope, setScope] = useState<"page" | "account" | null>(null);
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
@@ -66,24 +68,24 @@ function CapiRow({ pageId, provider, label }: { pageId: string; provider: "meta"
           onChange={(e) => (e.target.checked ? setOpen(true) : disable())}
           className="h-3.5 w-3.5 rounded border-edge-strong text-brand-600 focus:ring-brand-500/30 disabled:opacity-50"
         />
-        启用服务端回传（CAPI · {label}）
-        {scope === "page" ? " · 本页已配置 ✓" : scope === "account" ? " · 继承账号级 ✓" : ""}
+        {copy.capiEnable(label)}
+        {scope === "page" ? copy.capiScopePage : scope === "account" ? copy.capiScopeAccount : ""}
       </label>
       {scope === "account" && (
         <p className="mt-1 text-xs text-ink-muted">
-          正在使用设置里的账号级凭据。只想让这一张页用别的 Dataset，在下面填一份覆盖即可。
+          {copy.capiInherit}
         </p>
       )}
       {open && (
         <div className="mt-2 space-y-2">
           <Field label={provider === "meta" ? "Dataset ID" : "Pixel Code"}>
-            <TextInput value={externalId} onChange={(e) => setExternalId(e.target.value)} placeholder={provider === "meta" ? "如 1234567890" : "如 CXXXXXXXX"} />
+            <TextInput value={externalId} onChange={(e) => setExternalId(e.target.value)} placeholder={provider === "meta" ? "1234567890" : "CXXXXXXXX"} />
           </Field>
           <Field label="Access Token">
-            <TextInput value={token} onChange={(e) => setToken(e.target.value)} placeholder={configured ? "重填以覆盖（不回显已存）" : "粘贴 Access Token"} />
+            <TextInput value={token} onChange={(e) => setToken(e.target.value)} placeholder={configured ? copy.capiTokenOverwrite : copy.capiTokenPlaceholder} />
           </Field>
           <button type="button" onClick={save} className="rounded-md bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700">
-            {scope === "account" ? "保存为本页覆盖" : "保存凭据"}
+            {scope === "account" ? copy.capiSaveOverride : copy.capiSave}
           </button>
         </div>
       )}
@@ -92,13 +94,15 @@ function CapiRow({ pageId, provider, label }: { pageId: string; provider: "meta"
 }
 
 const PROVIDERS: { provider: PixelProvider; label: string; placeholder: string }[] = [
-  { provider: "meta", label: "Meta Pixel ID", placeholder: "如 1234567890" },
-  { provider: "ga4", label: "Google Analytics（GA4）ID", placeholder: "如 G-XXXXXXX" },
-  { provider: "googleAds", label: "Google Ads 转化 ID", placeholder: "如 AW-XXXXXXXXX" },
-  { provider: "tiktok", label: "TikTok Pixel ID", placeholder: "如 CXXXXXXXXXXXXXXXXX" },
+  // label 是各平台官方术语，placeholder 是 ID 格式样例，两者都与界面语言无关。
+  { provider: "meta", label: "Meta Pixel ID", placeholder: "1234567890" },
+  { provider: "ga4", label: "Google Analytics (GA4) ID", placeholder: "G-XXXXXXX" },
+  { provider: "googleAds", label: "Google Ads Conversion ID", placeholder: "AW-XXXXXXXXX" },
+  { provider: "tiktok", label: "TikTok Pixel ID", placeholder: "CXXXXXXXXXXXXXXXXX" },
 ];
 
 export function TrackingPanel({ onClose }: { onClose: () => void }) {
+  const copy = useAdminT().editor.tracking;
   const state = useEditorState();
   const dispatch = useEditorDispatch();
   const { pageId, plan } = useMeta();
@@ -117,18 +121,18 @@ export function TrackingPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}>
       <div className="w-[460px] rounded-xl bg-panel p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-base font-semibold text-ink">追踪与转化</h2>
-        <p className="mt-1 text-xs text-ink-muted">填入各平台 Pixel ID（留空即不启用）。事件按系统内置规则上报，仅咨询/留资，无交易语义。</p>
+        <h2 className="text-base font-semibold text-ink">{copy.title}</h2>
+        <p className="mt-1 text-xs text-ink-muted">{copy.intro}</p>
 
         <div className="mt-4 space-y-3">
           {PROVIDERS.map(({ provider, label, placeholder }) => {
             const locked = !advanced && provider !== "meta";
             return (
-              <Field key={provider} label={locked ? `${label}（Pro 解锁全矩阵像素）` : label}>
+              <Field key={provider} label={locked ? `${label}${copy.lockedSuffix}` : label}>
                 <TextInput
                   value={locked ? "" : idOf(provider)}
                   onChange={(e) => setPixel(provider, e.target.value)}
-                  placeholder={locked ? "升级 Pro 解锁 TikTok / GA4 / Google Ads" : placeholder}
+                  placeholder={locked ? copy.lockedPlaceholder : placeholder}
                   disabled={locked}
                 />
               </Field>
@@ -137,13 +141,13 @@ export function TrackingPanel({ onClose }: { onClose: () => void }) {
 
           {advanced && pageId ? (
             <div className="space-y-2 border-t border-edge pt-3">
-              <p className="text-xs font-medium text-ink-soft">服务端转化回传（CAPI）</p>
+              <p className="text-xs font-medium text-ink-soft">{copy.capiTitle}</p>
               <CapiRow pageId={pageId} provider="meta" label="Meta" />
               <CapiRow pageId={pageId} provider="tiktok" label="TikTok" />
             </div>
           ) : !advanced ? (
             <div className="border-t border-edge pt-3">
-              <p className="text-xs text-ink-muted">服务端转化回传（CAPI · Meta / TikTok）为 Pro 及以上套餐权益，升级后解锁。</p>
+              <p className="text-xs text-ink-muted">{copy.capiUpsell}</p>
             </div>
           ) : null}
 
@@ -154,7 +158,7 @@ export function TrackingPanel({ onClose }: { onClose: () => void }) {
               onChange={(e) => dispatch({ kind: "updateTracking", value: { ...t, utmPassthrough: e.target.checked } })}
               className="h-3.5 w-3.5 rounded border-edge-strong text-brand-600 focus:ring-brand-500/30"
             />
-            把 UTM 透传到 http(s) 外链 CTA
+            {copy.passUtm}
           </label>
 
           <label className="flex items-center gap-2 text-sm text-ink-soft">
@@ -164,22 +168,22 @@ export function TrackingPanel({ onClose }: { onClose: () => void }) {
               onChange={(e) => dispatch({ kind: "updateTracking", value: { ...t, consent: { ...t.consent, enabled: e.target.checked } } })}
               className="h-3.5 w-3.5 rounded border-edge-strong text-brand-600 focus:ring-brand-500/30"
             />
-            显示 Cookie 同意条（同意前不加载像素）
+            {copy.consentBar}
           </label>
 
           {t.consent.enabled && (
-            <Field label="同意条文案（留空用默认）">
+            <Field label={copy.consentText}>
               <TextInput
                 value={t.consent.text ?? ""}
                 onChange={(e) => dispatch({ kind: "updateTracking", value: { ...t, consent: { ...t.consent, text: e.target.value || undefined } } })}
-                placeholder="我们使用 Cookie 与第三方分析像素来改善投放效果…"
+                placeholder={copy.consentPlaceholder}
               />
             </Field>
           )}
         </div>
 
         <div className="mt-5 flex justify-end">
-          <button onClick={onClose} className="rounded-md bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700">完成</button>
+          <button onClick={onClose} className="rounded-md bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700">{copy.done}</button>
         </div>
       </div>
     </div>

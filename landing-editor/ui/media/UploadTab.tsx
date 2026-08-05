@@ -1,6 +1,7 @@
 "use client";
 // landing-editor/ui/media/UploadTab.tsx
 // 上传 Tab：选文件 → uploadMedia → 成功回传新素材 url（壳负责选中并关闭）。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useRef, useState } from "react";
 import { uploadMedia } from "@/lib/media-upload";
 import { Button } from "../Button";
@@ -12,6 +13,7 @@ export function UploadTab({
   accept: "image" | "video";
   onUploaded: (url: string) => void;
 }) {
+  const t = useAdminT().editor.ui;
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function UploadTab({
       const item = await uploadMedia(file);
       onUploaded(item.url);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "上传失败，请重试");
+      setError(e instanceof Error ? e.message : t.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -43,9 +45,9 @@ export function UploadTab({
         }}
       />
       <Button variant="primary" disabled={uploading} onClick={() => inputRef.current?.click()}>
-        {uploading ? "上传中…" : `上传${accept === "video" ? "视频" : "图片"}`}
+        {uploading ? t.uploading : accept === "video" ? t.uploadVideo : t.uploadImage}
       </Button>
-      <p className="text-xs text-ink-muted">上传后自动入库并选中（≤100MB，不支持 SVG）</p>
+      <p className="text-xs text-ink-muted">{t.uploadHint}</p>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
     </div>
   );

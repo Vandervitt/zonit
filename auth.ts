@@ -11,6 +11,7 @@ import { provisionUserByEmail } from "@/lib/auth/provision";
 import { effectivePlan, activeCompPlan, SIGNUP_TRIAL_PLAN, signupTrialExpiry, type PlanId } from "@/lib/plans";
 import { sendWelcomeEmail } from "@/lib/email";
 import { recordMilestone } from "@/lib/platform-milestones";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 
 // Debug configuration
 if (!process.env.AUTH_SECRET) {
@@ -151,7 +152,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const userId = user?.id ?? token.sub;
         if (userId) {
           const r = await pool.query(
-            "SELECT email, plan, comp_plan, comp_plan_expires_at, role, trial_expires_at, disabled_at, billing_expires_at, billing_subscription_id FROM users WHERE id = $1",
+            "SELECT email, plan, comp_plan, comp_plan_expires_at, role, trial_expires_at, disabled_at, billing_expires_at, billing_subscription_id, locale FROM users WHERE id = $1",
             [userId]
           );
           const userData = r.rows[0];
@@ -207,6 +208,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             // 隐藏「更换套餐」自助换档区（换档会 404，对赠送用户无意义）。
             token.hasSubscription = Boolean(userData.billing_subscription_id);
             token.role = (isHardwareAdmin ? UserRole.SUPER_ADMIN : (userData.role ?? UserRole.USER)) as UserRole;
+            // 后台界面语言。脏值按「没选过」处理，交由 resolveAdminLocale 回退到注册来源，
+            // 而不是让一个人工改库写错的值把整个后台钉死在某个语言上。
+            token.locale = isLocale(userData.locale ?? "") ? (userData.locale as Locale) : null;
           }
         }
         return token;
@@ -225,6 +229,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.role = token.role as UserRole;
       session.user.billingExpiresAt = (token.billingExpiresAt as string | null) ?? null;
       session.user.hasSubscription = Boolean(token.hasSubscription);
+      session.user.locale = (token.locale as Locale | null | undefined) ?? null;
       return session;
     },
   },

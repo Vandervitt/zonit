@@ -2,6 +2,7 @@
 import { Alert, Button, Space } from "antd";
 import Link from "next/link";
 import { Routes } from "@/lib/constants";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 /**
  * 发布配额超额横幅。
@@ -19,33 +20,28 @@ export function PublishQuotaBanner({
   limit: number;
   daysLeft: number;
 }) {
+  const t = useAdminT().domains.quotaBanner;
   const excess = publishedCount - limit;
+  const deadline = daysLeft > 0 ? t.deadlineWithin(daysLeft) : t.deadlinePassed;
   return (
     <Alert
       type={daysLeft <= 2 ? "error" : "warning"}
       showIcon
       style={{ marginBottom: 16 }}
-      message={
-        daysLeft <= 0
-          ? "已发布页数超出套餐额度，超出部分即将被取消发布"
-          : `已发布页数超出套餐额度，还有 ${daysLeft} 天`
-      }
+      message={daysLeft <= 0 ? t.expiredTitle : t.countdownTitle(daysLeft)}
       description={
         <span>
-          当前 {publishedCount} 张已发布，套餐额度 {limit} 张，超出 {excess} 张。
-          已上线的页面暂不受影响，但无法再发布新页面。
-          {daysLeft > 0 ? `若 ${daysLeft} 天内仍未处理，` : "宽限期已结束，"}
-          我们会自动取消发布超出的部分，优先保留域名根路径与最早发布的页面。
-          <strong>只是下线，页面内容不会被删除</strong>，升级套餐后可随时重新发布。
+          {t.body(publishedCount, limit, excess, deadline)}
+          <strong>{t.contentSafe}</strong>{t.contentSafeSuffix}
         </span>
       }
       action={
         <Space direction="vertical">
           <Link href={Routes.Billing}>
-            <Button size="small" type="primary">升级套餐</Button>
+            <Button size="small" type="primary">{t.upgrade}</Button>
           </Link>
           <Link href={Routes.LandingPages}>
-            <Button size="small">管理落地页</Button>
+            <Button size="small">{t.managePages}</Button>
           </Link>
         </Space>
       }

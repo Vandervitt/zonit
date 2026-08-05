@@ -12,20 +12,23 @@ export interface CreditPack {
   credits: number;
   /** 展示价（美元，仅展示；实际扣款以渠道产品定价为准）。 */
   priceUsd: number;
-  /** 卖点说明。 */
-  desc: string;
   /** 是否标注「更划算」。 */
   highlight?: boolean;
 }
 
+// 卖点说明（desc）已移出本文件：它是展示文案，随后台语言变化，
+// 现按 credits 数量存放在 lib/i18n/admin/dictionaries/*/billing.ts 的 credits.packDesc。
+// 本文件只留结构化事实——与 lib/plans.ts 的分工一致。
 export const CREDIT_PACKS: CreditPack[] = [
-  { credits: 50, priceUsd: 4.99, desc: "适合偶尔补量" },
-  { credits: 200, priceUsd: 14.99, desc: "单价更低，重度使用推荐", highlight: true },
+  { credits: 50, priceUsd: 4.99 },
+  { credits: 200, priceUsd: 14.99, highlight: true },
 ];
 
 /**
  * 充值包价格展示：美元为准，给定汇率时附人民币参考换算。
- * 后台固定中文，故换算文案在此直接写死，不走 i18n 字典。
+ *
+ * 汇率传 null 即表示该展示面不需要换算（英文界面），调用方无需自己分支——
+ * 与 lib/plans.ts 的 approxCnyText 同一约定。
  */
 export function creditPackPriceLabel(pack: CreditPack, cnyRate?: number | null): string {
   const approx = cnyRate == null ? null : approxCnyAmount(pack.priceUsd, cnyRate);

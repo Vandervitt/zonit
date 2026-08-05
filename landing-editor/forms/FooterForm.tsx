@@ -1,5 +1,6 @@
 "use client";
 // landing-editor/forms/FooterForm.tsx
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useEffect, useState } from "react";
 import type { FooterSection } from "@/types/schema.draft";
 import { ApiRoutes, Routes } from "@/lib/constants";
@@ -16,6 +17,7 @@ interface ProfileOption {
 }
 
 export function FooterForm({ value, onChange }: { value: FooterSection; onChange: (v: FooterSection) => void }) {
+  const t = useAdminT().editor.forms.footer;
   const patch = (p: Partial<FooterSection>) => onChange({ ...value, ...p });
 
   // 主体信息是账号级的，编辑器只负责「这张页用哪一份」。null = 仍在加载：
@@ -35,38 +37,38 @@ export function FooterForm({ value, onChange }: { value: FooterSection; onChange
 
   return (
     <div className="space-y-3">
-      <Field label="品牌名称">
+      <Field label={t.brandName}>
         <TextInput value={value.brandName} onChange={(e) => patch({ brandName: e.target.value })} />
       </Field>
-      <Field label="版权年份">
+      <Field label={t.copyrightYear}>
         <TextInput value={value.copyrightYear} onChange={(e) => patch({ copyrightYear: e.target.value })} placeholder="2026" />
       </Field>
       {/* 联系邮箱已并入页面级 contact.email，页脚不再单独存一份 */}
       <Field
-        label="经营主体信息"
-        hint="页脚展示的公司信息与执照。TikTok 对电商与金融类页面要求展示，Meta / LinkedIn 也会核对身份真实性。"
+        label={t.companyProfile}
+        hint={t.companyProfileHint}
       >
         <Select
           value={value.companyProfileId ?? ""}
           onChange={(e) => patch({ companyProfileId: e.target.value || undefined })}
         >
-          <option value="">不展示</option>
+          <option value="">{t.none}</option>
           {(profiles ?? []).map((p) => (
-            <option key={p.id} value={p.id}>{p.label}{p.is_default ? "（默认）" : ""}</option>
+            <option key={p.id} value={p.id}>{p.label}{p.is_default ? t.defaultSuffix : ""}</option>
           ))}
         </Select>
       </Field>
       {profiles !== null && profiles.length === 0 && (
         <p className="text-[11px] text-ink-muted">
-          账号里还没有主体信息。到{" "}
-          <a href={Routes.Settings} target="_blank" rel="noreferrer" className="underline">设置 · 经营主体信息</a>{" "}
-          填一份，所有页面都能选用。
+          {t.noProfile[0]}
+          <a href={Routes.Settings} target="_blank" rel="noreferrer" className="underline">{t.settingsLink}</a>
+          {t.noProfile[1]}
         </p>
       )}
-      <Field label="隐私政策" hint="这段文字既显示在页脚，也构成落地页的 /privacy 政策页。">
+      <Field label={t.privacy} hint={t.privacyHint}>
         <TextArea rows={4} value={value.privacyPolicy} onChange={(e) => patch({ privacyPolicy: e.target.value })} />
       </Field>
-      <Field label="服务条款" hint="同上，对应 /terms。">
+      <Field label={t.terms} hint={t.termsHint}>
         <TextArea rows={4} value={value.termsOfService} onChange={(e) => patch({ termsOfService: e.target.value })} />
       </Field>
     </div>

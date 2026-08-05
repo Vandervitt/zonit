@@ -4,24 +4,27 @@
 // SWRConfig 设 shouldRetryOnError: false，失败后不会自动重试，必须提供手动重试入口。
 import { Alert, Button } from "antd";
 import { ApiError } from "@/lib/api/fetcher";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 export function LoadErrorAlert({
   error,
   onRetry,
-  label = "数据",
+  label,
 }: {
   error: unknown;
   onRetry: () => void;
+  /** 出错的数据名（「落地页列表」等），已本地化。缺省时用字典的通用兜底词。 */
   label?: string;
 }) {
+  const t = useAdminT().common;
   if (!error) return null;
-  const detail = error instanceof ApiError ? `（HTTP ${error.status}）` : "";
+  const status = error instanceof ApiError ? error.status : null;
   return (
     <Alert
       type="error"
       showIcon
-      message={`${label}加载失败${detail}，当前显示可能不完整`}
-      action={<Button size="small" onClick={onRetry}>重试</Button>}
+      message={t.loadError(label ?? t.loadErrorFallbackLabel, status)}
+      action={<Button size="small" onClick={onRetry}>{t.retry}</Button>}
     />
   );
 }

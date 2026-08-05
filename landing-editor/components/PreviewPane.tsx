@@ -4,6 +4,7 @@
 // 用渲染器 LandingPage 在隔离 iframe 内实时呈现。
 // 落地页为移动端优先，故默认手机视图——把预览包进居中手机卡片（圆角 + 深色边框 +
 // 投影 + 内部滚动），iframe 以 390 宽渲染，命中纯移动端断面；保留桌面切换以查看宽屏版式。
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useState } from "react";
 import { useEditorState, toDraft } from "../store/editorStore";
 import { useMeta } from "../MetaContext";
@@ -16,6 +17,7 @@ type Device = "mobile" | "desktop";
 const DEVICE_WIDTH: Record<Device, number> = { mobile: 390, desktop: 1280 };
 
 export function PreviewPane() {
+  const t = useAdminT().editor.panels.preview;
   const state = useEditorState();
   const draft = toDraft(state);
   const { pageId } = useMeta();
@@ -46,10 +48,10 @@ export function PreviewPane() {
   return (
     <div className="flex h-full flex-col bg-canvas">
       <div className="flex shrink-0 items-center justify-between border-b border-edge bg-panel px-4 py-2.5">
-        <span className="text-xs font-medium text-ink">实时预览</span>
+        <span className="text-xs font-medium text-ink">{t.live}</span>
         <div className="flex items-center gap-1">
-          {tab("mobile", "移动")}
-          {tab("desktop", "桌面")}
+          {tab("mobile", t.mobile)}
+          {tab("desktop", t.desktop)}
         </div>
       </div>
       <div className="min-h-0 flex-1">

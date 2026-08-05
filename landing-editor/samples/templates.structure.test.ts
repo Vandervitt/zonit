@@ -19,6 +19,12 @@ import {
 } from "@/types/schema.draft";
 import { collectFieldIssues } from "../lib/validate";
 
+import { getAdminDictionary } from "@/lib/i18n/admin";
+
+// 这些断言认的是中文文案子串，故显式钉中文字典，不依赖 defaultLocale——
+// 后者是英文，且以后可能再变；测试要的是确定性，不是跟着默认值漂。
+const zh = getAdminDictionary("zh").editor.issues;
+
 /**
  * 模板实例化后的草稿——与用户真正拿到的一致。
  * 注意 loadTemplateDraft 会清空全部渠道值（逼用户填自己的联系方式），
@@ -50,7 +56,7 @@ describe("模板库结构完整性", () => {
       expect(isLandingPageStructureValid(draft)).toBe(true);
 
       // 2) 字段级格式（含交易语义链接拦截）
-      expect(collectFieldIssues(draft), `${id} 存在字段格式问题`).toEqual([]);
+      expect(collectFieldIssues(draft, zh), `${id} 存在字段格式问题`).toEqual([]);
 
       // 3) 页脚合规字段
       // 注：联系方式不在此断言——loadTemplateDraft 会清空全部渠道值（模板里的号码

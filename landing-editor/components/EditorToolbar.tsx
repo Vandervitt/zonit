@@ -11,12 +11,13 @@ import { TrackingPanel } from "./TrackingPanel";
 import { AntiBanPanel } from "./AntiBanPanel";
 import { SharePreviewPanel } from "./SharePreviewPanel";
 import { landingPreviewPath, Routes } from "@/lib/constants";
-
-const SAVE_LABEL: Record<string, string> = {
-  idle: "", saving: "保存中…", saved: "已保存",
-};
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 export function EditorToolbar() {
+  const t = useAdminT().editor.toolbar;
+  const issuesT = useAdminT().editor.issues;
+  // 保存态文案：idle 不显示任何字（刚进页面就出现「已保存」会让人以为刚发生过写入）。
+  const saveLabel: Record<string, string> = { idle: "", saving: t.saving, saved: t.saved };
   const { pageId, name, setName, saveState, saveError, status, publishedDirty, setGenerateOpen, flushSaveRef } = useMeta();
   const state = useEditorState();
   const dispatch = useEditorDispatch();
@@ -38,19 +39,19 @@ export function EditorToolbar() {
       // 先落库防抖窗口/在途的草稿，避免旧草稿 PUT 在 restore-live 之后 resolve 覆盖恢复结果（同 PublishDialog）
       const flushed = await flushSaveRef.current?.();
       if (flushed === false) {
-        setRestoreError("草稿保存失败，请检查网络后重试");
+        setRestoreError(t.saveNetworkError);
         return;
       }
       const res = await fetch(`/api/landing-pages/${pageId}/restore-live`, { method: "POST" });
       if (!res.ok) {
-        setRestoreError("恢复失败，请重试");
+        setRestoreError(t.restoreConfirm.failed);
         return;
       }
       const { page } = await res.json();
       dispatch({ kind: "replaceDraft", draft: page.data }); // 入 undo 历史，可一步撤销
       setRestoreOpen(false);
     } catch {
-      setRestoreError("恢复失败，请检查网络后重试");
+      setRestoreError(t.restoreConfirm.networkFailed);
     } finally {
       setRestoring(false);
     }
@@ -68,7 +69,7 @@ export function EditorToolbar() {
   }, [dispatch]);
 
   function handlePublish() {
-    const issues = collectPublishIssues(toDraft(state));
+    const issues = collectPublishIssues(toDraft(state), issuesT);
     if (issues.length > 0) {
       setBlockers(issues);
       return;
@@ -79,19 +80,19 @@ export function EditorToolbar() {
 
   return (
     <header className="flex shrink-0 items-center gap-3 border-b border-edge bg-panel px-5 py-3">
-      <Link href={Routes.LandingPages} className="text-sm text-ink-soft hover:text-ink">← 返回</Link>
+      <Link href={Routes.LandingPages} className="text-sm text-ink-soft hover:text-ink">← {t.back}</Link>
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
         className="w-56 rounded-md border border-transparent bg-transparent px-2 py-1 text-sm font-semibold text-ink hover:border-edge focus:border-brand-500 focus:outline-none"
-        placeholder="页面名称"
+        placeholder={t.namePlaceholder}
       />
       <div className="flex items-center gap-0.5">
         <button
           onClick={() => dispatch({ kind: "undo" })}
           disabled={!canUndo}
-          title="撤销（⌘Z / Ctrl+Z）"
-          aria-label="撤销"
+          title={t.undoTitle}
+          aria-label={t.undo}
           className="rounded-md px-2 py-1 text-sm text-ink-soft hover:bg-canvas disabled:opacity-30"
         >
           ↺
@@ -99,8 +100,8 @@ export function EditorToolbar() {
         <button
           onClick={() => dispatch({ kind: "redo" })}
           disabled={!canRedo}
-          title="重做（⇧⌘Z / Ctrl+Shift+Z）"
-          aria-label="重做"
+          title={t.redoTitle}
+          aria-label={t.redo}
           className="rounded-md px-2 py-1 text-sm text-ink-soft hover:bg-canvas disabled:opacity-30"
         >
           ↻
@@ -108,21 +109,21 @@ export function EditorToolbar() {
       </div>
       {saveState === "error" ? (
         <button onClick={() => void flushSaveRef.current?.()} className="text-xs text-red-500 underline underline-offset-2 hover:text-red-600">
-          {saveError || "保存失败，点击重试"}
+          {saveError || t.saveFailed}
         </button>
       ) : (
-        <span className="text-xs text-ink-muted">{SAVE_LABEL[saveState]}</span>
+        <span className="text-xs text-ink-muted">{saveLabel[saveState]}</span>
       )}
       {status === "published" && (
         publishedDirty ? (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            有未发布的修改，线上仍是上次发布的版本
+            {t.unpublishedChanges}
           </span>
         ) : (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            已发布
+            {t.published}
           </span>
         )
       )}
@@ -132,21 +133,21 @@ export function EditorToolbar() {
             onClick={() => setRestoreOpen((v) => !v)}
             className="rounded-md border border-edge px-2 py-1 text-xs text-ink-soft hover:bg-canvas"
           >
-            恢复为线上版本
+            {t.restore}
           </button>
           {restoreOpen && (
             <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-lg border border-edge bg-panel p-3 shadow-xl">
-              <p className="text-sm text-ink">将当前草稿恢复为线上正在展示的版本？</p>
-              <p className="mt-1 text-xs text-ink-muted">当前未发布的修改会被覆盖，可用撤销（⌘Z）找回。</p>
+              <p className="text-sm text-ink">{t.restoreConfirm.title}</p>
+              <p className="mt-1 text-xs text-ink-muted">{t.restoreConfirm.hint}</p>
               {restoreError && <p className="mt-2 text-xs text-red-500">{restoreError}</p>}
               <div className="mt-3 flex justify-end gap-2">
-                <button onClick={() => { setRestoreOpen(false); setRestoreError(""); }} className="rounded-md px-2.5 py-1 text-xs text-ink-soft hover:bg-canvas">取消</button>
+                <button onClick={() => { setRestoreOpen(false); setRestoreError(""); }} className="rounded-md px-2.5 py-1 text-xs text-ink-soft hover:bg-canvas">{t.restoreConfirm.cancel}</button>
                 <button
                   onClick={() => void handleRestoreLive()}
                   disabled={restoring}
                   className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-50"
                 >
-                  {restoring ? "恢复中…" : "确认恢复"}
+                  {restoring ? t.restoreConfirm.restoring : t.restoreConfirm.confirm}
                 </button>
               </div>
             </div>
@@ -161,19 +162,19 @@ export function EditorToolbar() {
           onClick={() => setRegenOpen((v) => !v)}
           className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
         >
-          AI 一键成页
+          {t.aiGenerate}
         </button>
         {regenOpen && (
           <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-lg border border-edge bg-panel p-3 shadow-xl">
-            <p className="text-sm text-ink">用 AI 依据你的资料重写整页文案？</p>
-            <p className="mt-1 text-xs text-ink-muted">当前页面全部内容会被生成结果覆盖，可用撤销（⌘Z）找回。</p>
+            <p className="text-sm text-ink">{t.regenConfirm.title}</p>
+            <p className="mt-1 text-xs text-ink-muted">{t.regenConfirm.hint}</p>
             <div className="mt-3 flex justify-end gap-2">
-              <button onClick={() => setRegenOpen(false)} className="rounded-md px-2.5 py-1 text-xs text-ink-soft hover:bg-canvas">取消</button>
+              <button onClick={() => setRegenOpen(false)} className="rounded-md px-2.5 py-1 text-xs text-ink-soft hover:bg-canvas">{t.regenConfirm.cancel}</button>
               <button
                 onClick={() => { setRegenOpen(false); setGenerateOpen(true); }}
                 className="rounded-md bg-brand-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-brand-700"
               >
-                继续
+                {t.regenConfirm.confirm}
               </button>
             </div>
           </div>
@@ -183,39 +184,39 @@ export function EditorToolbar() {
         onClick={() => setTrackingOpen(true)}
         className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
       >
-        追踪
+        {t.tracking}
       </button>
       <button
         onClick={() => setAntiBanOpen(true)}
         className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
       >
-        反同质化
+        {t.antiBan}
       </button>
       <Link
         href={landingPreviewPath(pageId)}
         target="_blank"
         className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
       >
-        预览
+        {t.preview}
       </Link>
       <button
         onClick={() => setShareOpen(true)}
         className="rounded-md border border-edge px-3 py-1.5 text-sm text-ink-soft hover:bg-canvas"
       >
-        分享预览
+        {t.sharePreview}
       </button>
       <div className="relative">
         <button
           onClick={handlePublish}
           className="rounded-md bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700"
         >
-          {status === "published" ? "更新发布" : "发布"}
+          {status === "published" ? t.republish : t.publish}
         </button>
         {blockers.length > 0 && (
           <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-lg border border-edge bg-panel p-3 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between gap-2">
-              <p className="text-sm font-medium text-amber-700">校验未通过，无法发布（{blockers.length} 项）</p>
-              <button onClick={() => setBlockers([])} className="shrink-0 text-xs text-ink-muted hover:text-ink">关闭</button>
+              <p className="text-sm font-medium text-amber-700">{t.blockers(blockers.length)}</p>
+              <button onClick={() => setBlockers([])} className="shrink-0 text-xs text-ink-muted hover:text-ink">{t.closeBlockers}</button>
             </div>
             <ul className="mt-2 max-h-60 space-y-1 overflow-auto text-xs text-ink-soft">
               {blockers.map((b, i) => (

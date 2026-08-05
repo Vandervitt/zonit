@@ -5,6 +5,7 @@ import { Button, App } from "antd";
 import { UploadOutlined, LoadingOutlined } from "@ant-design/icons";
 import { uploadMedia } from "@/lib/media-upload";
 import type { MediaItem } from "@/lib/media-db";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 interface UploadZoneProps {
   onUploaded: (item: MediaItem) => void;
@@ -13,6 +14,7 @@ interface UploadZoneProps {
 }
 
 export function UploadZone({ onUploaded, compact = false, accept = "all" }: UploadZoneProps) {
+  const t = useAdminT().media;
   const { message } = App.useApp();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -26,7 +28,7 @@ export function UploadZone({ onUploaded, compact = false, accept = "all" }: Uplo
       const item = await uploadMedia(file);
       onUploaded(item);
     } catch (e) {
-      void message.error(e instanceof Error ? e.message : "上传失败，请重试");
+      void message.error(e instanceof Error ? e.message : t.upload.failed);
     } finally {
       setUploading(false);
     }
@@ -54,7 +56,7 @@ export function UploadZone({ onUploaded, compact = false, accept = "all" }: Uplo
         type={compact ? "default" : "primary"}
         onClick={() => inputRef.current?.click()}
       >
-        {uploading ? "上传中…" : "上传素材"}
+        {uploading ? t.upload.uploading : t.upload.button}
       </Button>
     </div>
   );

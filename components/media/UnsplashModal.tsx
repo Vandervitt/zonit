@@ -7,6 +7,7 @@ import { importUnsplashMedia } from "@/lib/media-upload";
 import { toImportInput } from "@/landing-editor/ui/media/unsplash";
 import type { UnsplashPhoto } from "@/landing-editor/ui/media/unsplash";
 import type { MediaItem } from "@/lib/media-db";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 interface Props {
   open: boolean;
@@ -17,6 +18,7 @@ interface Props {
 type Status = "idle" | "loading" | "demo" | "error" | "done";
 
 export function UnsplashModal({ open, onClose, onImported }: Props) {
+  const t = useAdminT().media;
   const { message } = App.useApp();
   const [status, setStatus] = useState<Status>("idle");
   const [photos, setPhotos] = useState<UnsplashPhoto[]>([]);
@@ -44,32 +46,32 @@ export function UnsplashModal({ open, onClose, onImported }: Props) {
     try {
       const item = await importUnsplashMedia(toImportInput(p));
       onImported(item);
-      void message.success("已添加到素材库");
+      void message.success(t.unsplash.added);
     } catch (e) {
-      void message.error(e instanceof Error ? e.message : "添加失败");
+      void message.error(e instanceof Error ? e.message : t.unsplash.addFailed);
     } finally {
       setImportingId(null);
     }
   };
 
   return (
-    <Modal open={open} onCancel={onClose} footer={null} width={720} title="从 Unsplash 添加" destroyOnClose>
+    <Modal open={open} onCancel={onClose} footer={null} width={720} title={t.unsplash.title} destroyOnClose>
       <Input.Search
-        placeholder="搜索 Unsplash 图片（英文更准）"
+        placeholder={t.unsplash.searchPlaceholder}
         allowClear
-        enterButton="搜索"
-        aria-label="搜索 Unsplash 图片"
+        enterButton={t.unsplash.searchButton}
+        aria-label={t.unsplash.searchAria}
         onSearch={search}
         style={{ marginBottom: 12 }}
       />
       {status === "loading" ? (
         <div style={{ padding: 40, textAlign: "center" }}><Spin /></div>
       ) : status === "demo" ? (
-        <Empty description="未配置 Unsplash，请联系管理员" />
+        <Empty description={t.unsplash.notConfigured} />
       ) : status === "error" ? (
-        <Empty description="搜索失败，请重试" />
+        <Empty description={t.unsplash.searchFailed} />
       ) : photos.length === 0 ? (
-        <Empty description="输入关键词后搜索图片" />
+        <Empty description={t.unsplash.prompt} />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8 }}>
           {photos.map((p) => (
@@ -78,7 +80,7 @@ export function UnsplashModal({ open, onClose, onImported }: Props) {
               type="button"
               disabled={importingId !== null}
               onClick={() => void pick(p)}
-              aria-label={`添加 Unsplash 图片 by ${p.user.name}`}
+              aria-label={t.unsplash.addAria(p.user.name)}
               style={{ position: "relative", padding: 0, border: "none", background: "none", cursor: "pointer", borderRadius: 8, overflow: "hidden" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -87,7 +89,7 @@ export function UnsplashModal({ open, onClose, onImported }: Props) {
                 {p.user.name}
               </span>
               {importingId === p.id ? (
-                <span style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", background: "rgba(0,0,0,0.4)", color: "#fff", fontSize: 12 }}>添加中…</span>
+                <span style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", background: "rgba(0,0,0,0.4)", color: "#fff", fontSize: 12 }}>{t.unsplash.adding}</span>
               ) : null}
             </button>
           ))}

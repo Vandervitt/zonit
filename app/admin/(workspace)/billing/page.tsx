@@ -7,8 +7,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm, Statistic, App } from "antd";
 import { CheckOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
-import { PLANS, PLAN_ORDER, planPriceLabel } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, planPriceLabel, formatPlanLimit } from "@/lib/plans";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
+import { formatDate, formatDateTime } from "@/lib/i18n/admin";
 import type { PlanId } from "@/lib/plans";
 import { CREDIT_PACKS, creditPackPriceLabel } from "@/lib/credits";
 import type { UsageSummary } from "@/lib/ai/usage-summary";
@@ -23,29 +25,24 @@ function SuccessToast() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { notification } = App.useApp();
+  const t = useAdminT().billing;
   useEffect(() => {
     if (searchParams.get("success") === "1") {
-      notification.success({
-        message: "订阅成功",
-        description: "套餐将在几秒内生效，稍后刷新本页即可看到。",
-        placement: "topRight",
-      });
+      notification.success({ ...t.toast.subscribed, placement: "topRight" });
       router.replace(Routes.Billing);
     } else if (searchParams.get("topup") === "1") {
-      notification.success({
-        message: "充值成功",
-        description: "AI 额度将在几秒内到账，稍后刷新页面即可看到最新余额。",
-        placement: "topRight",
-      });
+      notification.success({ ...t.toast.toppedUp, placement: "topRight" });
       router.replace(Routes.Billing);
     }
-  }, [searchParams, router, notification]);
+  }, [searchParams, router, notification, t]);
   return null;
 }
 
 export default function BillingPage() {
   const { data: session } = useSession();
   const { notification } = App.useApp();
+  const t = useAdminT().billing;
+  const locale = useAdminLocale();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   // 正在发起结账的充值档位（credits 数量），用于按钮 loading 与互斥禁用。
   const [loadingCredits, setLoadingCredits] = useState<number | null>(null);
@@ -60,10 +57,11 @@ export default function BillingPage() {
   const usage = useSWR<UsageSummary>(ApiRoutes.AiUsage);
   const creditBalance = usage.data?.creditBalance;
 
-  // 人民币参考换算：收款货币是美元，后台面向中文用户，故在美元价旁附「约 ¥xx」。
+  // 人民币参考换算：收款货币恒为美元，仅在中文界面于美元价旁附「约 ¥xx」；
+  // 英文界面传 null 表示不需要换算（与 lib/plans.ts 的 approxCnyText 同一约定）。
   // 取不到汇率时（接口异常）仅展示美元，不阻塞任何计费操作。
   const fx = useSWR<{ rate: number }>(ApiRoutes.FxUsdCny);
-  const cnyRate = fx.data?.rate ?? null;
+  const cnyRate = locale === "zh" ? fx.data?.rate ?? null : null;
 
   // 生效套餐（含赠送）只用于权益上限展示；换档/管理订阅一律以付费订阅档为基准，
   // 否则「赠送档 > 付费档」时会把赠送档误当成当前订阅档（如订阅 starter + 赠送 pro 显示成 pro）。
@@ -86,12 +84,12 @@ export default function BillingPage() {
     (planId: string) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCheckout, "POST", { planId }),
     {
       onError: () => {
-        notification.error({ message: "无法创建结账链接", description: "请稍后重试。", placement: "topRight" });
+        notification.error({ message: t.errors.checkoutLink, description: t.errors.retryLater, placement: "topRight" });
         return false;
       },
       onSuccess: (res) => {
         if (!res.checkoutUrl) {
-          notification.error({ message: "无法创建结账链接", description: "请稍后重试。", placement: "topRight" });
+          notification.error({ message: t.errors.checkoutLink, description: t.errors.retryLater, placement: "topRight" });
           return;
         }
         // 新标签打开支付页，保留本页；被浏览器拦截弹窗时退回当前标签跳转。
@@ -99,8 +97,8 @@ export default function BillingPage() {
         if (win) {
           setAwaitingRefresh(true);
           notification.info({
-            message: "支付页已在新标签页打开",
-            description: "完成支付后请刷新本页查看最新套餐。",
+            message: t.toast.checkoutOpened.message,
+            description: t.toast.checkoutOpened.forPlan,
             placement: "topRight",
           });
         } else {
@@ -115,20 +113,20 @@ export default function BillingPage() {
     (amount: number) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCredits, "POST", { credits: amount }),
     {
       onError: () => {
-        notification.error({ message: "无法创建充值链接", description: "请稍后重试。", placement: "topRight" });
+        notification.error({ message: t.errors.creditsLink, description: t.errors.retryLater, placement: "topRight" });
         return false;
       },
       onSuccess: (res) => {
         if (!res.checkoutUrl) {
-          notification.error({ message: "无法创建充值链接", description: "请稍后重试。", placement: "topRight" });
+          notification.error({ message: t.errors.creditsLink, description: t.errors.retryLater, placement: "topRight" });
           return;
         }
         const win = window.open(res.checkoutUrl, "_blank", "noopener,noreferrer");
         if (win) {
           setAwaitingRefresh(true);
           notification.info({
-            message: "支付页已在新标签页打开",
-            description: "完成支付后请刷新本页查看最新额度余额。",
+            message: t.toast.checkoutOpened.message,
+            description: t.toast.checkoutOpened.forCredits,
             placement: "topRight",
           });
         } else {
@@ -142,12 +140,12 @@ export default function BillingPage() {
     () => fetcher<{ portalUrl?: string }>(ApiRoutes.BillingPortal),
     {
       onError: () => {
-        notification.error({ message: "无法获取管理链接", description: "请稍后重试。", placement: "topRight" });
+        notification.error({ message: t.errors.portalLink, description: t.errors.retryLater, placement: "topRight" });
         return false;
       },
       onSuccess: (res) => {
         if (res.portalUrl) window.location.href = res.portalUrl;
-        else notification.error({ message: "无法获取管理链接", description: "请稍后重试。", placement: "topRight" });
+        else notification.error({ message: t.errors.portalLink, description: t.errors.retryLater, placement: "topRight" });
       },
     },
   );
@@ -159,32 +157,20 @@ export default function BillingPage() {
       onError: (err) => {
         if (err.code === "subscription_cancel_scheduled") {
           setCancelScheduled(true);
-          notification.warning({
-            message: "订阅已安排取消，暂不能换档",
-            description: "当前订阅将在本计费周期结束时取消。请先在上方提示条点击「恢复订阅」，恢复后即可切换档位。",
-            placement: "topRight",
-          });
+          notification.warning({ ...t.changePlan.cancelScheduled, placement: "topRight" });
           return false; // 已用 notification 提示，跳过默认 toast
         }
         if (err.code === "no_active_subscription") {
           // 赠送套餐或无有效订阅：无自助订阅可改，重试无效，据实说明。
-          notification.warning({
-            message: "当前套餐无法在此切换",
-            description: "你的套餐来自管理员赠送、暂无自助订阅，无法在此升降档。如需调整请联系我们。",
-            placement: "topRight",
-          });
+          notification.warning({ ...t.changePlan.noSubscription, placement: "topRight" });
           return false;
         }
-        notification.error({ message: "套餐切换失败", description: "请稍后重试或联系支持。", placement: "topRight" });
+        notification.error({ message: t.errors.changePlan, description: t.errors.retryOrContact, placement: "topRight" });
         return false;
       },
       onSuccess: () => {
         setAwaitingRefresh(true);
-        notification.success({
-          message: "套餐切换请求已提交",
-          description: "生效后刷新本页即可看到新档位。",
-          placement: "topRight",
-        });
+        notification.success({ ...t.changePlan.submitted, placement: "topRight" });
       },
     },
   );
@@ -194,17 +180,13 @@ export default function BillingPage() {
     () => jsonRequest<{ ok?: boolean }>(ApiRoutes.BillingResume, "POST"),
     {
       onError: () => {
-        notification.error({ message: "恢复订阅失败", description: "请稍后重试或联系支持。", placement: "topRight" });
+        notification.error({ message: t.errors.resume, description: t.errors.retryOrContact, placement: "topRight" });
         return false;
       },
       onSuccess: () => {
         setCancelScheduled(false);
         setAwaitingRefresh(true);
-        notification.success({
-          message: "订阅已恢复",
-          description: "将正常续费，现在可以切换档位了。",
-          placement: "topRight",
-        });
+        notification.success({ ...t.resumed, placement: "topRight" });
       },
     },
   );
@@ -229,17 +211,17 @@ export default function BillingPage() {
   const currentPlanDescItems = [
     {
       key: "plan",
-      label: "套餐",
+      label: t.currentPlan.labels.plan,
       children: (
         <Space>
           <PlanBadge plan={effectivePlanId} />
           {giftedAbovePaid ? (
             <Text type="secondary">
-              管理员赠送
-              {compPlanExpiresAt ? `（至 ${new Date(compPlanExpiresAt).toLocaleDateString("zh-CN")}）` : ""}
+              {t.currentPlan.grantedByAdmin}
+              {compPlanExpiresAt ? t.currentPlan.grantedUntil(formatDate(compPlanExpiresAt, locale)) : ""}
             </Text>
           ) : (
-            <Text strong>{planPriceLabel(currentPlan, "zh", cnyRate)}</Text>
+            <Text strong>{planPriceLabel(currentPlan, locale, cnyRate)}</Text>
           )}
         </Space>
       ),
@@ -248,11 +230,11 @@ export default function BillingPage() {
       ? [
           {
             key: "subscription",
-            label: "订阅档位",
+            label: t.currentPlan.labels.subscription,
             children: (
               <Space>
                 <PlanBadge plan={currentPlanId} />
-                <Text strong>{planPriceLabel(currentPlan, "zh", cnyRate)}</Text>
+                <Text strong>{planPriceLabel(currentPlan, locale, cnyRate)}</Text>
               </Space>
             ),
           },
@@ -260,23 +242,23 @@ export default function BillingPage() {
       : []),
     {
       key: "pages",
-      label: "落地页上限",
-      children: entitlementPlan.landingPagesLimit === Infinity ? "无限" : `${entitlementPlan.landingPagesLimit} 张`,
+      label: t.currentPlan.labels.pages,
+      children: formatPlanLimit(entitlementPlan.landingPagesLimit, locale, "pages"),
     },
     {
       key: "domains",
-      label: "域名上限",
+      label: t.currentPlan.labels.domains,
+      // 0 个域名槽位在这里要说「不支持」而非 formatPlanLimit 的破折号：
+      // 计费页是用户判断该不该升档的地方，破折号读起来像「未知」。
       children:
         entitlementPlan.domainsLimit === 0
-          ? "不支持"
-          : entitlementPlan.domainsLimit === Infinity
-          ? "无限"
-          : `${entitlementPlan.domainsLimit} 个`,
+          ? t.currentPlan.domainsNotIncluded
+          : formatPlanLimit(entitlementPlan.domainsLimit, locale, "domains"),
     },
     {
       key: "watermark",
-      label: "品牌水印",
-      children: entitlementPlan.hasWatermark ? "有" : "无",
+      label: t.currentPlan.labels.watermark,
+      children: entitlementPlan.hasWatermark ? t.currentPlan.watermarkOn : t.currentPlan.watermarkOff,
     },
   ];
 
@@ -288,9 +270,9 @@ export default function BillingPage() {
 
       <div style={{ marginBottom: 24 }}>
         <Title level={3} style={{ marginBottom: 4 }}>
-          账户与计费
+          {t.title}
         </Title>
-        <Text type="secondary">管理你的订阅套餐</Text>
+        <Text type="secondary">{t.subtitle}</Text>
       </div>
 
       {(billingExpiresAt || cancelScheduled) && currentPlanId !== "free" && (
@@ -298,15 +280,15 @@ export default function BillingPage() {
           type="warning"
           showIcon
           style={{ marginBottom: 24 }}
-          message="订阅已取消"
+          message={t.cancelledBanner.title}
           description={
             billingExpiresAt
-              ? `当前 ${currentPlan.label} 套餐权益保留至 ${new Date(billingExpiresAt).toLocaleString("zh-CN")}，到期后自动回落 Free。取消期间无法切换档位，恢复订阅后即可正常续费与换档。`
-              : `当前 ${currentPlan.label} 订阅已安排在本计费周期结束时取消，期间无法切换档位。点击「恢复订阅」可撤销取消并继续正常续费。`
+              ? t.cancelledBanner.withDate(currentPlan.label, formatDateTime(billingExpiresAt, locale))
+              : t.cancelledBanner.withoutDate(currentPlan.label)
           }
           action={
             <Button size="small" type="primary" loading={resume.isMutating} onClick={() => void resume.trigger()}>
-              恢复订阅
+              {t.cancelledBanner.resume}
             </Button>
           }
         />
@@ -317,18 +299,18 @@ export default function BillingPage() {
           type="info"
           showIcon
           style={{ marginBottom: 24 }}
-          message="操作完成后请刷新页面"
-          description="支付或套餐切换生效后，点击右侧按钮刷新以显示最新的订阅档位。"
+          message={t.awaitingRefresh.title}
+          description={t.awaitingRefresh.description}
           action={
             <Button size="small" type="primary" onClick={() => window.location.reload()}>
-              刷新页面
+              {t.awaitingRefresh.action}
             </Button>
           }
         />
       )}
 
       <Card
-        title="当前套餐"
+        title={t.currentPlan.title}
         style={{ marginBottom: 24 }}
         extra={
           <Space>
@@ -337,7 +319,7 @@ export default function BillingPage() {
                 loading={portalLoading}
                 onClick={() => void portal.trigger()}
               >
-                管理订阅
+                {t.currentPlan.managePortal}
               </Button>
             )}
             <Button
@@ -345,7 +327,7 @@ export default function BillingPage() {
               href={Routes.Pricing}
               target="_blank"
             >
-              查看完整对比
+              {t.currentPlan.compare}
             </Button>
           </Space>
         }
@@ -357,20 +339,20 @@ export default function BillingPage() {
         <Alert
           type="info"
           showIcon
-          message="当前套餐由管理员赠送"
-          description="赠送套餐没有可自助管理的订阅，无法在此升级或降级。如需调整套餐，请联系我们。"
+          message={t.compedNotice.message}
+          description={t.compedNotice.description}
         />
       ) : (
       <div>
         <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
-          {currentPlanId === "free" ? "可升级套餐" : "更换套餐（立即生效，差额按比例计费/抵扣）"}
+          {currentPlanId === "free" ? t.switcher.fromFree : t.switcher.change}
         </Text>
         {giftedAbovePaid && compPlanId && (
           <Alert
             type="info"
             showIcon
             style={{ marginBottom: 12 }}
-            message={`升降档只调整付费订阅（当前 ${currentPlan.label}），不影响管理员赠送的 ${PLANS[compPlanId].label} 权益。`}
+            message={t.switcher.giftedNotice(currentPlan.label, PLANS[compPlanId].label)}
           />
         )}
         <Space direction="vertical" style={{ width: "100%" }} size={12}>
@@ -386,7 +368,7 @@ export default function BillingPage() {
                 onClick={isUpgrade || currentPlanId === "free" ? () => handleSelectPlan(planId) : undefined}
                 style={{ flexShrink: 0 }}
               >
-                {isUpgrade ? "升级" : "降级"}
+                {isUpgrade ? t.switcher.upgrade : t.switcher.downgrade}
               </Button>
             );
             return (
@@ -395,13 +377,13 @@ export default function BillingPage() {
                   <div style={{ flex: 1 }}>
                     <Space style={{ marginBottom: 8 }}>
                       <PlanBadge plan={planId} />
-                      <Text strong>{planPriceLabel(plan, "zh", cnyRate)}</Text>
+                      <Text strong>{planPriceLabel(plan, locale, cnyRate)}</Text>
                     </Space>
                     <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
-                      包含 {PLANS[PLAN_ORDER[PLAN_ORDER.indexOf(planId) - 1]].label} 全部权益
+                      {t.switcher.includesPrevious(PLANS[PLAN_ORDER[PLAN_ORDER.indexOf(planId) - 1]].label)}
                     </Text>
                     <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                      {getDictionary("zh").plans.highlights[planId].map((h) => (
+                      {getDictionary(locale).plans.highlights[planId].map((h) => (
                         <li key={h} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
                           <CheckOutlined style={{ color: SEMANTIC.success, fontSize: 12, flexShrink: 0 }} />
                           <Text type="secondary" style={{ fontSize: 12 }}>
@@ -415,10 +397,10 @@ export default function BillingPage() {
                     button
                   ) : (
                     <Popconfirm
-                      title="确认降级？"
-                      description={`将立即切换到 ${plan.label}，超出新档上限的功能会受限，差额按比例抵扣。`}
-                      okText="确认降级"
-                      cancelText="再想想"
+                      title={t.switcher.downgradeConfirm.title}
+                      description={t.switcher.downgradeConfirm.description(plan.label)}
+                      okText={t.switcher.downgradeConfirm.ok}
+                      cancelText={t.switcher.downgradeConfirm.cancel}
                       onConfirm={() => handleSelectPlan(planId)}
                     >
                       {button}
@@ -434,24 +416,24 @@ export default function BillingPage() {
 
       <div style={{ marginTop: 32 }}>
         <Text strong style={{ display: "block", marginBottom: 4 }}>
-          AI 额度充值
+          {t.credits.title}
         </Text>
         <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 12 }}>
-          额度仅用于「AI 整页生成」，当月免费额度用尽后自动消耗、永不过期。AI 文案改写不使用额度：当月改写额度用尽需等次月重置或升级套餐。一次性付款，不影响订阅。
+          {t.credits.description}
         </Text>
         <Card style={{ marginBottom: 12 }}>
           <Space align="center" size={12} style={{ width: "100%", justifyContent: "space-between" }}>
             <Statistic
-              title="当前可用充值额度"
+              title={t.credits.balanceTitle}
               value={usage.error ? "—" : creditBalance ?? "—"}
               loading={!usage.data && !usage.error}
               prefix={<ThunderboltOutlined style={{ color: SEMANTIC.warning }} />}
-              suffix="次"
+              suffix={t.credits.balanceSuffix}
             />
             <Text type="secondary" style={{ fontSize: 12, textAlign: "right" }}>
-              充值额度永不过期，
+              {t.credits.neverExpire[0]}
               <br />
-              免费额度用尽后自动消耗。
+              {t.credits.neverExpire[1]}
             </Text>
           </Space>
         </Card>
@@ -463,11 +445,11 @@ export default function BillingPage() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
                   <div style={{ flex: 1 }}>
                     <Space style={{ marginBottom: 4 }}>
-                      <Text strong>{pack.credits} 次整页生成额度</Text>
+                      <Text strong>{t.credits.packLabel(pack.credits)}</Text>
                       <Text strong>{creditPackPriceLabel(pack, cnyRate)}</Text>
                     </Space>
                     <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
-                      {pack.desc}
+                      {t.credits.packDesc[pack.credits as keyof typeof t.credits.packDesc]}
                     </Text>
                   </div>
                   <Button
@@ -477,7 +459,7 @@ export default function BillingPage() {
                     onClick={() => handleBuyCredits(pack.credits)}
                     style={{ flexShrink: 0 }}
                   >
-                    购买
+                    {t.credits.buy}
                   </Button>
                 </div>
               </Card>
@@ -488,7 +470,7 @@ export default function BillingPage() {
 
       {currentPlanId !== "free" && !isCompedWithoutSub && (
         <Text type="secondary" style={{ display: "block", marginTop: 24, textAlign: "center", fontSize: 12 }}>
-          如需取消订阅，请通过 管理订阅 进入收款渠道的客户门户操作
+          {t.cancelHint}
         </Text>
       )}
     </main>

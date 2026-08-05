@@ -1,5 +1,6 @@
 "use client";
 
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -14,12 +15,13 @@ export function RewriteButton({
   currentText: string;
   onApply: (text: string) => void;
 }) {
+  const t = useAdminT().editor.rewrite;
   const [loading, setLoading] = useState(false);
   const [candidates, setCandidates] = useState<string[]>([]);
 
   const run = async () => {
     if (!currentText.trim()) {
-      toast.error("先填写一些内容，再让 AI 改写");
+      toast.error(t.empty);
       return;
     }
     setLoading(true);
@@ -31,7 +33,7 @@ export function RewriteButton({
       });
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error === "ai_quota_exhausted" ? "AI 改写额度已用完，请升级" : "改写失败，请重试");
+        toast.error(data.error === "ai_quota_exhausted" ? t.quotaExhausted : t.failed);
         return;
       }
       setCandidates(data.candidates ?? []);
@@ -49,12 +51,12 @@ export function RewriteButton({
           className="inline-flex items-center gap-1 text-[11px] font-medium text-brand-600 transition-colors hover:text-brand-700"
         >
           <Sparkles className="h-3 w-3" />
-          {loading ? "改写中…" : "AI 改写"}
+          {loading ? t.rewriting : t.button}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-72 space-y-2">
         {candidates.length === 0 ? (
-          <p className="text-xs text-ink-muted">点击「AI 改写」生成候选文案</p>
+          <p className="text-xs text-ink-muted">{t.hint}</p>
         ) : (
           candidates.map((c, i) => (
             <button

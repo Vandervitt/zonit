@@ -5,6 +5,7 @@ import { Card, Switch, Input, Button, Space, Typography, message, Tag } from "an
 import { useSession } from "next-auth/react";
 import { hasLeadWebhook } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 interface Settings {
   email_enabled: boolean;
@@ -15,6 +16,7 @@ interface Settings {
 }
 
 export function LeadNotificationSettings() {
+  const t = useAdminT().settings.leadNotifications;
   const { data: session } = useSession();
   const plan = (session?.user?.plan ?? "free") as PlanId;
   const webhookAllowed = hasLeadWebhook(plan);
@@ -52,9 +54,9 @@ export function LeadNotificationSettings() {
       setS(d);
       setUrl(d.webhook_url ?? "");
       if (d.secret) setSecretOnce(d.secret);
-      message.success("已保存");
+      message.success(t.saved);
     } catch {
-      message.error("保存失败");
+      message.error(t.saveFailed);
     } finally {
       setSaving(false);
     }
@@ -63,22 +65,22 @@ export function LeadNotificationSettings() {
   if (!s) return null;
 
   return (
-    <Card title="线索通知">
+    <Card title={t.title}>
       <Space direction="vertical" size={16} style={{ width: "100%" }}>
         <Space>
           <Switch checked={s.email_enabled} loading={saving} onChange={(v) => save({ email_enabled: v })} />
-          <span>新线索邮件通知（发送到 {session?.user?.email}）</span>
+          <span>{t.emailToggle(session?.user?.email ?? "")}</span>
         </Space>
 
         <Space>
           <Switch checked={s.weekly_digest_enabled} loading={saving} onChange={(v) => save({ weekly_digest_enabled: v })} />
-          <span>每周获客周报（每周一汇总各页曝光 / CTA 点击 / 线索）</span>
+          <span>{t.weeklyDigest}</span>
         </Space>
 
         <div>
           <Space>
-            <span>Webhook 推送到 CRM / Zapier</span>
-            {!webhookAllowed && <Tag color="gold">Pro 及以上</Tag>}
+            <span>{t.webhookTitle}</span>
+            {!webhookAllowed && <Tag color="gold">{t.proTag}</Tag>}
           </Space>
           {webhookAllowed ? (
             <Space direction="vertical" size={8} style={{ width: "100%", marginTop: 8 }}>
@@ -90,25 +92,25 @@ export function LeadNotificationSettings() {
               />
               <Space>
                 <Switch checked={s.webhook_enabled} loading={saving} onChange={(v) => save({ webhook_enabled: v })} />
-                <span>启用推送</span>
+                <span>{t.enablePush}</span>
                 <Button type="primary" size="small" loading={saving} onClick={() => save({ webhook_url: url })}>
-                  保存 URL
+                  {t.saveUrl}
                 </Button>
               </Space>
               {s.hasSecret && (
                 <Typography.Text type="secondary">
-                  签名密钥已配置，请求头 <code>X-Zap-Bridge-Signature: sha256=…</code>
+                  {t.secretConfigured[0]}<code>{t.secretConfigured[1]}</code>
                 </Typography.Text>
               )}
               {secretOnce && (
                 <Typography.Text type="warning">
-                  签名密钥（仅显示一次，请复制）：<code>{secretOnce}</code>
+                  {t.secretOnce}<code>{secretOnce}</code>
                 </Typography.Text>
               )}
             </Space>
           ) : (
             <Typography.Paragraph type="secondary" style={{ marginTop: 8 }}>
-              升级到 Pro 后可把新线索实时推送到你的 CRM / Zapier / Make。
+              {t.upsell}
             </Typography.Paragraph>
           )}
         </div>
