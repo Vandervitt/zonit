@@ -1,6 +1,8 @@
 // 本文件只保留「结构化事实」：限额、权益开关、价格数值。
 // 一切展示文案（权益名称、说明、量词、每档要点）都在 lib/i18n/dictionaries/*/plans.ts，
-// 由下方展示层函数按 locale 组装——公开营销面出双语，/admin 后台固定取中文。
+// 由下方展示层函数按 locale 组装——公开营销面与 /admin 后台**均出双语**。
+// （后台原本固定取中文，自 admin 端国际化改造起改为跟随 users.locale，
+//  见 docs/feat_20260805_admin端国际化/design.md。）
 import type { Locale } from "./i18n/config";
 import { plans as enPlans } from "./i18n/dictionaries/en/plans";
 import { plans as zhPlans } from "./i18n/dictionaries/zh/plans";

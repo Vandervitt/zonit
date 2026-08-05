@@ -5,25 +5,31 @@ import {
 } from "@ant-design/icons";
 import { Routes } from "@/lib/constants";
 
+import type { AdminDictionary } from "@/lib/i18n/admin";
+
+/** 导航项的 key。作为字典 `shell.nav` 的索引，两边由 nav.test.ts 机械核对。 */
+export type AdminNavKey = keyof AdminDictionary["shell"]["nav"];
+
 export interface AdminNavItem {
-  key: string;
-  label: string;
+  key: AdminNavKey;
   icon: React.ComponentType;
   href?: string;
   disabled?: boolean;
   badge?: string;
 }
 
+// 本数组只留**结构**（顺序、图标、路由），文案在 lib/i18n/admin/dictionaries/*/shell.ts。
+// key 用 AdminNavKey 约束，写错或字典漏了对应条目直接编译报错。
 export const ADMIN_NAV: AdminNavItem[] = [
-  { key: "overview", label: "概览", icon: AppstoreOutlined, href: Routes.Dashboard },
-  { key: "pages", label: "落地页", icon: FileTextOutlined, href: Routes.LandingPages },
-  { key: "leads", label: "线索", icon: InboxOutlined, href: Routes.Leads },
-  { key: "domains", label: "域名", icon: GlobalOutlined, href: Routes.Domains },
-  { key: "media", label: "素材库", icon: PictureOutlined, href: Routes.Media },
-  { key: "analytics", label: "投放分析", icon: LineChartOutlined, href: Routes.Analytics },
-  { key: "billing", label: "账户与计费", icon: CreditCardOutlined, href: Routes.Billing },
-  { key: "settings", label: "设置", icon: SettingOutlined, href: Routes.Settings },
-  { key: "help", label: "帮助", icon: QuestionCircleOutlined, href: Routes.Help },
+  { key: "overview", icon: AppstoreOutlined, href: Routes.Dashboard },
+  { key: "pages", icon: FileTextOutlined, href: Routes.LandingPages },
+  { key: "leads", icon: InboxOutlined, href: Routes.Leads },
+  { key: "domains", icon: GlobalOutlined, href: Routes.Domains },
+  { key: "media", icon: PictureOutlined, href: Routes.Media },
+  { key: "analytics", icon: LineChartOutlined, href: Routes.Analytics },
+  { key: "billing", icon: CreditCardOutlined, href: Routes.Billing },
+  { key: "settings", icon: SettingOutlined, href: Routes.Settings },
+  { key: "help", icon: QuestionCircleOutlined, href: Routes.Help },
 ];
 
 // 当前页高亮判定：取「最长匹配」的 href，最具体者胜。
