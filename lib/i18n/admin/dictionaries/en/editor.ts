@@ -1,0 +1,225 @@
+// 落地页编辑器（landing-editor/）。
+//
+// ⚠️ 只放**编辑器界面**的文案。用户正在编辑的页面内容（草稿字段值、模板样例文案）
+// 不在这里：那是给租户的访客看的，语言由客户自己的内容决定，与后台界面语言无关。
+export const editor = {
+  toolbar: {
+    back: "Back",
+    namePlaceholder: "Page name",
+    saving: "Saving…",
+    saved: "Saved",
+    saveFailed: "Save failed — click to retry",
+    saveNetworkError: "Could not save the draft. Check your connection and try again.",
+    undo: "Undo",
+    undoTitle: "Undo (⌘Z / Ctrl+Z)",
+    redo: "Redo",
+    redoTitle: "Redo (⇧⌘Z / Ctrl+Shift+Z)",
+    unpublishedChanges: "Unpublished changes — visitors still see the last published version",
+    published: "Published",
+    restore: "Restore live version",
+    restoreConfirm: {
+      title: "Restore this draft to the version currently live?",
+      hint: "Your unpublished changes will be overwritten — undo (⌘Z) brings them back.",
+      cancel: "Cancel",
+      confirm: "Restore",
+      restoring: "Restoring…",
+      failed: "Could not restore. Please try again.",
+      networkFailed: "Could not restore. Check your connection and try again.",
+    },
+    aiGenerate: "AI: write the page",
+    regenConfirm: {
+      title: "Rewrite the whole page with AI from your brief?",
+      hint: "Everything on this page will be replaced by the generated result — undo (⌘Z) brings it back.",
+      cancel: "Cancel",
+      confirm: "Continue",
+    },
+    tracking: "Tracking",
+    antiBan: "Anti-duplication",
+    preview: "Preview",
+    sharePreview: "Share preview",
+    publish: "Publish",
+    republish: "Update",
+    blockers: (n: number) => `Validation failed — can't publish (${n} issues)`,
+    closeBlockers: "Close",
+  },
+
+  publish: {
+    title: "Publish page",
+    publishedLabel: "Published. Public link:",
+    checkHint: "Run a check before you start driving traffic — it shows how this page looks on the items reviewers usually flag.",
+    check: "Run pre-flight check",
+    checking: "Checking…",
+    done: "Done",
+    close: "Close",
+    checkRateLimited: "You've run this check too many times — try again shortly",
+    checkFetchFailed: "Could not fetch the page. Confirm the live address is working.",
+    checkFailed: "The check failed. Please try again shortly.",
+    checkNetworkFailed: "The check failed. Check your connection and try again.",
+
+    domainsLoadFailed: "Could not load your domains. Check your connection and try again.",
+    domainsLoading: "Loading domains…",
+
+    noDomains:
+      "You don't have a domain to publish to yet. Use a platform-provided address to get the page live now, and switch to your own brand domain once leads start coming in.",
+    claim: "Publish on a platform address",
+    claiming: "Assigning…",
+    claimHint:
+      "We'll assign a dedicated address based on the page name — no DNS to configure, live immediately. You can move the page to your own domain at any time.",
+    claimFailed: "Could not assign an address. Please try again shortly.",
+    claimUnavailable: "No platform address is available right now. Try again shortly, or connect your own domain.",
+    claimNetworkFailed: "Could not claim an address. Check your connection and try again.",
+    connectOwnDomain: "Connect your own domain",
+
+    selectDomain: "Choose a domain",
+    platformSuffix: " (platform-provided)",
+    pathsUsed: (n: number) => ` (${n} paths in use)`,
+    path: "Publish path",
+    pathPlaceholder: "Leave empty to publish at the site root",
+    pathHint: [
+      "Lowercase letters, numbers and hyphens, up to two levels — for example ",
+      " or ",
+      ". Leave it empty to publish at the domain root.",
+    ],
+    pathInvalid: "Invalid path: lowercase letters, numbers and hyphens only, up to two levels.",
+    pathReserved: "That path is reserved by the platform — pick another.",
+
+    /**
+     * 平台子域的展示 URL 一致性提示。
+     * 这条不是凑数的说明：Google 与 LinkedIn 都要求广告展示 URL 的域名与落地域名一致，
+     * 客户很容易在广告里填自己的品牌域，那是直接违规，且拒审理由通常看不出根因。
+     */
+    displayUrlWarning:
+      "This is a platform-provided address. On Google Ads and LinkedIn, the display URL domain in your ad must match the actual landing domain — putting your own brand domain there is a policy violation. To show your brand domain in ads, connect your own domain before publishing.",
+    rebindWarning: (address: string, currentPage: string) =>
+      `${address} currently serves “${currentPage}”. Publishing here moves that slot to this page, and the previous page goes offline immediately — check your running ads first.`,
+    fallbackPageName: "another page",
+
+    cancel: "Cancel",
+    confirm: "Publish",
+    rebind: "Move and publish",
+    publishing: "Publishing…",
+    errors: {
+      validation: "The page didn't pass validation and can't be published",
+      domainRequired: "Choose a verified domain",
+      domainNotVerified: "That domain isn't verified",
+      pathInvalid: "Invalid path: lowercase letters, numbers and hyphens only, up to two levels",
+      pathReserved: "That path is reserved by the platform — pick another",
+      quota: (published: string, limit: string) =>
+        `${published} pages published, which reaches your plan's allowance${limit}. Unpublish another page, or upgrade your plan.`,
+      quotaLimit: (limit: string) => ` of ${limit}`,
+      generic: "Publishing failed",
+      network: "Publishing failed. Check your connection and try again.",
+      draftSave: "Could not save the draft. Check your connection and try again.",
+    },
+  },
+
+  templatePicker: {
+    kicker: "Landing page templates",
+    title: "Pick a template and put a campaign-ready page together in minutes",
+    description:
+      "Structure and copy are already tuned for overseas lead-gen — pick one and you're in the editor, where every section can be added, removed or reordered.",
+    searchAria: "Search template names",
+    searchPlaceholder: "Search templates…",
+    all: "All",
+    count: (n: number) => `${n} templates`,
+    clearFilters: "· Clear filters",
+    noMatch: "No templates match — try a different filter.",
+    edit: "Edit directly",
+    creating: "Creating…",
+    aiGenerate: "AI: write it for me",
+    quotaReached: "You've hit your plan's landing page limit — upgrade to create more",
+    createFailed: "Could not create the page. Check your connection and try again.",
+  },
+
+  generate: {
+    titleIdle: "AI: write the page",
+    titleLoading: "AI is writing…",
+    ok: "Write it",
+    cancel: "Edit manually",
+    intro:
+      "Tell us about the product or company and AI will write campaign-ready copy for this page, following the current template. Or hit “Edit manually” to close.",
+    loadingHint:
+      "AI is rewriting the whole page from your brief and picking images — usually 30–90 seconds. Please keep this page open…",
+    checklistTitle: "What to check afterwards:",
+    checklist: [
+      "Check the copy and claims: does it state your product's value accurately, in compliant wording, with no exaggerated or false promises.",
+      "Replace the images — this one matters: review avatars and before/after shots are stock assets (not real customers or real cases). Running them as-is can constitute false advertising. Swap in your own.",
+      "Check anything numeric: statistics, reviews and case studies are mostly placeholder examples. Replace them with real material.",
+      "Check the section mix: go through each section and decide whether you need it — add, remove, reorder or hide what doesn't apply.",
+    ],
+    name: "Product / company name",
+    nameRequired: "Enter the product or company name",
+    namePlaceholder: "e.g. Acme Global Consulting",
+    what: "What it does / what it solves",
+    whatRequired: "Describe the product",
+    whatPlaceholder: "One line on the value it delivers and the problem it solves",
+    audience: "Target customer",
+    audiencePlaceholder: "e.g. small and mid-size ecommerce sellers in Southeast Asia",
+    tone: "Tone",
+    tonePlaceholder: "Pick one or more, e.g. professional, approachable",
+    toneOptions: ["Professional", "Approachable", "Trustworthy", "Premium", "Energetic", "Urgent", "Plain and honest"],
+    ctaGoal: "Enquiry channel",
+    ctaGoalPlaceholder: "How visitors should reach you; pick one or more",
+    language: "Output language",
+    pastedIntro: "Optional: paste an existing company / product description",
+    pastedIntroPlaceholder: "Paste anything you already have and AI will work from it",
+    autoImages: "Auto-select images (Unsplash)",
+    autoImagesExtra:
+      "Picks Unsplash images for the image slots based on your brief and writes alt text (including review avatars and before/after shots); adds a little to the generation time. Note these are stock assets, not real customers or cases — replace them with your own before running traffic.",
+    quotaExhausted: "You're out of AI credits — upgrade or buy more",
+    pageLimit: "You've hit your plan's landing page limit",
+    failed: "Generation failed. Please try again.",
+    success: "Copy generated from your brief — keep tuning it in the editor",
+  },
+
+  tracking: {
+    title: "Tracking & conversions",
+    intro:
+      "Enter each platform's Pixel ID (leave blank to skip). Events follow built-in rules and cover enquiries and lead capture only — no transaction semantics.",
+    lockedSuffix: " (Pro unlocks the full pixel set)",
+    lockedPlaceholder: "Upgrade to Pro for TikTok / GA4 / Google Ads",
+    capiTitle: "Server-side conversions (CAPI)",
+    capiUpsell:
+      "Server-side conversions (CAPI · Meta / TikTok) are a Pro-and-above benefit; upgrade to unlock.",
+    capiEnable: (label: string) => `Enable server-side conversions (CAPI · ${label})`,
+    capiScopePage: " · configured for this page ✓",
+    capiScopeAccount: " · inherited from account ✓",
+    capiInherit:
+      "Currently using the account-level credentials from Settings. To use a different Dataset for this page only, fill in an override below.",
+    capiTokenOverwrite: "Re-enter to overwrite (stored token is never shown)",
+    capiTokenPlaceholder: "Paste Access Token",
+    capiSaveOverride: "Save as page override",
+    capiSave: "Save credentials",
+    passUtm: "Pass UTM through to http(s) outbound CTAs",
+    consentBar: "Show the cookie consent bar (pixels don't load until consent)",
+    consentText: "Consent bar copy (blank uses the default)",
+    consentPlaceholder: "We use cookies and third-party analytics pixels to improve campaign performance…",
+    done: "Done",
+  },
+
+  antiBan: {
+    title: "Anti-duplication",
+    intro:
+      "Scatters the page fingerprint (DOM structure, attributes, meta) on published pages so they don't look identical to other advertisers using the same template and get flagged as duplicates. Visitors and crawlers see exactly the same content.",
+    loadFailed: "Could not load the risk reading. Try again shortly.",
+    counting: "Calculating…",
+    noPublished: "You have no published pages yet. Drafts aren't visible to the platforms, so there's no duplication risk to speak of.",
+    identical: (n: number) => `This page's section skeleton is identical to ${n} other published pages on your account.`,
+    skeleton: "Skeleton: ",
+    noMiddleSections: "(no middle sections)",
+    thisPage: "· this page",
+    seeded: " (scattered)",
+    unseeded: " (not scattered)",
+    unseededCount: (n: number) => `${n} of them haven't had their fingerprint scattered yet. Running these together is the easiest way to get caught in a duplicate sweep.`,
+    unique: "This page's section skeleton is unique among your published pages.",
+    summary: (total: number, duplicated: number, unseeded: number) =>
+      `${total} published on your account: ${duplicated} share a skeleton with another page, ${unseeded} haven't been scattered. Duplicate detection looks at structure, not wording — editing text alone won't change these numbers.`,
+    currentSeed: "Current fingerprint seed: ",
+    autoSeed: "Automatic (derived from page ID)",
+    reseedHint: "If a page gets flagged or throttled, use the button below to draw a new seed and re-scatter the fingerprint.",
+    reseed: "Re-scatter fingerprint",
+    reseeded: "New fingerprint generated; it takes effect on published pages after the next autosave.",
+    upsell: "Anti-duplication is an Agency benefit. Upgrade to scatter fingerprints on published pages and dodge duplicate detection.",
+    done: "Done",
+  },
+};

@@ -23,9 +23,8 @@ import { landingEditorPath, Routes } from "@/lib/constants";
 import { handleSessionExpired } from "@/lib/auth-client";
 import { TEMPLATES, type TemplateMeta } from "../samples/registry";
 import { categoryLabel, filterTemplates } from "../samples/templateFilter";
-
-// 编辑器属租户后台，不参与营销面国际化，固定取中文。
-const ADMIN_LOCALE = "zh" as const;
+import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
+import type { Locale } from "@/lib/i18n/config";
 
 // --font-mono-app 随 next/font 一起去掉了；font-mono 工具类直接解析到系统等宽栈。
 const monoCls = "font-mono";
@@ -36,24 +35,26 @@ interface CategoryChip {
   count: number;
 }
 
-/** 从静态 TEMPLATES 统计各行业计数，按数量降序生成 chip（含中文标签）。 */
-function useCategoryChips(): CategoryChip[] {
+/** 从静态 TEMPLATES 统计各行业计数，按数量降序生成 chip。 */
+function useCategoryChips(locale: Locale): CategoryChip[] {
   return useMemo(() => {
     const counts = new Map<string, number>();
     for (const t of TEMPLATES) counts.set(t.tags.category, (counts.get(t.tags.category) ?? 0) + 1);
     return [...counts.entries()]
-      .map(([value, count]) => ({ value, label: categoryLabel(ADMIN_LOCALE, value), count }))
+      .map(([value, count]) => ({ value, label: categoryLabel(locale, value), count }))
       .sort((a, b) => b.count - a.count);
-  }, []);
+  }, [locale]);
 }
 
 export function TemplatePickerDialog({ children }: { children: React.ReactNode }) {
+  const t = useAdminT().editor.templatePicker;
+  const locale = useAdminLocale();
   const [category, setCategory] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const chips = useCategoryChips();
+  const chips = useCategoryChips(locale);
   const list = useMemo(
-    () => filterTemplates(TEMPLATES, { category: category ?? undefined, query: query || undefined }, ADMIN_LOCALE),
-    [category, query],
+    () => filterTemplates(TEMPLATES, { category: category ?? undefined, query: query || undefined }, locale),
+    [category, query, locale],
   );
   const filtering = category !== null || query.trim() !== "";
 
@@ -87,13 +88,13 @@ export function TemplatePickerDialog({ children }: { children: React.ReactNode }
             <div className="min-w-0">
               <span className={cn(pill, "uppercase tracking-[0.16em]", monoCls)}>
                 <LayoutTemplate className="h-3.5 w-3.5" />
-                落地页模板
+                {t.kicker}
               </span>
               <DialogTitle className={cn("mt-3 text-2xl font-bold tracking-tight sm:text-[28px]", gradientText)}>
-                挑一套模板，几分钟搭出投放级落地页
+                {t.title}
               </DialogTitle>
               <DialogDescription className="mt-1.5 text-sm text-muted-foreground">
-                结构与文案已为海外获客调校好——选中即进编辑器，可自由增删、排序每个模块。
+                {t.description}
               </DialogDescription>
             </div>
 
@@ -101,8 +102,8 @@ export function TemplatePickerDialog({ children }: { children: React.ReactNode }
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="search"
-                aria-label="搜索模板名称"
-                placeholder="搜索模板…"
+                aria-label={t.searchAria}
+                placeholder={t.searchPlaceholder}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="w-full rounded-xl border border-border bg-white/80 py-2.5 pl-9 pr-3 text-sm text-foreground shadow-sm backdrop-blur transition-colors placeholder:text-muted-foreground/70 focus:border-aqua-300 focus:outline-none focus:ring-2 focus:ring-aqua-400/30"
@@ -117,7 +118,7 @@ export function TemplatePickerDialog({ children }: { children: React.ReactNode }
               onClick={() => setCategory(null)}
               className={cn(chipBase, category === null ? chipOn : chipOff, "shrink-0")}
             >
-              全部
+              {t.all}
               <span className={countCls(category === null)}>{TEMPLATES.length}</span>
             </button>
             {chips.map((c) => {
@@ -141,7 +142,7 @@ export function TemplatePickerDialog({ children }: { children: React.ReactNode }
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8">
           <div className={cn("mb-4 flex items-center gap-2 text-xs text-muted-foreground", monoCls)}>
             <span className="h-1 w-1 rounded-full bg-aqua-400" />
-            共 {list.length} 套模板
+            {t.count(list.length)}
             {filtering && (
               <button
                 type="button"
@@ -151,7 +152,7 @@ export function TemplatePickerDialog({ children }: { children: React.ReactNode }
                 }}
                 className="text-aqua-600 underline-offset-2 transition-colors hover:text-aqua-700 hover:underline"
               >
-                · 清空筛选
+                {t.clearFilters}
               </button>
             )}
           </div>
@@ -161,7 +162,7 @@ export function TemplatePickerDialog({ children }: { children: React.ReactNode }
               <span className="mx-auto grid h-12 w-12 place-items-center rounded-xl border border-aqua-100 bg-aqua-50 text-aqua-600">
                 <Sparkles className="h-5 w-5" />
               </span>
-              <p className="mt-5 text-sm text-muted-foreground">没有匹配的模板，换个筛选条件试试。</p>
+              <p className="mt-5 text-sm text-muted-foreground">{t.noMatch}</p>
             </div>
           ) : (
             <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -180,6 +181,8 @@ export function TemplatePickerDialog({ children }: { children: React.ReactNode }
 
 function TemplateCard({ template }: { template: TemplateMeta }) {
   const router = useRouter();
+  const t = useAdminT().editor.templatePicker;
+  const locale = useAdminLocale();
   const [loading, setLoading] = useState(false);
 
   // 两个按钮都先建库并进编辑器；AI 走 ?ai=1，编辑器内默认弹出「AI 一键成页」资料表单。
@@ -194,7 +197,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
       });
       if (handleSessionExpired(res, router)) return;
       if (res.status === 403) {
-        toast.error("已达当前套餐的落地页上限，请升级后再创建");
+        toast.error(t.quotaReached);
         router.push(Routes.Billing);
         return;
       }
@@ -202,7 +205,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
       const page = await res.json();
       router.push(withAi ? `${landingEditorPath(page.id)}?ai=1` : landingEditorPath(page.id));
     } catch {
-      toast.error("创建失败，请检查网络后重试");
+      toast.error(t.createFailed);
       setLoading(false);
     }
   }
@@ -233,7 +236,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
             monoCls,
           )}
         >
-          {template.industry[ADMIN_LOCALE]}
+          {template.industry[locale]}
         </span>
 
         {/* 浮现操作按钮 */}
@@ -245,7 +248,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/40 bg-white/85 px-3 py-2 text-sm font-medium text-foreground/80 backdrop-blur transition-colors hover:bg-white disabled:opacity-60"
           >
             <PenLine className="h-3.5 w-3.5" />
-            {loading ? "创建中…" : "直接编辑"}
+            {loading ? t.creating : t.edit}
           </button>
           <button
             type="button"
@@ -254,7 +257,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-3 py-2 text-sm font-semibold text-white shadow-sm shadow-aqua-600/30 transition-all hover:brightness-105 disabled:opacity-60"
           >
             <Sparkles className="h-3.5 w-3.5" />
-            AI 一键成页
+            {t.aiGenerate}
           </button>
         </div>
       </div>
@@ -263,7 +266,7 @@ function TemplateCard({ template }: { template: TemplateMeta }) {
         <h3 className="text-base font-semibold tracking-tight text-foreground transition-colors group-hover:text-aqua-700">
           {template.name}
         </h3>
-        <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{template.tagline[ADMIN_LOCALE]}</p>
+        <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{template.tagline[locale]}</p>
       </div>
     </div>
   );

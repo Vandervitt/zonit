@@ -14,6 +14,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { App, Checkbox, ConfigProvider, Modal, Form, Input, Select, Spin, Typography } from "antd";
 import zhCN from "antd/locale/zh_CN";
+import enUS from "antd/locale/en_US";
+import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
 import { adminTheme } from "@/lib/theme/antd-theme";
 import { handleSessionExpired } from "@/lib/auth-client";
 import { landingEditorPath } from "@/lib/constants";
@@ -37,7 +39,7 @@ const LANGUAGES = [
 ];
 
 /** 语气预设（多选）：join 后作为 brief.tone 注入 prompt，指导整页文案调性。 */
-const TONE_OPTIONS = ["专业", "亲和", "可信赖", "高端", "活力", "紧迫感", "简洁真诚"];
+
 
 /** 咨询渠道预设（多选）。标签由 lib/ai/brief-contact 的映射表派生——两处若各写一份，
  *  改一个标签就会让「勾了渠道却不生效」重新发生（它只是不再报错而已）。
@@ -56,19 +58,12 @@ interface BriefForm {
   autoImages: boolean;
 }
 
-/** 生成后需人工核对的要点：轮播高亮，提醒用户别把 AI 产出直接当成品。 */
-const REVIEW_TIPS = [
-  "核对文案与描述：是否准确表达你的产品价值，措辞合规、无夸大或不实承诺。",
-  "务必替换配图：评价头像、前后对比图均为图库素材（非真实客户 / 真实案例），直接投放可能构成虚假宣传，请换成你的真实素材。",
-  "核对数据类内容：统计数字、评价、案例多为占位示例，请替换为真实素材。",
-  "核对区块取舍：逐个区块看是否都需要，可增删、排序或隐藏不适用的模块。",
-];
-
 /** 生成中的加载态：整块替换表单，展示不断递增的耗时与需核对的提示。 */
 function GeneratingState({ elapsedMs }: { elapsedMs: number }) {
+  const t = useAdminT().editor.generate;
   const [active, setActive] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setActive((a) => (a + 1) % REVIEW_TIPS.length), 2600);
+    const id = setInterval(() => setActive((a) => (a + 1) % t.checklist.length), 2600);
     return () => clearInterval(id);
   }, []);
 
@@ -77,12 +72,12 @@ function GeneratingState({ elapsedMs }: { elapsedMs: number }) {
       <Spin size="large" />
       <div className="text-3xl font-semibold tabular-nums text-ink">{(elapsedMs / 1000).toFixed(1)}s</div>
       <Typography.Text type="secondary">
-        AI 正在依据你的资料重写整页文案并自动配图，通常约需 30–90 秒，请稍候，勿关闭页面…
+        {t.loadingHint}
       </Typography.Text>
       <div className="mt-1 w-full rounded-lg bg-canvas p-4 text-left">
-        <div className="mb-2 text-sm font-medium text-ink">生成后请重点核对：</div>
+        <div className="mb-2 text-sm font-medium text-ink">{t.checklistTitle}</div>
         <ul className="space-y-2">
-          {REVIEW_TIPS.map((tip, i) => (
+          {t.checklist.map((tip, i) => (
             <li
               key={i}
               className={`flex gap-2 text-sm transition-colors ${i === active ? "text-ink" : "text-ink-soft"}`}
@@ -97,10 +92,13 @@ function GeneratingState({ elapsedMs }: { elapsedMs: number }) {
   );
 }
 
+const ANTD_LOCALE = { en: enUS, zh: zhCN };
+
 export function GenerateBriefDialog() {
+  const locale = useAdminLocale();
   // 自带 antd 上下文：编辑器路由缺全局 Provider，component={false} 不额外产生 DOM 包裹。
   return (
-    <ConfigProvider theme={adminTheme} locale={zhCN}>
+    <ConfigProvider theme={adminTheme} locale={ANTD_LOCALE[locale]}>
       <App component={false}>
         <BriefModal />
       </App>
@@ -109,6 +107,7 @@ export function GenerateBriefDialog() {
 }
 
 function BriefModal() {
+  const t = useAdminT().editor.generate;
   const router = useRouter();
   const dispatch = useEditorDispatch();
   // open 状态上抬到 MetaContext：首开来自 ?ai=1 深链，之后可由工具栏「AI 一键成页」按钮再次唤起。
@@ -158,14 +157,14 @@ function BriefModal() {
       const data = await res.json();
       if (!res.ok) {
         if (data.error === "ai_quota_exhausted")
-          message.error("AI 额度已用完，请升级或加购 credits");
+          message.error(t.quotaExhausted);
         else if (data.error === "limit_exceeded")
-          message.error("落地页数量已达套餐上限");
-        else message.error("生成失败，请重试");
+          message.error(t.pageLimit);
+        else message.error(t.failed);
         return;
       }
       dispatch({ kind: "replaceDraft", draft: data.draft as LandingPageDraft });
-      message.success("已按你的资料生成文案，可继续在编辑器中调整");
+      message.success(t.success);
       close();
     } finally {
       setLoading(false);
@@ -174,12 +173,12 @@ function BriefModal() {
 
   return (
     <Modal
-      title={loading ? "AI 正在生成…" : "AI 一键成页"}
+      title={loading ? t.titleLoading : t.titleIdle}
       open={open}
       onOk={handleOk}
       onCancel={close}
-      okText="一键成页"
-      cancelText="手动编辑"
+      okText={t.ok}
+      cancelText={t.cancel}
       // 生成中：整块换成加载态，隐藏底部按钮并禁用关闭，避免中途取消或重复提交。
       footer={loading ? null : undefined}
       closable={!loading}
@@ -195,7 +194,7 @@ function BriefModal() {
       ) : (
         <>
       <Typography.Paragraph type="secondary">
-        填写产品或公司信息，AI 将依据当前模板为这张落地页自动生成可投放文案。也可点「手动编辑」直接关闭。
+        {t.intro}
       </Typography.Paragraph>
       <Form
         form={form}
@@ -204,50 +203,50 @@ function BriefModal() {
         requiredMark="optional"
       >
         <Form.Item
-          label="产品 / 公司名"
+          label={t.name}
           name="productName"
-          rules={[{ required: true, message: "请输入产品 / 公司名" }]}
+          rules={[{ required: true, message: t.nameRequired }]}
         >
-          <Input placeholder="如 Acme 出海咨询" maxLength={200} />
+          <Input placeholder={t.namePlaceholder} maxLength={200} />
         </Form.Item>
         <Form.Item
-          label="它做什么 / 解决什么"
+          label={t.what}
           name="description"
-          rules={[{ required: true, message: "请填写产品介绍" }]}
+          rules={[{ required: true, message: t.whatRequired }]}
         >
-          <Input.TextArea rows={3} placeholder="一句话说明产品价值与解决的问题" maxLength={4000} showCount />
+          <Input.TextArea rows={3} placeholder={t.whatPlaceholder} maxLength={4000} showCount />
         </Form.Item>
-        <Form.Item label="目标客户" name="targetAudience">
-          <Input placeholder="如 东南亚中小电商卖家" maxLength={500} />
+        <Form.Item label={t.audience} name="targetAudience">
+          <Input placeholder={t.audiencePlaceholder} maxLength={500} />
         </Form.Item>
-        <Form.Item label="语气" name="tone">
+        <Form.Item label={t.tone} name="tone">
           <Select
             mode="multiple"
             allowClear
-            placeholder="可多选，如 专业、亲和"
-            options={TONE_OPTIONS.map((t) => ({ value: t, label: t }))}
+            placeholder={t.tonePlaceholder}
+            options={t.toneOptions.map((o) => ({ value: o, label: o }))}
           />
         </Form.Item>
-        <Form.Item label="咨询渠道" name="ctaGoal">
+        <Form.Item label={t.ctaGoal} name="ctaGoal">
           <Select
             mode="multiple"
             allowClear
-            placeholder="访客的咨询 / 转化渠道，可多选"
+            placeholder={t.ctaGoalPlaceholder}
             options={CTA_CHANNELS.map((c: string) => ({ value: c, label: c }))}
           />
         </Form.Item>
-        <Form.Item label="生成语言" name="language">
+        <Form.Item label={t.language} name="language">
           <Select options={LANGUAGES.map((l) => ({ value: l, label: l }))} />
         </Form.Item>
-        <Form.Item label="可选：粘贴公司 / 产品介绍" name="pastedIntro">
-          <Input.TextArea rows={3} placeholder="有现成介绍可粘贴，AI 会据此提炼文案" maxLength={8000} showCount />
+        <Form.Item label={t.pastedIntro} name="pastedIntro">
+          <Input.TextArea rows={3} placeholder={t.pastedIntroPlaceholder} maxLength={8000} showCount />
         </Form.Item>
         <Form.Item
           name="autoImages"
           valuePropName="checked"
-          extra="据你的资料自动为图片位换 Unsplash 配图并生成 alt（含评价头像、前后对比图）；会稍增生成耗时。注意：这些均为图库素材、非真实客户 / 案例，投放前务必替换为你的真实素材。"
+          extra={t.autoImagesExtra}
         >
-          <Checkbox>自动配图（Unsplash）</Checkbox>
+          <Checkbox>{t.autoImages}</Checkbox>
         </Form.Item>
       </Form>
         </>

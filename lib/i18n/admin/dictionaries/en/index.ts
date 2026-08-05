@@ -10,12 +10,13 @@ import { billing } from "./billing";
 import { common } from "./common";
 import { shell } from "./shell";
 import { domains } from "./domains";
+import { editor } from "./editor";
 import { leads } from "./leads";
 import { media } from "./media";
 import { overview } from "./overview";
 import { pages } from "./pages";
 import { settings } from "./settings";
 
-export const en = { analytics, billing, common, domains, leads, media, overview, pages, shell, settings };
+export const en = { analytics, billing, common, domains, editor, leads, media, overview, pages, shell, settings };
 
 export type AdminDictionary = typeof en;
