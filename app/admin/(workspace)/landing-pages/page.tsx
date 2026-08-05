@@ -221,7 +221,8 @@ export default function LandingPagesPage() {
               d ? `${d}${r.bound_path && r.bound_path !== "/" ? r.bound_path : "/"}`
                 : <Typography.Text type="secondary">—</Typography.Text> },
           { title: "更新时间", dataIndex: "updated_at", width: 200, render: (t: string) => new Date(t).toLocaleString() },
-          { title: "操作", width: 300, render: (_: unknown, r: PageRow) => (
+          // 加了「自检」后是 6 个动作，300px 会把每个都折成两行竖排（「编/辑」「自/检」）。
+          { title: "操作", width: 380, render: (_: unknown, r: PageRow) => (
             <Space size="middle">
               <Link href={landingEditorPath(r.id)}>编辑</Link>
               <a onClick={() => duplicate(r.id)}>复制</a>

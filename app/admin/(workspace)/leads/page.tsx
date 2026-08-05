@@ -327,7 +327,9 @@ export default function LeadsPage() {
         dataSource={rows}
         // 列已经排到「标签 / 备注」这一层，窄屏下不给横向滚动会让单元格互相重叠，
         // 一键联系的按钮会被相邻单元格盖住点不动。
-        scroll={{ x: 1200 }}
+        // x 必须 ≥ 各列 width 之和，否则 antd 会把没设 width 的列压到几十像素：
+        // 「页面」曾被压成「A...」（看不出线索来自哪张页），联系按钮被截成「W」「邮」。
+        scroll={{ x: 1500 }}
         pagination={{
           current: page,
           pageSize: PAGE_SIZE,
@@ -357,8 +359,10 @@ export default function LeadsPage() {
           ),
         }}
         columns={[
-          { title: "页面", dataIndex: "page_name", ellipsis: true },
-          { title: "联系方式", render: (_: unknown, r: LeadRow) => <ContactCell row={r} onContacted={() => void markContacted(r)} />, ellipsis: true },
+          // 这两列必须给显式宽度：页面名是「这条线索来自哪」的唯一线索，
+          // 联系方式列要放得下两三个渠道按钮。
+          { title: "页面", dataIndex: "page_name", width: 180, ellipsis: true },
+          { title: "联系方式", width: 240, render: (_: unknown, r: LeadRow) => <ContactCell row={r} onContacted={() => void markContacted(r)} /> },
           // 列表只给渠道 / 来源 / 广告系列三层；创意、关键词与点击 ID 在展开行里。
           { title: "来源", width: 200, ellipsis: true,
             render: (_: unknown, r: LeadRow) => [r.channel, r.utm_source, r.utm_campaign].filter(Boolean).join(" / ") || "—" },
