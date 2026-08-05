@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal, Input, Tag, Typography, App } from "antd";
 import { ApiRoutes } from "@/lib/constants";
 import type { FeedbackSource, FeedbackContext } from "@/lib/feedback";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 export interface FeedbackModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ export function FeedbackModal({
   open, onClose, source, title, prompt, quickReasons = [], context = {},
 }: FeedbackModalProps) {
   const { message } = App.useApp();
+  const t = useAdminT().shell.feedback;
   const [reason, setReason] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -53,14 +55,14 @@ export function FeedbackModal({
         }),
       });
       if (res.ok) {
-        message.success("谢谢，已收到你的反馈 🙏");
+        message.success(t.thanks);
         handleClose();
       } else {
-        message.error("反馈提交失败，请稍后再试");
+        message.error(t.failed);
         setSubmitting(false);
       }
     } catch {
-      message.error("反馈提交失败，请检查网络后重试");
+      message.error(t.networkFailed);
       setSubmitting(false);
     }
   }
@@ -71,8 +73,8 @@ export function FeedbackModal({
       title={title}
       onCancel={handleClose}
       onOk={submit}
-      okText="发送"
-      cancelText="以后再说"
+      okText={t.send}
+      cancelText={t.later}
       okButtonProps={{ disabled: !canSubmit, loading: submitting }}
       destroyOnClose
     >
@@ -94,7 +96,7 @@ export function FeedbackModal({
       <Input.TextArea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="想多说两句就写这里（选填）"
+        placeholder={t.placeholder}
         autoSize={{ minRows: 3, maxRows: 6 }}
         maxLength={2000}
         showCount

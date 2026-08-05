@@ -15,6 +15,7 @@ import { PLANS } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 import type { TableColumnsType } from "antd";
 import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 interface DomainRoute {
   path: string;
@@ -36,6 +37,7 @@ interface Domain {
 }
 
 export default function DomainsPage() {
+  const t = useAdminT().domains;
   const { data: session } = useSession();
   const [addOpen, setAddOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
@@ -125,7 +127,7 @@ export default function DomainsPage() {
 
   const columns: TableColumnsType<Domain> = [
     {
-      title: "域名",
+      title: t.columns.domain,
       dataIndex: "domain",
       key: "domain",
       render: (_: unknown, record: Domain) => {
@@ -139,7 +141,7 @@ export default function DomainsPage() {
             <br />
             {live.length === 0 ? (
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                未发布任何页面
+                {t.noPublishedPages}
               </Typography.Text>
             ) : (
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>
@@ -150,7 +152,7 @@ export default function DomainsPage() {
               <>
                 <br />
                 <Typography.Text type="warning" style={{ fontSize: 12 }}>
-                  根路径尚未发布，直接访问 {record.domain} 会 404
+                  {t.rootMissing(record.domain)}
                 </Typography.Text>
               </>
             )}
@@ -159,51 +161,51 @@ export default function DomainsPage() {
       },
     },
     {
-      title: "验证状态",
+      title: t.columns.verification,
       key: "verified",
       width: 220,
       render: (_: unknown, record: Domain) =>
         record.verified ? (
           healthMap[record.id] === "misconfigured" ? (
             <Space size={4}>
-              <Tag color="green">已验证</Tag>
-              <Tooltip title="域名所有权已验证，但 DNS 记录配置不正确，访客访问该域名看不到你的落地页。请到 DNS 服务商检查 A/CNAME 记录。">
-                <Tag color="orange">DNS 未正确配置</Tag>
+              <Tag color="green">{t.verified}</Tag>
+              <Tooltip title={t.dns.misconfiguredTooltip}>
+                <Tag color="orange">{t.dns.misconfigured}</Tag>
               </Tooltip>
               <Button
                 type="text"
                 size="small"
                 icon={<ReloadOutlined spin={healthQuery.isValidating} />}
-                title="重新检测 DNS 配置"
+                title={t.dns.recheck}
                 onClick={() => void healthQuery.mutate()}
               />
             </Space>
           ) : (
             <Space size={4}>
-              <Tag color="green">已验证</Tag>
+              <Tag color="green">{t.verified}</Tag>
               {/* 健康检查 fail-open：unknown（接口异常）时不给「已正确配置」的虚假承诺 */}
               {healthMap[record.id] === "ok" ? (
-                <Tooltip title="域名所有权已验证，且 DNS 记录已正确指向，访客可以正常访问你的落地页。">
-                  <Tag color="green">DNS 已正确配置</Tag>
+                <Tooltip title={t.dns.okTooltip}>
+                  <Tag color="green">{t.dns.ok}</Tag>
                 </Tooltip>
               ) : null}
             </Space>
           )
         ) : (
           <Space size={4}>
-            <Tag>待验证</Tag>
+            <Tag>{t.pending}</Tag>
             <Button
               type="text"
               size="small"
               icon={<ReloadOutlined spin={pendingCheckId === record.id} />}
-              title="刷新验证状态"
+              title={t.refreshVerification}
               onClick={() => handleCheckStatus(record)}
             />
           </Space>
         ),
     },
     {
-      title: "启用",
+      title: t.columns.enabled,
       key: "enabled",
       width: 80,
       render: (_: unknown, record: Domain) => (
@@ -215,18 +217,18 @@ export default function DomainsPage() {
       ),
     },
     {
-      title: "操作",
+      title: t.columns.actions,
       key: "action",
       width: 80,
       render: (_: unknown, record: Domain) => (
         <Popconfirm
-          title="确认删除该域名？"
-          okText="删除"
-          cancelText="取消"
+          title={t.deleteConfirm.title}
+          okText={t.deleteConfirm.ok}
+          cancelText={t.deleteConfirm.cancel}
           okButtonProps={{ danger: true }}
           onConfirm={() => deleteMutation.trigger(record)}
         >
-          <a style={{ color: SEMANTIC.error }}>删除</a>
+          <a style={{ color: SEMANTIC.error }}>{t.delete}</a>
         </Popconfirm>
       ),
     },
@@ -236,17 +238,17 @@ export default function DomainsPage() {
     <Space direction="vertical" size={16} style={{ width: "100%", padding: "16px 24px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <Typography.Title level={3} style={{ margin: 0 }}>域名</Typography.Title>
+          <Typography.Title level={3} style={{ margin: 0 }}>{t.title}</Typography.Title>
           <Typography.Text type="secondary">
-            已启用 {enabledCount}{domainsLimit === Infinity ? "" : `/${domainsLimit}`} 个域名
+            {t.enabledCount(enabledCount, domainsLimit === Infinity ? "" : `/${domainsLimit}`)}
           </Typography.Text>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setAddOpen(true)}>
-          添加域名
+          {t.add}
         </Button>
       </div>
 
-      <LoadErrorAlert error={domainsQuery.error} onRetry={() => void domainsQuery.mutate()} label="域名列表" />
+      <LoadErrorAlert error={domainsQuery.error} onRetry={() => void domainsQuery.mutate()} label={t.loadErrorLabel} />
       <Table<Domain>
         rowKey="id"
         dataSource={domains}
@@ -255,7 +257,7 @@ export default function DomainsPage() {
         pagination={false}
         locale={{
           emptyText: (
-            <Empty description="还没有绑定任何域名" style={{ margin: "48px 0" }} />
+            <Empty description={t.empty} style={{ margin: "48px 0" }} />
           ),
         }}
       />

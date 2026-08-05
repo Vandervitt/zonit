@@ -8,9 +8,9 @@ describe("analytics 整形", () => {
   });
   it("buildFunnel 三步转化：曝光→CTA 点击→线索，rate 相对上一步、pct 相对曝光", () => {
     expect(buildFunnel(100, 20, 5)).toEqual([
-      { key: "views", label: "曝光", count: 100, rate: 1, pct: 1 },
-      { key: "clicks", label: "CTA 点击", count: 20, rate: 0.2, pct: 0.2 },
-      { key: "leads", label: "线索", count: 5, rate: 0.25, pct: 0.05 },
+      { key: "views", count: 100, rate: 1, pct: 1 },
+      { key: "clicks", count: 20, rate: 0.2, pct: 0.2 },
+      { key: "leads", count: 5, rate: 0.25, pct: 0.05 },
     ]);
   });
   it("buildFunnel 上一步为 0 时 rate 记 0（避免除零）", () => {

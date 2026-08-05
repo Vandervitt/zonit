@@ -12,7 +12,8 @@ export * from "./range";
 export interface Totals { views: number; clicks: number; leads: number; ctr: number; cvr: number; }
 export interface SeriesPoint { date: string; views: number; clicks: number; }
 export interface ChannelRow { channel: string; clicks: number; }
-export interface FunnelStep { key: "views" | "clicks" | "leads"; label: string; count: number; rate: number; pct: number; }
+// 只回 key 不回 label：展示文案随后台界面语言变化，归 lib/i18n/admin 的 analytics.funnel.steps 管。
+export interface FunnelStep { key: "views" | "clicks" | "leads"; count: number; rate: number; pct: number; }
 /** 表单漏斗：开始填 → 提交成功；errors 为提交被拒次数，errorBreakdown 按错误码分布。 */
 export interface FormFunnel {
   starts: number;
@@ -108,9 +109,9 @@ export function buildFunnel(views: number, clicks: number, leads: number): Funne
   const rate = (cur: number, prev: number) => (prev > 0 ? cur / prev : 0);
   const pct = (cur: number) => (views > 0 ? cur / views : 0);
   return [
-    { key: "views", label: "曝光", count: views, rate: 1, pct: 1 },
-    { key: "clicks", label: "CTA 点击", count: clicks, rate: rate(clicks, views), pct: pct(clicks) },
-    { key: "leads", label: "线索", count: leads, rate: rate(leads, clicks), pct: pct(leads) },
+    { key: "views", count: views, rate: 1, pct: 1 },
+    { key: "clicks", count: clicks, rate: rate(clicks, views), pct: pct(clicks) },
+    { key: "leads", count: leads, rate: rate(leads, clicks), pct: pct(leads) },
   ];
 }
 

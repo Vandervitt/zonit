@@ -10,4 +10,9 @@ export const common = {
   empty: "Nothing here yet",
   saved: "Saved",
   saveFailed: "Could not save. Please try again.",
+  retry: "Retry",
+  /** 列表接口失败的错误态。status 为 null 表示非 HTTP 错误（断网等）。 */
+  loadError: (label: string, status: number | null) =>
+    `Could not load ${label}${status === null ? "" : ` (HTTP ${status})`} — what you see may be incomplete`,
+  loadErrorFallbackLabel: "the data",
 };

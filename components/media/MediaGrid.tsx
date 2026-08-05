@@ -5,6 +5,7 @@ import { Card, Button, Popconfirm, Image } from "antd";
 import { DeleteOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { apiMediaPath } from "@/lib/constants";
 import type { MediaItem } from "@/lib/media-db";
+import { useAdminT } from "@/lib/i18n/admin/context";
 
 interface MediaGridProps {
   items: MediaItem[];
@@ -21,6 +22,7 @@ export function MediaGrid({
   selectedId,
   variant = "light",
 }: MediaGridProps) {
+  const t = useAdminT().media;
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (item: MediaItem) => {
@@ -38,7 +40,7 @@ export function MediaGrid({
     if (items.length === 0) {
       return (
         <div className="text-center py-8 text-zinc-500 text-sm">
-          还没有素材，点击 上传素材 开始
+          {t.emptyHint}
         </div>
       );
     }
@@ -68,9 +70,9 @@ export function MediaGrid({
               <p className="text-[10px] text-white truncate">{item.filename}</p>
             </div>
             <Popconfirm
-              title={`确认删除"${item.filename}"？`}
-              okText="删除"
-              cancelText="取消"
+              title={t.deleteConfirm.title(item.filename)}
+              okText={t.deleteConfirm.ok}
+              cancelText={t.deleteConfirm.cancel}
               okButtonProps={{ danger: true }}
               onConfirm={() => handleDelete(item)}
             >
@@ -101,7 +103,7 @@ export function MediaGrid({
   if (items.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground text-sm">
-        还没有素材，点击 上传素材 开始
+        {t.emptyHint}
       </div>
     );
   }
@@ -175,9 +177,9 @@ export function MediaGrid({
             ) : null}
           </Card>
           <Popconfirm
-            title={`确认删除"${item.filename}"？`}
-            okText="删除"
-            cancelText="取消"
+            title={t.deleteConfirm.title(item.filename)}
+            okText={t.deleteConfirm.ok}
+            cancelText={t.deleteConfirm.cancel}
             okButtonProps={{ danger: true }}
             onConfirm={() => handleDelete(item)}
           >

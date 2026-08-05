@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { Modal, Button, Typography } from "antd";
 import { Routes } from "@/lib/constants";
-import { PLANS, planPriceLabel } from "@/lib/plans";
+import { PLANS, planPriceLabel, formatPlanLimit } from "@/lib/plans";
+import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
 import type { PlanId } from "@/lib/plans";
 
 interface Props {
@@ -21,6 +22,8 @@ const UPGRADE_TARGET: Record<PlanId, PlanId | null> = {
 
 export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
   const router = useRouter();
+  const t = useAdminT().domains.upgradeDialog;
+  const locale = useAdminLocale();
   const targetPlan = UPGRADE_TARGET[currentPlan];
 
   if (!targetPlan) return null;
@@ -32,10 +35,10 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
     <Modal
       open={open}
       onCancel={() => onOpenChange(false)}
-      title="已达到落地页上限"
+      title={t.title}
       footer={[
         <Button key="cancel" onClick={() => onOpenChange(false)}>
-          稍后再说
+          {t.later}
         </Button>,
         <Button
           key="upgrade"
@@ -45,26 +48,29 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan }: Props) {
             router.push(Routes.Billing);
           }}
         >
-          查看 {target.label} 套餐 · {planPriceLabel(target, "zh")}
+          {t.cta(target.label, planPriceLabel(target, locale))}
         </Button>,
       ]}
     >
       <Typography.Paragraph type="secondary">
-        {current.label} 套餐最多创建 {current.landingPagesLimit} 张落地页。升级到{" "}
-        <Typography.Text strong>{target.label}</Typography.Text> 即可最多管理{" "}
-        {target.landingPagesLimit === Infinity ? "无限张" : `${target.landingPagesLimit} 张`}落地页。
+        {t.body(
+          current.label,
+          formatPlanLimit(current.landingPagesLimit, locale, "pages"),
+          target.label,
+          formatPlanLimit(target.landingPagesLimit, locale, "pages"),
+        )}
       </Typography.Paragraph>
 
       <div style={{ border: "1px solid #e6f4ff", borderRadius: 8, background: "#f0f9ff", padding: 16 }}>
         <Typography.Text type="secondary" style={{ display: "block", marginBottom: 4 }}>
-          升级后还可获得：
+          {t.alsoGet}
         </Typography.Text>
         {current.hasWatermark && !target.hasWatermark && (
-          <Typography.Text style={{ display: "block" }}>✓ 去除品牌水印</Typography.Text>
+          <Typography.Text style={{ display: "block" }}>{t.removeWatermark}</Typography.Text>
         )}
         {target.domainsLimit > current.domainsLimit && (
           <Typography.Text style={{ display: "block" }}>
-            ✓ 绑定最多 {target.domainsLimit === Infinity ? "无限个" : target.domainsLimit} 个自定义域名
+            {t.moreDomains(formatPlanLimit(target.domainsLimit, locale, "domains"))}
           </Typography.Text>
         )}
       </div>

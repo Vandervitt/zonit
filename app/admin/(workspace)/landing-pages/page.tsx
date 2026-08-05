@@ -21,6 +21,8 @@ import {
 } from "@/lib/constants";
 import { TemplatePickerDialog } from "@/landing-editor/components/TemplatePickerDialog";
 import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
+import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
+import { formatDateTime } from "@/lib/i18n/admin";
 
 interface PageRow {
   id: string;
@@ -38,9 +40,6 @@ function hasUnpublishedChanges(r: PageRow): boolean {
   return r.status === "published" && r.published_at !== null && new Date(r.updated_at) > new Date(r.published_at);
 }
 
-// 流失点反馈的快捷原因（取消发布 / 删除共用）。
-const CHURN_REASONS = ["太复杂 / 不好用", "效果不好 / 没收到线索", "改用其他工具了", "只是先试试 / 暂时不用", "其他原因"];
-
 interface FeedbackState {
   source: FeedbackSource;
   title: string;
@@ -56,6 +55,7 @@ function TemplateDeepLink() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { message } = App.useApp();
+  const t = useAdminT().pages;
   const fired = useRef(false);
 
   useEffect(() => {
@@ -69,26 +69,28 @@ function TemplateDeepLink() {
         body: JSON.stringify({ templateId }),
       });
       if (res.status === 403) {
-        message.error("已达当前套餐的落地页上限，请升级后再创建");
+        message.error(t.toast.quotaReached);
         router.replace(Routes.Billing);
         return;
       }
       if (!res.ok) {
-        message.error("从模板创建失败，请重试");
+        message.error(t.toast.fromTemplateFailed);
         router.replace(Routes.LandingPages);
         return;
       }
       const row: PageRow = await res.json();
-      message.success("已从模板创建草稿");
+      message.success(t.toast.fromTemplateOk);
       router.replace(landingEditorPath(row.id));
     })();
-  }, [searchParams, router, message]);
+  }, [searchParams, router, message, t]);
 
   return null;
 }
 
 export default function LandingPagesPage() {
   const { message } = App.useApp();
+  const t = useAdminT().pages;
+  const locale = useAdminLocale();
   const { data, error, mutate, isLoading } = useSWR<PageRow[]>(ApiRoutes.LandingPages);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   /** 正在自检的页 id——自检要抓取外站，慢到必须给反馈。 */
@@ -108,27 +110,27 @@ export default function LandingPagesPage() {
 
   async function unpublish(id: string, name: string) {
     const res = await fetch(apiLandingUnpublishPath(id), { method: "POST" });
-    if (!res.ok) { message.error("取消发布失败"); return; }
-    message.success("已取消发布");
+    if (!res.ok) { message.error(t.toast.unpublishFailed); return; }
+    message.success(t.toast.unpublished);
     void mutate();
-    setFeedback({ source: "unpublish", title: "为什么取消发布？", pageId: id, pageName: name });
+    setFeedback({ source: "unpublish", title: t.feedback.unpublishTitle, pageId: id, pageName: name });
   }
   async function remove(id: string, name: string) {
     const res = await fetch(apiLandingPagePath(id), { method: "DELETE" });
-    if (!res.ok) { message.error("删除失败"); return; }
-    message.success("已删除");
+    if (!res.ok) { message.error(t.toast.deleteFailed); return; }
+    message.success(t.toast.deleted);
     void mutate();
-    setFeedback({ source: "delete", title: "为什么删除这个页面？", pageId: id, pageName: name });
+    setFeedback({ source: "delete", title: t.feedback.deleteTitle, pageId: id, pageName: name });
   }
   async function duplicate(id: string) {
     const res = await fetch(apiLandingDuplicatePath(id), { method: "POST" });
     if (res.status === 403) {
-      message.error("已达当前套餐的落地页上限，请升级后再创建");
+      message.error(t.toast.quotaReached);
       window.location.href = Routes.Billing;
       return;
     }
-    if (!res.ok) { message.error("复制失败"); return; }
-    message.success("已复制为草稿");
+    if (!res.ok) { message.error(t.toast.duplicateFailed); return; }
+    message.success(t.toast.duplicated);
     void mutate();
   }
   /**
@@ -141,10 +143,10 @@ export default function LandingPagesPage() {
     setChecking(id);
     try {
       const res = await fetch(apiLandingCheckPath(id), { method: "POST" });
-      if (res.status === 429) { message.warning("自检次数已达上限，请稍后再试"); return; }
+      if (res.status === 429) { message.warning(t.toast.checkRateLimited); return; }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        message.error(body.error === "check_failed" ? "抓取页面失败，请确认线上地址可访问" : "自检失败，请稍后重试");
+        message.error(body.error === "check_failed" ? t.toast.checkFetchFailed : t.toast.checkFailed);
         return;
       }
       const { id: reportId } = await res.json();
@@ -156,15 +158,15 @@ export default function LandingPagesPage() {
 
   async function rename(id: string, name: string) {
     const trimmed = name.trim();
-    if (!trimmed) { message.error("名称不能为空"); void mutate(); return; }
+    if (!trimmed) { message.error(t.toast.nameEmpty); void mutate(); return; }
     const res = await fetch(apiLandingPagePath(id), {
       method: "PATCH",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ name: trimmed }),
     });
-    if (res.status === 409) { message.error("该名称已被其他落地页使用"); void mutate(); return; }
-    if (!res.ok) { message.error("重命名失败"); void mutate(); return; }
-    message.success("已重命名");
+    if (res.status === 409) { message.error(t.toast.nameTaken); void mutate(); return; }
+    if (!res.ok) { message.error(t.toast.renameFailed); void mutate(); return; }
+    message.success(t.toast.renamed);
     void mutate();
   }
 
@@ -174,12 +176,12 @@ export default function LandingPagesPage() {
         <TemplateDeepLink />
       </Suspense>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-        <Typography.Title level={3} style={{ margin: 0 }}>落地页</Typography.Title>
+        <Typography.Title level={3} style={{ margin: 0 }}>{t.title}</Typography.Title>
         <Space wrap>
           <Input.Search
             allowClear
-            placeholder="搜索名称或域名"
-            aria-label="搜索落地页"
+            placeholder={t.search.placeholder}
+            aria-label={t.search.ariaLabel}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             style={{ width: 220 }}
@@ -188,66 +190,68 @@ export default function LandingPagesPage() {
             value={statusFilter}
             onChange={(v) => setStatusFilter(v as typeof statusFilter)}
             options={[
-              { label: "全部", value: "all" },
-              { label: "已发布", value: "published" },
-              { label: "草稿", value: "draft" },
+              { label: t.filter.all, value: "all" },
+              { label: t.filter.published, value: "published" },
+              { label: t.filter.draft, value: "draft" },
             ]}
           />
-          <TemplatePickerDialog><Button type="primary" icon={<PlusOutlined />}>新建</Button></TemplatePickerDialog>
+          <TemplatePickerDialog><Button type="primary" icon={<PlusOutlined />}>{t.create}</Button></TemplatePickerDialog>
         </Space>
       </div>
-      <LoadErrorAlert error={error} onRetry={() => void mutate()} label="落地页列表" />
+      <LoadErrorAlert error={error} onRetry={() => void mutate()} label={t.loadErrorLabel} />
       <Table<PageRow> rowKey="id" loading={isLoading} dataSource={visibleRows}
-        locale={{ emptyText: (data ?? []).length > 0
-          ? "当前筛选条件下没有落地页"
-          : "还没有落地页，点「新建」从模板开始" }}
+        locale={{ emptyText: (data ?? []).length > 0 ? t.empty.filtered : t.empty.none }}
         columns={[
-          { title: "名称", dataIndex: "name", ellipsis: true,
+          { title: t.columns.name, dataIndex: "name", ellipsis: true,
             render: (name: string, r: PageRow) => (
-              <Typography.Text editable={{ onChange: (v) => rename(r.id, v), tooltip: "点击重命名" }} style={{ marginBottom: 0 }}>
+              <Typography.Text editable={{ onChange: (v) => rename(r.id, v), tooltip: t.renameTooltip }} style={{ marginBottom: 0 }}>
                 {name}
               </Typography.Text>
             ) },
-          { title: "状态", dataIndex: "status", width: 190,
+          { title: t.columns.status, dataIndex: "status", width: 190,
             render: (s: PageRow["status"], r: PageRow) => (
               <Space size={4}>
-                <Tag color={s === "published" ? "green" : "default"}>{s === "published" ? "已发布" : "草稿"}</Tag>
-                {hasUnpublishedChanges(r) && <Tag color="orange">有未发布修改</Tag>}
+                <Tag color={s === "published" ? "green" : "default"}>{s === "published" ? t.status.published : t.status.draft}</Tag>
+                {hasUnpublishedChanges(r) && <Tag color="orange">{t.status.unpublishedChanges}</Tag>}
               </Space>
             ) },
-          { title: "线上地址", dataIndex: "bound_domain", width: 220, ellipsis: true,
+          { title: t.columns.liveUrl, dataIndex: "bound_domain", width: 220, ellipsis: true,
             // 多路径发布后只显示域名会有歧义（同域名可能挂着好几张页），故连路径一起显示。
             render: (d: string | null, r: PageRow) =>
               d ? `${d}${r.bound_path && r.bound_path !== "/" ? r.bound_path : "/"}`
                 : <Typography.Text type="secondary">—</Typography.Text> },
-          { title: "更新时间", dataIndex: "updated_at", width: 200, render: (t: string) => new Date(t).toLocaleString() },
+          // 时间格式跟随界面语言：此前是裸 toLocaleString()，格式随运行环境漂移。
+          { title: t.columns.updatedAt, dataIndex: "updated_at", width: 200,
+            render: (value: string) => formatDateTime(value, locale) },
           // 加了「自检」后是 6 个动作，300px 会把每个都折成两行竖排（「编/辑」「自/检」）。
-          { title: "操作", width: 380, render: (_: unknown, r: PageRow) => (
+          { title: t.columns.actions, width: 380, render: (_: unknown, r: PageRow) => (
             <Space size="middle">
-              <Link href={landingEditorPath(r.id)}>编辑</Link>
-              <a onClick={() => duplicate(r.id)}>复制</a>
+              <Link href={landingEditorPath(r.id)}>{t.actions.edit}</Link>
+              <a onClick={() => duplicate(r.id)}>{t.actions.duplicate}</a>
               {r.status === "published" && r.bound_domain && (
-                <a href={`https://${r.bound_domain}${r.bound_path ?? "/"}`} target="_blank" rel="noreferrer">线上查看</a>
+                <a href={`https://${r.bound_domain}${r.bound_path ?? "/"}`} target="_blank" rel="noreferrer">{t.actions.viewLive}</a>
               )}
               {/* 自检只对已发布页开放：检查的必须是访客真正看到的那张页 */}
               {r.status === "published" && r.bound_domain && (
-                <Tooltip title="按投放平台常盯的项检查这张线上页，结果在新标签打开">
-                  <a onClick={() => runCheck(r.id)}>{checking === r.id ? "自检中…" : "自检"}</a>
+                <Tooltip title={t.actions.checkTooltip}>
+                  <a onClick={() => runCheck(r.id)}>{checking === r.id ? t.actions.checking : t.actions.check}</a>
                 </Tooltip>
               )}
               {r.status === "published" && (
                 <Popconfirm
-                  title="确定取消发布？"
-                  description={r.bound_domain ? `线上页面将立即从 ${r.bound_domain}${r.bound_path ?? "/"} 下线，若有广告在投请先确认。` : "线上页面将立即下线。"}
-                  okText="取消发布"
+                  title={t.unpublishConfirm.title}
+                  description={r.bound_domain
+                    ? t.unpublishConfirm.withDomain(`${r.bound_domain}${r.bound_path ?? "/"}`)
+                    : t.unpublishConfirm.withoutDomain}
+                  okText={t.unpublishConfirm.ok}
                   okButtonProps={{ danger: true }}
                   onConfirm={() => unpublish(r.id, r.name)}
                 >
-                  <a>取消发布</a>
+                  <a>{t.actions.unpublish}</a>
                 </Popconfirm>
               )}
-              <Popconfirm title="确定删除该落地页？" okText="删除" okButtonProps={{ danger: true }} onConfirm={() => remove(r.id, r.name)}>
-                <a style={{ color: SEMANTIC.error }}>删除</a>
+              <Popconfirm title={t.deleteConfirm.title} okText={t.deleteConfirm.ok} okButtonProps={{ danger: true }} onConfirm={() => remove(r.id, r.name)}>
+                <a style={{ color: SEMANTIC.error }}>{t.actions.delete}</a>
               </Popconfirm>
             </Space>
           ) },
@@ -257,8 +261,8 @@ export default function LandingPagesPage() {
         onClose={() => setFeedback(null)}
         source={feedback?.source ?? "general"}
         title={feedback?.title ?? ""}
-        prompt="一句话帮我们改进，只有创始人会看到（选填）。"
-        quickReasons={CHURN_REASONS}
+        prompt={t.feedback.prompt}
+        quickReasons={t.feedback.reasons}
         context={{ pageId: feedback?.pageId, pageName: feedback?.pageName }}
       />
     </Space>

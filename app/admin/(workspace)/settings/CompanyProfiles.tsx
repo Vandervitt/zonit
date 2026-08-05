@@ -12,6 +12,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { Card, Button, Space, Typography, Table, Modal, Form, Input, Switch, Tag, message } from "antd";
 import { ApiRoutes } from "@/lib/constants";
+import { useAdminT } from "@/lib/i18n/admin/context";
 import { formatCompanyInfo } from "@/lib/company-profiles/format";
 
 interface ProfileRow {
@@ -36,6 +37,7 @@ const EMPTY: FormValues = {
 };
 
 export function CompanyProfiles() {
+  const t = useAdminT().settings.companyProfiles;
   const { data, isLoading, mutate } = useSWR<ProfileRow[]>(ApiRoutes.CompanyProfiles, (url: string) =>
     fetch(url).then((r) => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -76,9 +78,9 @@ export function CompanyProfiles() {
       if (!res.ok) throw new Error();
       await mutate();
       setOpen(false);
-      message.success("已保存");
+      message.success(t.saved);
     } catch {
-      message.error("保存失败，请重试");
+      message.error(t.saveFailed);
     } finally {
       setSaving(false);
     }
@@ -89,26 +91,24 @@ export function CompanyProfiles() {
     if (res.status === 409) {
       // 仍被落地页引用：直接删会让那些页的页脚当场少掉公司信息，而它们可能正在投放。
       const json = await res.json().catch(() => null);
-      message.warning(`还有 ${json?.pages ?? ""} 张落地页在用这份主体信息，请先在页面里换成其他主体。`);
+      message.warning(t.inUse(String(json?.pages ?? "")));
       return;
     }
     if (!res.ok) {
-      message.error("删除失败，请重试");
+      message.error(t.deleteFailed);
       return;
     }
     await mutate();
-    message.success("已删除");
+    message.success(t.deleted);
   }
 
   return (
     <Card
-      title="经营主体信息"
-      extra={<Button type="primary" size="small" onClick={openNew}>新增主体</Button>}
+      title={t.title}
+      extra={<Button type="primary" size="small" onClick={openNew}>{t.add}</Button>}
     >
       <Typography.Paragraph type="secondary" style={{ marginTop: 0 }}>
-        落地页页脚展示的公司信息。TikTok 对电商与金融类页面要求页脚展示经营主体与执照，
-        Meta / LinkedIn 也会核对页面身份是否真实。可建多份（不同实体或不同市场各一份），
-        在编辑器的页脚面板里为每张页选用；改动会立即反映到所有引用它的已发布页。
+        {t.description}
       </Typography.Paragraph>
       <Table<ProfileRow>
         rowKey="id"
@@ -116,31 +116,31 @@ export function CompanyProfiles() {
         loading={isLoading}
         pagination={false}
         dataSource={rows}
-        locale={{ emptyText: "还没有主体信息。填一份，页脚与政策页就会展示它。" }}
+        locale={{ emptyText: t.empty }}
         columns={[
           {
-            title: "名称",
+            title: t.columns.name,
             dataIndex: "label",
             render: (label: string, r) => (
               <Space size={6}>
                 <span>{label}</span>
-                {r.is_default && <Tag color="blue">默认</Tag>}
+                {r.is_default && <Tag color="blue">{t.defaultTag}</Tag>}
               </Space>
             ),
           },
           {
-            title: "页脚展示效果",
+            title: t.columns.footerPreview,
             render: (_: unknown, r) => (
               <Typography.Text type="secondary">{formatCompanyInfo(r)}</Typography.Text>
             ),
           },
           {
-            title: "操作",
+            title: t.columns.actions,
             width: 120,
             render: (_: unknown, r) => (
               <Space size="small">
-                <Button type="link" size="small" onClick={() => openEdit(r)}>编辑</Button>
-                <Button type="link" size="small" danger onClick={() => void remove(r)}>删除</Button>
+                <Button type="link" size="small" onClick={() => openEdit(r)}>{t.edit}</Button>
+                <Button type="link" size="small" danger onClick={() => void remove(r)}>{t.delete}</Button>
               </Space>
             ),
           },
@@ -148,35 +148,35 @@ export function CompanyProfiles() {
       />
 
       <Modal
-        title={editing ? "编辑经营主体" : "新增经营主体"}
+        title={editing ? t.editTitle : t.newTitle}
         open={open}
         onCancel={() => setOpen(false)}
         onOk={() => void submit()}
         confirmLoading={saving}
-        okText="保存"
-        cancelText="取消"
+        okText={t.save}
+        cancelText={t.cancel}
       >
         <Form form={form} layout="vertical" initialValues={EMPTY}>
-          <Form.Item name="label" label="内部名称" extra="只在后台用于区分多份主体，不会出现在落地页上">
-            <Input placeholder="如：英国实体" />
+          <Form.Item name="label" label={t.fields.label} extra={t.fields.labelExtra}>
+            <Input placeholder={t.fields.labelPlaceholder} />
           </Form.Item>
           <Form.Item
             name="legal_name"
-            label="法律实体名"
-            rules={[{ required: true, message: "请填写法律实体名" }]}
+            label={t.fields.legalName}
+            rules={[{ required: true, message: t.fields.legalNameRequired }]}
           >
             <Input placeholder="Acme Aesthetics Ltd" />
           </Form.Item>
-          <Form.Item name="address" label="经营地址">
+          <Form.Item name="address" label={t.fields.address}>
             <Input placeholder="12 King Street, London W1" />
           </Form.Item>
-          <Form.Item name="registration_no" label="公司注册号">
+          <Form.Item name="registration_no" label={t.fields.registrationNo}>
             <Input placeholder="12345678" />
           </Form.Item>
-          <Form.Item name="license" label="行业执照 / 许可证编号" extra="医疗、金融、法律等高监管行业按平台要求展示">
+          <Form.Item name="license" label={t.fields.license} extra={t.fields.licenseExtra}>
             <Input placeholder="HCA-2291" />
           </Form.Item>
-          <Form.Item name="is_default" label="设为默认" valuePropName="checked" extra="新建落地页时预选这一份">
+          <Form.Item name="is_default" label={t.fields.isDefault} valuePropName="checked" extra={t.fields.isDefaultExtra}>
             <Switch />
           </Form.Item>
         </Form>

@@ -18,4 +18,23 @@ export const shell = {
   trialTag: (planLabel: string) => `${planLabel} trial`,
   trialUntil: (date: string) => ` · until ${date}`,
   signOut: "Sign out",
+
+  founderContact: {
+    tooltip: "Contact the founder",
+    intro: "Stuck on something? Message the founder directly — reply within 24 hours.",
+    wechat: "WeChat",
+    wechatQrAlt: "Founder's WeChat QR code",
+    noQr: "No QR code configured",
+    wechatId: (id: string) => `WeChat ID: ${id}`,
+    email: "Send an email",
+  },
+
+  feedback: {
+    send: "Send",
+    later: "Maybe later",
+    placeholder: "Anything else you'd like to add (optional)",
+    thanks: "Thank you — we got your feedback 🙏",
+    failed: "Could not submit your feedback. Please try again shortly.",
+    networkFailed: "Could not submit your feedback. Check your connection and try again.",
+  },
 };

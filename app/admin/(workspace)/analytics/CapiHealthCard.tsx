@@ -11,6 +11,8 @@ import { Card, Table, Tag, Space, Typography, Alert, Statistic, Row, Col } from 
 import { ApiRoutes, Routes } from "@/lib/constants";
 import type { CapiProviderHealth, CapiHealthSummary, CapiVerdict } from "@/lib/capi/health";
 import { explainCapiError } from "@/lib/capi/health";
+import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
+import { formatDateTime } from "@/lib/i18n/admin";
 
 interface HealthResponse {
   providers: CapiProviderHealth[];
@@ -19,14 +21,17 @@ interface HealthResponse {
 
 const PROVIDER_LABEL: Record<string, string> = { meta: "Meta", tiktok: "TikTok" };
 
-const VERDICT: Record<CapiVerdict, { color: string; text: string }> = {
-  idle: { color: "default", text: "无回传" },
-  healthy: { color: "green", text: "正常" },
-  degraded: { color: "orange", text: "有失败" },
-  failing: { color: "red", text: "大量失败" },
+/** 判定色。文案在字典的 analytics.capiHealth.verdict（同名 key）。 */
+const VERDICT_COLOR: Record<CapiVerdict, string> = {
+  idle: "default",
+  healthy: "green",
+  degraded: "orange",
+  failing: "red",
 };
 
 export function CapiHealthCard({ rangeQuery }: { rangeQuery: string }) {
+  const t = useAdminT().analytics.capiHealth;
+  const locale = useAdminLocale();
   const { data } = useSWR<HealthResponse>(`${ApiRoutes.CapiHealth}?${rangeQuery}`);
   const summary = data?.summary;
   const providers = data?.providers ?? [];
@@ -39,33 +44,32 @@ export function CapiHealthCard({ rangeQuery }: { rangeQuery: string }) {
 
   return (
     <Card
-      title="服务端回传（CAPI）"
-      extra={<Tag color={VERDICT[verdict].color}>{VERDICT[verdict].text}</Tag>}
+      title={t.title}
+      extra={<Tag color={VERDICT_COLOR[verdict]}>{t.verdict[verdict]}</Tag>}
     >
       {verdict === "idle" ? (
         <Typography.Text type="secondary">
-          该区间没有服务端回传记录。在<Link href={Routes.Settings}>设置</Link>里配置账号级凭据后，
-          表单转化会从服务端直接送回平台，补上被拦截插件吃掉的那部分。
+          {t.idleHint[0]}<Link href={Routes.Settings}>{t.settingsLink}</Link>{t.idleHint[1]}
         </Typography.Text>
       ) : (
         <Space direction="vertical" size={14} style={{ width: "100%" }}>
           <Row gutter={16}>
-            <Col xs={12} sm={6}><Statistic title="已送达" value={summary!.sent} /></Col>
-            <Col xs={12} sm={6}><Statistic title="重试中" value={summary!.pending} /></Col>
-            <Col xs={12} sm={6}><Statistic title="失败" value={summary!.failed} valueStyle={summary!.failed > 0 ? { color: "#cf1322" } : undefined} /></Col>
-            <Col xs={12} sm={6}><Statistic title="送达率" value={summary!.deliveryRate * 100} precision={1} suffix="%" /></Col>
+            <Col xs={12} sm={6}><Statistic title={t.sent} value={summary!.sent} /></Col>
+            <Col xs={12} sm={6}><Statistic title={t.pending} value={summary!.pending} /></Col>
+            <Col xs={12} sm={6}><Statistic title={t.failed} value={summary!.failed} valueStyle={summary!.failed > 0 ? { color: "#cf1322" } : undefined} /></Col>
+            <Col xs={12} sm={6}><Statistic title={t.deliveryRate} value={summary!.deliveryRate * 100} precision={1} suffix="%" /></Col>
           </Row>
 
           {explained?.raw && (
             <Alert
               type={verdict === "failing" ? "error" : "warning"}
               showIcon
-              message={`${PROVIDER_LABEL[explained.provider] ?? explained.provider} 最近一次失败`}
+              message={t.lastFailure(PROVIDER_LABEL[explained.provider] ?? explained.provider)}
               description={
                 <Space direction="vertical" size={2}>
                   {explained.hint && <span>{explained.hint}</span>}
                   <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    平台返回：<Typography.Text code>{explained.raw}</Typography.Text>
+                    {t.platformReturned}<Typography.Text code>{explained.raw}</Typography.Text>
                   </Typography.Text>
                 </Space>
               }
@@ -78,20 +82,19 @@ export function CapiHealthCard({ rangeQuery }: { rangeQuery: string }) {
             pagination={false}
             dataSource={providers}
             columns={[
-              { title: "平台", dataIndex: "provider", width: 120, render: (p: string) => PROVIDER_LABEL[p] ?? p },
-              { title: "已送达", dataIndex: "sent", width: 100 },
-              { title: "重试中", dataIndex: "pending", width: 100 },
-              { title: "失败", dataIndex: "failed", width: 90 },
+              { title: t.columns.provider, dataIndex: "provider", width: 120, render: (p: string) => PROVIDER_LABEL[p] ?? p },
+              { title: t.columns.sent, dataIndex: "sent", width: 100 },
+              { title: t.columns.pending, dataIndex: "pending", width: 100 },
+              { title: t.columns.failed, dataIndex: "failed", width: 90 },
               {
-                title: "最近失败时间", dataIndex: "lastErrorAt",
-                render: (t: string | null) => (t ? new Date(t).toLocaleString() : "—"),
+                title: t.columns.lastErrorAt, dataIndex: "lastErrorAt",
+                render: (value: string | null) => (value ? formatDateTime(value, locale) : "—"),
               },
             ]}
           />
 
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            送达率 = 已送达 /（已送达 + 失败）。重试中的事件尚未定局，不计入分母；
-            连续失败到上限（5 次）才计为失败。
+            {t.note}
           </Typography.Text>
         </Space>
       )}

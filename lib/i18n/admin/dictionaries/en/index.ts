@@ -5,10 +5,17 @@
 // components/marketing/LocaleSwitcher.tsx 是客户端组件且直接 import getDictionary，
 // 合并会把约 2700 行后台文案 ×2 语言打进营销站首页的客户端 bundle，
 // 而首页 LCP 是专门优化过的（PR#74/#75）。两套字典互不 import。
+import { analytics } from "./analytics";
+import { billing } from "./billing";
 import { common } from "./common";
 import { shell } from "./shell";
+import { domains } from "./domains";
+import { leads } from "./leads";
+import { media } from "./media";
+import { overview } from "./overview";
+import { pages } from "./pages";
 import { settings } from "./settings";
 
-export const en = { common, shell, settings };
+export const en = { analytics, billing, common, domains, leads, media, overview, pages, shell, settings };
 
 export type AdminDictionary = typeof en;

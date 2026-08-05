@@ -10,6 +10,9 @@ import { MAX_NOTE_LENGTH, MAX_TAGS } from "@/lib/leads/follow-up";
 import { contactLinks, type ContactKind } from "@/lib/leads/contact-links";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { LoadErrorAlert } from "../_shell/LoadErrorAlert";
+import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
+import { formatDateTime } from "@/lib/i18n/admin";
+import type { AdminDictionary } from "@/lib/i18n/admin";
 
 interface LeadRow {
   id: string;
@@ -36,30 +39,35 @@ interface LeadRow {
 }
 
 /**
- * 通知送达状态。「关」与「—」必须能区分：前者是租户自己关了通知，
- * 后者是这条线索早于本功能上线，都不等于「发失败了」。
+ * 通知送达状态的颜色。文案在字典的 leads.notify——「关」与「—」必须能区分：
+ * 前者是租户自己关了通知，后者是这条线索早于本功能上线，都不等于「发失败了」。
  */
-const NOTIFY_TAG: Record<string, { color: string; text: string }> = {
-  sent: { color: "green", text: "已发送" },
-  failed: { color: "red", text: "失败" },
-  pending: { color: "blue", text: "投递中" },
-  off: { color: "default", text: "关" },
+const NOTIFY_COLOR: Record<string, string> = {
+  sent: "green",
+  failed: "red",
+  pending: "blue",
+  off: "default",
 };
 
+type NotifyStatusKey = keyof AdminDictionary["leads"]["notify"];
+
 function NotifyTag({ label, status, error }: { label: string; status: string | null; error?: string | null }) {
+  const t = useAdminT().leads.notify;
   if (!status) return null;
-  const meta = NOTIFY_TAG[status] ?? { color: "default", text: status };
-  const tag = <Tag color={meta.color}>{label} {meta.text}</Tag>;
+  // 未知状态原样显示状态码：与其编一个可能不准的说法，不如让用户看见真实取值。
+  const text = t[status as NotifyStatusKey] ?? status;
+  const tag = <Tag color={NOTIFY_COLOR[status] ?? "default"}>{label} {text}</Tag>;
   return error ? <Tooltip title={error}>{tag}</Tooltip> : tag;
 }
 
 function NotifyCell({ row }: { row: LeadRow }) {
+  const t = useAdminT().leads.notify;
   const hasAny = row.notify_email || row.notify_webhook_status;
   if (!hasAny) return <Typography.Text type="secondary">—</Typography.Text>;
   return (
     <Space size={4} wrap>
-      <NotifyTag label="邮件" status={row.notify_email} error={row.notify_email_error} />
-      <NotifyTag label="Webhook" status={row.notify_webhook_status} error={row.notify_webhook_error} />
+      <NotifyTag label={t.email} status={row.notify_email} error={row.notify_email_error} />
+      <NotifyTag label={t.webhook} status={row.notify_webhook_status} error={row.notify_webhook_error} />
     </Space>
   );
 }
@@ -103,33 +111,31 @@ function ContactCell({ row, onContacted }: { row: LeadRow; onContacted: () => vo
   );
 }
 
-/** 展开行里的完整归因：列表列只放得下渠道与广告系列，对账要的粒度在这里。 */
-const ATTRIBUTION_FIELDS: { key: keyof LeadRow; label: string }[] = [
-  { key: "utm_source", label: "来源 utm_source" },
-  { key: "utm_medium", label: "媒介 utm_medium" },
-  { key: "utm_campaign", label: "广告系列 utm_campaign" },
-  { key: "utm_content", label: "广告 / 创意 utm_content" },
-  { key: "utm_term", label: "关键词 utm_term" },
-  { key: "gclid", label: "Google 点击 ID" },
-  { key: "fbclid", label: "Meta 点击 ID" },
-  { key: "ttclid", label: "TikTok 点击 ID" },
-];
+/**
+ * 展开行里的完整归因：列表列只放得下渠道与广告系列，对账要的粒度在这里。
+ * 本数组只定字段与展示顺序，标签文案在字典的 leads.attribution（同名 key）。
+ */
+const ATTRIBUTION_FIELDS = [
+  "utm_source", "utm_medium", "utm_campaign", "utm_content",
+  "utm_term", "gclid", "fbclid", "ttclid",
+] as const satisfies readonly (keyof LeadRow)[];
 
 function AttributionDetail({ row }: { row: LeadRow }) {
-  const present = ATTRIBUTION_FIELDS.filter((f) => row[f.key]);
+  const t = useAdminT().leads.attribution;
+  const present = ATTRIBUTION_FIELDS.filter((key) => row[key]);
   if (present.length === 0) {
     return (
       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-        这条线索没带任何 UTM 或点击 ID——广告链接上没加参数时就会这样。
+        {t.none}
       </Typography.Text>
     );
   }
   return (
     <Space direction="vertical" size={2}>
-      {present.map((f) => (
-        <span key={f.key} style={{ fontSize: 12 }}>
-          <Typography.Text type="secondary">{f.label}：</Typography.Text>
-          <Typography.Text copyable={{ text: String(row[f.key]) }}>{String(row[f.key])}</Typography.Text>
+      {present.map((key) => (
+        <span key={key} style={{ fontSize: 12 }}>
+          <Typography.Text type="secondary">{t[key]}：</Typography.Text>
+          <Typography.Text copyable={{ text: String(row[key]) }}>{String(row[key])}</Typography.Text>
         </span>
       ))}
     </Space>
@@ -167,6 +173,7 @@ function FollowUpEditor({
   tagOptions: string[];
   onSave: (body: Record<string, unknown>) => Promise<void>;
 }) {
+  const t = useAdminT().leads.followUp;
   const [note, setNote] = useState(row.note ?? "");
   const [tags, setTags] = useState<string[]>(row.tags);
   const [saving, setSaving] = useState(false);
@@ -191,22 +198,22 @@ function FollowUpEditor({
         value={tags}
         onChange={setTags}
         options={tagOptions.map((t) => ({ value: t, label: t }))}
-        placeholder="加标签（回车新建，如「已报价」「下周再聊」）"
-        aria-label="线索标签"
+        placeholder={t.tagsPlaceholder}
+        aria-label={t.tagsAria}
         style={{ width: "100%" }}
         maxTagCount={MAX_TAGS}
       />
       <Input.TextArea
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="跟进备注：这次沟通说了什么、下一步做什么"
-        aria-label="跟进备注"
+        placeholder={t.notePlaceholder}
+        aria-label={t.noteAria}
         maxLength={MAX_NOTE_LENGTH}
         autoSize={{ minRows: 2, maxRows: 6 }}
         showCount
       />
       <Button type="primary" size="small" disabled={!dirty} loading={saving} onClick={save}>
-        保存跟进
+        {t.save}
       </Button>
     </Space>
   );
@@ -219,6 +226,8 @@ interface LeadsResponse { rows: LeadRow[]; total: number }
 
 export default function LeadsPage() {
   const { message } = App.useApp();
+  const t = useAdminT().leads;
+  const locale = useAdminLocale();
   const [pageId, setPageId] = useState<string>("all");
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [tag, setTag] = useState<string | undefined>();
@@ -239,7 +248,7 @@ export default function LeadsPage() {
   const rows = data?.rows ?? [];
 
   const pageOptions = [
-    { value: "all", label: "全部落地页" },
+    { value: "all", label: t.filters.allPages },
     ...(pages.data ?? []).map((p) => ({ value: p.id, label: p.name })),
   ];
 
@@ -260,7 +269,7 @@ export default function LeadsPage() {
   }
   async function remove(id: string) {
     await fetch(apiLeadPath(id), { method: "DELETE" });
-    message.success("已删除");
+    message.success(t.toast.deleted);
     void mutate();
   }
 
@@ -269,7 +278,7 @@ export default function LeadsPage() {
     const res = await fetch(apiLeadPath(id), {
       method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body),
     });
-    if (!res.ok) { message.error("保存失败，请重试"); return; }
+    if (!res.ok) { message.error(t.toast.saveFailed); return; }
     void mutate();
     // 标签集合可能因此新增或消失，筛选器候选跟着刷新
     if ("tags" in body) void tags.mutate();
@@ -277,50 +286,50 @@ export default function LeadsPage() {
 
   async function setArchivedFor(r: LeadRow, next: boolean) {
     await patchFollowUp(r.id, { archived: next });
-    message.success(next ? "已归档" : "已取消归档");
+    message.success(next ? t.toast.archived : t.toast.unarchived);
   }
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-        <Typography.Title level={3} style={{ margin: 0 }}>线索</Typography.Title>
+        <Typography.Title level={3} style={{ margin: 0 }}>{t.title}</Typography.Title>
         <Space wrap>
           <Select
             value={pageId}
             onChange={(v) => changeFilter(() => setPageId(v))}
             options={pageOptions}
             style={{ minWidth: 180 }}
-            aria-label="按落地页筛选"
+            aria-label={t.filters.byPageAria}
           />
           <Segmented
             value={unreadOnly ? "unread" : "all"}
             onChange={(v) => changeFilter(() => setUnreadOnly(v === "unread"))}
-            options={[{ label: "全部", value: "all" }, { label: "只看未读", value: "unread" }]}
+            options={[{ label: t.filters.all, value: "all" }, { label: t.filters.unreadOnly, value: "unread" }]}
           />
           <Select
             value={tag}
             onChange={(v) => changeFilter(() => setTag(v))}
             options={(tags.data ?? []).map((t) => ({ value: t, label: t }))}
-            placeholder="按标签筛选"
+            placeholder={t.filters.byTagPlaceholder}
             allowClear
             style={{ minWidth: 150 }}
-            aria-label="按标签筛选"
+            aria-label={t.filters.byTagAria}
           />
           {/* 归档区是独立视图：把已处理的线索混进默认列表，归档这个动作就没意义了 */}
           <Segmented
             value={archived ? "archived" : "active"}
             onChange={(v) => changeFilter(() => setArchived(v === "archived"))}
-            options={[{ label: "进行中", value: "active" }, { label: "已归档", value: "archived" }]}
+            options={[{ label: t.filters.active, value: "active" }, { label: t.filters.archived, value: "archived" }]}
           />
           <Button
             href={apiLeadsExportPath({ pageId: pageId === "all" ? undefined : pageId, unreadOnly, tag, archived })}
             target="_blank"
           >
-            导出 CSV
+            {t.exportCsv}
           </Button>
         </Space>
       </div>
-      <LoadErrorAlert error={error} onRetry={() => void mutate()} label="线索列表" />
+      <LoadErrorAlert error={error} onRetry={() => void mutate()} label={t.loadErrorLabel} />
       <Table<LeadRow>
         rowKey="id"
         loading={isLoading}
@@ -336,11 +345,9 @@ export default function LeadsPage() {
           total: data?.total ?? 0,
           showSizeChanger: false,
           onChange: setPage,
-          showTotal: (t) => `共 ${t} 条`,
+          showTotal: (n) => t.total(n),
         }}
-        locale={{ emptyText: unreadOnly || pageId !== "all"
-          ? "当前筛选条件下没有线索"
-          : "还没有线索。访客通过落地页表单留资后会显示在这里" }}
+        locale={{ emptyText: unreadOnly || pageId !== "all" ? t.empty.filtered : t.empty.none }}
         expandable={{
           expandedRowRender: (r) => (
             <Space direction="vertical" size={10}>
@@ -361,21 +368,23 @@ export default function LeadsPage() {
         columns={[
           // 这两列必须给显式宽度：页面名是「这条线索来自哪」的唯一线索，
           // 联系方式列要放得下两三个渠道按钮。
-          { title: "页面", dataIndex: "page_name", width: 180, ellipsis: true },
-          { title: "联系方式", width: 240, render: (_: unknown, r: LeadRow) => <ContactCell row={r} onContacted={() => void markContacted(r)} /> },
+          { title: t.columns.page, dataIndex: "page_name", width: 180, ellipsis: true },
+          { title: t.columns.contact, width: 240, render: (_: unknown, r: LeadRow) => <ContactCell row={r} onContacted={() => void markContacted(r)} /> },
           // 列表只给渠道 / 来源 / 广告系列三层；创意、关键词与点击 ID 在展开行里。
-          { title: "来源", width: 200, ellipsis: true,
+          { title: t.columns.source, width: 200, ellipsis: true,
             render: (_: unknown, r: LeadRow) => [r.channel, r.utm_source, r.utm_campaign].filter(Boolean).join(" / ") || "—" },
-          { title: "标签 / 备注", width: 220, render: (_: unknown, r: LeadRow) => <FollowUpCell row={r} /> },
-          { title: "通知", width: 160, render: (_: unknown, r: LeadRow) => <NotifyCell row={r} /> },
-          { title: "时间", dataIndex: "created_at", width: 180, render: (t: string) => new Date(t).toLocaleString() },
-          { title: "状态", dataIndex: "is_read", width: 90, render: (v: boolean) => <Tag color={v ? "default" : "blue"}>{v ? "已读" : "未读"}</Tag> },
-          { title: "操作", width: 180, render: (_: unknown, r: LeadRow) => (
+          { title: t.columns.followUp, width: 220, render: (_: unknown, r: LeadRow) => <FollowUpCell row={r} /> },
+          { title: t.columns.notify, width: 160, render: (_: unknown, r: LeadRow) => <NotifyCell row={r} /> },
+          { title: t.columns.time, dataIndex: "created_at", width: 180,
+            render: (value: string) => formatDateTime(value, locale) },
+          { title: t.columns.status, dataIndex: "is_read", width: 90,
+            render: (v: boolean) => <Tag color={v ? "default" : "blue"}>{v ? t.read.read : t.read.unread}</Tag> },
+          { title: t.columns.actions, width: 180, render: (_: unknown, r: LeadRow) => (
             <Space size="middle">
-              <a onClick={() => setRead(r.id, !r.is_read)}>{r.is_read ? "标未读" : "标已读"}</a>
-              <a onClick={() => setArchivedFor(r, !r.archived_at)}>{r.archived_at ? "取消归档" : "归档"}</a>
-              <Popconfirm title="确定删除该线索？" okText="删除" okButtonProps={{ danger: true }} onConfirm={() => remove(r.id)}>
-                <a style={{ color: SEMANTIC.error }}>删除</a>
+              <a onClick={() => setRead(r.id, !r.is_read)}>{r.is_read ? t.actions.markUnread : t.actions.markRead}</a>
+              <a onClick={() => setArchivedFor(r, !r.archived_at)}>{r.archived_at ? t.actions.unarchive : t.actions.archive}</a>
+              <Popconfirm title={t.deleteConfirm.title} okText={t.deleteConfirm.ok} okButtonProps={{ danger: true }} onConfirm={() => remove(r.id)}>
+                <a style={{ color: SEMANTIC.error }}>{t.actions.delete}</a>
               </Popconfirm>
             </Space>
           ) },

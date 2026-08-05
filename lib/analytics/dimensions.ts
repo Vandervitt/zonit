@@ -22,7 +22,13 @@ export type AttributionDimension = keyof typeof ATTRIBUTION_DIMENSIONS;
 /** 默认看广告系列级：投放侧最常问的是「哪条广告带来的线索」。 */
 export const DEFAULT_DIMENSION: AttributionDimension = "campaign";
 
-/** 广告链接没带该维度时的归组名。与真实值 "unknown" 区分，故用中文括号形式。 */
+/**
+ * 广告链接没带该维度时的归组名。与真实值 "unknown" 区分，故用括号形式。
+ *
+ * ⚠️ 这是**写进 SQL 的哨兵值**（COALESCE 的兜底参数），会作为数据落在 AttributionRow.value 上，
+ * 因此不能随界面语言变化——改了它，历史分组就对不上了。
+ * 展示时由后台字典的 analytics.attribution.unlabeled 按语言替换。
+ */
 export const UNLABELED = "(未标注)";
 
 export function isAttributionDimension(v: unknown): v is AttributionDimension {
