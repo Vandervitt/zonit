@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { fontBody, fontHead, fontMono } from "@/lib/fonts";
+import { fonts } from "@/lib/fonts";
 import { LegalPage } from "@/components/marketing/LegalPage";
 import { Routes } from "@/lib/constants";
 import { marketingMetadata } from "@/lib/seo/site";
 import { getLegal } from "@/components/marketing/legal-content";
 import type { Locale } from "@/lib/i18n/config";
 
-const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
 
 type LegalKind = "privacy" | "terms";
 

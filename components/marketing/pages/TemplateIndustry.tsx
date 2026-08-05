@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { fontBody, fontHead, fontMono } from "@/lib/fonts";
+import { fonts } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { conversionLabel, archetypeLabel } from "@/landing-editor/samples/templateFilter";
 import { Routes, templateDetailPath, templateIndustryPath, guideDetailPath } from "@/lib/constants";
@@ -26,7 +26,6 @@ import { buildUnsplashImageSources } from "@/lib/images/unsplash";
 import { templateFaqJsonLd } from "@/lib/seo/template-content";
 import type { Locale } from "@/lib/i18n/config";
 
-const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
 
 export function industryStaticParams() {
   return industryCategories().map((category) => ({ category }));

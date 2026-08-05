@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fontBody, fontHead, fontMono } from "@/lib/fonts";
+import { fonts } from "@/lib/fonts";
 import MarketingHome from "@/components/marketing/MarketingHome";
 import { Routes } from "@/lib/constants";
 import { marketingMetadata, siteStructuredData } from "@/lib/seo/site";
@@ -41,11 +41,7 @@ export async function HomeView({ locale }: { locale: Locale }) {
         cnyRate={cnyRate}
         stats={TEMPLATE_STATS}
         industries={templateIndustries()}
-        fonts={{
-          display: fontHead.className,
-          body: fontBody.className,
-          mono: fontMono.className,
-        }}
+        fonts={fonts}
       />
     </>
   );

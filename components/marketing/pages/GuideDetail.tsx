@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { fontBody, fontHead, fontMono } from "@/lib/fonts";
+import { fonts } from "@/lib/fonts";
 import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { Routes, guideDetailPath, templateIndustryPath } from "@/lib/constants";
 import { industryLabel } from "@/lib/seo/industry-content";
@@ -15,7 +15,6 @@ import { localePath } from "@/lib/i18n/routes";
 import { fillCounts } from "@/lib/templates/stats";
 import { htmlLang, type Locale } from "@/lib/i18n/config";
 
-const fonts = { display: fontHead.className, body: fontBody.className, mono: fontMono.className };
 
 export function guideStaticParams() {
   return GUIDE_SLUGS.map((slug) => ({ slug }));
