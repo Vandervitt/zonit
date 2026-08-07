@@ -23,6 +23,8 @@ export const guides = {
     ctaDesc:
       "从覆盖 {industries} 个行业的 {templates} 套获客模板起步，改内容、绑域名、配好归因，几分钟发布你自己的落地页。",
     ctaAntiBan: "了解反同质化怎么做",
+    // WhatsApp 留资页那篇专用：读完方法论的人下一步该看产品怎么做这件事。
+    ctaWhatsApp: "看看这里怎么做 WhatsApp 页",
     ctaIndustryTemplates: "查看{industry}模板",
     ctaTemplates: "浏览模板库",
     ctaRegister: "免费开始",

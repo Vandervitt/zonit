@@ -34,17 +34,27 @@ describe("templateIndustries", () => {
   });
 });
 
+const STATS = { templates: 48, industries: 12, whatsappTemplates: 41, whatsappIndustries: 11 };
+
 describe("fillTemplateCounts", () => {
   it("替换两种占位符，且支持同一占位符多次出现", () => {
-    const out = fillTemplateCounts("{templates} 套 / {industries} 行业 / 再来一次 {templates}", {
-      templates: 48,
-      industries: 12,
-    });
+    const out = fillTemplateCounts(
+      "{templates} 套 / {industries} 行业 / 再来一次 {templates}",
+      STATS,
+    );
     expect(out).toBe("48 套 / 12 行业 / 再来一次 48");
   });
 
+  it("替换 WhatsApp 口径占位符", () => {
+    const out = fillTemplateCounts(
+      "{whatsappTemplates} 套覆盖 {whatsappIndustries} 个行业，全库共 {templates} 套",
+      STATS,
+    );
+    expect(out).toBe("41 套覆盖 11 个行业，全库共 48 套");
+  });
+
   it("无占位符时原样返回", () => {
-    expect(fillTemplateCounts("没有占位符", { templates: 48, industries: 12 })).toBe("没有占位符");
+    expect(fillTemplateCounts("没有占位符", STATS)).toBe("没有占位符");
   });
 
   it("fillCounts 使用注册表真实口径", () => {

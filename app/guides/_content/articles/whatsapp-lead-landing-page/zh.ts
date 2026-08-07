@@ -6,6 +6,8 @@ export const whatsappLeadLandingPage: GuideArticle = {
   description:
     "海外获客用 WhatsApp 承接线索为什么转化更高？一篇讲清高转化 WhatsApp 落地页的结构、从模板到发布的完整流程，以及最常见的 5 个错误。",
   keywords: ["WhatsApp 获客", "WhatsApp 落地页", "海外获客落地页", "独立站落地页"],
+  // 与 /whatsapp-landing-page 产品页配对：本文答「怎么做」，产品页答「在这里怎么做」。
+  ctaTarget: "whatsapp",
   datePublished: "2026-07-26",
   intro:
     "在很多海外市场，WhatsApp 是比表单更自然的沟通方式——访客点一下就能开聊，线索门槛低、回复率高。这篇讲清一个高转化 WhatsApp 获客落地页应该怎么搭，以及从模板到发布的完整流程。",

@@ -99,6 +99,21 @@ export function GuideDetailView({ slug, locale }: { slug: string; locale: Locale
     .filter((x) => x.slug !== g.slug)
     .slice(0, 2);
 
+  // 文末两枚 CTA 的落点。ctaTarget 显式覆盖优先于 industry，二者互斥
+  // （由 lib/seo/guides-industry.test.ts 守护），所以查表不会撞车。
+  const CTA_OVERRIDES = {
+    "anti-ban": { href: Routes.AntiBan, label: t.ctaAntiBan },
+    whatsapp: { href: Routes.WhatsAppLanding, label: t.ctaWhatsApp },
+  } as const;
+  const mainCta = g.ctaTarget
+    ? CTA_OVERRIDES[g.ctaTarget]
+    : g.industry
+      ? {
+          href: templateIndustryPath(g.industry),
+          label: t.ctaIndustryTemplates.replace("{industry}", industryLabel(g.industry, locale)),
+        }
+      : { href: Routes.Templates, label: t.ctaTemplates };
+
   return (
     <div className={`min-h-screen bg-background ${fonts.body}`}>
       <JsonLd data={articleJsonLd(g, locale)} />
@@ -130,24 +145,14 @@ export function GuideDetailView({ slug, locale }: { slug: string; locale: Locale
           <h2 className={`text-xl font-bold tracking-tight text-foreground ${fonts.display}`}>{t.ctaTitle}</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">{fillCounts(t.ctaDesc)}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            {/* 有所属行业时，主 CTA 指向该行业页而不是通用模板库——读完行业文的人
-                要找的是这个行业的模板，把他丢进 52 套的总列表是白白折损一次转化。 */}
+            {/* 主 CTA 落点：ctaTarget 显式覆盖优先，其次按所属行业指向该行业页，
+                最后才回落通用模板库——读完行业文的人要找的是这个行业的模板，
+                把他丢进全库总列表是白白折损一次转化。 */}
             <Link
-              href={localePath(
-                locale,
-                g.ctaTarget === "anti-ban"
-                  ? Routes.AntiBan
-                  : g.industry
-                    ? templateIndustryPath(g.industry)
-                    : Routes.Templates,
-              )}
+              href={localePath(locale, mainCta.href)}
               className="rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-5 py-2.5 text-sm font-medium text-white shadow-sm shadow-aqua-600/25 transition-all hover:brightness-105"
             >
-              {g.ctaTarget === "anti-ban"
-                ? t.ctaAntiBan
-                : g.industry
-                  ? t.ctaIndustryTemplates.replace("{industry}", industryLabel(g.industry, locale))
-                  : t.ctaTemplates}
+              {mainCta.label}
             </Link>
             {/* 合规簇（ctaTarget: anti-ban）的次 CTA 换成自检器：读完「审核会盯什么」
                 的人，下一步最自然的动作是「那我那张页现在什么样」，而不是注册开户。

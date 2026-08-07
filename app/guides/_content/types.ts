@@ -35,8 +35,12 @@ export interface GuideArticle {
    * 文末主 CTA 落点覆盖。缺省行为：有 industry 则指向该行业页，否则指向模板库。
    * 投放合规簇（簇 A）面向的是投手与代运营，他们读完要找的是反同质化能力，
    * 把他们丢进模板库是折损一次转化——故这类文章显式指向 /anti-ban。
+   *
+   * "whatsapp" 用于 WhatsApp 留资页那篇：它与 /whatsapp-landing-page 产品页
+   * 是一组（信息型长文 ↔ 产品页），读完方法论的人下一步该看产品怎么做，
+   * 而不是掉进通用模板库。两页互链的另一端见该产品页的 GuideLink 区块。
    */
-  ctaTarget?: "anti-ban";
+  ctaTarget?: "anti-ban" | "whatsapp";
   /** ISO 日期，用于 Article 结构化数据与展示 */
   datePublished: string;
   dateModified?: string;

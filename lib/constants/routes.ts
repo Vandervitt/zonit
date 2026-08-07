@@ -9,6 +9,7 @@ export enum Routes {
   Billing = '/admin/billing',
   Pricing = '/pricing',
   AntiBan = '/anti-ban',            // 反同质化叙事页（公开）
+  WhatsAppLanding = '/whatsapp-landing-page', // WhatsApp 落地页产品页（公开，承接商业意图查询）
   Templates = '/templates',         // 公开模板画廊（SEO 获客页）
   Guides = '/guides',               // 公开获客指南（SEO 内容营销）
   PageCheck = '/tools/landing-page-check', // 落地页自检器（公开工具，匿名可用）
