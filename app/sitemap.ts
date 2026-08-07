@@ -6,6 +6,7 @@ import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { GUIDE_SLUGS, getGuide } from "@/app/guides/_content";
 import { templateDetailPath, guideDetailPath, templateIndustryPath } from "@/lib/constants";
 import { marketingEntries, localizedDetailEntries } from "@/lib/seo/sitemap-entries";
+import { SITE_URL } from "@/lib/seo/site";
 import { indexableIndustryCategories } from "@/lib/templates/industries";
 
 // 多租户 sitemap：租户自有域名输出其唯一已发布落地页（根路径）；
@@ -13,7 +14,10 @@ import { indexableIndustryCategories } from "@/lib/templates/industries";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const hostname = hostnameOf((await headers()).get("host"));
   if (!isCustomDomain(hostname)) {
-    const base = `https://${hostname}`;
+    // 平台主域一律用 SITE_URL，不跟请求 host 走：canonical / OG 都由 SITE_URL 派生，
+    // 这里若改用 hostname，爬虫从 www（或任何 app 子域）进来就会拿到一份与 canonical
+    // 声明不一致的 URL 列表，两边互指形成规范化死结。见 app/sitemap.test.ts 顶部注释。
+    const base = SITE_URL;
     const now = new Date();
     const marketing = marketingEntries(base, now);
     // 模板详情页已双语（PR 3），每套出 en/zh 两条并互挂 hreflang。
