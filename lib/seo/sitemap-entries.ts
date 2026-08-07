@@ -11,6 +11,8 @@ const PRIORITY: Record<string, number> = {
   [Routes.Templates]: 0.9,
   [Routes.Pricing]: 0.8,
   [Routes.Guides]: 0.8,
+  // 承接商业意图查询的产品页，权重与模板库同级、高于 anti-ban 这类叙事页。
+  [Routes.WhatsAppLanding]: 0.9,
   [Routes.AntiBan]: 0.6,
 };
 

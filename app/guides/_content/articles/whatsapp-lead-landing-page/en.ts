@@ -6,6 +6,8 @@ export const whatsappLeadLandingPage: GuideArticle = {
   description:
     "Why does capturing leads over WhatsApp convert better in overseas markets? This covers the structure of a high-converting WhatsApp landing page, the full path from template to published, and the five mistakes people make most.",
   keywords: ["WhatsApp lead generation", "WhatsApp landing page", "overseas lead gen", "DTC landing page"],
+  // 与 /whatsapp-landing-page 产品页配对：本文答「怎么做」，产品页答「在这里怎么做」。
+  ctaTarget: "whatsapp",
   datePublished: "2026-07-26",
   intro:
     "In many overseas markets WhatsApp is a more natural way to talk than a form — one tap and the conversation starts, so the barrier is low and reply rates are high. This covers how a high-converting WhatsApp capture page should be built, and the full path from template to published.",

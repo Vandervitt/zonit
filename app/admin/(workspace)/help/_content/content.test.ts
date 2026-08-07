@@ -75,7 +75,7 @@ describe("帮助中心文案守卫", () => {
 });
 
 describe("fillChapterCounts", () => {
-  const stats = { templates: 48, industries: 12 };
+  const stats = { templates: 48, industries: 12, whatsappTemplates: 41, whatsappIndustries: 11 };
 
   it("替换后全库不再残留任何占位符", () => {
     const filled = HELP_CHAPTERS.map((c) => fillChapterCounts(c, stats));

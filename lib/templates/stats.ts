@@ -12,9 +12,13 @@ import { fillTemplateCounts, type TemplateStats } from "./counts";
 
 export type { TemplateStats };
 
+const WHATSAPP_TEMPLATES = TEMPLATES.filter((t) => t.tags.conversion.includes("whatsapp"));
+
 export const TEMPLATE_STATS: TemplateStats = {
   templates: TEMPLATES.length,
   industries: new Set(TEMPLATES.map((t) => t.tags.category)).size,
+  whatsappTemplates: WHATSAPP_TEMPLATES.length,
+  whatsappIndustries: new Set(WHATSAPP_TEMPLATES.map((t) => t.tags.category)).size,
 };
 
 /** 按注册表真实口径替换 `{templates}` / `{industries}` 占位符。 */
