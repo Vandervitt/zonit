@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 import { hostnameOf, isCustomDomain } from "@/lib/host";
 import { listPublishedRoutes } from "@/lib/domains-db";
+import { RSC_PREFETCH_DISALLOW } from "@/lib/seo/rsc";
 
 // 按访问 host 动态生成：读 header 使其成为每请求动态路由（绕过默认缓存）。
 export default async function robots(): Promise<MetadataRoute.Robots> {
@@ -17,16 +18,20 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     }
     // 逐页判定：只把 noindex 的那几个路径 disallow，其余放行。
     // 此前按「自有域单页」一刀切禁整站，多路径下会因一张 noindex 页误伤其余页。
-    const disallow = routes.filter((r) => r.noindex).map((r) => r.path);
+    // RSC 预取 URL 一并屏蔽——租户域跑的是同一套 App Router，同样会被稀释抓取预算。
+    const disallow = [
+      ...routes.filter((r) => r.noindex).map((r) => r.path),
+      RSC_PREFETCH_DISALLOW,
+    ];
     return {
-      rules: { userAgent: "*", allow: "/", ...(disallow.length ? { disallow } : {}) },
+      rules: { userAgent: "*", allow: "/", disallow },
       sitemap: `https://${hostname}/sitemap.xml`,
     };
   }
 
   // 平台主域：放开营销面（/、/pricing、/templates、/anti-ban），禁后台与接口；
   // 显式欢迎生成式引擎/AI 爬虫（GEO），使营销内容可被 AI 摘要抓取与引用。
-  const disallow = ["/admin", "/super-admin", "/api"];
+  const disallow = ["/admin", "/super-admin", "/api", RSC_PREFETCH_DISALLOW];
   return {
     rules: [
       { userAgent: "*", allow: "/", disallow },
