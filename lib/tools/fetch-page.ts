@@ -11,6 +11,7 @@
 // 我们既看不到中间跳，也无法对每一跳做闸门校验——那等于只校验了第一个 URL。
 
 import { Agent, request as undiciRequest } from "undici";
+import { gunzipSync, inflateSync, brotliDecompressSync } from "node:zlib";
 import { guardUrl as defaultGuard, type GuardResult, type UrlRejection } from "./url-guard";
 
 export type FetchRejection =
@@ -139,6 +140,37 @@ export async function fetchPageSafely(
 }
 
 /**
+ * 按 `content-encoding` 解压响应正文。
+ *
+ * ⚠️ 这一步不是可选的。`undici.request` 是低层 API，**不会自动解压**，
+ * 而站点即使在请求未声明 `accept-encoding` 时也可能返回 gzip
+ * （originalcontour.com 实测如此）。漏掉解压不报错，只是让正文变成乱码，
+ * 于是所有基于内容的检查项静默翻转成「缺失」——工具会当面告诉对方
+ * 「你的页面没有隐私政策」，而那是假的。回归用例见 fetch-page.test.ts。
+ *
+ * 两条自我保护：
+ *   · 解压失败退回原始字节（宁可内容可疑，也不要整次检查挂掉）
+ *   · `maxOutputLength` 兜住压缩炸弹——2 MB 的 gzip 能膨胀到几个 GB
+ */
+export function decodeResponseBody(buf: Buffer, contentEncoding: string | undefined): string {
+  const enc = (contentEncoding ?? "").split(",")[0].trim().toLowerCase();
+  if (!enc || enc === "identity") return buf.toString("utf8");
+
+  const limit = { maxOutputLength: DEFAULT_MAX_BYTES };
+  try {
+    if (enc === "gzip" || enc === "x-gzip") return gunzipSync(buf, limit).toString("utf8");
+    if (enc === "deflate") return inflateSync(buf, limit).toString("utf8");
+    if (enc === "br") return brotliDecompressSync(buf, limit).toString("utf8");
+  } catch {
+    // 超限或数据损坏时 zlib 抛错。返回原始字节：内容检查项会因此判为「找不到」，
+    // 但那本就是一个超过 2 MB 的页面，不是我们谎报。
+    return buf.toString("utf8");
+  }
+  // 未知编码（如 zstd）：原样返回，别假装能解。
+  return buf.toString("utf8");
+}
+
+/**
  * 真实传输层。
  *
  * 关键点：把已校验的 IP 通过自定义 `lookup` 固定给底层连接，**不重写 URL**。
@@ -172,6 +204,9 @@ export const nodeTransport: Transport = async (url, addresses) => {
         "user-agent":
           "ZapBridgeLandingPageCheck/1.0 (+https://zapbridge.tech/tools/landing-page-check)",
         accept: "text/html,application/xhtml+xml",
+        // 只要明文：我们不省流量，解压只增加出错面。
+        // ⚠️ 服务器可以无视它（实测就有），所以下面仍必须按 content-encoding 解压。
+        "accept-encoding": "identity",
       },
     });
 
@@ -193,10 +228,12 @@ export const nodeTransport: Transport = async (url, addresses) => {
       chunks.push(buf);
     }
 
+    // bytes 保持「实际传输字节」——那是访客真正要下载的量，也是体积检查项的语义；
+    // body 则必须是解压后的文本，否则内容检查全是假的。
     return {
       status: res.statusCode,
       headers,
-      body: Buffer.concat(chunks).toString("utf8"),
+      body: decodeResponseBody(Buffer.concat(chunks), headers["content-encoding"]),
       bytes,
     };
   } finally {

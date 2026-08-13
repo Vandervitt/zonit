@@ -4,7 +4,7 @@
 // 「首跳是公网、次跳跳进内网」就是一条完整的绕过链路。传输层被注入，
 // 这里只测策略，不打真实网络。
 import { describe, it, expect } from "vitest";
-import { fetchPageSafely, type RawResponse } from "./fetch-page";
+import { fetchPageSafely, decodeResponseBody, type RawResponse } from "./fetch-page";
 import type { GuardResult } from "./url-guard";
 
 /** 造一个假响应。 */
@@ -208,5 +208,46 @@ describe("fetchPageSafely · 失败透传", () => {
       expect(r.status).toBe(404);
       expect(r.chain[0].status).toBe(404);
     }
+  });
+});
+
+// 回归：2026-08-13 实测发现的线上缺陷。
+//
+// 有些站点即便请求头没要求压缩也会返回 `content-encoding: gzip`
+// （originalcontour.com 就是）。传输层此前直接把原始字节 `toString("utf8")`，
+// 于是正文变成 gzip 魔数开头的乱码，**所有基于内容的检查项全部翻转成「缺失」**——
+// 工具会当面告诉对方「你的页面没有隐私政策」，而那是假的。
+//
+// 这里测的是解码这一步本身（纯函数），不打真实网络。
+describe("decodeResponseBody · 压缩响应必须先解压", () => {
+  it("gzip 正文能解出原始 HTML", async () => {
+    const { gzipSync } = await import("node:zlib");
+    const html = '<html><head><meta name="viewport" content="width=device-width"></head></html>';
+    expect(decodeResponseBody(gzipSync(Buffer.from(html)), "gzip")).toBe(html);
+  });
+
+  it("deflate 与 br 同样能解", async () => {
+    const { deflateSync, brotliCompressSync } = await import("node:zlib");
+    const html = "<html>x</html>";
+    expect(decodeResponseBody(deflateSync(Buffer.from(html)), "deflate")).toBe(html);
+    expect(decodeResponseBody(brotliCompressSync(Buffer.from(html)), "br")).toBe(html);
+  });
+
+  it("没有 content-encoding 时原样返回", () => {
+    const html = "<html>plain</html>";
+    expect(decodeResponseBody(Buffer.from(html), undefined)).toBe(html);
+    expect(decodeResponseBody(Buffer.from(html), "identity")).toBe(html);
+  });
+
+  it("解压失败时退回原始字节，不抛错", () => {
+    // 声称 gzip 但实际是明文：宁可拿到可能有用的内容，也不要整次检查挂掉。
+    const html = "<html>not actually gzipped</html>";
+    expect(decodeResponseBody(Buffer.from(html), "gzip")).toBe(html);
+  });
+
+  it("解压后超过上限时不撑爆内存", async () => {
+    const { gzipSync } = await import("node:zlib");
+    const huge = gzipSync(Buffer.alloc(4 * 1024 * 1024, 0x61)); // 4 MB 的 'a'
+    expect(decodeResponseBody(huge, "gzip").length).toBeLessThanOrEqual(2 * 1024 * 1024);
   });
 });
