@@ -36,9 +36,22 @@ export function extractAnchors(html: string): Anchor[] {
 }
 
 const PRIVACY_TEXT = /(privacy|隐私|datenschutz|confidentialit|privacidad)/i;
-const TERMS_TEXT = /(terms|条款|服务协议|conditions|términos|nutzungsbedingungen)/i;
 const PRIVACY_PATH = /(privacy|policy\/privacy|隐私|datenschutz)/i;
-const TERMS_PATH = /(terms|tos\b|conditions|条款)/i;
+
+// ⚠️ `conditions` 不能单独作为「条款」的特征。
+//
+// 它本意是配 "Terms & Conditions"，但医疗站几乎都有「Conditions We Treat /
+// Conditions Treated / Conditions」这个讲**病症**的栏目，而医疗是本产品的主力客群。
+// 实测（2026-08-15）三家医疗站因此被判成「条款齐全」，工具于是当面告诉客户一件假事——
+// 与 fetch-page 的 gzip 缺陷同级：不报错，只是静默给出反向结论。回归用例见 checks.test.ts。
+//
+// 但也不能直接删：法务语境里 `conditions` 确实能独立成词（Amazon "Conditions of Use"、
+// 法语 "Conditions Générales"），那时 `terms` 匹配不到。
+// 所以判据改为**有没有法务限定语**，而不是有没有 conditions 这个词。
+const TERMS_TEXT =
+  /(terms|条款|服务协议|términos|nutzungsbedingungen|conditions\s+(of\s+(use|sale|service|purchase)|g[ée]n[ée]rales|d['’]utilisation))/i;
+const TERMS_PATH =
+  /(terms|tos\b|条款|\bcgv\b|\bcgu\b|conditions[-_](of[-_](use|sale|service|purchase)|g[ée]n[ée]rales|generales|dutilisation))/i;
 
 /**
  * 找隐私政策与服务条款链接。

@@ -67,6 +67,50 @@ describe("findPolicyLinks · 隐私政策与服务条款", () => {
   });
 });
 
+// 回归：2026-08-15 外呼时实测发现的线上缺陷。
+//
+// TERMS_TEXT / TERMS_PATH 原先把裸的 `conditions` 当作「条款」的充分特征
+// （本意是配 "Terms & Conditions"）。但**「Conditions We Treat」是医疗站的标配栏目**，
+// 而医疗正是本产品的主力客群——于是工具会当面告诉医疗客户「你有条款页」，
+// 而那是假的。性质与 fetch-page 的 gzip 缺陷同级：不报错，只是静默给出反向结论。
+//
+// 下面三条是当天真实扫到的站点，不是构造出来的例子。
+describe("findPolicyLinks · 医疗站的 conditions 栏目不是服务条款", () => {
+  it.each([
+    ["simplythrivemedical.com", "/conditions-we-treat", "Conditions We Treat"],
+    ["lookoutvalleychiro.com", "/conditions-treated", "Conditions Treated"],
+    ["auroramedicalspa.com", "/conditions/", "Conditions"],
+  ])("%s 的 %s 不算条款", (_site, href, text) => {
+    const html = `<a href="${href}">${text}</a>`;
+    expect(findPolicyLinks(html, BASE).terms).toBeUndefined();
+  });
+
+  it("同一页上有真条款时仍然认得出来", () => {
+    const html = `<a href="/conditions-we-treat">Conditions We Treat</a><a href="/terms">Terms of Service</a>`;
+    expect(findPolicyLinks(html, BASE).terms).toBe("https://example.com/terms");
+  });
+});
+
+// 收紧 conditions 之后必须守住的真阳性：`conditions` 在法务语境里确实
+// 可以独立成词（Amazon 的 "Conditions of Use"、法语 "Conditions Générales"），
+// 判据是**有没有法务限定语**，不是有没有 conditions 这个词。
+describe("findPolicyLinks · 带法务限定语的 conditions 仍算条款", () => {
+  it.each([
+    [`<a href="/legal/x">Conditions of Use</a>`, "https://example.com/legal/x"],
+    [`<a href="/legal/y">Conditions of Sale</a>`, "https://example.com/legal/y"],
+    [`<a href="/cgv">Conditions Générales de Vente</a>`, "https://example.com/cgv"],
+    [`<a href="/conditions-of-use">Legal</a>`, "https://example.com/conditions-of-use"],
+    [`<a href="/conditions-generales">Mentions</a>`, "https://example.com/conditions-generales"],
+  ])("%s", (html, expected) => {
+    expect(findPolicyLinks(html, BASE).terms).toBe(expected);
+  });
+
+  it("Terms & Conditions 这种最常见的写法不受影响", () => {
+    const html = `<a href="/terms-and-conditions">Terms &amp; Conditions</a>`;
+    expect(findPolicyLinks(html, BASE).terms).toBe("https://example.com/terms-and-conditions");
+  });
+});
+
 describe("detectContact · 经营主体与联系方式", () => {
   it("识别 mailto 与纯文本邮箱", () => {
     expect(detectContact(`<a href="mailto:hi@x.com">写信</a>`).email).toBe(true);
