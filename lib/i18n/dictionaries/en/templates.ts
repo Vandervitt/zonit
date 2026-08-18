@@ -1,9 +1,9 @@
 export const templates = {
   meta: {
-    title: "{templates} lead-gen landing page templates — pick by industry | Zap Bridge",
+    title: "{templates} lead-gen landing page templates — pick by industry | Urgizat",
     description:
       "Lead-gen landing page templates across {industries} industries — clinics, legal and immigration, education, home improvement and local services, B2B sourcing, plus beauty, apparel, home, and supplements. Capture leads by form, WhatsApp, phone, email, or Telegram — switch channel in one click, compliant footer out of the box.",
-    ogTitle: "{templates} lead-gen landing page templates | Zap Bridge",
+    ogTitle: "{templates} lead-gen landing page templates | Urgizat",
     ogDescription:
       "Pick a lead-gen template by industry, swap the content, connect your domain, and publish — no blank page to start from.",
   },

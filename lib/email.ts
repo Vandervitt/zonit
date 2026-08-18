@@ -10,7 +10,7 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY) 
   : null;
 
-const FROM_EMAIL = process.env.EMAIL_FROM || 'Zap Bridge <onboarding@resend.dev>';
+const FROM_EMAIL = process.env.EMAIL_FROM || 'Urgizat <onboarding@resend.dev>';
 
 /** HTML 转义：邮件正文插入不可信内容（如公开留资字段）前必须转义，防 HTML 注入。 */
 export function escapeHtml(input: string): string {
@@ -85,13 +85,13 @@ export async function sendInvitationEmail({
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
-      subject: `送你 ${days} 天 Zap Bridge ${planLabel}：一个下午做出能跑广告的获客落地页`,
+      subject: `送你 ${days} 天 Urgizat ${planLabel}：一个下午做出能跑广告的获客落地页`,
       html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;border:1px solid #eee;border-radius:10px;">
           <h2 style="color:#111;margin:0 0 12px;">一个下午，把你的获客落地页跑起来</h2>
           <p style="color:#555;margin:0 0 22px;line-height:1.75;">
             做海外获客，最拖后腿的常常不是投放，是那张落地页——找外包几千起步、来回等一周，
-            改个标题还得再排一次期。<strong style="color:#111;">Zap Bridge 就是来终结这件事的。</strong>
+            改个标题还得再排一次期。<strong style="color:#111;">Urgizat 就是来终结这件事的。</strong>
           </p>
 
           <p style="color:#111;margin:0 0 10px;font-weight:bold;">三步，页面就能开始收线索</p>

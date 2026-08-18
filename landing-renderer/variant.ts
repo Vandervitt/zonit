@@ -44,8 +44,16 @@ function mulberry32(seed: number): number {
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 }
 
-/** generator meta 候选（全字面量，语义等价品牌串）。 */
-const META_TOKENS = ["Zap Bridge", "Zap Bridge Sites", "Zap Bridge Pages", "Zap Bridge Studio"];
+/**
+ * generator meta 候选（全字面量，语义等价品牌串）。
+ *
+ * 更名 Zap Bridge → Urgizat 后旧 token 一并保留：存量已发布页的 meta 里带的是
+ * 旧串，删掉会让它们在反同质化检测里漏检。这是检测白名单不是对外文案。
+ */
+const META_TOKENS = [
+  "Urgizat", "Urgizat Sites", "Urgizat Pages", "Urgizat Studio",
+  "Zap Bridge", "Zap Bridge Sites", "Zap Bridge Pages", "Zap Bridge Studio",
+];
 
 /** 生成一枚全新种子（供编辑器「重新打散指纹」用；随机 + 时间戳，冲突概率极低）。 */
 export function newVariantSeed(): string {

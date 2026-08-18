@@ -44,7 +44,7 @@ export function LoginView({ locale }: { locale: Locale }) {
     <div className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl shadow-aqua-500/10 border border-aqua-100 p-8">
       <div className="flex items-center gap-2 mb-8">
         <BrandMark className="w-7 h-7 rounded-lg shadow-sm shadow-aqua-500/30" />
-        <span className="text-foreground tracking-widest text-sm uppercase">Zap Bridge</span>
+        <span className="text-foreground tracking-widest text-sm uppercase">Urgizat</span>
       </div>
 
       <h1 className="text-2xl text-foreground mb-1">{t.title}</h1>

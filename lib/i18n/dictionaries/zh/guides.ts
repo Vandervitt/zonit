@@ -1,9 +1,9 @@
 export const guides = {
   meta: {
-    title: "海外获客落地页指南 — 投放、合规与转化归因实操 | Zap Bridge",
+    title: "海外获客落地页指南 — 投放、合规与转化归因实操 | Urgizat",
     description:
       "面向出海广告主的获客落地页实操指南：广告落地页防拒审、WhatsApp 获客页搭建、转化归因(像素/UTM/CAPI)等，帮你把广告费花在能转化、能归因的页面上。",
-    ogTitle: "海外获客落地页指南 | Zap Bridge",
+    ogTitle: "海外获客落地页指南 | Urgizat",
   },
   list: {
     kicker: "指南",

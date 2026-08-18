@@ -139,7 +139,7 @@ export function SiteNav({ fonts, locale }: { fonts: Fonts; locale: Locale }) {
         <Link href={localePath(locale, Routes.Home)} className="group flex items-center gap-2">
           <BrandMark className="h-8 w-8 rounded-lg shadow-sm shadow-aqua-500/30" />
           <span className={`text-base font-bold tracking-tight text-foreground ${fonts.display}`}>
-            Zap Bridge
+            Urgizat
           </span>
         </Link>
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
@@ -225,7 +225,7 @@ export function SiteFooter({ fonts, locale }: { fonts: Fonts; locale: Locale }) 
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-muted-foreground md:flex-row">
         <div className="flex items-center gap-2">
           <BrandMark className="h-6 w-6 rounded-md" />
-          <span className={`font-semibold text-foreground ${fonts.display}`}>Zap Bridge</span>
+          <span className={`font-semibold text-foreground ${fonts.display}`}>Urgizat</span>
           <span>© {new Date().getFullYear()}</span>
         </div>
         <nav className="flex flex-wrap items-center justify-center gap-5">

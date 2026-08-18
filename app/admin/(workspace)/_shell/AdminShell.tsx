@@ -58,7 +58,7 @@ export function AdminShell({
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "16px 20px" }}>
             <BrandMark className="h-[30px] w-[30px] rounded-lg" />
-            {!collapsed && <Typography.Text strong>Zap Bridge</Typography.Text>}
+            {!collapsed && <Typography.Text strong>Urgizat</Typography.Text>}
           </div>
           <Menu mode="inline" selectedKeys={[selectedKey]} items={menuItems}
             style={{ borderInlineEnd: 0, flex: 1 }} />

@@ -11,7 +11,7 @@ export const compliance: HelpChapterData = {
       blocks: [
         {
           t: "p",
-          text: "Pages built on Zap Bridge are lead-capture pages, not storefronts: there's no cart, checkout, order, subscription or refund anywhere on them, and conversion runs through enquiries, bookings and form fills. That's a deliberate design choice:",
+          text: "Pages built on Urgizat are lead-capture pages, not storefronts: there's no cart, checkout, order, subscription or refund anywhere on them, and conversion runs through enquiries, bookings and form fills. That's a deliberate design choice:",
         },
         {
           t: "list",

@@ -1,5 +1,5 @@
 // lib/seo/site.ts
-// 平台主站（zapbridge.tech）站点级 SEO/GEO 事实源：品牌常量、绝对 URL、
+// 平台主站（urgizat.com）站点级 SEO/GEO 事实源：品牌常量、绝对 URL、
 // 结构化数据（JSON-LD）与营销页统一 metadata 构造。
 // 仅用于平台自有营销面，禁止用于租户 /p 落地页——否则会把平台品牌实体
 // （Organization/WebSite）注入客户页面，污染其 SEO/GEO 归属。
@@ -8,13 +8,13 @@ import { htmlLang, ogLocale, hreflang, defaultLocale, locales, type Locale } fro
 import { localePath, isLocalizedRoute } from "@/lib/i18n/routes";
 import { fillCounts } from "@/lib/templates/stats";
 
-// 生产由 Vercel 注入 NEXT_PUBLIC_APP_URL（= https://zapbridge.tech）；本地为
+// 生产由 Vercel 注入 NEXT_PUBLIC_APP_URL（= https://urgizat.com）；本地为
 // http://localhost:3001；空值兜底到主域，避免 metadataBase / OG 解析到 localhost。
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_APP_URL || "https://zapbridge.tech"
+  process.env.NEXT_PUBLIC_APP_URL || "https://urgizat.com"
 ).replace(/\/+$/, "");
 
-export const SITE_NAME = "Zap Bridge";
+export const SITE_NAME = "Urgizat";
 
 // 营销站默认英文，中文版走 /zh 前缀。
 // 英文面受众是全球中小企业。siteDescription 是全客群必经的站点级描述，故跨境表述
@@ -24,10 +24,10 @@ export const SITE_NAME = "Zap Bridge";
 // 模板数量由 fillCounts 按注册表替换，避免文案与模板库口径长期脱节。
 export const siteDescription: Record<Locale, string> = {
   en: fillCounts(
-    "Zap Bridge is a lead-gen landing page platform for businesses that run on inquiries: {templates} templates across {industries} industries plus AI full-page drafting get your first version out in minutes, published to your own brand domain, with every lead landing in one inbox.",
+    "Urgizat is a lead-gen landing page platform for businesses that run on inquiries: {templates} templates across {industries} industries plus AI full-page drafting get your first version out in minutes, published to your own brand domain, with every lead landing in one inbox.",
   ),
   zh: fillCounts(
-    "Zap Bridge 是面向海外获客的留资落地页平台：{templates} 套模板覆盖 {industries} 个行业，AI 整页成稿几分钟做出第一版；发布到自有品牌域名，所有线索归集到一个收件箱。",
+    "Urgizat 是面向海外获客的留资落地页平台：{templates} 套模板覆盖 {industries} 个行业，AI 整页成稿几分钟做出第一版；发布到自有品牌域名，所有线索归集到一个收件箱。",
   ),
 };
 
@@ -94,7 +94,7 @@ export function marketingMetadata(input: {
 
 /**
  * 平台组织 + 站点 结构化数据（JSON-LD @graph），置于营销首页。
- * 让搜索引擎与生成式引擎（GEO）明确「Zap Bridge 是谁、做什么、主站在哪」。
+ * 让搜索引擎与生成式引擎（GEO）明确「Urgizat 是谁、做什么、主站在哪」。
  */
 export function siteStructuredData(locale: Locale): Record<string, unknown> {
   const orgId = `${SITE_URL}/#organization`;

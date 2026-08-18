@@ -20,7 +20,7 @@ export const templateContent = {
   } as Record<string, string | undefined>,
 
   detailMeta: {
-    title: "{name} — {industry} 获客落地页模板 | Zap Bridge",
+    title: "{name} — {industry} 获客落地页模板 | Urgizat",
     description:
       "{tagline}预设「{conversion}」留资，一键可切成其他渠道；投放级结构、合规页脚开箱即用，改内容、绑定自有品牌域名，几分钟发布上线。",
   },

@@ -117,7 +117,7 @@ export const faq: HelpChapterData = {
       blocks: [
         {
           t: "p",
-          text: "Still stuck? Email support@zapbridge.tech with the page link and a screenshot and we'll come back to you as soon as we can. You can also hit “Contact the founder” in the dashboard sidebar.",
+          text: "Still stuck? Email support@urgizat.com with the page link and a screenshot and we'll come back to you as soon as we can. You can also hit “Contact the founder” in the dashboard sidebar.",
         },
       ],
     },

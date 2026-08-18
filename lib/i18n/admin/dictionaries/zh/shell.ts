@@ -39,6 +39,6 @@ export const shell = {
     title: "帮助中心",
     intro: "从建页到收线索的完整使用指南。新用户建议从「快速上手」开始，按目录顺序读完主链路（前六章）。",
     overview: "帮助首页",
-    noAnswer: "没找到答案？发邮件至 support@zapbridge.tech，附上页面链接与问题截图，我们会尽快回复。",
+    noAnswer: "没找到答案？发邮件至 support@urgizat.com，附上页面链接与问题截图，我们会尽快回复。",
   },
 };

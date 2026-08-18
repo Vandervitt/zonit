@@ -1,5 +1,5 @@
 export const common = {
-  brand: "Zap Bridge",
+  brand: "Urgizat",
   nav: {
     templates: "Templates",
     guides: "Guides",

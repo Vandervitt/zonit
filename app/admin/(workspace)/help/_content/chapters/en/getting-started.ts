@@ -5,7 +5,7 @@ export const gettingStarted: HelpChapterData = {
   title: "Getting started",
   summary: "Publish your first landing page in five minutes — from creating it to connecting a domain.",
   intro:
-    "Zap Bridge gets you a landing page that can run ads and capture leads in minutes, published on your own brand domain. This chapter walks the whole first-publish flow.",
+    "Urgizat gets you a landing page that can run ads and capture leads in minutes, published on your own brand domain. This chapter walks the whole first-publish flow.",
   sections: [
     {
       id: "first-publish",

@@ -1,13 +1,13 @@
 import type { LegalDocs } from "./types";
 import { LEGAL_CONTACT as C } from "./types";
 
-const UPDATED = "28 July 2026";
+const UPDATED = "18 August 2026";
 
 export const legal: LegalDocs = {
   privacy: {
-    metaTitle: "Privacy Policy | Zap Bridge",
+    metaTitle: "Privacy Policy | Urgizat",
     metaDescription:
-      "How Zap Bridge collects, uses, and protects your information, and the rights you have over your personal data.",
+      "How Urgizat collects, uses, and protects your information, and the rights you have over your personal data.",
     title: "Privacy Policy",
     subtitle: "How we collect, use, and protect your information.",
     updated: UPDATED,
@@ -16,7 +16,7 @@ export const legal: LegalDocs = {
         id: "overview",
         title: "1. Overview",
         paragraphs: [
-          "This Privacy Policy explains how Zap Bridge (“we”, “us”, “the Service”, provided via zapbridge.tech and related subdomains) collects, uses, stores, and protects your information. The Service is operated independently by an individual developer.",
+          "This Privacy Policy explains how Urgizat (“we”, “us”, “the Service”, provided via urgizat.com and related subdomains) collects, uses, stores, and protects your information. The Service is operated independently by an individual developer.",
           `By using the Service you confirm that you have read and understood this Policy. If you do not agree with it, please stop using the Service. If you have any questions about this Policy, you can contact us at ${C}.`,
         ],
       },
@@ -128,25 +128,25 @@ export const legal: LegalDocs = {
   },
 
   terms: {
-    metaTitle: "Terms of Service | Zap Bridge",
+    metaTitle: "Terms of Service | Urgizat",
     metaDescription:
-      "The terms and conditions for using Zap Bridge, covering accounts, billing, acceptable use, and limitation of liability.",
+      "The terms and conditions for using Urgizat, covering accounts, billing, acceptable use, and limitation of liability.",
     title: "Terms of Service",
-    subtitle: "The terms and conditions for using Zap Bridge.",
+    subtitle: "The terms and conditions for using Urgizat.",
     updated: UPDATED,
     sections: [
       {
         id: "acceptance",
         title: "1. Acceptance of these terms",
         paragraphs: [
-          "These Terms of Service (the “Terms”) form the agreement between you and Zap Bridge (“we”, “us”, “the Service”) regarding your use of the Service. By accessing or using the Service you agree to be bound by these Terms; if you do not agree, please do not use the Service.",
+          "These Terms of Service (the “Terms”) form the agreement between you and Urgizat (“we”, “us”, “the Service”) regarding your use of the Service. By accessing or using the Service you agree to be bound by these Terms; if you do not agree, please do not use the Service.",
         ],
       },
       {
         id: "service",
         title: "2. Description of the Service",
         paragraphs: [
-          "Zap Bridge provides tools for creating, hosting, and configuring tracking on landing pages for overseas lead generation, helping users produce marketing landing pages for inquiries and lead capture. The Service is operated independently by an individual developer.",
+          "Urgizat provides tools for creating, hosting, and configuring tracking on landing pages for overseas lead generation, helping users produce marketing landing pages for inquiries and lead capture. The Service is operated independently by an individual developer.",
           "We may add to, modify, or discontinue features from time to time. Where changes are material, we will notify you by appropriate means.",
         ],
       },

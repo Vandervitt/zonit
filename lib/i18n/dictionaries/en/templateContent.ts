@@ -23,7 +23,7 @@ export const templateContent = {
   } as Record<string, string | undefined>,
 
   detailMeta: {
-    title: "{name} — {industry} lead-gen landing page template | Zap Bridge",
+    title: "{name} — {industry} lead-gen landing page template | Urgizat",
     description:
       "{tagline} Set up for {conversion} capture — switch to any channel in one click. Ad-ready structure and a compliant footer out of the box; swap the content, connect your own brand domain, and publish in minutes.",
   },

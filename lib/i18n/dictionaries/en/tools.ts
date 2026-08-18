@@ -10,7 +10,7 @@
 export const tools = {
   check: {
     meta: {
-      title: "Landing page checker — what ad reviewers look at | Zap Bridge",
+      title: "Landing page checker — what ad reviewers look at | Urgizat",
       description:
         "Paste a landing page URL and see what ad reviewers commonly check: policy links, redirect chain, contact details, and whether tracking fires before consent. No score, no pass/fail — just what's on your page.",
     },
@@ -37,7 +37,7 @@ export const tools = {
   },
 
   report: {
-    metaTitle: "Landing page check — {host} | Zap Bridge",
+    metaTitle: "Landing page check — {host} | Urgizat",
     kicker: "Check result",
     title: "What reviewers commonly look at",
     checkedUrl: "Checked",
@@ -57,7 +57,7 @@ export const tools = {
     rerun: "Check another page",
     ctaTitle: "Building the page rather than auditing one?",
     ctaBody:
-      "Zap Bridge templates ship with a compliant footer, a real privacy policy, and lead capture that doesn't depend on a pixel firing.",
+      "Urgizat templates ship with a compliant footer, a real privacy policy, and lead capture that doesn't depend on a pixel firing.",
     ctaTemplates: "Browse templates",
     ctaAntiBan: "See how anti-duplication works",
     /** 深入阅读：finding 指向对应的合规文章。 */

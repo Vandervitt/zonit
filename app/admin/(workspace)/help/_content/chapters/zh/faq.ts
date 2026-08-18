@@ -117,7 +117,7 @@ export const faq: HelpChapterData = {
       blocks: [
         {
           t: "p",
-          text: "以上没有解决你的问题？发邮件至 support@zapbridge.tech，附上页面链接与问题截图，我们会尽快回复；也可在后台侧边栏点「联系创始人」。",
+          text: "以上没有解决你的问题？发邮件至 support@urgizat.com，附上页面链接与问题截图，我们会尽快回复；也可在后台侧边栏点「联系创始人」。",
         },
       ],
     },

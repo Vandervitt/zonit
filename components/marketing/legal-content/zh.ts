@@ -1,12 +1,12 @@
 import type { LegalDocs } from "./types";
 import { LEGAL_CONTACT as C } from "./types";
 
-const UPDATED = "2026 年 7 月 28 日";
+const UPDATED = "2026 年 8 月 18 日";
 
 export const legal: LegalDocs = {
   privacy: {
-    metaTitle: "隐私政策 | Zap Bridge",
-    metaDescription: "Zap Bridge 如何收集、使用与保护你的信息，以及你对个人数据享有的权利。",
+    metaTitle: "隐私政策 | Urgizat",
+    metaDescription: "Urgizat 如何收集、使用与保护你的信息，以及你对个人数据享有的权利。",
     title: "隐私政策",
     subtitle: "我们如何收集、使用与保护你的信息。",
     updated: UPDATED,
@@ -15,7 +15,7 @@ export const legal: LegalDocs = {
         id: "overview",
         title: "1. 概述",
         paragraphs: [
-          `本隐私政策说明 Zap Bridge（下称“我们”“本服务”，通过 zapbridge.tech 及相关子域名提供）如何收集、使用、存储与保护你的信息。本服务由个人开发者独立运营。`,
+          `本隐私政策说明 Urgizat（下称“我们”“本服务”，通过 urgizat.com 及相关子域名提供）如何收集、使用、存储与保护你的信息。本服务由个人开发者独立运营。`,
           `使用本服务即表示你已阅读并理解本政策。如你不同意本政策，请停止使用本服务。若对本政策有任何疑问，可通过 ${C} 与我们联系。`,
         ],
       },
@@ -125,24 +125,24 @@ export const legal: LegalDocs = {
   },
 
   terms: {
-    metaTitle: "服务条款 | Zap Bridge",
-    metaDescription: "使用 Zap Bridge 服务的条款与条件，包括账户、计费、可接受使用与责任限制。",
+    metaTitle: "服务条款 | Urgizat",
+    metaDescription: "使用 Urgizat 服务的条款与条件，包括账户、计费、可接受使用与责任限制。",
     title: "服务条款",
-    subtitle: "使用 Zap Bridge 服务的条款与条件。",
+    subtitle: "使用 Urgizat 服务的条款与条件。",
     updated: UPDATED,
     sections: [
       {
         id: "acceptance",
         title: "1. 条款的接受",
         paragraphs: [
-          `本服务条款（下称“条款”）是你与 Zap Bridge（下称“我们”“本服务”）之间就使用本服务达成的协议。访问或使用本服务即表示你同意受本条款约束；如你不同意，请勿使用本服务。`,
+          `本服务条款（下称“条款”）是你与 Urgizat（下称“我们”“本服务”）之间就使用本服务达成的协议。访问或使用本服务即表示你同意受本条款约束；如你不同意，请勿使用本服务。`,
         ],
       },
       {
         id: "service",
         title: "2. 服务说明",
         paragraphs: [
-          "Zap Bridge 提供面向海外获客的落地页创建、托管与追踪配置工具，帮助用户制作用于咨询与留资的营销落地页。本服务由个人开发者独立运营。",
+          "Urgizat 提供面向海外获客的落地页创建、托管与追踪配置工具，帮助用户制作用于咨询与留资的营销落地页。本服务由个人开发者独立运营。",
           "我们可能不时增加、修改或停止部分功能。对于重大变更，我们会通过适当方式告知。",
         ],
       },

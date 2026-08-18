@@ -1,8 +1,8 @@
 export const antiban = {
   meta: {
-    title: "Anti-duplication — stop same-template pages from looking cloned | Zap Bridge",
+    title: "Anti-duplication — stop same-template pages from looking cloned | Urgizat",
     description:
-      "Near-identical pages get flagged as duplicate content by ad platforms, bringing rejections and throttling. Zap Bridge builds anti-duplication into the Agency plan: your content stays exactly as written while the page's structural fingerprint is scattered, lowering the odds that same-template pages are judged duplicates — reshuffle any time in one click.",
+      "Near-identical pages get flagged as duplicate content by ad platforms, bringing rejections and throttling. Urgizat builds anti-duplication into the Agency plan: your content stays exactly as written while the page's structural fingerprint is scattered, lowering the odds that same-template pages are judged duplicates — reshuffle any time in one click.",
     ogTitle: "Anti-duplication — stop same-template pages from looking cloned",
     ogDescription:
       "Same content, different structure. Scatter the structural fingerprint for advertisers running at scale, and lower the odds of a false duplicate-detection hit — this is not cloaking, it is a guardrail for legitimate advertisers.",
@@ -12,7 +12,7 @@ export const antiban = {
     titleLine1: "One template, ten advertisers",
     titleLine2: "Don't let duplicate detection mistake you for a clone",
     subtitle:
-      "The deepest fear in overseas paid acquisition isn't low volume — it's near-identical pages getting flagged as duplicates, throttled, or caught in a chain ban. Zap Bridge's anti-duplication engine gives every published page its own structural variant: content stays identical for everyone, while the odds of a duplicate-detection hit drop sharply.",
+      "The deepest fear in overseas paid acquisition isn't low volume — it's near-identical pages getting flagged as duplicates, throttled, or caught in a chain ban. Urgizat's anti-duplication engine gives every published page its own structural variant: content stays identical for everyone, while the odds of a duplicate-detection hit drop sharply.",
     ctaPrimary: "Start free",
     ctaSecondary: "See the Agency plan",
   },

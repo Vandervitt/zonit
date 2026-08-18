@@ -5,7 +5,7 @@ export const gettingStarted: HelpChapterData = {
   title: "快速上手",
   summary: "五分钟发布第一张落地页：从建页到绑定域名的端到端流程。",
   intro:
-    "Zap Bridge 帮你在几分钟内做出一张能跑广告、能收线索的海外落地页，并发布到你自己的品牌域名。本章带你走完第一次发布的完整流程。",
+    "Urgizat 帮你在几分钟内做出一张能跑广告、能收线索的海外落地页，并发布到你自己的品牌域名。本章带你走完第一次发布的完整流程。",
   sections: [
     {
       id: "first-publish",

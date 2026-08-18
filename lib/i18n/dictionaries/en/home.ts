@@ -19,7 +19,7 @@
 // 数量一律用 {templates} / {industries} 占位符，由 lib/templates/stats.ts 按注册表实际内容替换。
 export const home = {
   meta: {
-    title: "Zap Bridge — Landing pages that turn visitors into reachable leads",
+    title: "Urgizat — Landing pages that turn visitors into reachable leads",
     description:
       "Lead-gen landing pages for businesses that run on inquiries: start from {templates} templates across {industries} industries, draft a full page with AI, and ship your first version in minutes. Form leads land in one inbox you can actually work, and you still see the clicks and sources behind every WhatsApp and phone inquiry.",
     ogDescription:

@@ -45,7 +45,7 @@ export const leads: HelpChapterData = {
           t: "steps",
           items: [
             { title: "Set the endpoint", desc: "Settings → Lead notifications → enter your webhook URL (a Zapier Catch Hook address, for example) and switch it on." },
-            { title: "Save the signing secret", desc: "Turning it on the first time generates a signing secret, shown only once — save it right away. Use it on your end to verify the request really came from Zap Bridge." },
+            { title: "Save the signing secret", desc: "Turning it on the first time generates a signing secret, shown only once — save it right away. Use it on your end to verify the request really came from Urgizat." },
             { title: "Receive and verify", desc: "Each new lead is POSTed to your endpoint as JSON with a signature header. Failed deliveries are retried automatically." },
           ],
         },

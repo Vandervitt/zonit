@@ -2,7 +2,7 @@
 //
 // 定位：**产品页**，承接商业意图查询（"whatsapp landing page" 及其变体）。
 // 与 /guides/whatsapp-lead-landing-page 分工——那篇是信息型长文，答「这类页面
-// 怎么做」；本页答「用 Zap Bridge 怎么做」，落点是注册与模板库。两页互链但不
+// 怎么做」；本页答「用 Urgizat 怎么做」，落点是注册与模板库。两页互链但不
 // 复述对方的主体内容，避免关键词自噬。
 //
 // ⚠️ 口径铁律（全站一致，改前先读 lib/i18n/dictionaries/en/home.ts 顶部注释）：
@@ -16,7 +16,7 @@
 // 数量一律用占位符，由 lib/templates/stats.ts 按注册表实际内容替换。
 export const whatsapp = {
   meta: {
-    title: "WhatsApp landing pages that turn ad clicks into chats | Zap Bridge",
+    title: "WhatsApp landing pages that turn ad clicks into chats | Urgizat",
     description:
       "Send paid traffic to a real page instead of a bare wa.me link: {whatsappTemplates} templates across {whatsappIndustries} industries open WhatsApp with your message pre-filled, every tap is tracked back to its source, and the policy footer ad reviewers look for is there from the first publish.",
     ogTitle: "WhatsApp landing pages — from ad click to chat",
