@@ -2,7 +2,7 @@ import debug from "debug";
 import * as Sentry from "@sentry/nextjs";
 
 // 初始化 debug 命名空间
-const log = debug("zapbridge:request");
+const log = debug("urgizat:request");
 
 // 内部日志打印逻辑
 const internalLog = (msg: string, data?: unknown) => {

@@ -1,11 +1,11 @@
-# Zap Bridge · 产品说明书
+# Urgizat · 产品说明书
 
 > **一句话定位**：让做海外获客的个人创业者与小团队，无需开发，几分钟内基于行业模板（或 AI 一句话生成）做出一张投放级落地页，发布到自己的品牌域名，并把「像素追踪 → 留资 → 线索管理 → CRM 推送」整条获客链路跑通。
 
 | | |
 |---|---|
 | 文档类型 | 产品说明书（现状版，2026-07-23 同步）|
-| 状态 | 产品已上线生产（https://zapbridge.tech ，2026-07-16 上线，07-19 生产 smoke 8/8 通过）|
+| 状态 | 产品已上线生产（https://urgizat.com ，2026-07-16 上线，07-19 生产 smoke 8/8 通过）|
 | 面向读者 | 产品、运营、新成员 |
 | 关联文档 | 早期简版 PRD：`docs/landing-page-flow-product-overview.md`；产品/工程约束：`docs/constraints/*`；自定义域名架构：`docs/custom-domain-publishing.md` |
 
@@ -13,7 +13,7 @@
 
 ## 一、产品定位
 
-Zap Bridge 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Builder / lead-gen 工具），聚焦**海外获客（leadgen）**场景：
+Urgizat 是一个 **SaaS 落地页搭建与获客工具**（Landing Page Builder / lead-gen 工具），聚焦**海外获客（leadgen）**场景：
 
 - **品类**：自助式落地页搭建器 + 投放追踪 + 线索管理。
 - **转化方式（核心红线：非交易）**：生成的落地页只引导访客通过 **WhatsApp / Telegram / 表单 / 电话 / 邮件 / 预约咨询**留资，**绝不包含**下单、结账、购物车、订单、订阅、退款、货到付款等任何电商交易环节。平台自身向 SaaS 客户收费（订阅套餐 + AI 额度包，Dodo / Creem 双收款渠道），但平台收费与生成页面的能力边界严格分离。
