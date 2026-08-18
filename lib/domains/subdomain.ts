@@ -87,3 +87,33 @@ export function buildPlatformSubdomain(slug: string, root: string): string | nul
   if (!root) return null;
   return `${slug}.${root.trim().toLowerCase()}`;
 }
+
+/**
+ * 平台自有根域全集 = 当前根 + 遗留根。
+ *
+ * 品牌更名后旧根（如 zapbridge.site）不再分配新子域，但存量子域仍在客户广告里
+ * 跑，必须继续解析。遗留根因此只保留两项能力：apex 重定向、阻止用户手动认领。
+ * **分配新子域一律只用当前根**，故分配路径不使用本函数。
+ *
+ * legacy 为逗号分隔，去空白与空项。
+ */
+export function platformSubdomainRoots(
+  current: string | undefined,
+  legacy: string | undefined,
+): string[] {
+  return [current ?? "", ...(legacy ?? "").split(",")]
+    .map((root) => root.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/**
+ * host 是否属于任一平台根 —— apex 本身或其下的子域。
+ *
+ * 用于阻止用户手动添加平台自有域名。不拦的话任何人都能占住别人的子域：
+ * DNS 验证虽永远不会通过，但 domains.domain 的唯一约束会让真正的分配请求
+ * 再也拿不到这个名字。遗留根同样要拦 —— 通配 DNS 仍指向平台，抢注是真风险。
+ */
+export function isPlatformOwnedHost(hostname: string, roots: readonly string[]): boolean {
+  const host = hostname.trim().toLowerCase();
+  return roots.some((root) => host === root || isPlatformSubdomainHost(host, root));
+}

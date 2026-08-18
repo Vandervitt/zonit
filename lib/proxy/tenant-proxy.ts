@@ -4,6 +4,7 @@ import { resolveTenantRoute } from "@/lib/domains-db";
 import { isReservedRoutePath, normalizeRoutePath } from "@/lib/domains/route-path";
 import { splitPolicyPath } from "@/lib/landing-pages/policy-paths";
 import { hostnameOf, isCustomDomain, TENANT_HOST_HEADER, TENANT_PATH_HEADER } from "@/lib/host";
+import { platformSubdomainRoots } from "@/lib/domains/subdomain";
 
 // 这些公开元数据路由按 host 自行生成（app/robots.ts、app/sitemap.ts、
 // app/llms.txt），不能被改写到 /p/{slug}，否则会返回落地页 HTML 而非
@@ -30,14 +31,19 @@ export async function handleTenancy(req: NextRequest) {
   if (PUBLIC_TENANT_API_PATHS.has(req.nextUrl.pathname)) return null;
   if (req.nextUrl.pathname.startsWith(CRON_PATH_PREFIX)) return null;
 
-  // 子域池的 apex（如 zapbridge.site）不属于任何用户，它只是平台分配子域的根
+  // 子域池的 apex 不属于任何用户，它只是平台分配子域的根
   // （isPlatformSubdomainHost 对 apex 返回 false）。历史上它曾被当作客户自有域名
   // 绑过一张模板样例页，不拦截的话访客访问根域会看到那张页面，误以为这是某个
   // 品牌的独立站。这里在租户解析之前重定向到平台主域，也顺带保证日后任何遗留
   // 绑定都不会露出来。子域本身不受影响。
-  const subdomainRoot = (process.env.PLATFORM_SUBDOMAIN_ROOT ?? "").trim().toLowerCase();
+  //
+  // 遗留根（品牌更名前的旧根）一并重定向：它的子域仍在服务，但 apex 同样不该露出。
+  const subdomainRoots = platformSubdomainRoots(
+    process.env.PLATFORM_SUBDOMAIN_ROOT,
+    process.env.PLATFORM_SUBDOMAIN_LEGACY_ROOTS,
+  );
   const appOrigin = process.env.NEXT_PUBLIC_APP_URL;
-  if (subdomainRoot && appOrigin && hostname === subdomainRoot) {
+  if (appOrigin && subdomainRoots.includes(hostname.toLowerCase())) {
     return NextResponse.redirect(new URL("/", appOrigin), 308);
   }
 
