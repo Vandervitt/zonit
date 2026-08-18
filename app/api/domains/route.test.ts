@@ -28,10 +28,12 @@ const req = (domain: string) =>
     body: JSON.stringify({ domain }),
   });
 
-async function loadRoute(root: string | undefined) {
+async function loadRoute(root: string | undefined, legacyRoots?: string) {
   vi.resetModules();
   if (root === undefined) delete process.env.PLATFORM_SUBDOMAIN_ROOT;
   else process.env.PLATFORM_SUBDOMAIN_ROOT = root;
+  if (legacyRoots === undefined) delete process.env.PLATFORM_SUBDOMAIN_LEGACY_ROOTS;
+  else process.env.PLATFORM_SUBDOMAIN_LEGACY_ROOTS = legacyRoots;
   return import("./route");
 }
 
@@ -78,6 +80,26 @@ describe("POST /api/domains —— 平台自有域名不可手动添加", () => 
     const { POST } = await loadRoute(undefined);
     const res = await POST(req("acme.zapbridge.site"));
     expect((await res.json()).error).not.toBe("domain_reserved_suffix");
+  });
+
+  it("遗留根同样拦截 —— 旧根虽不再分配，通配 DNS 仍指向平台，抢注是真风险", async () => {
+    const { POST } = await loadRoute("urgizat.site", "zapbridge.site");
+    const res = await POST(req("competitor.zapbridge.site"));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("domain_reserved_suffix");
+    expect(insertDomainMock).not.toHaveBeenCalled();
+  });
+
+  it("遗留根的 apex 也拦截", async () => {
+    const { POST } = await loadRoute("urgizat.site", "zapbridge.site");
+    const res = await POST(req("zapbridge.site"));
+    expect((await res.json()).error).toBe("domain_reserved_suffix");
+  });
+
+  it("只配遗留根、当前根缺失时仍然拦截", async () => {
+    const { POST } = await loadRoute(undefined, "zapbridge.site");
+    const res = await POST(req("acme.zapbridge.site"));
+    expect((await res.json()).error).toBe("domain_reserved_suffix");
   });
 
   it("正常客户域名不受影响", async () => {

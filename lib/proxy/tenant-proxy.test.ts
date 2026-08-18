@@ -285,3 +285,36 @@ describe("子域池 apex 重定向", () => {
     expect(res?.status).toBe(404);
   });
 });
+
+describe("遗留子域根", () => {
+  // 品牌更名后旧根不再分配新子域，但存量子域仍在客户广告里跑，必须继续解析；
+  // 与此同时旧 apex 依然不该露出。
+  let tenancy: Tenancy["handleTenancy"];
+
+  beforeAll(async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://app.example.com");
+    vi.stubEnv("PLATFORM_SUBDOMAIN_ROOT", "new.example");
+    vi.stubEnv("PLATFORM_SUBDOMAIN_LEGACY_ROOTS", "old.example,older.example");
+    vi.resetModules();
+    ({ handleTenancy: tenancy } = await import("./tenant-proxy"));
+  });
+
+  it("遗留根的 apex 也重定向到平台主域", async () => {
+    const res = await tenancy(makeReq("old.example", "/"));
+    expect(res?.status).toBe(308);
+    expect(res?.headers.get("location")).toBe("https://app.example.com/");
+  });
+
+  it("逗号分隔的第二个遗留根同样生效", async () => {
+    expect((await tenancy(makeReq("older.example", "/")))?.status).toBe(308);
+  });
+
+  it("当前根不受影响，仍然重定向", async () => {
+    expect((await tenancy(makeReq("new.example", "/")))?.status).toBe(308);
+  });
+
+  it("遗留根的子域继续按租户域解析 —— 存量发布页不能被打死", async () => {
+    const res = await tenancy(makeReq("acme.old.example", "/"));
+    expect(res?.status).toBe(404); // 未绑定故 404；关键是没被 308 掉
+  });
+});

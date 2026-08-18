@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   RESERVED_SUBDOMAINS,
   buildPlatformSubdomain,
+  isPlatformOwnedHost,
   isPlatformSubdomainHost,
   isReservedSubdomain,
+  platformSubdomainRoots,
   slugifyForSubdomain,
   subdomainFallbackId,
   subdomainSuffix,
@@ -111,6 +113,63 @@ describe("isPlatformSubdomainHost", () => {
   it("客户自有域名与平台主域一律不是平台子域", () => {
     expect(isPlatformSubdomainHost("brand.com", ROOT)).toBe(false);
     expect(isPlatformSubdomainHost("zapbridge.tech", ROOT)).toBe(false);
+  });
+});
+
+describe("platformSubdomainRoots", () => {
+  it("当前根排在最前，遗留根按逗号拆开", () => {
+    expect(platformSubdomainRoots("urgizat.site", "zapbridge.site,zapbridge.xyz")).toEqual([
+      "urgizat.site",
+      "zapbridge.site",
+      "zapbridge.xyz",
+    ]);
+  });
+
+  it("去空白与空项，统一小写", () => {
+    expect(platformSubdomainRoots(" URGIZAT.site ", " ZapBridge.site , ,")).toEqual([
+      "urgizat.site",
+      "zapbridge.site",
+    ]);
+  });
+
+  it("两者都未配置时返回空数组 —— 否则空串会把所有 host 判成平台自有", () => {
+    expect(platformSubdomainRoots(undefined, undefined)).toEqual([]);
+    expect(platformSubdomainRoots("", "")).toEqual([]);
+  });
+
+  it("只配遗留根也成立：更名后当前根尚未就绪时不能放开抢注", () => {
+    expect(platformSubdomainRoots(undefined, "zapbridge.site")).toEqual(["zapbridge.site"]);
+  });
+});
+
+describe("isPlatformOwnedHost", () => {
+  const ROOTS = ["urgizat.site", "zapbridge.site"];
+
+  it("当前根的 apex 与子域都算平台自有", () => {
+    expect(isPlatformOwnedHost("urgizat.site", ROOTS)).toBe(true);
+    expect(isPlatformOwnedHost("acme.urgizat.site", ROOTS)).toBe(true);
+  });
+
+  it("遗留根同样拦截 —— 通配 DNS 仍指向平台，抢注是真风险", () => {
+    expect(isPlatformOwnedHost("zapbridge.site", ROOTS)).toBe(true);
+    expect(isPlatformOwnedHost("competitor.zapbridge.site", ROOTS)).toBe(true);
+  });
+
+  it("大小写与首尾空白不影响判定", () => {
+    expect(isPlatformOwnedHost("  ACME.ZAPBRIDGE.SITE  ", ROOTS)).toBe(true);
+  });
+
+  it("仿冒后缀不放进来", () => {
+    expect(isPlatformOwnedHost("evilzapbridge.site", ROOTS)).toBe(false);
+    expect(isPlatformOwnedHost("zapbridge.site.evil.com", ROOTS)).toBe(false);
+  });
+
+  it("客户自有域名放行", () => {
+    expect(isPlatformOwnedHost("brand.com", ROOTS)).toBe(false);
+  });
+
+  it("根列表为空时一律放行", () => {
+    expect(isPlatformOwnedHost("acme.zapbridge.site", [])).toBe(false);
   });
 
   it("未配置 root 时一律返回 false（避免空串把所有 host 判成子域）", () => {

@@ -13,7 +13,7 @@ import {
 } from "@/lib/domains-db";
 import { addDomainToProject, type DnsRecord } from "@/lib/vercel";
 import { isMainlandChinaDomain, mainlandNsProvider, normalizeDomain } from "@/lib/domain";
-import { isPlatformSubdomainHost } from "@/lib/domains/subdomain";
+import { isPlatformOwnedHost, platformSubdomainRoots } from "@/lib/domains/subdomain";
 import { lookupNameservers } from "@/lib/domain-ns";
 import { recordMilestone } from "@/lib/platform-milestones";
 
@@ -44,11 +44,14 @@ export async function POST(request: Request) {
   }
 
   // 平台自有域名只能经 /api/domains/platform-subdomain 分配。不拦的话，任何人都能
-  // 手动添加 competitor.zapbridge.site 把别人的子域占住——DNS 验证虽永远不会通过，
-  // 但 domains.domain 的唯一约束会让真正的分配请求再也拿不到这个名字。
-  // apex 同样拒绝：它是平台演示位，不属于任何用户。
-  const subdomainRoot = (process.env.PLATFORM_SUBDOMAIN_ROOT ?? "").trim().toLowerCase();
-  if (subdomainRoot && (domain === subdomainRoot || isPlatformSubdomainHost(domain, subdomainRoot))) {
+  // 手动添加别人的子域把它占住——DNS 验证虽永远不会通过，但 domains.domain 的
+  // 唯一约束会让真正的分配请求再也拿不到这个名字。apex 同样拒绝：它不属于任何用户。
+  // 遗留根一并拦截：它已不再分配新子域，但通配 DNS 仍指向平台，抢注是真风险。
+  const platformRoots = platformSubdomainRoots(
+    process.env.PLATFORM_SUBDOMAIN_ROOT,
+    process.env.PLATFORM_SUBDOMAIN_LEGACY_ROOTS,
+  );
+  if (isPlatformOwnedHost(domain, platformRoots)) {
     return NextResponse.json({ error: ApiErrors.DOMAIN_RESERVED_SUFFIX }, { status: 400 });
   }
 
