@@ -21,7 +21,7 @@ export const templateIndustry = {
 
   byCategory: {
     beauty: {
-      metaTitle: "美妆个护落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "美妆个护落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向护肤、彩妆、美容仪器、生发与香氛品牌的留资落地页模板。把广告流量变成咨询对话，发布到自有域名，线索统一归集到一个收件箱。",
       h1: "美妆个护落地页模板",
@@ -53,7 +53,7 @@ export const templateIndustry = {
     },
 
     medical: {
-      metaTitle: "医疗诊所落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "医疗诊所落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向口腔、植发、医美、生殖与视力矫正诊所的问诊留资落地页模板。预约面诊、以表单或电话承接咨询，发布到诊所自有域名。",
       h1: "医疗诊所落地页模板",
@@ -85,7 +85,7 @@ export const templateIndustry = {
     },
 
     "local-service": {
-      metaTitle: "本地服务落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "本地服务落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向保洁、搬家、暖通维修、屋顶与园艺公司的报价留资落地页模板。以电话或表单承接订单，展示服务范围，发布到自有域名。",
       h1: "本地服务落地页模板",
@@ -115,7 +115,7 @@ export const templateIndustry = {
     },
 
     b2b: {
-      metaTitle: "B2B 与批发落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "B2B 与批发落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向 OEM 代工、工业设备、定制包装、货代与 SaaS 演示的询盘落地页模板。承接高质量商务询盘，发布到自有域名。",
       h1: "B2B 与批发落地页模板",
@@ -147,7 +147,7 @@ export const templateIndustry = {
     },
 
     education: {
-      metaTitle: "教育培训落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "教育培训落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向留学咨询、语言学校、在线课程与 K-12 辅导的招生留资落地页模板。承接试听与咨询预约，发布到自有域名。",
       h1: "教育培训落地页模板",
@@ -179,7 +179,7 @@ export const templateIndustry = {
     },
 
     supplement: {
-      metaTitle: "健康保健落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "健康保健落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向维生素、体重管理、助眠、关节与女性健康品牌的留资落地页模板。以合规导向的页面结构承接咨询与询盘。",
       h1: "健康保健落地页模板",
@@ -211,7 +211,7 @@ export const templateIndustry = {
     },
 
     apparel: {
-      metaTitle: "服饰配饰落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "服饰配饰落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向时装、大码、运动服、塑身衣与鞋类品牌的留资落地页模板。承接批发询盘、尺码咨询与新品候补登记，发布到自有域名。",
       h1: "服饰配饰落地页模板",
@@ -243,7 +243,7 @@ export const templateIndustry = {
     },
 
     gadget: {
-      metaTitle: "3C 数码落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "3C 数码落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向手机配件、充电、音频、可穿戴与智能家居产品的留资落地页模板。承接分销询盘、新品候补登记与售前咨询。",
       h1: "3C 数码落地页模板",
@@ -275,7 +275,7 @@ export const templateIndustry = {
     },
 
     home: {
-      metaTitle: "家居家纺落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "家居家纺落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向收纳、厨房、宠物、园艺与床品品牌的留资落地页模板。承接咨询、报价与批发询盘，发布到自有域名。",
       h1: "家居家纺落地页模板",
@@ -307,7 +307,7 @@ export const templateIndustry = {
     },
 
     "toys-baby": {
-      metaTitle: "玩具母婴落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "玩具母婴落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向益智玩具、感统玩具、喂养、孕产与户外玩具品牌的留资落地页模板。以安全信息前置的结构承接家长咨询与批发询盘。",
       h1: "玩具母婴落地页模板",
@@ -339,7 +339,7 @@ export const templateIndustry = {
     },
 
     "home-improvement": {
-      metaTitle: "家装落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "家装落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向太阳能与家装施工商的报价留资落地页模板。承接勘测预约与报价申请，发布到自有品牌域名。",
       h1: "家装落地页模板",
@@ -369,7 +369,7 @@ export const templateIndustry = {
     },
 
     legal: {
-      metaTitle: "法律移民落地页模板（{count} 套）| Zap Bridge",
+      metaTitle: "法律移民落地页模板（{count} 套）| Urgizat",
       metaDescription:
         "{count} 套面向移民与律师事务所的案件咨询落地页模板。承接资格评估与面谈预约，发布到律所自有域名。",
       h1: "法律移民落地页模板",

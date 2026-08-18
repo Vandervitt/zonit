@@ -12,7 +12,7 @@ import "./globals.css";
 // 提供绝对 canonical/OG，故此处以主站为 base 不会影响其归属。
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Zap Bridge",
+  title: "Urgizat",
   description: "Build and publish high-converting landing pages on your own domain.",
   icons: { icon: "/brand-mark.svg" },
 };

@@ -45,7 +45,7 @@ export const leads: HelpChapterData = {
           t: "steps",
           items: [
             { title: "配置地址", desc: "「设置」→「线索通知」→ 填入你的 Webhook URL（如 Zapier 的 Catch Hook 地址）并开启。" },
-            { title: "保存签名密钥", desc: "首次开启会生成签名密钥（secret），只显示一次，请立即保存。用于在你的接收端校验请求确实来自 Zap Bridge。" },
+            { title: "保存签名密钥", desc: "首次开启会生成签名密钥（secret），只显示一次，请立即保存。用于在你的接收端校验请求确实来自 Urgizat。" },
             { title: "接收与验证", desc: "新线索产生时系统实时 POST JSON 数据到你的地址，请求带签名头；投递失败会自动重试。" },
           ],
         },

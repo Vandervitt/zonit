@@ -3,17 +3,17 @@ import type { EmailDictionary } from "./en";
 // 中文侧沿用改造前的原文案，不趁国际化顺手改词。
 export const emails = {
   otp: {
-    subject: (code: string) => `Zap Bridge 登录验证码：${code}`,
+    subject: (code: string) => `Urgizat 登录验证码：${code}`,
     heading: "登录验证码",
-    intro: "使用以下验证码登录 Zap Bridge。验证码 10 分钟内有效，请勿泄露给他人。",
+    intro: "使用以下验证码登录 Urgizat。验证码 10 分钟内有效，请勿泄露给他人。",
     ignore: "如果你没有尝试登录，请忽略这封邮件，你的账号是安全的。",
   },
 
   welcome: {
-    subject: "欢迎加入 Zap Bridge，3 步上线你的第一张获客落地页",
+    subject: "欢迎加入 Urgizat，3 步上线你的第一张获客落地页",
     heading: (greeting: string) => `欢迎，${greeting} 👋`,
     fallbackGreeting: "你好",
-    intro: "Zap Bridge 帮你不写代码、几分钟做出一张能跑广告、能收线索的出海落地页。三步就能跑通：",
+    intro: "Urgizat 帮你不写代码、几分钟做出一张能跑广告、能收线索的出海落地页。三步就能跑通：",
     steps: [
       ["1. 建页", "选行业模板，或 AI 一句话生成整页"],
       ["2. 发布", "先用平台提供的地址，或绑定自己的品牌域名让投放更可信"],
@@ -24,7 +24,7 @@ export const emails = {
   },
 
   invitation: {
-    subject: "你被邀请加入 Zap Bridge",
+    subject: "你被邀请加入 Urgizat",
     heading: "你被邀请加入",
     cta: "接受邀请",
     validity: (duration: string) => `该链接 ${duration}内有效。`,

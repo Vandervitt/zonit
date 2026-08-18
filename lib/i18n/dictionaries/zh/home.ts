@@ -2,7 +2,7 @@
 // 数量一律用 {templates} / {industries} 占位符，由 lib/templates/stats.ts 按注册表实际内容替换。
 export const home = {
   meta: {
-    title: "Zap Bridge — 把访客变成能打通的联系方式",
+    title: "Urgizat — 把访客变成能打通的联系方式",
     description:
       "为海外获客打造的留资落地页：{templates} 套模板覆盖 {industries} 个行业，AI 整页成稿，几分钟出第一版。表单线索自动进收件箱，WhatsApp 与电话咨询的点击和来源也一样看得清。",
     ogDescription:

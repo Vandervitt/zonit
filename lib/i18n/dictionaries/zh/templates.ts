@@ -1,9 +1,9 @@
 export const templates = {
   meta: {
-    title: "{templates} 套海外获客落地页模板 — 按行业挑选，直接开始 | Zap Bridge",
+    title: "{templates} 套海外获客落地页模板 — 按行业挑选，直接开始 | Urgizat",
     description:
       "覆盖 {industries} 个行业的海外获客落地页模板：牙科诊所与医疗、法律移民、教育培训、家装与本地服务、B2B 批发与工厂，以及美妆、服饰、3C、家居、保健、母婴。留资渠道可选表单、WhatsApp、电话、邮箱或 Telegram，一键切换，合规页脚开箱即用。",
-    ogTitle: "{templates} 套海外获客落地页模板 | Zap Bridge",
+    ogTitle: "{templates} 套海外获客落地页模板 | Urgizat",
     ogDescription: "按行业挑一套获客落地页模板，改内容、绑域名、发布上线——不用从空白页开始。",
   },
   gallery: {

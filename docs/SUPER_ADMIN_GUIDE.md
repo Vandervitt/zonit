@@ -1,6 +1,6 @@
-# Zap Bridge Super Admin 操作指南
+# Urgizat Super Admin 操作指南
 
-本指南介绍如何配置、初始化以及使用 Zap Bridge 的平台超级管理后台。
+本指南介绍如何配置、初始化以及使用 Urgizat 的平台超级管理后台。
 
 > **两套后台不要混淆**
 > - `/admin` —— **租户工作台**，每个注册用户登录后都能进，用于管理自己的落地页、线索、域名、媒体与计费。
@@ -41,7 +41,7 @@
 
 ```bash
 # 支持多个邮箱，用英文逗号分隔
-ADMIN_EMAILS=your-name@example.com,admin@zapbridge.tech
+ADMIN_EMAILS=your-name@example.com,admin@urgizat.com
 ```
 
 ### 第三步：登录激活

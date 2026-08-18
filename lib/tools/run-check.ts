@@ -18,7 +18,7 @@ import {
   type PageCheckReport,
 } from "./report";
 
-export const CHECKER_UA = "ZapBridgeLandingPageCheck";
+export const CHECKER_UA = "UrgizatLandingPageCheck";
 
 /** 读取 robots.txt；拿不到一律视为允许（「读不到」不等于「被禁止」）。 */
 async function loadRobots(target: URL): Promise<string> {

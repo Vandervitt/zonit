@@ -9,7 +9,7 @@
 export const tools = {
   check: {
     meta: {
-      title: "落地页自检器——看看审核到底在看什么 | Zap Bridge",
+      title: "落地页自检器——看看审核到底在看什么 | Urgizat",
       description:
         "贴一个落地页地址，看审核常盯的那些地方在你这页上是什么情况：政策链接、跳转链、联系方式，以及追踪是否可能在同意前触发。不打分、不判过审，只陈述事实。",
     },
@@ -36,7 +36,7 @@ export const tools = {
   },
 
   report: {
-    metaTitle: "落地页检查 — {host} | Zap Bridge",
+    metaTitle: "落地页检查 — {host} | Urgizat",
     kicker: "检查结果",
     title: "审核常看的那些地方",
     checkedUrl: "已检查",
@@ -54,7 +54,7 @@ export const tools = {
     empty: "在我们能从页面外部做的检查里，没有发现值得特别指出的项。",
     rerun: "检查另一张页面",
     ctaTitle: "你要做的是页面本身，而不是体检？",
-    ctaBody: "Zap Bridge 的模板自带合规页脚、真实的隐私政策，以及不依赖像素触发的留资链路。",
+    ctaBody: "Urgizat 的模板自带合规页脚、真实的隐私政策，以及不依赖像素触发的留资链路。",
     ctaTemplates: "浏览模板",
     ctaAntiBan: "了解反同质化怎么做",
     readMore: "延伸阅读",

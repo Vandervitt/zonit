@@ -8,5 +8,5 @@
 export function BrandMark({ className }: { className?: string }) {
   // 品牌图标为自带配色的静态 SVG，用原生 <img> 引用单一源文件即可，无需 next/image 优化。
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src="/brand-mark.svg" alt="Zap Bridge" className={className} />;
+  return <img src="/brand-mark.svg" alt="Urgizat" className={className} />;
 }

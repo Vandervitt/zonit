@@ -25,7 +25,7 @@ export async function guideDetailMetadata(slug: string, locale: Locale): Promise
   if (!g) return {};
   return marketingMetadata({
     locale,
-    title: `${g.title} | Zap Bridge`,
+    title: `${g.title} | Urgizat`,
     description: g.description,
     path: guideDetailPath(g.slug),
     ogTitle: g.title,

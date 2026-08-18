@@ -1,7 +1,7 @@
 // lib/seo/landing-jsonld.ts
 // 租户落地页（/p/[slug]，客户自有域名）结构化数据：从落地页 schema 派生
 // FAQPage 与 Organization JSON-LD，用于 SEO 富媒体与 GEO（被 AI 摘要引用）。
-// 注入的是「客户品牌 + 客户域名」实体，绝不使用平台 Zap Bridge 实体。
+// 注入的是「客户品牌 + 客户域名」实体，绝不使用平台 Urgizat 实体。
 // 合规：schema 无评分字段，故不产出 Review/AggregateRating（不伪造评分）。
 import type { LandingPageDraft, LandingSection } from "@/types/schema.draft";
 

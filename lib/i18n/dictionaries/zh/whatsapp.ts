@@ -3,7 +3,7 @@
 // 全站通用——WhatsApp / 电话一律说「点击」，不得说「线索」。
 export const whatsapp = {
   meta: {
-    title: "WhatsApp 落地页：让广告点击变成聊得起来的对话 | Zap Bridge",
+    title: "WhatsApp 落地页：让广告点击变成聊得起来的对话 | Urgizat",
     description:
       "别再把广告直接投到裸 wa.me 链接：{whatsappTemplates} 套模板覆盖 {whatsappIndustries} 个行业，点开 WhatsApp 时开场白已经写好，每一次点击都能追回到具体广告，审核要看的政策页第一次发布就在。",
     ogTitle: "WhatsApp 落地页 — 从广告点击到对话",

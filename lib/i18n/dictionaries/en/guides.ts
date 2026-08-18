@@ -1,9 +1,9 @@
 export const guides = {
   meta: {
-    title: "Lead-gen landing page guides — campaigns, compliance, attribution | Zap Bridge",
+    title: "Lead-gen landing page guides — campaigns, compliance, attribution | Urgizat",
     description:
       "Practical guides for anyone running lead-gen campaigns: keeping ad landing pages out of rejection, building pages that capture inquiries, and conversion attribution (pixels / UTM / CAPI) — so your traffic lands on pages that convert and can be attributed.",
-    ogTitle: "Lead-gen landing page guides | Zap Bridge",
+    ogTitle: "Lead-gen landing page guides | Urgizat",
   },
   list: {
     kicker: "Guides",

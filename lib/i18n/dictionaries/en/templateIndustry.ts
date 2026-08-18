@@ -57,7 +57,7 @@ export const templateIndustry = {
 
   byCategory: {
     beauty: {
-      metaTitle: "Beauty & personal care landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Beauty & personal care landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} lead-gen landing page templates for skincare, makeup, beauty device, hair care, and fragrance brands. Turn ad traffic into consultations and inquiries, publish to your own domain, and keep every lead in one inbox.",
       h1: "Beauty & personal care landing page templates",
@@ -89,7 +89,7 @@ export const templateIndustry = {
     },
 
     medical: {
-      metaTitle: "Medical & clinic landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Medical & clinic landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} patient-inquiry landing page templates for dental, hair restoration, aesthetic medicine, fertility, and vision correction clinics. Book consultations, capture inquiries by form or phone, and publish to your own clinic domain.",
       h1: "Medical & clinic landing page templates",
@@ -121,7 +121,7 @@ export const templateIndustry = {
     },
 
     "local-service": {
-      metaTitle: "Local services landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Local services landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} quote-request landing page templates for cleaning, moving, HVAC, roofing, and landscaping businesses. Capture jobs by phone or form, show your service area, and publish to your own domain.",
       h1: "Local services landing page templates",
@@ -151,7 +151,7 @@ export const templateIndustry = {
     },
 
     b2b: {
-      metaTitle: "B2B & wholesale landing page templates ({count}) | Zap Bridge",
+      metaTitle: "B2B & wholesale landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} inquiry and RFQ landing page templates for OEM manufacturing, industrial equipment, custom packaging, freight forwarding, and SaaS demos. Capture qualified business inquiries and publish to your own domain.",
       h1: "B2B & wholesale landing page templates",
@@ -183,7 +183,7 @@ export const templateIndustry = {
     },
 
     education: {
-      metaTitle: "Education & training landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Education & training landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} enrolment inquiry landing page templates for study abroad consultancies, language schools, online course providers, and K-12 tutoring. Book trial classes and consultations, and publish to your own domain.",
       h1: "Education & training landing page templates",
@@ -215,7 +215,7 @@ export const templateIndustry = {
     },
 
     supplement: {
-      metaTitle: "Health & supplement landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Health & supplement landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} lead-gen landing page templates for vitamins, weight management, sleep, joint health, and women's health brands. Capture consultations and inquiries with a compliance-aware page structure.",
       h1: "Health & supplement landing page templates",
@@ -247,7 +247,7 @@ export const templateIndustry = {
     },
 
     apparel: {
-      metaTitle: "Apparel & accessories landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Apparel & accessories landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} lead-gen landing page templates for fashion, plus-size, activewear, shapewear, and footwear brands. Capture wholesale inquiries, fit consultations, and waitlist signups on your own domain.",
       h1: "Apparel & accessories landing page templates",
@@ -279,7 +279,7 @@ export const templateIndustry = {
     },
 
     gadget: {
-      metaTitle: "Consumer tech landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Consumer tech landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} lead-gen landing page templates for phone accessories, charging, audio, wearables, and smart home products. Capture distributor inquiries, pre-launch signups, and product consultations.",
       h1: "Consumer tech landing page templates",
@@ -311,7 +311,7 @@ export const templateIndustry = {
     },
 
     home: {
-      metaTitle: "Home & living landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Home & living landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} lead-gen landing page templates for storage, kitchen, pet, garden, and bedding brands. Capture consultations, quotes, and wholesale inquiries, and publish to your own domain.",
       h1: "Home & living landing page templates",
@@ -343,7 +343,7 @@ export const templateIndustry = {
     },
 
     "toys-baby": {
-      metaTitle: "Toys & baby landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Toys & baby landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} lead-gen landing page templates for educational toys, sensory toys, feeding, maternity, and outdoor play brands. Capture parent inquiries and wholesale requests with safety-first page structure.",
       h1: "Toys & baby landing page templates",
@@ -375,7 +375,7 @@ export const templateIndustry = {
     },
 
     "home-improvement": {
-      metaTitle: "Home improvement landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Home improvement landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} quote-request landing page template for solar and home improvement installers. Capture assessment bookings and quote requests, and publish to your own brand domain.",
       h1: "Home improvement landing page templates",
@@ -405,7 +405,7 @@ export const templateIndustry = {
     },
 
     legal: {
-      metaTitle: "Legal & immigration landing page templates ({count}) | Zap Bridge",
+      metaTitle: "Legal & immigration landing page templates ({count}) | Urgizat",
       metaDescription:
         "{count} case-inquiry landing page template for immigration and legal practices. Capture eligibility assessments and consultation bookings, and publish to your own firm domain.",
       h1: "Legal & immigration landing page templates",

@@ -39,7 +39,7 @@
 | 变量 | 用途 | 获取 |
 |---|---|---|
 | `AUTH_SECRET` | next-auth 会话加密 | `openssl rand -base64 32` —— **须重新生成（历史已泄露）** |
-| `NEXTAUTH_URL` | 邀请邮件链接基址，`lib/email.ts` | 生产应用地址，如 `https://app.zapbridge.com` |
+| `NEXTAUTH_URL` | 邀请邮件链接基址，`lib/email.ts` | 生产应用地址，如 `https://app.urgizat.com` |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google OAuth，`auth.ts` | Google Cloud Console —— **secret 须轮换**；回调加 `<域名>/api/auth/callback/google` |
 | `ADMIN_EMAILS` | 逗号分隔，登录即授予 ADMIN，`auth.ts:153` | 平台管理员邮箱列表 |
 
@@ -54,6 +54,19 @@
 | `VERCEL_TEAM_ID` 🟡 | 同上，仅 **Team 账号**需要；个人账号可不配（`lib/vercel.ts` 缺失则省略 `teamId` 参数）| 团队 Settings |
 
 > `VERCEL_API_TOKEN` / `VERCEL_PROJECT_ID` 缺任意一个 → 用户「发布到自有域名」必失败，整个价值主张断在最后一步。
+
+### 平台子域池 🟡（试用期零门槛发布）
+
+| 变量 | 用途 | 获取 |
+|---|---|---|
+| `PLATFORM_SUBDOMAIN_ROOT` | 分配新子域的根域（如 `zapbridge.site`），`app/api/domains/platform-subdomain/route.ts`；同时用于 apex 重定向与「阻止用户手动认领」| 子域池根域，需配通配 DNS 指向平台 |
+| `PLATFORM_SUBDOMAIN_LEGACY_ROOTS` | 逗号分隔的**遗留根**。已停止分配但存量子域仍在服务的旧根，`lib/domains/subdomain.ts` | 仅在更换子域池根域后才需要 |
+
+> 未配 `PLATFORM_SUBDOMAIN_ROOT` → 平台子域功能整体关闭（用户必须自带域名才能发布）。
+>
+> ⚠️ 遗留根**必须**继续列在 `PLATFORM_SUBDOMAIN_LEGACY_ROOTS` 里：通配 DNS 仍指向平台，
+> 不列的话他人可手动添加 `competitor.<旧根>` 且 DNS 验证会真的通过，`domains.domain`
+> 的唯一约束会让存量子域再也无法被重新分配。
 
 ### 媒体上传 🔴
 

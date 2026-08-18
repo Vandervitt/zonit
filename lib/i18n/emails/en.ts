@@ -5,18 +5,18 @@
 // 邮件是异步发送的，没有请求上下文可读 cookie。
 export const emails = {
   otp: {
-    subject: (code: string) => `Zap Bridge sign-in code: ${code}`,
+    subject: (code: string) => `Urgizat sign-in code: ${code}`,
     heading: "Your sign-in code",
-    intro: "Use this code to sign in to Zap Bridge. It's valid for 10 minutes — don't share it with anyone.",
+    intro: "Use this code to sign in to Urgizat. It's valid for 10 minutes — don't share it with anyone.",
     ignore: "If you didn't try to sign in, ignore this email; your account is safe.",
   },
 
   welcome: {
-    subject: "Welcome to Zap Bridge — your first lead-gen page in 3 steps",
+    subject: "Welcome to Urgizat — your first lead-gen page in 3 steps",
     heading: (greeting: string) => `Welcome, ${greeting} 👋`,
     fallbackGreeting: "there",
     intro:
-      "Zap Bridge gets you a landing page that runs ads and captures leads in minutes, no code required. Three steps to the whole loop:",
+      "Urgizat gets you a landing page that runs ads and captures leads in minutes, no code required. Three steps to the whole loop:",
     steps: [
       ["1. Build it", "pick an industry template, or let AI write the page from one sentence"],
       ["2. Publish it", "start on a platform address, or connect your own brand domain for more credible campaigns"],
@@ -27,7 +27,7 @@ export const emails = {
   },
 
   invitation: {
-    subject: "You've been invited to Zap Bridge",
+    subject: "You've been invited to Urgizat",
     heading: "You've been invited",
     cta: "Accept the invitation",
     validity: (duration: string) => `This link is valid for ${duration}.`,

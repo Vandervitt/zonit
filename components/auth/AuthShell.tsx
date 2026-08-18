@@ -25,7 +25,7 @@ export function AuthShell({ locale, children }: { locale: Locale; children: Reac
       <div className="absolute inset-x-0 top-0 flex items-center justify-between px-6 py-4 text-sm">
         <Link href={localePath(locale, Routes.Home)} className="flex items-center gap-2">
           <BrandMark className="h-6 w-6 rounded-md" />
-          <span className="font-semibold text-foreground">Zap Bridge</span>
+          <span className="font-semibold text-foreground">Urgizat</span>
         </Link>
         <LocaleSwitcher
           locale={locale}

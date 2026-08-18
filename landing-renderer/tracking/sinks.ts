@@ -60,7 +60,7 @@ export class PixelSink implements EventSink {
   }
 }
 
-/** first-party 采集 sink：匿名事件回传 Zap Bridge，独立于第三方像素与同意条。 */
+/** first-party 采集 sink：匿名事件回传 Urgizat，独立于第三方像素与同意条。 */
 export class BeaconSink implements EventSink {
   /**
    * 一律走同源相对路径：租户自有域名下 /api/track 由 tenant-proxy 白名单直通

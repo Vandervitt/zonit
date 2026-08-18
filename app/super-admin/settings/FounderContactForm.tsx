@@ -73,7 +73,7 @@ export function FounderContactForm({ initial }: { initial: FounderContact }) {
           extra="用户点「发邮件」时的收件地址；留空则不展示发邮件按钮。"
           rules={[{ type: "email", message: "请填写合法邮箱地址", transform: (v) => v || undefined }]}
         >
-          <Input prefix={<MailOutlined />} placeholder="support@zapbridge.tech" allowClear />
+          <Input prefix={<MailOutlined />} placeholder="support@urgizat.com" allowClear />
         </Form.Item>
 
         <Form.Item style={{ marginBottom: 0 }}>

@@ -202,7 +202,7 @@ export const nodeTransport: Transport = async (url, addresses) => {
       headers: {
         // 明确身份，便于被检查方识别与联系（设计文档风险表）
         "user-agent":
-          "ZapBridgeLandingPageCheck/1.0 (+https://zapbridge.tech/tools/landing-page-check)",
+          "UrgizatLandingPageCheck/1.0 (+https://urgizat.com/tools/landing-page-check)",
         accept: "text/html,application/xhtml+xml",
         // 只要明文：我们不省流量，解压只增加出错面。
         // ⚠️ 服务器可以无视它（实测就有），所以下面仍必须按 content-encoding 解压。
