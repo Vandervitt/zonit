@@ -84,7 +84,7 @@
 
    落地页那 5 处最需要注意——它印在**客户的公开页面上**，对外露出最广：
    - `landing-renderer/Watermark.tsx` —— Free/Starter 套餐右下角「Made with Zap Bridge」角标，共 3 处（含 `aria-label`）
-   - `landing-renderer/variant.ts:48` —— 反同质化检测的 `META_TOKENS = ["Zap Bridge", "Zap Bridge Sites", …]`，改名后旧 token 要保留还是替换需确认（存量已发布页的 meta 里可能还带旧 token）
+   - `landing-renderer/variant.ts:48` —— 反同质化检测的 `META_TOKENS = ["Zap Bridge", "Zap Bridge Sites", …]`。**已决策：旧 token 保留，新 token 追加**。存量已发布页的 meta 里带的是旧 token，删掉会让它们漏检；这个数组是检测白名单不是对外文案，留着旧值是功能需要，不算遗留脏数据。
    - `landing-renderer/tracking/sinks.ts:63` —— 注释
 
 5. **`lib/i18n` 是重灾区，79 处 / 28 文件**。`brand: "Zap Bridge"` 虽在 `lib/i18n/dictionaries/{en,zh}/common.ts:2` 定义为事实源，但**大量文案把品牌名硬编码进了句子里**，密度最高的是 `templateIndustry.ts`（中英各 12 处）、`emails/{zh,en}.ts`（各 5 处）、`auth.ts`（各 4 处）。改名时应顺手把这些改成引用 `common.brand`，否则下次再改还是散的。
