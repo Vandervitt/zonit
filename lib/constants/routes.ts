@@ -63,6 +63,8 @@ export const templateIndustryPath = (category: string) => `/templates/industry/$
 export const guideDetailPath = (slug: string) => `/guides/${slug}`;
 /** 自检报告页。id 不可猜测，页面 noindex——报告是他人页面的检查结果。 */
 export const pageCheckReportPath = (id: string) => `/tools/landing-page-check/r/${id}`;
+/** 多页对比报告页。与单页报告同样是「持有链接即可见」且 noindex。 */
+export const pageCheckBatchPath = (id: string) => `/tools/landing-page-check/b/${id}`;
 
 export const apiMediaPath = (id: string) => `/api/media/${id}`;
 

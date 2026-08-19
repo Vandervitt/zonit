@@ -78,6 +78,61 @@ export const tools = {
     },
   },
 
+  /** 多页横向对比报告。 */
+  compare: {
+    metaTitle: "落地页横向对比 — {count} 张页 | Urgizat",
+    kicker: "横向对比",
+    title: "同一套检查，跑在 {count} 张页上",
+    createdAt: "运行于 {date}",
+    shareNotice: "任何持有此链接的人都能查看这份对比。它不会被搜索引擎收录，30 天后自动删除。",
+    // 与单页报告同源的免责声明；多页更容易被读成排名，所以说得更直白。
+    disclaimer:
+      "这是一份观察清单，不是排名。我们不给页面打分，也不告诉你哪张最差——每列顶上的数字只是「有几张页在这一项上值得看看」。",
+    attentionCount: "{total} 张中 {n} 张",
+    unknownCount: "{n} 张看不出",
+    noAttention: "无",
+    blockedRow: "未检查成功 — 见该页报告",
+    openReport: "完整报告",
+    empty: "这份对比已过期。",
+    rerun: "再跑一次对比",
+    dimensions: {
+      privacy: "隐私政策",
+      terms: "服务条款",
+      consent: "跟踪与同意",
+      contact: "联系方式",
+      viewport: "移动端 viewport",
+      hops: "跳转",
+      weight: "页面体积",
+      scripts: "阻塞脚本",
+      copyright: "页脚年份",
+    },
+    ctaTitle: "手上不止一个客户？",
+    ctaBody:
+      "Urgizat 给每个客户一张自己的页、一个自己的域名，页脚合规，留资不依赖像素是否触发。",
+    ctaTemplates: "浏览模板",
+    ctaAntiBan: "看看反同质化怎么做",
+  },
+
+  /** 多页对比的提交表单。 */
+  batchForm: {
+    heading: "一次比对多张页",
+    body: "在帮多个客户看页？每行一个网址，最多 {max} 个，一次并排比出来。",
+    label: "落地页网址，每行一个",
+    placeholder: "https://client-one.com/offer\nhttps://client-two.com/quote",
+    submit: "开始对比",
+    submitting: "正在检查 {n} 张页…",
+    note: "每个网址与单页检查共用同一份每小时额度。",
+    errors: {
+      too_few_urls: "至少填两个网址才能对比。",
+      too_many_urls: "一次最多对比 {max} 张页。",
+      duplicate_url: "有一个网址填了两遍。",
+      invalid_url: "其中有一个不是我们能检查的网址。",
+      rate_limited: "你刚跑过几次检查，稍后再试。",
+      check_failed: "其中有一张页抓不到。",
+      generic: "出了点问题。",
+    },
+  },
+
   /**
    * 每条 finding 的文案。key 必须与 lib/tools/report.ts 产出的 id 完全一致，
    * 由 tools.test.ts 断言覆盖——漏一条就是页面上出现一个空白条目。

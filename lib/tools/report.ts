@@ -229,3 +229,46 @@ function sortFindings(findings: Finding[]): Finding[] {
   const rank: Record<FindingLevel, number> = { attention: 0, unknown: 1, info: 2 };
   return [...findings].sort((a, b) => rank[a.level] - rank[b.level]);
 }
+
+/**
+ * 对比维度：多页横向对比表的列。
+ *
+ * ⚠️ **这是一处「按名字工作」的逻辑**——键是 finding id，改 id 会静默让某一列
+ * 全变空白（表还是渲染出来，只是那一格永远没数据），测试不会自己报错。
+ * 故意放在本文件、紧挨 finding id 的产生处，改 id 时能一眼看到要同步改这里；
+ * `compare.test.ts` 断言「每个 finding id 都必须在这张表里或在显式豁免名单里」，
+ * 新增 finding 而忘了归类会当场变红。
+ */
+export const FINDING_DIMENSION: Record<string, string> = {
+  privacy_missing: "privacy",
+  privacy_broken: "privacy",
+  privacy_ok: "privacy",
+  terms_missing: "terms",
+  terms_broken: "terms",
+  terms_ok: "terms",
+  contact_missing: "contact",
+  contact_ok: "contact",
+  viewport_missing: "viewport",
+  viewport_zoom_blocked: "viewport",
+  viewport_ok: "viewport",
+  pixel_before_consent_suspected: "consent",
+  pixel_before_consent_verified: "consent",
+  pixel_no_fire_before_consent_verified: "consent",
+  pixel_with_cmp: "consent",
+  pixel_not_found_in_html: "consent",
+  redirect_chain: "hops",
+  page_heavy: "weight",
+  blocking_scripts: "scripts",
+  copyright_stale: "copyright",
+};
+
+/**
+ * 不进对比表的 finding。
+ * 这三条是「这一页整体没检查成」的状态，不是某个可横向比较的维度——
+ * 塞进表里会让那一行的其余格子显示成「正常」，读者会以为检查过了。
+ */
+export const UNCOMPARABLE_FINDINGS = new Set([
+  "fetch_failed",
+  "robots_disallows_check",
+  "final_status_error",
+]);

@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { replaySpooledLeads } from "@/lib/leads/spool";
 import { computeLeadNudges, markNudged } from "@/lib/leads/nudge";
 import { pruneRateLimitHits } from "@/lib/rate-limit-db";
-import { pruneExpiredReports } from "@/lib/tools/store";
+import { pruneExpiredReports, pruneExpiredBatches } from "@/lib/tools/store";
 import { touchSnapshot } from "@/lib/tools/sandbox-check";
 import { consumeSandboxBudget } from "@/lib/tools/sandbox-budget";
 import { getRetryableEvents } from "@/lib/capi/events-store";
@@ -113,6 +113,9 @@ export async function GET(request: NextRequest) {
   // 限频计数行清理：留 24 小时足够任何窗口回看，再久只是占空间。
   try {
     result.rateLimitPruned = await pruneRateLimitHits();
+    // 先删批次再删报告：批次内的报告仍在保留期时不该被批次的过期时间连带删掉，
+    // 而反过来报告过期时 batch_items 会级联清掉，两者都不会留下悬空引用。
+    result.pageCheckBatchesPruned = await pruneExpiredBatches();
     result.pageCheckReportsPruned = await pruneExpiredReports();
   } catch (err) {
     console.error("cron/daily rate-limit-prune failed:", err);

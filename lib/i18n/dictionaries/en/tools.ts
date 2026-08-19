@@ -82,6 +82,62 @@ export const tools = {
     },
   },
 
+  /** 多页横向对比报告。 */
+  compare: {
+    metaTitle: "Landing page comparison — {count} pages | Urgizat",
+    kicker: "Comparison",
+    title: "The same checks across {count} pages",
+    createdAt: "Run on {date}",
+    shareNotice:
+      "Anyone with this link can view this comparison. It is not indexed by search engines and is deleted after 30 days.",
+    // 与单页报告同源的免责声明：多页更容易被读成排名，所以说得更直白。
+    disclaimer:
+      "This is a list of observations, not a ranking. We don't score pages and we don't tell you which one is worst — the count at the top of each column is just how many pages have something worth looking at there.",
+    attentionCount: "{n} of {total}",
+    unknownCount: "{n} unclear",
+    noAttention: "None",
+    blockedRow: "Not checked — see the report",
+    openReport: "Full report",
+    empty: "This comparison has expired.",
+    rerun: "Run another comparison",
+    dimensions: {
+      privacy: "Privacy policy",
+      terms: "Terms",
+      consent: "Tracking vs consent",
+      contact: "Contact details",
+      viewport: "Mobile viewport",
+      hops: "Redirects",
+      weight: "Page weight",
+      scripts: "Blocking scripts",
+      copyright: "Footer year",
+    },
+    ctaTitle: "Running pages for more than one client?",
+    ctaBody:
+      "Urgizat gives every client their own page and their own domain, with a compliant footer and lead capture that doesn't depend on a pixel firing.",
+    ctaTemplates: "Browse templates",
+    ctaAntiBan: "See how anti-duplication works",
+  },
+
+  /** 多页对比的提交表单。 */
+  batchForm: {
+    heading: "Compare several pages at once",
+    body: "Checking pages for more than one client? Paste up to {max} URLs, one per line, and get them side by side.",
+    label: "Landing page URLs, one per line",
+    placeholder: "https://client-one.com/offer\nhttps://client-two.com/quote",
+    submit: "Compare pages",
+    submitting: "Checking {n} pages…",
+    note: "Each URL counts towards the same hourly limit as a single check.",
+    errors: {
+      too_few_urls: "Enter at least two URLs to compare.",
+      too_many_urls: "You can compare up to {max} pages at a time.",
+      duplicate_url: "The same URL appears twice.",
+      invalid_url: "One of those isn't a URL we can check.",
+      rate_limited: "You've run a few checks recently. Try again later.",
+      check_failed: "One of those pages couldn't be reached.",
+      generic: "Something went wrong.",
+    },
+  },
+
   /**
    * 每条 finding 的文案。key 必须与 lib/tools/report.ts 产出的 id 完全一致，
    * 由 tools.test.ts 断言覆盖——漏一条就是页面上出现一个空白条目。

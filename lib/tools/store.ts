@@ -111,3 +111,77 @@ export async function pruneExpiredReports(): Promise<number> {
   const res = await pool.query(`DELETE FROM page_check_reports WHERE expires_at <= now()`);
   return res.rowCount ?? 0;
 }
+
+/**
+ * 建一个批次并挂上已存在的报告。
+ *
+ * 报告先各自存好、批次只负责分组（见迁移 047 注释）——因此本函数不接收报告内容，
+ * 只接收 id 列表，顺序即用户提交顺序。
+ */
+export async function saveBatch(input: {
+  reportIds: string[];
+  locale: string;
+  ip: string;
+}): Promise<string> {
+  const id = newReportId();
+  const expires = new Date(Date.now() + RETENTION_DAYS * 24 * 3600 * 1000);
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      `INSERT INTO page_check_batches (id, locale, ip_hash, expires_at) VALUES ($1,$2,$3,$4)`,
+      [id, input.locale, hashIp(input.ip), expires],
+    );
+    // 一条 INSERT 带多组值：批次最多 5 条，展开成数组参数比循环往返省事也更原子。
+    await client.query(
+      `INSERT INTO page_check_batch_items (batch_id, report_id, position)
+       SELECT $1, rid, ord - 1
+         FROM unnest($2::text[]) WITH ORDINALITY AS t(rid, ord)`,
+      [id, input.reportIds],
+    );
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+  return id;
+}
+
+/**
+ * 读批次内的全部报告，按提交顺序。
+ *
+ * 报告被 cron 清理时 batch_items 会级联删除，所以这里拿到的必然是仍然存在的报告；
+ * 批次本身尚未过期但报告已过期的情况下会返回空数组，由调用方按 404 处理。
+ */
+export async function getBatchReports(id: string): Promise<StoredReport[]> {
+  const res = await pool.query(
+    `SELECT r.id, r.input_url, r.final_url, r.locale, r.status, r.bytes, r.hops,
+            r.findings, r.browser_verified, r.created_at
+       FROM page_check_batches b
+       JOIN page_check_batch_items i ON i.batch_id = b.id
+       JOIN page_check_reports r ON r.id = i.report_id
+      WHERE b.id = $1 AND b.expires_at > now() AND r.expires_at > now()
+      ORDER BY i.position`,
+    [id],
+  );
+  return res.rows.map((row) => ({
+    id: row.id,
+    inputUrl: row.input_url,
+    finalUrl: row.final_url,
+    locale: row.locale,
+    status: row.status,
+    bytes: row.bytes,
+    hops: row.hops,
+    findings: row.findings,
+    browserVerified: row.browser_verified,
+    createdAt: new Date(row.created_at).toISOString(),
+  }));
+}
+
+/** 清理过期批次；供 cron 每日调用（items 随外键级联删除）。 */
+export async function pruneExpiredBatches(): Promise<number> {
+  const res = await pool.query(`DELETE FROM page_check_batches WHERE expires_at <= now()`);
+  return res.rowCount ?? 0;
+}
