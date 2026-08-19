@@ -7,6 +7,7 @@ import { marketingMetadata } from "@/lib/seo/site";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import { PageCheckForm } from "./PageCheckForm";
+import { PageCheckBatchForm } from "./PageCheckBatchForm";
 import { getGuide } from "@/app/guides/_content";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -32,6 +33,7 @@ const RELATED_GUIDES = [
 export function PageCheckView({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
   const t = dict.tools.check;
+  const batchCopy = dict.tools.batchForm;
   const guides = dict.guides;
 
   return (
@@ -49,6 +51,8 @@ export function PageCheckView({ locale }: { locale: Locale }) {
         <p className="mt-4 text-base leading-relaxed text-muted-foreground">{t.subtitle}</p>
 
         <PageCheckForm copy={t} locale={locale} />
+
+        <PageCheckBatchForm copy={batchCopy} locale={locale} />
 
         <section className="mt-16">
           <h2 className={`text-lg font-bold tracking-tight text-foreground ${fonts.display}`}>
