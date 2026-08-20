@@ -89,7 +89,22 @@ export function buildPlatformSubdomain(slug: string, root: string): string | nul
 }
 
 /**
- * 平台自有根域全集 = 当前根 + 遗留根。
+ * 品牌更名（Zap Bridge → Urgizat）遗留的旧域，**硬编码而非读环境变量**。
+ *
+ * 教训来自 2026-08-20 的 Neon 计算配额耗尽故障：遗留根重定向的代码一直都在，
+ * 但 PLATFORM_SUBDOMAIN_LEGACY_ROOTS 在生产从未配置，于是 zapbridge.xyz 的每次
+ * 访问都落进租户解析 → 查库 → 动态渲染。一个每 60 秒一次的探测就足以让 Neon
+ * 计算永不挂起，最终烧穿整月配额、全站 DB 路径 500。
+ * 详见 docs/incident-neon-compute-quota-20260820.md。
+ *
+ * 这批域是历史事实、不随部署环境变化，**没有任何理由让它可配置**：
+ * 配错或漏配的代价是静默的（表现为「怎么有点慢」而不是报错），
+ * 而收益为零。环境变量仍然支持，用于追加本清单之外的根。
+ */
+export const BRAND_LEGACY_ROOTS = ["zapbridge.tech", "zapbridge.xyz", "zapbridge.com"] as const;
+
+/**
+ * 平台自有根域全集 = 当前根 + 更名遗留根 + 环境变量追加的遗留根。
  *
  * 品牌更名后旧根（如 zapbridge.site）不再分配新子域，但存量子域仍在客户广告里
  * 跑，必须继续解析。遗留根因此只保留两项能力：apex 重定向、阻止用户手动认领。
@@ -101,9 +116,10 @@ export function platformSubdomainRoots(
   current: string | undefined,
   legacy: string | undefined,
 ): string[] {
-  return [current ?? "", ...(legacy ?? "").split(",")]
+  const roots = [current ?? "", ...BRAND_LEGACY_ROOTS, ...(legacy ?? "").split(",")]
     .map((root) => root.trim().toLowerCase())
     .filter(Boolean);
+  return [...new Set(roots)];
 }
 
 /**

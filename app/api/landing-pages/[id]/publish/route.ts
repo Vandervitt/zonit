@@ -5,6 +5,7 @@ import { ApiErrors } from "@/lib/constants";
 import { isLandingPageStructureValid } from "@/types/schema.draft";
 import { collectPublishIssues } from "@/landing-editor/lib/publishIssues";
 import { getLandingPage, ensureUniqueSlug, publishLandingPage } from "@/lib/landing-pages/store";
+import { invalidatePublishedPage } from "@/lib/landing-pages/published-cache";
 import { getDomainById, bindDomainToLandingPage } from "@/lib/domains-db";
 import { isReservedRoutePath, normalizeRoutePath, ROOT_PATH } from "@/lib/domains/route-path";
 import { addDomainToProject } from "@/lib/vercel";
@@ -74,6 +75,8 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/landing
   if (!bound) return NextResponse.json({ error: ApiErrors.DOMAIN_NOT_VERIFIED }, { status: 422 });
 
   const published = await publishLandingPage(id, session.user.id, finalSlug);
+  // 发布后必须失效读缓存，否则访客在缓存窗口内看到的仍是上一次发布的快照。
+  invalidatePublishedPage(finalSlug);
   await recordMilestone(session.user.id, "page_published");
   return NextResponse.json({ ...published, domain: domain.domain, path });
 }

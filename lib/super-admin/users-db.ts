@@ -1,5 +1,6 @@
 import pool from "@/lib/db";
 import type { PlanId } from "@/lib/plans";
+import { invalidateAllPublishedPages, invalidateUserPlan } from "@/lib/landing-pages/published-cache";
 
 export interface AdminUserPatch {
   compPlan?: PlanId | null;              // null = 取消赠送
@@ -25,7 +26,19 @@ export async function updateUserAdminFields(userId: string, patch: AdminUserPatc
     `UPDATE users SET ${set.join(", ")} WHERE id = $${i} RETURNING id`,
     values,
   );
-  return result.rows.length > 0;
+  const hit = result.rows.length > 0;
+
+  // 这里改的每个字段都会改变公开落地页的渲染结果，故必须失效读缓存：
+  // - disabled  → 被禁账号的页面必须立刻从公网消失（封禁是超管的核心能力，
+  //               getPublishedBySlug 的 `u.disabled_at IS NULL` 就是为它写的）
+  // - compPlan  → 影响水印与埋点门控
+  // 失效放在这一层而不是各调用方，是因为漏调的后果是静默的：
+  // 页面看起来一切正常，只是封禁没生效。
+  if (hit) {
+    invalidateUserPlan(userId);
+    if (patch.disabled !== undefined) invalidateAllPublishedPages();
+  }
+  return hit;
 }
 
 export interface AdminUserDetail {

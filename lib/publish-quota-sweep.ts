@@ -8,6 +8,7 @@ import {
   daysLeftOf,
 } from "@/lib/publish-quota-db";
 import { sendPublishQuotaEmail } from "@/lib/email";
+import { invalidateAllPublishedPages } from "@/lib/landing-pages/published-cache";
 
 export interface SweepResult {
   scanned: number;
@@ -81,6 +82,9 @@ export async function sweepPublishQuota(now: Date, appUrl: string): Promise<Swee
 
         case "enforce": {
           const n = await unpublishForQuota(action.unpublishIds);
+          // 该函数只返回条数、拿不到 slug 列表，故走全量失效。
+          // 每日对账频次极低，多失效一些缓存无所谓；漏失效则是「已下线的页还在线上」。
+          if (n > 0) invalidateAllPublishedPages();
           // 先下线再清起算时间：中途失败则下次对账重来，不会留下「已清标记但没下线」。
           await setOverQuotaSince(c.userId, null);
           result.enforced++;
