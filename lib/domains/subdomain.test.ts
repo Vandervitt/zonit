@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  BRAND_LEGACY_ROOTS,
   RESERVED_SUBDOMAINS,
   buildPlatformSubdomain,
   isPlatformOwnedHost,
@@ -118,27 +119,43 @@ describe("isPlatformSubdomainHost", () => {
 
 describe("platformSubdomainRoots", () => {
   it("当前根排在最前，遗留根按逗号拆开", () => {
-    expect(platformSubdomainRoots("urgizat.site", "zapbridge.site,zapbridge.xyz")).toEqual([
-      "urgizat.site",
-      "zapbridge.site",
-      "zapbridge.xyz",
-    ]);
+    const roots = platformSubdomainRoots("urgizat.site", "zapbridge.site");
+    expect(roots[0]).toBe("urgizat.site");
+    expect(roots).toContain("zapbridge.site");
   });
 
   it("去空白与空项，统一小写", () => {
-    expect(platformSubdomainRoots(" URGIZAT.site ", " ZapBridge.site , ,")).toEqual([
-      "urgizat.site",
-      "zapbridge.site",
-    ]);
+    const roots = platformSubdomainRoots(" URGIZAT.site ", " ZapBridge.site , ,");
+    expect(roots[0]).toBe("urgizat.site");
+    expect(roots).toContain("zapbridge.site");
+    expect(roots).not.toContain("");
   });
 
-  it("两者都未配置时返回空数组 —— 否则空串会把所有 host 判成平台自有", () => {
-    expect(platformSubdomainRoots(undefined, undefined)).toEqual([]);
-    expect(platformSubdomainRoots("", "")).toEqual([]);
+  it("永不返回空串 —— 空串会把所有 host 判成平台自有", () => {
+    expect(platformSubdomainRoots(undefined, undefined)).not.toContain("");
+    expect(platformSubdomainRoots("", "")).not.toContain("");
   });
 
-  it("只配遗留根也成立：更名后当前根尚未就绪时不能放开抢注", () => {
-    expect(platformSubdomainRoots(undefined, "zapbridge.site")).toEqual(["zapbridge.site"]);
+  it("同一个根重复配置只出现一次", () => {
+    const roots = platformSubdomainRoots("zapbridge.xyz", "zapbridge.xyz");
+    expect(roots.filter((r) => r === "zapbridge.xyz")).toHaveLength(1);
+  });
+
+  // 回归：2026-08-20 Neon 计算配额耗尽故障。
+  // 遗留根重定向的代码一直都在，但 PLATFORM_SUBDOMAIN_LEGACY_ROOTS 在生产从未配置，
+  // 于是 zapbridge.xyz 的每次访问都落进租户解析并查库，把 Neon 计算钉住不挂起。
+  // 这几个根是历史事实，必须无条件在列，不依赖任何环境变量。
+  it("更名遗留域无条件在列，即使环境变量完全没配", () => {
+    const roots = platformSubdomainRoots(undefined, undefined);
+    for (const legacy of BRAND_LEGACY_ROOTS) {
+      expect(roots).toContain(legacy);
+    }
+  });
+
+  it("遗留域在 isPlatformOwnedHost 下真的会被拦住（apex 与子域都算）", () => {
+    const roots = platformSubdomainRoots(undefined, undefined);
+    expect(isPlatformOwnedHost("zapbridge.xyz", roots)).toBe(true);
+    expect(isPlatformOwnedHost("anything.zapbridge.xyz", roots)).toBe(true);
   });
 });
 

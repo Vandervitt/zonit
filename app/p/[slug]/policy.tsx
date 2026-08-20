@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { PolicyDocument } from "@/landing-renderer/PolicyDocument";
-import { getPublishedBySlug } from "@/lib/landing-pages/store";
+import { getPublishedBySlugCached } from "@/lib/landing-pages/published-cache";
 import { resolveCompanyInfo } from "@/lib/company-profiles/resolve";
 import { isAppHost, resolveTenantHostname, resolveTenantPath } from "@/lib/host";
 import type { PolicyKind } from "@/lib/landing-pages/policy-paths";
@@ -23,7 +23,7 @@ async function loadTenantPage(params: Promise<{ slug: string }>) {
   // 与落地页同一条守卫：app 主域直连不提供页面托管。
   if (isAppHost(resolveTenantHostname(h))) return null;
   const { slug } = await params;
-  return (await getPublishedBySlug(slug)) ?? null;
+  return (await getPublishedBySlugCached(slug)) ?? null;
 }
 
 /**
