@@ -6,7 +6,9 @@ import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { Routes, guideDetailPath } from "@/lib/constants";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
-import { getReport } from "@/lib/tools/store";
+import { getReportForView, recordReportView } from "@/lib/tools/store";
+import { currentVisitor } from "@/lib/tools/visitor";
+import { pageCheckWithUrl } from "@/lib/tools/rerun-link";
 import { auth } from "@/auth";
 import { PageCheckVerify } from "./PageCheckVerify";
 import type { Locale } from "@/lib/i18n/config";
@@ -19,13 +21,70 @@ import type { FindingLevel } from "@/lib/tools/report";
  * 且链接本就设计成「持有即可见」，不该被搜索引擎顺手公开（设计文档决议 2）。
  */
 export async function pageCheckReportMetadata(id: string, locale: Locale): Promise<Metadata> {
-  const report = await getReport(id);
+  const envelope = await getReportForView(id);
   const t = getDictionary(locale).tools.report;
-  const host = report ? safeHost(report.inputUrl) : "";
+  // 过期报告仍然给出被检查站点的 host：标题是收件人回头看时的第一个锚点。
+  const inputUrl =
+    envelope?.state === "live" ? envelope.report.inputUrl : envelope?.inputUrl ?? "";
   return {
-    title: t.metaTitle.replace("{host}", host),
+    title: t.metaTitle.replace("{host}", inputUrl ? safeHost(inputUrl) : ""),
     robots: { index: false, follow: false },
   };
+}
+
+/**
+ * 过期报告页。
+ *
+ * 这一页存在的唯一理由：外发出去的报告链接，收件人可能几周后才想起来点开。
+ * 那一刻给他 404 是最糟的结果——他还记得这封信，我们却拿不出任何东西。
+ * 所以过期不展示旧结论（会误导），但保留「当初查的是哪个页面」并直接给出重查入口。
+ */
+async function ExpiredReport({
+  envelope,
+  locale,
+}: {
+  envelope: { inputUrl: string; createdAt: string };
+  locale: Locale;
+}) {
+  const t = getDictionary(locale).tools.report.expired;
+  return (
+    <div className={`min-h-screen bg-background ${fonts.body}`}>
+      <SiteNav fonts={fonts} locale={locale} />
+      <main className="mx-auto max-w-3xl px-6 pb-24 pt-32">
+        <span className={`text-xs uppercase tracking-[0.22em] text-slate-500 ${fonts.mono}`}>
+          {t.kicker}
+        </span>
+        <h1 className={`mt-3 text-3xl font-bold tracking-tight text-foreground ${fonts.display}`}>
+          {t.title}
+        </h1>
+        <p className="mt-4 text-base leading-relaxed text-muted-foreground">{t.body}</p>
+
+        <dl className={`mt-6 space-y-1 text-xs text-muted-foreground ${fonts.mono}`}>
+          <div>
+            <dt className="inline">{t.checkedUrl}: </dt>
+            <dd className="inline break-all text-foreground">{envelope.inputUrl}</dd>
+          </div>
+          <div>{t.ranOn.replace("{date}", envelope.createdAt.slice(0, 10))}</div>
+        </dl>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href={localePath(locale, pageCheckWithUrl(envelope.inputUrl))}
+            className="rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-5 py-2.5 text-sm font-medium text-white shadow-sm shadow-aqua-600/25 transition-all hover:brightness-105"
+          >
+            {t.rerun}
+          </Link>
+          <Link
+            href={localePath(locale, Routes.PageCheck)}
+            className="rounded-xl border border-border px-5 py-2.5 text-sm text-muted-foreground transition-colors hover:border-aqua-300 hover:text-aqua-700"
+          >
+            {t.rerunOther}
+          </Link>
+        </div>
+      </main>
+      <SiteFooter fonts={fonts} locale={locale} />
+    </div>
+  );
 }
 
 function safeHost(url: string): string {
@@ -55,8 +114,17 @@ const LEVEL_BADGE: Record<FindingLevel, string> = {
 };
 
 export async function PageCheckReportView({ id, locale }: { id: string; locale: Locale }) {
-  const report = await getReport(id);
-  if (!report) notFound();
+  const envelope = await getReportForView(id);
+  if (!envelope) notFound();
+
+  // 过期访问同样记录——对方在链接过期后还回头来看，本身就是更强的信号。
+  // recordReportView 永不抛错，页面渲染不会因为记录失败而挂掉。
+  await recordReportView(id, await currentVisitor());
+
+  if (envelope.state === "expired") {
+    return <ExpiredReport envelope={envelope} locale={locale} />;
+  }
+  const report = envelope.report;
 
   const session = await auth();
   const dict = getDictionary(locale);

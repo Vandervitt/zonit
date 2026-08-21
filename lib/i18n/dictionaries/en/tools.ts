@@ -44,7 +44,20 @@ export const tools = {
     redirectedTo: "Resolved to",
     createdAt: "Run on {date}",
     shareNotice:
-      "Anyone with this link can view this report. It is not indexed by search engines and is deleted after 30 days.",
+      "Anyone with this link can view this report. It is not indexed by search engines. Results expire after 30 days — the link keeps working and offers a fresh check instead.",
+    /**
+     * 过期态。链接是发到站外去的，收件人什么时候回头点它不由我们决定——
+     * 所以过期不能是 404，得是一次重新检查的入口。
+     */
+    expired: {
+      kicker: "Expired",
+      title: "These results have expired",
+      body: "We keep results for 30 days. The page has probably changed since then, so showing you the old findings would be misleading. A fresh check takes a few seconds.",
+      checkedUrl: "Originally checked",
+      ranOn: "Run on {date}",
+      rerun: "Check this page again",
+      rerunOther: "Check a different page",
+    },
     // 报告页最重要的一句：把「我们不下结论」说清楚，否则整份报告会被读成评分。
     disclaimer:
       "This is a list of observations, not a verdict. We don't score pages and we can't tell you whether an ad will be approved — only the platform reviewing it can. Everything below is a fact about your page that you can verify yourself.",
@@ -89,7 +102,16 @@ export const tools = {
     title: "The same checks across {count} pages",
     createdAt: "Run on {date}",
     shareNotice:
-      "Anyone with this link can view this comparison. It is not indexed by search engines and is deleted after 30 days.",
+      "Anyone with this link can view this comparison. It is not indexed by search engines. Results expire after 30 days — the link keeps working and offers a fresh comparison instead.",
+    /** 过期态。语义同单页报告，但要把「当初比的是哪几个页面」列全。 */
+    expired: {
+      kicker: "Expired",
+      title: "This comparison has expired",
+      body: "We keep results for 30 days. These pages have probably changed since then, and a comparison built from stale data would read as a difference between the pages rather than a difference in time.",
+      checkedUrls: "Originally compared",
+      ranOn: "Run on {date}",
+      rerun: "Run this comparison again",
+    },
     // 与单页报告同源的免责声明：多页更容易被读成排名，所以说得更直白。
     disclaimer:
       "This is a list of observations, not a ranking. We don't score pages and we don't tell you which one is worst — the count at the top of each column is just how many pages have something worth looking at there.",

@@ -11,6 +11,7 @@ import {
   SettingOutlined,
   SafetyOutlined,
   MessageOutlined,
+  LinkOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
 import { superAdminSiderTheme } from "@/lib/theme/antd-theme";
@@ -22,6 +23,7 @@ const NAV = [
   { key: "/super-admin", icon: DashboardOutlined, label: "概览" },
   { key: "/super-admin/users", icon: TeamOutlined, label: "用户" },
   { key: "/super-admin/feedback", icon: MessageOutlined, label: "用户反馈" },
+  { key: "/super-admin/outreach", icon: LinkOutlined, label: "报告触达" },
   { key: "/super-admin/settings", icon: SettingOutlined, label: "平台设置" },
 ] as const;
 
