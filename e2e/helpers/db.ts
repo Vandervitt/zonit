@@ -62,6 +62,21 @@ export async function ensureDevUserLocale(): Promise<void> {
   await getPool().query(`UPDATE users SET locale = $1 WHERE email = $2`, [E2E_LOCALE, email]);
 }
 
+/**
+ * 直接执行 SQL，供需要构造特殊数据库状态的用例使用
+ * （例如「已过期的自检报告」——那个状态没有任何 UI 路径能造出来）。
+ *
+ * ⚠️ 用完不要关连接池：池是 worker 级共享的，各 spec 各自关会打穿同 worker
+ * 里后续的用例。关闭统一由 global-teardown 负责。
+ */
+export async function dbQuery<T extends Record<string, unknown> = Record<string, unknown>>(
+  sql: string,
+  params: unknown[] = [],
+): Promise<T[]> {
+  const res = await getPool().query(sql, params);
+  return res.rows as T[];
+}
+
 export async function cleanupAllE2EFixtures(): Promise<void> {
   await getPool().query(`DELETE FROM domains WHERE domain LIKE $1`, [`${SLUG_PREFIX}%`]);
   await getPool().query(`DELETE FROM landing_pages WHERE slug LIKE $1`, [`${SLUG_PREFIX}%`]);

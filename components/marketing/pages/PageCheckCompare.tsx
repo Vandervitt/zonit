@@ -6,7 +6,8 @@ import { SiteNav, SiteFooter } from "@/components/marketing/chrome";
 import { Routes, pageCheckReportPath } from "@/lib/constants";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
-import { getBatchReports } from "@/lib/tools/store";
+import { getBatchForView, recordBatchView } from "@/lib/tools/store";
+import { currentVisitor } from "@/lib/tools/visitor";
 import { buildCompareTable, DIMENSIONS, type Dimension } from "@/lib/tools/compare";
 import type { Locale } from "@/lib/i18n/config";
 import type { FindingLevel } from "@/lib/tools/report";
@@ -16,10 +17,14 @@ import type { FindingLevel } from "@/lib/tools/report";
  * 且链接本就设计成「持有即可见」（设计文档决议 2）。
  */
 export async function pageCheckCompareMetadata(id: string, locale: Locale): Promise<Metadata> {
-  const reports = await getBatchReports(id);
+  const envelope = await getBatchForView(id);
   const t = getDictionary(locale).tools.compare;
+  const count =
+    envelope?.state === "live"
+      ? envelope.reports.length
+      : envelope?.inputUrls.length ?? 0;
   return {
-    title: t.metaTitle.replace("{count}", String(reports.length)),
+    title: t.metaTitle.replace("{count}", String(count)),
     robots: { index: false, follow: false },
   };
 }
@@ -35,9 +40,75 @@ const CELL_STYLE: Record<FindingLevel, string> = {
   info: "bg-white text-muted-foreground",
 };
 
+/**
+ * 过期对比页。理由同单页报告的 ExpiredReport：外发链接不能以 404 收场。
+ * 这里额外把当初对比的**每一个 URL** 都列出来——对方回头看时要认出这是哪一组页。
+ */
+function ExpiredCompare({
+  inputUrls,
+  createdAt,
+  locale,
+}: {
+  inputUrls: string[];
+  createdAt: string;
+  locale: Locale;
+}) {
+  const t = getDictionary(locale).tools.compare.expired;
+  return (
+    <div className={`min-h-screen bg-background ${fonts.body}`}>
+      <SiteNav fonts={fonts} locale={locale} />
+      <main className="mx-auto max-w-3xl px-6 pb-24 pt-32">
+        <span className={`text-xs uppercase tracking-[0.22em] text-slate-500 ${fonts.mono}`}>
+          {t.kicker}
+        </span>
+        <h1 className={`mt-3 text-3xl font-bold tracking-tight text-foreground ${fonts.display}`}>
+          {t.title}
+        </h1>
+        <p className="mt-4 text-base leading-relaxed text-muted-foreground">{t.body}</p>
+
+        <p className={`mt-6 text-xs text-muted-foreground ${fonts.mono}`}>{t.checkedUrls}:</p>
+        <ul className={`mt-2 space-y-1 text-xs ${fonts.mono}`}>
+          {inputUrls.map((url, i) => (
+            <li key={`${url}-${i}`} className="break-all text-foreground">
+              {url}
+            </li>
+          ))}
+        </ul>
+        <p className={`mt-3 text-xs text-muted-foreground ${fonts.mono}`}>
+          {t.ranOn.replace("{date}", createdAt.slice(0, 10))}
+        </p>
+
+        <p className="mt-8">
+          <Link
+            href={localePath(locale, Routes.PageCheck)}
+            className="inline-block rounded-xl bg-gradient-to-r from-aqua-600 to-tech px-5 py-2.5 text-sm font-medium text-white shadow-sm shadow-aqua-600/25 transition-all hover:brightness-105"
+          >
+            {t.rerun}
+          </Link>
+        </p>
+      </main>
+      <SiteFooter fonts={fonts} locale={locale} />
+    </div>
+  );
+}
+
 export async function PageCheckCompareView({ id, locale }: { id: string; locale: Locale }) {
-  const reports = await getBatchReports(id);
-  if (reports.length === 0) notFound();
+  const envelope = await getBatchForView(id);
+  if (!envelope) notFound();
+
+  // 过期访问同样记录；recordBatchView 永不抛错。
+  await recordBatchView(id, await currentVisitor());
+
+  if (envelope.state === "expired") {
+    return (
+      <ExpiredCompare
+        inputUrls={envelope.inputUrls}
+        createdAt={envelope.createdAt}
+        locale={locale}
+      />
+    );
+  }
+  const reports = envelope.reports;
 
   const dict = getDictionary(locale);
   const t = dict.tools.compare;

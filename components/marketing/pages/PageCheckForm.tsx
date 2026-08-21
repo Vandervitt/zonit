@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { pageCheckReportPath } from "@/lib/constants";
 import { localePath } from "@/lib/i18n/routes";
@@ -27,6 +27,21 @@ export function PageCheckForm({ copy, locale }: { copy: Copy; locale: Locale }) 
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 从 ?url= 预填（过期报告页的「重新检查这个页面」把原始 URL 带了过来）。
+  //
+  // ⚠️ 刻意**不用** useSearchParams：本页是自检器入口，也是 SEO 获客页，
+  // 而 useSearchParams 会让最近 Suspense 边界内的组件退化成客户端渲染
+  // （见 Next 文档 use-search-params「Static Rendering」一节），
+  // 表单就不在首屏 HTML 里了。为一个预填付这个代价不划算，故直接读
+  // window.location，把影响限制在挂载后的一次赋值。
+  //
+  // 代价：只在挂载时读一次，同路由内 ?url= 变化不会重新预填。
+  // 站内没有这样的跳转（唯一来源是过期报告页的跨路由 Link），可以接受。
+  useEffect(() => {
+    const prefill = new URLSearchParams(window.location.search).get("url");
+    if (prefill) setUrl(prefill);
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
