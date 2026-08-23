@@ -7,6 +7,8 @@ import { test, expect } from "@playwright/test";
 // 因此整个文件只消耗每语言 1 次额度——否则跑到后面必然被自己的限频拦下。
 const EN_URL = "https://example.com/?e2e=en";
 const ZH_URL = "https://example.com/?e2e=zh";
+// 多页对比用：与 EN_URL 同 host、只有 query 不同——正是「两行会同名」的形态。
+const CMP_URL = "https://example.com/?e2e=cmp";
 
 test.describe("落地页自检器", () => {
   // 一次运行中的**第一次真检查**要同时付两笔时间：next dev 冷编译该 API 路由，
@@ -34,6 +36,26 @@ test.describe("落地页自检器", () => {
     await page.getByRole("button", { name: /Check this page/i }).click();
     await page.waitForURL(/\/r\/[A-Za-z0-9]+$/, { timeout: 45_000 });
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  });
+
+  // 生产走查发现的真实缺陷（2026-08-23）：对比表的行标识只有 host，
+  // 同域的多张页因此两行同名，报告说「有一张缺隐私政策」却看不出是哪一张。
+  // 逻辑本身由 lib/tools/compare.test.ts 守，**这条守的是组件真的用了 label**——
+  // 单测拦不住有人把 {row.label} 改回 {row.host}。
+  // ⚠️ 额度：EN_URL 已被前面的用例缓存（缓存命中不计限频），所以这条只多花 1 次，
+  // 全文件仍在每小时 5 次的预算内。别把两个 URL 都换成新的。
+  test("同域多页对比：每行标识必须能区分，不能两行同名", async ({ page }) => {
+    await page.goto("/tools/landing-page-check");
+    await page
+      .getByLabel("Landing page URLs, one per line")
+      .fill(`${EN_URL}\n${CMP_URL}`);
+    await page.getByRole("button", { name: /Compare pages/i }).click();
+
+    await page.waitForURL(/\/tools\/landing-page-check\/b\/[A-Za-z0-9]+$/, { timeout: 60_000 });
+
+    // 两行同 host，只有 query 不同——修复前这里会是两个一模一样的 example.com。
+    await expect(page.getByRole("rowheader", { name: /example\.com\/\?e2e=en/ })).toBeVisible();
+    await expect(page.getByRole("rowheader", { name: /example\.com\/\?e2e=cmp/ })).toBeVisible();
   });
 
   test("非法地址在前端给出可读提示，不跳转", async ({ page }) => {

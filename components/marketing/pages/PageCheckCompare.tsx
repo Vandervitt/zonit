@@ -175,10 +175,18 @@ export async function PageCheckCompareView({ id, locale }: { id: string; locale:
                 <tr key={row.reportId} className="border-b border-border last:border-0">
                   <th
                     scope="row"
-                    className="sticky left-0 z-10 max-w-[14rem] bg-white/95 px-4 py-3 align-top"
+                    className="sticky left-0 z-10 w-[18rem] min-w-[18rem] bg-white/95 px-4 py-3 align-top"
                   >
-                    <span className="block truncate text-xs font-semibold text-foreground">
-                      {row.host}
+                    {/*
+                      ⚠️ 这里**不能 truncate**。行标识的唯一职责是把同一批里的页区分开，
+                      而同域多路径（go.客户域.com/offer 与 /quote）正是最常见的形态——
+                      截断后共同前缀会把两行重新压成一样，等于没修。宁可换行。
+                    */}
+                    <span
+                      className="block break-all text-xs font-semibold text-foreground"
+                      title={row.inputUrl}
+                    >
+                      {row.label}
                     </span>
                     <Link
                       href={localePath(locale, pageCheckReportPath(row.reportId))}
