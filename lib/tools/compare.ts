@@ -37,6 +37,14 @@ export interface CompareRow {
   reportId: string;
   inputUrl: string;
   host: string;
+  /**
+   * 表格行标识。**必须能把这一批里的每一行区分开**——这是整张表可用性的前提：
+   * 报告说「有一张页缺隐私政策」时，读者要能看出是哪一张。
+   *
+   * ⚠️ 曾经只放 host，于是 `go.x.com/in-house` 与 `go.x.com/playbook` 两行同名，
+   * 而「同域多路径」恰恰是代运营方最常见的形态。见 compare.test.ts 末尾那组用例。
+   */
+  label: string;
   /** 整页级失败（抓不到 / robots 拦截 / 状态码异常）。有值时该行不展示各维度格子。 */
   blocked: Finding | null;
   cells: Record<Dimension, CompareCell>;
@@ -65,6 +73,34 @@ function hostOf(url: string): string {
   }
 }
 
+/**
+ * 行标识的首选形态：host + 路径 + query，去掉 www 与光秃秃的根斜杠。
+ * 比完整 URL 短（表格第一列很窄），又保住了区分度。
+ */
+function shortLabelOf(url: string): string {
+  try {
+    const u = new URL(url);
+    // 根路径通常省略，但带 query 时要留着——`a.com?x=1` 读起来像拼错了。
+    const path = u.pathname === "/" ? (u.search ? "/" : "") : u.pathname.replace(/\/$/, "");
+    return `${hostOf(url)}${path}${u.search}`;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * 给每一行定标识：能区分就用短的，不能区分就退回完整 URL。
+ *
+ * 短标识会丢掉 www 和协议，多数时候无害，但 `a.com` 与 `www.a.com` 是两个真实
+ * 不同的落点——一旦折叠到同名，「窄一列」的收益就必须让位于「读者能分清」。
+ */
+function labelRows(urls: string[]): string[] {
+  const short = urls.map(shortLabelOf);
+  const seen = new Map<string, number>();
+  for (const s of short) seen.set(s, (seen.get(s) ?? 0) + 1);
+  return short.map((s, i) => ((seen.get(s) ?? 0) > 1 ? urls[i] : s));
+}
+
 /** 同一维度命中多条时取更值得看的那条（attention > unknown > info）。 */
 const LEVEL_RANK: Record<FindingLevel, number> = { attention: 0, unknown: 1, info: 2 };
 
@@ -78,7 +114,9 @@ export function buildCompareTable(reports: StoredReport[]): CompareTable {
     number
   >;
 
-  const rows = reports.map((report) => {
+  const labels = labelRows(reports.map((r) => r.inputUrl));
+
+  const rows = reports.map((report, index) => {
     const cells = Object.fromEntries(
       DIMENSIONS.map((d) => [d, { finding: null } as CompareCell]),
     ) as Record<Dimension, CompareCell>;
@@ -106,6 +144,7 @@ export function buildCompareTable(reports: StoredReport[]): CompareTable {
       reportId: report.id,
       inputUrl: report.inputUrl,
       host: hostOf(report.inputUrl),
+      label: labels[index],
       blocked,
       cells,
     };

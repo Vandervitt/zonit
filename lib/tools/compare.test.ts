@@ -118,3 +118,71 @@ describe("buildCompareTable", () => {
     expect(table.rows[0].blocked?.id).toBe("robots_disallows_check");
   });
 });
+
+// 生产走查发现的真实缺陷（2026-08-23）：对比 go.foreverbooked.com/in-house 与
+// /playbook，两行的标识都只有 host，**报告说「有一张页缺隐私政策」却没说是哪一张**。
+// 而「同域多路径」正是代运营方最典型的形态（go.客户域.com/offer、/quote），
+// 也就是说这个缺陷专门在我们最想服务的场景下发作。
+// 更糟的是这样的链接已经发给过真实潜客——收信人无法核对信里说的是哪张页，
+// 而「每句可核实」是这批信唯一的差异点。
+describe("行标识必须能区分同域的不同页", () => {
+  it("同域不同路径：标识带上路径", () => {
+    const table = buildCompareTable([
+      report("r1", "https://go.foreverbooked.com/in-house", [
+        { id: "privacy_ok", level: "info", data: { href: "/p" } },
+      ]),
+      report("r2", "https://go.foreverbooked.com/playbook", [
+        { id: "privacy_missing", level: "attention" },
+      ]),
+    ]);
+
+    const labels = table.rows.map((r) => r.label);
+    expect(labels).toEqual([
+      "go.foreverbooked.com/in-house",
+      "go.foreverbooked.com/playbook",
+    ]);
+    // 真正的判据不是格式而是「两行不一样」——格式可以再改，这条不能破。
+    expect(new Set(labels).size).toBe(labels.length);
+  });
+
+  it("根路径不画蛇添足地拖一个斜杠", () => {
+    const table = buildCompareTable([
+      report("r1", "https://a.com", []),
+      report("r2", "https://www.b.com/", []),
+    ]);
+    expect(table.rows.map((r) => r.label)).toEqual(["a.com", "b.com"]);
+  });
+
+  it("路径相同只有 query 不同时，靠 query 区分", () => {
+    const table = buildCompareTable([
+      report("r1", "https://a.com/offer?v=a", []),
+      report("r2", "https://a.com/offer?v=b", []),
+    ]);
+    expect(table.rows.map((r) => r.label)).toEqual(["a.com/offer?v=a", "a.com/offer?v=b"]);
+  });
+
+  it("根路径带 query 时保留斜杠——a.com?x=1 读起来像拼错了", () => {
+    const table = buildCompareTable([
+      report("r1", "https://a.com/?v=a", []),
+      report("r2", "https://a.com?v=b", []),
+    ]);
+    expect(table.rows.map((r) => r.label)).toEqual(["a.com/?v=a", "a.com/?v=b"]);
+  });
+
+  it("剥掉 www 后撞车时退回完整 URL，绝不留两行同名", () => {
+    // hostOf 去 www 是为了窄一列，但 a.com 与 www.a.com 是两个真实不同的落点，
+    // 折叠后就分不出来了——这时候窄一列的收益必须让位于可区分。
+    const table = buildCompareTable([
+      report("r1", "https://a.com", []),
+      report("r2", "https://www.a.com", []),
+    ]);
+    const labels = table.rows.map((r) => r.label);
+    expect(new Set(labels).size).toBe(2);
+    expect(labels).toEqual(["https://a.com", "https://www.a.com"]);
+  });
+
+  it("host 仍然单独保留，供需要窄标识的地方使用", () => {
+    const table = buildCompareTable([report("r1", "https://www.b.com/y", [])]);
+    expect(table.rows[0].host).toBe("b.com");
+  });
+});
