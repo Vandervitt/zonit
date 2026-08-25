@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMeta } from "../MetaContext";
 import { useEditorState, useEditorDispatch, useEditorHistory, toDraft } from "../store/editorStore";
 import { collectPublishIssues } from "../lib/publishIssues";
+import { shouldForwardUndoRedo } from "../lib/undoRedoGuard";
 import { ValidationBar } from "./ValidationBar";
 import { ComplianceHintsBar } from "./ComplianceHintsBar";
 import { PublishDialog } from "./PublishDialog";
@@ -58,9 +59,12 @@ export function EditorToolbar() {
   }
 
   // Cmd/Ctrl+Z 撤销、Shift+Cmd/Ctrl+Z 重做（拦截浏览器默认，编辑器内容均为受控输入）。
+  // 弹窗（如 AI 一键成页）内的表单字段不是编辑器 draft 的一部分，弹窗内按 Cmd/Ctrl+Z
+  // 不应转发成整页 undo，见 shouldForwardUndoRedo 注释。
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "z") return;
+      if (!shouldForwardUndoRedo(e.target)) return;
       e.preventDefault();
       dispatch({ kind: e.shiftKey ? "redo" : "undo" });
     }
