@@ -3,6 +3,9 @@ import { useAdminT } from "@/lib/i18n/admin/context";
 import { useEffect, useState } from "react";
 import { useMeta } from "../MetaContext";
 import { apiLandingPublishPath, apiLandingCheckPath, pageCheckReportPath, Routes } from "@/lib/constants";
+// 纯字符串逻辑、无 IO，浏览器端可以直接复用——避免前端另起一份 slug 规则，
+// 跟服务端各写各的、慢慢跑偏。
+import { slugifyForSubdomain } from "@/lib/domains/subdomain";
 
 interface RouteInfo {
   path: string;
@@ -37,6 +40,10 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
   const [liveUrl, setLiveUrl] = useState("");
   // 平台子域分配中：这是没有自有域名的用户唯一的发布出口，失败必须让他看到原因。
   const [claiming, setClaiming] = useState(false);
+  // 平台子域根域（如 zapbridge.site），仅用于拼「slug.root」的实时预览；未配置时不显示预览。
+  const [subdomainRoot, setSubdomainRoot] = useState<string | null>(null);
+  // 用户自定义的子域名：预填页面名转出的 slug，可编辑；提交后不可修改（幂等由后端保证）。
+  const [slugInput, setSlugInput] = useState("");
   // 发布后的自检（抓取线上页，慢，必须有进行中反馈）
   const [checking, setChecking] = useState(false);
   const [checkError, setCheckError] = useState("");
@@ -79,6 +86,18 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
         if (preset) setDomainId(preset.id);
         const current = bound?.routes?.find((r) => r.landingPageId === pageId);
         if (current) setPathInput(current.path === "/" ? "" : current.path.slice(1));
+
+        // 还没有任何可用域名：这次是「首次用平台地址发布」，去取根域来拼实时预览，
+        // 并用页面名预填一个可编辑的建议 slug——不强迫用户从空白想名字，但选择权在他。
+        if (usable.length === 0) {
+          const subRes = await fetch("/api/domains/platform-subdomain");
+          if (subRes.ok) {
+            const { root } = await subRes.json();
+            setSubdomainRoot(root ?? null);
+          }
+          const suggested = slugifyForSubdomain(name ?? "");
+          if (suggested) setSlugInput(suggested);
+        }
       } catch {
         setLoadFailed(true);
       }
@@ -146,25 +165,36 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
     return `${d.domain}${suffix}${t.pathsUsed(used)}`;
   }
 
+  // 与服务端同一份规则（同一个函数，不是抄一份）：不合法输入不让点提交，
+  // 而不是等服务端 400 才告诉用户哪里错了。
+  const slugTrimmed = slugInput.trim().toLowerCase();
+  const slugShapeOk = slugTrimmed !== "" && slugTrimmed === slugifyForSubdomain(slugTrimmed);
+
   /**
    * 领取平台子域：没有自有域名的用户由此拿到一个可立即发布的地址，
    * 不必先去买域名、改 DNS、等验证。领取后重新拉列表并预选它。
+   *
+   * 子域名由用户在上面的输入框自己定，且**只能设置这一次**——不是前端拦着不让改，
+   * 是后端幂等保证的：这个账号已经有子域了，再传别的 slug 也只会原样返回旧的
+   * （见 route.ts 里 `existing` 那条早退）。
    */
   async function claimSubdomain() {
-    if (claiming) return;
+    if (claiming || !slugShapeOk) return;
     setClaiming(true);
     setError("");
     try {
       const res = await fetch("/api/domains/platform-subdomain", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ fromTitle: name ?? "" }),
+        body: JSON.stringify({ slug: slugTrimmed }),
       });
       const json = await res.json().catch(() => null);
       if (!res.ok) {
         setError(
-          json?.error === "subdomain_unavailable"
-            ? t.claimUnavailable
+          json?.error === "slug_taken" ? t.claimSlugTaken
+            : json?.error === "slug_invalid" ? t.claimSlugInvalid
+            : json?.error === "slug_reserved" ? t.claimSlugReserved
+            : json?.error === "subdomain_unavailable" ? t.claimUnavailable
             : t.claimFailed,
         );
         return;
@@ -216,9 +246,28 @@ export function PublishDialog({ onClose }: { onClose: () => void }) {
         ) : domains.length === 0 ? (
           <div className="mt-4 space-y-3 text-sm text-ink-soft">
             <p>{t.noDomains}</p>
+            <label className="block text-sm text-ink-soft" htmlFor="claim-slug">
+              {t.claimSlugLabel}
+            </label>
+            <div className="flex items-center gap-1 rounded-md border border-edge bg-canvas px-3 py-2">
+              <input
+                id="claim-slug"
+                value={slugInput}
+                onChange={(e) => setSlugInput(e.target.value)}
+                placeholder={t.claimSlugPlaceholder}
+                className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-soft/60"
+              />
+              <span className="shrink-0 text-sm text-ink-soft">.{subdomainRoot ?? "yourbrand.site"}</span>
+            </div>
+            {slugTrimmed !== "" && !slugShapeOk && (
+              <p className="text-sm text-red-500">{t.claimSlugInvalid}</p>
+            )}
+            <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-700">
+              {t.claimSlugLockedHint}
+            </p>
             <button
               onClick={() => void claimSubdomain()}
-              disabled={claiming}
+              disabled={claiming || !slugShapeOk}
               className="w-full rounded-md bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
             >
               {claiming ? t.claiming : t.claim}

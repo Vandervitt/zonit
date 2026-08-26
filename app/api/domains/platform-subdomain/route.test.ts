@@ -119,4 +119,96 @@ describe("POST /api/domains/platform-subdomain", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ domain: "raced.zapbridge.site" });
   });
+
+  describe("用户自定义 slug", () => {
+    it("合法且未被占用 → 原样使用，不追加随机后缀", async () => {
+      const { POST } = await loadRoute("zapbridge.site");
+      const res = await POST(req({ slug: "acme" }));
+      expect(res.status).toBe(201);
+      expect(await res.json()).toMatchObject({ domain: "acme.zapbridge.site" });
+      expect(insertDomainMock).toHaveBeenCalledWith(
+        expect.objectContaining({ domain: "acme.zapbridge.site", isPlatformSubdomain: true }),
+      );
+    });
+
+    it("大小写不敏感，落库前统一转小写", async () => {
+      const { POST } = await loadRoute("zapbridge.site");
+      const res = await POST(req({ slug: "AcMe" }));
+      expect(await res.json()).toMatchObject({ domain: "acme.zapbridge.site" });
+    });
+
+    it("已被别人占用 → 409 slug_taken，不静默换名", async () => {
+      const { POST } = await loadRoute("zapbridge.site");
+      getDomainByNameMock.mockResolvedValue({ id: "other", domain: "acme.zapbridge.site" });
+      const res = await POST(req({ slug: "acme" }));
+      expect(res.status).toBe(409);
+      expect(await res.json()).toMatchObject({ error: "slug_taken" });
+      expect(insertDomainMock).not.toHaveBeenCalled();
+    });
+
+    it("格式不合法（含大写以外的非法字符）→ 400 slug_invalid", async () => {
+      const { POST } = await loadRoute("zapbridge.site");
+      const res = await POST(req({ slug: "acme_dental!" }));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toMatchObject({ error: "slug_invalid" });
+      expect(insertDomainMock).not.toHaveBeenCalled();
+    });
+
+    it("首尾是连字符 → 400 slug_invalid", async () => {
+      const { POST } = await loadRoute("zapbridge.site");
+      const res = await POST(req({ slug: "-acme-" }));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toMatchObject({ error: "slug_invalid" });
+    });
+
+    it("撞平台保留字 → 400 slug_reserved", async () => {
+      const { POST } = await loadRoute("zapbridge.site");
+      const res = await POST(req({ slug: "admin" }));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toMatchObject({ error: "slug_reserved" });
+      expect(insertDomainMock).not.toHaveBeenCalled();
+    });
+
+    it("已有子域时再传 slug 也直接返回旧的——只能设置一次", async () => {
+      const { POST } = await loadRoute("zapbridge.site");
+      getPlatformSubdomainMock.mockResolvedValue({ id: "d0", domain: "first-pick.zapbridge.site" });
+      const res = await POST(req({ slug: "second-pick" }));
+      expect(await res.json()).toMatchObject({ domain: "first-pick.zapbridge.site" });
+      expect(insertDomainMock).not.toHaveBeenCalled();
+    });
+
+    it("并发下唯一索引冲突且赢家不是自己 → 409 slug_taken，不误报为「已有」", async () => {
+      const { POST } = await loadRoute("zapbridge.site");
+      insertDomainMock.mockRejectedValue(new Error("duplicate key"));
+      getPlatformSubdomainMock.mockResolvedValue(null); // 冲突后再查依然没有：这次没抢到的是自己
+      const res = await POST(req({ slug: "acme" }));
+      expect(res.status).toBe(409);
+      expect(await res.json()).toMatchObject({ error: "slug_taken" });
+    });
+  });
+});
+
+describe("GET /api/domains/platform-subdomain", () => {
+  it("未登录 → 401", async () => {
+    const { GET } = await loadRoute("zapbridge.site");
+    authMock.mockResolvedValue(null);
+    expect((await GET()).status).toBe(401);
+  });
+
+  it("返回 { domain, root }，供前端拼实时预览", async () => {
+    const { GET } = await loadRoute("zapbridge.site");
+    getPlatformSubdomainMock.mockResolvedValue({ id: "d1", domain: "acme.zapbridge.site" });
+    const res = await GET();
+    expect(await res.json()).toMatchObject({
+      domain: { id: "d1", domain: "acme.zapbridge.site" },
+      root: "zapbridge.site",
+    });
+  });
+
+  it("未分配子域时 domain 为 null，root 仍照常返回", async () => {
+    const { GET } = await loadRoute("zapbridge.site");
+    getPlatformSubdomainMock.mockResolvedValue(null);
+    const res = await GET();
+    expect(await res.json()).toMatchObject({ domain: null, root: "zapbridge.site" });
+  });
 });
