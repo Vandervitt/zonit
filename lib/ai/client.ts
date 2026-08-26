@@ -123,21 +123,36 @@ class OpenAiCompatibleClient implements AiClient {
   private client = new OpenAI({ apiKey: this.cfg.apiKey, baseURL: this.cfg.baseURL });
 
   async completeJson<T = unknown>({ system, user, schema, schemaName }: CompleteJsonArgs): Promise<T> {
-    const resp = await this.client.chat.completions.create({
-      model: this.cfg.model,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      response_format: this.cfg.strictJsonSchema
-        ? {
-            type: "json_schema",
-            json_schema: { name: schemaName, schema: schema as Record<string, unknown>, strict: true },
-          }
-        : { type: "json_object" },
-    });
-    const content = resp.choices[0]?.message?.content ?? "{}";
-    return JSON.parse(content) as T;
+    // 临时排查埋点：生产环境「AI 一键成页」偶发超时/失败，本地永远复现不出来。
+    // 怀疑是 Vercel Function 跑在 iad1（美东）、DashScope 在国内，跨太平洋调用不稳定。
+    // 先测个真实耗时和失败原因，别猜。查完这条埋点会删掉。
+    const startedAt = Date.now();
+    try {
+      const resp = await this.client.chat.completions.create({
+        model: this.cfg.model,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+        response_format: this.cfg.strictJsonSchema
+          ? {
+              type: "json_schema",
+              json_schema: { name: schemaName, schema: schema as Record<string, unknown>, strict: true },
+            }
+          : { type: "json_object" },
+      });
+      console.log(
+        `[ai-client] completeJson(${schemaName}) ok in ${Date.now() - startedAt}ms, provider=${this.cfg.baseURL ?? "openai"}, model=${this.cfg.model}`,
+      );
+      const content = resp.choices[0]?.message?.content ?? "{}";
+      return JSON.parse(content) as T;
+    } catch (e) {
+      console.error(
+        `[ai-client] completeJson(${schemaName}) FAILED after ${Date.now() - startedAt}ms, provider=${this.cfg.baseURL ?? "openai"}, model=${this.cfg.model}:`,
+        e,
+      );
+      throw e;
+    }
   }
 }
 

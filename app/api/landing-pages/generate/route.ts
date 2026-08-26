@@ -98,8 +98,11 @@ export async function POST(request: Request) {
   baseDraft = applyBriefChannels(baseDraft, body.brief.ctaGoal);
 
   // 生成（失败不扣额度）
+  const genStartedAt = Date.now();
   const result = await generateDraftFromBrief(baseDraft, body.brief);
+  console.log(`[generate] generateDraftFromBrief took ${Date.now() - genStartedAt}ms, ok=${result.ok}`);
   if (!result.ok) {
+    console.error(`[generate] failed: reason=${result.reason} detail=${result.detail}`);
     return NextResponse.json(
       { error: ApiErrors.AI_GENERATION_FAILED, reason: result.reason },
       { status: 422 },
