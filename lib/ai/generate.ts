@@ -32,12 +32,14 @@ export async function generateDraftFromBrief(
       });
       filled = out.slots ?? [];
     } catch (e) {
+      console.error(`[generate] attempt ${attempt} model call threw:`, e);
       last = { ok: false, reason: "model_error", detail: String(e) };
       continue;
     }
     const draft = mergeSlots(template, filled);
     const compliance = checkDraftCompliance(draft);
     if (compliance.ok) return { ok: true, draft };
+    console.error(`[generate] attempt ${attempt} failed compliance:`, compliance.reason, compliance.detail);
     last = { ok: false, reason: compliance.reason ?? "invalid_structure", detail: compliance.detail };
   }
   return last;
