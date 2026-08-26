@@ -3,6 +3,10 @@ export const ApiErrors = {
   SESSION_STALE: 'session_stale',
   NOT_FOUND: 'Not found',
   SLUG_TAKEN: 'slug_taken',
+  /** 用户自定义子域名不合法：非小写字母数字连字符、开头/结尾是连字符等。 */
+  SLUG_INVALID: 'slug_invalid',
+  /** 用户自定义子域名撞了平台保留字（www/api/admin…）。 */
+  SLUG_RESERVED: 'slug_reserved',
   NAME_TAKEN: 'name_taken',
   SITE_NAME_EXISTS: 'Site name already exists.',
   EMAIL_NOT_SUPPORTED: 'Only Gmail addresses are supported.',

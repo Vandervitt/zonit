@@ -63,10 +63,16 @@ export const editor = {
 
     noDomains:
       "You don't have a domain to publish to yet. Use a platform-provided address to get the page live now, and switch to your own brand domain once leads start coming in.",
-    claim: "Publish on a platform address",
+    claimSlugLabel: "Pick a subdomain",
+    claimSlugPlaceholder: "e.g. acme",
+    claimSlugInvalid: "Lowercase letters, numbers and hyphens only — and it can't start or end with a hyphen.",
+    claimSlugReserved: "That name is reserved by the platform. Try another.",
+    claimSlugTaken: "That name is already taken. Try another.",
+    claimSlugLockedHint: "⚠️ This subdomain can't be changed once you set it — double-check before submitting.",
+    claim: "Publish on this address",
     claiming: "Assigning…",
     claimHint:
-      "We'll assign a dedicated address based on the page name — no DNS to configure, live immediately. You can move the page to your own domain at any time.",
+      "No DNS to configure, live immediately. You can move the page to your own domain later, but this platform address is fixed once created.",
     claimFailed: "Could not assign an address. Please try again shortly.",
     claimUnavailable: "No platform address is available right now. Try again shortly, or connect your own domain.",
     claimNetworkFailed: "Could not claim an address. Check your connection and try again.",
