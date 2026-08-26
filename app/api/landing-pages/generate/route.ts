@@ -21,6 +21,9 @@ import { checkAndConsume, hasAllowance } from "@/lib/ai/usage";
 import type { GenerationBrief } from "@/lib/ai/types";
 import type { LandingPageDraft } from "@/types/schema.draft";
 
+/** LLM 文案生成 + 可选的 Unsplash 配图检索，实测常超过默认时限（与 page-check 系列一致）。 */
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user?.id) {

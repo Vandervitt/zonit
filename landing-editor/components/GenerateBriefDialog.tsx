@@ -167,6 +167,10 @@ function BriefModal() {
       dispatch({ kind: "replaceDraft", draft: data.draft as LandingPageDraft });
       message.success(t.success);
       close();
+    } catch {
+      // fetch 本身失败（网络中断、连接被中间层掐断等）：res.ok 分支管不到这里，
+      // 不补这个 catch 就是「等了一分半，弹窗静默变回表单」，没有任何提示。
+      message.error(t.failed);
     } finally {
       setLoading(false);
     }
