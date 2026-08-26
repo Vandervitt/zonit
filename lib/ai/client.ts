@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import * as Sentry from "@sentry/nextjs";
 
 export interface CompleteJsonArgs {
   system: string;
@@ -123,10 +124,11 @@ class OpenAiCompatibleClient implements AiClient {
   private client = new OpenAI({ apiKey: this.cfg.apiKey, baseURL: this.cfg.baseURL });
 
   async completeJson<T = unknown>({ system, user, schema, schemaName }: CompleteJsonArgs): Promise<T> {
-    // 临时排查埋点：生产环境「AI 一键成页」偶发超时/失败，本地永远复现不出来。
-    // 怀疑是 Vercel Function 跑在 iad1（美东）、DashScope 在国内，跨太平洋调用不稳定。
-    // 先测个真实耗时和失败原因，别猜。查完这条埋点会删掉。
+    // 耗时埋点：生产上「AI 一键成页」曾偶发超时/失败，本地永远复现不出来，
+    // 排查确认是 Vercel Function（iad1）打国内 DashScope 单次就要 60+ 秒（见 PR #196）。
+    // 留着这条埋点——那条延迟不是一次性的，以后哪个 provider/region 变慢了还得靠它发现。
     const startedAt = Date.now();
+    const provider = this.cfg.baseURL ?? "openai";
     try {
       const resp = await this.client.chat.completions.create({
         model: this.cfg.model,
@@ -141,16 +143,25 @@ class OpenAiCompatibleClient implements AiClient {
             }
           : { type: "json_object" },
       });
-      console.log(
-        `[ai-client] completeJson(${schemaName}) ok in ${Date.now() - startedAt}ms, provider=${this.cfg.baseURL ?? "openai"}, model=${this.cfg.model}`,
-      );
+      const durationMs = Date.now() - startedAt;
+      console.log(`[ai-client] completeJson(${schemaName}) ok in ${durationMs}ms, provider=${provider}, model=${this.cfg.model}`);
+      // 只留面包屑，不单独报事件——成功没有必要产生 Sentry 告警噪音，
+      // 但一旦后面真出错了，这条能告诉你「失败前那次调用花了多久」。
+      Sentry.addBreadcrumb({
+        category: "ai-client",
+        message: `completeJson(${schemaName}) ok`,
+        level: "info",
+        data: { durationMs, provider, model: this.cfg.model },
+      });
       const content = resp.choices[0]?.message?.content ?? "{}";
       return JSON.parse(content) as T;
     } catch (e) {
-      console.error(
-        `[ai-client] completeJson(${schemaName}) FAILED after ${Date.now() - startedAt}ms, provider=${this.cfg.baseURL ?? "openai"}, model=${this.cfg.model}:`,
-        e,
-      );
+      const durationMs = Date.now() - startedAt;
+      console.error(`[ai-client] completeJson(${schemaName}) FAILED after ${durationMs}ms, provider=${provider}, model=${this.cfg.model}:`, e);
+      Sentry.captureException(e, {
+        tags: { route: "ai-client", schemaName, provider },
+        extra: { durationMs, model: this.cfg.model },
+      });
       throw e;
     }
   }

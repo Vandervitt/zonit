@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { auth } from "@/auth";
 import pool from "@/lib/db";
 import { ApiErrors } from "@/lib/constants";
@@ -9,19 +9,20 @@ import {
   createLandingPage,
   listLandingPages,
   getLandingPage,
-  updateLandingPageDraft,
   ensureUniqueName,
 } from "@/lib/landing-pages/store";
+import { createAiJob } from "@/lib/landing-pages/ai-jobs";
+import { performGeneration, runGenerationJob } from "@/lib/landing-pages/generate-job";
 import { getUserPlan } from "@/lib/plans-db";
 import { PLANS } from "@/lib/plans";
-import { generateDraftFromBrief, generateImageQueries } from "@/lib/ai/generate";
-import { deriveImageSlots, mergeImages, buildImageReplacements, MAX_AUTO_IMAGES } from "@/lib/ai/images";
-import { searchTopPhoto, searchPhotoAt, persistUnsplashPhoto } from "@/lib/media/unsplash";
-import { checkAndConsume, hasAllowance } from "@/lib/ai/usage";
+import { hasAllowance } from "@/lib/ai/usage";
 import type { GenerationBrief } from "@/lib/ai/types";
 import type { LandingPageDraft } from "@/types/schema.draft";
 
-/** LLM 文案生成 + 可选的 Unsplash 配图检索，实测常超过默认时限（与 page-check 系列一致）。 */
+/**
+ * 生成主体挪到了 after() 里跑（编辑器内路径），这个值现在只约束「同步部分」还剩多少余量
+ * 给 after() 的后台任务——保留跟 page-check 系列一致的量级，别让它比后台任务本身还短。
+ */
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
@@ -55,9 +56,11 @@ export async function POST(request: Request) {
   const plan = await getUserPlan(userId);
 
   // 两种模式：
-  // - 编辑器内（body.pageId）：为「已建好的空白落地页」原地生成文案；base 用该页当前草稿，
-  //   不占用「新建数量」名额，成功后落库并把生成结果回传给编辑器灌入 store（前端 autosave 兜底）。
+  // - 编辑器内（body.pageId）：为「已建好的空白落地页」原地生成文案。异步——生成本身
+  //   （跨太平洋打 DashScope，单次实测 60+ 秒）挪进 after() 后台跑，这里只建 job 立刻回 202，
+  //   前端轮询 job 状态。不占用「新建数量」名额。
   // - 旧建页模式（无 pageId）：按模板新建一张落地页（保留兼容，受落地页数量上限约束）。
+  //   目前没有调用方在用这条路径，维持原有同步行为，不做异步化——没有真实场景就不引入抽象。
   const inEditor = typeof body.pageId === "string" && body.pageId.length > 0;
 
   // 落地页数量上限仅约束「新建」；编辑器内原地生成不新增页面，跳过该校验。
@@ -97,85 +100,25 @@ export async function POST(request: Request) {
   // 只定主渠道不填值：AI 编不出用户的真实号码，值由用户在联系方式面板里填。
   baseDraft = applyBriefChannels(baseDraft, body.brief.ctaGoal);
 
-  // 生成（失败不扣额度）
-  const genStartedAt = Date.now();
-  const result = await generateDraftFromBrief(baseDraft, body.brief);
-  console.log(`[generate] generateDraftFromBrief took ${Date.now() - genStartedAt}ms, ok=${result.ok}`);
+  if (inEditor) {
+    const job = await createAiJob(userId, body.pageId!);
+    const brief = body.brief;
+    // 响应先发出去，生成本身（可能 1~2 分钟）在响应发出后继续跑；
+    // runGenerationJob 自己兜住所有异常，job 一定会落到终态，不会卡死在 pending。
+    after(() => runGenerationJob({ jobId: job.id, pageId: body.pageId!, userId, baseDraft, brief, quota }));
+    return NextResponse.json({ jobId: job.id }, { status: 202 });
+  }
+
+  const result = await performGeneration(baseDraft, body.brief, userId, quota);
   if (!result.ok) {
-    console.error(`[generate] failed: reason=${result.reason} detail=${result.detail}`);
     return NextResponse.json(
       { error: ApiErrors.AI_GENERATION_FAILED, reason: result.reason },
       { status: 422 },
     );
   }
 
-  // 成功后扣额度（月额度优先，满则扣 credit）；并发耗尽时拒绝
-  const consumed = await checkAndConsume(pool, userId, "page", quota);
-  if (!consumed.ok) {
-    return NextResponse.json(
-      { error: ApiErrors.AI_QUOTA_EXHAUSTED, hints: { upgrade: "/pricing", topup: "/admin/billing" } },
-      { status: 403 },
-    );
-  }
-
-  // 自动配图（尽力而为）：据 brief 为图片位换 Unsplash 图并写 alt；任何失败都回退文本版 draft。
-  const finalDraft = await applyAutoImages(result.draft, body.brief, userId);
-
-  if (inEditor) {
-    // 原地落库；同时回传 draft 供编辑器灌入 store（若前端未及时 autosave，DB 已是新内容）。
-    await updateLandingPageDraft(body.pageId!, userId, { data: finalDraft });
-    return NextResponse.json({ id: body.pageId, draft: finalDraft }, { status: 200 });
-  }
-
   const template = getTemplate(body.templateId);
   const name = await ensureUniqueName(userId, `${template.name} (AI)`);
-  const row = await createLandingPage(userId, name, finalDraft);
+  const row = await createLandingPage(userId, name, result.draft);
   return NextResponse.json(row, { status: 201 });
-}
-
-/**
- * 自动配图：AI 出检索词 → Unsplash 取首图 → 存 Blob → 写回 src/alt。
- * 全程尽力而为——未开启、无 Unsplash key、任一步失败，都返回原（文本版）draft，绝不阻断生成。
- * 同一检索词只下载一次（去重），并受 MAX_AUTO_IMAGES 数量上限约束。
- */
-async function applyAutoImages(
-  draft: LandingPageDraft,
-  brief: GenerationBrief,
-  userId: string,
-): Promise<LandingPageDraft> {
-  if (brief.autoImages === false) return draft;
-  if (!process.env.UNSPLASH_ACCESS_KEY || process.env.UNSPLASH_ACCESS_KEY === "your_access_key_here") return draft;
-
-  try {
-    const slots = deriveImageSlots(draft, MAX_AUTO_IMAGES);
-    if (slots.length === 0) return draft;
-
-    const plan = await generateImageQueries(brief, slots);
-    // 头像逐个换脸：用递增计数从结果池取不同图，即使模型给了相同检索词也不撞脸。
-    let avatarSeq = 0;
-    // 单图解析：Unsplash 取图 → 存 Blob；无结果 / 失败返回 null（该图保留原图）。
-    const replacements = await buildImageReplacements(slots, plan, async (query, slot) => {
-      const photo =
-        slot.kind === "avatar"
-          ? await searchPhotoAt(query, avatarSeq++, "squarish") // 人像取向、逐个取不同结果
-          : await searchTopPhoto(query); // 普通/对比图：landscape 首图
-      if (!photo) return null;
-      try {
-        const saved = await persistUnsplashPhoto(userId, {
-          downloadLocation: photo.downloadLocation,
-          imageUrl: photo.urls.regular,
-          creditName: photo.user.name,
-          creditUrl: photo.user.profileUrl,
-        });
-        if (!saved || "error" in saved) return null;
-        return { src: saved.item.url, alt: photo.alt_description ?? undefined };
-      } catch {
-        return null;
-      }
-    });
-
-    return replacements.length ? mergeImages(draft, replacements) : draft;
-  } catch {
-    return draft; // 出错整段回退，保证「有文案结果」优先
-  }
 }
