@@ -92,6 +92,45 @@ function GeneratingState({ elapsedMs }: { elapsedMs: number }) {
   );
 }
 
+const POLL_INTERVAL_MS = 2500;
+/** 5 分钟：留够两轮 LLM 重试（实测单次 60~90 秒）的余量，防止极端情况下永远轮询。 */
+const POLL_TIMEOUT_MS = 5 * 60_000;
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+type PollResult = "succeeded" | "ai_quota_exhausted" | "failed" | "timeout" | "session_expired";
+
+/**
+ * 轮询 job 状态直到终态或超时。
+ * 单次轮询请求本身失败（网络抖动）不算任务失败，直接进入下一轮——
+ * 真正代表任务失败的是 job 状态本身变成 failed，不是「这一次没查到」。
+ */
+async function pollJob(
+  jobId: string,
+  router: { push: (href: string) => void },
+  sessionExpiredMsg: string,
+): Promise<PollResult> {
+  const deadline = Date.now() + POLL_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    await delay(POLL_INTERVAL_MS);
+    let res: Response;
+    try {
+      res = await fetch(`/api/landing-pages/generate/${jobId}`);
+    } catch {
+      continue;
+    }
+    if (handleSessionExpired(res, router, sessionExpiredMsg)) return "session_expired";
+    if (!res.ok) continue;
+    const data = await res.json();
+    if (data.status === "pending") continue;
+    if (data.status === "succeeded") return "succeeded";
+    return data.reason === "ai_quota_exhausted" ? "ai_quota_exhausted" : "failed";
+  }
+  return "timeout";
+}
+
 const ANTD_LOCALE = { en: enUS, zh: zhCN };
 
 export function GenerateBriefDialog() {
@@ -149,27 +188,40 @@ function BriefModal() {
         tone: values.tone?.length ? values.tone.join("、") : undefined,
         ctaGoal: values.ctaGoal?.length ? values.ctaGoal.join("、") : undefined,
       };
-      const res = await fetch("/api/landing-pages/generate", {
+      // 生成本身（跨太平洋打 DashScope）常常要一两分钟，接口只同步做校验/建 job，
+      // 202 立刻回；真正的生成在后台跑，这里改成轮询 job 状态。
+      const startRes = await fetch("/api/landing-pages/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pageId, brief }),
       });
-      if (handleSessionExpired(res, router, sessionExpiredMsg)) return;
-      const data = await res.json();
-      if (!res.ok) {
-        if (data.error === "ai_quota_exhausted")
-          message.error(t.quotaExhausted);
-        else if (data.error === "limit_exceeded")
-          message.error(t.pageLimit);
+      if (handleSessionExpired(startRes, router, sessionExpiredMsg)) return;
+      const startData = await startRes.json();
+      if (!startRes.ok) {
+        if (startData.error === "ai_quota_exhausted") message.error(t.quotaExhausted);
+        else if (startData.error === "limit_exceeded") message.error(t.pageLimit);
         else message.error(t.failed);
         return;
       }
-      dispatch({ kind: "replaceDraft", draft: data.draft as LandingPageDraft });
+      const jobId = startData.jobId as string;
+
+      const status = await pollJob(jobId, router, sessionExpiredMsg);
+      if (status === "session_expired") return; // handleSessionExpired 内部已处理跳转
+      if (status !== "succeeded") {
+        message.error(status === "ai_quota_exhausted" ? t.quotaExhausted : t.failed);
+        return;
+      }
+
+      // 成功：job 只落状态，不带 draft——回去重新取一次页面数据，灌进编辑器 store。
+      const pageRes = await fetch(`/api/landing-pages/${pageId}`);
+      if (handleSessionExpired(pageRes, router, sessionExpiredMsg)) return;
+      const pageData = await pageRes.json();
+      dispatch({ kind: "replaceDraft", draft: pageData.data as LandingPageDraft });
       message.success(t.success);
       close();
     } catch {
-      // fetch 本身失败（网络中断、连接被中间层掐断等）：res.ok 分支管不到这里，
-      // 不补这个 catch 就是「等了一分半，弹窗静默变回表单」，没有任何提示。
+      // fetch 本身失败（网络中断、连接被中间层掐断等）：上面各分支管不到这里，
+      // 不补这个 catch 就是「等了一两分钟，弹窗静默变回表单」，没有任何提示。
       message.error(t.failed);
     } finally {
       setLoading(false);
