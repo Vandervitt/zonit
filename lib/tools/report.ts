@@ -17,6 +17,9 @@ import type { FetchResult } from "./fetch-page";
 import {
   findPolicyLinks,
   detectContact,
+  detectLeadForm,
+  hasConversionEarly,
+  detectTrustSignals,
   detectTrackers,
   detectViewport,
   countBlockingScripts,
@@ -47,6 +50,12 @@ export interface PageCheckReport {
 const HEAVY_PAGE_BYTES = 1_500_000;
 /** 阻塞脚本数量的提示阈值。 */
 const MANY_BLOCKING_SCRIPTS = 4;
+/**
+ * 单个留资表单字段数的提示阈值。
+ * 取 5：本产品自己的表单是 6 个字段全开、常态开 2-3 个，阈值定在 5 才不会
+ * 对正常配置刷屏；同时能接住市场反复吐槽的「填一堆信息」那种十几个字段的表单。
+ */
+const FORM_FIELDS_MANY = 5;
 
 export interface AssembleInput {
   fetched: Extract<FetchResult, { ok: true }>;
@@ -96,16 +105,52 @@ export function assembleReport(input: AssembleInput): PageCheckReport {
   }
 
   // —— 联系方式 ——
+  // 表单也是联系方式，且往往是唯一的那个（广告落地页的主转化）。只认 mailto/tel
+  // 会把「表单为唯一转化」的页面误判成没有联系方式。
   const contact = detectContact(html);
-  if (!contact.email && !contact.phone) {
+  const leadForm = detectLeadForm(html);
+  if (!contact.email && !contact.phone && !leadForm.present) {
     findings.push({ id: "contact_missing", level: "attention" });
   } else {
     findings.push({
       id: "contact_ok",
       level: "info",
-      data: { email: contact.email ? 1 : 0, phone: contact.phone ? 1 : 0 },
+      data: {
+        email: contact.email ? 1 : 0,
+        phone: contact.phone ? 1 : 0,
+        form: leadForm.present ? 1 : 0,
+      },
     });
   }
+
+  // —— 转化承接 ——
+  // 这三条回答的是市场反复问的「有流量为什么没询盘」，而不是合规问题。
+  // 与本模块其余检查同一红线：只陈述页面上有什么，不打分、不下「会不会转化」的结论。
+  if (leadForm.present && leadForm.maxFields > FORM_FIELDS_MANY) {
+    findings.push({
+      id: "form_fields_many",
+      level: "info",
+      data: { fields: leadForm.maxFields, threshold: FORM_FIELDS_MANY },
+    });
+  }
+  // 首屏位置静态判不了（没有几何信息），用文档序近似：转化控件是否出现在
+  // HTML 前 FOLD_RATIO 部分。近似的代价是长页面会偏严，故只给 info 不给 attention。
+  if (leadForm.present || contact.email || contact.phone) {
+    const early = hasConversionEarly(html);
+    findings.push(
+      early
+        ? { id: "conversion_reachable_early", level: "info" }
+        : { id: "conversion_late_only", level: "info" },
+    );
+  }
+  // 信任元素同样受静态检查的能力边界约束（可能由 JS 渲染），故「没找到」走
+  // unknown 而不是断言「你没有」——与像素那条同一条红线。
+  const trust = detectTrustSignals(html);
+  findings.push(
+    trust.length > 0
+      ? { id: "trust_signals_present", level: "info", data: { kinds: trust.join(", ") } }
+      : { id: "trust_signals_not_found", level: "unknown" },
+  );
 
   // —— 追踪与同意 ——
   // 静态检查看不到 JS 动态注入的像素（设计文档 11.8），故「没找到」必须
@@ -248,6 +293,11 @@ export const FINDING_DIMENSION: Record<string, string> = {
   terms_ok: "terms",
   contact_missing: "contact",
   contact_ok: "contact",
+  form_fields_many: "form_fields",
+  conversion_reachable_early: "conversion_position",
+  conversion_late_only: "conversion_position",
+  trust_signals_present: "trust",
+  trust_signals_not_found: "trust",
   viewport_missing: "viewport",
   viewport_zoom_blocked: "viewport",
   viewport_ok: "viewport",

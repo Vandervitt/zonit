@@ -127,6 +127,9 @@ export const tools = {
       terms: "Terms",
       consent: "Tracking vs consent",
       contact: "Contact details",
+      form_fields: "Form length",
+      conversion_position: "Contact position",
+      trust: "Trust elements",
       viewport: "Mobile viewport",
       hops: "Redirects",
       weight: "Page weight",
@@ -200,11 +203,35 @@ export const tools = {
       guide: "google-ads-landing-page-policy",
     },
     contact_missing: {
-      title: "No email or phone found on the page",
+      title: "No form, email or phone found on the page",
       why: "Transparency about who you are feeds landing page experience, and it is the most commonly missing item on lead-gen pages.",
       guide: "google-ads-landing-page-policy",
     },
     contact_ok: { title: "Contact details present on the page", why: "" },
+    form_fields_many: {
+      title: "The form asks for {fields} fields",
+      why: "Every extra field is another reason to leave. Above {threshold}, it is worth checking which fields you actually need before the first reply.",
+      guide: "google-ads-landing-page-policy",
+    },
+    conversion_reachable_early: {
+      title: "A way to get in touch appears early in the page",
+      why: "",
+    },
+    conversion_late_only: {
+      title: "The only way to get in touch appears late in the page",
+      why: "Visitors arriving from an ad decide fast. This is read from document order, not from where things land on screen — on a long page it can read stricter than reality.",
+      guide: "google-ads-landing-page-policy",
+    },
+    trust_signals_present: {
+      title: "Trust elements found ({kinds})",
+      why: "",
+    },
+    // ⚠️ 同 pixel_not_found_in_html 的红线：静态读不到 ≠ 页面上没有。
+    trust_signals_not_found: {
+      title: "No trust elements found in the initial HTML",
+      why: "This does not mean the page has none. Testimonials and case studies rendered by JavaScript after load are invisible to a static read.",
+      guide: "google-ads-landing-page-policy",
+    },
     pixel_before_consent_suspected: {
       title: "Tracking code found with no consent gate ({pixels})",
       why: "In the EU and UK, non-essential tracking generally needs consent before it fires. We found tracking code and no sign of a consent tool holding it back — this is a suspicion from the HTML, not a measurement.",

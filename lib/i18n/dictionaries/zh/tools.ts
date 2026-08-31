@@ -124,6 +124,9 @@ export const tools = {
       terms: "服务条款",
       consent: "跟踪与同意",
       contact: "联系方式",
+      form_fields: "表单长度",
+      conversion_position: "联系方式位置",
+      trust: "信任元素",
       viewport: "移动端 viewport",
       hops: "跳转",
       weight: "页面体积",
@@ -195,11 +198,35 @@ export const tools = {
       guide: "google-ads-landing-page-policy",
     },
     contact_missing: {
-      title: "页面上没找到邮箱或电话",
+      title: "页面上没找到表单、邮箱或电话",
       why: "「你是谁」的透明度会进入着陆页体验评分，而这是留资类页面上最常缺失的一项。",
       guide: "google-ads-landing-page-policy",
     },
     contact_ok: { title: "页面上有联系方式", why: "" },
+    form_fields_many: {
+      title: "表单要填 {fields} 个字段",
+      why: "每多一个字段就多一个放弃的理由。超过 {threshold} 个时，值得回头看看哪些是第一次回复之前真的必须问的。",
+      guide: "google-ads-landing-page-policy",
+    },
+    conversion_reachable_early: {
+      title: "页面靠前的位置就能找到联系方式",
+      why: "",
+    },
+    conversion_late_only: {
+      title: "只有翻到页面靠后才能找到联系方式",
+      why: "从广告点进来的访客决定得很快。这一条按文档顺序判断，不是按实际显示位置——页面很长时可能比实际情况偏严。",
+      guide: "google-ads-landing-page-policy",
+    },
+    trust_signals_present: {
+      title: "找到了信任元素（{kinds}）",
+      why: "",
+    },
+    // ⚠️ 同 pixel_not_found_in_html 的红线：静态读不到 ≠ 页面上没有。
+    trust_signals_not_found: {
+      title: "初始 HTML 中没找到信任元素",
+      why: "这不代表页面上没有。由 JavaScript 在加载后渲染的评价、案例，静态读取看不到。",
+      guide: "google-ads-landing-page-policy",
+    },
     pixel_before_consent_suspected: {
       title: "发现追踪代码，且没有同意门控（{pixels}）",
       why: "在欧盟与英国，非必要追踪通常需要先取得同意才能触发。我们看到了追踪代码，却没看到任何同意工具在拦着它——这是基于 HTML 的**怀疑**，不是实测。",

@@ -93,6 +93,87 @@ export function detectContact(html: string): { email: boolean; phone: boolean } 
   };
 }
 
+/** 留资表单里算数的输入控件；隐藏域与提交按钮不是「要访客填的字段」。 */
+const FORM_FIELD_RE =
+  /<(?:input|select|textarea)\b(?![^>]*\btype=["'](?:hidden|submit|button|image|reset)["'])[^>]*>/gi;
+const FORM_RE = /<form\b[\s\S]*?<\/form>/gi;
+
+/**
+ * 蜜罐字段的特征。
+ *
+ * ⚠️ 蜜罐**不能**用 `type="hidden"`（机器人会跳过它，蜜罐就失效了），所以它一定
+ * 长得像个普通可填字段——本仓库自己的留资表单就是 `type="text"` + `aria-hidden`
+ * + `tabIndex={-1}` + 隐藏 class。不排掉它，每张页的字段数都会虚高 1 个，
+ * 我们会先误报自己。
+ */
+const HONEYPOT_RE = /\baria-hidden=["']true["']|\btabindex=["']-1["']|\bclass=["'][^"']*\bhidden\b/i;
+
+export interface LeadFormDetection {
+  /** 页面上是否存在留资表单 */
+  present: boolean;
+  /** 单个表单里要访客填的字段数上限（多个表单取最多的那个） */
+  maxFields: number;
+}
+
+/**
+ * 检测留资表单。
+ *
+ * ⚠️ 存在的意义不只是多一项检查：`detectContact` 只认 mailto/tel，而表单是
+ * 本产品与市场共同推荐的主转化方式。缺了这个检测，一张「表单为唯一转化」的
+ * 页面会被判成「没有联系方式」——自检器会诬告自己生成的页面。
+ *
+ * 字段数按**单个表单**计，不跨表单累加：访客一次只填一个表单，把页面上
+ * 所有表单的字段加起来会虚高（例如页尾还有个订阅邮箱框）。
+ *
+ * ⚠️ 已知会偏高一处：国际电话常见「国码下拉 + 号码输入」两个控件表达一个字段，
+ * 这里会数成 2。判「下拉是不是国码选择器」很脆，故不猜；阈值留了余量吸收它，
+ * 且这条只出 info 不出 attention。
+ */
+export function detectLeadForm(html: string): LeadFormDetection {
+  const forms = html.match(FORM_RE) ?? [];
+  if (forms.length === 0) return { present: false, maxFields: 0 };
+  let maxFields = 0;
+  for (const form of forms) {
+    const fields = (form.match(FORM_FIELD_RE) ?? []).filter((tag) => !HONEYPOT_RE.test(tag));
+    if (fields.length > maxFields) maxFields = fields.length;
+  }
+  return { present: true, maxFields };
+}
+
+/**
+ * 转化控件出现在文档前多少比例内，算「访客不用一路翻到底才能联系」。
+ *
+ * 首屏是几何概念，静态 HTML 没有几何信息，这里用文档序近似。近似必然不准
+ * （长页面偏严），所以调用方只给 info 不给 attention，且文案说的是「靠前 / 靠后」
+ * 而不是「在首屏 / 不在首屏」。要真判首屏得让 sandbox 侧回传 DOM 几何，
+ * 那是另一个量级的改动，别用正则硬撑。
+ */
+const FOLD_RATIO = 0.4;
+
+/** 转化控件：表单、表单锚点、以及 mailto/tel/WhatsApp/Telegram 深链。 */
+const CONVERSION_MARK_RE =
+  /<form\b|href=["'](?:mailto:|tel:|https?:\/\/(?:wa\.me|api\.whatsapp\.com|t\.me)\/)|href=["']#lead-form["']/i;
+
+/** 转化控件是否出现在文档靠前的位置（首屏的文档序近似）。 */
+export function hasConversionEarly(html: string): boolean {
+  const head = html.slice(0, Math.max(1, Math.floor(html.length * FOLD_RATIO)));
+  return CONVERSION_MARK_RE.test(head);
+}
+
+/** 信任元素的静态特征。命中即说明「找到了」，找不到不等于没有（可能 JS 渲染）。 */
+const TRUST_SIGNATURES: { id: string; re: RegExp }[] = [
+  { id: "testimonial", re: /\b(?:testimonial|review|rating)s?\b/i },
+  { id: "case_study", re: /\bcase[\s-]?stud(?:y|ies)\b|\bsuccess[\s-]stor(?:y|ies)\b/i },
+  { id: "credential", re: /\b(?:certified|accredited|licen[cs]ed|iso\s?\d{4,5})\b/i },
+  { id: "guarantee", re: /\b(?:money[\s-]back|satisfaction\s+guarantee|warranty)\b/i },
+];
+
+/** 页面上能静态识别到的信任元素种类。 */
+export function detectTrustSignals(html: string): string[] {
+  const text = stripTags(html);
+  return TRUST_SIGNATURES.filter((s) => s.re.test(text) || s.re.test(html)).map((s) => s.id);
+}
+
 /** 已知追踪代码的静态特征。 */
 const PIXEL_SIGNATURES: { id: string; re: RegExp }[] = [
   { id: "meta", re: /\bfbq\s*\(|connect\.facebook\.net/i },

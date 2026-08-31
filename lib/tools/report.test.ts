@@ -110,6 +110,20 @@ describe("assembleReport · 其余检查", () => {
     expect(ids(fresh)).not.toContain("copyright_stale");
   });
 
+  // 回归：表单是本产品与市场共同推荐的主转化方式，而 detectContact 只认
+  // mailto/tel。以表单为唯一转化的页面曾被判成 contact_missing（attention）——
+  // 即自检器诬告我们自己生成的页面。这是「只认某种写法」的第二次复发
+  // （第一次是政策链接只认 <a>）。
+  it("只有留资表单、没有 mailto/tel 时不判 contact_missing", () => {
+    const html = `<form action="/api/leads" method="post">
+      <input type="email" name="email" required />
+      <button type="submit">Get my free quote</button>
+    </form>`;
+    const r = assembleReport({ fetched: fetched(html) });
+    expect(ids(r)).not.toContain("contact_missing");
+    expect(ids(r)).toContain("contact_ok");
+  });
+
   it("attention 排在 info 前面", () => {
     const r = assembleReport({ fetched: fetched("<html><p>x</p></html>") });
     const levels = r.findings.map((f) => f.level);
