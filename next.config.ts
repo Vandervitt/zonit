@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import { OPTIMIZABLE_IMAGE_HOSTS } from "./lib/images/optimizable";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["pg"],
   images: {
-    remotePatterns: [
-      { hostname: "lh3.googleusercontent.com" },
-      { hostname: "*.public.blob.vercel-storage.com" },
-    ],
+    // ⚠️ 白名单的事实源是 lib/images/optimizable.ts —— 落地页渲染器据同一份名单
+    // 决定「这张图能不能走 /_next/image」。写两份必然漂移：这边加了那边没加 →
+    // 优化静默失效；反过来 → 图片 400 打不开，两种都不会有人立刻发现。
+    remotePatterns: OPTIMIZABLE_IMAGE_HOSTS.map((hostname) => ({ hostname })),
   },
   async headers() {
     return [
