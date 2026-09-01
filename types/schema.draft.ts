@@ -152,6 +152,17 @@ export interface ProcessSection {
   title: string;
   subtitle?: string;
   steps: ProcessStep[];
+  /**
+   * 可选的区块级 CTA。
+   *
+   * 为什么加：此前全库只有 hero.cta / hero.secondaryCta / plans.items[].cta /
+   * floatingButton 四个落点，价值论述型区块一个都没有——访客读完「凭什么信你」
+   * 之后，最近的按钮要么在首屏（已经划过去了），要么在页尾。业界通行做法是
+   * CTA 在首屏、价值阐述之后、页尾各出现一次，中间这次我们缺。
+   *
+   * 刻意是可选的：54 套现成模板一套都不该被迫改，加了字段不填就跟以前一样。
+   */
+  cta?: CtaButton;
 }
 
 // ============ 7. 信任模块 ============
@@ -179,6 +190,17 @@ export interface FeaturesSection {
   title: string;
   subtitle?: string;
   items: FeatureItem[];        // 特性项
+  /**
+   * 可选的区块级 CTA。
+   *
+   * 为什么加：此前全库只有 hero.cta / hero.secondaryCta / plans.items[].cta /
+   * floatingButton 四个落点，价值论述型区块一个都没有——访客读完「凭什么信你」
+   * 之后，最近的按钮要么在首屏（已经划过去了），要么在页尾。业界通行做法是
+   * CTA 在首屏、价值阐述之后、页尾各出现一次，中间这次我们缺。
+   *
+   * 刻意是可选的：54 套现成模板一套都不该被迫改，加了字段不填就跟以前一样。
+   */
+  cta?: CtaButton;
 }
 
 // ============ 9. 评价模块 ============
@@ -202,6 +224,17 @@ export interface ReviewsSection {
   subtitle?: string;
   description?: string;        // desc
   items: ReviewItem[];         // 评价项
+  /**
+   * 可选的区块级 CTA。
+   *
+   * 为什么加：此前全库只有 hero.cta / hero.secondaryCta / plans.items[].cta /
+   * floatingButton 四个落点，价值论述型区块一个都没有——访客读完「凭什么信你」
+   * 之后，最近的按钮要么在首屏（已经划过去了），要么在页尾。业界通行做法是
+   * CTA 在首屏、价值阐述之后、页尾各出现一次，中间这次我们缺。
+   *
+   * 刻意是可选的：54 套现成模板一套都不该被迫改，加了字段不填就跟以前一样。
+   */
+  cta?: CtaButton;
 }
 
 // ============ 10. 产品故事 ============
@@ -310,6 +343,60 @@ export interface PageTracking {
 // 首屏 / 页脚为页面级必填单例，固定在顶部/底部，不进入可排序列表；
 // 其余模块进入 sections[]，可自由增删与排序。
 
+// ============ 13. Logo 墙 ============
+
+/**
+ * 合作方 / 客户 logo 墙。
+ *
+ * 为什么不复用 trust：TrustSection 只有 `icon?: string`（emoji 或图标名），
+ * 放不了图片，而市场清单里点名的「合作 Logo」「资质徽章」本质是图片背书。
+ * 用 emoji 冒充别人的品牌标识既不像也不诚实。
+ */
+export interface LogoItem {
+  image: ImageRef;
+  /** 品牌名。既作 alt（无障碍与 SEO），也在图挂掉时兜底显示。 */
+  name: string;
+}
+
+export interface LogoWallSection {
+  title: string;
+  subtitle?: string;
+  items: LogoItem[];
+}
+
+// ============ 14. 客户案例 ============
+
+/**
+ * 客户案例。
+ *
+ * 与 story 的区别：story 讲品牌自己（创始人、缘起），案例讲**客户**发生了什么。
+ * 与 beforeAfter 的区别：那个是图片对比，这个是叙事。
+ *
+ * ⚠️ metric 是可选的，且刻意只给「标签 + 值」两个自由字符串，不做数值计算、
+ * 不做百分比推导：一旦平台替用户算出「提升 300%」，那个数字的举证责任就落到
+ * 我们头上。用户自己写什么就显示什么，合规提示另在编辑器侧给（见 complianceHints）。
+ */
+export interface CaseStudyItem {
+  /** 客户 / 项目名 */
+  client: string;
+  /** 一句话结果概述 */
+  summary: string;
+  /** 展开描述（可选） */
+  detail?: string;
+  image?: ImageRef;
+  /** 可选的量化指标：标签与值都由用户自己填，平台不参与计算。 */
+  metricLabel?: string;
+  metricValue?: string;
+}
+
+export interface CaseStudySection {
+  title: string;
+  subtitle?: string;
+  items: CaseStudyItem[];
+  /** 读完案例正是最愿意行动的时刻，故这一块同样支持区块级 CTA。 */
+  cta?: CtaButton;
+}
+
 export type LandingSection =
   | { type: 'stats'; data: StatsSection }
   | { type: 'plans'; data: PlansSection }
@@ -322,7 +409,9 @@ export type LandingSection =
   | { type: 'story'; data: StorySection }
   | { type: 'countdown'; data: CountdownSection }
   | { type: 'faq'; data: FaqSection }
-  | { type: 'guarantee'; data: GuaranteeSection };
+  | { type: 'guarantee'; data: GuaranteeSection }
+  | { type: 'logoWall'; data: LogoWallSection }
+  | { type: 'caseStudy'; data: CaseStudySection };
 
 export type LandingSectionType = LandingSection['type'];
 
@@ -441,6 +530,8 @@ export const SECTION_REGISTRY: Record<LandingSectionType, SectionMeta> = {
   countdown:   { type: 'countdown',   label: '倒计时',   required: false, singleton: true },
   faq:         { type: 'faq',         label: '常见问题', required: false, singleton: true },
   guarantee:   { type: 'guarantee',   label: '安全保障', required: false, singleton: true },
+  logoWall:    { type: 'logoWall',    label: 'Logo 墙', required: false, singleton: true },
+  caseStudy:   { type: 'caseStudy',   label: '客户案例', required: false, singleton: true },
 };
 
 // ============ 方案 B：运行期校验 ============

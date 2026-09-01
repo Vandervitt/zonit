@@ -1,11 +1,12 @@
 // landing-renderer/sections/Process.tsx
-import type { ProcessSection } from "@/types/schema.draft";
+import type { ProcessSection, PageContact } from "@/types/schema.draft";
 import type { RendererTheme } from "../theme";
 import { SectionShell } from "../primitives/SectionShell";
+import { SectionCta } from "../primitives/SectionCta";
 import { SectionHeading } from "../primitives/SectionHeading";
 import { Img } from "../primitives/Img";
 
-export function Process({ data, theme }: { data: ProcessSection; theme: RendererTheme }) {
+export function Process({ data, contact, theme, preview = false }: { data: ProcessSection; contact: PageContact; theme: RendererTheme; preview?: boolean }) {
   return (
     <SectionShell tone="muted">
       <SectionHeading title={data.title} subtitle={data.subtitle} />
@@ -23,6 +24,7 @@ export function Process({ data, theme }: { data: ProcessSection; theme: Renderer
           ))}
         </ol>
       )}
+      <SectionCta cta={data.cta} contact={contact} theme={theme} preview={preview} />
     </SectionShell>
   );
 }

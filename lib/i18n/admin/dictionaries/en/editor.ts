@@ -250,6 +250,8 @@ export const editor = {
 
   /** 共享字段组件（fields.tsx）。 */
   fieldKit: {
+    sectionCta: "CTA button at the end of this section",
+    sectionCtaHint: "Give readers a way to act right after this section; leave it off to keep things exactly as they are.",
     ctaButton: "CTA button",
     ctaPlaceholder: "Chat with us",
     linkManagedNote: "The button link comes from the page's Contact settings and isn't set here.",
@@ -263,6 +265,25 @@ export const editor = {
   },
 
   forms: {
+    logoWall: {
+      items: "Logos",
+      add: "Add logo",
+      name: "Brand name",
+      namePlaceholder: "Used as the image description and as a fallback if the image fails",
+    },
+    caseStudy: {
+      items: "Cases",
+      add: "Add case",
+      client: "Client / project",
+      clientPlaceholder: "Client or project name",
+      summary: "Result in one line",
+      summaryPlaceholder: "What this client ended up with",
+      metricValue: "Metric value",
+      metricValuePlaceholder: "e.g. 3 months",
+      metricLabel: "Metric label",
+      metricLabelPlaceholder: "e.g. payback period",
+      metricHint: "Shown only when both are filled. We display exactly what you type and calculate nothing — you need to be able to back the number up.",
+    },
     hero: {
       badge: "Top badge",
       primaryCta: "Primary CTA",
@@ -534,6 +555,7 @@ export const editor = {
       stats: "Stats", plans: "Plans", products: "Products", beforeAfter: "Before / after",
       process: "Process", trust: "Trust", features: "Features", reviews: "Reviews",
       story: "Story", countdown: "Countdown", faq: "FAQ", guarantee: "Guarantee",
+      logoWall: "Logo wall", caseStudy: "Case studies",
     } satisfies Record<LandingSectionType, string>,
     emptyLink: (what: string) => `${what} has an empty link — tapping it does nothing`,
     formNotEnabled: (what: string) =>

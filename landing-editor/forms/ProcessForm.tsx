@@ -6,8 +6,8 @@ import { Field } from "../ui/Field";
 import { TextInput } from "../ui/TextInput";
 import { TextArea } from "../ui/TextArea";
 import { RepeatableList } from "../ui/RepeatableList";
-import { TitleSubtitleFields, ImageRefField, Optional } from "./fields";
-import { createProcessStep } from "../store/defaults";
+import { TitleSubtitleFields, ImageRefField, Optional, CtaButtonField } from "./fields";
+import { createProcessStep , createSectionCta } from "../store/defaults";
 
 export function ProcessForm({ value, onChange }: { value: ProcessSection; onChange: (v: ProcessSection) => void }) {
   const d = useAdminT().editor;
@@ -41,6 +41,16 @@ export function ProcessForm({ value, onChange }: { value: ProcessSection; onChan
           </>
         )}
       />
+      {/* 区块级 CTA：默认关闭。开着不填会在预览里显示占位、线上不渲染（见 Cta 组件），
+          所以「勾了但没填完」不会把线上页面弄坏。 */}
+      <Optional
+        label={d.fieldKit.sectionCta}
+        present={!!value.cta}
+        onToggle={(on) => patch({ cta: on ? createSectionCta() : undefined })}
+      >
+        <p className="text-xs text-slate-500">{d.fieldKit.sectionCtaHint}</p>
+        {value.cta && <CtaButtonField value={value.cta} onChange={(cta) => patch({ cta })} />}
+      </Optional>
     </div>
   );
 }

@@ -15,6 +15,8 @@ import { Story } from "./Story";
 import { CountdownBanner } from "./CountdownBanner";
 import { Faq } from "./Faq";
 import { Guarantee } from "./Guarantee";
+import { LogoWall } from "./LogoWall";
+import { CaseStudy } from "./CaseStudy";
 import { sectionWrap, IDENTITY_VARIANT, type PageVariant } from "../variant";
 
 function assertNever(x: never): null {
@@ -28,21 +30,24 @@ function renderInner(section: LandingSection, contact: PageContact, theme: Rende
     case "plans":       return <Plans key={key} data={section.data} contact={contact} theme={theme} preview={preview} />;
     case "products":    return <Products key={key} data={section.data} />;
     case "beforeAfter": return <BeforeAfter key={key} data={section.data} theme={theme} />;
-    case "process":     return <Process key={key} data={section.data} theme={theme} />;
+    case "process":     return <Process key={key} data={section.data} contact={contact} theme={theme} preview={preview} />;
     case "trust":       return <Trust key={key} data={section.data} />;
-    case "features":    return <Features key={key} data={section.data} theme={theme} />;
-    case "reviews":     return <Reviews key={key} data={section.data} theme={theme} />;
+    case "features":    return <Features key={key} data={section.data} contact={contact} theme={theme} preview={preview} />;
+    case "reviews":     return <Reviews key={key} data={section.data} contact={contact} theme={theme} preview={preview} />;
     case "story":       return <Story key={key} data={section.data} theme={theme} />;
     case "countdown":   return <CountdownBanner key={key} data={section.data} theme={theme} />;
     case "faq":         return <Faq key={key} data={section.data} theme={theme} />;
     case "guarantee":   return <Guarantee key={key} data={section.data} />;
+    case "logoWall":    return <LogoWall key={key} data={section.data} />;
+    case "caseStudy":   return <CaseStudy key={key} data={section.data} contact={contact} theme={theme} preview={preview} />;
     default:            return assertNever(section);
   }
 }
 
 export function renderSection(
   section: LandingSection,
-  /** 页面联系方式：只有 plans 用得上，但由入口统一透传，避免各 section 各拿一套。 */
+  /** 页面联系方式：带区块级 CTA 的区块（plans / features / process / reviews）用得上，
+   *  由入口统一透传，避免各 section 各拿一套。 */
   contact: PageContact,
   theme: RendererTheme,
   key: number,

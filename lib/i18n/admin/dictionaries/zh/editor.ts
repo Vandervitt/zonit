@@ -225,6 +225,8 @@ export const editor = {
   },
 
   fieldKit: {
+    sectionCta: "区块底部 CTA 按钮",
+    sectionCtaHint: "在这一段内容之后再给一个行动入口；不勾选则与现在完全一样。",
     ctaButton: "CTA 按钮",
     ctaPlaceholder: "立即咨询",
     linkManagedNote: "按钮链接由页面的「联系方式」统一决定，不在此单独设置。",
@@ -238,6 +240,25 @@ export const editor = {
   },
 
   forms: {
+    logoWall: {
+      items: "Logo",
+      add: "添加 Logo",
+      name: "品牌名",
+      namePlaceholder: "用于图片描述与图片加载失败时显示",
+    },
+    caseStudy: {
+      items: "案例",
+      add: "添加案例",
+      client: "客户 / 项目",
+      clientPlaceholder: "客户或项目名称",
+      summary: "一句话结果",
+      summaryPlaceholder: "这个客户最后得到了什么",
+      metricValue: "指标数值",
+      metricValuePlaceholder: "如 3 个月",
+      metricLabel: "指标说明",
+      metricLabelPlaceholder: "如 回本周期",
+      metricHint: "两个都填才会显示。平台原样展示你填的内容，不做任何计算——数字的依据需要你自己能拿得出来。",
+    },
     hero: {
       badge: "顶部标签 Badge",
       primaryCta: "主按钮 CTA",
@@ -494,6 +515,7 @@ export const editor = {
       stats: "数据展示", plans: "套餐", products: "产品", beforeAfter: "前后对比",
       process: "服务流程", trust: "信任", features: "特性", reviews: "评价",
       story: "产品故事", countdown: "倒计时", faq: "常见问题", guarantee: "安全保障",
+      logoWall: "Logo 墙", caseStudy: "客户案例",
     },
     emptyLink: (what: string) => `${what}链接为空，访客点击不会有任何反应`,
     formNotEnabled: (what: string) =>

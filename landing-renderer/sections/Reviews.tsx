@@ -1,11 +1,12 @@
 // landing-renderer/sections/Reviews.tsx
-import type { ReviewsSection } from "@/types/schema.draft";
+import type { ReviewsSection, PageContact } from "@/types/schema.draft";
 import type { RendererTheme } from "../theme";
 import { SectionShell } from "../primitives/SectionShell";
+import { SectionCta } from "../primitives/SectionCta";
 import { SectionHeading } from "../primitives/SectionHeading";
 import { Img } from "../primitives/Img";
 
-export function Reviews({ data, theme }: { data: ReviewsSection; theme: RendererTheme }) {
+export function Reviews({ data, contact, theme, preview = false }: { data: ReviewsSection; contact: PageContact; theme: RendererTheme; preview?: boolean }) {
   return (
     <SectionShell tone="muted">
       <SectionHeading title={data.title} subtitle={data.subtitle ?? data.description} />
@@ -27,6 +28,7 @@ export function Reviews({ data, theme }: { data: ReviewsSection; theme: Renderer
           ))}
         </div>
       )}
+      <SectionCta cta={data.cta} contact={contact} theme={theme} preview={preview} />
     </SectionShell>
   );
 }

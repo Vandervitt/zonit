@@ -87,3 +87,70 @@ describe("switchPrimaryChannel", () => {
     expect(d.hero.cta.text).toBe("Chat on WhatsApp");
   });
 });
+
+// 区块级 CTA（features / process / reviews / caseStudy）是后加的落点。
+// switchPrimaryChannel 靠深度遍历找 CTA 形状的对象，不认区块类型——
+// 这几条用例就是钉死「后加的落点不用改这里也能被覆盖到」这个前提。
+describe("switchPrimaryChannel · 区块级 CTA", () => {
+  const withSectionCta = () =>
+    draft({
+      sections: [
+        {
+          type: "features",
+          data: {
+            title: "What you get",
+            items: [],
+            cta: {
+              text: "Chat on WhatsApp",
+              textByChannel: { whatsapp: "Chat on WhatsApp", form: "Request a quote" },
+              target: { kind: "primary" },
+            },
+          },
+        },
+      ],
+    });
+
+  it("跟随主渠道的区块 CTA 会换文案", () => {
+    const out = switchPrimaryChannel(withSectionCta(), "form");
+    const cta = (out.sections[0].data as { cta: { text: string } }).cta;
+    expect(cta.text).toBe("Request a quote");
+  });
+
+  it("用户手改过的区块 CTA 不被覆盖", () => {
+    const d = withSectionCta();
+    (d.sections[0].data as { cta: { textEdited?: boolean } }).cta.textEdited = true;
+    const out = switchPrimaryChannel(d, "form");
+    expect((out.sections[0].data as { cta: { text: string } }).cta.text).toBe("Chat on WhatsApp");
+  });
+
+  it("钉死渠道的区块 CTA 不跟随", () => {
+    const d = withSectionCta();
+    (d.sections[0].data as { cta: { target: unknown } }).cta.target = {
+      kind: "channel",
+      channel: "whatsapp",
+    };
+    const out = switchPrimaryChannel(d, "form");
+    expect((out.sections[0].data as { cta: { text: string } }).cta.text).toBe("Chat on WhatsApp");
+  });
+
+  it("caseStudy 这种新区块同样被覆盖到（遍历不认类型）", () => {
+    const d = draft({
+      sections: [
+        {
+          type: "caseStudy",
+          data: {
+            title: "Client results",
+            items: [],
+            cta: {
+              text: "Chat on WhatsApp",
+              textByChannel: { form: "Request a quote" },
+              target: { kind: "primary" },
+            },
+          },
+        },
+      ],
+    });
+    const out = switchPrimaryChannel(d, "form");
+    expect((out.sections[0].data as { cta: { text: string } }).cta.text).toBe("Request a quote");
+  });
+});
