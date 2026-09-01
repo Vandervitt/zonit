@@ -127,6 +127,8 @@ export const tools = {
       form_fields: "表单长度",
       conversion_position: "联系方式位置",
       trust: "信任元素",
+      hero_clarity: "首屏清晰度",
+      cta_clarity: "行动号召文案",
       viewport: "移动端 viewport",
       hops: "跳转",
       weight: "页面体积",
@@ -225,6 +227,25 @@ export const tools = {
     trust_signals_not_found: {
       title: "初始 HTML 中没找到信任元素",
       why: "这不代表页面上没有。由 JavaScript 在加载后渲染的评价、案例，静态读取看不到。",
+      guide: "google-ads-landing-page-policy",
+    },
+    // 以下六条来自 AI 阅读，文案里必须说明来源。
+    ai_hero_clear: { title: "AI 阅读：首屏说清了你是谁、卖什么", why: "" },
+    ai_hero_unclear: {
+      title: "AI 阅读：首屏没说清你是谁、卖什么",
+      why: "从广告点进来的访客几秒内就会决定去留。这是语言模型对你文案的阅读结果，不是实测，当作第二意见看。",
+      guide: "google-ads-landing-page-policy",
+    },
+    ai_cta_clear: { title: "AI 阅读：行动号召说清了下一步会发生什么", why: "" },
+    ai_cta_vague: {
+      title: "AI 阅读：行动号召文案偏笼统",
+      why: "「提交」这类写法只要求点击，没告诉访客能得到什么。这是语言模型的阅读结果，不是实测。",
+      guide: "google-ads-landing-page-policy",
+    },
+    ai_trust_present: { title: "AI 阅读：页面上有评价、案例或资质", why: "" },
+    ai_trust_absent: {
+      title: "AI 阅读：页面上没有评价、案例或资质",
+      why: "信任元素是从广告来的陌生人判断你是否真实存在的依据。这是语言模型的阅读结果，不是实测。",
       guide: "google-ads-landing-page-policy",
     },
     pixel_before_consent_suspected: {

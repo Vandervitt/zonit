@@ -22,6 +22,8 @@ export const DIMENSIONS = [
   "form_fields",
   "conversion_position",
   "trust",
+  "hero_clarity",
+  "cta_clarity",
   "viewport",
   "hops",
   "weight",

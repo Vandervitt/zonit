@@ -24,6 +24,22 @@ function stripTags(s: string): string {
 
 const ANCHOR_RE = /<a\b[^>]*\bhref=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
 
+/**
+ * 抽出页面的可读正文，供 AI 辅助判断使用。
+ *
+ * 必须先去掉 script / style / noscript 的**内容**再去标签：stripTags 只删尖括号，
+ * 直接用它会把整坨 JS 源码当成正文送进模型——既烧 token，又让模型在压缩后的
+ * 打包代码里找「首屏文案」。
+ */
+export function extractText(html: string): string {
+  const withoutCode = html
+    .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript\b[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ");
+  return stripTags(withoutCode);
+}
+
 /** 提取页面上的锚点；跳过 mailto / tel / javascript 等非导航链接。 */
 export function extractAnchors(html: string): Anchor[] {
   const out: Anchor[] = [];

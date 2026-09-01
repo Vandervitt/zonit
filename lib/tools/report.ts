@@ -14,6 +14,7 @@
 //   unknown   —— 静态检查能力边界内看不到的（见 11.8），必须如实说不知道
 
 import type { FetchResult } from "./fetch-page";
+import type { AiCheckResult } from "./ai-check";
 import {
   findPolicyLinks,
   detectContact,
@@ -44,6 +45,8 @@ export interface PageCheckReport {
   findings: Finding[];
   /** 是否经过浏览器实测（登录用户走 Sandbox 时为 true）。 */
   browserVerified: boolean;
+  /** 是否并入了 AI 辅助判断。报告页据此标注这几条的来源。 */
+  aiAssisted?: boolean;
 }
 
 /** 页面体积的提示阈值（字节）。超过只作为 info 呈现，不判对错。 */
@@ -298,6 +301,12 @@ export const FINDING_DIMENSION: Record<string, string> = {
   conversion_late_only: "conversion_position",
   trust_signals_present: "trust",
   trust_signals_not_found: "trust",
+  ai_trust_present: "trust",
+  ai_trust_absent: "trust",
+  ai_hero_clear: "hero_clarity",
+  ai_hero_unclear: "hero_clarity",
+  ai_cta_clear: "cta_clarity",
+  ai_cta_vague: "cta_clarity",
   viewport_missing: "viewport",
   viewport_zoom_blocked: "viewport",
   viewport_ok: "viewport",
@@ -322,3 +331,39 @@ export const UNCOMPARABLE_FINDINGS = new Set([
   "robots_disallows_check",
   "final_status_error",
 ]);
+
+/**
+ * 把 AI 辅助判断并入报告。
+ *
+ * 与 applyBrowserVerification 的区别是**权限不同**：
+ *   · 沙箱实测可以**推翻**静态像素结论——实测是更强的证据，且两种说法并列会
+ *     让用户同时看到「疑似」和「实测」；
+ *   · AI 阅读只能**补充**，以及**解答静态留下的 unknown**。它不得覆盖任何
+ *     A 档正则得出的事实（有没有隐私页、有没有表单这类是非题，正则比模型可靠）。
+ *
+ * 唯一被它接管的是 trust_signals_not_found——那条本来就是 unknown（正则只认
+ * 英文关键词，看不到就得承认看不到）。模型真读了正文之后，这个 unknown 就有了
+ * 答案，再并列显示「没找到」只会让人困惑。
+ */
+export function applyAiFindings(
+  report: PageCheckReport,
+  ai: AiCheckResult,
+): PageCheckReport {
+  const findings = [...report.findings];
+  const push = (id: string, level: FindingLevel) => findings.push({ id, level });
+
+  if (ai.heroClear === "yes") push("ai_hero_clear", "info");
+  else if (ai.heroClear === "no") push("ai_hero_unclear", "info");
+
+  if (ai.ctaClear === "yes") push("ai_cta_clear", "info");
+  else if (ai.ctaClear === "no") push("ai_cta_vague", "info");
+
+  if (ai.trustSignals !== "unknown") {
+    // 模型给出了答案，静态那条 unknown 就该退场。
+    const idx = findings.findIndex((f) => f.id === "trust_signals_not_found");
+    if (idx !== -1) findings.splice(idx, 1);
+    push(ai.trustSignals === "yes" ? "ai_trust_present" : "ai_trust_absent", "info");
+  }
+
+  return { ...report, findings: sortFindings(findings), aiAssisted: true };
+}

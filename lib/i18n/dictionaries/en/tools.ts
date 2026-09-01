@@ -130,6 +130,8 @@ export const tools = {
       form_fields: "Form length",
       conversion_position: "Contact position",
       trust: "Trust elements",
+      hero_clarity: "Opening clarity",
+      cta_clarity: "CTA wording",
       viewport: "Mobile viewport",
       hops: "Redirects",
       weight: "Page weight",
@@ -230,6 +232,25 @@ export const tools = {
     trust_signals_not_found: {
       title: "No trust elements found in the initial HTML",
       why: "This does not mean the page has none. Testimonials and case studies rendered by JavaScript after load are invisible to a static read.",
+      guide: "google-ads-landing-page-policy",
+    },
+    // 以下六条来自 AI 阅读，文案里必须说明来源。
+    ai_hero_clear: { title: "AI read: the opening states who you are and what is offered", why: "" },
+    ai_hero_unclear: {
+      title: "AI read: the opening doesn't make clear who you are or what is offered",
+      why: "Visitors arriving from an ad decide in seconds. This is a language model's reading of your copy, not a measurement — treat it as a second opinion.",
+      guide: "google-ads-landing-page-policy",
+    },
+    ai_cta_clear: { title: "AI read: the call to action says what happens next", why: "" },
+    ai_cta_vague: {
+      title: "AI read: the call to action is generic",
+      why: "Wording like \"Submit\" asks for a click without saying what the visitor gets. This is a language model's reading, not a measurement.",
+      guide: "google-ads-landing-page-policy",
+    },
+    ai_trust_present: { title: "AI read: the page carries testimonials, cases or credentials", why: "" },
+    ai_trust_absent: {
+      title: "AI read: no testimonials, cases or credentials on the page",
+      why: "Trust elements are what a stranger from an ad uses to decide you are real. This is a language model's reading, not a measurement.",
       guide: "google-ads-landing-page-policy",
     },
     pixel_before_consent_suspected: {
