@@ -318,3 +318,32 @@ describe("遗留子域根", () => {
     expect(res?.status).toBe(404); // 未绑定故 404；关键是没被 308 掉
   });
 });
+
+// 回归：2026-09-01 生产走查发现 zapbridge.xyz/meizhuan 被 308 到营销首页。
+//
+// 硬编码的 BRAND_LEGACY_ROOTS 里混进了两个**不属于平台**的域名。这里的判断是
+// 纯 hostname 精确匹配、且发生在租户解析**之前**，所以后果不是「apex 不露出」，
+// 而是该域名下**每一条已发布路径**都打不开——而后台照旧显示「已验证 / 已发布」，
+// 故障完全静默。这组用例锁住「租户自有域名不得被当成平台根」。
+describe("租户自有域名不得被误判为平台根（回归：整域被 308）", () => {
+  let tenancy: Tenancy["handleTenancy"];
+
+  beforeAll(async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://app.example.com");
+    vi.stubEnv("PLATFORM_SUBDOMAIN_ROOT", "new.example");
+    vi.stubEnv("PLATFORM_SUBDOMAIN_LEGACY_ROOTS", "");
+    vi.resetModules();
+    ({ handleTenancy: tenancy } = await import("./tenant-proxy"));
+  });
+
+  it.each(["zapbridge.xyz", "zapbridge.com"])("%s 不被 308，走租户解析", async (host) => {
+    const res = await tenancy(makeReq(host, "/meizhuan"));
+    expect(res?.status).not.toBe(308);
+  });
+
+  it("平台自己的旧根 zapbridge.tech 仍然重定向", async () => {
+    const res = await tenancy(makeReq("zapbridge.tech", "/"));
+    expect(res?.status).toBe(308);
+    expect(res?.headers.get("location")).toBe("https://app.example.com/");
+  });
+});

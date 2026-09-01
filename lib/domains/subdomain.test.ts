@@ -137,14 +137,15 @@ describe("platformSubdomainRoots", () => {
   });
 
   it("同一个根重复配置只出现一次", () => {
-    const roots = platformSubdomainRoots("zapbridge.xyz", "zapbridge.xyz");
-    expect(roots.filter((r) => r === "zapbridge.xyz")).toHaveLength(1);
+    const roots = platformSubdomainRoots("urgizat.site", "urgizat.site");
+    expect(roots.filter((r) => r === "urgizat.site")).toHaveLength(1);
   });
 
-  // 回归：2026-08-20 Neon 计算配额耗尽故障。
-  // 遗留根重定向的代码一直都在，但 PLATFORM_SUBDOMAIN_LEGACY_ROOTS 在生产从未配置，
-  // 于是 zapbridge.xyz 的每次访问都落进租户解析并查库，把 Neon 计算钉住不挂起。
-  // 这几个根是历史事实，必须无条件在列，不依赖任何环境变量。
+  // 平台旧根是历史事实，必须无条件在列，不依赖任何环境变量：
+  // 遗留根重定向的代码一直都在，但 PLATFORM_SUBDOMAIN_LEGACY_ROOTS 在生产从未配置过，
+  // 靠环境变量的写法等于这段逻辑从来没生效。
+  // ⚠️ 「无条件在列」说的是**平台自己的**旧根；别把租户可自有的域名塞进来，
+  // 那会让该域名下所有已发布页面被 308 走（见下一条用例）。
   it("更名遗留域无条件在列，即使环境变量完全没配", () => {
     const roots = platformSubdomainRoots(undefined, undefined);
     for (const legacy of BRAND_LEGACY_ROOTS) {
@@ -154,8 +155,30 @@ describe("platformSubdomainRoots", () => {
 
   it("遗留域在 isPlatformOwnedHost 下真的会被拦住（apex 与子域都算）", () => {
     const roots = platformSubdomainRoots(undefined, undefined);
-    expect(isPlatformOwnedHost("zapbridge.xyz", roots)).toBe(true);
-    expect(isPlatformOwnedHost("anything.zapbridge.xyz", roots)).toBe(true);
+    expect(isPlatformOwnedHost("zapbridge.tech", roots)).toBe(true);
+    expect(isPlatformOwnedHost("anything.zapbridge.tech", roots)).toBe(true);
+  });
+
+  // 回归：2026-09-01 生产走查发现 zapbridge.xyz/meizhuan 被 308 到营销首页。
+  //
+  // 根因是这份清单混进了**不属于平台的域名**。它只该装「品牌更名遗留的平台根」，
+  // 而平台旧根只有 zapbridge.tech；.xyz / .com 是租户可以自有的普通域名。
+  // 混进来的后果有两个，且都是静默的：
+  //   ① tenant-proxy 在租户解析**之前**按 hostname 精确匹配就 308，
+  //      于是该域名下**所有已发布路径**（不只是 apex）全部打不开；
+  //   ② isPlatformOwnedHost 会阻止用户把自己的域名添加进来。
+  //
+  // ⚠️ 当初把 .xyz 放进来是为了挡机器人探测查库（2026-08-20 Neon 事故），
+  // 但那份事故报告自己已经写了事后修正：真正烧配额的是 Neon 侧
+  // suspend_timeout_seconds=0（计算 24×7 常驻），且烧的是 preview 分支。
+  // 「不挡就会再烧穿」的因果叙述已被推翻，**不要再以那个理由把它加回来**。
+  it("不把租户可自有的域名当成平台根", () => {
+    const roots = platformSubdomainRoots(undefined, undefined);
+    for (const tenantOwnable of ["zapbridge.xyz", "zapbridge.com"]) {
+      expect(roots, `${tenantOwnable} 不是平台域名`).not.toContain(tenantOwnable);
+      expect(isPlatformOwnedHost(tenantOwnable, roots)).toBe(false);
+      expect(isPlatformOwnedHost(`www.${tenantOwnable}`, roots)).toBe(false);
+    }
   });
 });
 
