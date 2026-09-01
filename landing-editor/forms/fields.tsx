@@ -42,6 +42,48 @@ export function CtaButtonField({
   );
 }
 
+/**
+ * 补图片原始尺寸：渲染器靠它输出 width/height 消除 CLS
+ * （见 landing-renderer/primitives/Img）。
+ *
+ * 做成 hook 而不是在两个字段里各写一遍：ImageRefField 与 MediaField 都要用，
+ * 而这段有几个不写就出 bug 的细节（防重入、结果过期判断），复制必然漂移。
+ *
+ * 放在编辑器这一层是因为图片有四个来源（媒体库 / Unsplash / 上传 / 手贴外链），
+ * 只有浏览器这一处能一次覆盖全部。
+ */
+function useProbedImageSize<T extends { src: string; width?: number; height?: number }>(
+  value: T,
+  onChange: (v: T) => void,
+  enabled = true,
+) {
+  // ⚠️ onChange 会把新对象写回父级并触发重渲染，不记住「探过哪个 src」就是无限循环。
+  const probedSrc = useRef<string | null>(null);
+  const latest = useRef(value);
+  latest.current = value;
+  useEffect(() => {
+    if (!enabled) return;
+    const src = value.src;
+    if (!src || (value.width && value.height)) return;
+    if (probedSrc.current === src) return;
+    probedSrc.current = src;
+    let cancelled = false;
+    void probeImageSize(src).then((size) => {
+      // 量不到就保持原样：不占位好过按猜出来的比例把图挤变形。
+      if (cancelled || !size) return;
+      // 期间用户可能又换了图，这次结果已经过期。
+      if (latest.current.src !== src) return;
+      onChange({ ...latest.current, width: size.width, height: size.height });
+    });
+    return () => {
+      cancelled = true;
+    };
+    // onChange 每次渲染都是新函数，放进依赖会让本效果每帧重跑；
+    // 真正的触发条件只有 src 变化，取值统一走 latest ref。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, value.src, value.width, value.height]);
+}
+
 export function ImageRefField({
   label,
   value,
@@ -56,36 +98,7 @@ export function ImageRefField({
   const f = d.fields;
   const issuesT = d.issues;
 
-  // 补原始尺寸：渲染器靠它输出 width/height 消除 CLS（见 landing-renderer/primitives/Img）。
-  //
-  // 放在这一处而不是各个选图 tab 里，是因为图片有四个来源（媒体库、Unsplash、
-  // 上传、手贴外链），只有这里能一次覆盖全部——包括用户直接粘贴的链接。
-  //
-  // ⚠️ 只在「有 src 且尚无尺寸」时探一次，且用 ref 记住探过的 src：
-  // onChange 会把新对象写回父级并触发重渲染，不设这道闸就是无限循环。
-  const probedSrc = useRef<string | null>(null);
-  const latest = useRef(value);
-  latest.current = value;
-  useEffect(() => {
-    const src = value.src;
-    if (!src || (value.width && value.height)) return;
-    if (probedSrc.current === src) return;
-    probedSrc.current = src;
-    let cancelled = false;
-    void probeImageSize(src).then((size) => {
-      // 量不到就保持原样：不占位好过按猜出来的比例把图挤变形。
-      if (cancelled || !size) return;
-      // 期间用户可能又换了图，此时这次结果已经过期。
-      if (latest.current.src !== src) return;
-      onChange({ ...latest.current, width: size.width, height: size.height });
-    });
-    return () => {
-      cancelled = true;
-    };
-    // onChange 每次渲染都是新函数，放进依赖会让本效果每帧重跑；
-    // 真正的触发条件只有 src 变化，取值统一走 latest ref。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value.src, value.width, value.height]);
+  useProbedImageSize(value, onChange);
 
   return (
     <div className="space-y-2 rounded-lg border border-dashed border-edge p-2.5">
@@ -164,6 +177,12 @@ export function MediaField({ value, onChange }: { value: Media; onChange: (v: Me
   const t = d.fieldKit;
   const f = d.fields;
   const issuesT = d.issues;
+  // 只有图片需要尺寸；视频的 src 拿去当图片探测必然失败，白等一次超时。
+  useProbedImageSize(
+    value as Media & { width?: number; height?: number },
+    onChange as (v: Media & { width?: number; height?: number }) => void,
+    value.type === "image",
+  );
   return (
     <div className="space-y-2 rounded-lg border border-dashed border-edge p-2.5">
       <Field label={t.mediaType}>
@@ -182,7 +201,14 @@ export function MediaField({ value, onChange }: { value: Media; onChange: (v: Me
         <MediaPicker
           value={value.src}
           accept={value.type}
-          onChange={(src, alt) => onChange({ ...value, src, ...(alt !== undefined ? { alt } : {}) })}
+          // 换图必须同时清掉旧尺寸，否则新图会套用上一张的宽高比被挤变形。
+          onChange={(src, alt) =>
+            onChange(
+              value.type === "image"
+                ? { ...value, src, ...(alt !== undefined ? { alt } : {}), width: undefined, height: undefined }
+                : { ...value, src },
+            )
+          }
         />
       </Field>
       {value.type === "image" ? (

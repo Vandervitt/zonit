@@ -26,7 +26,8 @@ export interface ImageRef {
 
 /** 富媒体素材：图片或视频 */
 export type Media =
-  | { type: 'image'; src: string; alt?: string }
+  // 尺寸语义与 ImageRef 的 width/height 完全一致（要么都有要么都没有，仅用于占位消 CLS）。
+  | { type: 'image'; src: string; alt?: string; width?: number; height?: number }
   | { type: 'video'; src: string; poster?: string };
 
 /** 顶部小标签：emoji + 文案 */
