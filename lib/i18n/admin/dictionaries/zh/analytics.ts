@@ -9,6 +9,10 @@ export const analytics = {
     clicks: "CTA 点击",
     leads: "线索",
     ctr: "点击率",
+    uniqueViews: "访客数 (UV)",
+    uniqueViewsHint: "按天去重；同一人跨天再来会重复计一次",
+    uniqueViewsUnavailable: "该时段无访客数据",
+    uniqueViewsUnavailableHint: "访客去重是后来才开始采集的，更早的数据补不回来，所以这里不显示 0，也不拿 PV 顶替",
   },
   change: {
     new: "较上一段：新增",
