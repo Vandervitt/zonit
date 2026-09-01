@@ -89,19 +89,27 @@ export function buildPlatformSubdomain(slug: string, root: string): string | nul
 }
 
 /**
- * 品牌更名（Zap Bridge → Urgizat）遗留的旧域，**硬编码而非读环境变量**。
+ * 品牌更名（Zap Bridge → Urgizat）遗留的**平台旧根域**，硬编码而非读环境变量。
  *
- * 教训来自 2026-08-20 的 Neon 计算配额耗尽故障：遗留根重定向的代码一直都在，
- * 但 PLATFORM_SUBDOMAIN_LEGACY_ROOTS 在生产从未配置，于是 zapbridge.xyz 的每次
- * 访问都落进租户解析 → 查库 → 动态渲染。一个每 60 秒一次的探测就足以让 Neon
- * 计算永不挂起，最终烧穿整月配额、全站 DB 路径 500。
- * 详见 docs/incident-neon-compute-quota-20260820.md。
+ * ⚠️ **这里只能放平台自己拥有的根域，当前只有 zapbridge.tech。**
+ * 判据是「这个域名是不是平台的」，不是「名字里有没有 zapbridge」。
  *
- * 这批域是历史事实、不随部署环境变化，**没有任何理由让它可配置**：
- * 配错或漏配的代价是静默的（表现为「怎么有点慢」而不是报错），
- * 而收益为零。环境变量仍然支持，用于追加本清单之外的根。
+ * 曾经误把 zapbridge.xyz 与 zapbridge.com 也列进来，2026-09-01 生产走查发现后果：
+ * tenant-proxy 在租户解析**之前**只按 hostname 精确匹配就 308 到平台首页，于是
+ * 这些域名下**所有已发布路径**（不只是 apex）全部打不开，而后台域名页仍显示
+ * 「已验证 · DNS 已正确配置」、落地页仍显示「已发布」——故障完全静默。
+ * 另外 isPlatformOwnedHost 还会因此阻止用户添加自己的域名。
+ *
+ * ⚠️ 当初加 .xyz 是为了挡机器人探测查库（2026-08-20 Neon 计算配额耗尽故障），
+ * **不要再以这个理由把它加回来**：那份事故报告自己已经写了事后修正——真正烧掉
+ * 配额的是 Neon 侧 `suspend_timeout_seconds: 0`（计算 24×7 常驻，与流量无关），
+ * 且烧的是 preview 分支。见 docs/incident-neon-compute-quota-20260820.md。
+ * 无缓存动态页的查库浪费是真的，但那要靠缓存解决，不能靠把别人的域名判给平台。
+ *
+ * 硬编码而非环境变量：这批域是历史事实、不随部署环境变化。配错或漏配的代价是
+ * 静默的，而可配置的收益为零。环境变量仍支持，用于追加本清单之外的根。
  */
-export const BRAND_LEGACY_ROOTS = ["zapbridge.tech", "zapbridge.xyz", "zapbridge.com"] as const;
+export const BRAND_LEGACY_ROOTS = ["zapbridge.tech"] as const;
 
 /**
  * 平台自有根域全集 = 当前根 + 更名遗留根 + 环境变量追加的遗留根。
