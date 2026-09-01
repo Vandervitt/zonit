@@ -7,6 +7,9 @@ import {
   extractAnchors,
   findPolicyLinks,
   detectContact,
+  detectLeadForm,
+  hasConversionEarly,
+  detectTrustSignals,
   detectTrackers,
   countBlockingScripts,
   detectViewport,
@@ -130,6 +133,79 @@ describe("detectContact · 经营主体与联系方式", () => {
 
   it("不把版本号之类的数字误判成电话", () => {
     expect(detectContact(`<p>v1.2.3 build 20260802</p>`).phone).toBe(false);
+  });
+});
+
+describe("detectLeadForm · 表单也是联系方式", () => {
+  it("识别表单并数出要访客填的字段", () => {
+    const r = detectLeadForm(
+      `<form><input type="text" name="n"><input type="email" name="e"><textarea></textarea><button type="submit">Go</button></form>`,
+    );
+    expect(r.present).toBe(true);
+    expect(r.maxFields).toBe(3);
+  });
+
+  it("不把隐藏域与提交按钮算成要填的字段", () => {
+    const r = detectLeadForm(
+      `<form><input type="hidden" name="utm"><input type="email"><input type="submit" value="Go"></form>`,
+    );
+    expect(r.maxFields).toBe(1);
+  });
+
+  // 回归：蜜罐不能用 type=hidden（否则挡不住机器人），本仓库自己的表单就是
+  // type=text + aria-hidden + tabIndex=-1。不排掉的话每张页都虚高 1 个字段。
+  it("不把蜜罐字段算成要填的字段", () => {
+    const r = detectLeadForm(
+      `<form><input type="email"><input type="text" name="company_url" tabindex="-1" aria-hidden="true" class="hidden"></form>`,
+    );
+    expect(r.maxFields).toBe(1);
+  });
+
+  it("多个表单取字段最多的那个，不累加", () => {
+    // 页尾常有一个只要邮箱的订阅框，累加会让主表单看起来比实际长。
+    const r = detectLeadForm(
+      `<form><input name="a"><input name="b"><input name="c"></form><form><input type="email"></form>`,
+    );
+    expect(r.maxFields).toBe(3);
+  });
+
+  it("没有表单时 present 为 false", () => {
+    expect(detectLeadForm(`<p>call us</p>`)).toEqual({ present: false, maxFields: 0 });
+  });
+});
+
+describe("hasConversionEarly · 首屏的文档序近似", () => {
+  const tail = "<p>filler</p>".repeat(200);
+
+  it("表单出现在文档靠前时为 true", () => {
+    expect(hasConversionEarly(`<form><input type="email"></form>${tail}`)).toBe(true);
+  });
+
+  it("只有页尾才有联系方式时为 false", () => {
+    expect(hasConversionEarly(`${tail}<a href="mailto:hi@x.com">write</a>`)).toBe(false);
+  });
+
+  it("认表单锚点与 WhatsApp 深链，不只认 <form>", () => {
+    expect(hasConversionEarly(`<a href="#lead-form">Get quote</a>${tail}`)).toBe(true);
+    expect(hasConversionEarly(`<a href="https://wa.me/15551234567">chat</a>${tail}`)).toBe(true);
+  });
+});
+
+describe("detectTrustSignals · 找不到不等于没有", () => {
+  it("识别评价与案例类特征", () => {
+    expect(detectTrustSignals(`<h2>What our customers say</h2><div>Reviews</div>`)).toContain(
+      "testimonial",
+    );
+    expect(detectTrustSignals(`<h2>Case studies</h2>`)).toContain("case_study");
+  });
+
+  it("识别资质与保障类特征", () => {
+    expect(detectTrustSignals(`<p>ISO 9001 certified</p>`)).toContain("credential");
+    expect(detectTrustSignals(`<p>30-day money-back guarantee</p>`)).toContain("guarantee");
+  });
+
+  it("什么都没有时返回空数组（调用方据此走 unknown 而非「你没有」）", () => {
+    expect(detectTrustSignals(`<p>just some copy</p>`)).toEqual([]);
   });
 });
 

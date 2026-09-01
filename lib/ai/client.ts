@@ -167,6 +167,18 @@ class OpenAiCompatibleClient implements AiClient {
   }
 }
 
+/**
+ * 当前环境是否配得出一个能用的模型源。
+ *
+ * 给「可选的 AI 增强」路径用（如落地页自检器的 C 档）：没配就直接跳过，
+ * 免得每次都先记一笔预算、再让调用必然失败——计数器会被没花过的钱污染。
+ * 注入的 fake 与 AI_FAKE 都算「配好了」，否则测试与 e2e 走不到这条路径。
+ */
+export function isAiConfigured(): boolean {
+  if (override || process.env.AI_FAKE === "1") return true;
+  return Boolean(resolveProvider().apiKey);
+}
+
 /** 取当前 client：注入优先；否则 fake 标志；否则按 AI_PROVIDER 选真实源。 */
 export function getAiClient(): AiClient {
   if (override) return override;

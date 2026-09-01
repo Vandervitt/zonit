@@ -14,9 +14,13 @@
 //   unknown   —— 静态检查能力边界内看不到的（见 11.8），必须如实说不知道
 
 import type { FetchResult } from "./fetch-page";
+import type { AiCheckResult } from "./ai-check";
 import {
   findPolicyLinks,
   detectContact,
+  detectLeadForm,
+  hasConversionEarly,
+  detectTrustSignals,
   detectTrackers,
   detectViewport,
   countBlockingScripts,
@@ -41,12 +45,20 @@ export interface PageCheckReport {
   findings: Finding[];
   /** 是否经过浏览器实测（登录用户走 Sandbox 时为 true）。 */
   browserVerified: boolean;
+  /** 是否并入了 AI 辅助判断。报告页据此标注这几条的来源。 */
+  aiAssisted?: boolean;
 }
 
 /** 页面体积的提示阈值（字节）。超过只作为 info 呈现，不判对错。 */
 const HEAVY_PAGE_BYTES = 1_500_000;
 /** 阻塞脚本数量的提示阈值。 */
 const MANY_BLOCKING_SCRIPTS = 4;
+/**
+ * 单个留资表单字段数的提示阈值。
+ * 取 5：本产品自己的表单是 6 个字段全开、常态开 2-3 个，阈值定在 5 才不会
+ * 对正常配置刷屏；同时能接住市场反复吐槽的「填一堆信息」那种十几个字段的表单。
+ */
+const FORM_FIELDS_MANY = 5;
 
 export interface AssembleInput {
   fetched: Extract<FetchResult, { ok: true }>;
@@ -96,16 +108,52 @@ export function assembleReport(input: AssembleInput): PageCheckReport {
   }
 
   // —— 联系方式 ——
+  // 表单也是联系方式，且往往是唯一的那个（广告落地页的主转化）。只认 mailto/tel
+  // 会把「表单为唯一转化」的页面误判成没有联系方式。
   const contact = detectContact(html);
-  if (!contact.email && !contact.phone) {
+  const leadForm = detectLeadForm(html);
+  if (!contact.email && !contact.phone && !leadForm.present) {
     findings.push({ id: "contact_missing", level: "attention" });
   } else {
     findings.push({
       id: "contact_ok",
       level: "info",
-      data: { email: contact.email ? 1 : 0, phone: contact.phone ? 1 : 0 },
+      data: {
+        email: contact.email ? 1 : 0,
+        phone: contact.phone ? 1 : 0,
+        form: leadForm.present ? 1 : 0,
+      },
     });
   }
+
+  // —— 转化承接 ——
+  // 这三条回答的是市场反复问的「有流量为什么没询盘」，而不是合规问题。
+  // 与本模块其余检查同一红线：只陈述页面上有什么，不打分、不下「会不会转化」的结论。
+  if (leadForm.present && leadForm.maxFields > FORM_FIELDS_MANY) {
+    findings.push({
+      id: "form_fields_many",
+      level: "info",
+      data: { fields: leadForm.maxFields, threshold: FORM_FIELDS_MANY },
+    });
+  }
+  // 首屏位置静态判不了（没有几何信息），用文档序近似：转化控件是否出现在
+  // HTML 前 FOLD_RATIO 部分。近似的代价是长页面会偏严，故只给 info 不给 attention。
+  if (leadForm.present || contact.email || contact.phone) {
+    const early = hasConversionEarly(html);
+    findings.push(
+      early
+        ? { id: "conversion_reachable_early", level: "info" }
+        : { id: "conversion_late_only", level: "info" },
+    );
+  }
+  // 信任元素同样受静态检查的能力边界约束（可能由 JS 渲染），故「没找到」走
+  // unknown 而不是断言「你没有」——与像素那条同一条红线。
+  const trust = detectTrustSignals(html);
+  findings.push(
+    trust.length > 0
+      ? { id: "trust_signals_present", level: "info", data: { kinds: trust.join(", ") } }
+      : { id: "trust_signals_not_found", level: "unknown" },
+  );
 
   // —— 追踪与同意 ——
   // 静态检查看不到 JS 动态注入的像素（设计文档 11.8），故「没找到」必须
@@ -248,6 +296,17 @@ export const FINDING_DIMENSION: Record<string, string> = {
   terms_ok: "terms",
   contact_missing: "contact",
   contact_ok: "contact",
+  form_fields_many: "form_fields",
+  conversion_reachable_early: "conversion_position",
+  conversion_late_only: "conversion_position",
+  trust_signals_present: "trust",
+  trust_signals_not_found: "trust",
+  ai_trust_present: "trust",
+  ai_trust_absent: "trust",
+  ai_hero_clear: "hero_clarity",
+  ai_hero_unclear: "hero_clarity",
+  ai_cta_clear: "cta_clarity",
+  ai_cta_vague: "cta_clarity",
   viewport_missing: "viewport",
   viewport_zoom_blocked: "viewport",
   viewport_ok: "viewport",
@@ -272,3 +331,39 @@ export const UNCOMPARABLE_FINDINGS = new Set([
   "robots_disallows_check",
   "final_status_error",
 ]);
+
+/**
+ * 把 AI 辅助判断并入报告。
+ *
+ * 与 applyBrowserVerification 的区别是**权限不同**：
+ *   · 沙箱实测可以**推翻**静态像素结论——实测是更强的证据，且两种说法并列会
+ *     让用户同时看到「疑似」和「实测」；
+ *   · AI 阅读只能**补充**，以及**解答静态留下的 unknown**。它不得覆盖任何
+ *     A 档正则得出的事实（有没有隐私页、有没有表单这类是非题，正则比模型可靠）。
+ *
+ * 唯一被它接管的是 trust_signals_not_found——那条本来就是 unknown（正则只认
+ * 英文关键词，看不到就得承认看不到）。模型真读了正文之后，这个 unknown 就有了
+ * 答案，再并列显示「没找到」只会让人困惑。
+ */
+export function applyAiFindings(
+  report: PageCheckReport,
+  ai: AiCheckResult,
+): PageCheckReport {
+  const findings = [...report.findings];
+  const push = (id: string, level: FindingLevel) => findings.push({ id, level });
+
+  if (ai.heroClear === "yes") push("ai_hero_clear", "info");
+  else if (ai.heroClear === "no") push("ai_hero_unclear", "info");
+
+  if (ai.ctaClear === "yes") push("ai_cta_clear", "info");
+  else if (ai.ctaClear === "no") push("ai_cta_vague", "info");
+
+  if (ai.trustSignals !== "unknown") {
+    // 模型给出了答案，静态那条 unknown 就该退场。
+    const idx = findings.findIndex((f) => f.id === "trust_signals_not_found");
+    if (idx !== -1) findings.splice(idx, 1);
+    push(ai.trustSignals === "yes" ? "ai_trust_present" : "ai_trust_absent", "info");
+  }
+
+  return { ...report, findings: sortFindings(findings), aiAssisted: true };
+}

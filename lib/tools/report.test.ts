@@ -3,7 +3,12 @@
 // 报告层的契约：不给评分、不给总评；「静态看不到」必须表述为 unknown 而不是
 // 「没有」；所有 finding 只带可核实事实，不带判断文案。
 import { describe, it, expect } from "vitest";
-import { assembleReport, buildRobotsBlockedReport, buildFetchFailedReport } from "./report";
+import {
+  assembleReport,
+  buildRobotsBlockedReport,
+  buildFetchFailedReport,
+  applyAiFindings,
+} from "./report";
 import type { FetchResult } from "./fetch-page";
 
 type Ok = Extract<FetchResult, { ok: true }>;
@@ -110,6 +115,20 @@ describe("assembleReport · 其余检查", () => {
     expect(ids(fresh)).not.toContain("copyright_stale");
   });
 
+  // 回归：表单是本产品与市场共同推荐的主转化方式，而 detectContact 只认
+  // mailto/tel。以表单为唯一转化的页面曾被判成 contact_missing（attention）——
+  // 即自检器诬告我们自己生成的页面。这是「只认某种写法」的第二次复发
+  // （第一次是政策链接只认 <a>）。
+  it("只有留资表单、没有 mailto/tel 时不判 contact_missing", () => {
+    const html = `<form action="/api/leads" method="post">
+      <input type="email" name="email" required />
+      <button type="submit">Get my free quote</button>
+    </form>`;
+    const r = assembleReport({ fetched: fetched(html) });
+    expect(ids(r)).not.toContain("contact_missing");
+    expect(ids(r)).toContain("contact_ok");
+  });
+
   it("attention 排在 info 前面", () => {
     const r = assembleReport({ fetched: fetched("<html><p>x</p></html>") });
     const levels = r.findings.map((f) => f.level);
@@ -137,5 +156,55 @@ describe("特殊入口", () => {
     expect(assembleReport({ fetched: fetched("<p/>") }).browserVerified).toBe(false);
     expect(buildRobotsBlockedReport("https://x/").browserVerified).toBe(false);
     expect(buildFetchFailedReport("https://x/", "r", []).browserVerified).toBe(false);
+  });
+});
+
+describe("applyAiFindings · AI 只能补充，不能推翻静态事实", () => {
+  const AI = { heroClear: "no", ctaClear: "yes", trustSignals: "yes" } as const;
+
+  it("追加 AI 结论并标记 aiAssisted", () => {
+    const r = applyAiFindings(assembleReport({ fetched: fetched("<html></html>") }), AI);
+    expect(ids(r)).toContain("ai_hero_unclear");
+    expect(ids(r)).toContain("ai_cta_clear");
+    expect(r.aiAssisted).toBe(true);
+  });
+
+  // 这条是与 applyBrowserVerification 的关键差别：实测可以推翻静态像素结论，
+  // AI 阅读不行——正则得出的是非题（有没有隐私页、有没有表单）比模型可靠。
+  it("不移除、不改写任何静态 finding", () => {
+    const base = assembleReport({ fetched: fetched("<html></html>") });
+    const after = applyAiFindings(base, AI);
+    const kept = ids(after);
+    for (const f of base.findings) {
+      // trust 那条是唯一允许被接管的，单独在下一个用例里断言。
+      if (f.id === "trust_signals_not_found") continue;
+      expect(kept).toContain(f.id);
+    }
+  });
+
+  // 唯一的例外：静态那条本来就是 unknown（正则只认英文关键词）。模型真读了正文
+  // 之后这个 unknown 有了答案，再并列显示「没找到」只会让人困惑。
+  it("模型给出信任元素答案时，接管静态那条 unknown", () => {
+    const base = assembleReport({ fetched: fetched("<html></html>") });
+    expect(ids(base)).toContain("trust_signals_not_found");
+    const after = applyAiFindings(base, AI);
+    expect(ids(after)).not.toContain("trust_signals_not_found");
+    expect(ids(after)).toContain("ai_trust_present");
+  });
+
+  it("模型对信任元素也说不准时，保留静态的 unknown", () => {
+    const after = applyAiFindings(assembleReport({ fetched: fetched("<html></html>") }), {
+      ...AI,
+      trustSignals: "unknown",
+    });
+    expect(ids(after)).toContain("trust_signals_not_found");
+    expect(ids(after)).not.toContain("ai_trust_present");
+    expect(ids(after)).not.toContain("ai_trust_absent");
+  });
+
+  it("仍然不产出评分或判定字段", () => {
+    const r = applyAiFindings(assembleReport({ fetched: fetched("<html></html>") }), AI);
+    expect(r).not.toHaveProperty("score");
+    expect(r).not.toHaveProperty("passed");
   });
 });

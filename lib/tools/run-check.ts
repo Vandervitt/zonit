@@ -10,9 +10,13 @@
 
 import { fetchPageSafely } from "./fetch-page";
 import { isAllowed } from "./robots";
-import { findPolicyLinks } from "./checks";
+import { findPolicyLinks, extractText } from "./checks";
+import { isAiConfigured } from "@/lib/ai/client";
+import { runAiCheck } from "./ai-check";
+import { consumeAiCheckBudget } from "./ai-budget";
 import {
   assembleReport,
+  applyAiFindings,
   buildRobotsBlockedReport,
   buildFetchFailedReport,
   type PageCheckReport,
@@ -67,5 +71,17 @@ export async function runPageCheck(inputUrl: string): Promise<PageCheckReport> {
     links.terms ? probeStatus(links.terms) : Promise.resolve(undefined),
   ]);
 
-  return assembleReport({ fetched, linkStatus: { privacy, terms } });
+  const report = assembleReport({ fetched, linkStatus: { privacy, terms } });
+
+  // C 档：AI 辅助判断，四道闸门任意一道没过都只是少几条结论——
+  //   ① 没配模型源就直接跳过（否则每次白记一笔预算，计数器被没花过的钱污染）
+  //   ② 预算守卫 fail-closed：数不清就不花钱
+  //   ③ 正文太短（骨架屏 / 纯 JS 站）不送模型，硬判只会得到噪音
+  //   ④ 模型报错返回 null
+  // A 档报告在任何一种情况下都照常返回，这条路径不该拖垮整份报告。
+  if (!isAiConfigured()) return report;
+  const budget = await consumeAiCheckBudget();
+  if (!budget.allowed) return report;
+  const ai = await runAiCheck(extractText(fetched.html));
+  return ai ? applyAiFindings(report, ai) : report;
 }
