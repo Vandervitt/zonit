@@ -6,10 +6,13 @@ import type {
   LeadForm,
   LandingSection,
   LandingSectionType,
+  CtaButton,
   StatItem,
   PlanItem,
   ProductItem,
   BeforeAfterItem,
+  LogoItem,
+  CaseStudyItem,
   ProcessStep,
   TrustBadgeItem,
   FeatureItem,
@@ -64,6 +67,17 @@ export const createSeo = (): PageSeo => ({});
  * 不随后台界面语言变化。此前是中文，等于中文后台用户一加区块就在给海外访客的页面上
  * 放了个中文标题。
  */
+/**
+ * 区块级 CTA 的默认值。
+ *
+ * 落点默认 `primary`（跟随页面主渠道），这样它会自动跟着「联系方式」面板走，
+ * 也会被 switchPrimaryChannel 的文案跟随覆盖到——钉死渠道要用户显式去改。
+ * 文案留空：空文案的 CTA 线上不渲染，比替用户编一句更安全。
+ */
+export function createSectionCta(): CtaButton {
+  return { text: "", target: { kind: "primary" } };
+}
+
 export function createSection(type: LandingSectionType): LandingSection {
   switch (type) {
     case "stats":
@@ -90,6 +104,10 @@ export function createSection(type: LandingSectionType): LandingSection {
       return { type, data: { title: { text: "FAQ" }, items: [] } };
     case "guarantee":
       return { type, data: { title: "Our guarantee", items: [] } };
+    case "logoWall":
+      return { type, data: { title: "Trusted by", items: [] } };
+    case "caseStudy":
+      return { type, data: { title: "Client results", items: [] } };
   }
 }
 
@@ -113,5 +131,8 @@ export const createProcessStep = (): ProcessStep => ({ title: "", description: "
 export const createTrustBadge = (): TrustBadgeItem => ({ title: "" });
 export const createFeatureItem = (): FeatureItem => ({ title: "", description: "" });
 export const createReviewItem = (): ReviewItem => ({ name: "", content: { text: "" } });
+export const createLogoItem = (): LogoItem => ({ image: { src: "" }, name: "" });
+// 指标默认不给：留空即不渲染，避免平台替用户「先摆个数字上去」。
+export const createCaseStudyItem = (): CaseStudyItem => ({ client: "", summary: "" });
 export const createFaqItem = (): FaqItem => ({ question: "", answer: "" });
 export const createGuaranteeItem = (): GuaranteeItem => ({ title: "" });

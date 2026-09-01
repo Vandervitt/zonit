@@ -16,6 +16,8 @@ import { StoryForm } from "../forms/StoryForm";
 import { CountdownForm } from "../forms/CountdownForm";
 import { FaqForm } from "../forms/FaqForm";
 import { GuaranteeForm } from "../forms/GuaranteeForm";
+import { LogoWallForm } from "../forms/LogoWallForm";
+import { CaseStudyForm } from "../forms/CaseStudyForm";
 
 export function renderSectionForm(
   section: EditorSection,
@@ -46,5 +48,9 @@ export function renderSectionForm(
       return <FaqForm value={section.data} onChange={onData} />;
     case "guarantee":
       return <GuaranteeForm value={section.data} onChange={onData} />;
+    case "logoWall":
+      return <LogoWallForm value={section.data} onChange={onData} />;
+    case "caseStudy":
+      return <CaseStudyForm value={section.data} onChange={onData} />;
   }
 }

@@ -1,10 +1,11 @@
 // landing-renderer/sections/Features.tsx
-import type { FeaturesSection } from "@/types/schema.draft";
+import type { FeaturesSection, PageContact } from "@/types/schema.draft";
 import type { RendererTheme } from "../theme";
 import { SectionShell } from "../primitives/SectionShell";
+import { SectionCta } from "../primitives/SectionCta";
 import { SectionHeading } from "../primitives/SectionHeading";
 
-export function Features({ data, theme }: { data: FeaturesSection; theme: RendererTheme }) {
+export function Features({ data, contact, theme, preview = false }: { data: FeaturesSection; contact: PageContact; theme: RendererTheme; preview?: boolean }) {
   return (
     <SectionShell>
       <SectionHeading title={data.title} subtitle={data.subtitle} />
@@ -21,6 +22,7 @@ export function Features({ data, theme }: { data: FeaturesSection; theme: Render
           ))}
         </div>
       )}
+      <SectionCta cta={data.cta} contact={contact} theme={theme} preview={preview} />
     </SectionShell>
   );
 }
