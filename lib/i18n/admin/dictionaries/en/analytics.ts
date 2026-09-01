@@ -10,6 +10,10 @@ export const analytics = {
     clicks: "CTA clicks",
     leads: "Leads",
     ctr: "Click-through rate",
+    uniqueViews: "Visitors (UV)",
+    uniqueViewsHint: "Deduplicated per day; the same person returning on another day counts again",
+    uniqueViewsUnavailable: "No visitor data for this period",
+    uniqueViewsUnavailableHint: "Visitor deduplication started later and can't be backfilled, so we don't show a zero here and we don't substitute PV",
   },
   change: {
     new: "vs previous: new",

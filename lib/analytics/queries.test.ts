@@ -3,8 +3,12 @@ import { buildSeries, summarize, buildFunnel, buildFormFunnel } from "./queries"
 
 describe("analytics 整形", () => {
   it("summarize 计算 ctr 与线索转化率（无 views 时为 0）", () => {
-    expect(summarize(100, 5, 2)).toEqual({ views: 100, clicks: 5, leads: 2, ctr: 0.05, cvr: 0.02 });
-    expect(summarize(0, 0, 0)).toEqual({ views: 0, clicks: 0, leads: 0, ctr: 0, cvr: 0 });
+    expect(summarize(100, 5, 2)).toEqual({
+      views: 100, clicks: 5, leads: 2, ctr: 0.05, cvr: 0.02, uniqueViews: null,
+    });
+    expect(summarize(0, 0, 0)).toEqual({
+      views: 0, clicks: 0, leads: 0, ctr: 0, cvr: 0, uniqueViews: null,
+    });
   });
   it("buildFunnel 三步转化：曝光→CTA 点击→线索，rate 相对上一步、pct 相对曝光", () => {
     expect(buildFunnel(100, 20, 5)).toEqual([
@@ -46,5 +50,31 @@ describe("buildFormFunnel", () => {
     ]);
     expect(f.errors).toBe(30);
     expect(f.errorBreakdown[0]).toEqual({ detail: "bad_whatsapp", count: 25 });
+  });
+});
+
+// 口径断裂的处理规则。迁移 050 之前的行没有 visitor_hash，且补不回来
+// （原始 IP/UA 从未落库）——所以「没采集」必须与「真的 0 个访客」区分开。
+describe("UV 口径：没采集 ≠ 0", () => {
+  it("传入访客数时如实带出", () => {
+    expect(summarize(100, 5, 2, 40).uniqueViews).toBe(40);
+  });
+
+  it("默认是 null 而不是 0——省略参数意味着「这段没数据」", () => {
+    expect(summarize(100, 5, 2).uniqueViews).toBeNull();
+  });
+
+  // 0 是一个有意义的值：采集在跑、但这段区间确实没有可去重的访客。
+  // 它与 null 必须能区分，否则界面无从选择显示「0」还是「无数据」。
+  it("0 与 null 是两回事，不能互相折叠", () => {
+    expect(summarize(0, 0, 0, 0).uniqueViews).toBe(0);
+    expect(summarize(0, 0, 0, null).uniqueViews).toBeNull();
+  });
+
+  it("UV 不参与 ctr / cvr 的计算，分母仍是 PV（不改既有指标语义）", () => {
+    const a = summarize(100, 5, 2, 10);
+    const b = summarize(100, 5, 2, null);
+    expect(a.ctr).toBe(b.ctr);
+    expect(a.cvr).toBe(b.cvr);
   });
 });

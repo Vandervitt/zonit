@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { Row, Col, Card, Statistic, Segmented, Select, Table, Tag, Typography, Space, Empty, Spin, DatePicker } from "antd";
+// ⚠️ antd 与 recharts 都导出 Tooltip，且本文件两个都要用——antd 的必须起别名，
+// 否则 recharts 的图表提示会被静默替换成一个 title 属性用不上的组件。
+import { Row, Col, Card, Statistic, Segmented, Select, Table, Tag, Typography, Space, Empty, Spin, DatePicker, Tooltip as InfoTooltip } from "antd";
 import {
   EyeOutlined, AimOutlined, PercentageOutlined, ContactsOutlined, ArrowUpOutlined, ArrowDownOutlined,
 } from "@ant-design/icons";
@@ -106,6 +108,30 @@ export default function AnalyticsPage() {
           <Card>
             <Statistic title={t.totals.views} value={a?.totals.views ?? 0} prefix={<EyeOutlined />} />
             {cmp && <ChangeBadge change={cmp.change.views} />}
+            {/*
+              UV 与 PV 同卡并列：它们是同一族指标，拆成第五张卡会把这一行从
+              4 列挤成 5 列。
+              ⚠️ uniqueViews 为 null 时**必须显示「无数据」而不是 0**——迁移 050
+              之前没采集过访客标识，且补不回来。显示 0 是撒谎，拿 PV 顶替会让
+              口径变化被读成流量暴跌。
+            */}
+            {a && (
+              <div className="mt-2 text-xs text-slate-500">
+                {a.totals.uniqueViews === null ? (
+                  <InfoTooltip title={t.totals.uniqueViewsUnavailableHint}>
+                    <span>{t.totals.uniqueViewsUnavailable}</span>
+                  </InfoTooltip>
+                ) : (
+                  <InfoTooltip title={t.totals.uniqueViewsHint}>
+                    <span>
+                      {t.totals.uniqueViews}
+                      {" "}
+                      {a.totals.uniqueViews.toLocaleString()}
+                    </span>
+                  </InfoTooltip>
+                )}
+              </div>
+            )}
           </Card>
         </Col>
         <Col xs={12} sm={6}>

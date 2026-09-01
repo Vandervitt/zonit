@@ -9,7 +9,20 @@ import { previousRange, changeRate, datesInRange, type DateRange } from "./range
 export * from "./dimensions";
 export * from "./range";
 
-export interface Totals { views: number; clicks: number; leads: number; ctr: number; cvr: number; }
+export interface Totals {
+  views: number;
+  clicks: number;
+  leads: number;
+  ctr: number;
+  cvr: number;
+  /**
+   * 按天去重的访客数。**迁移 050 之前的时段为 null**——那些行没有
+   * visitor_hash，且无法补算（原始 IP/UA 从未落库）。
+   * null 必须在界面上呈现为「该时段无此数据」，不得补 0，也不得回退成 views：
+   * 前者是撒谎，后者会把口径变化读成流量暴跌。
+   */
+  uniqueViews: number | null;
+}
 export interface SeriesPoint { date: string; views: number; clicks: number; }
 export interface ChannelRow { channel: string; clicks: number; }
 // 只回 key 不回 label：展示文案随后台界面语言变化，归 lib/i18n/admin 的 analytics.funnel.steps 管。
@@ -96,11 +109,22 @@ export async function getPagePerformance(userId: string, range: DateRange): Prom
     .sort((a, b) => b.leads - a.leads || b.views - a.views);
 }
 
-export function summarize(views: number, clicks: number, leads: number): Totals {
+/**
+ * @param uniqueViews 按天去重的访客数；**该时段没有采集过 visitor_hash 时必须传
+ *   null**（不是 0）。判据是「这段区间里有没有任何一条带 visitor_hash 的 page_view」，
+ *   由调用方给出——查询层比展示层更清楚数据到底存不存在。
+ */
+export function summarize(
+  views: number,
+  clicks: number,
+  leads: number,
+  uniqueViews: number | null = null,
+): Totals {
   return {
     views, clicks, leads,
     ctr: views > 0 ? clicks / views : 0,
     cvr: views > 0 ? leads / views : 0,
+    uniqueViews,
   };
 }
 
@@ -171,11 +195,17 @@ export async function getAnalytics(
     totalsRes, seriesRes, channelsRes, attrEventsRes, attrLeadsRes, leadsRes, formErrorsRes,
     prevEventsRes, prevLeadsRes,
   ] = await Promise.all([
+    // unique_views 是去重访客；identified_views 数的是这段区间里有多少条 page_view
+    // 带得上 visitor_hash——用来区分「真的 0 个访客」与「这段时间根本没采集」。
+    // ⚠️ 中文只能写在 JS 注释里，不能写进 SQL 字符串：
+    // no-hardcoded-cjk 的扫描会剥掉 // 注释，但剥不掉模板串里的 -- 注释。
     pool.query(`SELECT
         count(*) FILTER (WHERE event='page_view')::int   AS views,
         count(*) FILTER (WHERE event='cta_click')::int   AS clicks,
         count(*) FILTER (WHERE event='form_start')::int  AS form_starts,
-        count(*) FILTER (WHERE event='form_submit')::int AS form_submits
+        count(*) FILTER (WHERE event='form_submit')::int AS form_submits,
+        count(DISTINCT visitor_hash) FILTER (WHERE event='page_view')::int AS unique_views,
+        count(*) FILTER (WHERE event='page_view' AND visitor_hash IS NOT NULL)::int AS identified_views
        ${base}`, args),
     pool.query(`SELECT to_char(date_trunc('day', created_at), 'YYYY-MM-DD') AS date,
         count(*) FILTER (WHERE event='page_view')::int AS views,
@@ -209,7 +239,14 @@ export async function getAnalytics(
   const c = Number(totalsRes.rows[0]?.clicks ?? 0);
   const l = Number(leadsRes.rows[0]?.leads ?? 0);
   return {
-    totals: summarize(v, c, l),
+    // 该区间一条带 visitor_hash 的曝光都没有 → 这段时间根本没采集（迁移 050 之前），
+    // 必须是 null 而不是 0。「有曝光但 0 个访客」在数据上不可能，显示 0 只会误导。
+    totals: summarize(
+      v, c, l,
+      Number(totalsRes.rows[0]?.identified_views ?? 0) > 0
+        ? Number(totalsRes.rows[0]?.unique_views ?? 0)
+        : null,
+    ),
     funnel: buildFunnel(v, c, l),
     formFunnel: buildFormFunnel(
       Number(totalsRes.rows[0]?.form_starts ?? 0),
