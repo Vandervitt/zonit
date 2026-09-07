@@ -10,6 +10,7 @@ import { verifyOtp } from "@/lib/auth/otp";
 import { provisionUserByEmail } from "@/lib/auth/provision";
 import { effectivePlan, activeCompPlan, SIGNUP_TRIAL_PLAN, signupTrialExpiry, type PlanId } from "@/lib/plans";
 import { sendWelcomeEmail } from "@/lib/email";
+import { notifyAdminsOfSignup } from "@/lib/auth/signup-notify";
 import { recordMilestone } from "@/lib/platform-milestones";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 
@@ -140,6 +141,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             } catch (err) {
               console.error("welcome email (oauth) failed:", err);
             }
+            // 超管注册通知与欢迎邮件互不影响：各自独立 try，一封失败不吞掉另一封。
+            await notifyAdminsOfSignup({
+              email: welcomeTo,
+              name: welcomeName,
+              source: "google",
+              plan: SIGNUP_TRIAL_PLAN,
+            });
           });
         } catch (err) {
           console.error("welcome email (oauth) schedule failed:", err);
