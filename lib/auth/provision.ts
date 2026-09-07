@@ -1,6 +1,7 @@
 import { after } from "next/server";
 import pool from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
+import { notifyAdminsOfSignup } from "@/lib/auth/signup-notify";
 import { normalizeEmail } from "@/lib/auth/otp";
 import { recordMilestone } from "@/lib/platform-milestones";
 import { signupCompGrant, type PlanId } from "@/lib/plans";
@@ -100,6 +101,13 @@ export async function provisionUserByEmail(
         } catch (err) {
           console.error("welcome email (otp) failed:", err);
         }
+        // 超管注册通知与欢迎邮件互不影响：各自独立 try，一封失败不吞掉另一封。
+        await notifyAdminsOfSignup({
+          email: u.email,
+          name: u.name ?? null,
+          source: "email_otp",
+          plan: grant.plan,
+        });
       });
     } catch (err) {
       console.error("welcome email (otp) schedule failed:", err);

@@ -249,6 +249,60 @@ export async function sendFeedbackNotificationEmail({
   }
 }
 
+/** 建号来源。中文标签只在本文件落地——lib/ 其余位置不放 UI 文案（见漏译守卫）。 */
+export type SignupSource = "email_otp" | "google";
+
+const SIGNUP_SOURCE_LABEL: Record<SignupSource, string> = {
+  email_otp: "邮箱验证码",
+  google: "Google 登录",
+};
+
+/**
+ * 新用户注册通知（发给超管）。**刻意保持中文**：收件人是平台运营方，不是客户。
+ */
+export async function sendSignupNotificationEmail({
+  to, email, name, source, plan, signedUpAt, dashboardUrl,
+}: {
+  to: string[];
+  email: string;
+  name?: string | null;
+  source: SignupSource;
+  plan?: string | null;
+  signedUpAt?: Date;
+  dashboardUrl: string;
+}) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  if (to.length === 0) { return { error: "no_recipient" }; }
+  const meta: Record<string, string> = {
+    邮箱: email,
+    昵称: name || "—",
+    注册方式: SIGNUP_SOURCE_LABEL[source] ?? source,
+    赠送档: plan || "—",
+    注册时间: (signedUpAt ?? new Date()).toISOString(),
+  };
+  const rows = Object.entries(meta)
+    .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666;">${escapeHtml(k)}</td><td style="padding:4px 0;color:#111;">${escapeHtml(v)}</td></tr>`)
+    .join("");
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `🎉 新用户注册 · ${escapeHtml(email)}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #eee;border-radius:10px;">
+          <h2 style="color:#111;margin:0 0 12px;">有新用户注册</h2>
+          <table style="border-collapse:collapse;font-size:13px;">${rows}</table>
+          <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在超管后台查看</a></p>
+        </div>`,
+    });
+    if (error) { console.error("Failed to send signup notification email:", error); return { error }; }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send signup notification email:", error);
+    return { error };
+  }
+}
+
 export interface DigestEmailPage {
   name: string;
   views: number;
