@@ -4,6 +4,7 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 // import PostgresAdapter from "@auth/pg-adapter";
 import pool from "@/lib/db";
+import { touchLastSeen } from "@/lib/auth/last-seen";
 import { Routes, UserRole, AuthProvider } from "@/lib/constants";
 import { isValidEmailFormat } from "@/lib/auth/trusted-email";
 import { verifyOtp } from "@/lib/auth/otp";
@@ -179,6 +180,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               token.role = UserRole.USER;
               return token;
             }
+            await touchLastSeen(userId);
             const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim());
             const isHardwareAdmin = adminEmails.includes(userData.email);
 
