@@ -15,13 +15,44 @@ import { MoreOutlined, SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { InviteUserDialog } from "@/components/admin/InviteUserDialog";
 import { UserDetailDrawer } from "./UserDetailDrawer";
+import {
+  activationStage, daysUntil, matchesView, OPS_VIEWS,
+  type ActivationStage, type OpsFacts, type OpsView,
+} from "@/lib/super-admin/user-ops";
+
+const STAGE_META: Record<ActivationStage, { label: string; color: string }> = {
+  signup: { label: "仅注册", color: "default" },
+  page_created: { label: "已建页", color: "blue" },
+  page_published: { label: "已发布", color: "cyan" },
+  first_lead: { label: "已收线索", color: "green" },
+};
+
+const VIEW_LABEL: Record<OpsView, string> = {
+  all: "全部",
+  stuck_no_page: "注册 3 天未建页",
+  published_no_lead: "发布 7 天无线索",
+  trial_ending: "赠送 3 天内到期",
+  dormant: "14 天未活跃",
+};
+
+const DAY_MS = 86400_000;
+
+/** 相对时间。以服务端渲染时刻为基准，避免水合不匹配。 */
+function relativeDays(iso: string, nowMs: number): string {
+  const d = Math.floor((nowMs - new Date(iso).getTime()) / DAY_MS);
+  return d <= 0 ? "今天" : `${d} 天前`;
+}
 
 export interface UserRow {
   key: string; id: string; name: string; email: string;
   plan: PlanId; compPlan: PlanId | null;
   compPlanExpiresAt: string | null; compExpired: boolean;
   effective: PlanId;
-  role: string; disabled: boolean; pageCount: number; createdAt: string;
+  role: string; disabled: boolean; pageCount: number;
+  createdAt: string; lastSeenAt: string | null;
+  milestones: OpsFacts["milestones"]; publishedAt: string | null; lastLeadAt: string | null;
+  paid: boolean;
+  latestNote: { body: string; at: string } | null;
   /** 内部账号：不计入运营统计。超管恒为内部（internalLocked），不可取消。 */
   internal: boolean; internalLocked: boolean;
 }
@@ -44,8 +75,20 @@ async function patchUser(id: string, body: Record<string, unknown>): Promise<boo
   return res.ok;
 }
 
-export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
+function toFacts(r: UserRow): OpsFacts {
+  return {
+    createdAt: r.createdAt, lastSeenAt: r.lastSeenAt, milestones: r.milestones,
+    publishedAt: r.publishedAt, lastLeadAt: r.lastLeadAt,
+    compExpiresAt: r.compExpired ? null : r.compPlanExpiresAt,
+    paid: r.paid, disabled: r.disabled, internal: r.internal,
+  };
+}
+
+export function SuperAdminUsersClient({ rows, nowIso }: { rows: UserRow[]; nowIso: string }) {
   const router = useRouter();
+  const now = useMemo(() => new Date(nowIso), [nowIso]);
+  const nowMs = now.getTime();
+  const [view, setView] = useState<OpsView>("all");
   const [keyword, setKeyword] = useState("");
   const [detailId, setDetailId] = useState<string | null>(null);
   const [compTarget, setCompTarget] = useState<UserRow | null>(null);
@@ -69,11 +112,17 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
     }
   }
 
+  const viewCounts = useMemo(
+    () => Object.fromEntries(OPS_VIEWS.map((v) => [v, rows.filter((r) => matchesView(toFacts(r), v, now)).length])) as Record<OpsView, number>,
+    [rows, now],
+  );
+
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
-    if (!kw) return rows;
-    return rows.filter((r) => r.email.toLowerCase().includes(kw) || r.name.toLowerCase().includes(kw));
-  }, [rows, keyword]);
+    return rows.filter((r) =>
+      matchesView(toFacts(r), view, now) &&
+      (!kw || r.email.toLowerCase().includes(kw) || r.name.toLowerCase().includes(kw)));
+  }, [rows, keyword, view, now]);
 
   async function apply(id: string, body: Record<string, unknown>, okMsg: string) {
     setSavingId(id);
@@ -124,6 +173,10 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
               <Tag color="gold">赠送</Tag>
             </Tooltip>
           )}
+          {row.compPlan && !row.compExpired && !row.paid && (() => {
+            const d = daysUntil(row.compPlanExpiresAt, now);
+            return d === null ? null : <Tag color={d <= 3 ? "error" : "default"}>剩 {d} 天</Tag>;
+          })()}
           {row.compPlan && row.compExpired && (
             <Tooltip title={`赠送 ${PLANS[row.compPlan].label} 已于 ${row.compPlanExpiresAt ? dayjs(row.compPlanExpiresAt).format("YYYY-MM-DD") : ""} 到期`}>
               <Tag>已过期</Tag>
@@ -154,8 +207,46 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
       render: (disabled: boolean) =>
         disabled ? <Tag color="error">已禁用</Tag> : <Tag color="success">正常</Tag>,
     },
+    { title: "激活阶段", key: "stage",
+      filters: Object.entries(STAGE_META).map(([k, v]) => ({ text: v.label, value: k })),
+      onFilter: (v, row) => activationStage(row.milestones) === v,
+      render: (_, row) => {
+        const m = STAGE_META[activationStage(row.milestones)];
+        return <Tag color={m.color}>{m.label}</Tag>;
+      },
+    },
     { title: "注册时间", dataIndex: "createdAt", key: "createdAt",
-      render: (v: string) => <Typography.Text type="secondary" style={{ fontSize: 12 }}>{v}</Typography.Text>,
+      sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
+      render: (v: string) => (
+        <Tooltip title={dayjs(v).format("YYYY-MM-DD HH:mm")}>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>{relativeDays(v, nowMs)}</Typography.Text>
+        </Tooltip>
+      ),
+    },
+    { title: "最后活跃", dataIndex: "lastSeenAt", key: "lastSeenAt",
+      sorter: (a, b) => (a.lastSeenAt ?? "").localeCompare(b.lastSeenAt ?? ""),
+      render: (v: string | null) =>
+        v ? (
+          <Tooltip title={dayjs(v).format("YYYY-MM-DD HH:mm")}>
+            <Typography.Text style={{ fontSize: 12 }}>{relativeDays(v, nowMs)}</Typography.Text>
+          </Tooltip>
+        ) : (
+          <Tooltip title="活跃记录于 2026-10-08 上线，此后未出现过">
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>—</Typography.Text>
+          </Tooltip>
+        ),
+    },
+    { title: "跟进", key: "note", width: 200,
+      render: (_, row) =>
+        row.latestNote ? (
+          <Tooltip title={row.latestNote.body}>
+            <Typography.Text ellipsis style={{ fontSize: 12, maxWidth: 190, display: "block" }}>
+              {dayjs(row.latestNote.at).format("MM-DD")} {row.latestNote.body}
+            </Typography.Text>
+          </Tooltip>
+        ) : (
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>—</Typography.Text>
+        ),
     },
     { title: "落地页数", dataIndex: "pageCount", key: "pageCount", align: "center",
       render: (count: number) => <Tag color="default">{count}</Tag>,
@@ -230,6 +321,13 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
           <InviteUserDialog />
         </Space>
       </div>
+
+      <Segmented
+        style={{ marginBottom: 16 }}
+        value={view}
+        onChange={(v) => setView(v as OpsView)}
+        options={OPS_VIEWS.map((v) => ({ value: v, label: `${VIEW_LABEL[v]} (${viewCounts[v]})` }))}
+      />
 
       <Table columns={columns} dataSource={filtered} rowKey="key"
         pagination={{ pageSize: 20, showSizeChanger: false }} size="middle" />
@@ -307,7 +405,7 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
         </Space>
       </Modal>
 
-      <UserDetailDrawer userId={detailId} onClose={() => setDetailId(null)} />
+      <UserDetailDrawer userId={detailId} onClose={() => setDetailId(null)} onNoteAdded={() => router.refresh()} />
     </div>
   );
 }
