@@ -1,5 +1,6 @@
 import pool from "@/lib/db";
 import type { PlanId } from "@/lib/plans";
+import { auditEntries, type AuditBefore } from "./audit";
 import { invalidateAllPublishedPages, invalidateUserPlan } from "@/lib/landing-pages/published-cache";
 
 export interface AdminUserPatch {
@@ -10,8 +11,11 @@ export interface AdminUserPatch {
   isInternal?: boolean;                  // 内部账号（测试号等），排除出运营统计
 }
 
-/** 超管更新用户运营字段；返回是否命中行。调用方负责鉴权与自我保护校验。 */
-export async function updateUserAdminFields(userId: string, patch: AdminUserPatch): Promise<boolean> {
+/**
+ * 超管更新用户运营字段并写审计；返回是否命中行。调用方负责鉴权与自我保护校验。
+ * 读旧值、更新、写审计在同一事务里：审计必须与变更同生共死，否则会有「改了却查不到谁改的」。
+ */
+export async function updateUserAdminFields(userId: string, patch: AdminUserPatch, actorId: string): Promise<boolean> {
   const set: string[] = [];
   const values: unknown[] = [];
   let i = 1;
@@ -24,10 +28,33 @@ export async function updateUserAdminFields(userId: string, patch: AdminUserPatc
   if (patch.isInternal !== undefined) { set.push(`is_internal = $${i++}`); values.push(patch.isInternal); }
   if (set.length === 0) return false;
   values.push(userId);
-  const result = await pool.query(
-    `UPDATE users SET ${set.join(", ")} WHERE id = $${i} RETURNING id`,
-    values,
-  );
+
+  const client = await pool.connect();
+  let result;
+  try {
+    await client.query("BEGIN");
+    const beforeRes = await client.query(
+      `SELECT comp_plan, comp_plan_expires_at, role, disabled_at, is_internal FROM users WHERE id = $1 FOR UPDATE`,
+      [userId],
+    );
+    if (beforeRes.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return false;
+    }
+    result = await client.query(`UPDATE users SET ${set.join(", ")} WHERE id = $${i} RETURNING id`, values);
+    for (const e of auditEntries(beforeRes.rows[0] as AuditBefore, patch)) {
+      await client.query(
+        `INSERT INTO admin_audit_logs (actor_id, target_user_id, action, detail) VALUES ($1, $2, $3, $4)`,
+        [actorId, userId, e.action, JSON.stringify(e.detail)],
+      );
+    }
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
   const hit = result.rows.length > 0;
 
   // 这里改的每个字段都会改变公开落地页的渲染结果，故必须失效读缓存：
@@ -63,6 +90,7 @@ export interface AdminUserDetail {
   trial_emails: { stage: string; sent_at: string }[];
   feedback: { source: string; message: string; created_at: string }[];
   notes: AdminUserNote[];
+  audit: { action: string; detail: { before: unknown; after: unknown }; actor_email: string | null; created_at: string }[];
   pages: { id: string; name: string; status: string; slug: string | null; bound_domain: string | null }[];
 }
 
@@ -94,7 +122,7 @@ export async function getUserAdminDetail(userId: string): Promise<AdminUserDetai
     [userId],
   );
   // 运营时间线：昨天排查「两位用户卡在哪」要手写的那几条 SQL，在这里一次取齐。
-  const [milestonesRes, aiJobsRes, trialRes, feedbackRes, notes] = await Promise.all([
+  const [milestonesRes, aiJobsRes, trialRes, feedbackRes, notes, auditRes] = await Promise.all([
     pool.query(`SELECT event, created_at FROM platform_milestones WHERE user_id = $1 ORDER BY created_at`, [userId]),
     pool.query(
       `SELECT status, reason, created_at FROM landing_page_ai_jobs WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10`,
@@ -106,6 +134,12 @@ export async function getUserAdminDetail(userId: string): Promise<AdminUserDetai
       [userId],
     ),
     listUserNotes(userId),
+    pool.query(
+      `SELECT l.action, l.detail, a.email AS actor_email, l.created_at
+         FROM admin_audit_logs l LEFT JOIN users a ON a.id = l.actor_id
+        WHERE l.target_user_id = $1 ORDER BY l.created_at DESC LIMIT 50`,
+      [userId],
+    ),
   ]);
   return {
     ...userRes.rows[0],
@@ -116,6 +150,7 @@ export async function getUserAdminDetail(userId: string): Promise<AdminUserDetai
     trial_emails: trialRes.rows,
     feedback: feedbackRes.rows,
     notes,
+    audit: auditRes.rows,
   };
 }
 

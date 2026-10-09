@@ -360,9 +360,8 @@ export function SuperAdminUsersClient({ rows, nowIso }: { rows: UserRow[]; nowIs
               onChange={setCompValue}
               options={[
                 { value: "none", label: "无赠送" },
-                { value: "starter", label: "Starter" },
-                { value: "pro", label: "Pro" },
-                { value: "agency", label: "Agency" },
+                // 赠送只对付费档有意义；跟随 PLAN_ORDER，套餐增减时不必再改这里。
+                ...PLAN_ORDER.filter((p) => p !== "free").map((p) => ({ value: p, label: PLANS[p].label })),
               ]}
             />
           </div>

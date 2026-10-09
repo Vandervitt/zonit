@@ -18,6 +18,30 @@ interface Detail {
   trial_emails: { stage: string; sent_at: string }[];
   feedback: { source: string; message: string; created_at: string }[];
   notes: { id: string; body: string; author_email: string | null; created_at: string }[];
+  audit: { action: string; detail: { before: unknown; after: unknown }; actor_email: string | null; created_at: string }[];
+}
+
+const PAGE_STATUS: Record<string, { label: string; color: string }> = {
+  published: { label: "已发布", color: "success" },
+  draft: { label: "草稿", color: "default" },
+};
+
+function describeAudit(a: Detail["audit"][number]): string {
+  const { before, after } = a.detail;
+  switch (a.action) {
+    case "comp_plan": {
+      const g = (v: unknown) => {
+        const x = v as { plan: string | null; expiresAt: string | null };
+        if (!x.plan) return "无";
+        return `${x.plan}${x.expiresAt ? `（${dayjs(x.expiresAt).format("YYYY-MM-DD")} 到期）` : "（永久）"}`;
+      };
+      return `赠送套餐：${g(before)} → ${g(after)}`;
+    }
+    case "role": return `角色：${before} → ${after}`;
+    case "disabled": return after ? "禁用账号" : "启用账号";
+    case "is_internal": return after ? "标记为内部账号" : "取消内部标记";
+    default: return a.action;
+  }
 }
 
 const MILESTONE_LABEL: Record<string, string> = {
@@ -42,6 +66,11 @@ function buildTimeline(d: Detail) {
       label: <>AI 一键成页 <Tag color={AI_STATUS_COLOR[j.status]}>{j.status}{j.reason ? ` · ${j.reason}` : ""}</Tag></>,
     })),
     ...d.feedback.map((f) => ({ at: f.created_at, color: "orange", label: `反馈（${f.source}）：${f.message}` })),
+    ...d.audit.map((a) => ({
+      at: a.created_at,
+      color: "purple",
+      label: `操作 · ${describeAudit(a)}（${a.actor_email ?? "已删除的管理员"}）`,
+    })),
   ];
   return items.sort((a, b) => a.at.localeCompare(b.at));
 }
@@ -210,7 +239,7 @@ export function UserDetailDrawer({
             columns={[
               { title: "名称", dataIndex: "name" },
               { title: "状态", dataIndex: "status",
-                render: (s: string) => <Tag color={s === "published" ? "success" : "default"}>{s}</Tag> },
+                render: (s: string) => <Tag color={PAGE_STATUS[s]?.color}>{PAGE_STATUS[s]?.label ?? s}</Tag> },
               { title: "绑定域名", dataIndex: "bound_domain", render: (d: string | null) => d || "—" },
             ]}
           />
