@@ -58,6 +58,15 @@ describe("listUserMilestones", () => {
 });
 
 describe("getFunnelStats", () => {
+  it("只统计时间窗内注册的外部用户（排除内部账号、按注册批次）", async () => {
+    query.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rows: [] });
+    await getFunnelStats("30");
+    for (const [sql] of query.mock.calls) {
+      expect(sql).toContain("NOT u.is_internal AND u.role <> 'SUPER_ADMIN'");
+      expect(sql).toContain("u.created_at > NOW() - INTERVAL '30 days'");
+    }
+  });
+
   it("聚合各里程碑人数，缺失事件补 0，中位耗时透传为数字", async () => {
     query
       .mockResolvedValueOnce({
