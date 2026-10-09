@@ -9,6 +9,7 @@ import type { DailyPoint } from "@/lib/super-admin/trend";
 import type { FunnelStats, MilestoneEvent } from "@/lib/platform-milestones";
 import { ratePercent, type StatsRange } from "@/lib/super-admin/metrics";
 import { TrendCharts } from "./TrendCharts";
+import { OpsHealth, type OpsHealthData } from "./OpsHealth";
 import {
   UserOutlined,
   GlobalOutlined,
@@ -43,6 +44,7 @@ export interface OverviewStats {
   leadTrend: DailyPoint[];
   latestPages: LatestPage[];
   funnel: FunnelStats;
+  opsHealth: OpsHealthData;
 }
 
 const FUNNEL_STAGES: { event: MilestoneEvent; label: string }[] = [
@@ -186,6 +188,9 @@ export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
           </Col>
         ))}
       </Row>
+
+      {/* 运行健康：故障类信号放在业务数字之前，坏了要第一眼看到 */}
+      <OpsHealth data={stats.opsHealth} />
 
       {/* 激活漏斗 */}
       <ActivationFunnel funnel={stats.funnel} range={stats.range} />
