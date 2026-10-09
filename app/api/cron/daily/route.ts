@@ -16,6 +16,7 @@ import { sweepTrialEmails } from "@/lib/billing/trial-emails-sweep";
 import { sendWeeklyDigestEmail, sendLeadNudgeEmail } from "@/lib/email";
 import { getEmailDictionary } from "@/lib/i18n/emails";
 import { Routes } from "@/lib/constants";
+import { recordCronRun } from "@/lib/cron-runs";
 
 /**
  * 每日 cron 编排器（Vercel Hobby 计划 cron 数量有限，多任务合并为一条）：
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  const startedAt = new Date();
   const result: Record<string, unknown> = {};
 
   // 线索兜底重投优先：落库失败被暂存的线索是真金白银，早一轮回库早一轮跟进。
@@ -176,5 +178,6 @@ export async function GET(request: NextRequest) {
     result.digestSkipped = "not_monday";
   }
 
+  await recordCronRun("daily", startedAt, result);
   return NextResponse.json(result);
 }

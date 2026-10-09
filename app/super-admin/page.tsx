@@ -5,11 +5,48 @@ import { getFunnelStats } from "@/lib/platform-milestones";
 import {
   EXTERNAL_USER, PAID_USER, parseStatsRange, ratePercent, type StatsRange,
 } from "@/lib/super-admin/metrics";
+import { aiJobHealth, cronHealth } from "@/lib/super-admin/ops-health";
 import { SuperAdminOverview, type OverviewStats } from "./_overview-client";
+import type { OpsHealthData } from "./OpsHealth";
+
+const AI_STUCK_SQL = `(j.status = 'pending' AND j.created_at < NOW() - INTERVAL '10 minutes')`;
+
+// 运行健康不排除内部账号：这里看的是系统有没有坏，谁触发的都算。
+async function getOpsHealth(now: Date): Promise<OpsHealthData> {
+  const [cronRes, aiRes, reasonsRes, failuresRes] = await Promise.all([
+    pool.query(`SELECT started_at, failed_tasks FROM cron_runs WHERE job = 'daily' ORDER BY started_at DESC LIMIT 7`),
+    pool.query(`SELECT status, created_at FROM landing_page_ai_jobs WHERE created_at > NOW() - INTERVAL '7 days'`),
+    pool.query(`
+      SELECT COALESCE(j.reason, CASE WHEN ${AI_STUCK_SQL} THEN 'stuck' ELSE 'unknown' END) AS reason, COUNT(*)::int AS n
+        FROM landing_page_ai_jobs j
+       WHERE j.created_at > NOW() - INTERVAL '7 days' AND (j.status = 'failed' OR ${AI_STUCK_SQL})
+       GROUP BY 1 ORDER BY n DESC LIMIT 5`),
+    pool.query(`
+      SELECT j.id, u.email, j.status, j.reason, j.created_at
+        FROM landing_page_ai_jobs j LEFT JOIN users u ON u.id = j.user_id
+       WHERE j.created_at > NOW() - INTERVAL '7 days' AND (j.status = 'failed' OR ${AI_STUCK_SQL})
+       ORDER BY j.created_at DESC LIMIT 5`),
+  ]);
+  const cronRuns = cronRes.rows.map((r) => ({
+    ranAt: new Date(r.started_at).toISOString(),
+    failedTasks: r.failed_tasks as string[],
+  }));
+  return {
+    cronStatus: cronHealth(cronRuns[0] ?? null, now).status,
+    cronRuns,
+    ai: aiJobHealth(aiRes.rows.map((r) => ({ status: r.status, createdAt: new Date(r.created_at).toISOString() })), now),
+    aiTopReasons: reasonsRes.rows,
+    aiRecentFailures: failuresRes.rows.map((r) => ({
+      id: r.id, email: r.email, status: r.status, reason: r.reason,
+      createdAt: new Date(r.created_at).toISOString(),
+    })),
+  };
+}
 
 // 全部统计排除内部账号（超管、测试号），口径见 lib/super-admin/metrics.ts。
 async function getStats(range: StatsRange): Promise<OverviewStats> {
-  const [userAgg, pagesCount, leadsCount, planRows, userTrend, leadTrend, latestPages, funnel] =
+  const now = new Date();
+  const [userAgg, pagesCount, leadsCount, planRows, userTrend, leadTrend, latestPages, funnel, opsHealth] =
     await Promise.all([
       pool.query(`
         SELECT COUNT(*)::int AS total,
@@ -41,6 +78,7 @@ async function getStats(range: StatsRange): Promise<OverviewStats> {
          WHERE ${EXTERNAL_USER}
          ORDER BY lp.created_at DESC LIMIT 5`),
       getFunnelStats(range),
+      getOpsHealth(now),
     ]);
 
   const planDist = Object.fromEntries(PLAN_ORDER.map((p) => [p, 0])) as Record<PlanId, number>;
@@ -49,7 +87,6 @@ async function getStats(range: StatsRange): Promise<OverviewStats> {
   }
 
   const { total, paid, comp, internal } = userAgg.rows[0];
-  const now = new Date();
   return {
     range,
     totalUsers: total,
@@ -67,6 +104,7 @@ async function getStats(range: StatsRange): Promise<OverviewStats> {
       created_at: new Date(r.created_at).toISOString(), user_email: r.user_email,
     })),
     funnel,
+    opsHealth,
   };
 }
 
