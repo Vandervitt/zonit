@@ -583,3 +583,36 @@ export async function sendLeadNotificationEmail({
     return { error };
   }
 }
+
+/**
+ * 超管给单个用户发的一对一邮件。**纯文本、无模板、无链接追踪**：
+ * 这类信要读起来像创始人亲手写的，而 HTML 营销模板恰恰是收件人和过滤器最先识别的特征。
+ * 回复直接进 replyTo（创始人邮箱），不落在 noreply 发件地址上。
+ */
+export async function sendAdminDirectEmail({
+  to, subject, text, replyTo,
+}: {
+  to: string;
+  subject: string;
+  text: string;
+  replyTo: string | null;
+}) {
+  if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
+  try {
+    const data = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [to],
+      subject,
+      text,
+      ...(replyTo ? { replyTo } : {}),
+    });
+    if (data.error) {
+      console.error("Failed to send admin direct email:", data.error);
+      return { error: data.error };
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("Failed to send admin direct email:", error);
+    return { error };
+  }
+}
