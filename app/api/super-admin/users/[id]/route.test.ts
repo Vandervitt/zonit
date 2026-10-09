@@ -47,7 +47,7 @@ describe("PATCH /api/super-admin/users/[id]", () => {
     expect((await PATCH(patchReq({ isInternal: "yes" }), params("u2"))).status).toBe(400);
     expect(updateUserAdminFields).not.toHaveBeenCalled();
     expect((await PATCH(patchReq({ isInternal: true }), params("u2"))).status).toBe(200);
-    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { isInternal: true });
+    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { isInternal: true }, "admin1");
   });
   it("非法 compPlan / role 值 → 400", async () => {
     expect((await PATCH(patchReq({ compPlan: "vip" }), params("u2"))).status).toBe(400);
@@ -57,12 +57,12 @@ describe("PATCH /api/super-admin/users/[id]", () => {
   it("合法更新（赠送 pro + 禁用，不带到期）→ 200 并透传数据层（到期不动）", async () => {
     const res = await PATCH(patchReq({ compPlan: "pro", disabled: true }), params("u2"));
     expect(res.status).toBe(200);
-    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: "pro", disabled: true });
+    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: "pro", disabled: true }, "admin1");
   });
   it("取消赠送（compPlan: null）→ 200 并强制清空到期", async () => {
     const res = await PATCH(patchReq({ compPlan: null }), params("u2"));
     expect(res.status).toBe(200);
-    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: null, compPlanExpiresAt: null });
+    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: null, compPlanExpiresAt: null }, "admin1");
   });
 
   const future = new Date(Date.now() + 7 * 86400_000).toISOString();
@@ -71,12 +71,12 @@ describe("PATCH /api/super-admin/users/[id]", () => {
   it("赠送 pro + 未来到期 → 200 并透传到期", async () => {
     const res = await PATCH(patchReq({ compPlan: "pro", compPlanExpiresAt: future }), params("u2"));
     expect(res.status).toBe(200);
-    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: "pro", compPlanExpiresAt: future });
+    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: "pro", compPlanExpiresAt: future }, "admin1");
   });
   it("赠送 pro + 到期为 null（永久）→ 200", async () => {
     const res = await PATCH(patchReq({ compPlan: "pro", compPlanExpiresAt: null }), params("u2"));
     expect(res.status).toBe(200);
-    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: "pro", compPlanExpiresAt: null });
+    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { compPlan: "pro", compPlanExpiresAt: null }, "admin1");
   });
   it("赠送 + 过去到期 → 400 且不更新", async () => {
     const res = await PATCH(patchReq({ compPlan: "pro", compPlanExpiresAt: past }), params("u2"));

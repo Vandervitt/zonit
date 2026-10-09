@@ -89,7 +89,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
   }
 
-  const ok = await updateUserAdminFields(id, patch);
+  const ok = await updateUserAdminFields(id, patch, guard.session.user.id);
   if (!ok) return NextResponse.json({ error: ApiErrors.NOT_FOUND }, { status: 404 });
   return NextResponse.json({ ok: true });
 }

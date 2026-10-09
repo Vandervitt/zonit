@@ -236,7 +236,7 @@ export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <Tag color={site.status === "published" ? "success" : "default"}>
-                        {site.status}
+                        {site.status === "published" ? "已发布" : site.status === "draft" ? "草稿" : site.status}
                       </Tag>
                       <Typography.Text
                         type="secondary"
