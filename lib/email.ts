@@ -230,7 +230,7 @@ export async function sendFeedbackNotificationEmail({
     .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666;">${escapeHtml(k)}</td><td style="padding:4px 0;color:#111;">${escapeHtml(String(v))}</td></tr>`)
     .join("");
   try {
-    const data = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
       subject: `💬 新用户反馈 · ${escapeHtml(source)}`,
@@ -242,6 +242,7 @@ export async function sendFeedbackNotificationEmail({
           <p style="margin-top:24px;"><a href="${dashboardUrl}" style="display:inline-block;background:${BRAND};color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;">在超管收件箱查看</a></p>
         </div>`,
     });
+    if (error) { console.error("Failed to send feedback notification email:", error); return { error }; }
     return { success: true, data };
   } catch (error) {
     console.error("Failed to send feedback notification email:", error);
@@ -564,7 +565,7 @@ export async function sendLeadNotificationEmail({
     .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666;">${escapeHtml(k)}</td><td style="padding:4px 0;color:#111;">${escapeHtml(String(v))}</td></tr>`)
     .join("");
   try {
-    const data = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
       subject: t.subject(pageName),
@@ -577,6 +578,8 @@ export async function sendLeadNotificationEmail({
           <p style="font-size:12px;color:#999;margin-top:24px;">${t.unsubscribe}</p>
         </div>`,
     });
+    // 结果会回写成线索的「邮件送达」状态给客户看：拒发必须记成 failed，不能算 sent。
+    if (error) { console.error("Failed to send lead notification email:", error); return { error }; }
     return { success: true, data };
   } catch (error) {
     console.error("Failed to send lead notification email:", error);
@@ -599,17 +602,14 @@ export async function sendAdminDirectEmail({
 }) {
   if (!resend) { console.error("RESEND_API_KEY is not configured"); return { error: "not_configured" }; }
   try {
-    const data = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [to],
       subject,
       text,
       ...(replyTo ? { replyTo } : {}),
     });
-    if (data.error) {
-      console.error("Failed to send admin direct email:", data.error);
-      return { error: data.error };
-    }
+    if (error) { console.error("Failed to send admin direct email:", error); return { error }; }
     return { success: true, data };
   } catch (error) {
     console.error("Failed to send admin direct email:", error);
