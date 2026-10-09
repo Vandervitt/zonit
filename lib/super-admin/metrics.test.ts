@@ -28,3 +28,13 @@ describe("ratePercent", () => {
     expect(ratePercent(0, 0, 1)).toBeNull();
   });
 });
+
+describe("weekOverWeek", () => {
+  it("环比变化百分比向下截断；上周为 0 时返回 null（无法计算，不是无穷大）", async () => {
+    const { weekOverWeek } = await import("./metrics");
+    expect(weekOverWeek(3, 2)).toBe(50);
+    expect(weekOverWeek(2, 3)).toBe(-33); // -33.33… 向零截断
+    expect(weekOverWeek(5, 0)).toBeNull();
+    expect(weekOverWeek(0, 0)).toBeNull();
+  });
+});

@@ -34,3 +34,9 @@ export function ratePercent(numerator: number, denominator: number, digits: numb
   const scaled = Number(((numerator / denominator) * 100 * factor).toPrecision(12));
   return Math.floor(scaled) / factor;
 }
+
+/** 环比变化（%，整数，向零截断：只舍不入）；上周为 0 时无从比较，返回 null。 */
+export function weekOverWeek(current: number, previous: number): number | null {
+  if (previous <= 0) return null;
+  return Math.trunc(Number((((current - previous) / previous) * 100).toPrecision(12)));
+}

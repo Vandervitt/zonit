@@ -3,6 +3,7 @@ import { effectivePlan, activeCompPlan, type PlanId } from "@/lib/plans";
 import { UserRole } from "@/lib/constants";
 import { MILESTONE_EVENTS, type MilestoneEvent } from "@/lib/platform-milestones";
 import { PAID_USER } from "@/lib/super-admin/metrics";
+import { OPS_VIEWS, type OpsView } from "@/lib/super-admin/user-ops";
 import { SuperAdminUsersClient } from "./_client";
 
 const iso = (v: unknown) => (v ? new Date(v as string).toISOString() : null);
@@ -34,7 +35,13 @@ async function getUsers() {
   return result.rows;
 }
 
-export default async function AdminUsersPage() {
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string | string[] }>;
+}) {
+  const rawView = (await searchParams).view;
+  const initialView: OpsView = (OPS_VIEWS as readonly unknown[]).includes(rawView) ? (rawView as OpsView) : "all";
   const users = await getUsers();
   const now = new Date();
   const tableRows = users.map((u) => {
@@ -65,5 +72,5 @@ export default async function AdminUsersPage() {
       latestNote: u.note_body ? { body: u.note_body as string, at: iso(u.note_at)! } : null,
     };
   });
-  return <SuperAdminUsersClient rows={tableRows} nowIso={now.toISOString()} />;
+  return <SuperAdminUsersClient rows={tableRows} nowIso={now.toISOString()} initialView={initialView} />;
 }

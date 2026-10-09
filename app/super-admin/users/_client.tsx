@@ -84,11 +84,13 @@ function toFacts(r: UserRow): OpsFacts {
   };
 }
 
-export function SuperAdminUsersClient({ rows, nowIso }: { rows: UserRow[]; nowIso: string }) {
+export function SuperAdminUsersClient({
+  rows, nowIso, initialView = "all",
+}: { rows: UserRow[]; nowIso: string; initialView?: OpsView }) {
   const router = useRouter();
   const now = useMemo(() => new Date(nowIso), [nowIso]);
   const nowMs = now.getTime();
-  const [view, setView] = useState<OpsView>("all");
+  const [view, setView] = useState<OpsView>(initialView);
   const [keyword, setKeyword] = useState("");
   const [detailId, setDetailId] = useState<string | null>(null);
   const [compTarget, setCompTarget] = useState<UserRow | null>(null);
