@@ -5,6 +5,8 @@ import dayjs from "dayjs";
 import { Drawer, Descriptions, Table, Tag, Typography, Spin, Alert, Space, Timeline, Input, Button, App, Empty } from "antd";
 import type { PlanId } from "@/lib/plans";
 import { PlanBadge } from "@/components/billing/PlanBadge";
+import { MailOutlined } from "@ant-design/icons";
+import { SendEmailModal } from "./SendEmailModal";
 
 interface DetailPage { id: string; name: string; status: string; slug: string | null; bound_domain: string | null }
 interface Detail {
@@ -154,6 +156,7 @@ export function UserDetailDrawer({
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  const [emailOpen, setEmailOpen] = useState(false);
   // 每次打开（userId 变化）刷新，避免长会话下沿用过时的时间戳误判「已过期」。
   const [nowMs, setNowMs] = useState(() => Date.now());
 
@@ -179,7 +182,15 @@ export function UserDetailDrawer({
   }, [userId, reloadKey]);
 
   return (
-    <Drawer title="用户详情" width={560} open={!!userId} onClose={onClose}>
+    <Drawer
+      title="用户详情"
+      width={560}
+      open={!!userId}
+      onClose={onClose}
+      extra={detail && !detail.disabled_at && (
+        <Button icon={<MailOutlined />} onClick={() => setEmailOpen(true)}>发邮件</Button>
+      )}
+    >
       {loading && <Spin />}
       {error && <Alert type="error" message="加载失败，请关闭后重试" />}
       {detail && (
@@ -205,6 +216,17 @@ export function UserDetailDrawer({
             </Descriptions.Item>
             <Descriptions.Item label="线索总数">{detail.leads_count}</Descriptions.Item>
           </Descriptions>
+
+          {emailOpen && (
+            <SendEmailModal
+              open
+              userId={detail.id}
+              email={detail.email}
+              name={detail.name}
+              onClose={() => setEmailOpen(false)}
+              onSent={() => { setReloadKey((k) => k + 1); onNoteAdded?.(); }}
+            />
+          )}
 
           <Typography.Title level={5} style={{ marginTop: 24 }}>跟进备注</Typography.Title>
           <NotesSection
