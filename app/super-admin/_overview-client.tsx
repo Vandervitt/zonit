@@ -1,16 +1,19 @@
 "use client";
 
-import { Row, Col, Card, Statistic, Tag, Typography, Space, Progress } from "antd";
+import { useRouter } from "next/navigation";
+import { Row, Col, Card, Statistic, Tag, Typography, Space, Progress, Segmented } from "antd";
 import { BRAND } from "@/lib/theme/brand";
 import { SEMANTIC } from "@/lib/theme/antd-theme";
 import { PLAN_ORDER, PLANS, type PlanId } from "@/lib/plans";
 import type { DailyPoint } from "@/lib/super-admin/trend";
 import type { FunnelStats, MilestoneEvent } from "@/lib/platform-milestones";
+import { ratePercent, type StatsRange } from "@/lib/super-admin/metrics";
 import { TrendCharts } from "./TrendCharts";
 import {
   UserOutlined,
   GlobalOutlined,
   CreditCardOutlined,
+  GiftOutlined,
   RiseOutlined,
   FileTextOutlined,
   ContactsOutlined,
@@ -26,9 +29,14 @@ export interface LatestPage {
 }
 
 export interface OverviewStats {
+  range: StatsRange;
   totalUsers: number;
+  internalUsers: number;
   totalPages: number;
-  activeSubs: number;
+  paidUsers: number;
+  compUsers: number;
+  /** 付费转化率（%，向下截断）；无外部用户时为 null。 */
+  paidRate: number | null;
   totalLeads: number;
   planDist: Record<PlanId, number>;
   userTrend: DailyPoint[];
@@ -52,20 +60,35 @@ function formatMedianHours(h: number | null): string {
   return `${(h / 24).toFixed(1)} 天`;
 }
 
-function ActivationFunnel({ funnel }: { funnel: FunnelStats }) {
+const RANGE_OPTIONS: { label: string; value: StatsRange }[] = [
+  { label: "近 30 天注册", value: "30" },
+  { label: "近 90 天注册", value: "90" },
+  { label: "全部", value: "all" },
+];
+
+function ActivationFunnel({ funnel, range }: { funnel: FunnelStats; range: StatsRange }) {
+  const router = useRouter();
   const signupCount = funnel.counts.signup;
   return (
     <Card
       title={
         <Space>
           <FunnelPlotOutlined />
-          激活漏斗（首次达成人数）
+          激活漏斗（按注册批次）
         </Space>
       }
       extra={
-        <Typography.Text type="secondary">
-          注册 → 首次发布中位耗时：{formatMedianHours(funnel.medianHoursToPublish)}
-        </Typography.Text>
+        <Space size={16}>
+          <Typography.Text type="secondary">
+            注册 → 首次发布中位耗时：{formatMedianHours(funnel.medianHoursToPublish)}
+          </Typography.Text>
+          <Segmented
+            size="small"
+            value={range}
+            options={RANGE_OPTIONS}
+            onChange={(v) => router.push(v === "30" ? "/super-admin" : `/super-admin?range=${v}`)}
+          />
+        </Space>
       }
       style={{ marginBottom: 24 }}
     >
@@ -73,8 +96,8 @@ function ActivationFunnel({ funnel }: { funnel: FunnelStats }) {
         {FUNNEL_STAGES.map((stage, i) => {
           const count = funnel.counts[stage.event];
           const prev = i === 0 ? null : funnel.counts[FUNNEL_STAGES[i - 1].event];
-          const stepRate = prev ? ((count / prev) * 100).toFixed(0) : null;
-          const overallPct = signupCount > 0 ? Math.round((count / signupCount) * 100) : 0;
+          const stepRate = prev == null ? null : ratePercent(count, prev, 0);
+          const overallPct = ratePercent(count, signupCount, 0) ?? 0;
           return (
             <Col key={stage.event} xs={12} md={8} lg={Math.floor(24 / FUNNEL_STAGES.length)}>
               <Statistic
@@ -98,8 +121,6 @@ function ActivationFunnel({ funnel }: { funnel: FunnelStats }) {
 }
 
 export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
-  const conversionRate = ((stats.activeSubs / (stats.totalUsers || 1)) * 100).toFixed(1);
-
   const statCards = [
     {
       title: "总用户数",
@@ -114,16 +135,22 @@ export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
       suffix: undefined as string | undefined,
     },
     {
-      title: "付费订阅",
-      value: stats.activeSubs,
+      title: "付费用户",
+      value: stats.paidUsers,
       prefix: <CreditCardOutlined style={{ color: BRAND }} />,
       suffix: undefined as string | undefined,
     },
     {
-      title: "转化率",
-      value: parseFloat(conversionRate),
+      title: "赠送中（未付费）",
+      value: stats.compUsers,
+      prefix: <GiftOutlined style={{ color: SEMANTIC.warning }} />,
+      suffix: undefined as string | undefined,
+    },
+    {
+      title: "付费转化率",
+      value: stats.paidRate ?? "—",
       prefix: <RiseOutlined style={{ color: SEMANTIC.warning }} />,
-      suffix: "%",
+      suffix: stats.paidRate == null ? undefined : "%",
     },
     {
       title: "线索总量",
@@ -139,7 +166,9 @@ export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
         <Typography.Title level={2} style={{ margin: 0 }}>
           平台概览
         </Typography.Title>
-        <Typography.Text type="secondary">实时平台运营指标与最新动态</Typography.Text>
+        <Typography.Text type="secondary">
+          以下统计均已排除 {stats.internalUsers} 个内部账号（超管与标记为内部的测试号）
+        </Typography.Text>
       </div>
 
       {/* 统计卡片 */}
@@ -159,7 +188,7 @@ export function SuperAdminOverview({ stats }: { stats: OverviewStats }) {
       </Row>
 
       {/* 激活漏斗 */}
-      <ActivationFunnel funnel={stats.funnel} />
+      <ActivationFunnel funnel={stats.funnel} range={stats.range} />
 
       {/* 近 30 天趋势图 */}
       <TrendCharts userTrend={stats.userTrend} leadTrend={stats.leadTrend} />

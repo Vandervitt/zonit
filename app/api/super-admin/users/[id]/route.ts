@@ -75,6 +75,12 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     }
     patch.disabled = body.disabled;
   }
+  if ("isInternal" in body) {
+    if (typeof body.isInternal !== "boolean") {
+      return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
+    }
+    patch.isInternal = body.isInternal;
+  }
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: ApiErrors.BAD_REQUEST }, { status: 400 });
   }

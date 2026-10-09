@@ -1,6 +1,7 @@
 // 平台激活漏斗里程碑：记录用户首次达成的关键节点（注册 → 建页 → 域名验证 → 发布 → 首线索）。
 // 写入全部 best-effort：埋点失败只记日志，绝不影响注册/发布/留资等主链路。
 import pool from "@/lib/db";
+import { EXTERNAL_USER, rangeSinceSql, type StatsRange } from "@/lib/super-admin/metrics";
 
 export const MILESTONE_EVENTS = [
   "signup",
@@ -52,17 +53,28 @@ export interface FunnelStats {
   medianHoursToPublish: number | null;
 }
 
-/** super-admin 看板：激活漏斗聚合。 */
-export async function getFunnelStats(): Promise<FunnelStats> {
+/**
+ * super-admin 看板：激活漏斗聚合。
+ * 按注册批次统计——只看 range 内注册的外部用户各自走到了哪一步；
+ * 全量累计会把老用户和新用户混在一起，改了引导也看不出效果。
+ */
+export async function getFunnelStats(range: StatsRange = "all"): Promise<FunnelStats> {
+  const cohort = `${EXTERNAL_USER} AND ${rangeSinceSql(range, "u.created_at")}`;
   const [countsRes, medianRes] = await Promise.all([
-    pool.query(`SELECT event, COUNT(*)::int AS n FROM platform_milestones GROUP BY event`),
+    pool.query(`
+      SELECT m.event, COUNT(*)::int AS n
+        FROM platform_milestones m
+        JOIN users u ON u.id = m.user_id
+       WHERE ${cohort}
+       GROUP BY m.event`),
     pool.query(`
       SELECT percentile_cont(0.5) WITHIN GROUP (
                ORDER BY EXTRACT(EPOCH FROM (p.created_at - s.created_at)) / 3600
              ) AS h
         FROM platform_milestones s
         JOIN platform_milestones p ON p.user_id = s.user_id AND p.event = 'page_published'
-       WHERE s.event = 'signup' AND p.created_at >= s.created_at`),
+        JOIN users u ON u.id = s.user_id
+       WHERE s.event = 'signup' AND p.created_at >= s.created_at AND ${cohort}`),
   ]);
   const counts = Object.fromEntries(MILESTONE_EVENTS.map((e) => [e, 0])) as Record<MilestoneEvent, number>;
   for (const r of countsRes.rows) {

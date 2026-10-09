@@ -22,6 +22,8 @@ export interface UserRow {
   compPlanExpiresAt: string | null; compExpired: boolean;
   effective: PlanId;
   role: string; disabled: boolean; pageCount: number; createdAt: string;
+  /** 内部账号：不计入运营统计。超管恒为内部（internalLocked），不可取消。 */
+  internal: boolean; internalLocked: boolean;
 }
 
 // 快捷时长预设（天，字符串值）；"custom" 走日期选择器。
@@ -130,6 +132,19 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
         </Space>
       ),
     },
+    { title: "统计", dataIndex: "internal", key: "internal",
+      filters: [
+        { text: "计入统计", value: false },
+        { text: "内部账号", value: true },
+      ],
+      onFilter: (v, row) => row.internal === v,
+      render: (internal: boolean, row) =>
+        internal ? (
+          <Tooltip title={row.internalLocked ? "超管恒视为内部账号" : "已标记为内部账号，不计入概览统计"}>
+            <Tag color="purple">内部</Tag>
+          </Tooltip>
+        ) : null,
+    },
     { title: "状态", dataIndex: "disabled", key: "disabled",
       filters: [
         { text: "正常", value: false },
@@ -156,6 +171,11 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
                 row.role === UserRole.SUPER_ADMIN
                   ? { key: "demote", label: "取消超管" }
                   : { key: "promote", label: "设为超管" },
+                ...(row.internalLocked
+                  ? []
+                  : [row.internal
+                      ? { key: "external", label: "取消内部标记" }
+                      : { key: "internal", label: "标记为内部账号" }]),
                 { type: "divider" as const },
                 row.disabled
                   ? { key: "enable", label: "启用账号" }
@@ -178,6 +198,8 @@ export function SuperAdminUsersClient({ rows }: { rows: UserRow[] }) {
                     onOk: () => apply(row.id, { disabled: true }, "已禁用"),
                   });
                 }
+                if (key === "internal") void apply(row.id, { isInternal: true }, "已标记为内部账号");
+                if (key === "external") void apply(row.id, { isInternal: false }, "已取消内部标记");
                 if (key === "enable") void apply(row.id, { disabled: false }, "已启用");
               },
             }}

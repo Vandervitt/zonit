@@ -7,6 +7,7 @@ export interface AdminUserPatch {
   compPlanExpiresAt?: string | null;     // ISO；null = 永久；取消赠送时随之置空
   role?: "USER" | "SUPER_ADMIN";
   disabled?: boolean;
+  isInternal?: boolean;                  // 内部账号（测试号等），排除出运营统计
 }
 
 /** 超管更新用户运营字段；返回是否命中行。调用方负责鉴权与自我保护校验。 */
@@ -20,6 +21,7 @@ export async function updateUserAdminFields(userId: string, patch: AdminUserPatc
   if (patch.disabled !== undefined) {
     set.push(patch.disabled ? `disabled_at = COALESCE(disabled_at, NOW())` : `disabled_at = NULL`);
   }
+  if (patch.isInternal !== undefined) { set.push(`is_internal = $${i++}`); values.push(patch.isInternal); }
   if (set.length === 0) return false;
   values.push(userId);
   const result = await pool.query(

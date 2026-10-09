@@ -43,6 +43,12 @@ describe("PATCH /api/super-admin/users/[id]", () => {
     expect(res2.status).toBe(400);
     expect(updateUserAdminFields).not.toHaveBeenCalled();
   });
+  it("isInternal 只接受布尔值，合法时透传", async () => {
+    expect((await PATCH(patchReq({ isInternal: "yes" }), params("u2"))).status).toBe(400);
+    expect(updateUserAdminFields).not.toHaveBeenCalled();
+    expect((await PATCH(patchReq({ isInternal: true }), params("u2"))).status).toBe(200);
+    expect(updateUserAdminFields).toHaveBeenCalledWith("u2", { isInternal: true });
+  });
   it("非法 compPlan / role 值 → 400", async () => {
     expect((await PATCH(patchReq({ compPlan: "vip" }), params("u2"))).status).toBe(400);
     expect((await PATCH(patchReq({ role: "ADMIN" }), params("u2"))).status).toBe(400);
