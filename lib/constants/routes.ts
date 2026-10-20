@@ -35,6 +35,8 @@ export enum ApiRoutes {
   Feedback = '/api/feedback',
   AiUsage = '/api/ai/usage',
   Milestones = '/api/milestones',
+  /** 注册后补报首触来源（只写一次）。 */
+  SignupSource = '/api/me/signup-source',
   Analytics = '/api/analytics',
   /** 多页横向对比（哪张在跑、哪张在空转）。 */
   AnalyticsPages = '/api/analytics/pages',

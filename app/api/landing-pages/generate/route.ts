@@ -119,6 +119,6 @@ export async function POST(request: Request) {
 
   const template = getTemplate(body.templateId);
   const name = await ensureUniqueName(userId, `${template.name} (AI)`);
-  const row = await createLandingPage(userId, name, result.draft);
+  const row = await createLandingPage(userId, name, result.draft, template.id);
   return NextResponse.json(row, { status: 201 });
 }

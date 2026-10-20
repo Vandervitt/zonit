@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   const draft = await loadTemplateDraft(templateId); // 草稿体按需加载
   // 同模板可重复创建：撞 (user_id, name) 唯一约束时自动追加「 2」「 3」…，避免 500。
   const name = await ensureUniqueName(session.user.id, template.name);
-  const row = await createLandingPage(session.user.id, name, draft);
+  const row = await createLandingPage(session.user.id, name, draft, template.id);
   await recordMilestone(session.user.id, "page_created");
   return NextResponse.json(row, { status: 201 });
 }

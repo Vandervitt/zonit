@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { WebAnalytics } from "@/components/WebAnalytics";
+import { FirstTouchCapture } from "@/components/attribution/FirstTouch";
 import { SITE_URL } from "@/lib/seo/site";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
         <WebAnalytics />
+        <FirstTouchCapture />
         <SpeedInsights />
       </body>
     </html>
