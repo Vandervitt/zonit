@@ -14,6 +14,7 @@ export const LOCALIZED_ROUTES = [
   "/pricing",
   "/anti-ban",
   "/whatsapp-landing-page",
+  "/rfq-landing-page",
   "/login",
   "/register",
   "/templates",

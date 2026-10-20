@@ -9,6 +9,7 @@
 
 import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { fillTemplateCounts, type TemplateStats } from "./counts";
+import { isRfqTemplate } from "@/lib/marketing/rfq";
 
 export type { TemplateStats };
 
@@ -19,6 +20,7 @@ export const TEMPLATE_STATS: TemplateStats = {
   industries: new Set(TEMPLATES.map((t) => t.tags.category)).size,
   whatsappTemplates: WHATSAPP_TEMPLATES.length,
   whatsappIndustries: new Set(WHATSAPP_TEMPLATES.map((t) => t.tags.category)).size,
+  rfqTemplates: TEMPLATES.filter(isRfqTemplate).length,
 };
 
 /** 按注册表真实口径替换 `{templates}` / `{industries}` 占位符。 */

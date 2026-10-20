@@ -10,8 +10,9 @@ import { templateIndustry } from "./templateIndustry";
 import { guides } from "./guides";
 import { tools } from "./tools";
 import { whatsapp } from "./whatsapp";
+import { rfq } from "./rfq";
 
-export const en = { common, home, plans, pricing, antiban, auth, templates, templateContent, templateIndustry, guides, tools, whatsapp };
+export const en = { common, home, plans, pricing, antiban, auth, templates, templateContent, templateIndustry, guides, tools, whatsapp, rfq };
 
 /** 英文是字典事实源；中文以 `satisfies Dictionary` 对齐，漏 key / 多 key 均编译期报错。 */
 export type Dictionary = typeof en;

@@ -11,5 +11,6 @@ import { templateIndustry } from "./templateIndustry";
 import { guides } from "./guides";
 import { tools } from "./tools";
 import { whatsapp } from "./whatsapp";
+import { rfq } from "./rfq";
 
-export const zh = { common, home, plans, pricing, antiban, auth, templates, templateContent, templateIndustry, guides, tools, whatsapp } satisfies Dictionary;
+export const zh = { common, home, plans, pricing, antiban, auth, templates, templateContent, templateIndustry, guides, tools, whatsapp, rfq } satisfies Dictionary;

@@ -34,7 +34,7 @@ describe("templateIndustries", () => {
   });
 });
 
-const STATS = { templates: 48, industries: 12, whatsappTemplates: 41, whatsappIndustries: 11 };
+const STATS = { templates: 48, industries: 12, whatsappTemplates: 41, whatsappIndustries: 11, rfqTemplates: 4 };
 
 describe("fillTemplateCounts", () => {
   it("替换两种占位符，且支持同一占位符多次出现", () => {

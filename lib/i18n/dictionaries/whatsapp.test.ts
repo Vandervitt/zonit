@@ -104,7 +104,7 @@ describe("WhatsApp 页计数口径", () => {
 });
 
 describe("WhatsApp 页数量占位符", () => {
-  const STATS = { templates: 54, industries: 12, whatsappTemplates: 47, whatsappIndustries: 11 };
+  const STATS = { templates: 54, industries: 12, whatsappTemplates: 47, whatsappIndustries: 11, rfqTemplates: 4 };
 
   it("替换后不残留任何占位符", () => {
     for (const dict of [en.whatsapp, zh.whatsapp]) {

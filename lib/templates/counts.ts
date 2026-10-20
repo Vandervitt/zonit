@@ -13,11 +13,13 @@ export interface TemplateStats {
   whatsappTemplates: number;
   /** 上述模板覆盖的行业大类数——恒 ≤ industries。 */
   whatsappIndustries: number;
+  /** 外贸询价型模板数（B2B 且以咨询报价为主转化，见 lib/marketing/rfq.ts 的 isRfqTemplate）。 */
+  rfqTemplates: number;
 }
 
 /**
  * 把文案中的数量占位符替换为真实数量。
- * 支持 `{templates}` / `{industries}` / `{whatsappTemplates}` / `{whatsappIndustries}`。
+ * 支持 `{templates}` / `{industries}` / `{whatsappTemplates}` / `{whatsappIndustries}` / `{rfqTemplates}`。
  *
  * ⚠️ 替换顺序有讲究：`{whatsappTemplates}` 必须先于 `{templates}` 替换。
  * 否则不会出错（两者是不同的完整 token），但如果将来有人加了 `{templatesFoo}`
@@ -27,6 +29,7 @@ export function fillTemplateCounts(text: string, stats: TemplateStats): string {
   return text
     .replaceAll("{whatsappTemplates}", String(stats.whatsappTemplates))
     .replaceAll("{whatsappIndustries}", String(stats.whatsappIndustries))
+    .replaceAll("{rfqTemplates}", String(stats.rfqTemplates))
     .replaceAll("{templates}", String(stats.templates))
     .replaceAll("{industries}", String(stats.industries));
 }
