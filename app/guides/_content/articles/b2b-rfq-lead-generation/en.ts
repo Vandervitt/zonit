@@ -2,17 +2,24 @@ import type { GuideArticle } from "../../types";
 
 export const b2bRfqLeadGeneration: GuideArticle = {
   slug: "b2b-rfq-lead-generation",
-  title: "B2B lead generation: designing an RFQ your sales team can quote from",
+  // 标题对准 GSC 实际带来展示的查询（request for quote leads / rfq lead generation）。
+  // 注意不写成「我们卖询价线索」：本文讲的是自己产出能报价的询价，不是线索中介。
+  title: "RFQ lead generation: request-for-quote leads your sales team can actually price",
   description:
-    "A generic contact form produces enquiries you cannot price. This covers the five fields that make an RFQ actionable, why MOQ belongs on the page and price does not, and what makes a supplier look credible.",
+    "Request for quote (RFQ) leads are only worth chasing if you can price them. A generic contact form produces enquiries you cannot quote; this covers the five fields that make an RFQ actionable, why MOQ belongs on the page and price does not, and what makes a supplier look credible.",
   keywords: [
+    "RFQ lead generation",
+    "request for quote leads",
     "B2B lead generation",
     "RFQ form design",
     "wholesale enquiries",
     "supplier landing page",
   ],
   industry: "b2b",
+  // 与 /rfq-landing-page 产品页配对：主 CTA 指产品页，次 CTA 指回 B2B 模板（见 types.ts 的 ctaTarget 注释）。
+  ctaTarget: "rfq",
   datePublished: "2026-08-02",
+  dateModified: "2026-10-20",
   intro:
     "A B2B enquiry is worth many times a consumer lead, and the buyer knows it — they are deciding whether you are a credible supplier before they will spend a reply. That makes this the one category where asking for more, not less, is usually correct. This covers what to ask, what to publish, and what to leave for the quote.",
   sections: [

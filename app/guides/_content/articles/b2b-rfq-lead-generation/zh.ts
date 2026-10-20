@@ -2,12 +2,15 @@ import type { GuideArticle } from "../../types";
 
 export const b2bRfqLeadGeneration: GuideArticle = {
   slug: "b2b-rfq-lead-generation",
-  title: "B2B 获客：怎么设计一张销售能直接据以报价的询价单",
+  title: "外贸询盘获客：怎么设计一张能直接报价的询价单（RFQ）",
   description:
-    "一个通用联系表单收上来的询盘没法报价。本文讲清让询价单可执行的五个字段、为什么起订量要写在页面上而价格不要，以及什么样的供应商页面显得可信。",
-  keywords: ["B2B 获客", "询价表单设计", "批发询盘", "供应商落地页"],
+    "海外采购商的询盘（RFQ）只有能报价才值得跟。通用联系表单收上来的询盘没法报价——本文讲清让询价单可执行的五个字段、为什么起订量要写在页面上而价格不要，以及什么样的供应商页面显得可信。",
+  keywords: ["外贸询盘", "询价单", "RFQ", "询价表单设计", "B2B 获客", "供应商落地页"],
   industry: "b2b",
+  // 与 /rfq-landing-page 产品页配对：主 CTA 指产品页，次 CTA 指回 B2B 模板（见 types.ts 的 ctaTarget 注释）。
+  ctaTarget: "rfq",
   datePublished: "2026-08-02",
+  dateModified: "2026-10-20",
   intro:
     "一条 B2B 询盘的价值是消费线索的很多倍，而买家自己也清楚这一点——他要先判断你是不是一个可信的供应商，才肯花一次回复。这也让 B2B 成为唯一一个「多问」通常比「少问」正确的类目。本文讲该问什么、该公开什么、以及什么该留到报价里。",
   sections: [

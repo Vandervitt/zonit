@@ -99,11 +99,12 @@ export function GuideDetailView({ slug, locale }: { slug: string; locale: Locale
     .filter((x) => x.slug !== g.slug)
     .slice(0, 2);
 
-  // 文末两枚 CTA 的落点。ctaTarget 显式覆盖优先于 industry，二者互斥
+  // 文末两枚 CTA 的落点。ctaTarget 显式覆盖优先于 industry，二者互斥（唯一例外 rfq，见 types.ts）
   // （由 lib/seo/guides-industry.test.ts 守护），所以查表不会撞车。
   const CTA_OVERRIDES = {
     "anti-ban": { href: Routes.AntiBan, label: t.ctaAntiBan },
     whatsapp: { href: Routes.WhatsAppLanding, label: t.ctaWhatsApp },
+    rfq: { href: Routes.RfqLanding, label: t.ctaRfq },
   } as const;
   const mainCta = g.ctaTarget
     ? CTA_OVERRIDES[g.ctaTarget]
@@ -113,6 +114,18 @@ export function GuideDetailView({ slug, locale }: { slug: string; locale: Locale
           label: t.ctaIndustryTemplates.replace("{industry}", industryLabel(g.industry, locale)),
         }
       : { href: Routes.Templates, label: t.ctaTemplates };
+
+  // 次 CTA：合规簇换成自检器（理由见下方 JSX 注释）；rfq 配对文章的主 CTA 已让给产品页，
+  // 次 CTA 指回该行业模板——读者仍能一步进模板，行业路径不因产品页配对而断。
+  const secondaryCta =
+    g.ctaTarget === "anti-ban"
+      ? { href: Routes.PageCheck, label: t.ctaPageCheck }
+      : g.ctaTarget === "rfq" && g.industry
+        ? {
+            href: templateIndustryPath(g.industry),
+            label: t.ctaIndustryTemplates.replace("{industry}", industryLabel(g.industry, locale)),
+          }
+        : { href: Routes.Register, label: t.ctaRegister };
 
   return (
     <div className={`min-h-screen bg-background ${fonts.body}`}>
@@ -159,10 +172,10 @@ export function GuideDetailView({ slug, locale }: { slug: string; locale: Locale
                 主 CTA 仍指向 anti-ban，变现路径不让位；自检报告页本身再引导注册，
                 漏斗顺序比在这里直接要注册更顺。其余文章保持注册。 */}
             <Link
-              href={localePath(locale, g.ctaTarget === "anti-ban" ? Routes.PageCheck : Routes.Register)}
+              href={localePath(locale, secondaryCta.href)}
               className="rounded-xl border border-border px-5 py-2.5 text-sm text-muted-foreground transition-colors hover:border-aqua-300 hover:text-aqua-700"
             >
-              {g.ctaTarget === "anti-ban" ? t.ctaPageCheck : t.ctaRegister}
+              {secondaryCta.label}
             </Link>
           </div>
         </section>

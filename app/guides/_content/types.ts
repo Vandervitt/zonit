@@ -39,8 +39,12 @@ export interface GuideArticle {
    * "whatsapp" 用于 WhatsApp 留资页那篇：它与 /whatsapp-landing-page 产品页
    * 是一组（信息型长文 ↔ 产品页），读完方法论的人下一步该看产品怎么做，
    * 而不是掉进通用模板库。两页互链的另一端见该产品页的 GuideLink 区块。
+   *
+   * "rfq" 用于 B2B 询价那篇，与 /rfq-landing-page 产品页配对。它是唯一允许与 industry
+   * 共存的值：那篇同时是 B2B 行业页反向链接的文章（靠 industry），主 CTA 指产品页，
+   * 次 CTA 指回该行业模板（见 GuideDetail），行业互链与产品页配对都保留。
    */
-  ctaTarget?: "anti-ban" | "whatsapp";
+  ctaTarget?: "anti-ban" | "whatsapp" | "rfq";
   /** ISO 日期，用于 Article 结构化数据与展示 */
   datePublished: string;
   dateModified?: string;
