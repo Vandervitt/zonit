@@ -24,4 +24,16 @@ test.describe("外贸询盘落地页", () => {
     await expect(page.getByRole("link", { name: "Browse B2B templates" }).first()).toHaveAttribute("href", "/templates/industry/b2b");
     await expect(page.getByRole("link", { name: "Read the B2B RFQ guide" })).toHaveAttribute("href", "/guides/b2b-rfq-lead-generation");
   });
+
+  test("B2B 询价指南：主 CTA 指产品页，次 CTA 指回 B2B 模板（行业路径不断）", async ({ page }) => {
+    await page.goto("/zh/guides/b2b-rfq-lead-generation");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("外贸询盘获客");
+    await expect(page.getByRole("link", { name: "看看这里怎么做询价页" })).toHaveAttribute("href", "/zh/rfq-landing-page");
+    await expect(page.getByRole("link", { name: /^查看.*模板$/ }).last()).toHaveAttribute("href", "/zh/templates/industry/b2b");
+
+    // 行业页反向链接到本文（靠 industry 字段），不因产品页配对而断
+    await page.goto("/zh/templates/industry/b2b");
+    await expect(page.locator('a[href="/zh/guides/b2b-rfq-lead-generation"]').first()).toBeVisible();
+  });
 });
+

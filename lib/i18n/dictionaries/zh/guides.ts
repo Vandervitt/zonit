@@ -25,6 +25,7 @@ export const guides = {
     ctaAntiBan: "了解反同质化怎么做",
     // WhatsApp 留资页那篇专用：读完方法论的人下一步该看产品怎么做这件事。
     ctaWhatsApp: "看看这里怎么做 WhatsApp 页",
+    ctaRfq: "看看这里怎么做询价页",
     ctaIndustryTemplates: "查看{industry}模板",
     ctaTemplates: "浏览模板库",
     ctaRegister: "免费开始",

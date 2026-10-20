@@ -90,13 +90,33 @@ describe("投放合规簇的 CTA 落点", () => {
     }
   });
 
-  it("industry 与 ctaTarget 互斥——同时设置会让落点无从判断", () => {
+  it("industry 与 ctaTarget 互斥——唯一例外是 rfq 产品页配对", () => {
+    // rfq 例外的理由：B2B 询价指南既是行业页反向链接的那篇（靠 industry），又与
+    // /rfq-landing-page 产品页配对（主 CTA）。两者职责不同：industry 管「行业页 → 本文」，
+    // ctaTarget 管「本文 → 下一步」，次 CTA 再指回行业模板，两条路都不丢。
     for (const locale of locales) {
       for (const g of getGuides(locale)) {
+        if (g.ctaTarget === "rfq") continue;
         expect(
           Boolean(g.industry) && Boolean(g.ctaTarget),
           `${g.slug} 同时设置了 industry 与 ctaTarget`,
         ).toBe(false);
+      }
+    }
+  });
+
+  it("B2B 询价指南指向 RFQ 产品页，且仍挂 b2b 行业（行业页反向链接不断）", () => {
+    for (const locale of locales) {
+      const g = getGuides(locale).find((x) => x.slug === "b2b-rfq-lead-generation");
+      expect(g?.ctaTarget, locale).toBe("rfq");
+      expect(g?.industry, locale).toBe("b2b");
+    }
+  });
+
+  it("rfq 只用于挂了 industry 的文章（否则次 CTA 无行业模板可指）", () => {
+    for (const locale of locales) {
+      for (const g of getGuides(locale).filter((x) => x.ctaTarget === "rfq")) {
+        expect(g.industry, `${g.slug}`).toBeTruthy();
       }
     }
   });

@@ -26,6 +26,7 @@ export const guides = {
     ctaAntiBan: "See how anti-duplication works",
     // WhatsApp 留资页那篇专用：读完方法论的人下一步该看产品怎么做这件事。
     ctaWhatsApp: "See how WhatsApp pages work here",
+    ctaRfq: "See how RFQ pages work here",
     ctaTemplates: "Browse templates",
     /** `{industry}` 为行业展示名。 */
     ctaIndustryTemplates: "See {industry} templates",
