@@ -9,6 +9,7 @@ import { Routes, AuthProvider } from "@/lib/constants";
 import { useMutation } from "@/lib/api/use-mutation";
 import { ApiError } from "@/lib/api/fetcher";
 import { OtpAuthForm } from "@/components/auth/OtpAuthForm";
+import { useRememberZhEntry } from "@/components/auth/useRememberZhEntry";
 import { GoogleMark } from "@/components/auth/GoogleMark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
@@ -19,6 +20,7 @@ function LoginContent({ locale }: { locale: Locale }) {
   const t = getDictionary(locale).auth.login;
   const router = useRouter();
   const callbackUrl = useSearchParams().get(CALLBACK_PARAM);
+  useRememberZhEntry(locale);
   const [oauthProvider, setOauthProvider] = useState<AuthProvider | null>(null);
 
   const oauthSignIn = useMutation(

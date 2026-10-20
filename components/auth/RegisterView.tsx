@@ -10,6 +10,7 @@ import { Routes, AuthProvider } from "@/lib/constants";
 import { withLogger } from "@/lib/logger";
 import { useMutation } from "@/lib/api/use-mutation";
 import { OtpAuthForm } from "@/components/auth/OtpAuthForm";
+import { useRememberZhEntry } from "@/components/auth/useRememberZhEntry";
 import { GoogleMark } from "@/components/auth/GoogleMark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
@@ -22,6 +23,7 @@ function RegisterContent({ locale }: { locale: Locale }) {
   const token = searchParams.get("token");
   const isInvited = Boolean(token);
   const callbackUrl = searchParams.get(CALLBACK_PARAM);
+  useRememberZhEntry(locale);
 
   const googleSignIn = useMutation(
     () => withLogger("GOOGLE_SIGN_IN", "auth/google", "POST", {}, () =>
