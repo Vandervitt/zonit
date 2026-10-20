@@ -59,7 +59,7 @@ describe("区块级 CTA", () => {
     const data = { title: "T", items: [], cta: cta({ text: "" }) };
     const live = html(createElement(Features, { data, contact, theme }));
     expect(live).not.toContain("wa.me");
-    const preview = html(createElement(Features, { data, contact, theme, preview: true }));
+    const preview = html(createElement(Features, { data, contact, theme, preview: "zh" as const }));
     expect(preview).toContain("CTA");
   });
 

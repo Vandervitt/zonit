@@ -6,6 +6,7 @@ import { Img } from "../primitives/Img";
 import { Media } from "../primitives/Media";
 import { Badge } from "../primitives/Badge";
 import { Cta } from "../primitives/Cta";
+import type { PreviewMode } from "../preview";
 
 interface HeroProps {
   data: HeroSection;
@@ -14,7 +15,7 @@ interface HeroProps {
   theme: RendererTheme;
   logo?: string;
   layout?: HeroLayout; // 反同质化布局变体；缺省 background（与改造前一致）
-  preview?: boolean;   // 预览渲染：不完整 CTA 显示占位而非隐藏
+  preview?: PreviewMode;   // 预览渲染：不完整 CTA 显示占位而非隐藏
 }
 
 export function Hero({ data, contact, theme, logo, layout = "background", preview }: HeroProps) {
@@ -25,7 +26,7 @@ export function Hero({ data, contact, theme, logo, layout = "background", previe
 }
 
 /** 原始布局：淡背景图 + 左对齐堆叠，展示图在下（改造前逐字节一致，守零回归）。 */
-function HeroBackground({ data, contact, theme, logo, preview }: { data: HeroSection; contact: PageContact; theme: RendererTheme; logo?: string; preview?: boolean }) {
+function HeroBackground({ data, contact, theme, logo, preview }: { data: HeroSection; contact: PageContact; theme: RendererTheme; logo?: string; preview?: PreviewMode }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white">
       {data.backgroundImage && (
@@ -66,7 +67,7 @@ function HeroSplit({
   theme: RendererTheme;
   logo?: string;
   side: "left" | "right";
-  preview?: boolean;
+  preview?: PreviewMode;
 }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white">
@@ -98,7 +99,7 @@ function HeroSplit({
 }
 
 /** 居中布局：文案居中，展示图在下居中。 */
-function HeroCentered({ data, contact, theme, logo, preview }: { data: HeroSection; contact: PageContact; theme: RendererTheme; logo?: string; preview?: boolean }) {
+function HeroCentered({ data, contact, theme, logo, preview }: { data: HeroSection; contact: PageContact; theme: RendererTheme; logo?: string; preview?: PreviewMode }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white">
       <div className="relative mx-auto max-w-3xl px-5 py-20 text-center sm:px-6">

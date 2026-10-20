@@ -128,6 +128,18 @@ test.describe("后台双语", () => {
     await expect(page.getByRole("button", { name: "Publish" })).toBeVisible();
     // 区块名来自 issues.sections，曾经写死在 schema 里
     await expect(page.getByText("FAQ")).toBeVisible();
+
+    // 实时预览里的未填占位提示是写给运营者看的，曾写死中文（渲染器不知道后台语言）。
+    // 模板建页时联系方式为空，占位必然出现。字面量断言，不引字典。
+    const preview = page.frameLocator("iframe").first();
+    await expect(preview.getByText("hidden when live").first()).toBeVisible({ timeout: 15_000 });
+    await expect(preview.getByText("线上不显示")).toHaveCount(0);
+
+    // 品牌配色色卡名曾写死在渲染器 THEME_META 里
+    await page.getByText("Brand theme").first().click();
+    // 色卡外层是 <label> 包裹的 Field，按钮可访问名会被合并，故按可见文字断言
+    await expect(page.getByText("Teal", { exact: true })).toBeVisible();
+    await expect(page.getByText("青翠")).toHaveCount(0);
   });
 
   test("帮助中心 12 章跟随语言，slug 不变", async ({ page }) => {

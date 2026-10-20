@@ -5,8 +5,9 @@ import { SectionShell } from "../primitives/SectionShell";
 import { SectionHeading } from "../primitives/SectionHeading";
 import { Cta } from "../primitives/Cta";
 import { Countdown } from "../components/Countdown";
+import type { PreviewMode } from "../preview";
 
-export function Plans({ data, contact, theme, preview }: { data: PlansSection; contact: PageContact; theme: RendererTheme; preview?: boolean }) {
+export function Plans({ data, contact, theme, preview }: { data: PlansSection; contact: PageContact; theme: RendererTheme; preview?: PreviewMode }) {
   return (
     <SectionShell>
       <SectionHeading title={data.title} subtitle={data.subtitle} />

@@ -342,6 +342,7 @@ export const editor = {
       theme: "主题配色",
       logo: "品牌 Logo（宽图，显示在首屏与页脚）",
       favicon: "Favicon（方形小图，浏览器标签图标）",
+      themes: { teal: "青翠", blue: "蓝", rose: "玫红", amber: "琥珀", violet: "紫", slate: "墨" },
     },
     footer: {
       brandName: "品牌名称",

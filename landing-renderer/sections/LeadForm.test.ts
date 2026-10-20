@@ -32,7 +32,7 @@ const data = (fields: Partial<LeadFormData["fields"]> = {}): LeadFormData => ({
 });
 
 const html = (d: LeadFormData = data()) =>
-  renderToStaticMarkup(createElement(LeadForm, { data: d, pageId: "p1", theme, preview: true }));
+  renderToStaticMarkup(createElement(LeadForm, { data: d, pageId: "p1", theme, preview: "zh" as const }));
 
 describe("LeadForm 字段标签", () => {
   it("缺省标签为英文，不得渲染出中文", () => {
@@ -84,7 +84,7 @@ describe("LeadForm 国码选择器", () => {
         data: withPhone,
         pageId: "p1",
         theme,
-        preview: true,
+        preview: "zh" as const,
         defaultDial: { iso: "BR", dial: "+55", name: "Brazil" },
       }),
     );

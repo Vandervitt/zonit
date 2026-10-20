@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { THEMES, THEME_META, resolveTheme, type RendererTheme } from "./theme";
+import { getAdminDictionary } from "@/lib/i18n/admin";
 
 const FIELDS: (keyof RendererTheme)[] = [
   "accentGradient", "accentGradientHover", "accentShadow", "accentTextGradient",
@@ -21,12 +22,15 @@ describe("THEMES", () => {
 });
 
 describe("THEME_META", () => {
-  it("6 条，每条有 id/label/swatch", () => {
+  it("6 条，每条有 id/swatch，且后台中英字典都有对应色卡名（名字不再写死在渲染器里）", () => {
     expect(THEME_META).toHaveLength(6);
     for (const m of THEME_META) {
       expect(m.id in THEMES).toBe(true);
-      expect(m.label.length).toBeGreaterThan(0);
       expect(m.swatch.length).toBeGreaterThan(0);
+      for (const locale of ["en", "zh"] as const) {
+        expect(getAdminDictionary(locale).editor.forms.branding.themes[m.id]?.length, `${locale}:${m.id}`).toBeGreaterThan(0);
+      }
+      expect(getAdminDictionary("en").editor.forms.branding.themes[m.id]).not.toMatch(/[\u4e00-\u9fff]/);
     }
   });
 });
