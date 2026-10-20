@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { AuthProvider, Routes, ApiRoutes } from "@/lib/constants";
+import { AuthProvider, ApiRoutes } from "@/lib/constants";
+import { postLoginTarget } from "@/lib/auth/callback-url";
 import { jsonRequest, ApiError } from "@/lib/api/fetcher";
 import { useMutation } from "@/lib/api/use-mutation";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -16,9 +17,17 @@ type SendResponse = { ok: true; devCode?: string };
 /**
  * 邮箱验证码免密登录/注册表单（登录、注册页共用）。
  * 阶段一：输入邮箱 → 发送验证码；阶段二：输入 6 位验证码 → 登录/注册（find-or-create）。
- * 支持可选邀请 token（新用户套用权益）。
+ * 支持可选邀请 token（新用户套用权益）；callbackUrl 为登录后回跳地址（如模板深链）。
  */
-export function OtpAuthForm({ locale, token }: { locale: Locale; token?: string | null }) {
+export function OtpAuthForm({
+  locale,
+  token,
+  callbackUrl,
+}: {
+  locale: Locale;
+  token?: string | null;
+  callbackUrl?: string | null;
+}) {
   const t = getDictionary(locale).auth.otp;
   const router = useRouter();
   const [phase, setPhase] = useState<"email" | "code">("email");
@@ -60,7 +69,7 @@ export function OtpAuthForm({ locale, token }: { locale: Locale; token?: string 
     {
       errorToast: false,
       onSuccess: () => {
-        router.push(Routes.Dashboard);
+        router.push(postLoginTarget(callbackUrl));
         router.refresh();
       },
     },

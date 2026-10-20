@@ -2,14 +2,24 @@ import { describe, it, expect } from "vitest";
 import { handleAuth } from "./auth-proxy";
 import { UserRole } from "@/lib/constants";
 
-type ReqOpts = { loggedIn?: boolean; role?: UserRole; method?: string };
+type ReqOpts = {
+  loggedIn?: boolean;
+  role?: UserRole;
+  method?: string;
+  search?: string;
+  localeCookie?: string;
+  referer?: string;
+};
 type HandleAuthReq = Parameters<typeof handleAuth>[0];
 
 function makeReq(pathname: string, opts: ReqOpts = {}): HandleAuthReq {
+  const search = opts.search ?? "";
   return {
-    nextUrl: { pathname },
-    url: `https://app.example.com${pathname}`,
+    nextUrl: { pathname, search, searchParams: new URLSearchParams(search) },
+    url: `https://app.example.com${pathname}${search}`,
     method: opts.method ?? "GET",
+    cookies: { get: (name: string) => (name === "zb_locale" && opts.localeCookie ? { value: opts.localeCookie } : undefined) },
+    headers: new Headers(opts.referer ? { referer: opts.referer } : {}),
     auth: opts.loggedIn ? { user: { role: opts.role ?? UserRole.USER } } : null,
   } as unknown as HandleAuthReq;
 }
@@ -73,14 +83,14 @@ describe("handleAuth 登录/注册页在已登录时跳转 /admin", () => {
 });
 
 describe("handleAuth 既有守卫不回归", () => {
-  it("未登录访问 /admin → 重定向 /login", () => {
+  it("未登录访问 /admin → 重定向 /login 并带回跳", () => {
     const res = handleAuth(makeReq("/admin"));
-    expect(locationOf(res)).toBe("https://app.example.com/login");
+    expect(locationOf(res)).toBe("https://app.example.com/login?callbackUrl=%2Fadmin");
   });
 
-  it("未登录访问 /admin 子路径 → 重定向 /login", () => {
+  it("未登录访问 /admin 子路径 → 重定向 /login 并带回跳", () => {
     const res = handleAuth(makeReq("/admin/domains"));
-    expect(locationOf(res)).toBe("https://app.example.com/login");
+    expect(locationOf(res)).toBe("https://app.example.com/login?callbackUrl=%2Fadmin%2Fdomains");
   });
 
   it("普通用户访问 /super-admin → 重定向 /admin", () => {
@@ -147,5 +157,59 @@ describe("handleAuth 公开路径按段边界匹配", () => {
 
   it("支付 webhook 端点未登录放行：/api/webhooks/creem", () => {
     expect(handleAuth(makeReq("/api/webhooks/creem", { method: "POST" }))).toBeNull();
+  });
+});
+
+describe("handleAuth 登录回跳（模板选择不丢失）", () => {
+  it("未登录点模板深链 → /login 携带完整路径与查询串", () => {
+    const res = handleAuth(makeReq("/admin/landing-pages", { search: "?template=b2b-sourcing" }));
+    expect(locationOf(res)).toBe(
+      "https://app.example.com/login?callbackUrl=%2Fadmin%2Flanding-pages%3Ftemplate%3Db2b-sourcing",
+    );
+  });
+
+  it("未登录访问 /super-admin → /login 携带回跳", () => {
+    const res = handleAuth(makeReq("/super-admin/users"));
+    expect(locationOf(res)).toBe("https://app.example.com/login?callbackUrl=%2Fsuper-admin%2Fusers");
+  });
+
+  it("语言 cookie 为 zh → 跳中文登录页", () => {
+    const res = handleAuth(makeReq("/admin/landing-pages", { search: "?template=pet", localeCookie: "zh" }));
+    expect(locationOf(res)).toBe(
+      "https://app.example.com/zh/login?callbackUrl=%2Fadmin%2Flanding-pages%3Ftemplate%3Dpet",
+    );
+  });
+
+  it("从 /zh 页面点进来 → 跳中文登录页", () => {
+    const res = handleAuth(makeReq("/admin/landing-pages", {
+      search: "?template=pet",
+      referer: "https://app.example.com/zh/templates/pet",
+    }));
+    expect(locationOf(res)).toBe(
+      "https://app.example.com/zh/login?callbackUrl=%2Fadmin%2Flanding-pages%3Ftemplate%3Dpet",
+    );
+  });
+
+  it("显式选了英文的 cookie 优先于中文来源页", () => {
+    const res = handleAuth(makeReq("/admin", { localeCookie: "en", referer: "https://app.example.com/zh/templates/pet" }));
+    expect(locationOf(res)).toBe("https://app.example.com/login?callbackUrl=%2Fadmin");
+  });
+
+  it("外站 referer 的 /zh 路径不算中文来源", () => {
+    const res = handleAuth(makeReq("/admin", { referer: "https://evil.com/zh/x" }));
+    expect(locationOf(res)).toBe("https://app.example.com/login?callbackUrl=%2Fadmin");
+  });
+
+  it("已登录访问带回跳的登录页 → 直接去回跳地址", () => {
+    const res = handleAuth(makeReq("/zh/login", {
+      loggedIn: true,
+      search: "?callbackUrl=%2Fadmin%2Flanding-pages%3Ftemplate%3Dpet",
+    }));
+    expect(locationOf(res)).toBe("https://app.example.com/admin/landing-pages?template=pet");
+  });
+
+  it("已登录访问带非法回跳的登录页 → 回落 /admin，不外跳", () => {
+    const res = handleAuth(makeReq("/login", { loggedIn: true, search: "?callbackUrl=%2F%2Fevil.com" }));
+    expect(locationOf(res)).toBe("https://app.example.com/admin");
   });
 });

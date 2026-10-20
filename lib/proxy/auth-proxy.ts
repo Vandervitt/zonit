@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { UserRole } from "@/lib/constants";
+import { Routes, UserRole } from "@/lib/constants";
+import { CALLBACK_PARAM, postLoginTarget, withCallbackUrl } from "@/lib/auth/callback-url";
+import { LOCALE_COOKIE } from "@/lib/i18n/config";
+import { localePath } from "@/lib/i18n/routes";
 
 export const PUBLIC_PATHS = [
   "/login",
@@ -30,6 +33,31 @@ type ProxyAuth = {
 /** 登录/注册入口（含 /zh 镜像）：已登录时统一跳转后台。 */
 const AUTH_ENTRY_PATHS = new Set(["/login", "/register", "/zh/login", "/zh/register"]);
 
+/**
+ * 登录页语言：用户手动选过语言（cookie）则以其为准；否则看是否从本站 /zh 页面点进来。
+ * 外站 referer 不参与判定，避免被任意站点左右。
+ */
+function loginLocale(req: NextRequest): "zh" | "en" {
+  const chosen = req.cookies.get(LOCALE_COOKIE)?.value;
+  if (chosen === "zh" || chosen === "en") return chosen;
+  const referer = req.headers.get("referer");
+  if (!referer) return "en";
+  try {
+    const from = new URL(referer);
+    const sameSite = from.origin === new URL(req.url).origin;
+    return sameSite && (from.pathname === "/zh" || from.pathname.startsWith("/zh/")) ? "zh" : "en";
+  } catch {
+    return "en";
+  }
+}
+
+/** 未登录访问受保护页：带着原地址去登录，登录后回到原处（如模板深链 ?template=）。 */
+function redirectToLogin(req: NextRequest) {
+  const { pathname, search } = req.nextUrl;
+  const loginPath = withCallbackUrl(localePath(loginLocale(req), Routes.Login), `${pathname}${search}`);
+  return NextResponse.redirect(new URL(loginPath, req.url));
+}
+
 export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
@@ -42,7 +70,8 @@ export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
   // 已登录用户点登录/注册：直接进租户后台（仅此入口触发跳转）。
   // 含中文镜像路由——/zh/login 与 /login 是同一入口的两种语言版本。
   if (isLoggedIn && AUTH_ENTRY_PATHS.has(pathname)) {
-    return NextResponse.redirect(new URL("/admin", req.url));
+    const target = postLoginTarget(req.nextUrl.searchParams.get(CALLBACK_PARAM));
+    return NextResponse.redirect(new URL(target, req.url));
   }
 
   // 按路径段边界匹配（精确命中或其子路径），避免裸前缀误伤：
@@ -60,7 +89,7 @@ export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
   // 平台后台：需 SUPER_ADMIN
   if (pathname.startsWith("/super-admin")) {
     if (!isLoggedIn) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return redirectToLogin(req);
     }
     if (req.auth?.user?.role !== UserRole.SUPER_ADMIN) {
       return NextResponse.redirect(new URL("/admin", req.url));
@@ -84,7 +113,7 @@ export function handleAuth(req: NextRequest & { auth?: ProxyAuth }) {
   // 不再被误重定向到 /login（受保护页仅 /admin 与上方 /super-admin 两棵树）。
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!isLoggedIn) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return redirectToLogin(req);
     }
     return null;
   }
