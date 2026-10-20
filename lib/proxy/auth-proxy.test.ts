@@ -9,6 +9,9 @@ type ReqOpts = {
   search?: string;
   localeCookie?: string;
   referer?: string;
+  /** 浏览器实际访问的域名；生产上 next-auth 会按 NEXTAUTH_URL 改写 req.url，二者可能不同。 */
+  host?: string;
+  urlOrigin?: string;
 };
 type HandleAuthReq = Parameters<typeof handleAuth>[0];
 
@@ -16,10 +19,13 @@ function makeReq(pathname: string, opts: ReqOpts = {}): HandleAuthReq {
   const search = opts.search ?? "";
   return {
     nextUrl: { pathname, search, searchParams: new URLSearchParams(search) },
-    url: `https://app.example.com${pathname}${search}`,
+    url: `${opts.urlOrigin ?? "https://app.example.com"}${pathname}${search}`,
     method: opts.method ?? "GET",
     cookies: { get: (name: string) => (name === "zb_locale" && opts.localeCookie ? { value: opts.localeCookie } : undefined) },
-    headers: new Headers(opts.referer ? { referer: opts.referer } : {}),
+    headers: new Headers({
+      ...(opts.referer ? { referer: opts.referer } : {}),
+      ...(opts.host ? { host: opts.host } : {}),
+    }),
     auth: opts.loggedIn ? { user: { role: opts.role ?? UserRole.USER } } : null,
   } as unknown as HandleAuthReq;
 }
@@ -211,5 +217,25 @@ describe("handleAuth 登录回跳（模板选择不丢失）", () => {
   it("已登录访问带非法回跳的登录页 → 回落 /admin，不外跳", () => {
     const res = handleAuth(makeReq("/login", { loggedIn: true, search: "?callbackUrl=%2F%2Fevil.com" }));
     expect(locationOf(res)).toBe("https://app.example.com/admin");
+  });
+});
+
+describe("handleAuth 中文登录页判定以真实访问域名为准", () => {
+  it("req.url 被改写成旧域名时，本站 /zh 来源仍判为中文", () => {
+    const res = handleAuth(makeReq("/admin", {
+      urlOrigin: "https://old.example.com",
+      host: "app.example.com",
+      referer: "https://app.example.com/zh/templates/pet",
+    }));
+    expect(locationOf(res)).toBe("https://old.example.com/zh/login?callbackUrl=%2Fadmin");
+  });
+
+  it("referer 与真实域名不同站时不判中文", () => {
+    const res = handleAuth(makeReq("/admin", {
+      urlOrigin: "https://old.example.com",
+      host: "app.example.com",
+      referer: "https://evil.com/zh/x",
+    }));
+    expect(locationOf(res)).toBe("https://old.example.com/login?callbackUrl=%2Fadmin");
   });
 });
