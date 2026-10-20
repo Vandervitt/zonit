@@ -14,16 +14,18 @@ import { GoogleMark } from "@/components/auth/GoogleMark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import type { Locale } from "@/lib/i18n/config";
+import { CALLBACK_PARAM, postLoginTarget, withCallbackUrl } from "@/lib/auth/callback-url";
 
 function RegisterContent({ locale }: { locale: Locale }) {
   const t = getDictionary(locale).auth.register;
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const isInvited = Boolean(token);
+  const callbackUrl = searchParams.get(CALLBACK_PARAM);
 
   const googleSignIn = useMutation(
     () => withLogger("GOOGLE_SIGN_IN", "auth/google", "POST", {}, () =>
-      signIn(AuthProvider.Google, { callbackUrl: Routes.Home }),
+      signIn(AuthProvider.Google, { callbackUrl: postLoginTarget(callbackUrl) }),
     ),
   );
   const googleLoading = googleSignIn.isMutating;
@@ -64,11 +66,11 @@ function RegisterContent({ locale }: { locale: Locale }) {
         <div className="flex-1 h-px bg-aqua-100" />
       </div>
 
-      <OtpAuthForm locale={locale} token={token} />
+      <OtpAuthForm locale={locale} token={token} callbackUrl={callbackUrl} />
 
       <p className="text-xs text-muted-foreground text-center mt-5">
         {t.hasAccount}{" "}
-        <Link href={localePath(locale, Routes.Login)} className="text-aqua-600 font-medium hover:underline">
+        <Link href={withCallbackUrl(localePath(locale, Routes.Login), callbackUrl)} className="text-aqua-600 font-medium hover:underline">
           {t.loginLink}
         </Link>
       </p>

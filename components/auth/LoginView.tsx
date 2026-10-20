@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand/BrandMark";
 import { Routes, AuthProvider } from "@/lib/constants";
@@ -13,14 +13,16 @@ import { GoogleMark } from "@/components/auth/GoogleMark";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import type { Locale } from "@/lib/i18n/config";
+import { CALLBACK_PARAM, postLoginTarget, withCallbackUrl } from "@/lib/auth/callback-url";
 
-export function LoginView({ locale }: { locale: Locale }) {
+function LoginContent({ locale }: { locale: Locale }) {
   const t = getDictionary(locale).auth.login;
   const router = useRouter();
+  const callbackUrl = useSearchParams().get(CALLBACK_PARAM);
   const [oauthProvider, setOauthProvider] = useState<AuthProvider | null>(null);
 
   const oauthSignIn = useMutation(
-    (provider: AuthProvider) => signIn(provider, { callbackUrl: Routes.Dashboard }),
+    (provider: AuthProvider) => signIn(provider, { callbackUrl: postLoginTarget(callbackUrl) }),
   );
 
   const devSignIn = useMutation(
@@ -29,7 +31,7 @@ export function LoginView({ locale }: { locale: Locale }) {
       if (res?.error) throw new ApiError(401, "Dev login failed.");
       return res;
     },
-    { onSuccess: () => { router.push(Routes.Dashboard); router.refresh(); } },
+    { onSuccess: () => { router.push(postLoginTarget(callbackUrl)); router.refresh(); } },
   );
 
   async function handleOAuthSignIn(provider: AuthProvider) {
@@ -71,11 +73,11 @@ export function LoginView({ locale }: { locale: Locale }) {
         <div className="flex-1 h-px bg-aqua-100" />
       </div>
 
-      <OtpAuthForm locale={locale} />
+      <OtpAuthForm locale={locale} callbackUrl={callbackUrl} />
 
       <p className="text-xs text-muted-foreground text-center mt-5">
         {t.noAccount}{" "}
-        <Link href={localePath(locale, Routes.Register)} className="text-aqua-600 font-medium hover:underline">
+        <Link href={withCallbackUrl(localePath(locale, Routes.Register), callbackUrl)} className="text-aqua-600 font-medium hover:underline">
           {t.registerLink}
         </Link>
       </p>
@@ -93,5 +95,13 @@ export function LoginView({ locale }: { locale: Locale }) {
         </div>
       )}
     </div>
+  );
+}
+
+export function LoginView({ locale }: { locale: Locale }) {
+  return (
+    <Suspense fallback={<div className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-8" />}>
+      <LoginContent locale={locale} />
+    </Suspense>
   );
 }
