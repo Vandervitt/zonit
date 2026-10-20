@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { WebAnalytics } from "@/components/WebAnalytics";
 import { SITE_URL } from "@/lib/seo/site";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
-        <Analytics />
+        <WebAnalytics />
         <SpeedInsights />
       </body>
     </html>
