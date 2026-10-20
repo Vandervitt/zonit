@@ -44,7 +44,10 @@ function loginLocale(req: NextRequest): "zh" | "en" {
   if (!referer) return "en";
   try {
     const from = new URL(referer);
-    const sameSite = from.origin === new URL(req.url).origin;
+    // 同站判定用浏览器实际访问的 Host：next-auth 会按 NEXTAUTH_URL 改写 req.url，
+    // 生产上它可能仍是更名前的旧域名，拿它比对会让所有中文来源都判成外站。
+    const host = req.headers.get("host") ?? new URL(req.url).host;
+    const sameSite = from.host === host;
     return sameSite && (from.pathname === "/zh" || from.pathname.startsWith("/zh/")) ? "zh" : "en";
   } catch {
     return "en";
