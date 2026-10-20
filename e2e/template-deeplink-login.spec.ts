@@ -61,6 +61,9 @@ test.describe("模板深链登录后回到模板", () => {
 
     // 回到深链 → 自动按模板建草稿 → 进编辑器
     await page.waitForURL(/\/admin\/editor\//, { timeout: 60_000 });
+
+    // 从中文入口注册的新用户，后台也必须是中文（字面量断言，不引字典）
+    await expect(page.getByRole("button", { name: "AI 一键成页" })).toBeVisible({ timeout: 30_000 });
     const pages = await pool.query(
       `SELECT lp.name, lp.template_id FROM landing_pages lp JOIN users u ON u.id = lp.user_id WHERE u.email = $1`,
       [EMAIL],
