@@ -5,8 +5,9 @@ import { SectionShell } from "../primitives/SectionShell";
 import { SectionCta } from "../primitives/SectionCta";
 import { SectionHeading } from "../primitives/SectionHeading";
 import { Img } from "../primitives/Img";
+import type { PreviewMode } from "../preview";
 
-export function Reviews({ data, contact, theme, preview = false }: { data: ReviewsSection; contact: PageContact; theme: RendererTheme; preview?: boolean }) {
+export function Reviews({ data, contact, theme, preview = false }: { data: ReviewsSection; contact: PageContact; theme: RendererTheme; preview?: PreviewMode }) {
   return (
     <SectionShell tone="muted">
       <SectionHeading title={data.title} subtitle={data.subtitle ?? data.description} />

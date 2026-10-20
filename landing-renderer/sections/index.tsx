@@ -18,13 +18,14 @@ import { Guarantee } from "./Guarantee";
 import { LogoWall } from "./LogoWall";
 import { CaseStudy } from "./CaseStudy";
 import { sectionWrap, IDENTITY_VARIANT, type PageVariant } from "../variant";
+import type { PreviewMode } from "../preview";
 
 function assertNever(x: never): null {
   void x;
   return null;
 }
 
-function renderInner(section: LandingSection, contact: PageContact, theme: RendererTheme, key: number, preview: boolean) {
+function renderInner(section: LandingSection, contact: PageContact, theme: RendererTheme, key: number, preview: PreviewMode) {
   switch (section.type) {
     case "stats":       return <Stats key={key} data={section.data} theme={theme} />;
     case "plans":       return <Plans key={key} data={section.data} contact={contact} theme={theme} preview={preview} />;
@@ -52,7 +53,7 @@ export function renderSection(
   theme: RendererTheme,
   key: number,
   variant: PageVariant = IDENTITY_VARIANT,
-  preview = false,
+  preview: PreviewMode = false,
 ) {
   const el = renderInner(section, contact, theme, key, preview);
   const w = sectionWrap(variant, key);

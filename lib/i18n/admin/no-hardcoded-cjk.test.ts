@@ -78,6 +78,8 @@ const ALLOWED = [
   /^lib\/tools\//,
   // 收款渠道的能力差异说明，只在超管侧触发。
   /^lib\/billing\/providers\//,
+  // 渲染器预览占位的中英对照表本身（其余渲染器源码不得写死中文，提示一律从这张表按后台语言取）。
+  /^landing-renderer\/preview\.ts$/,
 ];
 
 /**
@@ -101,7 +103,8 @@ const ALLOWED_LINE = [
   /（无姓名）/,
 ];
 
-const ROOTS = ["app/admin", "landing-editor", "components", "lib"];
+// landing-renderer 也在内：编辑器预览里的占位提示曾写死中文，英文后台照样显示「线上不显示」。
+const ROOTS = ["app/admin", "landing-editor", "landing-renderer", "components", "lib"];
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -113,7 +116,7 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 describe("后台源码不得硬编码中文 UI 文案", () => {
-  it("扫描 app/admin、landing-editor、components、lib", () => {
+  it("扫描 app/admin、landing-editor、landing-renderer、components、lib", () => {
     const files = ROOTS.flatMap((r) => walk(r)).filter((f) => !ALLOWED.some((re) => re.test(f)));
     // 兜底：路径写错时 files 会是空数组，测试将永真通过。
     expect(files.length).toBeGreaterThan(100);

@@ -7,11 +7,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { FloatingButton } from "./FloatingButton";
 import type { RendererTheme } from "../theme";
 import type { PageContact } from "@/types/schema.draft";
+import type { PreviewMode } from "../preview";
 
 const theme = { accentGradient: "bg-a", accentShadow: "shadow-c" } as RendererTheme;
 
 // 同 Cta.test.ts：由 helper 从链接反推等价的 contact + target，断言不改。
-const html = (text: string, link: string, preview?: boolean) => {
+const html = (text: string, link: string, preview?: PreviewMode) => {
   const wa = link.match(/wa\.me\/(\d+)/);
   const contact: PageContact = wa ? { primary: "whatsapp", whatsapp: `+${wa[1]}` } : { primary: "whatsapp" };
   return renderToStaticMarkup(
@@ -37,7 +38,7 @@ describe("FloatingButton 空内容守卫", () => {
 
 describe("FloatingButton 预览占位态", () => {
   it("预览 + 链接为空 → 渲染不可点击占位并标注线上不显示", () => {
-    const out = html("Chat", "", true);
+    const out = html("Chat", "", "zh");
     expect(out).not.toContain("<a");
     expect(out).toContain("Chat");
     expect(out).toContain("联系方式未填");
@@ -45,12 +46,21 @@ describe("FloatingButton 预览占位态", () => {
   });
 
   it("预览 + 内容完整 → 与线上一致正常渲染", () => {
-    const out = html("Chat", "https://wa.me/8613800138000", true);
+    const out = html("Chat", "https://wa.me/8613800138000", "zh");
     expect(out).toContain('href="https://wa.me/8613800138000"');
     expect(out).not.toContain("线上不显示");
   });
 
   it("非预览 + 不完整 → 仍不渲染", () => {
     expect(html("Chat", "", false)).toBe("");
+  });
+});
+
+describe("FloatingButton 预览占位随后台语言", () => {
+  it("英文预览：标注与兜底文案均为英文", () => {
+    const out = html("", "", "en");
+    expect(out).toContain("Floating button");
+    expect(out).toContain("hidden when live");
+    expect(out).not.toMatch(/[\u4e00-\u9fff]/);
   });
 });

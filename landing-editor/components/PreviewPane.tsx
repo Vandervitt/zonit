@@ -4,7 +4,7 @@
 // 用渲染器 LandingPage 在隔离 iframe 内实时呈现。
 // 落地页为移动端优先，故默认手机视图——把预览包进居中手机卡片（圆角 + 深色边框 +
 // 投影 + 内部滚动），iframe 以 390 宽渲染，命中纯移动端断面；保留桌面切换以查看宽屏版式。
-import { useAdminT } from "@/lib/i18n/admin/context";
+import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
 import { useState } from "react";
 import { useEditorState, toDraft } from "../store/editorStore";
 import { useMeta } from "../MetaContext";
@@ -18,6 +18,7 @@ const DEVICE_WIDTH: Record<Device, number> = { mobile: 390, desktop: 1280 };
 
 export function PreviewPane() {
   const t = useAdminT().editor.panels.preview;
+  const locale = useAdminLocale();
   const state = useEditorState();
   const draft = toDraft(state);
   const { pageId } = useMeta();
@@ -41,7 +42,7 @@ export function PreviewPane() {
 
   const preview = (
     <PreviewFrame virtualWidth={DEVICE_WIDTH[device]}>
-      <LandingPage page={draft} pageId="preview" preview policyBase={landingPreviewPath(pageId)} companyInfo={companyInfo} />
+      <LandingPage page={draft} pageId="preview" preview={locale} policyBase={landingPreviewPath(pageId)} companyInfo={companyInfo} />
     </PreviewFrame>
   );
 

@@ -10,6 +10,7 @@
 import type { CtaButton, PageContact } from "@/types/schema.draft";
 import type { RendererTheme } from "../theme";
 import { Cta } from "./Cta";
+import type { PreviewMode } from "../preview";
 
 export function SectionCta({
   cta,
@@ -20,7 +21,7 @@ export function SectionCta({
   cta?: CtaButton;
   contact: PageContact;
   theme: RendererTheme;
-  preview?: boolean;
+  preview?: PreviewMode;
 }) {
   if (!cta) return null;
   return (

@@ -103,14 +103,17 @@ export const THEMES: Record<ThemeId, RendererTheme> = {
   slate: slateNeutral,
 };
 
-/** 编辑器色卡用：swatch 为预览渐变 class（写死，Tailwind JIT 可扫到）。 */
-export const THEME_META: { id: ThemeId; label: string; swatch: string }[] = [
-  { id: "teal",   label: "青翠", swatch: "bg-gradient-to-r from-teal-500 to-emerald-600" },
-  { id: "blue",   label: "蓝",   swatch: "bg-gradient-to-r from-blue-500 to-indigo-600" },
-  { id: "rose",   label: "玫红", swatch: "bg-gradient-to-r from-rose-500 to-pink-600" },
-  { id: "amber",  label: "琥珀", swatch: "bg-gradient-to-r from-amber-500 to-orange-600" },
-  { id: "violet", label: "紫",   swatch: "bg-gradient-to-r from-violet-500 to-purple-600" },
-  { id: "slate",  label: "墨",   swatch: "bg-gradient-to-r from-slate-700 to-slate-900" },
+/**
+ * 编辑器色卡用：swatch 为预览渐变 class（写死，Tailwind JIT 可扫到）。
+ * 色卡名是后台界面文案，按后台语言取自 admin 字典 editor.forms.branding.themes，不写在渲染器里。
+ */
+export const THEME_META: { id: ThemeId; swatch: string }[] = [
+  { id: "teal",   swatch: "bg-gradient-to-r from-teal-500 to-emerald-600" },
+  { id: "blue",   swatch: "bg-gradient-to-r from-blue-500 to-indigo-600" },
+  { id: "rose",   swatch: "bg-gradient-to-r from-rose-500 to-pink-600" },
+  { id: "amber",  swatch: "bg-gradient-to-r from-amber-500 to-orange-600" },
+  { id: "violet", swatch: "bg-gradient-to-r from-violet-500 to-purple-600" },
+  { id: "slate",  swatch: "bg-gradient-to-r from-slate-700 to-slate-900" },
 ];
 
 export const defaultTheme = tealEmerald;

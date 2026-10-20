@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { LandingPage } from "@/landing-renderer/LandingPage";
 import { Watermark } from "@/landing-renderer/Watermark";
@@ -9,12 +10,23 @@ import { loadValidPreview } from "@/lib/preview/load";
 import { previewPolicyBase } from "./policy";
 import { resolveCompanyInfo } from "@/lib/company-profiles/resolve";
 import { resolvePageMeta } from "@/lib/seo/resolve";
+import { LOCALE_COOKIE } from "@/lib/i18n/config";
+import { requestLocale } from "@/lib/i18n/request-locale";
+
+/** 分享预览的看客多半没有账号：按其语言 cookie / 浏览器语言决定提示语言。 */
+async function viewerLocale() {
+  const [c, h] = await Promise.all([cookies(), headers()]);
+  return requestLocale(c.get(LOCALE_COOKIE)?.value, h.get("accept-language"));
+}
+
+const PREVIEW_TITLE = { zh: "预览", en: "Preview" } as const;
 
 // 预览页永远 noindex（叠加 next.config 的 X-Robots-Tag 头）；不派生 OG/canonical，避免被分享抓取当正式页。
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params;
   const page = await loadValidPreview(token);
-  const title = page ? `预览 · ${resolvePageMeta(page.data).title}` : "预览";
+  const label = PREVIEW_TITLE[await viewerLocale()];
+  const title = page ? `${label} · ${resolvePageMeta(page.data).title}` : label;
   return { title, robots: { index: false, follow: false } };
 }
 
@@ -36,7 +48,7 @@ export default async function PreviewByToken({ params }: { params: Promise<{ tok
         page={page.data}
         pageId={page.id}
         variant={variant}
-        preview
+        preview={await viewerLocale()}
         policyBase={previewPolicyBase(token)}
         companyInfo={companyInfo}
       />

@@ -9,6 +9,7 @@ import { composeE164 } from "@/lib/leads/contact-format";
 import type { RendererTheme } from "../theme";
 import { parseUtm } from "../tracking/utm";
 import { useFormTracking } from "../tracking/TrackingProvider";
+import type { PreviewMode } from "../preview";
 
 // 落地页面向海外访客，故缺省标签为英文；需要其它语言时由 schema 的
 // LeadFormFieldConfig.label 逐字段覆盖（见 types/schema.draft.ts）。
@@ -75,7 +76,7 @@ export function LeadForm({ data, pageId, theme, preview = false, defaultDial = F
   data: LeadFormData;
   pageId: string;
   theme: RendererTheme;
-  preview?: boolean;
+  preview?: PreviewMode;
   /** 服务端按访客 IP（x-vercel-ip-country）解析出的国码，作为选择器初值。 */
   defaultDial?: DialCode;
   /** 隐私政策子页地址；缺省不渲染表单旁的告知行（见渲染处注释）。 */
@@ -251,7 +252,7 @@ export function LeadForm({ data, pageId, theme, preview = false, defaultDial = F
           />
           <button
             type="submit"
-            disabled={status === "sending" || preview}
+            disabled={status === "sending" || Boolean(preview)}
             className={`w-full rounded-xl px-4 py-2.5 text-sm font-bold text-white transition disabled:opacity-60 ${theme.accentGradient} ${theme.accentGradientHover} ${theme.accentShadow}`}
           >
             {preview ? "Preview only" : status === "sending" ? "Sending…" : data.submitText}

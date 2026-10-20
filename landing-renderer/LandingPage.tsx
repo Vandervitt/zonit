@@ -10,6 +10,7 @@ import { LeadForm } from "./sections/LeadForm";
 import { renderSection } from "./sections";
 import { IDENTITY_VARIANT, type PageVariant } from "./variant";
 import { policyPath } from "@/lib/landing-pages/policy-paths";
+import type { PreviewMode } from "./preview";
 
 export function LandingPage({
   page,
@@ -25,7 +26,7 @@ export function LandingPage({
   theme?: RendererTheme; // 显式覆盖；默认按 branding 派生
   pageId?: string;
   variant?: PageVariant; // 反同质化变体；缺省恒等（输出不变）
-  preview?: boolean; // 预览渲染：留资表单停用提交；不完整 CTA 按钮显示占位标注而非隐藏
+  preview?: PreviewMode; // 预览渲染：留资表单停用提交；不完整 CTA 按钮显示占位标注而非隐藏
   defaultDial?: DialCode; // 按访客 IP 解析的默认国码；预览态不传，用组件内兜底
   /** 政策子页前缀（公开页 = 发布路径，预览 = /preview/{token}）；缺省不渲染政策链接 */
   policyBase?: string;

@@ -369,6 +369,7 @@ export const editor = {
       theme: "Theme colours",
       logo: "Brand logo (wide, shown in the hero and footer)",
       favicon: "Favicon (square, the browser tab icon)",
+      themes: { teal: "Teal", blue: "Blue", rose: "Rose", amber: "Amber", violet: "Violet", slate: "Ink" },
     },
     footer: {
       brandName: "Brand name",

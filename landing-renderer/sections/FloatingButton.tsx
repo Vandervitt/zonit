@@ -8,8 +8,9 @@ import type { FloatingButton as FloatingButtonData, PageContact } from "@/types/
 import type { RendererTheme } from "../theme";
 import { missingCtaLabel } from "../primitives/Cta";
 import { resolveCtaHref, resolveCtaChannel } from "../lib/resolveCta";
+import { PREVIEW_LABELS, type PreviewMode } from "../preview";
 
-export function FloatingButton({ data, contact, theme, preview = false }: { data: FloatingButtonData; contact: PageContact; theme: RendererTheme; preview?: boolean }) {
+export function FloatingButton({ data, contact, theme, preview = false }: { data: FloatingButtonData; contact: PageContact; theme: RendererTheme; preview?: PreviewMode }) {
   const resolved = resolveCtaHref(data.target, contact);
   const complete = Boolean(resolved && data.text?.trim());
   const ref = useRef<HTMLAnchorElement>(null);
@@ -34,8 +35,8 @@ export function FloatingButton({ data, contact, theme, preview = false }: { data
     if (!preview) return null;
     return (
       <span className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full border-2 border-dashed border-amber-400 bg-amber-50 px-5 py-3 text-sm font-bold text-amber-700">
-        {data.text?.trim() || "悬浮按钮"}
-        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium">{missingCtaLabel(data, contact)}</span>
+        {data.text?.trim() || PREVIEW_LABELS[preview].floatingFallback}
+        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium">{missingCtaLabel(data, contact, preview)}</span>
       </span>
     );
   }

@@ -141,7 +141,7 @@ export async function TemplateDetailView({ slug, locale }: { slug: string; local
 
         <p className={`mt-10 text-xs text-muted-foreground ${fonts.mono}`}>{dict.detail.detailIntroNote}</p>
         <div className="mt-3 overflow-hidden rounded-2xl border border-border shadow-sm">
-          <LandingPage page={draft} pageId={`template-${t.id}`} variant={IDENTITY_VARIANT} preview />
+          <LandingPage page={draft} pageId={`template-${t.id}`} variant={IDENTITY_VARIANT} preview={locale} />
         </div>
 
         <section className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-3">

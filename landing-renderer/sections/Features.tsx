@@ -4,8 +4,9 @@ import type { RendererTheme } from "../theme";
 import { SectionShell } from "../primitives/SectionShell";
 import { SectionCta } from "../primitives/SectionCta";
 import { SectionHeading } from "../primitives/SectionHeading";
+import type { PreviewMode } from "../preview";
 
-export function Features({ data, contact, theme, preview = false }: { data: FeaturesSection; contact: PageContact; theme: RendererTheme; preview?: boolean }) {
+export function Features({ data, contact, theme, preview = false }: { data: FeaturesSection; contact: PageContact; theme: RendererTheme; preview?: PreviewMode }) {
   return (
     <SectionShell>
       <SectionHeading title={data.title} subtitle={data.subtitle} />

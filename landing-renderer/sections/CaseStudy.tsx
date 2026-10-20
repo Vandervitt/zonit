@@ -5,6 +5,7 @@ import { SectionShell } from "../primitives/SectionShell";
 import { SectionHeading } from "../primitives/SectionHeading";
 import { SectionCta } from "../primitives/SectionCta";
 import { Img } from "../primitives/Img";
+import type { PreviewMode } from "../preview";
 
 export function CaseStudy({
   data,
@@ -15,7 +16,7 @@ export function CaseStudy({
   data: CaseStudySection;
   contact: PageContact;
   theme: RendererTheme;
-  preview?: boolean;
+  preview?: PreviewMode;
 }) {
   return (
     <SectionShell>

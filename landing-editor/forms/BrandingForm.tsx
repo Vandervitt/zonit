@@ -26,7 +26,7 @@ export function BrandingForm({ value, onChange }: { value: Branding; onChange: (
               }
             >
               <span className={`h-8 w-full rounded-md ${m.swatch}`} />
-              <span className="text-xs text-ink">{m.label}</span>
+              <span className="text-xs text-ink">{t.themes[m.id]}</span>
             </button>
           ))}
         </div>
