@@ -48,10 +48,12 @@ export async function createLandingPage(
   userId: string,
   name: string,
   data: LandingPageDraft,
+  templateId: string | null = null,
 ): Promise<ClientLandingPageRow> {
+  // template_id 记录建页所用模板（获客归因用），名字可被用户改掉，id 不会。
   const result = await pool.query(
-    `INSERT INTO landing_pages (user_id, name, data) VALUES ($1, $2, $3) RETURNING *`,
-    [userId, name, JSON.stringify(data)],
+    `INSERT INTO landing_pages (user_id, name, data, template_id) VALUES ($1, $2, $3, $4) RETURNING *`,
+    [userId, name, JSON.stringify(data), templateId],
   );
   return toClient(result.rows[0]);
 }
