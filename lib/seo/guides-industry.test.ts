@@ -113,11 +113,10 @@ describe("投放合规簇的 CTA 落点", () => {
     }
   });
 
-  it("rfq 只用于挂了 industry 的文章（否则次 CTA 无行业模板可指）", () => {
+  it("rfq 簇：外贸询盘相关文章都指向产品页（不挂行业的文章次 CTA 回落注册）", () => {
     for (const locale of locales) {
-      for (const g of getGuides(locale).filter((x) => x.ctaTarget === "rfq")) {
-        expect(g.industry, `${g.slug}`).toBeTruthy();
-      }
+      const slugs = getGuides(locale).filter((x) => x.ctaTarget === "rfq").map((g) => g.slug).sort();
+      expect(slugs, locale).toEqual(["b2b-ads-homepage-vs-landing-page", "b2b-rfq-lead-generation", "rfq-first-reply"]);
     }
   });
 

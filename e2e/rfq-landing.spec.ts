@@ -35,5 +35,20 @@ test.describe("外贸询盘落地页", () => {
     await page.goto("/zh/templates/industry/b2b");
     await expect(page.locator('a[href="/zh/guides/b2b-rfq-lead-generation"]').first()).toBeVisible();
   });
+
+  test("外贸询盘长尾文章：双语渲染，主 CTA 指产品页，未挂行业的次 CTA 回落注册", async ({ page }) => {
+    for (const [path, h1] of [
+      ["/zh/guides/rfq-first-reply", "外贸询盘怎么回"],
+      ["/zh/guides/b2b-ads-homepage-vs-landing-page", "B2B 广告打到官网还是落地页"],
+    ] as const) {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { level: 1 })).toContainText(h1);
+      await expect(page.getByRole("link", { name: "看看这里怎么做询价页" })).toHaveAttribute("href", "/zh/rfq-landing-page");
+      await expect(page.getByRole("link", { name: "免费开始" }).last()).toHaveAttribute("href", "/zh/register");
+    }
+    await page.goto("/guides/rfq-first-reply");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Replying to an RFQ");
+    await expect(page.getByRole("link", { name: "See how RFQ pages work here" })).toHaveAttribute("href", "/rfq-landing-page");
+  });
 });
 
