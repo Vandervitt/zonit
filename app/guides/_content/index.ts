@@ -42,6 +42,10 @@ import { immigrationFirmLeadGeneration as legalZh } from "./articles/immigration
 import { immigrationFirmLeadGeneration as legalEn } from "./articles/immigration-firm-lead-generation/en";
 import { localServiceLeadGeneration as localZh } from "./articles/local-service-lead-generation/zh";
 import { localServiceLeadGeneration as localEn } from "./articles/local-service-lead-generation/en";
+import { rfqFirstReply as rfqReplyZh } from "./articles/rfq-first-reply/zh";
+import { rfqFirstReply as rfqReplyEn } from "./articles/rfq-first-reply/en";
+import { b2bAdsHomepageVsLandingPage as b2bAdsZh } from "./articles/b2b-ads-homepage-vs-landing-page/zh";
+import { b2bAdsHomepageVsLandingPage as b2bAdsEn } from "./articles/b2b-ads-homepage-vs-landing-page/en";
 
 /**
  * 列表顺序即展示顺序（新文放前，突出新鲜度）。
@@ -49,8 +53,8 @@ import { localServiceLeadGeneration as localEn } from "./articles/local-service-
  * 两种语言共用同一 slug，使 hreflang 配对无需额外映射表。
  */
 const GUIDES_BY_LOCALE: Record<Locale, GuideArticle[]> = {
-  en: [dupEn, banEn, ttEn, gadsEn, privEn, beautyEn, clinicEn, solarEn, apparelEn, gadgetEn, homeEn, suppEn, toysEn, b2bEn, eduEn, legalEn, localEn, xbEn, fbEn, waEn, attrEn],
-  zh: [dupZh, banZh, ttZh, gadsZh, privZh, beautyZh, clinicZh, solarZh, apparelZh, gadgetZh, homeZh, suppZh, toysZh, b2bZh, eduZh, legalZh, localZh, xbZh, fbZh, waZh, attrZh],
+  en: [b2bAdsEn, rfqReplyEn, dupEn, banEn, ttEn, gadsEn, privEn, beautyEn, clinicEn, solarEn, apparelEn, gadgetEn, homeEn, suppEn, toysEn, b2bEn, eduEn, legalEn, localEn, xbEn, fbEn, waEn, attrEn],
+  zh: [b2bAdsZh, rfqReplyZh, dupZh, banZh, ttZh, gadsZh, privZh, beautyZh, clinicZh, solarZh, apparelZh, gadgetZh, homeZh, suppZh, toysZh, b2bZh, eduZh, legalZh, localZh, xbZh, fbZh, waZh, attrZh],
 };
 
 export function getGuides(locale: Locale): GuideArticle[] {
