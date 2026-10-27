@@ -39,6 +39,9 @@ export function AdminShell({
 
   const selectedKey = resolveActiveNavKey(pathname);
 
+  // 菜单链接做完整预取（prefetch）：布局是 force-dynamic，默认 <Link> 对动态路由不预取，
+  // 点击后要先等一次服务端往返（海外机房约 0.9s）画面才动，随后页面挂载再发 SWR 又一次往返。
+  // 这些页面都是客户端组件，RSC 载荷只是组件引用、不含数据，预取后点击即切页，只剩取数那一次往返。
   const menuItems = ADMIN_NAV.map((i) => {
     const label = t.shell.nav[i.key];
     return {
@@ -47,7 +50,7 @@ export function AdminShell({
       disabled: i.disabled,
       label: i.disabled
         ? <span>{label} <Tag color="blue" style={{ marginInlineStart: 6 }}>{i.badge}</Tag></span>
-        : <Link href={i.href!}>{label}</Link>,
+        : <Link href={i.href!} prefetch>{label}</Link>,
     };
   });
 
