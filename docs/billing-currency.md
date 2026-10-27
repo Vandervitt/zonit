@@ -6,12 +6,20 @@
 
 | 环节 | 由谁决定 | 实现 |
 |---|---|---|
-| 官网/后台展示的价格 | **我们自己的代码** | `lib/plans.ts` 存美元数值；中文面经 `lib/pricing/fx-server.ts` 取实时汇率，附「约 ¥xx」 |
+| 官网/后台展示的价格 | **构建期 Dodo 定价快照** | `scripts/sync-dodo-prices.ts` 在 `vercel-build` 中拉取 Dodo 产品定价写入 `lib/pricing/prices.json`，`lib/plans.ts` / `lib/credits.ts` 从中读美元价；中文面经 `lib/pricing/fx-server.ts` 取实时汇率，附「约 ¥xx」 |
 | 结账页实际扣款的币种与金额 | **收款渠道** | Dodo Adaptive Currency（Dashboard 开关）；金额本身来自 Dodo/Creem 后台的 product 定价 |
 
 关键约束：**没有任何收款渠道能驱动你自己网站上的价格展示。** Dodo 官方文档明确 Adaptive Currency 只作用于 Dodo 结账页。所以官网的本地货币换算必须自己做，两者是互补而非二选一。
 
-对应地，**改价必须两边同时改**：`lib/plans.ts` 只改展示，Dodo/Creem 后台的 product 定价不同步就会出现「官网 $19.99、结账页扣旧价」。
+对应地，展示价**以 Dodo 后台产品定价为唯一事实源**：改价 = 在 Dodo 后台改 product 定价 → 重新部署（价格在构建期取一次，不重新部署官网不会变）。代码里不再手写价格数字，`lib/pricing/prices-source.test.ts` 守住这一点。
+
+## 构建期价格同步
+
+- 入口：`pnpm prices:sync`（`vercel-build` 在 `next build` 前自动执行）。按 `DODO_PRODUCT_STARTER/PRO/AGENCY`、`DODO_CREDITS_50/200` 逐个 `products.retrieve`，金额以美分整数写入 `lib/pricing/prices.json`。
+- 校验从严（`lib/pricing/dodo-prices.ts`）：非 USD、订阅周期不是每 1 个月、带折扣、按需付费，一律报错——这些形态下官网「$x/月」的展示与实际扣款对不上。
+- 失败策略：**生产构建（`VERCEL_ENV=production`）取价失败即中止构建**，宁可部署不上也不展示错价；本地 / Preview / CI 无凭据时沿用仓库内快照并告警。
+- 仓库内的 `prices.json` 只是兜底快照：生产构建会就地覆盖，不回写 Git。想让快照与线上一致，配好 live 凭据后本地执行 `pnpm prices:sync` 再提交 diff；**勿用 test_mode 凭据刷新后提交**。
+- 只认 Dodo：super-admin 切到 Creem 时，展示价仍是 Dodo 定价，Creem 后台产品价需人工保持一致。
 
 ## 展示侧：实时汇率 + 兜底
 

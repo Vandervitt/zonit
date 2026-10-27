@@ -7,13 +7,19 @@ import type { Locale } from "./i18n/config";
 import { plans as enPlans } from "./i18n/dictionaries/en/plans";
 import { plans as zhPlans } from "./i18n/dictionaries/zh/plans";
 import { approxCnyAmount } from "./pricing/fx";
+import { centsToUsd, type PriceSnapshot } from "./pricing/dodo-prices";
+import pricesJson from "./pricing/prices.json";
+
+// 付费档月费来自构建期 Dodo 定价快照（scripts/sync-dodo-prices.ts 生成），
+// 改价只需在 Dodo 后台改产品定价并重新部署，代码里不再手写价格数字。
+const PRICES = pricesJson as PriceSnapshot;
 
 export type PlanId = "free" | "starter" | "pro" | "agency";
 
 export interface PlanConfig {
   id: PlanId;
   label: string;                // 档位品牌名（Free / Starter / Pro / Agency），不翻译
-  priceAmount: number;          // 月费数值（美元）
+  priceAmount: number;          // 月费数值（美元）；付费档取自 Dodo 定价快照，Free 固定为 0
   currency: string;             // 收款货币固定 USD，不随界面语言变化；中文面另附「约 ¥xx」参考换算
   color: string;
   highlight?: boolean;          // "最受欢迎"
@@ -39,20 +45,20 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     aiPageQuota: 3, aiRewriteQuota: 10,
   },
   starter: {
-    id: "starter", label: "Starter", priceAmount: 5.99, currency: "$", color: "blue",
+    id: "starter", label: "Starter", priceAmount: centsToUsd(PRICES.plans.starter), currency: "$", color: "blue",
     // 多路径发布后，页数额度即发布额度：5 张页可全部挂在这 1 个域名的不同路径下。
     landingPagesLimit: 5, domainsLimit: 1,
     hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 15, aiRewriteQuota: 100,
   },
   pro: {
-    id: "pro", label: "Pro", priceAmount: 19.99, currency: "$", color: "violet", highlight: true,
+    id: "pro", label: "Pro", priceAmount: centsToUsd(PRICES.plans.pro), currency: "$", color: "violet", highlight: true,
     landingPagesLimit: 20, domainsLimit: 5,
     hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: false, leadWebhook: true,
     aiPageQuota: 80, aiRewriteQuota: Infinity,
   },
   agency: {
-    id: "agency", label: "Agency", priceAmount: 49.99, currency: "$", color: "amber",
+    id: "agency", label: "Agency", priceAmount: centsToUsd(PRICES.plans.agency), currency: "$", color: "amber",
     landingPagesLimit: Infinity, domainsLimit: Infinity,
     hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: true, leadWebhook: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,

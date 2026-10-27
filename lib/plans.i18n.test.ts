@@ -33,6 +33,11 @@ describe("formatPlanLimit", () => {
   });
 });
 
+// 付费档价格来自构建期 Dodo 快照，随后台改价变化；格式化断言用固定价的 fixture，
+// 免得 Dodo 一改价这里就误报。「PLANS 价格 = 快照」由 lib/pricing/prices-source.test.ts 守住。
+const PRO_1999 = { ...PLANS.pro, priceAmount: 19.99 };
+const AGENCY_4999 = { ...PLANS.agency, priceAmount: 49.99 };
+
 describe("planPriceText", () => {
   it("free 档显示免费文案，不显示金额", () => {
     expect(planPriceText(PLANS.free, "en")).toEqual({ amount: "Free", suffix: "", approx: null });
@@ -40,12 +45,12 @@ describe("planPriceText", () => {
   });
 
   it("付费档保留美元金额，仅后缀本地化；不传汇率则无换算", () => {
-    expect(planPriceText(PLANS.pro, "en")).toEqual({ amount: "$19.99", suffix: "/mo", approx: null });
-    expect(planPriceText(PLANS.pro, "zh")).toEqual({ amount: "$19.99", suffix: "/月", approx: null });
+    expect(planPriceText(PRO_1999, "en")).toEqual({ amount: "$19.99", suffix: "/mo", approx: null });
+    expect(planPriceText(PRO_1999, "zh")).toEqual({ amount: "$19.99", suffix: "/月", approx: null });
   });
 
   it("传入汇率时中文面附人民币参考换算，金额本身仍是美元", () => {
-    expect(planPriceText(PLANS.pro, "zh", 7.1)).toEqual({
+    expect(planPriceText(PRO_1999, "zh", 7.1)).toEqual({
       amount: "$19.99",
       suffix: "/月",
       approx: "约 ¥141.93",
@@ -59,8 +64,8 @@ describe("planPriceText", () => {
 
 describe("planPriceLabel", () => {
   it("单行版：美元价 + 周期后缀，传汇率时括号内附参考换算", () => {
-    expect(planPriceLabel(PLANS.agency, "zh")).toBe("$49.99/月");
-    expect(planPriceLabel(PLANS.agency, "zh", 7.1)).toBe("$49.99/月（约 ¥354.93）");
+    expect(planPriceLabel(AGENCY_4999, "zh")).toBe("$49.99/月");
+    expect(planPriceLabel(AGENCY_4999, "zh", 7.1)).toBe("$49.99/月（约 ¥354.93）");
     expect(planPriceLabel(PLANS.free, "zh", 7.1)).toBe("$0");
   });
 });

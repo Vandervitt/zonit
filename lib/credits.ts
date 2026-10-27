@@ -6,11 +6,15 @@
 // CREEM_CREDITS_50 / CREEM_CREDITS_200），后端据 credits 反查产品 id 建结账会话。
 
 import { approxCnyAmount } from "./pricing/fx";
+import { centsToUsd, type PriceSnapshot } from "./pricing/dodo-prices";
+import pricesJson from "./pricing/prices.json";
+
+const PRICES = pricesJson as PriceSnapshot;
 
 export interface CreditPack {
   /** 充值额度（同时作为选购标识，与渠道产品映射对齐）。 */
   credits: number;
-  /** 展示价（美元，仅展示；实际扣款以渠道产品定价为准）。 */
+  /** 展示价（美元）：取自构建期 Dodo 定价快照，与结账页扣款同源。 */
   priceUsd: number;
   /** 是否标注「更划算」。 */
   highlight?: boolean;
@@ -20,8 +24,8 @@ export interface CreditPack {
 // 现按 credits 数量存放在 lib/i18n/admin/dictionaries/*/billing.ts 的 credits.packDesc。
 // 本文件只留结构化事实——与 lib/plans.ts 的分工一致。
 export const CREDIT_PACKS: CreditPack[] = [
-  { credits: 50, priceUsd: 4.99 },
-  { credits: 200, priceUsd: 14.99, highlight: true },
+  { credits: 50, priceUsd: centsToUsd(PRICES.credits["50"]) },
+  { credits: 200, priceUsd: centsToUsd(PRICES.credits["200"]), highlight: true },
 ];
 
 /**

@@ -1,0 +1,12 @@
+{
+  "currency": "USD",
+  "plans": {
+    "starter": 599,
+    "pro": 1999,
+    "agency": 4999
+  },
+  "credits": {
+    "50": 499,
+    "200": 1499
+  }
+}

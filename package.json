@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
-    "vercel-build": "pnpm migrate:up && next build",
+    "vercel-build": "pnpm migrate:up && pnpm prices:sync && next build",
     "start": "next start",
+    "prices:sync": "DOTENV_CONFIG_PATH=.env.local tsx -r dotenv/config scripts/sync-dodo-prices.ts",
     "lint": "eslint",
     "migrate": "DOTENV_CONFIG_PATH=.env.local tsx -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js -m migrations -d DATABASE_URL_UNPOOLED",
     "migrate:up": "DOTENV_CONFIG_PATH=.env.local tsx -r dotenv/config node_modules/node-pg-migrate/bin/node-pg-migrate.js up -m migrations -d DATABASE_URL_UNPOOLED",
