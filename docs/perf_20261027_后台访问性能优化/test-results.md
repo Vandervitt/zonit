@@ -143,4 +143,4 @@ admin 端与 super-admin 端切换菜单「又卡又慢」：点击后画面长�
 
 - 每次取数据仍需 1 次往返（国内 → 新加坡约 0.2s），这是物理下限。
 - super-admin「用户」页的聚合 SQL 需要在数据量上来后复测。
-- 待办：旧库 `neon-for-zapbrige`（us-east-1，`long-brook-97677049`）在验证通过后断开并删除（需在 Vercel 控制台人工操作）。
+- 旧库 `neon-for-zapbrige`（us-east-1，`long-brook-97677049`）已于 2026-10-27 验证通过后在 Vercel 控制台断开并删除，回滚路径随之失效。
