@@ -1,3 +1,4 @@
+import { PLANS, PLAN_ORDER, planPriceLabel } from "@/lib/plans";
 import type { HelpChapterData } from "../../types";
 
 export const billing: HelpChapterData = {
@@ -11,7 +12,7 @@ export const billing: HelpChapterData = {
       blocks: [
         {
           t: "table",
-          head: ["权益", "Free（$0）", "Starter（$5.99/月）", "Pro（$19.99/月）", "Agency（$49.99/月）"],
+          head: ["权益", ...PLAN_ORDER.map((id) => `${PLANS[id].label}（${planPriceLabel(PLANS[id], "zh")}）`)],
           rows: [
             ["落地页数量", "1", "5", "20", "无限"],
             ["自定义域名", "0", "1", "5", "无限"],

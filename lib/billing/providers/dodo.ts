@@ -37,7 +37,8 @@ function productForCredits(credits: number): string | undefined {
   return byCredits[credits];
 }
 
-function client(): DodoPayments {
+/** 按 env 装配 SDK 客户端；构建期价格同步脚本（scripts/sync-dodo-prices.ts）也复用它。 */
+export function dodoClient(): DodoPayments {
   const environment = process.env.DODO_PAYMENTS_ENVIRONMENT === "live_mode" ? "live_mode" : "test_mode";
   return new DodoPayments({ bearerToken: process.env.DODO_PAYMENTS_API_KEY!, environment });
 }
@@ -59,7 +60,7 @@ export const dodoProvider: BillingProvider = {
     const productId = productForPlan(planId);
     if (!productId) throw new Error(`No Dodo product configured for plan: ${planId}`);
 
-    const session = await client().checkoutSessions.create({
+    const session = await dodoClient().checkoutSessions.create({
       product_cart: [{ product_id: productId, quantity: 1 }],
       customer: { email, name: email },
       return_url: `${baseUrl}/admin/billing?success=1`,
@@ -73,7 +74,7 @@ export const dodoProvider: BillingProvider = {
     const productId = productForCredits(credits);
     if (!productId) throw new Error(`No Dodo product configured for credits: ${credits}`);
 
-    const session = await client().checkoutSessions.create({
+    const session = await dodoClient().checkoutSessions.create({
       product_cart: [{ product_id: productId, quantity: 1 }],
       customer: { email, name: email },
       // 一次性充值成功后回 billing 页，用 topup=1 触发充值成功提示（与订阅 success=1 区分）。
@@ -85,7 +86,7 @@ export const dodoProvider: BillingProvider = {
   },
 
   async getPortalUrl(customerId: string): Promise<string> {
-    const session = await client().customers.customerPortal.create(customerId);
+    const session = await dodoClient().customers.customerPortal.create(customerId);
     if (!session.link) throw new Error("Dodo returned no customer portal link");
     return session.link;
   },
@@ -94,7 +95,7 @@ export const dodoProvider: BillingProvider = {
     const productId = productForPlan(planId);
     if (!productId) throw new Error(`No Dodo product configured for plan: ${planId}`);
     // 按比例立即计费/抵扣；扣款失败则不切换（避免降到付不起的档还生效）。
-    await client().subscriptions.changePlan(subscriptionId, {
+    await dodoClient().subscriptions.changePlan(subscriptionId, {
       product_id: productId,
       quantity: 1,
       proration_billing_mode: "prorated_immediately",
@@ -104,7 +105,7 @@ export const dodoProvider: BillingProvider = {
 
   async resume(subscriptionId: string): Promise<void> {
     // 撤销周期末取消：清掉 cancel_at_next_billing_date，订阅恢复正常续费。
-    await client().subscriptions.update(subscriptionId, { cancel_at_next_billing_date: false });
+    await dodoClient().subscriptions.update(subscriptionId, { cancel_at_next_billing_date: false });
   },
 
   async verifyAndParse(rawBody: string, headers: Record<string, string>): Promise<BillingEvent> {

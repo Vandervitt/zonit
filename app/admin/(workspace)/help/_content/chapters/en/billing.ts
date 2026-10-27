@@ -1,3 +1,4 @@
+import { PLANS, PLAN_ORDER, planPriceLabel } from "@/lib/plans";
 import type { HelpChapterData } from "../../types";
 
 export const billing: HelpChapterData = {
@@ -11,7 +12,7 @@ export const billing: HelpChapterData = {
       blocks: [
         {
           t: "table",
-          head: ["Feature", "Free ($0)", "Starter ($5.99/mo)", "Pro ($19.99/mo)", "Agency ($49.99/mo)"],
+          head: ["Feature", ...PLAN_ORDER.map((id) => `${PLANS[id].label} (${planPriceLabel(PLANS[id], "en")})`)],
           rows: [
             ["Landing pages", "1", "5", "20", "Unlimited"],
             ["Custom domains", "0", "1", "5", "Unlimited"],
