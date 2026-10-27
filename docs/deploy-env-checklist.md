@@ -34,6 +34,8 @@
 
 > ⚠️ `vercel-build` = `pnpm migrate:up && next build`，每次生产构建都会拿 `DATABASE_URL_UNPOOLED` 对生产库跑迁移。该变量必须在**构建环境**可用，否则部署直接失败。
 
+> 生产库为 Neon `neon-singapore`（aws-ap-southeast-1），经 Vercel Storage 连接，Preview 选 **Isolated copies**：每个 PR 的 Preview 用独立分支 `preview/<分支名>`，迁移跑在该分支上，**生产主分支只在合并后的生产构建里迁移**。连接时 Production 与 Preview 都要勾选，漏勾 Preview 会导致 Preview 构建缺 `DATABASE_URL_UNPOOLED` 而失败。函数区域（`vercel.json` 的 `regions`）必须与库同区域，原因见 [后台访问性能优化](perf_20261027_后台访问性能优化/test-results.md)。
+
 ### 认证 🔴
 
 | 变量 | 用途 | 获取 |
