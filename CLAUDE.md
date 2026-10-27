@@ -30,6 +30,7 @@ Hard rules:
 - This project uses `proxy.ts` as middleware.
 - Tailwind only: no custom CSS and no inline styles.
 - Commit messages must use Chinese Conventional Commits.
+- Functions run in `sin1` (`vercel.json` `regions`) and the production Neon database is in `aws-ap-southeast-1`; they must stay co-located. Each authenticated request makes 5+ sequential DB round trips (proxy `auth()` + route `auth()` + queries), so moving only one side multiplies cross-region latency.
 
 # IMPORTANT
 "IMPORTANT: After finishing the code and passing local tests, you MUST execute git commit with a JSON summary in the message. Do not wait for user input to exit."

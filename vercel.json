@@ -1,6 +1,7 @@
 {
   "framework": "nextjs",
   "installCommand": "pnpm install",
+  "regions": ["sin1"],
   "git": {
     "deploymentEnabled": {
       "main": true,
