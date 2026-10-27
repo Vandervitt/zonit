@@ -5,7 +5,7 @@ import { test, expect } from "@playwright/test";
 test.describe("外贸询盘落地页", () => {
   test("中文页：标题、模板数量、主 CTA 经中文登录页带着模板回跳", async ({ page }) => {
     await page.goto("/zh/rfq-landing-page");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("是一张能直接发询价的页面");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("一张单页独立站就能接询价");
     await expect(page.getByRole("heading", { name: /^\d+ 套外贸 B2B 模板，自带询价表单$/ })).toBeVisible();
     await expect(page.locator("main")).not.toContainText("{rfqTemplates}");
 
@@ -39,7 +39,7 @@ test.describe("外贸询盘落地页", () => {
   test("外贸询盘长尾文章：双语渲染，主 CTA 指产品页，未挂行业的次 CTA 回落注册", async ({ page }) => {
     for (const [path, h1] of [
       ["/zh/guides/rfq-first-reply", "外贸询盘怎么回"],
-      ["/zh/guides/b2b-ads-homepage-vs-landing-page", "B2B 广告打到官网还是落地页"],
+      ["/zh/guides/b2b-ads-homepage-vs-landing-page", "B2B 广告打到独立站首页还是落地页"],
     ] as const) {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1 })).toContainText(h1);

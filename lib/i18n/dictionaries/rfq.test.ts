@@ -69,6 +69,18 @@ describe("外贸询盘页文案", () => {
   });
 });
 
+// 中文面借用目标人群自己的词「独立站」（福步建站板块的需求帖都这么说），但产品是单页，
+// 不带产品目录、多栏目和 SEO 架构——每处「独立站」必须在同一句里带「单页」限定，否则就是超卖。
+const UNQUALIFIED_SITE = (s: string) => /独立站/.test(s) && !/单页/.test(s);
+
+describe("中文「独立站」说法不超卖", () => {
+  it("matcher 有效，且中文文案里的「独立站」都带「单页」限定", () => {
+    expect(UNQUALIFIED_SITE("生成你的外贸独立站")).toBe(true);
+    expect(UNQUALIFIED_SITE("外贸询盘独立站（单页版）")).toBe(false);
+    expect(texts(zh.rfq).filter(UNQUALIFIED_SITE)).toEqual([]);
+  });
+});
+
 describe("外贸询盘页引用的配置真实存在", () => {
   it("主 CTA 的模板在注册表里，且是询价型模板", () => {
     const tpl = TEMPLATES.find((t) => t.id === RFQ_PRIMARY_TEMPLATE);
