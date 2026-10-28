@@ -180,8 +180,6 @@ export const home = {
     kicker: "Simple, transparent pricing",
     title: "Go live free, upgrade when you want your own domain",
     desc: "Free publishes a real, working page on a platform-provided address — no domain to buy, no DNS to touch. Upgrade to connect your own brand domain and unlock more pages, tracking, and AI credits by plan.",
-    ctaFree: "Start free",
-    ctaPaid: "Sign up to upgrade",
   },
   finalCta: {
     titleLine1: "Your next campaign",

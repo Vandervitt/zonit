@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { Card, Table, Tag, Typography, Space, Alert } from "antd";
-import { CheckCircleTwoTone, CloseOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { PLANS, PLAN_ORDER, planFeatureRows, planPriceLabel, type PlanId } from "@/lib/plans";
-import { getDictionary } from "@/lib/i18n/dictionaries";
-import { SEMANTIC } from "@/lib/theme/antd-theme";
+import type { PlanId } from "@/lib/plans";
 import { PlanBadge } from "@/components/billing/PlanBadge";
+import { PlanComparison } from "@/components/billing/PlanComparison";
 import type { FounderContact } from "@/lib/platform-settings";
 import { PlatformHealth, type PlatformEnv } from "./PlatformHealth";
 import { FounderContactForm } from "./FounderContactForm";
@@ -48,64 +46,6 @@ const adminColumns: ColumnsType<SuperAdminRow> = [
     render: (disabled: boolean) =>
       disabled ? <Tag color="error">已禁用</Tag> : <Tag color="success">正常</Tag>,
   },
-];
-
-function FeatureCell({ value }: { value: string | boolean }) {
-  if (typeof value === "boolean") {
-    return value ? (
-      <CheckCircleTwoTone twoToneColor={SEMANTIC.success} />
-    ) : (
-      <CloseOutlined style={{ color: "rgba(0,0,0,0.22)" }} />
-    );
-  }
-  return <Typography.Text style={{ fontSize: 13 }}>{value}</Typography.Text>;
-}
-
-interface PlanTableRow {
-  key: string;
-  label: string;
-  desc: string;
-  values: Record<PlanId, string | boolean>;
-}
-
-// 平台后台固定中文，不参与营销面国际化。
-const planRows: PlanTableRow[] = planFeatureRows(getDictionary("zh").plans, "zh").map((row) => ({
-  key: row.key,
-  label: row.label,
-  desc: row.desc,
-  values: Object.fromEntries(
-    PLAN_ORDER.map((p) => [p, row.valueFor(PLANS[p])]),
-  ) as Record<PlanId, string | boolean>,
-}));
-
-const planColumns: ColumnsType<PlanTableRow> = [
-  {
-    title: "权益",
-    dataIndex: "label",
-    key: "label",
-    fixed: "left",
-    width: 180,
-    render: (label: string, row) => (
-      <div>
-        <Typography.Text strong style={{ display: "block", fontSize: 13 }}>{label}</Typography.Text>
-        <Typography.Text type="secondary" style={{ fontSize: 11 }}>{row.desc}</Typography.Text>
-      </div>
-    ),
-  },
-  ...PLAN_ORDER.map((p) => ({
-    key: p,
-    align: "center" as const,
-    onCell: () => (PLANS[p].highlight ? { style: { background: "#f0f9ff" } } : {}),
-    title: (
-      <Space direction="vertical" size={0}>
-        <span>{PLANS[p].label}</span>
-        <Typography.Text type="secondary" style={{ fontSize: 11, fontWeight: 400 }}>
-          {planPriceLabel(PLANS[p], "zh")}
-        </Typography.Text>
-      </Space>
-    ),
-    render: (_: unknown, row: PlanTableRow) => <FeatureCell value={row.values[p]} />,
-  })),
 ];
 
 export function SuperAdminSettingsClient({ data }: { data: SettingsData }) {
@@ -149,14 +89,8 @@ export function SuperAdminSettingsClient({ data }: { data: SettingsData }) {
         </Card>
 
         <Card title="套餐与限额总览" extra={<Typography.Text type="secondary">只读参考 · 源自 lib/plans</Typography.Text>}>
-          <Table
-            columns={planColumns}
-            dataSource={planRows}
-            rowKey="key"
-            pagination={false}
-            size="small"
-            scroll={{ x: 720 }}
-          />
+          {/* 与营销站定价页同一个组件：运营看到的就是客户看到的。平台后台固定中文。 */}
+          <PlanComparison locale="zh" />
         </Card>
       </Space>
     </div>

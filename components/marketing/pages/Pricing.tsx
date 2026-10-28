@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PlanComparison } from "@/components/billing/PlanComparison";
+import { PlanComparison, visitorPlanCta } from "@/components/billing/PlanComparison";
 import { Routes } from "@/lib/constants";
 import { marketingMetadata } from "@/lib/seo/site";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -30,7 +30,7 @@ export async function PricingView({ locale }: { locale: Locale }) {
           <h1 className="text-4xl font-bold text-foreground mb-3">{t.title}</h1>
           <p className="text-muted-foreground text-lg">{t.subtitle}</p>
         </div>
-        <PlanComparison locale={locale} cnyRate={cnyRate} />
+        <PlanComparison locale={locale} cnyRate={cnyRate} cta={visitorPlanCta(locale)} showTrialBadge />
       </div>
     </main>
   );

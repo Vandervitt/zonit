@@ -12,10 +12,25 @@ export const plans = {
   },
   table: {
     feature: "Feature",
-    description: "What it does",
-    mostPopular: "Most popular",
+    includedInAll: "Included in every plan",
+    included: "Included",
+    notIncluded: "Not included",
+    // 窄屏卡片里「权益名: 额度」的分隔符。
+    valueSeparator: ": ",
+    // {days} is filled from SIGNUP_TRIAL_DAYS — never hard-code the number.
+    trialBadge: "{days} days free on sign-up",
+    currentBadge: "Your plan",
     ctaFree: "Start free",
-    ctaUpgrade: "Upgrade",
+    ctaTrial: "Try free for {days} days",
+    ctaChoose: "Choose {plan}",
+  },
+  groups: { publish: "Publishing", tracking: "Tracking & leads", ai: "AI generation", scale: "Running at scale" },
+  // Who each plan is for: visitors pick by who they are, not by diffing rows.
+  fit: {
+    free: "Publish one page free and see whether inquiries come in",
+    starter: "One brand with a few service pages on one domain",
+    pro: "Several offers at once, with CAPI sending conversions back to ad platforms",
+    agency: "Agencies running campaigns for many clients",
   },
   rows: {
     landingPages: {
@@ -66,30 +81,5 @@ export const plans = {
       label: "AI rewriting",
       desc: "Polish and rewrite section by section to produce variants fast",
     },
-  },
-  highlights: {
-    free: [
-      "1 landing page",
-      "The full lead-gen template library",
-      "Visual content editor",
-      "Publish on a platform-provided address (watermarked); your own brand domain needs a paid plan",
-    ],
-    starter: [
-      "5 landing pages, each on its own path under one domain",
-      "1 custom domain, no platform watermark",
-      "Built for one brand with several service pages — clinics, law firms, tutors",
-      "1× Meta Pixel tracking",
-    ],
-    pro: [
-      "20 landing pages + 5 domains",
-      "Separate domains to isolate campaigns when running several offers",
-      "Lead webhook to your CRM / Zapier",
-      "Meta / TikTok / Google tracking + Meta / TikTok CAPI",
-    ],
-    agency: [
-      "Unlimited pages + unlimited domains",
-      "Anti-duplication",
-      "AI generation raised to 300 / mo",
-    ],
   },
 };

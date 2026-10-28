@@ -166,10 +166,15 @@ export function planPriceLabel(plan: PlanConfig, locale: Locale, cnyRate?: numbe
   return `${plan.currency}${plan.priceAmount}${suffix}${approx ? `（${approx}）` : ""}`;
 }
 
+/** 对比表分组：按访客选档时关心的顺序排列（先能不能发出去，再能不能量化，最后是规模化）。 */
+export const PLAN_FEATURE_GROUPS = ["publish", "tracking", "ai", "scale"] as const;
+export type PlanFeatureGroup = (typeof PLAN_FEATURE_GROUPS)[number];
+
 /** 对比表行定义：valueFor 返回字符串（额度）或布尔（有无）；desc 为该权益的作用说明。 */
 export interface PlanFeatureRow {
   /** 稳定标识，供测试与后续引用锚定（不随语言变化）。 */
   key: string;
+  group: PlanFeatureGroup;
   label: string;
   desc: string;
   valueFor: (plan: PlanConfig) => string | boolean;
@@ -179,25 +184,49 @@ export interface PlanFeatureRow {
 export function planFeatureRows(t: PlansDict, locale: Locale = "en"): PlanFeatureRow[] {
   const r = t.rows;
   return [
-    { key: "landingPages", ...r.landingPages, valueFor: (p) => formatPlanLimit(p.landingPagesLimit, locale, "pages") },
+    { key: "landingPages", group: "publish", ...r.landingPages, valueFor: (p) => formatPlanLimit(p.landingPagesLimit, locale, "pages") },
     {
       key: "customDomain",
+      group: "publish",
       ...r.customDomain,
       // Free 的 domainsLimit 是 0，但平台子域不占该额度，它照样能发布——
       // 直接落到 formatPlanLimit 会显示破折号，读起来像「发不了」。
       valueFor: (p) =>
         p.domainsLimit === 0 ? r.customDomain.freeValue : formatPlanLimit(p.domainsLimit, locale, "domains"),
     },
-    { key: "templates", ...r.templates, valueFor: () => true },
-    { key: "editor", ...r.editor, valueFor: () => true },
-    { key: "basicPixel", ...r.basicPixel, valueFor: (p) => p.basicPixel },
-    { key: "watermark", ...r.watermark, valueFor: (p) => !p.hasWatermark },
-    { key: "advancedTracking", ...r.advancedTracking, valueFor: (p) => p.advancedTracking },
-    { key: "antiBan", ...r.antiBan, valueFor: (p) => p.antiBan },
-    { key: "leadWebhook", ...r.leadWebhook, valueFor: (p) => p.leadWebhook },
-    { key: "aiPage", ...r.aiPage, valueFor: (p) => formatPlanLimit(p.aiPageQuota, locale, "perMonth") },
-    { key: "aiRewrite", ...r.aiRewrite, valueFor: (p) => formatPlanLimit(p.aiRewriteQuota, locale, "perMonth") },
+    { key: "templates", group: "publish", ...r.templates, valueFor: () => true },
+    { key: "editor", group: "publish", ...r.editor, valueFor: () => true },
+    { key: "basicPixel", group: "tracking", ...r.basicPixel, valueFor: (p) => p.basicPixel },
+    { key: "watermark", group: "publish", ...r.watermark, valueFor: (p) => !p.hasWatermark },
+    { key: "advancedTracking", group: "tracking", ...r.advancedTracking, valueFor: (p) => p.advancedTracking },
+    { key: "antiBan", group: "scale", ...r.antiBan, valueFor: (p) => p.antiBan },
+    { key: "leadWebhook", group: "tracking", ...r.leadWebhook, valueFor: (p) => p.leadWebhook },
+    { key: "aiPage", group: "ai", ...r.aiPage, valueFor: (p) => formatPlanLimit(p.aiPageQuota, locale, "perMonth") },
+    { key: "aiRewrite", group: "ai", ...r.aiRewrite, valueFor: (p) => formatPlanLimit(p.aiRewriteQuota, locale, "perMonth") },
   ];
+}
+
+export interface PlanComparisonLayout {
+  /** 四档全有的布尔权益：合并成一句「所有套餐都包含」，不占对比行。 */
+  common: PlanFeatureRow[];
+  groups: { id: PlanFeatureGroup; label: string; rows: PlanFeatureRow[] }[];
+}
+
+/**
+ * 对比表的展示布局：先剔出四档全有的行，其余按 PLAN_FEATURE_GROUPS 分组（组内保持 planFeatureRows 顺序）。
+ * 「全有」按 PLANS 实时判定而非写死名单——某项权益哪天改成分档，它会自动回到所属分组。
+ */
+export function planComparisonLayout(t: PlansDict, locale: Locale = "en"): PlanComparisonLayout {
+  const rows = planFeatureRows(t, locale);
+  const isCommon = (row: PlanFeatureRow) => PLAN_ORDER.every((id) => row.valueFor(PLANS[id]) === true);
+  return {
+    common: rows.filter(isCommon),
+    groups: PLAN_FEATURE_GROUPS.map((id) => ({
+      id,
+      label: t.groups[id],
+      rows: rows.filter((r) => r.group === id && !isCommon(r)),
+    })).filter((g) => g.rows.length > 0),
+  };
 }
 
 /**

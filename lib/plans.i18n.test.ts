@@ -53,7 +53,7 @@ describe("planPriceText", () => {
     expect(planPriceText(PRO_1999, "zh", 7.1)).toEqual({
       amount: "$19.99",
       suffix: "/月",
-      approx: "约 ¥141.93",
+      approx: "约 ¥141",
     });
   });
 
@@ -65,7 +65,7 @@ describe("planPriceText", () => {
 describe("planPriceLabel", () => {
   it("单行版：美元价 + 周期后缀，传汇率时括号内附参考换算", () => {
     expect(planPriceLabel(AGENCY_4999, "zh")).toBe("$49.99/月");
-    expect(planPriceLabel(AGENCY_4999, "zh", 7.1)).toBe("$49.99/月（约 ¥354.93）");
+    expect(planPriceLabel(AGENCY_4999, "zh", 7.1)).toBe("$49.99/月（约 ¥354）");
     expect(planPriceLabel(PLANS.free, "zh", 7.1)).toBe("$0");
   });
 });
@@ -112,11 +112,10 @@ describe("planFeatureRows", () => {
     expect(zh!.valueFor(PLANS.agency)).toBe("无限");
   });
 
-  it("每档 highlights 两种语言条数一致", () => {
-    const en = getDictionary("en").plans;
-    const zh = getDictionary("zh").plans;
-    for (const planId of PLAN_ORDER) {
-      expect(en.highlights[planId].length).toBe(zh.highlights[planId].length);
+  it("每档都有两种语言的「适合谁」一句话", () => {
+    for (const locale of ["en", "zh"] as const) {
+      const fit = getDictionary(locale).plans.fit;
+      expect(PLAN_ORDER.filter((id) => !fit[id]?.trim())).toEqual([]);
     }
   });
 });

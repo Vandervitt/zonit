@@ -149,8 +149,6 @@ export const home = {
     kicker: "简单透明的定价",
     title: "免费就能上线，想用自有域名时再升级",
     desc: "Free 就能用平台提供的地址把页面真正发布出去——不用买域名，也不用改 DNS。升级后绑定自有品牌域名，并按套餐解锁更多页面、追踪与 AI 额度。",
-    ctaFree: "免费开始",
-    ctaPaid: "注册后升级",
   },
   finalCta: {
     titleLine1: "你的下一次获客",

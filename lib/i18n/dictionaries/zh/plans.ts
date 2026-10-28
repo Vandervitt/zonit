@@ -12,10 +12,25 @@ export const plans = {
   },
   table: {
     feature: "功能",
-    description: "说明",
-    mostPopular: "最受欢迎",
+    includedInAll: "所有套餐都包含",
+    included: "包含",
+    notIncluded: "不包含",
+    // 窄屏卡片里「权益名：额度」的分隔符。
+    valueSeparator: "：",
+    // {days} 由 SIGNUP_TRIAL_DAYS 填充，不写死天数。
+    trialBadge: "注册即送 {days} 天",
+    currentBadge: "当前套餐",
     ctaFree: "免费开始",
-    ctaUpgrade: "立即升级",
+    ctaTrial: "免费试用 {days} 天",
+    ctaChoose: "选择 {plan}",
+  },
+  groups: { publish: "发布", tracking: "追踪与线索", ai: "AI 生成", scale: "批量投放风控" },
+  // 每档「适合谁」：访客按身份选档，而不是逐行比功能。
+  fit: {
+    free: "先免费发一张页，验证有没有询盘",
+    starter: "单一品牌，几张服务页挂在同一个域名下",
+    pro: "同时投多个 offer，用 CAPI 把转化回传广告平台",
+    agency: "代运营方，为多个客户批量投放",
   },
   rows: {
     landingPages: { label: "落地页数量", desc: "可创建并保存的落地页总数" },
@@ -38,11 +53,5 @@ export const plans = {
     leadWebhook: { label: "线索 Webhook 推送", desc: "新线索实时 POST 到你的 CRM / Zapier（含签名）" },
     aiPage: { label: "AI 整页生成", desc: "输入业务资料，AI 按当前模板生成整页营销文案" },
     aiRewrite: { label: "AI 智能改写", desc: "逐段润色改写文案，快速产出多个版本" },
-  },
-  highlights: {
-    free: ["1 张落地页", "全量海外获客模板库", "可视化内容编辑器", "可发布到平台提供的地址（带水印），自有品牌域名需付费"],
-    starter: ["5 张落地页，可挂在同一个域名的不同路径下", "1 个自定义域名，无平台水印", "适合单品牌多服务页（诊所、律所、教培）", "1× Meta Pixel 追踪"],
-    pro: ["20 张落地页 + 5 个域名", "多域名隔离，适合同时投多个 offer", "线索 Webhook 推送到 CRM / Zapier", "Meta / TikTok / Google 追踪 + Meta / TikTok CAPI"],
-    agency: ["无限落地页 + 无限域名", "反同质化", "AI 生成额度提升至 300 次/月"],
   },
 };

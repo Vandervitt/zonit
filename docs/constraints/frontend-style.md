@@ -17,6 +17,7 @@
   - 历史上曾整套引入 shadcn/ui,但 49 个组件里 45 个从未被使用,已于 2026-07-27 移除。**不要因为「项目用 shadcn」就直接 `npx shadcn add`**。
 - **后台**(`app/admin`、`app/super-admin`):Ant Design v5,主题经 `lib/theme/antd-theme.ts` 的 ConfigProvider 注入。
 - 禁止引入第三套 UI 库(MUI/emotion 等);ESLint 已通过 `no-restricted-imports` 阻断。
+- **跨区共享例外**:`components/billing/PlanComparison.tsx`(套餐对比)是全站唯一的套餐对照组件,营销站、后台计费页、超管设置页共用,用 Tailwind 实现、不依赖 antd、不用 hooks;后台需要的交互按钮(antd `Button`/`Popconfirm`)经 `cta` prop 由调用方注入。布局按容器宽度(`@container`)切换表格/卡片。新增套餐展示面直接复用它,不要再各写一张表。
 
 ## Ant Design 必须在 Client Component 里渲染(后台）
 

@@ -17,7 +17,7 @@ import {
   Inbox,
 } from "lucide-react";
 import { Routes } from "@/lib/constants";
-import { PlanComparison } from "@/components/billing/PlanComparison";
+import { PlanComparison, visitorPlanCta } from "@/components/billing/PlanComparison";
 import { ctaPrimary, ctaGhost, gradientText, glassCard, pill, glowAura } from "@/lib/theme";
 import { Backdrop, SiteNav, SiteFooter, SectionHead, PricingLink, type Fonts } from "./chrome";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
@@ -592,15 +592,7 @@ function Pricing({
         fonts={fonts}
       />
       <div className="mx-auto mt-16 max-w-6xl">
-        <PlanComparison
-          locale={locale}
-          cnyRate={cnyRate}
-          ctaFor={(planId) => ({
-            // 首页两档 CTA 都去注册页——未登录访客无法直接进后台升级。
-            href: localePath(locale, Routes.Register),
-            label: planId === "free" ? t.pricing.ctaFree : t.pricing.ctaPaid,
-          })}
-        />
+        <PlanComparison locale={locale} cnyRate={cnyRate} cta={visitorPlanCta(locale)} showTrialBadge />
       </div>
     </section>
   );
