@@ -16,6 +16,7 @@ import {
 } from "@ant-design/icons";
 import { superAdminSiderTheme } from "@/lib/theme/antd-theme";
 import { BRAND } from "@/lib/theme/brand";
+import { SITE_NAME } from "@/lib/seo/site-name";
 
 const { Sider, Header, Content } = Layout;
 
@@ -79,7 +80,8 @@ export function SuperAdminShell({ children }: { children: React.ReactNode }) {
                 strong
                 style={{ color: "#fff", display: "block", fontSize: 13, letterSpacing: "0.04em" }}
               >
-                ZAP BRIDGE ADMIN
+                {/* 取 SITE_NAME 而非写死：更名时这里曾被漏掉，一直显示旧品牌 */}
+                {SITE_NAME} Admin
               </Typography.Text>
               <Typography.Text
                 style={{
