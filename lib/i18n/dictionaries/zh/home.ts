@@ -2,20 +2,21 @@
 // 数量一律用 {templates} / {industries} 占位符，由 lib/templates/stats.ts 按注册表实际内容替换。
 export const home = {
   meta: {
-    title: "Urgizat — 把访客变成能打通的联系方式",
+    title: "Urgizat — 流量进得来，询盘留得住",
     description:
       "为海外获客打造的留资落地页：{templates} 套模板覆盖 {industries} 个行业，AI 整页成稿，几分钟出第一版。表单线索自动进收件箱，WhatsApp 与电话咨询的点击和来源也一样看得清。",
     ogDescription:
       "{templates} 套咨询与留资模板，覆盖 {industries} 个行业，AI 整页成稿几分钟出第一版；发布到自有品牌域名，所有线索归集到一个收件箱。",
   },
   hero: {
-    badge: "为获客而生",
-    titleLine1: "把访客变成",
-    titleLine2: "能打通的联系方式",
+    badge: "给外贸工厂和代运营团队的获客落地页",
+    titleLine1: "流量进得来",
+    titleLine2: "询盘留得住",
     // 首屏讲结果不讲机制：像素 / UTM / CAPI 等术语一律留到下方追踪区再展开。
     // 也不锁死流量来源（广告 / SEO / 社媒同样成立）与转化渠道（表单 / WhatsApp / 电话）。
+    // 副标题讲优势不讲流程：三个「不」依次对应平台分流询盘、说不清效果、预算浪费三处痛点。
     subtitle:
-      "选一套获客模板，让 AI 照着你的业务把整页写完，再发布到你自己的域名——一个下午就能上线第一版。表单线索直接进你的收件箱；WhatsApp 与电话咨询走各自渠道，点击与来源照样统计得清清楚楚。",
+      "询盘不外流，来源不糊涂，广告不白烧。",
     ctaPrimary: "免费开始",
     ctaSecondary: "查看套餐",
     note: "注册即赠 Pro 全功能 14 天 · 无需信用卡 · 无需写一行代码",
@@ -151,8 +152,8 @@ export const home = {
     desc: "Free 就能用平台提供的地址把页面真正发布出去——不用买域名，也不用改 DNS。升级后绑定自有品牌域名，并按套餐解锁更多页面、追踪与 AI 额度。",
   },
   finalCta: {
-    titleLine1: "你的下一次获客",
-    titleLine2: "值得一张真的能转化的页面",
+    titleLine1: "下一条询盘",
+    titleLine2: "别再让它溜走",
     desc: "现在就能做出第一张页面并发布上线，不用域名，也不用信用卡；想换到自己的品牌域名时再升级。",
     ctaPrimary: "免费开始",
     ctaSecondary: "已有账号，登录",

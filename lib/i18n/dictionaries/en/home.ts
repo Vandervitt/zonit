@@ -19,21 +19,23 @@
 // 数量一律用 {templates} / {industries} 占位符，由 lib/templates/stats.ts 按注册表实际内容替换。
 export const home = {
   meta: {
-    title: "Urgizat — Landing pages that turn visitors into reachable leads",
+    title: "Urgizat — Get the traffic. Keep the inquiries.",
     description:
       "Lead-gen landing pages for businesses that run on inquiries: start from {templates} templates across {industries} industries, draft a full page with AI, and ship your first version in minutes. Form leads land in one inbox you can actually work, and you still see the clicks and sources behind every WhatsApp and phone inquiry.",
     ogDescription:
       "{templates} inquiry and lead-capture templates across {industries} industries, plus AI full-page drafting — first version in minutes. Publish to your own brand domain and keep every lead in one inbox.",
   },
   hero: {
-    badge: "Built for businesses that run on inquiries",
-    titleLine1: "Turn visitors into",
+    badge: "For manufacturers and the agencies behind their ads",
+    titleLine1: "Get the traffic.",
     // 保持两行：更长的措辞在 1440 宽下会折成三行，末行只剩一个词。
-    titleLine2: "leads you can reach",
+    titleLine2: "Keep the inquiries.",
     // 首屏讲结果不讲机制：像素 / UTM / CAPI 等术语一律留到下方追踪区再展开。
     // 也不锁死流量来源（广告 / SEO / 社媒同样成立）与转化渠道（表单 / WhatsApp / 电话）。
+    // 用 inquiries 不用 leads：本站口径 leads 只指表单线索，inquiries 才涵盖 WhatsApp / 电话。
+    // 副标题三个祈使句依次对应中文面「不外流 / 不糊涂 / 不白烧」。
     subtitle:
-      "Pick a lead-gen template, let AI write the whole page around your business, and publish to your own domain — first version live in an afternoon. Form leads land straight in your inbox; WhatsApp and phone inquiries reach you on their own channels, with every click and source tracked.",
+      "Own every inquiry. Trace every source. Stop burning ad spend.",
     ctaPrimary: "Start free",
     ctaSecondary: "See pricing",
     note: "14 days of full Pro on sign-up · No credit card · No code",
@@ -182,8 +184,8 @@ export const home = {
     desc: "Free publishes a real, working page on a platform-provided address — no domain to buy, no DNS to touch. Upgrade to connect your own brand domain and unlock more pages, tracking, and AI credits by plan.",
   },
   finalCta: {
-    titleLine1: "Your next campaign",
-    titleLine2: "deserves a page that converts",
+    titleLine1: "Don't let the next inquiry",
+    titleLine2: "slip away",
     desc: "Build and publish your first page right now — no domain, no credit card. Upgrade when you want it on your own brand domain.",
     ctaPrimary: "Start free",
     ctaSecondary: "Already have an account? Log in",

@@ -108,7 +108,8 @@ function Hero({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeDict 
         >
           {t.hero.titleLine1}
           <br className="hidden sm:block" />{" "}
-          <span className={gradientText}>{t.hero.titleLine2}</span>
+          {/* inline-block：窄屏不显示 <br> 时第二行整体折行，避免末字单独掉到第三行。 */}
+          <span className={`inline-block ${gradientText}`}>{t.hero.titleLine2}</span>
         </motion.h1>
 
         <motion.p
@@ -616,7 +617,7 @@ function FinalCTA({ fonts, locale, t }: { fonts: Fonts; locale: Locale; t: HomeD
         <Sparkles className="relative mx-auto h-8 w-8 text-aqua-500" />
         <h2 className={`relative mt-5 text-3xl font-bold tracking-tight text-foreground sm:text-5xl ${fonts.display}`}>
           {t.finalCta.titleLine1}
-          <br className="hidden sm:block" /> {t.finalCta.titleLine2}
+          <br className="hidden sm:block" /> <span className="inline-block">{t.finalCta.titleLine2}</span>
         </h2>
         <p className="relative mx-auto mt-5 max-w-xl text-base text-muted-foreground">
           {t.finalCta.desc}
