@@ -4,7 +4,7 @@ import type { PageTracking } from "@/types/schema.draft";
 
 /**
  * 按套餐门控页面追踪配置，两级：
- * - free/starter（basicPixel && !advancedTracking）：只保留 Meta 客户端 pixel，
+ * - free（basicPixel && !advancedTracking）：只保留 Meta 客户端 pixel，
  *   剥离 TikTok/GA4/GoogleAds 与服务端 CAPI（serverSide）——即「基础数据追踪 (1× Meta Pixel)」，
  *   让免费用户也能跑小额投放、体验核心价值后再升级。
  * - pro/agency（advancedTracking）：原样返回全矩阵能力。

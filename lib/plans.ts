@@ -7,19 +7,27 @@ import type { Locale } from "./i18n/config";
 import { plans as enPlans } from "./i18n/dictionaries/en/plans";
 import { plans as zhPlans } from "./i18n/dictionaries/zh/plans";
 import { approxCnyAmount } from "./pricing/fx";
-import { centsToUsd, type PriceSnapshot } from "./pricing/dodo-prices";
+import {
+  centsToUsd,
+  type BillingInterval,
+  type PriceSnapshot,
+} from "./pricing/dodo-prices";
 import pricesJson from "./pricing/prices.json";
 
 // 付费档月费来自构建期 Dodo 定价快照（scripts/sync-dodo-prices.ts 生成），
 // 改价只需在 Dodo 后台改产品定价并重新部署，代码里不再手写价格数字。
 const PRICES = pricesJson as PriceSnapshot;
 
-export type PlanId = "free" | "starter" | "pro" | "agency";
+export { BILLING_INTERVALS, type BillingInterval } from "./pricing/dodo-prices";
+
+// 2026-10-28 去掉 Starter：付费入门直接是 Pro，见 docs/feat_20261028_年付与去除Starter档/design.md。
+export type PlanId = "free" | "pro" | "agency";
 
 export interface PlanConfig {
   id: PlanId;
-  label: string;                // 档位品牌名（Free / Starter / Pro / Agency），不翻译
-  priceAmount: number;          // 月费数值（美元）；付费档取自 Dodo 定价快照，Free 固定为 0
+  label: string;                // 档位品牌名（Free / Pro / Agency），不翻译
+  priceAmount: number;          // 月费数值（美元），即 prices.month；单行价格展示沿用它
+  prices: Record<BillingInterval, number>; // 月付 / 年付价（美元）；付费档取自 Dodo 定价快照，Free 均为 0
   currency: string;             // 收款货币固定 USD，不随界面语言变化；中文面另附「约 ¥xx」参考换算
   color: string;
   highlight?: boolean;          // "最受欢迎"
@@ -37,36 +45,38 @@ export interface PlanConfig {
   aiRewriteQuota: number;
 }
 
+const pricesOf = (id: Exclude<PlanId, "free">): Record<BillingInterval, number> => ({
+  month: centsToUsd(PRICES.plans[id].month),
+  year: centsToUsd(PRICES.plans[id].year),
+});
+
 export const PLANS: Record<PlanId, PlanConfig> = {
   free: {
-    id: "free", label: "Free", priceAmount: 0, currency: "$", color: "slate",
+    id: "free", label: "Free", priceAmount: 0, prices: { month: 0, year: 0 }, currency: "$", color: "slate",
     landingPagesLimit: 1, domainsLimit: 0,
     hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 3, aiRewriteQuota: 10,
   },
-  starter: {
-    id: "starter", label: "Starter", priceAmount: centsToUsd(PRICES.plans.starter), currency: "$", color: "blue",
-    // 多路径发布后，页数额度即发布额度：5 张页可全部挂在这 1 个域名的不同路径下。
-    landingPagesLimit: 5, domainsLimit: 1,
-    // 付费即去水印：Starter 买的就是挂自己的品牌域名，页脚再挂平台水印是自相矛盾。
-    hasWatermark: false, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
-    aiPageQuota: 15, aiRewriteQuota: 100,
-  },
   pro: {
-    id: "pro", label: "Pro", priceAmount: centsToUsd(PRICES.plans.pro), currency: "$", color: "violet", highlight: true,
+    id: "pro", label: "Pro", priceAmount: pricesOf("pro").month, prices: pricesOf("pro"), currency: "$", color: "violet", highlight: true,
+    // 多路径发布后，页数额度即发布额度：页面可挂在同一域名的不同路径下。
     landingPagesLimit: 20, domainsLimit: 5,
     hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: false, leadWebhook: true,
     aiPageQuota: 80, aiRewriteQuota: Infinity,
   },
   agency: {
-    id: "agency", label: "Agency", priceAmount: centsToUsd(PRICES.plans.agency), currency: "$", color: "amber",
-    landingPagesLimit: Infinity, domainsLimit: Infinity,
+    id: "agency", label: "Agency", priceAmount: pricesOf("agency").month, prices: pricesOf("agency"), currency: "$", color: "amber",
+    // 域名封顶 25 而非不限：「不限 + 低价」对代运营方是不可信信号，成本也不可控。
+    landingPagesLimit: Infinity, domainsLimit: 25,
     hasWatermark: false, basicPixel: true, advancedTracking: true, antiBan: true, leadWebhook: true,
     aiPageQuota: 300, aiRewriteQuota: Infinity,
   },
 };
 
-export const PLAN_ORDER: PlanId[] = ["free", "starter", "pro", "agency"];
+export const PLAN_ORDER: PlanId[] = ["free", "pro", "agency"];
+
+/** 后台计费页的展示顺序：已在用产品的人关心的是付费档，Free 置后（官网仍按 PLAN_ORDER 由低到高）。 */
+export const PAID_FIRST_PLAN_ORDER: readonly PlanId[] = [...PLAN_ORDER.filter((id) => id !== "free"), "free"];
 
 // 注册赠送试用：新用户建号即写入 comp_plan（复用赠送套餐机制，到期由
 // activeCompPlan 自动回落，无独立降级逻辑）。对外文案统一「注册即赠 Pro 14 天」。
@@ -118,6 +128,14 @@ type LimitUnit = keyof PlansDict["units"];
 // 直接引各语言字典模块（而非走 getDictionary），避免 plans.ts ↔ dictionaries/index.ts 循环依赖。
 const PLANS_DICT: Record<Locale, PlansDict> = { en: enPlans, zh: zhPlans };
 
+/**
+ * 套餐文案字典。客户端组件（如 PlanComparison）用它而不是 getDictionary——
+ * 后者会把全部营销字典（含模板正文）打进客户端包。
+ */
+export function plansDictionary(locale: Locale): PlansDict {
+  return PLANS_DICT[locale];
+}
+
 /** 额度展示：Infinity → 不限；0 → 破折号；其余带本地化量词（英文区分单复数）。 */
 export function formatPlanLimit(n: number, locale: Locale, unit: LimitUnit): string {
   const t = PLANS_DICT[locale];
@@ -127,43 +145,70 @@ export function formatPlanLimit(n: number, locale: Locale, unit: LimitUnit): str
   return `${n} ${n === 1 ? forms.one : forms.other}`;
 }
 
-/**
- * 参考换算文案：给定汇率时产出「约 ¥xx」，否则为 null。
- * 传 null/undefined 汇率即表示该展示面不需要换算（如英文站），调用方无需分支。
- */
-function approxCnyText(plan: PlanConfig, locale: Locale, cnyRate?: number | null): string | null {
-  if (cnyRate == null) return null;
-  const amount = approxCnyAmount(plan.priceAmount, cnyRate);
-  return amount ? PLANS_DICT[locale].approxCny.replace("{amount}", amount) : null;
+/** 美元金额展示：整数不带小数（$390），否则两位小数（$32.50）；带千分位（$1,490）。 */
+function usd(plan: PlanConfig, amount: number): string {
+  const digits = Number.isInteger(amount) ? 0 : 2;
+  return `${plan.currency}${amount.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
 }
 
 /**
  * 价格展示（拆分版）：对比表里金额与周期后缀分开排版，free 档显示「免费」而非 $0。
  * 金额与货币（USD）不随语言变化，仅周期后缀本地化；
- * 传入 cnyRate 时额外产出人民币参考换算，供中文面在金额下方另起一行展示。
+ * 传入 cnyRate 时额外产出人民币参考换算（按所选周期的价格算），供中文面另起一行展示。
+ * 年付时附 yearlyNote：折合月价（向下截断到分，只舍不入）与相对月付全年的节省额。
  */
 export function planPriceText(
   plan: PlanConfig,
   locale: Locale,
   cnyRate?: number | null,
-): { amount: string; suffix: string; approx: string | null } {
+  interval: BillingInterval = "month",
+): { amount: string; suffix: string; approx: string | null; yearlyNote: string | null } {
   const t = PLANS_DICT[locale];
-  if (plan.priceAmount === 0) return { amount: t.free, suffix: "", approx: null };
+  if (plan.priceAmount === 0) return { amount: t.free, suffix: "", approx: null, yearlyNote: null };
+  const price = plan.prices[interval];
+  const approx = cnyRate == null ? null : approxCnyAmount(price, cnyRate);
+  let yearlyNote: string | null = null;
+  if (interval === "year") {
+    const perMonth = Math.floor((Math.round(price * 100) / 12) + 1e-9) / 100;
+    const saved = Math.round((plan.prices.month * 12 - price) * 100) / 100;
+    yearlyNote = t.yearlyNote
+      .replace("{monthly}", `${plan.currency}${perMonth.toFixed(2)}`)
+      .replace("{saved}", usd(plan, saved));
+  }
   return {
-    amount: `${plan.currency}${plan.priceAmount}`,
-    suffix: t.perMonthSuffix,
-    approx: approxCnyText(plan, locale, cnyRate),
+    amount: usd(plan, price),
+    suffix: interval === "year" ? t.perYearSuffix : t.perMonthSuffix,
+    approx: approx ? t.approxCny.replace("{amount}", approx) : null,
+    yearlyNote,
   };
+}
+
+/**
+ * 年付相当于省了几个月：按各付费档的**实际**价格算（年付价由运营在 Dodo 自由定）。
+ * 只有各档都恰好省整数个月且一致时才返回该数，否则 null——切换按钮上的「省 N 个月」
+ * 是对所有档的统一表述，不一致时宁可不说，也不说假话（各档的节省额另由 yearlyNote 按实价展示）。
+ */
+export function yearlySavedMonths(plans: PlanConfig[]): number | null {
+  const months = plans.map((p) => 12 - p.prices.year / p.prices.month);
+  if (months.length === 0) return null;
+  const first = Math.round(months[0]);
+  const consistent = months.every((m) => Math.abs(m - first) < 1e-9);
+  return consistent && first > 0 ? first : null;
 }
 
 /**
  * 价格展示（单行版）：等价于改造前的 PlanConfig.priceText，
  * free 档同样输出 `$0`——后台既有排版依赖这一形态，不在货币改造中顺手改 UX。
  */
-export function planPriceLabel(plan: PlanConfig, locale: Locale, cnyRate?: number | null): string {
-  const suffix = plan.priceAmount === 0 ? "" : PLANS_DICT[locale].perMonthSuffix;
-  const approx = approxCnyText(plan, locale, cnyRate);
-  return `${plan.currency}${plan.priceAmount}${suffix}${approx ? `（${approx}）` : ""}`;
+export function planPriceLabel(
+  plan: PlanConfig,
+  locale: Locale,
+  cnyRate?: number | null,
+  interval: BillingInterval = "month",
+): string {
+  if (plan.priceAmount === 0) return `${plan.currency}0`;
+  const { amount, suffix, approx } = planPriceText(plan, locale, cnyRate, interval);
+  return `${amount}${suffix}${approx ? `（${approx}）` : ""}`;
 }
 
 /** 对比表分组：按访客选档时关心的顺序排列（先能不能发出去，再能不能量化，最后是规模化）。 */
@@ -230,7 +275,7 @@ export function planComparisonLayout(t: PlansDict, locale: Locale = "en"): PlanC
 }
 
 /**
- * 纯文本对照表的行：[权益名, Free, Starter, Pro, Agency]，布尔渲染为 ✓ / —。
+ * 纯文本对照表的行：[权益名, …各档（按 PLAN_ORDER）]，布尔渲染为 ✓ / —。
  * 供帮助中心这类只能放字符串表格的场景使用——与定价页对比表同源（planFeatureRows），
  * 套餐配置一改两边一起变，不再手写数字。keys 缺省取全部行；传入时仍按 planFeatureRows 的顺序取子集。
  */

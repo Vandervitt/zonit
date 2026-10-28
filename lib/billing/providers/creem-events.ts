@@ -1,12 +1,12 @@
 // Creem webhook 原始事件 → 规范化 BillingEvent 的纯映射（无网络，可单测）。
 // 结构参考官方 payload：object 为 subscription/checkout，product/customer 可能是对象或字符串 id，
 // checkout 时的 metadata 会透传到 subscription（user_id 归属靠它）。
-import type { PlanId } from "@/lib/plans";
+import type { PlanProduct } from "../products";
 import type { BillingEvent } from "../types";
 
 /** product id ↔ 套餐/额度映射（由 env 装配，测试可注入假配置）。 */
 export interface CreemProductMap {
-  planByProduct: Record<string, PlanId>;
+  planByProduct: Record<string, PlanProduct>;
   creditsByProduct: Record<string, number>;
 }
 
@@ -53,12 +53,13 @@ export function parseCreemEvent(event: AnyRec, map: CreemProductMap): BillingEve
 
   if (SUB_GRANT.has(type)) {
     const productId = idOf(obj.product);
-    const plan = productId ? map.planByProduct[productId] : undefined;
-    if (!userId || !plan) return { kind: "ignored" };
+    const product = productId ? map.planByProduct[productId] : undefined;
+    if (!userId || !product) return { kind: "ignored" };
     return {
       kind: "subscription_activated",
       userId,
-      plan,
+      plan: product.plan,
+      interval: product.interval,
       customerId: idOf(obj.customer),
       subscriptionId: idOf(obj.id) ?? stringField(obj, "id"),
       eventTime,

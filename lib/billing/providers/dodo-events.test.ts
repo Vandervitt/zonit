@@ -3,9 +3,9 @@ import { parseDodoEvent, type DodoProductMap } from "./dodo-events";
 
 const map: DodoProductMap = {
   planByProduct: {
-    pdt_starter: "starter",
-    pdt_pro: "pro",
-    pdt_agency: "agency",
+    pdt_pro: { plan: "pro", interval: "month" },
+    pdt_pro_year: { plan: "pro", interval: "year" },
+    pdt_agency: { plan: "agency", interval: "month" },
   },
   creditsByProduct: {
     pdt_credits50: 50,
@@ -26,12 +26,22 @@ const sub = (type: string, productId: string, extra: Record<string, unknown> = {
 });
 
 describe("parseDodoEvent — 订阅激活", () => {
+  it("年付产品 → 同一档位、计费周期为 year", () => {
+    const r = parseDodoEvent(sub("subscription.active", "pdt_pro_year"), map);
+    expect(r).toMatchObject({ kind: "subscription_activated", plan: "pro", interval: "year" });
+  });
+
+  it("未知产品（如已下架的旧 Starter 产品）→ 忽略，不误授任何档位", () => {
+    expect(parseDodoEvent(sub("subscription.active", "pdt_legacy_starter"), map)).toEqual({ kind: "ignored" });
+  });
+
   it("subscription.active → 按 product 映射套餐", () => {
     const r = parseDodoEvent(sub("subscription.active", "pdt_pro"), map);
     expect(r).toEqual({
       kind: "subscription_activated",
       userId: "u1",
       plan: "pro",
+      interval: "month",
       customerId: "cus_1",
       subscriptionId: "sub_1",
       eventTime: null,
@@ -39,8 +49,8 @@ describe("parseDodoEvent — 订阅激活", () => {
   });
 
   it("subscription.renewed 也视为激活续期", () => {
-    const r = parseDodoEvent(sub("subscription.renewed", "pdt_starter"), map);
-    expect(r).toMatchObject({ kind: "subscription_activated", plan: "starter" });
+    const r = parseDodoEvent(sub("subscription.renewed", "pdt_pro"), map);
+    expect(r).toMatchObject({ kind: "subscription_activated", plan: "pro" });
   });
 
   it("subscription.plan_changed 用新 product 更新套餐", () => {

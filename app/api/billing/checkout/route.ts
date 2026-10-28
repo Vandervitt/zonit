@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { getActiveProvider } from "@/lib/billing/provider";
+import { parsePlanSelection } from "@/lib/billing/products";
+import { PlanProductNotConfiguredError } from "@/lib/billing/types";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -9,8 +11,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: ApiErrors.UNAUTHORIZED }, { status: 401 });
   }
 
-  const { planId } = (await request.json()) as { planId: string };
-  if (!planId || planId === "free") {
+  const body = (await request.json().catch(() => ({}))) as { planId?: unknown; interval?: unknown };
+  const selection = parsePlanSelection(body.planId, body.interval);
+  if (!selection) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
 
@@ -23,13 +26,17 @@ export async function POST(request: Request) {
 
   try {
     const checkoutUrl = await provider.createCheckout({
-      planId,
+      planId: selection.plan,
+      interval: selection.interval,
       email: session.user.email,
       userId: session.user.id,
       baseUrl,
     });
     return NextResponse.json({ checkoutUrl });
   } catch (err) {
+    if (err instanceof PlanProductNotConfiguredError) {
+      return NextResponse.json({ error: err.code }, { status: 503 });
+    }
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
   }

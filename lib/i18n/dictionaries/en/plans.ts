@@ -2,6 +2,9 @@ export const plans = {
   free: "Free",
   unlimited: "Unlimited",
   perMonthSuffix: "/mo",
+  perYearSuffix: "/yr",
+  // 年付价下方的说明：{monthly} 为折合月价（向下截断到分），{saved} 为相对月付全年的节省额。
+  yearlyNote: "{monthly}/mo billed yearly · save {saved}",
   // 英文面直接以美元结算，不做换算——保留此键仅为两语字典结构对齐。
   approxCny: "≈ CN¥{amount}",
   // 量词区分单复数：英文 "1 page" / "3 pages"。中文无此变化，两个形态取同值。
@@ -23,12 +26,16 @@ export const plans = {
     ctaFree: "Start free",
     ctaTrial: "Start free trial",
     ctaChoose: "Choose {plan}",
+    // 月付 / 年付切换；{months} 由 yearlySavedMonths 按实际价格算出，算不出整月时不显示。
+    billingPeriod: "Billing period",
+    intervalMonth: "Monthly",
+    intervalYear: "Yearly",
+    yearSave: "{months} months free",
   },
   groups: { publish: "Publishing", tracking: "Tracking & leads", ai: "AI generation", scale: "Running at scale" },
   // Who each plan is for: visitors pick by who they are, not by diffing rows.
   fit: {
     free: "Publish one page free and see whether inquiries come in",
-    starter: "One brand with a few service pages on one domain",
     pro: "Several offers at once, with CAPI sending conversions back to ad platforms",
     agency: "Agencies running campaigns for many clients",
   },

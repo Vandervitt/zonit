@@ -28,7 +28,7 @@ export const gettingStarted: HelpChapterData = {
         {
           t: "callout",
           tone: "info",
-          text: "新注册账号自动获得 Pro 全功能试用 14 天（含发布、CAPI、去水印），可完整跑通上线与收线索；试用到期回到 Free 后，发布到自有域名需要含域名额度的套餐（Starter 及以上），平台地址仍可继续用。概览页的「4 步上线」清单会跟着你的进度打勾。",
+          text: "新注册账号自动获得 Pro 全功能试用 14 天（含发布、CAPI、去水印），可完整跑通上线与收线索；试用到期回到 Free 后，发布到自有域名需要付费套餐（Pro 及以上），平台地址仍可继续用。概览页的「4 步上线」清单会跟着你的进度打勾。",
         },
       ],
     },
@@ -59,7 +59,7 @@ export const gettingStarted: HelpChapterData = {
       blocks: [
         {
           t: "p",
-          text: "四档套餐（Free / Starter / Pro / Agency）都能使用全量模板和可视化编辑器，差异主要在页面数、域名数、AI 额度和高级获客能力上。",
+          text: "三档套餐（Free / Pro / Agency）都能使用全量模板和可视化编辑器，差异主要在页面数、域名数、AI 额度和高级获客能力上。",
         },
         {
           t: "table",

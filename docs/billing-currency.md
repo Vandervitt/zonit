@@ -15,8 +15,9 @@
 
 ## 构建期价格同步
 
-- 入口：`pnpm prices:sync`（`vercel-build` 在 `next build` 前自动执行）。按 `DODO_PRODUCT_STARTER/PRO/AGENCY`、`DODO_CREDITS_50/200` 逐个 `products.retrieve`，金额以美分整数写入 `lib/pricing/prices.json`。
-- 校验从严（`lib/pricing/dodo-prices.ts`）：非 USD、订阅周期不是每 1 个月、带折扣、按需付费，一律报错——这些形态下官网「$x/月」的展示与实际扣款对不上。
+- 入口：`pnpm prices:sync`（`vercel-build` 在 `next build` 前自动执行）。按 `DODO_PRODUCT_PRO/AGENCY`（月付）、`DODO_PRODUCT_PRO_YEARLY/AGENCY_YEARLY`（年付）、`DODO_CREDITS_50/200` 逐个 `products.retrieve`，金额以美分整数写入 `lib/pricing/prices.json`（每档 `{ month, year }`）。
+- 校验从严（`lib/pricing/dodo-prices.ts`）：非 USD、月付产品不是每 1 个月 / 年付产品不是每 1 年、带折扣、按需付费，一律报错——这些形态下官网展示与实际扣款对不上。
+- **年付价与月费的倍数不做约束**（2026-10-28 用户决定）：定价由运营在 Dodo 后台自由调整。展示侧按实际价格算：每档的「省 $x」由月费 × 12 − 年付价得出；切换按钮上的「省 N 个月」只在各付费档都恰好省整数个月且一致时显示（`yearlySavedMonths`），否则隐藏，避免说假话。
 - 失败策略：**生产构建（`VERCEL_ENV=production`）取价失败即中止构建**，宁可部署不上也不展示错价；本地 / Preview / CI 无凭据时沿用仓库内快照并告警。
 - 仓库内的 `prices.json` 只是兜底快照：生产构建会就地覆盖，不回写 Git。想让快照与线上一致，配好 live 凭据后本地执行 `pnpm prices:sync` 再提交 diff；**勿用 test_mode 凭据刷新后提交**。
 - 只认 Dodo：super-admin 切到 Creem 时，展示价仍是 Dodo 定价，Creem 后台产品价需人工保持一致。

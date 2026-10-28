@@ -3,9 +3,9 @@ import { parseCreemEvent, type CreemProductMap } from "./creem-events";
 
 const map: CreemProductMap = {
   planByProduct: {
-    prod_starter: "starter",
-    prod_pro: "pro",
-    prod_agency: "agency",
+    prod_pro: { plan: "pro", interval: "month" },
+    prod_pro_year: { plan: "pro", interval: "year" },
+    prod_agency: { plan: "agency", interval: "month" },
   },
   creditsByProduct: {
     prod_credits50: 50,
@@ -35,12 +35,21 @@ describe("parseCreemEvent — 订阅授权（active/paid/trialing）", () => {
         kind: "subscription_activated",
         userId: "u1",
         plan: "pro",
+        interval: "month",
         customerId: "cust_1",
         subscriptionId: "sub_1",
         eventTime: null,
       });
     });
   }
+
+  it("年付产品 → 计费周期为 year", () => {
+    expect(parseCreemEvent(sub("subscription.active", "prod_pro_year"), map)).toMatchObject({
+      kind: "subscription_activated",
+      plan: "pro",
+      interval: "year",
+    });
+  });
 
   it("customer 为字符串 id 也能取到 customerId", () => {
     const ev = sub("subscription.active", "prod_agency");

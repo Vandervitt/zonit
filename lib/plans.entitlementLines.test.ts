@@ -19,7 +19,7 @@ describe("planEntitlementLines", () => {
     // 现在它虽无自有域名槽位，却能发布到平台分配的地址，这是它真实拥有的权益，
     // 邮件里的套餐权益清单必须体现，否则免费用户会以为自己发不出页面。
     expect(keysOf("free")).toContain("customDomain");
-    expect(keysOf("starter")).toContain("customDomain");
+    expect(keysOf("pro")).toContain("customDomain");
   });
 
   it("布尔为假的行仍被剔除（剔除机制本身未失效）", () => {
@@ -60,7 +60,7 @@ describe("planEntitlementLines", () => {
   });
 
   it("档位越高权益条目不减少（单调性）", () => {
-    const counts = (["free", "starter", "pro", "agency"] as const).map(
+    const counts = (["free", "pro", "agency"] as const).map(
       (p) => planEntitlementLines(p).length,
     );
     for (let i = 1; i < counts.length; i++) {
@@ -69,7 +69,7 @@ describe("planEntitlementLines", () => {
   });
 
   it("每档都至少含模板与编辑器（全档共有）", () => {
-    for (const p of ["free", "starter", "pro", "agency"] as const) {
+    for (const p of ["free", "pro", "agency"] as const) {
       expect(keysOf(p)).toEqual(expect.arrayContaining(["templates", "editor"]));
     }
   });

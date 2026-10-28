@@ -166,6 +166,6 @@ describe("套餐表必须从 lib/plans.ts 派生", () => {
   it("派生行确实反映 PLANS：水印行只有 Free 是 —", () => {
     const watermark = planComparisonRows("zh", ["watermark"])[0];
     expect(watermark.slice(1)).toEqual(PLAN_ORDER.map((id) => (PLANS[id].hasWatermark ? "—" : "✓")));
-    expect(watermark.slice(1)).toEqual(["—", "✓", "✓", "✓"]);
+    expect(watermark.slice(1)).toEqual(["—", "✓", "✓"]);
   });
 });

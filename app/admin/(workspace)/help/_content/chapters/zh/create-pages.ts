@@ -43,7 +43,7 @@ export const createPages: HelpChapterData = {
         {
           t: "callout",
           tone: "info",
-          text: "AI 额度按套餐计：整页生成 Free 3 次/月、Starter 15 次/月、Pro 80 次/月、Agency 300 次/月；月额度自然月重置。额外购买的 credit 永不过期，月额度用尽后自动消耗 credit。",
+          text: "AI 额度按套餐计（各档月额度见「套餐与账单」章），自然月重置。额外购买的 credit 永不过期，月额度用尽后自动消耗 credit。",
         },
       ],
     },

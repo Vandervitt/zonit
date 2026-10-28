@@ -11,6 +11,7 @@ vi.mock("@/lib/billing/provider", () => ({
 }));
 
 import { POST } from "./route";
+import { PlanProductNotConfiguredError } from "@/lib/billing/types";
 
 const USER = { user: { id: "u1", email: "a@b.c" } };
 const req = (body: unknown) =>
@@ -49,10 +50,28 @@ describe("POST /api/billing/change-plan", () => {
     expect(changePlanMock).not.toHaveBeenCalled();
   });
 
-  it("正常换档 → 200 并把 subscriptionId+planId 透传给渠道", async () => {
-    const res = await POST(req({ planId: "starter" }));
+  it("正常换档 → 200 并把 subscriptionId + 档位 + 周期透传给渠道（缺省月付）", async () => {
+    const res = await POST(req({ planId: "pro" }));
     expect(res.status).toBe(200);
-    expect(changePlanMock).toHaveBeenCalledWith("sub_1", "starter");
+    expect(changePlanMock).toHaveBeenCalledWith("sub_1", "pro", "month");
+  });
+
+  it("同档换成年付 → 透传 year", async () => {
+    expect((await POST(req({ planId: "pro", interval: "year" }))).status).toBe(200);
+    expect(changePlanMock).toHaveBeenCalledWith("sub_1", "pro", "year");
+  });
+
+  it("已下架的 starter 与非法周期 → 400", async () => {
+    expect((await POST(req({ planId: "starter" }))).status).toBe(400);
+    expect((await POST(req({ planId: "pro", interval: "week" }))).status).toBe(400);
+    expect(changePlanMock).not.toHaveBeenCalled();
+  });
+
+  it("渠道未配置该周期的产品 → 503 业务码 plan_product_not_configured", async () => {
+    changePlanMock.mockRejectedValue(new PlanProductNotConfiguredError("no yearly"));
+    const res = await POST(req({ planId: "agency", interval: "year" }));
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: "plan_product_not_configured" });
   });
 
   it("渠道抛错 → 500", async () => {

@@ -106,7 +106,7 @@ export function TrackingPanel({ onClose }: { onClose: () => void }) {
   const state = useEditorState();
   const dispatch = useEditorDispatch();
   const { pageId, plan } = useMeta();
-  // free/starter 仅「基础数据追踪 (1× Meta Pixel)」；TikTok/GA4/GoogleAds 与服务端 CAPI 属高级追踪。
+  // free 仅「基础数据追踪 (1× Meta Pixel)」；TikTok/GA4/GoogleAds 与服务端 CAPI 属高级追踪。
   const advanced = PLANS[plan].advancedTracking;
   const t = state.tracking;
 

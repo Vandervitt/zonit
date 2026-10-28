@@ -28,7 +28,7 @@ export const gettingStarted: HelpChapterData = {
         {
           t: "callout",
           tone: "info",
-          text: "New accounts get 14 days of full Pro (publishing, CAPI, no watermark included), enough to run the whole publish-and-capture loop. When the trial ends and you drop to Free, publishing on your own domain needs a plan with a domain slot (Starter or above) — the platform address stays available. The “4 steps to launch” checklist on the Overview page ticks off as you go.",
+          text: "New accounts get 14 days of full Pro (publishing, CAPI, no watermark included), enough to run the whole publish-and-capture loop. When the trial ends and you drop to Free, publishing on your own domain needs a paid plan (Pro or above) — the platform address stays available. The “4 steps to launch” checklist on the Overview page ticks off as you go.",
         },
       ],
     },
@@ -59,7 +59,7 @@ export const gettingStarted: HelpChapterData = {
       blocks: [
         {
           t: "p",
-          text: "All four plans (Free / Starter / Pro / Agency) include every template and the full visual editor. What differs is page count, domain count, AI allowance and the advanced lead-gen features.",
+          text: "All three plans (Free / Pro / Agency) include every template and the full visual editor. What differs is page count, domain count, AI allowance and the advanced lead-gen features.",
         },
         {
           t: "table",

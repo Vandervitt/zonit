@@ -44,7 +44,7 @@ export const createPages: HelpChapterData = {
         {
           t: "callout",
           tone: "info",
-          text: "AI allowance depends on your plan: full-page generation is 3/month on Free, 15 on Starter, 80 on Pro and 300 on Agency, resetting each calendar month. Credits bought separately never expire and are used automatically once the monthly allowance runs out.",
+          text: "AI allowance depends on your plan (see “Plans & billing” for each plan's monthly allowance) and resets each calendar month. Credits bought separately never expire and are used automatically once the monthly allowance runs out.",
         },
       ],
     },

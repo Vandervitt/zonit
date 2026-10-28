@@ -60,7 +60,7 @@ export interface LeadContext {
  */
 export async function enqueueCapiEvents(pageId: string, ctx: LeadContext): Promise<void> {
   if (!ctx.consent) return;
-  // 套餐门控：服务端 CAPI 属高级追踪，free/starter 不派发。
+  // 套餐门控：服务端 CAPI 属高级追踪，free 不派发。
   if (!PLANS[await getPlanByPageId(pageId)].advancedTracking) return;
   const creds = await getCredentials(pageId);
   if (creds.length === 0) return;

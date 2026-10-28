@@ -1,5 +1,5 @@
 import type { DefaultSession } from "next-auth";
-import type { PlanId } from "@/lib/plans";
+import type { BillingInterval, PlanId } from "@/lib/plans";
 import type { UserRole } from "@/lib/constants/auth";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -13,6 +13,8 @@ declare module "next-auth" {
       billingExpiresAt: string | null;
       /** 是否持有渠道真实订阅（赠送套餐为 false）；控制 billing 页换档区显隐。 */
       hasSubscription: boolean;
+      /** 当前订阅的计费周期；无订阅为 null。 */
+      billingInterval: BillingInterval | null;
       /** 付费订阅档位（不含赠送）；billing 页换档基准，plan 为含赠送的生效档。 */
       paidPlan: PlanId;
       /** 生效中的超管赠送档（已过期为 null）。 */
@@ -35,6 +37,7 @@ declare module "next-auth/jwt" {
     role: UserRole;
     billingExpiresAt?: string | null;
     hasSubscription?: boolean;
+    billingInterval?: BillingInterval | null;
     paidPlan?: PlanId;
     compPlan?: PlanId | null;
     compPlanExpiresAt?: string | null;

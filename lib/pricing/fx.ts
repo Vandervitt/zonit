@@ -29,5 +29,5 @@ export function extractCnyRate(payload: unknown): number | null {
  */
 export function approxCnyAmount(usd: number, rate: number): string | null {
   if (usd <= 0 || !isSaneRate(rate)) return null;
-  return String(Math.floor(usd * rate + 1e-9));
+  return Math.floor(usd * rate + 1e-9).toLocaleString("en-US");
 }

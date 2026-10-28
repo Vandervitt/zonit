@@ -35,18 +35,18 @@ describe("formatPlanLimit", () => {
 
 // 付费档价格来自构建期 Dodo 快照，随后台改价变化；格式化断言用固定价的 fixture，
 // 免得 Dodo 一改价这里就误报。「PLANS 价格 = 快照」由 lib/pricing/prices-source.test.ts 守住。
-const PRO_1999 = { ...PLANS.pro, priceAmount: 19.99 };
-const AGENCY_4999 = { ...PLANS.agency, priceAmount: 49.99 };
+const PRO_1999 = { ...PLANS.pro, priceAmount: 19.99, prices: { month: 19.99, year: 199.9 } };
+const AGENCY_4999 = { ...PLANS.agency, priceAmount: 49.99, prices: { month: 49.99, year: 499.9 } };
 
 describe("planPriceText", () => {
   it("free 档显示免费文案，不显示金额", () => {
-    expect(planPriceText(PLANS.free, "en")).toEqual({ amount: "Free", suffix: "", approx: null });
-    expect(planPriceText(PLANS.free, "zh")).toEqual({ amount: "免费", suffix: "", approx: null });
+    expect(planPriceText(PLANS.free, "en")).toEqual({ amount: "Free", suffix: "", approx: null, yearlyNote: null });
+    expect(planPriceText(PLANS.free, "zh")).toEqual({ amount: "免费", suffix: "", approx: null, yearlyNote: null });
   });
 
   it("付费档保留美元金额，仅后缀本地化；不传汇率则无换算", () => {
-    expect(planPriceText(PRO_1999, "en")).toEqual({ amount: "$19.99", suffix: "/mo", approx: null });
-    expect(planPriceText(PRO_1999, "zh")).toEqual({ amount: "$19.99", suffix: "/月", approx: null });
+    expect(planPriceText(PRO_1999, "en")).toEqual({ amount: "$19.99", suffix: "/mo", approx: null, yearlyNote: null });
+    expect(planPriceText(PRO_1999, "zh")).toEqual({ amount: "$19.99", suffix: "/月", approx: null, yearlyNote: null });
   });
 
   it("传入汇率时中文面附人民币参考换算，金额本身仍是美元", () => {
@@ -54,6 +54,7 @@ describe("planPriceText", () => {
       amount: "$19.99",
       suffix: "/月",
       approx: "约 ¥141",
+      yearlyNote: null,
     });
   });
 
@@ -67,6 +68,8 @@ describe("planPriceLabel", () => {
     expect(planPriceLabel(AGENCY_4999, "zh")).toBe("$49.99/月");
     expect(planPriceLabel(AGENCY_4999, "zh", 7.1)).toBe("$49.99/月（约 ¥354）");
     expect(planPriceLabel(PLANS.free, "zh", 7.1)).toBe("$0");
+    // 年付订阅者在后台看到的是年价。
+    expect(planPriceLabel(AGENCY_4999, "zh", null, "year")).toBe("$499.90/年");
   });
 });
 
@@ -105,9 +108,9 @@ describe("planFeatureRows", () => {
     const zh = planFeatureRows(getDictionary("zh").plans, "zh").find((r) => r.key === "landingPages");
     // 断言的是量词（pages / 张），不是套餐页数本身——把数字写死会让任何一次
     // 额度调整都误报成 i18n 回归（Starter 3→5 时就发生过一次）。
-    const n = PLANS.starter.landingPagesLimit;
-    expect(en!.valueFor(PLANS.starter)).toBe(`${n} pages`);
-    expect(zh!.valueFor(PLANS.starter)).toBe(`${n} 张`);
+    const n = PLANS.pro.landingPagesLimit;
+    expect(en!.valueFor(PLANS.pro)).toBe(`${n} pages`);
+    expect(zh!.valueFor(PLANS.pro)).toBe(`${n} 张`);
     expect(en!.valueFor(PLANS.agency)).toBe("Unlimited");
     expect(zh!.valueFor(PLANS.agency)).toBe("无限");
   });
@@ -137,8 +140,9 @@ describe("Free 档在对比表里必须体现「能发布」", () => {
   it.each(["zh", "en"] as const)("%s：付费档仍显示自有域名数量", (locale) => {
     const dict = getDictionary(locale);
     const row = planFeatureRows(dict.plans, locale).find((r) => r.key === "customDomain")!;
-    expect(String(row.valueFor(PLANS.starter))).toContain("1");
-    expect(String(row.valueFor(PLANS.pro))).toContain("5");
-    expect(row.valueFor(PLANS.agency)).toBe(locale === "zh" ? "无限" : "Unlimited");
+    expect(row.valueFor(PLANS.pro)).toBe(formatPlanLimit(PLANS.pro.domainsLimit, locale, "domains"));
+    // Agency 自 2026-10-28 起封顶 25 个，不再显示「不限」。
+    expect(row.valueFor(PLANS.agency)).toBe(formatPlanLimit(PLANS.agency.domainsLimit, locale, "domains"));
+    expect(row.valueFor(PLANS.agency)).not.toBe(locale === "zh" ? "无限" : "Unlimited");
   });
 });

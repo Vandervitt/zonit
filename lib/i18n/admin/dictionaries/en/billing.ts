@@ -100,6 +100,8 @@ export const billing = {
       `Changing tiers only affects your paid subscription (currently ${paid}). It does not touch the ${comp} benefits granted by an administrator.`,
     upgrade: "Upgrade",
     downgrade: "Downgrade",
+    switchToYear: "Switch to yearly",
+    switchToMonth: "Switch to monthly",
     downgradeConfirm: {
       title: "Downgrade?",
       description: (plan: string) =>

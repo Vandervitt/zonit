@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { UserRole, ApiErrors } from "@/lib/constants";
-import type { PlanId } from "@/lib/plans";
+import { PLAN_ORDER, type PlanId } from "@/lib/plans";
 import {
   getUserAdminDetail,
   updateUserAdminFields,
   type AdminUserPatch,
 } from "@/lib/super-admin/users-db";
 
-const COMP_PLANS: ReadonlyArray<string> = ["starter", "pro", "agency"];
+const COMP_PLANS: ReadonlyArray<string> = PLAN_ORDER.filter((p) => p !== "free");
 const ROLES: ReadonlyArray<string> = [UserRole.USER, UserRole.SUPER_ADMIN];
 
 async function requireSuperAdmin() {

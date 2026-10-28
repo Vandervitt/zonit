@@ -9,7 +9,7 @@ export type HeroLayout = "background" | "split-right" | "split-left" | "centered
 const HERO_LAYOUTS: HeroLayout[] = ["background", "split-right", "split-left", "centered"];
 
 export interface PageVariant {
-  /** true = 恒等变体（Free/Starter 或无 antiBan）：输出与改造前完全一致。 */
+  /** true = 恒等变体（无 antiBan 的档位）：输出与改造前完全一致。 */
   identity: boolean;
   /** 种子哈希（identity 时为 0）。 */
   seedHash: number;

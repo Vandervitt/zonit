@@ -25,9 +25,9 @@ describe("signupCompGrant", () => {
     expect(daysBetween(g.expiresAt, NOW)).toBe(30);
   });
 
-  it("邀请档低于默认赠送时不回抬——超管的显式选择优先", () => {
-    const g = signupCompGrant({ plan: "starter", durationDays: 3 }, NOW);
-    expect(g.plan).toBe("starter");
+  it("邀请天数短于默认试用时不回抬——超管的显式选择优先", () => {
+    const g = signupCompGrant({ plan: "pro", durationDays: 3 }, NOW);
+    expect(g.plan).toBe("pro");
     expect(daysBetween(g.expiresAt, NOW)).toBe(3);
   });
 

@@ -55,7 +55,7 @@ export async function landingMetadata(page: LandingPageRow, landingPath: string)
 }
 
 export async function renderLandingPage(page: LandingPageRow, landingPath: string) {
-  // 按 owner 套餐门控：free/starter 只放行 Meta 客户端 pixel；仅 free 挂水印。
+  // 按 owner 套餐门控：free 只放行 Meta 客户端 pixel 并挂水印。
   const plan = await getUserPlanCached(page.user_id);
   const tracking = gateTrackingByPlan(page.data.tracking, plan);
   const variant = hasAntiBan(plan) ? deriveVariant(page.data.variantSeed ?? page.id) : IDENTITY_VARIANT;
