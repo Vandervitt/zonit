@@ -36,7 +36,7 @@ export const home = {
       "Pick a lead-gen template, let AI write the whole page around your business, and publish to your own domain — first version live in an afternoon. Form leads land straight in your inbox; WhatsApp and phone inquiries reach you on their own channels, with every click and source tracked.",
     ctaPrimary: "Start free",
     ctaSecondary: "See pricing",
-    note: "7 days of full Pro on sign-up · No credit card · No code",
+    note: "14 days of full Pro on sign-up · No credit card · No code",
   },
   // 首屏示意图上的两枚浮动徽标。与 hero.subtitle 同一条约束：首屏只讲结果，
   // 不出现 Pixel / CAPI / UTM 这类机制术语——非投放用户看到会直接判定
@@ -180,8 +180,6 @@ export const home = {
     kicker: "Simple, transparent pricing",
     title: "Go live free, upgrade when you want your own domain",
     desc: "Free publishes a real, working page on a platform-provided address — no domain to buy, no DNS to touch. Upgrade to connect your own brand domain and unlock more pages, tracking, and AI credits by plan.",
-    ctaFree: "Start free",
-    ctaPaid: "Sign up to upgrade",
   },
   finalCta: {
     titleLine1: "Your next campaign",

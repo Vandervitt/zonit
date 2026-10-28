@@ -5,7 +5,11 @@ const NOW = new Date("2026-07-28T00:00:00.000Z");
 const daysBetween = (a: Date, b: Date) => (a.getTime() - b.getTime()) / 86_400_000;
 
 describe("signupCompGrant", () => {
-  it("无邀请：默认注册赠送 Pro 7 天", () => {
+  it("注册试用为 14 天：线索类投放要过完一个广告学习期才看得到价值", () => {
+    expect(SIGNUP_TRIAL_DAYS).toBe(14);
+  });
+
+  it("无邀请：默认注册赠送 Pro 试用", () => {
     const g = signupCompGrant(null, NOW);
     expect(g.plan).toBe(SIGNUP_TRIAL_PLAN);
     expect(daysBetween(g.expiresAt, NOW)).toBe(SIGNUP_TRIAL_DAYS);

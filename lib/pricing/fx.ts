@@ -22,8 +22,12 @@ export function extractCnyRate(payload: unknown): number | null {
   return isSaneRate(rate) ? rate : null;
 }
 
-/** 美元金额换算为人民币展示串（两位小数，无货币符号）。0 元不展示换算。 */
+/**
+ * 美元金额换算为人民币展示串（取整到元，无货币符号）。0 元不展示换算。
+ * 向下截断、只舍不入（项目数值约定）；「约」后面跟到分既别扭，也容易被读成结算金额。
+ * 加一个极小量抵消浮点误差（如 x.9999999 被截成 x-1）。
+ */
 export function approxCnyAmount(usd: number, rate: number): string | null {
   if (usd <= 0 || !isSaneRate(rate)) return null;
-  return (usd * rate).toFixed(2);
+  return String(Math.floor(usd * rate + 1e-9));
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { locales } from "@/lib/i18n/config";
 import { getHelpChapters } from ".";
-import { PLANS } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, planComparisonRows } from "@/lib/plans";
 
 /** 中文侧仍是主内容，既有口径守卫以它为准。 */
 const HELP_CHAPTERS = getHelpChapters("zh");
@@ -129,49 +129,43 @@ describe("中英章节对齐", () => {
   });
 });
 
-describe("套餐数字不得与 lib/plans.ts 脱节", () => {
+describe("套餐表必须从 lib/plans.ts 派生", () => {
   // 「文案与能力脱节」在本项目已复发多次（写死模板数、一域名一页、不提供子域）。
-  // 帮助中心的套餐表是最后一处还在手写数字的地方，故用 PLANS 反查锁住。
+  // 帮助中心的套餐表曾是最后一处手写数字的地方：初版守卫只校验了页数与 AI 额度两行，
+  // Starter 去水印时手写的水印行照样会悄悄过期。现在表格行由 planComparisonRows 生成，
+  // 这里锁住「每一行都与派生结果逐格相等」，任何手写行都会在这里红。
   //
   // ⚠️ 必须收集**全部**套餐表：getting-started 与 billing 各有一张，
   // 只取第一张的话改坏 billing 不会被发现（本守卫初版就栽在这里）。
-  function planRows(locale: "en" | "zh", rowLabel: RegExp): { where: string; cells: string[] }[] {
-    const out: { where: string; cells: string[] }[] = [];
+  function planTables(locale: "en" | "zh"): { where: string; rows: string[][] }[] {
+    const out: { where: string; rows: string[][] }[] = [];
     for (const chapter of getHelpChapters(locale)) {
       for (const section of chapter.sections) {
         for (const block of section.blocks) {
-          if (block.t !== "table") continue;
-          // 必须是「套餐对照表」：表头里出现四个档位名。
-          // 否则 "Landing pages" 会先撞上侧边栏导览表的同名行。
-          if (!/Free/.test(block.head[1] ?? "")) continue;
-          const row = block.rows.find((r) => rowLabel.test(r[0]));
-          if (row) out.push({ where: `${chapter.slug}/${section.id}`, cells: row.slice(1) });
+          // 必须是「套餐对照表」：表头里出现档位名，否则会撞上侧边栏导览等其他表。
+          if (block.t === "table" && /Free/.test(block.head[1] ?? "")) {
+            out.push({ where: `${chapter.slug}/${section.id}`, rows: block.rows });
+          }
         }
       }
     }
     return out;
   }
 
-  const TIERS = [PLANS.free, PLANS.starter, PLANS.pro, PLANS.agency];
-
-  it.each(locales)("%s：落地页数量与 PLANS 的 landingPagesLimit 一致", (locale) => {
-    const rows = planRows(locale, locale === "zh" ? /^落地页数量$/ : /^Landing pages$/);
-    expect(rows.length, "至少应有两张套餐表（快速上手 + 套餐与账单）").toBeGreaterThanOrEqual(2);
-    for (const { where, cells } of rows) {
-      TIERS.forEach((plan, i) => {
-        // Infinity 那格文案自由（无限 / Unlimited），只校验有限值。
-        if (plan.landingPagesLimit !== Infinity) {
-          expect(cells[i], `${where} 第 ${i + 1} 档`).toBe(String(plan.landingPagesLimit));
-        }
-      });
+  it.each(locales)("%s：每张套餐表的每一行都与 planComparisonRows 逐格一致", (locale) => {
+    const tables = planTables(locale);
+    expect(tables.length, "至少应有两张套餐表（快速上手 + 套餐与账单）").toBeGreaterThanOrEqual(2);
+    const derived = planComparisonRows(locale).map((r) => JSON.stringify(r));
+    for (const { where, rows } of tables) {
+      for (const row of rows) {
+        expect(derived, `${where}: ${row[0]}`).toContain(JSON.stringify(row));
+      }
     }
   });
 
-  it.each(locales)("%s：AI 整页生成额度与 PLANS 的 aiPageQuota 一致", (locale) => {
-    const rows = planRows(locale, locale === "zh" ? /^AI 整页生成/ : /^AI full-page generations/);
-    expect(rows.length).toBeGreaterThanOrEqual(2);
-    for (const { where, cells } of rows) {
-      expect(cells.slice(0, 4), where).toEqual(TIERS.map((p) => String(p.aiPageQuota)));
-    }
+  it("派生行确实反映 PLANS：水印行只有 Free 是 —", () => {
+    const watermark = planComparisonRows("zh", ["watermark"])[0];
+    expect(watermark.slice(1)).toEqual(PLAN_ORDER.map((id) => (PLANS[id].hasWatermark ? "—" : "✓")));
+    expect(watermark.slice(1)).toEqual(["—", "✓", "✓", "✓"]);
   });
 });

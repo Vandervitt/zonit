@@ -63,7 +63,7 @@ export async function provisionUserByEmail(
       }
     }
 
-    // 赠送档一律走 comp_plan：邀请存在则覆盖默认的「注册即赠 Pro 7 天」，
+    // 赠送档一律走 comp_plan：邀请存在则覆盖默认的注册赠送试用，
     // 否则用默认赠送（见 signupCompGrant）。
     // plan（付费档）恒为 free —— 邀请权益绝不写付费档，否则受邀用户会被计入
     // 付费统计并污染计费页展示。trial_expires_at 属旧试用机制，新用户不再写入

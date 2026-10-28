@@ -5,10 +5,10 @@ import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm, Statistic, App } from "antd";
-import { CheckOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { ThunderboltOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
+import { PlanComparison } from "@/components/billing/PlanComparison";
 import { PLANS, PLAN_ORDER, planPriceLabel, formatPlanLimit } from "@/lib/plans";
-import { getDictionary } from "@/lib/i18n/dictionaries";
 import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
 import { formatDate, formatDateTime } from "@/lib/i18n/admin";
 import type { PlanId } from "@/lib/plans";
@@ -204,6 +204,36 @@ export default function BillingPage() {
     setLoadingCredits(null);
   }
 
+  // 对比表每档的换档按钮：Free 走「管理订阅」取消而非这里；当前付费档不放按钮。
+  function renderPlanCta(planId: PlanId) {
+    if (planId === "free" || planId === currentPlanId) return null;
+    const isLoading = loadingPlan === planId;
+    const isUpgrade = PLAN_ORDER.indexOf(planId) > currentIdx;
+    const button = (
+      <Button
+        block
+        type={isUpgrade ? "primary" : "default"}
+        loading={isLoading}
+        disabled={!!loadingPlan && !isLoading}
+        onClick={isUpgrade || currentPlanId === "free" ? () => handleSelectPlan(planId) : undefined}
+      >
+        {isUpgrade ? t.switcher.upgrade : t.switcher.downgrade}
+      </Button>
+    );
+    if (isUpgrade) return button;
+    return (
+      <Popconfirm
+        title={t.switcher.downgradeConfirm.title}
+        description={t.switcher.downgradeConfirm.description(PLANS[planId].label)}
+        okText={t.switcher.downgradeConfirm.ok}
+        cancelText={t.switcher.downgradeConfirm.cancel}
+        onConfirm={() => handleSelectPlan(planId)}
+      >
+        {button}
+      </Popconfirm>
+    );
+  }
+
   const portalLoading = portal.isMutating;
 
   // 权益上限按生效套餐（含赠送）展示；「套餐」「订阅档位」两行区分赠送与付费。
@@ -322,13 +352,6 @@ export default function BillingPage() {
                 {t.currentPlan.managePortal}
               </Button>
             )}
-            <Button
-              type="link"
-              href={Routes.Pricing}
-              target="_blank"
-            >
-              {t.currentPlan.compare}
-            </Button>
           </Space>
         }
       >
@@ -339,80 +362,35 @@ export default function BillingPage() {
         <Alert
           type="info"
           showIcon
+          style={{ marginBottom: 12 }}
           message={t.compedNotice.message}
           description={t.compedNotice.description}
         />
       ) : (
-      <div>
-        <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
-          {currentPlanId === "free" ? t.switcher.fromFree : t.switcher.change}
-        </Text>
-        {giftedAbovePaid && compPlanId && (
-          <Alert
-            type="info"
-            showIcon
-            style={{ marginBottom: 12 }}
-            message={t.switcher.giftedNotice(currentPlan.label, PLANS[compPlanId].label)}
-          />
-        )}
-        <Space direction="vertical" style={{ width: "100%" }} size={12}>
-          {PLAN_ORDER.filter((p) => p !== "free" && p !== currentPlanId).map((planId) => {
-            const plan = PLANS[planId];
-            const isLoading = loadingPlan === planId;
-            const isUpgrade = PLAN_ORDER.indexOf(planId) > currentIdx;
-            const button = (
-              <Button
-                type={isUpgrade ? "primary" : "default"}
-                loading={isLoading}
-                disabled={!!loadingPlan && !isLoading}
-                onClick={isUpgrade || currentPlanId === "free" ? () => handleSelectPlan(planId) : undefined}
-                style={{ flexShrink: 0 }}
-              >
-                {isUpgrade ? t.switcher.upgrade : t.switcher.downgrade}
-              </Button>
-            );
-            return (
-              <Card key={planId}>
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-                  <div style={{ flex: 1 }}>
-                    <Space style={{ marginBottom: 8 }}>
-                      <PlanBadge plan={planId} />
-                      <Text strong>{planPriceLabel(plan, locale, cnyRate)}</Text>
-                    </Space>
-                    <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 6 }}>
-                      {t.switcher.includesPrevious(PLANS[PLAN_ORDER[PLAN_ORDER.indexOf(planId) - 1]].label)}
-                    </Text>
-                    <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-                      {getDictionary(locale).plans.highlights[planId].map((h) => (
-                        <li key={h} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                          <CheckOutlined style={{ color: SEMANTIC.success, fontSize: 12, flexShrink: 0 }} />
-                          <Text type="secondary" style={{ fontSize: 12 }}>
-                            {h}
-                          </Text>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  {isUpgrade ? (
-                    button
-                  ) : (
-                    <Popconfirm
-                      title={t.switcher.downgradeConfirm.title}
-                      description={t.switcher.downgradeConfirm.description(plan.label)}
-                      okText={t.switcher.downgradeConfirm.ok}
-                      cancelText={t.switcher.downgradeConfirm.cancel}
-                      onConfirm={() => handleSelectPlan(planId)}
-                    >
-                      {button}
-                    </Popconfirm>
-                  )}
-                </div>
-              </Card>
-            );
-          })}
-        </Space>
-      </div>
+        <>
+          <Text type="secondary" style={{ display: "block", marginBottom: 12 }}>
+            {currentPlanId === "free" ? t.switcher.fromFree : t.switcher.change}
+          </Text>
+          {giftedAbovePaid && compPlanId && (
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 12 }}
+              message={t.switcher.giftedNotice(currentPlan.label, PLANS[compPlanId].label)}
+            />
+          )}
+        </>
       )}
+      {/* 与营销站定价页同一个对比组件；高亮列 = 当前生效档，换档按钮按付费订阅档判定升/降。
+          赠送档无订阅时自助换档会 404，故只展示对比、不放按钮。 */}
+      <Card>
+        <PlanComparison
+          locale={locale}
+          cnyRate={cnyRate}
+          currentPlan={effectivePlanId}
+          cta={isCompedWithoutSub ? undefined : renderPlanCta}
+        />
+      </Card>
 
       <div style={{ marginTop: 32 }}>
         <Text strong style={{ display: "block", marginBottom: 4 }}>

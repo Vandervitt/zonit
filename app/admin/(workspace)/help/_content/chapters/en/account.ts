@@ -15,7 +15,7 @@ export const account: HelpChapterData = {
             "Passwordless: enter your email, get a 6-digit code, and you're in — no password to set, any email domain works.",
             "You can also sign in with Google in one click.",
             "Both routes with the same email land in the same account, sharing all data.",
-            "New accounts get 7 days of full Pro, then drop back to Free automatically (pages and data are kept).",
+            "New accounts get 14 days of full Pro, then drop back to Free automatically (pages and data are kept).",
           ],
         },
       ],

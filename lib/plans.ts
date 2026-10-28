@@ -48,7 +48,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     id: "starter", label: "Starter", priceAmount: centsToUsd(PRICES.plans.starter), currency: "$", color: "blue",
     // 多路径发布后，页数额度即发布额度：5 张页可全部挂在这 1 个域名的不同路径下。
     landingPagesLimit: 5, domainsLimit: 1,
-    hasWatermark: true, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
+    // 付费即去水印：Starter 买的就是挂自己的品牌域名，页脚再挂平台水印是自相矛盾。
+    hasWatermark: false, basicPixel: true, advancedTracking: false, antiBan: false, leadWebhook: false,
     aiPageQuota: 15, aiRewriteQuota: 100,
   },
   pro: {
@@ -68,9 +69,11 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 export const PLAN_ORDER: PlanId[] = ["free", "starter", "pro", "agency"];
 
 // 注册赠送试用：新用户建号即写入 comp_plan（复用赠送套餐机制，到期由
-// activeCompPlan 自动回落，无独立降级逻辑）。对外文案统一「注册即赠 Pro 7 天」。
+// activeCompPlan 自动回落，无独立降级逻辑）。对外文案统一「注册即赠 Pro 14 天」。
+// 14 天而非 7 天：线索类投放从上线、过广告学习期到出第一批线索通常要 1–2 周，
+// 7 天往往还没看到价值试用就结束了。改天数须同步文案，守卫见 lib/i18n/trial-days-copy.test.ts。
 export const SIGNUP_TRIAL_PLAN: PlanId = "pro";
-export const SIGNUP_TRIAL_DAYS = 7;
+export const SIGNUP_TRIAL_DAYS = 14;
 
 /** 注册试用到期时刻（从 now 起算）。 */
 export function signupTrialExpiry(now: Date = new Date()): Date {
@@ -88,7 +91,7 @@ export interface CompGrant {
  * 建号时写入 comp_plan 的赠送档。
  *
  * 邀请存在则**完全覆盖**默认注册赠送——超管在邀请弹窗里显式选了档位与天数，
- * 那就是他的意图；默认的「注册即赠 Pro 7 天」只是无邀请时的兜底。
+ * 那就是他的意图；默认的注册赠送试用只是无邀请时的兜底。
  * 不做「取较高档」之类的合并：comp_plan 只有一列，存不下两份赠送，
  * 任何合并规则都会在某个方向上偏离超管的显式选择，反而更难预测。
  *
@@ -163,10 +166,15 @@ export function planPriceLabel(plan: PlanConfig, locale: Locale, cnyRate?: numbe
   return `${plan.currency}${plan.priceAmount}${suffix}${approx ? `（${approx}）` : ""}`;
 }
 
+/** 对比表分组：按访客选档时关心的顺序排列（先能不能发出去，再能不能量化，最后是规模化）。 */
+export const PLAN_FEATURE_GROUPS = ["publish", "tracking", "ai", "scale"] as const;
+export type PlanFeatureGroup = (typeof PLAN_FEATURE_GROUPS)[number];
+
 /** 对比表行定义：valueFor 返回字符串（额度）或布尔（有无）；desc 为该权益的作用说明。 */
 export interface PlanFeatureRow {
   /** 稳定标识，供测试与后续引用锚定（不随语言变化）。 */
   key: string;
+  group: PlanFeatureGroup;
   label: string;
   desc: string;
   valueFor: (plan: PlanConfig) => string | boolean;
@@ -176,25 +184,66 @@ export interface PlanFeatureRow {
 export function planFeatureRows(t: PlansDict, locale: Locale = "en"): PlanFeatureRow[] {
   const r = t.rows;
   return [
-    { key: "landingPages", ...r.landingPages, valueFor: (p) => formatPlanLimit(p.landingPagesLimit, locale, "pages") },
+    { key: "landingPages", group: "publish", ...r.landingPages, valueFor: (p) => formatPlanLimit(p.landingPagesLimit, locale, "pages") },
     {
       key: "customDomain",
+      group: "publish",
       ...r.customDomain,
       // Free 的 domainsLimit 是 0，但平台子域不占该额度，它照样能发布——
       // 直接落到 formatPlanLimit 会显示破折号，读起来像「发不了」。
       valueFor: (p) =>
         p.domainsLimit === 0 ? r.customDomain.freeValue : formatPlanLimit(p.domainsLimit, locale, "domains"),
     },
-    { key: "templates", ...r.templates, valueFor: () => true },
-    { key: "editor", ...r.editor, valueFor: () => true },
-    { key: "basicPixel", ...r.basicPixel, valueFor: (p) => p.basicPixel },
-    { key: "watermark", ...r.watermark, valueFor: (p) => !p.hasWatermark },
-    { key: "advancedTracking", ...r.advancedTracking, valueFor: (p) => p.advancedTracking },
-    { key: "antiBan", ...r.antiBan, valueFor: (p) => p.antiBan },
-    { key: "leadWebhook", ...r.leadWebhook, valueFor: (p) => p.leadWebhook },
-    { key: "aiPage", ...r.aiPage, valueFor: (p) => formatPlanLimit(p.aiPageQuota, locale, "perMonth") },
-    { key: "aiRewrite", ...r.aiRewrite, valueFor: (p) => formatPlanLimit(p.aiRewriteQuota, locale, "perMonth") },
+    { key: "templates", group: "publish", ...r.templates, valueFor: () => true },
+    { key: "editor", group: "publish", ...r.editor, valueFor: () => true },
+    { key: "basicPixel", group: "tracking", ...r.basicPixel, valueFor: (p) => p.basicPixel },
+    { key: "watermark", group: "publish", ...r.watermark, valueFor: (p) => !p.hasWatermark },
+    { key: "advancedTracking", group: "tracking", ...r.advancedTracking, valueFor: (p) => p.advancedTracking },
+    { key: "antiBan", group: "scale", ...r.antiBan, valueFor: (p) => p.antiBan },
+    { key: "leadWebhook", group: "tracking", ...r.leadWebhook, valueFor: (p) => p.leadWebhook },
+    { key: "aiPage", group: "ai", ...r.aiPage, valueFor: (p) => formatPlanLimit(p.aiPageQuota, locale, "perMonth") },
+    { key: "aiRewrite", group: "ai", ...r.aiRewrite, valueFor: (p) => formatPlanLimit(p.aiRewriteQuota, locale, "perMonth") },
   ];
+}
+
+export interface PlanComparisonLayout {
+  /** 四档全有的布尔权益：合并成一句「所有套餐都包含」，不占对比行。 */
+  common: PlanFeatureRow[];
+  groups: { id: PlanFeatureGroup; label: string; rows: PlanFeatureRow[] }[];
+}
+
+/**
+ * 对比表的展示布局：先剔出四档全有的行，其余按 PLAN_FEATURE_GROUPS 分组（组内保持 planFeatureRows 顺序）。
+ * 「全有」按 PLANS 实时判定而非写死名单——某项权益哪天改成分档，它会自动回到所属分组。
+ */
+export function planComparisonLayout(t: PlansDict, locale: Locale = "en"): PlanComparisonLayout {
+  const rows = planFeatureRows(t, locale);
+  const isCommon = (row: PlanFeatureRow) => PLAN_ORDER.every((id) => row.valueFor(PLANS[id]) === true);
+  return {
+    common: rows.filter(isCommon),
+    groups: PLAN_FEATURE_GROUPS.map((id) => ({
+      id,
+      label: t.groups[id],
+      rows: rows.filter((r) => r.group === id && !isCommon(r)),
+    })).filter((g) => g.rows.length > 0),
+  };
+}
+
+/**
+ * 纯文本对照表的行：[权益名, Free, Starter, Pro, Agency]，布尔渲染为 ✓ / —。
+ * 供帮助中心这类只能放字符串表格的场景使用——与定价页对比表同源（planFeatureRows），
+ * 套餐配置一改两边一起变，不再手写数字。keys 缺省取全部行；传入时仍按 planFeatureRows 的顺序取子集。
+ */
+export function planComparisonRows(locale: Locale, keys?: readonly string[]): string[][] {
+  return planFeatureRows(PLANS_DICT[locale], locale)
+    .filter((r) => !keys || keys.includes(r.key))
+    .map((r) => [
+      r.label,
+      ...PLAN_ORDER.map((id) => {
+        const v = r.valueFor(PLANS[id]);
+        return v === true ? "✓" : v === false ? "—" : v;
+      }),
+    ]);
 }
 
 export interface PlanEntitlementLine {

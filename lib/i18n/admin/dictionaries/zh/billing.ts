@@ -67,7 +67,6 @@ export const billing = {
   currentPlan: {
     title: "当前套餐",
     managePortal: "管理订阅",
-    compare: "查看完整对比",
     labels: {
       plan: "套餐",
       subscription: "订阅档位",
@@ -94,7 +93,6 @@ export const billing = {
       `升降档只调整付费订阅（当前 ${paid}），不影响管理员赠送的 ${comp} 权益。`,
     upgrade: "升级",
     downgrade: "降级",
-    includesPrevious: (plan: string) => `包含 ${plan} 全部权益`,
     downgradeConfirm: {
       title: "确认降级？",
       description: (plan: string) => `将立即切换到 ${plan}，超出新档上限的功能会受限，差额按比例抵扣。`,

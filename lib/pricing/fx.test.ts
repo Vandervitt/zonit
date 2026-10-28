@@ -40,9 +40,10 @@ describe("extractCnyRate", () => {
 });
 
 describe("approxCnyAmount", () => {
-  it("按汇率换算并保留两位小数", () => {
-    expect(approxCnyAmount(19.99, 7.1)).toBe("141.93");
-    expect(approxCnyAmount(5.99, 7.1)).toBe("42.53");
+  it("按汇率换算并向下取整到元（只舍不入）：「约」后面跟到分既别扭又像结算金额", () => {
+    expect(approxCnyAmount(19.99, 7.1)).toBe("141"); // 141.929
+    expect(approxCnyAmount(5.99, 7.1)).toBe("42"); // 42.529
+    expect(approxCnyAmount(49.99, 7.1)).toBe("354"); // 354.929，四舍五入会是 355
   });
 
   it("免费档与非法汇率不产出换算", () => {

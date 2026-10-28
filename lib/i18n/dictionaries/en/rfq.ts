@@ -96,7 +96,7 @@ export const rfq = {
   },
   finalCta: {
     title: "One page that catches every request for quote",
-    desc: "Start from a B2B template, brief it in your own words, and have an English RFQ page in minutes. Every signup gets 7 days of full Pro, no card required — and the free plan publishes your first page on a platform address.",
+    desc: "Start from a B2B template, brief it in your own words, and have an English RFQ page in minutes. Every signup gets 14 days of full Pro, no card required — and the free plan publishes your first page on a platform address.",
     ctaPrimary: "Start free",
     ctaSecondary: "See pricing",
   },

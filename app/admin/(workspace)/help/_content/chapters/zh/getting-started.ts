@@ -1,4 +1,8 @@
+import { PLANS, PLAN_ORDER, planComparisonRows } from "@/lib/plans";
 import type { HelpChapterData } from "../../types";
+
+/** 「套餐速览」只列各档拉开差距的几行；完整对照在「套餐与账单」章。 */
+const GLANCE_ROWS = ["landingPages", "customDomain", "aiPage", "watermark", "advancedTracking", "leadWebhook", "antiBan"];
 
 export const gettingStarted: HelpChapterData = {
   slug: "getting-started",
@@ -24,7 +28,7 @@ export const gettingStarted: HelpChapterData = {
         {
           t: "callout",
           tone: "info",
-          text: "新注册账号自动获得 Pro 全功能试用 7 天（含发布、CAPI、去水印），可完整跑通上线与收线索；试用到期回到 Free 后，发布到自有域名需要含域名额度的套餐（Starter 及以上），平台地址仍可继续用。概览页的「4 步上线」清单会跟着你的进度打勾。",
+          text: "新注册账号自动获得 Pro 全功能试用 14 天（含发布、CAPI、去水印），可完整跑通上线与收线索；试用到期回到 Free 后，发布到自有域名需要含域名额度的套餐（Starter 及以上），平台地址仍可继续用。概览页的「4 步上线」清单会跟着你的进度打勾。",
         },
       ],
     },
@@ -59,16 +63,8 @@ export const gettingStarted: HelpChapterData = {
         },
         {
           t: "table",
-          head: ["关键差异", "Free", "Starter", "Pro", "Agency"],
-          rows: [
-            ["落地页数量", "1", "5", "20", "无限"],
-            ["自定义域名", "0（仅平台地址）", "1", "5", "无限"],
-            ["AI 整页生成 / 月", "3", "15", "80", "300"],
-            ["去品牌水印", "—", "—", "✓", "✓"],
-            ["多平台追踪 + 服务端回传", "—", "—", "✓", "✓"],
-            ["线索 Webhook 推送", "—", "—", "✓", "✓"],
-            ["反同质化", "—", "—", "—", "✓"],
-          ],
+          head: ["关键差异", ...PLAN_ORDER.map((id) => PLANS[id].label)],
+          rows: planComparisonRows("zh", GLANCE_ROWS),
         },
         { t: "p", text: "完整对照与计费说明见「套餐与账单」章。" },
       ],

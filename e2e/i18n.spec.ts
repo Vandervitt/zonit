@@ -2,7 +2,7 @@
 // 营销站双语：/ 出英文、/zh 出中文，切换器往返保持路径，hreflang 齐备，后台不受影响。
 // 不依赖数据库 fixture，故无需 RUN_DB_E2E。
 import { test, expect } from "@playwright/test";
-import { PLANS, planPriceText } from "@/lib/plans";
+import { PLANS, SIGNUP_TRIAL_DAYS, planPriceText } from "@/lib/plans";
 
 // Pro 档价格来自构建期 Dodo 快照，断言跟随快照而非写死数字。
 const PRO_PRICE = planPriceText(PLANS.pro, "en").amount;
@@ -48,12 +48,12 @@ test.describe("营销站双语", () => {
 
   test("/zh 下的套餐对比表也是中文", async ({ page }) => {
     await page.goto("/zh");
-    await expect(page.getByText("最受欢迎").first()).toBeVisible();
+    await expect(page.getByText("所有套餐都包含").first()).toBeVisible();
   });
 
   test("/ 下的套餐对比表是英文", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("Most popular").first()).toBeVisible();
+    await expect(page.getByText("Included in every plan").first()).toBeVisible();
   });
 
   // 收款货币是美元：两语都必须出美元价，只有中文面额外附「约 ¥xx」参考换算。
@@ -67,7 +67,28 @@ test.describe("营销站双语", () => {
     await page.goto("/zh/pricing");
     await expect(page.getByText(PRO_PRICE).first()).toBeVisible();
     // 汇率取自实时接口，只断言形态与「约」字，不锁死具体数值。
-    await expect(page.getByText(/^约 ¥[\d,]+\.\d{2}$/).first()).toBeVisible();
+    // 换算取整到元（只舍不入），不带小数。
+    await expect(page.getByText(/^约 ¥\d+$/).first()).toBeVisible();
+  });
+
+  // 回归：付费档按钮曾指向 /admin/billing，未登录访客只会落到登录页。
+  test("定价页访客按钮一律去注册页，试用档主按钮带真实天数", async ({ page }) => {
+    await page.goto("/zh/pricing");
+    const trial = page.getByRole("link", { name: `免费试用 ${SIGNUP_TRIAL_DAYS} 天` });
+    await expect(trial).toBeVisible();
+    await expect(trial).toHaveAttribute("href", "/zh/register");
+    await expect(page.getByRole("link", { name: "选择 Agency" })).toHaveAttribute("href", "/zh/register");
+    await expect(page.locator('a[href="/admin/billing"]')).toHaveCount(0);
+  });
+
+  // 回归：旧对比表在手机上首屏只露出「功能 + 说明」两列，价格要横向滑动才看得到。
+  test("手机宽度下定价页直接看得到价格，且不出现横向滚动", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/pricing");
+    await expect(page.locator(`text=${PRO_PRICE} >> visible=true`).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Start free trial" })).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
   });
 
   test("/zh 子树标注中文语言属性", async ({ page }) => {

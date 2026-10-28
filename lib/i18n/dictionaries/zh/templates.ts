@@ -12,7 +12,7 @@ export const templates = {
     /** `{templates}` 与 `{industries}` 会被替换为实际数量。 */
     subtitle:
       "{templates} 套留资模板，覆盖 {industries} 个行业，全部自带合规页脚。每套模板都能配任意渠道——下面的标签只是它的预设，选完之后一键就能改成表单、WhatsApp、电话、邮箱或 Telegram。",
-    cta: "免费开始 · 注册即赠 Pro 7 天",
+    cta: "免费开始 · 注册即赠 Pro 14 天",
     /** 卡片上的转化标签，如「WhatsApp 留资」。`{channel}` 为渠道名。 */
     /**
      * 卡片上的转化标签。措辞强调「预设」而非「只能用」——渠道现在是页面级设置，
