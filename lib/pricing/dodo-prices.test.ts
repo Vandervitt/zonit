@@ -93,8 +93,9 @@ describe("fetchPriceSnapshot", () => {
     await expect(fetchPriceSnapshot(async (id) => broken[id], ids)).rejects.toThrow(/plans\.pro\.month/);
   });
 
-  it("年付价不等于月费 × 10 时整体失败：官网写的「省 2 个月」会与实际扣款不符", async () => {
-    const off: Record<string, ProductPriceLike> = { ...catalog, pdt_ay: yearly(149900) };
-    await expect(fetchPriceSnapshot(async (id) => off[id], ids)).rejects.toThrow(/plans\.agency.*× ?10/);
+  it("年付价与月费的倍数不做约束：定价由运营在 Dodo 后台自由调整，原样进快照", async () => {
+    const promo: Record<string, ProductPriceLike> = { ...catalog, pdt_ay: yearly(129900) };
+    const snapshot = await fetchPriceSnapshot(async (id) => promo[id], ids);
+    expect(snapshot.plans.agency).toEqual({ month: 14900, year: 129900 });
   });
 });

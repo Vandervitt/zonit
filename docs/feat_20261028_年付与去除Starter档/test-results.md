@@ -10,7 +10,9 @@
 | E2E 营销站 | `npx playwright test e2e/i18n.spec.ts` | 35 条全过（新增：年付切换显示年价与折合月价、档位无 Starter） |
 | E2E 后台 | `RUN_DB_E2E=1 npx playwright test e2e/admin-i18n.spec.ts e2e/gallery-and-pages.spec.ts e2e/rfq-landing.spec.ts` | 11 条全过 |
 
-先见红的新测试：快照年付取价与 `year === month × 10` 断言、产品 ↔ (档位, 周期) 映射、webhook 年付产品落 `interval: "year"`、结账 / 换档接口的 interval 校验与 503 业务码、`billing_interval` 落库、`planAction` 按钮判定、档位精简与 Agency 25 域名、年付价格文案（折合月价截断、千分位）、文案无 Starter 守卫（另以临时插入 Starter 验证会报红）。
+先见红的新测试：快照年付取价、产品 ↔ (档位, 周期) 映射、webhook 年付产品落 `interval: "year"`、结账 / 换档接口的 interval 校验与 503 业务码、`billing_interval` 落库、`planAction` 按钮判定、档位精简与 Agency 25 域名、年付价格文案（折合月价截断、千分位）、文案无 Starter 守卫（另以临时插入 Starter 验证会报红）。
+
+> 10-28 追加：按用户决定移除 ×10 断言，改为「倍数不约束、原样进快照」的测试；「省 N 个月」改由 `yearlySavedMonths` 按实价计算；后台计费页 Free 置后（`PAID_FIRST_PLAN_ORDER`）。
 
 ## 迁移 057（本地开发库演练）
 

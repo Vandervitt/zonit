@@ -3,7 +3,8 @@
 // lib/plans.ts 与 lib/credits.ts 从它读价格，页面上不再出现手写数字。
 //
 // 校验从严：任何会让「官网展示价 ≠ 结账页扣款价」的形态（非美元、周期不符、带折扣、
-// 按需付费、年付价 ≠ 月费 × 10）一律报错，交给构建脚本决定是中止构建还是沿用旧快照。
+// 按需付费）一律报错，交给构建脚本决定是中止构建还是沿用旧快照。
+// 年付价与月费的倍数**不做约束**：定价由运营在 Dodo 后台自由调整，展示侧按实际价格算节省额。
 
 /** Dodo Product 里与取价相关的最小形状（与 SDK 的 Product 结构兼容）。 */
 export interface ProductPriceLike {
@@ -24,10 +25,9 @@ export type PriceKind = "monthly" | "yearly" | "one_time";
 export type PaidPlanId = "pro" | "agency";
 export const PAID_PLAN_IDS: readonly PaidPlanId[] = ["pro", "agency"];
 
-/** 计费周期。年付价固定为月费 × YEARLY_PRICE_MONTHS（官网文案「年付省 2 个月」依赖这一点）。 */
+/** 计费周期。 */
 export type BillingInterval = "month" | "year";
 export const BILLING_INTERVALS: readonly BillingInterval[] = ["month", "year"];
-export const YEARLY_PRICE_MONTHS = 10;
 export type CreditPackKey = "50" | "200";
 
 /** prices.json 的结构：金额一律存美分整数，避免浮点误差；换算成美元在读取侧做。 */
@@ -77,11 +77,6 @@ export async function fetchPriceSnapshot(
       priceOf(`plans.${plan}.month`, ids.plans[plan].month, "monthly"),
       priceOf(`plans.${plan}.year`, ids.plans[plan].year, "yearly"),
     ]);
-    if (year !== month * YEARLY_PRICE_MONTHS) {
-      throw new Error(
-        `plans.${plan}: yearly price ${year} must equal monthly ${month} × ${YEARLY_PRICE_MONTHS} (${month * YEARLY_PRICE_MONTHS})`,
-      );
-    }
     return { month, year };
   };
   const [pro, agency, c50, c200] = await Promise.all([

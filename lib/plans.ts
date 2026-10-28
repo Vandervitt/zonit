@@ -18,7 +18,7 @@ import pricesJson from "./pricing/prices.json";
 // 改价只需在 Dodo 后台改产品定价并重新部署，代码里不再手写价格数字。
 const PRICES = pricesJson as PriceSnapshot;
 
-export { BILLING_INTERVALS, YEARLY_PRICE_MONTHS, type BillingInterval } from "./pricing/dodo-prices";
+export { BILLING_INTERVALS, type BillingInterval } from "./pricing/dodo-prices";
 
 // 2026-10-28 去掉 Starter：付费入门直接是 Pro，见 docs/feat_20261028_年付与去除Starter档/design.md。
 export type PlanId = "free" | "pro" | "agency";
@@ -74,6 +74,9 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 };
 
 export const PLAN_ORDER: PlanId[] = ["free", "pro", "agency"];
+
+/** 后台计费页的展示顺序：已在用产品的人关心的是付费档，Free 置后（官网仍按 PLAN_ORDER 由低到高）。 */
+export const PAID_FIRST_PLAN_ORDER: readonly PlanId[] = [...PLAN_ORDER.filter((id) => id !== "free"), "free"];
 
 // 注册赠送试用：新用户建号即写入 comp_plan（复用赠送套餐机制，到期由
 // activeCompPlan 自动回落，无独立降级逻辑）。对外文案统一「注册即赠 Pro 14 天」。
@@ -178,6 +181,19 @@ export function planPriceText(
     approx: approx ? t.approxCny.replace("{amount}", approx) : null,
     yearlyNote,
   };
+}
+
+/**
+ * 年付相当于省了几个月：按各付费档的**实际**价格算（年付价由运营在 Dodo 自由定）。
+ * 只有各档都恰好省整数个月且一致时才返回该数，否则 null——切换按钮上的「省 N 个月」
+ * 是对所有档的统一表述，不一致时宁可不说，也不说假话（各档的节省额另由 yearlyNote 按实价展示）。
+ */
+export function yearlySavedMonths(plans: PlanConfig[]): number | null {
+  const months = plans.map((p) => 12 - p.prices.year / p.prices.month);
+  if (months.length === 0) return null;
+  const first = Math.round(months[0]);
+  const consistent = months.every((m) => Math.abs(m - first) < 1e-9);
+  return consistent && first > 0 ? first : null;
 }
 
 /**

@@ -8,7 +8,7 @@ import { Typography, Card, Descriptions, Button, Space, Alert, Popconfirm, Stati
 import { ThunderboltOutlined } from "@ant-design/icons";
 import { PlanBadge } from "@/components/billing/PlanBadge";
 import { PlanComparison } from "@/components/billing/PlanComparison";
-import { PLANS, PLAN_ORDER, planPriceLabel, formatPlanLimit } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, PAID_FIRST_PLAN_ORDER, planPriceLabel, formatPlanLimit } from "@/lib/plans";
 import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
 import { formatDate, formatDateTime } from "@/lib/i18n/admin";
 import type { BillingInterval, PlanId } from "@/lib/plans";
@@ -399,6 +399,7 @@ export default function BillingPage() {
           cnyRate={cnyRate}
           currentPlan={effectivePlanId}
           defaultInterval={billingInterval ?? "month"}
+          order={PAID_FIRST_PLAN_ORDER}
           cta={isCompedWithoutSub ? undefined : renderPlanCta}
         />
       </Card>

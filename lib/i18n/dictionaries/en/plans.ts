@@ -26,7 +26,7 @@ export const plans = {
     ctaFree: "Start free",
     ctaTrial: "Start free trial",
     ctaChoose: "Choose {plan}",
-    // 月付 / 年付切换；{months} = 12 - YEARLY_PRICE_MONTHS。
+    // 月付 / 年付切换；{months} 由 yearlySavedMonths 按实际价格算出，算不出整月时不显示。
     billingPeriod: "Billing period",
     intervalMonth: "Monthly",
     intervalYear: "Yearly",

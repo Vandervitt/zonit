@@ -9,11 +9,11 @@ import {
   PLAN_ORDER,
   SIGNUP_TRIAL_DAYS,
   SIGNUP_TRIAL_PLAN,
-  YEARLY_PRICE_MONTHS,
   BILLING_INTERVALS,
   planComparisonLayout,
   planPriceText,
   plansDictionary,
+  yearlySavedMonths,
   type BillingInterval,
   type PlanFeatureRow,
   type PlanId,
@@ -44,6 +44,8 @@ export interface PlanComparisonProps {
   cta?: (planId: PlanId, interval: BillingInterval) => ReactNode;
   /** 初始展示的计费周期，默认月付。 */
   defaultInterval?: BillingInterval;
+  /** 档位展示顺序，默认 PLAN_ORDER（由低到高）；后台计费页传 PAID_FIRST_PLAN_ORDER 把 Free 置后。 */
+  order?: readonly PlanId[];
   /** 当前所在档：该列高亮并标「当前套餐」。不传时高亮推荐档。 */
   currentPlan?: PlanId;
   /** 是否在注册试用档上标「注册即送 N 天」——只对还没注册的访客有意义。 */
@@ -78,9 +80,11 @@ function IntervalToggle({
   value,
   onChange,
   t,
+  savedMonths,
 }: {
   value: BillingInterval;
   onChange: (v: BillingInterval) => void;
+  savedMonths: number | null;
   t: { billingPeriod: string; intervalMonth: string; intervalYear: string; yearSave: string };
 }) {
   const label = (v: BillingInterval) => (v === "month" ? t.intervalMonth : t.intervalYear);
@@ -107,9 +111,9 @@ function IntervalToggle({
             className="sr-only"
           />
           {label(v)}
-          {v === "year" && (
+          {v === "year" && savedMonths != null && (
             <span className={cn("text-xs", value === v ? "text-white/85" : "text-aqua-700")}>
-              {t.yearSave.replace("{months}", String(12 - YEARLY_PRICE_MONTHS))}
+              {t.yearSave.replace("{months}", String(savedMonths))}
             </span>
           )}
         </label>
@@ -185,6 +189,7 @@ export function PlanComparison({
   currentPlan,
   showTrialBadge = false,
   defaultInterval = "month",
+  order = PLAN_ORDER,
 }: PlanComparisonProps) {
   const [interval, setBillingInterval] = useState<BillingInterval>(defaultInterval);
   const t = plansDictionary(locale);
@@ -200,7 +205,7 @@ export function PlanComparison({
     return null;
   };
 
-  const plans = PLAN_ORDER.map((id) => ({
+  const plans = order.map((id) => ({
     id,
     label: PLANS[id].label,
     config: PLANS[id],
@@ -237,7 +242,12 @@ export function PlanComparison({
   return (
     <div className="@container">
       <div className="mb-5">
-        <IntervalToggle value={interval} onChange={setBillingInterval} t={t.table} />
+        <IntervalToggle
+          value={interval}
+          onChange={setBillingInterval}
+          t={t.table}
+          savedMonths={yearlySavedMonths(PLAN_ORDER.filter((id) => id !== "free").map((id) => PLANS[id]))}
+        />
       </div>
       {included}
 

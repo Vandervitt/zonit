@@ -8,7 +8,8 @@
 |---|---|
 | 主攻客户 | 代运营方与外贸工厂兼顾 |
 | 档位 | 去掉 Starter，保留 Free / Pro / Agency 三档 |
-| 年付 | 新增年付，**年付价 = 月费 × 10**（相当于送 2 个月） |
+| 年付 | 新增年付，上线定价为月费 × 10（相当于送 2 个月）；**倍数不做代码约束**，以 Dodo 后台定价为准（用户 10-28 追加决定） |
+| 后台顺序 | 后台计费页 Free 置后（`PAID_FIRST_PLAN_ORDER`），官网顺序不变 |
 
 ## 2. 价位与细节（2026-10-28 已确认）
 
@@ -42,7 +43,7 @@
 |---|---|
 | Dodo 产品 | 用户在 Dodo 后台新建 `Pro 年付`、`Agency 年付` 两个产品（每 1 年扣款），并改 Pro/Agency 月付价；停用 Starter 产品 |
 | 环境变量 | 新增 `DODO_PRODUCT_PRO_YEARLY`、`DODO_PRODUCT_AGENCY_YEARLY`；删除 `DODO_PRODUCT_STARTER`（`check-env.mjs` 同步） |
-| 价格快照 | `prices.json` 改为 `plans: { pro: { month, year }, agency: { month, year } }`；`extractUsdCents` 增加 `yearly` 校验（每 1 年）；**构建期断言 `year === month × 10`，不等即视为取价失败**（生产构建中止，宁可不部署也不展示错价） |
+| 价格快照 | `prices.json` 改为 `plans: { pro: { month, year }, agency: { month, year } }`；`extractUsdCents` 增加 `yearly` 校验（每 1 年）。~~构建期断言 year = month × 10~~（已按用户决定移除：定价由运营在 Dodo 自由调整；「省 N 个月」改为按实价算，不整齐时不显示） |
 | 产品映射 | `dodoProductMap` 改为 product → `{ plan, interval }`；结账 / 换档按 `(plan, interval)` 取产品 |
 | 接口 | `POST /api/billing/checkout`、`/change-plan` 入参增加 `interval`（缺省 `month`，向后兼容）；白名单校验 |
 | 数据库 | 迁移 057：`users.billing_interval TEXT CHECK (IN ('month','year'))`，webhook 激活时写入、结束时清空；同时把 `users_plan_check` / `users_comp_plan_check` 去掉 `starter`。**迁移内先断言不存在 starter 行，有则 throw 回滚**（不做静默映射） |
@@ -64,15 +65,15 @@
 
 ## 5. 上线顺序（避免官网价与结账价不一致的窗口）
 
-1. 用户在 Dodo **live** 后台：改 Pro/Agency 月付价、新建两个年付产品（价格 = 月费 × 10）、记下产品 id。
+1. 用户在 Dodo **live** 后台：改 Pro/Agency 月付价、新建两个年付产品、记下产品 id（已提供：Pro `pdt_0NqhpIf5gjgXzg0R20Jl3`、Agency `pdt_0Nqhp929wouEppPA2vIHm`）。
 2. 用户（或我经 Vercel CLI）在 Vercel 生产环境配置 `DODO_PRODUCT_PRO_YEARLY`、`DODO_PRODUCT_AGENCY_YEARLY`。
-3. 合并 PR → `vercel-build` 自动跑迁移 057 + 价格同步（含 ×10 断言）→ 部署。
+3. 合并 PR → `vercel-build` 自动跑迁移 057 + 价格同步 → 部署。
 4. 生产复查：定价页三档 + 年付切换；Dodo test mode 走一遍月付 / 年付结账与 webhook 落库。
 5. 确认无误后在 Dodo 后台归档 Starter 产品。
 
 ## 6. 测试策略
 
-- 先写失败测试：`PLAN_ORDER` 不含 starter；`year === month × 10` 断言（构造不等的快照应报错）；product ↔ (plan, interval) 映射往返；webhook 年付产品落 `billing_interval='year'`；接口拒绝非法 interval；折合月价截断。
+- 先写失败测试：`PLAN_ORDER` 不含 starter；年付价原样进快照；product ↔ (plan, interval) 映射往返；webhook 年付产品落 `billing_interval='year'`；接口拒绝非法 interval；折合月价截断。
 - 迁移在本地库演练 up/down，并演练「存在 starter 行时 throw」。
 - E2E：定价页月付/年付切换（中英、桌面/手机）、访客按钮仍去注册页；后台计费页按钮随周期变化。
 - 文案守卫：新增「界面与字典不再出现 Starter」守卫。
