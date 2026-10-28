@@ -55,7 +55,7 @@ export function FounderContactForm({ initial }: { initial: FounderContact }) {
           name="wechatId"
           extra="用户可一键复制添加；留空则弹层不展示微信号文本。"
         >
-          <Input prefix={<WechatOutlined style={{ color: "#07c160" }} />} placeholder="如：zapbridge-founder" allowClear />
+          <Input prefix={<WechatOutlined style={{ color: "#07c160" }} />} placeholder="如：urgizat-founder" allowClear />
         </Form.Item>
 
         <Form.Item

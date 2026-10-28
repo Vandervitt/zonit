@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import { htmlLang, ogLocale, hreflang, defaultLocale, locales, type Locale } from "@/lib/i18n/config";
 import { localePath, isLocalizedRoute } from "@/lib/i18n/routes";
 import { fillCounts } from "@/lib/templates/stats";
+import { SITE_NAME } from "./site-name";
 
 // 生产由 Vercel 注入 NEXT_PUBLIC_APP_URL（= https://urgizat.com）；本地为
 // http://localhost:3001；空值兜底到主域，避免 metadataBase / OG 解析到 localhost。
@@ -14,7 +15,7 @@ export const SITE_URL = (
   process.env.NEXT_PUBLIC_APP_URL || "https://urgizat.com"
 ).replace(/\/+$/, "");
 
-export const SITE_NAME = "Urgizat";
+export { SITE_NAME };
 
 // 营销站默认英文，中文版走 /zh 前缀。
 // 英文面受众是全球中小企业。siteDescription 是全客群必经的站点级描述，故跨境表述

@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { execSync } from "node:child_process";
 import { locales } from "./config";
 import { getDictionary } from "./dictionaries";
 import { getAdminDictionary } from "./admin";
@@ -49,5 +50,21 @@ describe("品牌名一致性", () => {
   it.each(locales)("营销站字典（%s）确实提到了新品牌 —— 防止误删成空", (locale) => {
     const mentions = flatten(getDictionary(locale)).filter(([, text]) => text.includes("Urgizat"));
     expect(mentions.length).toBeGreaterThan(0);
+  });
+});
+
+describe("界面源码不残留旧品牌名", () => {
+  // 上面的守卫只扫字典；超管后台固定中文、文案直接写在 TSX 里，
+  // 侧边栏的 "ZAP BRIDGE ADMIN" 就是这样漏过了更名（10-28 才发现）。
+  // 只扫 .tsx：渲染给人看的字面量都在这里；.ts 里的旧串是刻意保留的
+  // 识别词（variant.ts META_TOKENS）或测试 fixture，不在本守卫范围。
+  it("app / components / landing-editor / landing-renderer 下的 .tsx 不含 Zap Bridge 字样", () => {
+    const out = execSync(
+      "git grep -niE 'zap ?bridge' -- 'app/**/*.tsx' 'components/**/*.tsx' 'landing-editor/**/*.tsx' 'landing-renderer/**/*.tsx' || true",
+      { encoding: "utf8" },
+    ).trim();
+    // zapbridge.site 是试用子域的根域名（与更名无关、刻意保留），不算旧品牌残留。
+    const offenders = out.split("\n").filter((line) => line && !/zapbridge\.site/i.test(line));
+    expect(offenders).toEqual([]);
   });
 });
