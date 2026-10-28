@@ -62,6 +62,20 @@
 | 阿什本 | 514–559 | 516–534 |
 | 圣保罗 | 779–854 | 733–796 |
 
+### 4.1 合并后生产复测（同一请求前后对比）
+
+同一个未绑定子域 `zz-latency-probe.zapbridge.site/`：改前是 proxy 查库后 404，改后是页面函数带缓存解析后 404。同组探针 4 轮，取第 2–4 轮中位数（ms）：
+
+| 探针 | 改前 | 改后 | 降幅 |
+|---|---|---|---|
+| 法兰克福 | 1208 | 387 | −68% |
+| 伦敦 | 1294 | 279 | −78% |
+| 阿什本 | 1638 | 330 | −80% |
+| 洛杉矶 | 1267 | 261 | −79% |
+| 圣保罗 | 2842 | 398 | −86% |
+
+同轮对照：生产 proxy 直接 404 的路径仍是 25–65ms，营销首页 CDN 命中 32–120ms，均不受影响。生产比 Preview 再低约 100–400ms，与「Preview 的 proxy 多一段开销」的判断一致。
+
 ## 5. 验证
 
 - 单测 1915 全过；新 proxy 测试在旧实现上失败（mock 查库即抛错）。
@@ -77,8 +91,8 @@
 | Preview 部署保护 | 匿名请求 302 到 Vercel SSO，Globalping 进不去 | 只给测试域名加 Deployment Protection Exception，不关全局保护 |
 | E2E fixture 撞缓存 | 直接写库的 fixture 不失效缓存，复用固定 slug / 域名时上一轮末尾的「已下线」被缓存住，下一轮一上来 404 | fixture 每轮独立 slug 与域名 |
 
-## 7. 测试残留（需清理）
+## 7. 测试残留
 
-- Vercel 域名 `perf-preview.zapbridge.site`（绑本分支）及其 Deployment Protection Exception
-- 本分支级 Preview 环境变量 `NEXT_PUBLIC_APP_URL`
-- Preview 库分支 `preview/perf_20261028_落地页租户路由移出proxy` 里的测试用户 / 页面 / 域名（库分支随 PR 关闭由集成清理）
+- ✅ 已删：Vercel 域名 `perf-preview.zapbridge.site`、本分支级 Preview 变量 `NEXT_PUBLIC_APP_URL`
+- ⏳ 待删：该域名的 Deployment Protection Exception（Security → Deployment Protection）
+- Preview 库分支 `preview/perf_20261028_落地页租户路由移出proxy` 里的测试数据随库分支由集成清理
