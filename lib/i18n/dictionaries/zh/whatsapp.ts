@@ -84,7 +84,7 @@ export const whatsapp = {
   },
   finalCta: {
     title: "在广告和对话之间放一张页面",
-    desc: "从一套已经接好 WhatsApp 路径的模板开始，发布到自有域名，然后看清楚哪些广告真的带来了对话。注册即得 7 天完整 Pro，无需信用卡。",
+    desc: "从一套已经接好 WhatsApp 路径的模板开始，发布到自有域名，然后看清楚哪些广告真的带来了对话。注册即得 14 天完整 Pro，无需信用卡。",
     ctaPrimary: "免费开始",
     ctaSecondary: "查看定价",
   },

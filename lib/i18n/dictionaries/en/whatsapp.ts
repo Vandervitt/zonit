@@ -102,7 +102,7 @@ export const whatsapp = {
   },
   finalCta: {
     title: "Put a page between the ad and the chat",
-    desc: "Start from a template that already has the WhatsApp path wired up, publish it to your own domain, and see which campaigns actually produce conversations. Every sign-up gets 7 days of full Pro — no credit card.",
+    desc: "Start from a template that already has the WhatsApp path wired up, publish it to your own domain, and see which campaigns actually produce conversations. Every sign-up gets 14 days of full Pro — no credit card.",
     ctaPrimary: "Start free",
     ctaSecondary: "See pricing",
   },

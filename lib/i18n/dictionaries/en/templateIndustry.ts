@@ -51,7 +51,7 @@ export const templateIndustry = {
     guideHeading: "Go deeper on this industry",
     faqHeading: "Common questions",
     otherIndustriesHeading: "Other industries",
-    cta: "Start free · 7 days of Pro on sign-up",
+    cta: "Start free · 14 days of Pro on sign-up",
     allTemplates: "Browse all templates",
   },
 

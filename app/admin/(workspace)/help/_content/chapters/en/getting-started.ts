@@ -1,4 +1,8 @@
+import { PLANS, PLAN_ORDER, planComparisonRows } from "@/lib/plans";
 import type { HelpChapterData } from "../../types";
+
+/** 「套餐速览」只列各档拉开差距的几行；完整对照在「套餐与账单」章。 */
+const GLANCE_ROWS = ["landingPages", "customDomain", "aiPage", "watermark", "advancedTracking", "leadWebhook", "antiBan"];
 
 export const gettingStarted: HelpChapterData = {
   slug: "getting-started",
@@ -24,7 +28,7 @@ export const gettingStarted: HelpChapterData = {
         {
           t: "callout",
           tone: "info",
-          text: "New accounts get 7 days of full Pro (publishing, CAPI, no watermark included), enough to run the whole publish-and-capture loop. When the trial ends and you drop to Free, publishing on your own domain needs a plan with a domain slot (Starter or above) — the platform address stays available. The “4 steps to launch” checklist on the Overview page ticks off as you go.",
+          text: "New accounts get 14 days of full Pro (publishing, CAPI, no watermark included), enough to run the whole publish-and-capture loop. When the trial ends and you drop to Free, publishing on your own domain needs a plan with a domain slot (Starter or above) — the platform address stays available. The “4 steps to launch” checklist on the Overview page ticks off as you go.",
         },
       ],
     },
@@ -59,16 +63,8 @@ export const gettingStarted: HelpChapterData = {
         },
         {
           t: "table",
-          head: ["Key difference", "Free", "Starter", "Pro", "Agency"],
-          rows: [
-            ["Landing pages", "1", "5", "20", "Unlimited"],
-            ["Custom domains", "0 (platform address only)", "1", "5", "Unlimited"],
-            ["AI full-page generations / month", "3", "15", "80", "300"],
-            ["Remove platform watermark", "—", "—", "✓", "✓"],
-            ["Multi-platform tracking + server-side conversions", "—", "—", "✓", "✓"],
-            ["Lead webhook", "—", "—", "✓", "✓"],
-            ["Anti-duplication", "—", "—", "—", "✓"],
-          ],
+          head: ["Key difference", ...PLAN_ORDER.map((id) => PLANS[id].label)],
+          rows: planComparisonRows("en", GLANCE_ROWS),
         },
         { t: "p", text: "Full comparison and billing details are in the “Plans & billing” chapter." },
       ],

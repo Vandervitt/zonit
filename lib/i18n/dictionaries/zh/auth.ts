@@ -16,9 +16,9 @@ export const auth = {
   register: {
     metaTitle: "注册 | Urgizat",
     metaDescription:
-      "免费注册 Urgizat，即赠 Pro 全功能试用 7 天。几分钟发布第一张留资落地页到自有品牌域名。",
+      "免费注册 Urgizat，即赠 Pro 全功能试用 14 天。几分钟发布第一张留资落地页到自有品牌域名。",
     title: "创建账号",
-    subtitle: "输入邮箱获取验证码，注册即赠 Pro 全功能试用 7 天",
+    subtitle: "输入邮箱获取验证码，注册即赠 Pro 全功能试用 14 天",
     invited: "专属邀请权益已应用",
     google: "使用 Google 继续",
     googleLoading: "连接中…",

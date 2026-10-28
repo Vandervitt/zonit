@@ -41,8 +41,8 @@ export const plans = {
   },
   highlights: {
     free: ["1 张落地页", "全量海外获客模板库", "可视化内容编辑器", "可发布到平台提供的地址（带水印），自有品牌域名需付费"],
-    starter: ["5 张落地页，可挂在同一个域名的不同路径下", "1 个自定义域名", "适合单品牌多服务页（诊所、律所、教培）", "1× Meta Pixel 追踪"],
-    pro: ["20 张落地页 + 5 个域名", "多域名隔离，适合同时投多个 offer", "去除品牌水印", "Meta / TikTok / Google 追踪 + Meta / TikTok CAPI"],
+    starter: ["5 张落地页，可挂在同一个域名的不同路径下", "1 个自定义域名，无平台水印", "适合单品牌多服务页（诊所、律所、教培）", "1× Meta Pixel 追踪"],
+    pro: ["20 张落地页 + 5 个域名", "多域名隔离，适合同时投多个 offer", "线索 Webhook 推送到 CRM / Zapier", "Meta / TikTok / Google 追踪 + Meta / TikTok CAPI"],
     agency: ["无限落地页 + 无限域名", "反同质化", "AI 生成额度提升至 300 次/月"],
   },
 };

@@ -13,7 +13,7 @@ export const templates = {
     /** `{templates}` 与 `{industries}` 会被替换为实际数量。 */
     subtitle:
       "{templates} lead-capture templates across {industries} industries, each with a compliant footer built in. Every template works with any channel — the tags below are just what each one is set up for, and you can switch to a form, WhatsApp, phone, email, or Telegram in one click after you pick it.",
-    cta: "Start free · 7 days of Pro on sign-up",
+    cta: "Start free · 14 days of Pro on sign-up",
     /**
      * 卡片上的转化标签，如 "Set up for WhatsApp"。`{channel}` 为渠道名。
      * 措辞刻意强调「预设」而非「只能用」——渠道现在是页面级设置，选完模板

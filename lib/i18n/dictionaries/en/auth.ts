@@ -16,9 +16,9 @@ export const auth = {
   register: {
     metaTitle: "Sign up | Urgizat",
     metaDescription:
-      "Create a free Urgizat account and get 7 days of full Pro. Publish your first lead-gen landing page on your own domain in minutes.",
+      "Create a free Urgizat account and get 14 days of full Pro. Publish your first lead-gen landing page on your own domain in minutes.",
     title: "Create your account",
-    subtitle: "Enter your email to get a code — every sign-up gets 7 days of full Pro",
+    subtitle: "Enter your email to get a code — every sign-up gets 14 days of full Pro",
     invited: "Invitation benefits applied",
     google: "Continue with Google",
     googleLoading: "Connecting…",
