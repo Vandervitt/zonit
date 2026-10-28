@@ -13,12 +13,12 @@ export function appUrl(path: string, base: string = process.env.NEXT_PUBLIC_APP_
   return `${base.replace(/\/+$/, "")}${path}`;
 }
 
-// 中间件改写租户请求到 /p/{slug} 时，把原始客户域名盖进这个请求头。
+// 中间件改写租户请求到 /p 时，把原始客户域名盖进这个请求头。
 // 因为改写后下游读到的 `host` 会变成 app 主域，无法再据此判定租户，故显式透传。
 export const TENANT_HOST_HEADER = "x-tenant-host";
 
-// 同理透传原始路径：改写到 /p/{slug} 后下游只看得到 slug，无从得知访客请求的
-// 是根路径还是 /invisalign，而 canonical 必须指向真实地址。
+// 同理透传访客请求的路径（已规范化）：改写到 /p 后下游看不到原路径，
+// 而页面要据此解析该渲染哪张页（/、/invisalign、/invisalign/privacy……）。
 export const TENANT_PATH_HEADER = "x-tenant-path";
 
 /** host 头（可能带端口）→ 纯主机名。 */
@@ -34,10 +34,7 @@ export function resolveTenantHostname(headers: Headers): string {
   return hostnameOf(headers.get(TENANT_HOST_HEADER) ?? headers.get("host"));
 }
 
-/**
- * 解析租户请求的原始路径（规范化后）。未经改写的请求没有该头，回退根路径。
- * 供 canonical / OG url 使用——它们必须是访客看到的地址，不是 /p/{slug}。
- */
+/** 解析租户请求的原始路径（规范化后）。未经改写的请求没有该头，回退根路径。 */
 export function resolveTenantPath(headers: Headers): string {
   return headers.get(TENANT_PATH_HEADER) || "/";
 }

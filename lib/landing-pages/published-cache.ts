@@ -2,6 +2,7 @@ import { unstable_cache, revalidateTag } from "next/cache";
 import { getPublishedBySlug } from "./store";
 import type { LandingPageRow } from "./store";
 import { getUserPlan } from "@/lib/plans-db";
+import { resolveTenantRoute } from "@/lib/domains-db";
 import type { PlanId } from "@/lib/plans";
 
 /**
@@ -91,6 +92,39 @@ export function invalidatePublishedPage(slug: string | null | undefined): void {
  */
 export function invalidateAllPublishedPages(): void {
   revalidateTag(ALL_TAG, IMMEDIATE);
+}
+
+/** 租户路由映射（域名 + 路径 → slug）共用的 tag。 */
+const ROUTES_TAG = "tenant-routes";
+
+/**
+ * 按「客户域名 + 规范化路径」解析已发布页的 slug（带缓存）。未绑定时为 null，同样缓存。
+ *
+ * # 为什么从 proxy 挪到这里
+ *
+ * proxy 在离访客最近的区域执行，而库在新加坡。2026-10-28 从欧美实测，proxy 里这一次
+ * 查库单独就要 1.1–1.6 秒（圣保罗 2.9 秒），且发生在任何缓存之前。挪进与库同区的
+ * 页面函数并加缓存后，跨区只剩「边缘 → 函数」一跳。
+ *
+ * # ⚠️ 失效
+ *
+ * 映射来自 domains 与 domain_routes 两张表，**每一处会改变映射的写入都要调用
+ * invalidateTenantRoutes**：发布（绑定 / 换位置）、域名启停 / 验证 / 删除、删页面
+ * （级联删 route）。配额下线与禁用账号走 invalidateAllPublishedPages，靠 ALL_TAG 覆盖。
+ * 漏一处的后果与页面缓存一样：该下线的页面在缓存窗口内仍对公众可见。
+ * 不按域名精确失效：写入点未必知道受影响的 host，而映射全集很小，全量失效足够便宜。
+ * 带上 ALL_TAG，使禁用账号、配额下线这类全量失效顺带清掉映射。
+ */
+export function resolveTenantRouteCached(domain: string, path: string): Promise<string | null> {
+  return unstable_cache(() => resolveTenantRoute(domain, path), ["tenant-route", domain, path], {
+    tags: [ALL_TAG, ROUTES_TAG],
+    revalidate: 300,
+  })();
+}
+
+/** domains / domain_routes 任何写入之后调用。 */
+export function invalidateTenantRoutes(): void {
+  revalidateTag(ROUTES_TAG, IMMEDIATE);
 }
 
 /** 套餐缓存的 tag：套餐变化影响水印与埋点门控，与页面内容各自独立失效。 */

@@ -18,7 +18,14 @@ vi.mock("@/lib/plans-db", () => ({
   getUserPlan: (...a: unknown[]) => getUserPlan(...a),
 }));
 
+const resolveTenantRoute = vi.fn();
+vi.mock("@/lib/domains-db", () => ({
+  resolveTenantRoute: (...a: unknown[]) => resolveTenantRoute(...a),
+}));
+
 const {
+  resolveTenantRouteCached,
+  invalidateTenantRoutes,
   getPublishedBySlugCached,
   getUserPlanCached,
   invalidatePublishedPage,
@@ -30,6 +37,7 @@ beforeEach(() => {
   revalidateTag.mockClear();
   getPublishedBySlug.mockReset();
   getUserPlan.mockReset();
+  resolveTenantRoute.mockReset();
 });
 
 describe("读路径", () => {
@@ -37,6 +45,12 @@ describe("读路径", () => {
     getPublishedBySlug.mockResolvedValue({ id: "p1", slug: "acme" });
     await expect(getPublishedBySlugCached("acme")).resolves.toMatchObject({ id: "p1" });
     expect(getPublishedBySlug).toHaveBeenCalledWith("acme");
+  });
+
+  it("租户路由映射读时透传到 domains-db", async () => {
+    resolveTenantRoute.mockResolvedValue("acme");
+    await expect(resolveTenantRouteCached("tenant.example", "/invisalign")).resolves.toBe("acme");
+    expect(resolveTenantRoute).toHaveBeenCalledWith("tenant.example", "/invisalign");
   });
 
   it("套餐读时透传到 plans-db", async () => {
@@ -67,6 +81,11 @@ describe("失效", () => {
     expect(revalidateTag).toHaveBeenCalledWith("published-pages", expect.anything());
   });
 
+  it("映射失效走租户路由的 tag", () => {
+    invalidateTenantRoutes();
+    expect(revalidateTag).toHaveBeenCalledWith("tenant-routes", expect.anything());
+  });
+
   it("套餐失效按用户隔离，不波及别人", () => {
     invalidateUserPlan("u1");
     expect(revalidateTag).toHaveBeenCalledWith("user-plan:u1", expect.anything());
@@ -81,6 +100,7 @@ describe("失效", () => {
       () => invalidatePublishedPage("acme"),
       () => invalidateAllPublishedPages(),
       () => invalidateUserPlan("u1"),
+      () => invalidateTenantRoutes(),
     ]) {
       revalidateTag.mockClear();
       call();

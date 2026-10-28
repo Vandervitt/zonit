@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { resolveTenantRoute } from "@/lib/domains-db";
 import { isReservedRoutePath, normalizeRoutePath } from "@/lib/domains/route-path";
-import { splitPolicyPath } from "@/lib/landing-pages/policy-paths";
 import { hostnameOf, isCustomDomain, TENANT_HOST_HEADER, TENANT_PATH_HEADER } from "@/lib/host";
 import { platformSubdomainRoots } from "@/lib/domains/subdomain";
 
 // 这些公开元数据路由按 host 自行生成（app/robots.ts、app/sitemap.ts、
-// app/llms.txt），不能被改写到 /p/{slug}，否则会返回落地页 HTML 而非
+// app/llms.txt），不能被改写到落地页路由 /p，否则会返回落地页 HTML 而非
 // robots/sitemap/llms.txt。租户域上 /llms.txt 由路由处理器自行返回 404（Phase B 再做租户版）。
 const METADATA_PATHS = new Set(["/robots.txt", "/sitemap.xml", "/llms.txt"]);
 
@@ -56,42 +54,26 @@ export async function handleTenancy(req: NextRequest) {
       return new NextResponse("Not Found", { status: 404 });
     }
 
-    // 自定义域名 + 路径 → 已发布落地页。未绑定的路径 404（不 fallback 到根页，
-    // 见设计决策 D6：静默 fallback 会让每个错误路径都变成一份重复内容）。
-    const landingSlug = await resolveTenantRoute(hostname, path);
-    if (!landingSlug) {
-      // 政策子页（/privacy、/terms）不是独立发布位置，它挂在落地页路径下：
-      // /privacy → 根页的政策页，/invisalign/terms → /invisalign 那张页的。
-      // 顺序有意 —— 先试精确绑定，客户真把某张页发布在 /privacy 时那张页优先，
-      // 政策子页只在该路径没有绑定时才接手。
-      const policy = splitPolicyPath(path);
-      if (policy) {
-        const parentSlug = await resolveTenantRoute(hostname, policy.parentPath);
-        if (parentSlug) {
-          return rewriteToTenantPage(req, `/p/${parentSlug}/${policy.kind}`, hostname, policy.parentPath);
-        }
-      }
-      return new NextResponse("Not Found", { status: 404 });
-    }
-    return rewriteToTenantPage(req, `/p/${landingSlug}`, hostname, path);
+    // 不在这里查「这个路径发布了哪张页」：proxy 在访客就近区域执行，库在新加坡，
+    // 欧美访客单这一次查库就要 1.1–1.6 秒（2026-10-28 实测）。改写到 /p，由与库
+    // 同区的页面函数带缓存解析；未绑定路径照旧 404，只是改由页面返回（见 app/p/page.tsx）。
+    return rewriteToTenantPage(req, hostname, path);
   }
 
   return null;
 }
 
 /**
- * 改写到内部落地页路由，并透传租户上下文。
+ * 改写到内部落地页路由 /p，并透传租户上下文。
  *
- * 改写后下游的 host 会变成 app 主域、pathname 会变成 /p/{slug}，故这里把真实
- * 客户域名与**落地页所在路径**透传给页面/metadata，使租户判定与 canonical 不依赖
- * 被改写污染的 host / path。政策子页透传的同样是落地页路径（不含 /privacy 段）
- * ——它需要据此生成「返回落地页」的链接。
+ * 改写后下游的 host 会变成 app 主域、pathname 会变成 /p，故这里把真实客户域名与
+ * 访客请求的（规范化后）路径透传给页面，由页面解析出该渲染哪张页。
  */
-function rewriteToTenantPage(req: NextRequest, target: string, hostname: string, landingPath: string) {
+function rewriteToTenantPage(req: NextRequest, hostname: string, path: string) {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set(TENANT_HOST_HEADER, hostname);
-  requestHeaders.set(TENANT_PATH_HEADER, landingPath);
-  return NextResponse.rewrite(new URL(target, req.url), {
+  requestHeaders.set(TENANT_PATH_HEADER, path);
+  return NextResponse.rewrite(new URL("/p", req.url), {
     request: { headers: requestHeaders },
   });
 }

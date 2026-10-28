@@ -1,11 +1,13 @@
+// app/p/landing.tsx
+// 客户域名上落地页本体的渲染与元数据。由 app/p/page.tsx 解析出目标页后调用。
 import { headers } from "next/headers";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { LandingPage } from "@/landing-renderer/LandingPage";
-import { getPublishedBySlugCached, getUserPlanCached } from "@/lib/landing-pages/published-cache";
+import { getUserPlanCached } from "@/lib/landing-pages/published-cache";
+import type { LandingPageRow } from "@/lib/landing-pages/store";
 import { TrackingProvider } from "@/landing-renderer/tracking/TrackingProvider";
 import { Watermark } from "@/landing-renderer/Watermark";
-import { isAppHost, resolveTenantHostname, resolveTenantPath } from "@/lib/host";
+import { resolveTenantHostname } from "@/lib/host";
 import { resolvePageMeta } from "@/lib/seo/resolve";
 import { hasWatermark, hasAntiBan } from "@/lib/plans";
 import { gateTrackingByPlan } from "@/lib/tracking/gate";
@@ -16,30 +18,17 @@ import { resolveCompanyInfo } from "@/lib/company-profiles/resolve";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { landingFaqJsonLd, landingOrganizationJsonLd } from "@/lib/seo/landing-jsonld";
 
-async function isAppHostDirect(): Promise<boolean> {
-  return isAppHost(resolveTenantHostname(await headers()));
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const page = await getPublishedBySlugCached(slug);
-  if (!page) return {};
-
+export async function landingMetadata(page: LandingPageRow, landingPath: string): Promise<Metadata> {
   const plan = await getUserPlanCached(page.user_id);
   const variant = hasAntiBan(plan) ? deriveVariant(page.data.variantSeed ?? page.id) : IDENTITY_VARIANT;
 
   const { footer } = page.data;
   const { title, description, ogImage, noindex } = resolvePageMeta(page.data);
 
-  // canonical 必须是访客看到的真实地址：改写后 pathname 已变成 /p/{slug}，
-  // 故取中间件透传的原始路径（多路径发布后可能是 /invisalign 而非根）。
-  const h = await headers();
-  const host = resolveTenantHostname(h);
-  const canonical = `https://${host}${resolveTenantPath(h)}`;
+  // canonical 必须是访客看到的真实地址：改写后 pathname 已变成 /p，
+  // 故用落地页所在路径（多路径发布后可能是 /invisalign 而非根）。
+  const host = resolveTenantHostname(await headers());
+  const canonical = `https://${host}${landingPath}`;
 
   return {
     title,
@@ -65,18 +54,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function PublicLandingPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  // app 主域直连不提供页面托管：客户页面只经自有域名或平台子域访问（两者都不是 appHost）
-  if (await isAppHostDirect()) notFound();
-
-  const { slug } = await params;
-  const page = await getPublishedBySlugCached(slug);
-  if (!page) notFound();
-
+export async function renderLandingPage(page: LandingPageRow, landingPath: string) {
   // 按 owner 套餐门控：free/starter 只放行 Meta 客户端 pixel，并挂水印。
   const plan = await getUserPlanCached(page.user_id);
   const tracking = gateTrackingByPlan(page.data.tracking, plan);
@@ -93,13 +71,12 @@ export default async function PublicLandingPage({
 
   // 结构化数据（SEO 富媒体 + GEO）：注入租户品牌/域名实体，noindex 页不输出。
   const noindex = page.data.seo?.noindex === true;
-  const h = await headers();
-  const pageUrl = `https://${resolveTenantHostname(h)}${resolveTenantPath(h)}`;
+  const pageUrl = `https://${resolveTenantHostname(await headers())}${landingPath}`;
   const faqJsonLd = noindex ? null : landingFaqJsonLd(page.data);
   const orgJsonLd = noindex ? null : landingOrganizationJsonLd(page.data, pageUrl);
 
   // 政策子页挂在落地页所在路径下（/privacy、/invisalign/privacy）；页脚与表单据此出链。
-  const policyBase = resolveTenantPath(h);
+  const policyBase = landingPath;
   // 页脚的经营主体信息：账号级真源，按 footer.companyProfileId 现查现渲染，
   // 故客户改一次主体信息，所有引用它的已发布页立即跟上（不需要逐页重发）。
   const companyInfo = await resolveCompanyInfo(page.data.footer.companyProfileId, page.user_id);

@@ -3,16 +3,13 @@
 // /p/{slug}，返回 200 HTML，线索静默丢失（客户端 res.ok 误判成功）。
 import { describe, it, expect, vi, beforeAll } from "vitest";
 
-// 解析依据是 domain_routes（域名 + 路径）。模拟一个域名下发布了两张页：
-// 根路径与 /invisalign，其余路径无绑定。
-const ROUTES: Record<string, string> = {
-  "/": "solar-page",
-  "/invisalign": "dental-page",
-};
+// proxy 不再查库：「这个路径发布了哪张页」改由 app/p/page.tsx 解析
+// （规则与用例见 lib/landing-pages/tenant-target.test.ts）。这里只验证改写边界。
+// 一旦 proxy 重新碰库，这个 mock 会让对应用例立即失败。
 vi.mock("@/lib/domains-db", () => ({
-  resolveTenantRoute: vi.fn(async (domain: string, path: string) =>
-    domain === "tenant.example" ? (ROUTES[path] ?? null) : null,
-  ),
+  resolveTenantRoute: vi.fn(() => {
+    throw new Error("proxy 不得查库：欧美访客每次跨区查新加坡库 1.1–1.6 秒");
+  }),
 }));
 
 type Tenancy = typeof import("./tenant-proxy");
@@ -36,16 +33,25 @@ function makeReq(host: string, pathname: string, method = "GET") {
 
 const rewriteTarget = (res: Response | null) =>
   res?.headers.get("x-middleware-rewrite") ?? null;
+const tenantPath = (res: Response | null) =>
+  res?.headers.get("x-middleware-request-x-tenant-path") ?? null;
+const tenantHost = (res: Response | null) =>
+  res?.headers.get("x-middleware-request-x-tenant-host") ?? null;
+/** 改写到落地页入口 /p（不是 /p/xxx），并透传域名与路径。 */
+const expectTenantRewrite = (res: Response | null, host: string, path: string) => {
+  expect(rewriteTarget(res)).toMatch(/\/p$/);
+  expect(tenantHost(res)).toBe(host);
+  expect(tenantPath(res)).toBe(path);
+};
 
 describe("handleTenancy 租户改写既有行为", () => {
-  it("自定义域名根路径 → 改写到 /p/{slug}", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/"));
-    expect(rewriteTarget(res)).toContain("/p/solar-page");
+  it("自定义域名根路径 → 改写到 /p 并透传域名与路径", async () => {
+    expectTenantRewrite(await handleTenancy(makeReq("tenant.example", "/")), "tenant.example", "/");
   });
 
-  it("未绑定页面的自定义域名 → 404", async () => {
-    const res = await handleTenancy(makeReq("unbound.example", "/"));
-    expect(res?.status).toBe(404);
+  // 绑定与否由页面判定（未绑定 → 页面 notFound()），proxy 不再为此查库。
+  it("未绑定页面的自定义域名同样改写，由页面返回 404", async () => {
+    expectTenantRewrite(await handleTenancy(makeReq("unbound.example", "/")), "unbound.example", "/");
   });
 
   it("app 域名不改写", async () => {
@@ -60,82 +66,30 @@ describe("handleTenancy 租户改写既有行为", () => {
 });
 
 // 政策子页：四家平台都会点开落地页的隐私政策与条款，故它必须是真地址而非页脚文本。
+// 它挂在哪张页下由页面解析；proxy 只需原样透传访客路径。
 describe("handleTenancy 政策子页", () => {
-  it("/privacy → 根页的政策页", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/privacy"));
-    expect(rewriteTarget(res)).toContain("/p/solar-page/privacy");
-  });
-
-  it("/terms → 根页的条款页", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/terms"));
-    expect(rewriteTarget(res)).toContain("/p/solar-page/terms");
-  });
-
-  it("子路径页的政策挂在自己路径下，不串到根页", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/invisalign/privacy"));
-    expect(rewriteTarget(res)).toContain("/p/dental-page/privacy");
-  });
-
-  it("透传的是落地页所在路径（政策页据此生成返回链接）", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/invisalign/terms"));
-    expect(res?.headers.get("x-middleware-request-x-tenant-path")).toBe("/invisalign");
-  });
-
-  it("落地页所在路径未绑定时，其政策路径同样 404", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/whitening/privacy"));
-    expect(res?.status).toBe(404);
-  });
-
-  it("客户真把某张页发布在 /privacy 时，那张页优先（精确绑定先于政策兜底）", async () => {
-    ROUTES["/privacy"] = "custom-privacy-page";
-    try {
-      const res = await handleTenancy(makeReq("tenant.example", "/privacy"));
-      expect(rewriteTarget(res)).toContain("/p/custom-privacy-page");
-      expect(rewriteTarget(res)).not.toContain("/privacy/privacy");
-    } finally {
-      delete ROUTES["/privacy"];
-    }
-  });
-
-  it("形近路径不被当成政策页", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/privacy-policy"));
-    expect(res?.status).toBe(404);
-  });
+  it.each(["/privacy", "/terms", "/invisalign/privacy", "/invisalign/terms"])(
+    "%s 原样透传给页面解析",
+    async (pathname) => {
+      expectTenantRewrite(await handleTenancy(makeReq("tenant.example", pathname)), "tenant.example", pathname);
+    },
+  );
 });
 
 describe("handleTenancy 多路径解析", () => {
-  it("根路径 → 根页", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/"));
-    expect(rewriteTarget(res)).toContain("/p/solar-page");
+  it("子路径透传原路径（页面据此解析该渲染哪张页）", async () => {
+    expectTenantRewrite(
+      await handleTenancy(makeReq("tenant.example", "/invisalign")),
+      "tenant.example",
+      "/invisalign",
+    );
   });
 
-  it("已发布子路径 → 对应页（不是根页）", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/invisalign"));
-    expect(rewriteTarget(res)).toContain("/p/dental-page");
-  });
-
-  it("透传原始路径供 canonical 使用", async () => {
-    const res = await handleTenancy(makeReq("tenant.example", "/invisalign"));
-    // 改写后下游 pathname 变成 /p/{slug}，canonical 只能靠这个头还原真实地址。
-    expect(res?.headers.get("x-middleware-request-x-tenant-path")).toBe("/invisalign");
-  });
-
+  // 透传的是规范化后的路径：页面按它查 domain_routes，与发布时写入的口径一致。
   it.each(["/Invisalign", "/invisalign/", "//invisalign"])(
-    "%s 经规范化命中同一条 route",
+    "%s 规范化为 /invisalign 后透传",
     async (pathname) => {
-      const res = await handleTenancy(makeReq("tenant.example", pathname));
-      expect(rewriteTarget(res)).toContain("/p/dental-page");
-    },
-  );
-
-  // 未绑定路径必须 404，不得 fallback 到根页（设计决策 D6）：
-  // 静默 fallback 会让每个错误路径都变成一份重复内容，正是 PR #136 修掉的问题。
-  it.each(["/pricing", "/asdf", "/whitening"])(
-    "未绑定路径 %s → 404，不回落到根页",
-    async (pathname) => {
-      const res = await handleTenancy(makeReq("tenant.example", pathname));
-      expect(res?.status).toBe(404);
-      expect(rewriteTarget(res)).toBeNull();
+      expectTenantRewrite(await handleTenancy(makeReq("tenant.example", pathname)), "tenant.example", "/invisalign");
     },
   );
 
@@ -155,8 +109,7 @@ describe("handleTenancy 多路径解析", () => {
   });
 
   it.each(["//", "///"])("%s 折叠为根路径并正常改写", async (pathname) => {
-    const res = await handleTenancy(makeReq("tenant.example", pathname));
-    expect(rewriteTarget(res)).toContain("/p/solar-page");
+    expectTenantRewrite(await handleTenancy(makeReq("tenant.example", pathname)), "tenant.example", "/");
   });
 
   it("公开 API 与 /_next 的放行优先于路径解析", async () => {
@@ -275,14 +228,12 @@ describe("子域池 apex 重定向", () => {
     expect(res?.status).toBe(308);
   });
 
-  it("子域不受影响：仍按租户域解析（未绑定则 404）", async () => {
-    const res = await tenancy(makeReq("acme.pool.example", "/"));
-    expect(res?.status).toBe(404);
+  it("子域不受影响：仍按租户域改写", async () => {
+    expectTenantRewrite(await tenancy(makeReq("acme.pool.example", "/")), "acme.pool.example", "/");
   });
 
   it("仿冒 apex 的域名不被重定向，按普通租户域处理", async () => {
-    const res = await tenancy(makeReq("evilpool.example", "/"));
-    expect(res?.status).toBe(404);
+    expectTenantRewrite(await tenancy(makeReq("evilpool.example", "/")), "evilpool.example", "/");
   });
 });
 
@@ -314,8 +265,7 @@ describe("遗留子域根", () => {
   });
 
   it("遗留根的子域继续按租户域解析 —— 存量发布页不能被打死", async () => {
-    const res = await tenancy(makeReq("acme.old.example", "/"));
-    expect(res?.status).toBe(404); // 未绑定故 404；关键是没被 308 掉
+    expectTenantRewrite(await tenancy(makeReq("acme.old.example", "/")), "acme.old.example", "/"); // 关键是没被 308 掉
   });
 });
 

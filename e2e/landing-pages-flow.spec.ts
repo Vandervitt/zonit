@@ -2,13 +2,14 @@
 //
 // 与既有 e2e 一致：绕开登录态/编辑器，直接通过 pg 注入 fixture，再走公开渲染路径校验。
 // 这里走「新流程」表：landing_pages + domains.landing_page_id。
-// 通过给根路径 / 带自定义 Host 头，触发 handleTenancy 重写到 /p/<slug> 渲染。
+// 通过给根路径 / 带自定义 Host 头，触发 handleTenancy 重写到 /p，由页面解析并渲染。
 //
 // SSL 说明：本地 docker Postgres 不支持 SSL，远端（如 Neon）需要。
 // 因此连接策略对齐 lib/db.ts —— 本地关闭 SSL，其余 rejectUnauthorized:false。
 
 import { test, expect, request as playwrightRequest } from '@playwright/test';
 import { Pool } from 'pg';
+import { encode } from 'next-auth/jwt';
 import { config as loadEnv } from 'dotenv';
 import {
   E2E_USER_ID,
@@ -21,8 +22,11 @@ import { skincareConsultDraft } from '@/landing-editor/samples/skincareConsultDr
 loadEnv({ path: '.env.local' });
 loadEnv({ path: '.env' });
 
-const SLUG = `${SLUG_PREFIX}skincare`;
-const CUSTOM_DOMAIN = 'e2e-acme.test';
+// 每轮用独立的 slug 与域名：fixture 直接写库、不经接口，不会失效读缓存。
+// 复用固定值时，上一轮末尾「已下线」被缓存住（最长 5 分钟），下一轮一上来就 404。
+const RUN_ID = Date.now().toString(36);
+const SLUG = `${SLUG_PREFIX}skincare-${RUN_ID}`;
+const CUSTOM_DOMAIN = `e2e-acme-${RUN_ID}.test`;
 const HERO_TITLE = 'Skincare that actually fits your skin';
 
 let pool: Pool;
@@ -93,15 +97,38 @@ test.describe('落地页多租户：发布渲染与取消发布', () => {
     // APIRequestContext 可可靠设置自定义 Host 头，触发 handleTenancy 重写。
     const ctx = await playwrightRequest.newContext();
     try {
-      // —— 发布态：Host=自定义域名 → 重写到 /p/<slug> 并渲染 hero 标题 ——
+      // —— 发布态：Host=自定义域名 → 重写到 /p 并渲染 hero 标题 ——
       const published = await ctx.get('http://localhost:3001/', {
         headers: { Host: CUSTOM_DOMAIN },
       });
       expect(published.status()).toBe(200);
       expect(await published.text()).toContain(HERO_TITLE);
 
-      // —— 取消发布：同一域名请求应返回 404 ——
-      await pool.query(`UPDATE landing_pages SET status = 'draft' WHERE id = $1`, [landingPageId]);
+      // 以下状态变更都走真实接口，不直接改库：域名→页面映射与页面快照都有读缓存，
+      // 只有经接口的写入才会失效它们。锁住的是「接口操作 → 缓存立即失效」。
+      const cookieName = 'authjs.session-token';
+      const session = await encode({
+        secret: process.env.AUTH_SECRET!,
+        salt: cookieName,
+        token: { sub: E2E_USER_ID, email: E2E_USER_EMAIL },
+      });
+      const auth = { Cookie: `${cookieName}=${session}` };
+      const visit = () => ctx.get('http://localhost:3001/', { headers: { Host: CUSTOM_DOMAIN } });
+
+      // —— 停用域名：其下页面应立即从公网消失；重新启用后恢复 ——
+      const domainId = (await pool.query(`SELECT id FROM domains WHERE domain = $1`, [CUSTOM_DOMAIN])).rows[0].id;
+      const setEnabled = (enabled: boolean) =>
+        ctx.patch(`http://localhost:3001/api/domains/${domainId}`, { headers: auth, data: { enabled } });
+      expect((await setEnabled(false)).status()).toBe(200);
+      expect((await visit()).status()).toBe(404);
+      expect((await setEnabled(true)).status()).toBe(200);
+      expect((await visit()).status()).toBe(200);
+
+      // —— 取消发布：同一域名请求应立即返回 404 ——
+      const unpublish = await ctx.post(`http://localhost:3001/api/landing-pages/${landingPageId}/unpublish`, {
+        headers: auth,
+      });
+      expect(unpublish.status()).toBe(200);
 
       const afterUnpublish = await ctx.get('http://localhost:3001/', {
         headers: { Host: CUSTOM_DOMAIN },
