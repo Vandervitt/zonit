@@ -3,11 +3,10 @@ import { auth } from "@/auth";
 import pool from "@/lib/db";
 import { ApiErrors } from "@/lib/constants";
 import { getProvider } from "@/lib/billing/provider";
-import type { BillingProviderId } from "@/lib/billing/types";
+import { PlanProductNotConfiguredError, type BillingProviderId } from "@/lib/billing/types";
+import { parsePlanSelection } from "@/lib/billing/products";
 
-const PAID_PLANS = new Set(["starter", "pro", "agency"]);
-
-// 已订阅用户升/降档：改现有订阅的 product（走渠道 change-plan/upgrade API），
+// 已订阅用户升/降档或切换月付 / 年付：改现有订阅的 product（走渠道 change-plan/upgrade API），
 // 禁止走 checkout 另开新订阅（会重复扣费）。档位落库由 subscription.plan_changed webhook 回写。
 export async function POST(request: Request) {
   const session = await auth();
@@ -15,8 +14,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: ApiErrors.UNAUTHORIZED }, { status: 401 });
   }
 
-  const { planId } = (await request.json().catch(() => ({}))) as { planId?: string };
-  if (!planId || !PAID_PLANS.has(planId)) {
+  const body = (await request.json().catch(() => ({}))) as { planId?: unknown; interval?: unknown };
+  const selection = parsePlanSelection(body.planId, body.interval);
+  if (!selection) {
     return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
   }
 
@@ -34,9 +34,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    await getProvider(providerId).changePlan(subscriptionId, planId);
+    await getProvider(providerId).changePlan(subscriptionId, selection.plan, selection.interval);
     return NextResponse.json({ ok: true });
   } catch (err) {
+    if (err instanceof PlanProductNotConfiguredError) {
+      return NextResponse.json({ error: err.code }, { status: 503 });
+    }
     const message = err instanceof Error ? err.message : "Unknown error";
     // 渠道拒绝：订阅处于「周期末取消」状态时不允许换档 → 映射成业务 409，前端引导先恢复订阅。
     const status = (err as { status?: number }).status;

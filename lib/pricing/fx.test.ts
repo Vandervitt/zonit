@@ -44,6 +44,7 @@ describe("approxCnyAmount", () => {
     expect(approxCnyAmount(19.99, 7.1)).toBe("141"); // 141.929
     expect(approxCnyAmount(5.99, 7.1)).toBe("42"); // 42.529
     expect(approxCnyAmount(49.99, 7.1)).toBe("354"); // 354.929，四舍五入会是 355
+    expect(approxCnyAmount(1490, 7.1)).toBe("10,579"); // 千分位
   });
 
   it("免费档与非法汇率不产出换算", () => {

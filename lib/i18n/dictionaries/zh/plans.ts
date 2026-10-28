@@ -2,6 +2,9 @@ export const plans = {
   free: "免费",
   unlimited: "无限",
   perMonthSuffix: "/月",
+  perYearSuffix: "/年",
+  // 年付价下方的说明：{monthly} 为折合月价（向下截断到分），{saved} 为相对月付全年的节省额。
+  yearlyNote: "相当于 {monthly}/月 · 省 {saved}",
   // 收款货币为美元，人民币仅按参考汇率换算展示，故必须保留「约」字。
   approxCny: "约 ¥{amount}",
   // 中文量词无单复数变化，两个形态取同值（形状须与英文字典一致）。
@@ -23,12 +26,16 @@ export const plans = {
     ctaFree: "免费开始",
     ctaTrial: "免费试用 {days} 天",
     ctaChoose: "选择 {plan}",
+    // 月付 / 年付切换；{months} = 12 - YEARLY_PRICE_MONTHS。
+    billingPeriod: "计费周期",
+    intervalMonth: "月付",
+    intervalYear: "年付",
+    yearSave: "省 {months} 个月",
   },
   groups: { publish: "发布", tracking: "追踪与线索", ai: "AI 生成", scale: "批量投放风控" },
   // 每档「适合谁」：访客按身份选档，而不是逐行比功能。
   fit: {
     free: "先免费发一张页，验证有没有询盘",
-    starter: "单一品牌，几张服务页挂在同一个域名下",
     pro: "同时投多个 offer，用 CAPI 把转化回传广告平台",
     agency: "代运营方，为多个客户批量投放",
   },

@@ -1,9 +1,14 @@
 {
   "currency": "USD",
   "plans": {
-    "starter": 599,
-    "pro": 1999,
-    "agency": 4999
+    "pro": {
+      "month": 3900,
+      "year": 39000
+    },
+    "agency": {
+      "month": 14900,
+      "year": 149000
+    }
   },
   "credits": {
     "50": 499,

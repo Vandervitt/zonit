@@ -11,7 +11,8 @@ import { PlanComparison } from "@/components/billing/PlanComparison";
 import { PLANS, PLAN_ORDER, planPriceLabel, formatPlanLimit } from "@/lib/plans";
 import { useAdminT, useAdminLocale } from "@/lib/i18n/admin/context";
 import { formatDate, formatDateTime } from "@/lib/i18n/admin";
-import type { PlanId } from "@/lib/plans";
+import type { BillingInterval, PlanId } from "@/lib/plans";
+import { planAction } from "@/lib/billing/plan-action";
 import { CREDIT_PACKS, creditPackPriceLabel } from "@/lib/credits";
 import type { UsageSummary } from "@/lib/ai/usage-summary";
 import { Routes, ApiRoutes } from "@/lib/constants";
@@ -64,12 +65,13 @@ export default function BillingPage() {
   const cnyRate = locale === "zh" ? fx.data?.rate ?? null : null;
 
   // 生效套餐（含赠送）只用于权益上限展示；换档/管理订阅一律以付费订阅档为基准，
-  // 否则「赠送档 > 付费档」时会把赠送档误当成当前订阅档（如订阅 starter + 赠送 pro 显示成 pro）。
+  // 否则「赠送档 > 付费档」时会把赠送档误当成当前订阅档（如订阅 pro + 赠送 agency 显示成 agency）。
   const effectivePlanId = (session?.user?.plan ?? "free") as PlanId;
   const currentPlanId = (session?.user?.paidPlan ?? effectivePlanId) as PlanId;
   const currentPlan = PLANS[currentPlanId];
-  const currentIdx = PLAN_ORDER.indexOf(currentPlanId);
   const compPlanId = session?.user?.compPlan ?? null;
+  // 当前订阅的计费周期（无订阅为 null）；对比表默认停在这个周期上。
+  const billingInterval = session?.user?.billingInterval ?? null;
   const compPlanExpiresAt = session?.user?.compPlanExpiresAt ?? null;
   // 赠送档高于付费档：权益按赠送档生效，需在页面明示两者区别。
   const giftedAbovePaid =
@@ -81,7 +83,8 @@ export default function BillingPage() {
   const isCompedWithoutSub = effectivePlanId !== "free" && session?.user?.hasSubscription === false;
 
   const checkout = useMutation(
-    (planId: string) => jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCheckout, "POST", { planId }),
+    (sel: { planId: PlanId; interval: BillingInterval }) =>
+      jsonRequest<{ checkoutUrl?: string }>(ApiRoutes.BillingCheckout, "POST", sel),
     {
       onError: () => {
         notification.error({ message: t.errors.checkoutLink, description: t.errors.retryLater, placement: "topRight" });
@@ -152,7 +155,8 @@ export default function BillingPage() {
 
   // 已订阅用户升/降档：改现有订阅（渠道按比例计费），不得走 checkout 另开订阅（会重复扣费）。
   const changePlan = useMutation(
-    (planId: string) => jsonRequest<{ ok?: boolean }>(ApiRoutes.BillingChangePlan, "POST", { planId }),
+    (sel: { planId: PlanId; interval: BillingInterval }) =>
+      jsonRequest<{ ok?: boolean }>(ApiRoutes.BillingChangePlan, "POST", sel),
     {
       onError: (err) => {
         if (err.code === "subscription_cancel_scheduled") {
@@ -191,10 +195,10 @@ export default function BillingPage() {
     },
   );
 
-  async function handleSelectPlan(planId: string) {
-    setLoadingPlan(planId);
-    if (currentPlanId === "free") await checkout.trigger(planId);
-    else await changePlan.trigger(planId);
+  async function handleSelectPlan(planId: PlanId, interval: BillingInterval) {
+    setLoadingPlan(`${planId}:${interval}`);
+    if (currentPlanId === "free") await checkout.trigger({ planId, interval });
+    else await changePlan.trigger({ planId, interval });
     setLoadingPlan(null);
   }
 
@@ -204,30 +208,36 @@ export default function BillingPage() {
     setLoadingCredits(null);
   }
 
-  // 对比表每档的换档按钮：Free 走「管理订阅」取消而非这里；当前付费档不放按钮。
-  function renderPlanCta(planId: PlanId) {
-    if (planId === "free" || planId === currentPlanId) return null;
-    const isLoading = loadingPlan === planId;
-    const isUpgrade = PLAN_ORDER.indexOf(planId) > currentIdx;
+  // 对比表每档的按钮：动作由 planAction 按（付费订阅档 + 计费周期）判定，见 lib/billing/plan-action.ts。
+  function renderPlanCta(planId: PlanId, interval: BillingInterval) {
+    const action = planAction({ plan: currentPlanId, interval: billingInterval }, planId, interval);
+    if (action === "none") return null;
+    const key = `${planId}:${interval}`;
+    const isLoading = loadingPlan === key;
+    const primary = action === "upgrade" || (action === "switchInterval" && interval === "year");
+    const label =
+      action === "upgrade" ? t.switcher.upgrade
+      : action === "downgrade" ? t.switcher.downgrade
+      : interval === "year" ? t.switcher.switchToYear : t.switcher.switchToMonth;
     const button = (
       <Button
         block
-        type={isUpgrade ? "primary" : "default"}
+        type={primary ? "primary" : "default"}
         loading={isLoading}
         disabled={!!loadingPlan && !isLoading}
-        onClick={isUpgrade || currentPlanId === "free" ? () => handleSelectPlan(planId) : undefined}
+        onClick={action === "downgrade" ? undefined : () => handleSelectPlan(planId, interval)}
       >
-        {isUpgrade ? t.switcher.upgrade : t.switcher.downgrade}
+        {label}
       </Button>
     );
-    if (isUpgrade) return button;
+    if (action !== "downgrade") return button;
     return (
       <Popconfirm
         title={t.switcher.downgradeConfirm.title}
         description={t.switcher.downgradeConfirm.description(PLANS[planId].label)}
         okText={t.switcher.downgradeConfirm.ok}
         cancelText={t.switcher.downgradeConfirm.cancel}
-        onConfirm={() => handleSelectPlan(planId)}
+        onConfirm={() => handleSelectPlan(planId, interval)}
       >
         {button}
       </Popconfirm>
@@ -251,7 +261,7 @@ export default function BillingPage() {
               {compPlanExpiresAt ? t.currentPlan.grantedUntil(formatDate(compPlanExpiresAt, locale)) : ""}
             </Text>
           ) : (
-            <Text strong>{planPriceLabel(currentPlan, locale, cnyRate)}</Text>
+            <Text strong>{planPriceLabel(currentPlan, locale, cnyRate, billingInterval ?? "month")}</Text>
           )}
         </Space>
       ),
@@ -264,7 +274,7 @@ export default function BillingPage() {
             children: (
               <Space>
                 <PlanBadge plan={currentPlanId} />
-                <Text strong>{planPriceLabel(currentPlan, locale, cnyRate)}</Text>
+                <Text strong>{planPriceLabel(currentPlan, locale, cnyRate, billingInterval ?? "month")}</Text>
               </Space>
             ),
           },
@@ -388,6 +398,7 @@ export default function BillingPage() {
           locale={locale}
           cnyRate={cnyRate}
           currentPlan={effectivePlanId}
+          defaultInterval={billingInterval ?? "month"}
           cta={isCompedWithoutSub ? undefined : renderPlanCta}
         />
       </Card>

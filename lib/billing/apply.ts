@@ -34,9 +34,10 @@ export async function applyBillingEvent(event: BillingEvent, provider: BillingPr
                billing_customer_id = COALESCE($3, billing_customer_id),
                billing_subscription_id = COALESCE($4, billing_subscription_id),
                billing_expires_at = NULL,
+               billing_interval = $6,
                billing_event_at = ${g.setEventAt}
          WHERE id = $5 AND ${g.cond}`,
-        [event.plan, provider, event.customerId ?? null, event.subscriptionId ?? null, event.userId],
+        [event.plan, provider, event.customerId ?? null, event.subscriptionId ?? null, event.userId, event.interval],
         event.eventTime,
       );
       await pool.query(sql, params);
@@ -59,7 +60,7 @@ export async function applyBillingEvent(event: BillingEvent, provider: BillingPr
     case "subscription_ended": {
       const g = guard(event.eventTime);
       const [sql, params] = withGuardParams(
-        `UPDATE users SET plan = 'free', billing_subscription_id = NULL, billing_expires_at = NULL,
+        `UPDATE users SET plan = 'free', billing_subscription_id = NULL, billing_expires_at = NULL, billing_interval = NULL,
                billing_event_at = ${g.setEventAt}
           WHERE id = $1 AND ${g.cond}`,
         [event.userId],

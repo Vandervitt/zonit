@@ -20,11 +20,6 @@ describe("gateTrackingByPlan", () => {
     expect(r.pixels[0].serverSide).toBe(false);
   });
 
-  it("starter：只留 Meta 客户端 pixel（CAPI 关闭）", () => {
-    const r = gateTrackingByPlan(base, "starter")!;
-    expect(r.pixels.map((p) => p.provider)).toEqual(["meta"]);
-    expect(r.pixels[0].serverSide).toBe(false);
-  });
 
   it("pro：原样保留全部 provider 与 serverSide", () => {
     const r = gateTrackingByPlan(base, "pro")!;

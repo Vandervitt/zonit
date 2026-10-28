@@ -18,10 +18,13 @@ const strict = process.env.VERCEL_ENV === "production";
 function productIdsFromEnv(): PriceProductIds | null {
   const env = process.env;
   const ids = {
-    plans: { starter: env.DODO_PRODUCT_STARTER, pro: env.DODO_PRODUCT_PRO, agency: env.DODO_PRODUCT_AGENCY },
+    plans: {
+      pro: { month: env.DODO_PRODUCT_PRO, year: env.DODO_PRODUCT_PRO_YEARLY },
+      agency: { month: env.DODO_PRODUCT_AGENCY, year: env.DODO_PRODUCT_AGENCY_YEARLY },
+    },
     credits: { "50": env.DODO_CREDITS_50, "200": env.DODO_CREDITS_200 },
   };
-  const all = [...Object.values(ids.plans), ...Object.values(ids.credits)];
+  const all = [...Object.values(ids.plans).flatMap((p) => Object.values(p)), ...Object.values(ids.credits)];
   return all.every(Boolean) ? (ids as PriceProductIds) : null;
 }
 

@@ -21,7 +21,7 @@ export const billing: HelpChapterData = {
             "New accounts get 14 days of full Pro, then drop back to Free automatically (no card needed, pages and data are kept).",
             "Only Free pages carry a platform watermark in the footer; every paid plan removes it.",
             "Free can publish too — on a platform-assigned address. What it can't do is carry your own brand domain.",
-            "Which to pick: Starter to test a single page; Pro for real campaigns (CAPI attribution and lead automation); Agency for multi-client or multi-page portfolios, or when you need anti-duplication.",
+            "Which to pick: Pro for a brand running real campaigns (CAPI attribution and lead automation); Agency for multi-client or multi-page portfolios, or when you need anti-duplication.",
           ],
         },
       ],

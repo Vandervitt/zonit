@@ -68,7 +68,7 @@ test.describe("营销站双语", () => {
     await expect(page.getByText(PRO_PRICE).first()).toBeVisible();
     // 汇率取自实时接口，只断言形态与「约」字，不锁死具体数值。
     // 换算取整到元（只舍不入），不带小数。
-    await expect(page.getByText(/^约 ¥\d+$/).first()).toBeVisible();
+    await expect(page.getByText(/^约 ¥[\d,]+$/).first()).toBeVisible();
   });
 
   // 回归：付费档按钮曾指向 /admin/billing，未登录访客只会落到登录页。
@@ -79,6 +79,19 @@ test.describe("营销站双语", () => {
     await expect(trial).toHaveAttribute("href", "/zh/register");
     await expect(page.getByRole("link", { name: "选择 Agency" })).toHaveAttribute("href", "/zh/register");
     await expect(page.locator('a[href="/admin/billing"]')).toHaveCount(0);
+  });
+
+  test("定价页可切到年付：显示年价（= 月费 × 10）与折合月价", async ({ page }) => {
+    await page.goto("/zh/pricing");
+    await expect(page.getByText(PRO_PRICE).first()).toBeVisible();
+    // 单选框是视觉隐藏的（sr-only），用户点的是它的标签。
+    await page.locator("label", { hasText: "年付" }).click();
+    await expect(page.getByRole("radio", { name: /年付/ })).toBeChecked();
+    const yearly = planPriceText(PLANS.pro, "zh", null, "year");
+    await expect(page.locator(`text=${yearly.amount} >> visible=true`).first()).toBeVisible();
+    await expect(page.getByText(yearly.yearlyNote!).first()).toBeVisible();
+    // 档位只剩三档
+    await expect(page.getByText("Starter")).toHaveCount(0);
   });
 
   // 回归：旧对比表在手机上首屏只露出「功能 + 说明」两列，价格要横向滑动才看得到。

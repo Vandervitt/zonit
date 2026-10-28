@@ -9,10 +9,10 @@ describe("effectivePlan（生效套餐 = max(plan, comp_plan)）", () => {
   });
   it("赠送高于付费时取赠送档", () => {
     expect(effectivePlan("free", "pro")).toBe("pro");
-    expect(effectivePlan("starter", "agency")).toBe("agency");
+    expect(effectivePlan("pro", "agency")).toBe("agency");
   });
   it("付费高于或等于赠送时取付费档（LS 覆写 plan 不影响赠送语义）", () => {
-    expect(effectivePlan("agency", "starter")).toBe("agency");
+    expect(effectivePlan("agency", "pro")).toBe("agency");
     expect(effectivePlan("pro", "pro")).toBe("pro");
   });
 });

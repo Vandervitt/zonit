@@ -1,32 +1,39 @@
 // Dodo Payments provider 实现。产品 id 由 env 装配，webhook 用 standardwebhooks 验签后走纯解析。
 import DodoPayments from "dodopayments";
 import { Webhook } from "standardwebhooks";
-import type { PlanId } from "@/lib/plans";
-import type { BillingEvent, BillingProvider, CreateCheckoutInput, CreateCreditCheckoutInput } from "../types";
+import type { BillingInterval, PaidPlanId } from "@/lib/pricing/dodo-prices";
+import { planProductMap, productFor, type PlanProductIds } from "../products";
+import {
+  PlanProductNotConfiguredError,
+  type BillingEvent,
+  type BillingProvider,
+  type CreateCheckoutInput,
+  type CreateCreditCheckoutInput,
+} from "../types";
 import { parseDodoEvent, type DodoProductMap } from "./dodo-events";
 
 /** 从 env 装配 product 映射（缺失的项跳过，isConfigured 会校验必需项）。 */
-export function dodoProductMap(): DodoProductMap {
-  const planByProduct: Record<string, PlanId> = {};
-  const add = (id: string | undefined, plan: PlanId) => { if (id) planByProduct[id] = plan; };
-  add(process.env.DODO_PRODUCT_STARTER, "starter");
-  add(process.env.DODO_PRODUCT_PRO, "pro");
-  add(process.env.DODO_PRODUCT_AGENCY, "agency");
+/** 各付费档 × 周期的产品 id（env）。年付产品对应 *_YEARLY。 */
+export function dodoPlanProductIds(): PlanProductIds {
+  return {
+    pro: { month: process.env.DODO_PRODUCT_PRO, year: process.env.DODO_PRODUCT_PRO_YEARLY },
+    agency: { month: process.env.DODO_PRODUCT_AGENCY, year: process.env.DODO_PRODUCT_AGENCY_YEARLY },
+  };
+}
 
+/** 从 env 装配 product 映射（缺失的项跳过，isConfigured 会校验必需项）。 */
+export function dodoProductMap(): DodoProductMap {
   const creditsByProduct: Record<string, number> = {};
   if (process.env.DODO_CREDITS_50) creditsByProduct[process.env.DODO_CREDITS_50] = 50;
   if (process.env.DODO_CREDITS_200) creditsByProduct[process.env.DODO_CREDITS_200] = 200;
 
-  return { planByProduct, creditsByProduct };
+  return { planByProduct: planProductMap(dodoPlanProductIds()), creditsByProduct };
 }
 
-function productForPlan(planId: string): string | undefined {
-  const byPlan: Record<string, string | undefined> = {
-    starter: process.env.DODO_PRODUCT_STARTER,
-    pro: process.env.DODO_PRODUCT_PRO,
-    agency: process.env.DODO_PRODUCT_AGENCY,
-  };
-  return byPlan[planId];
+function productForPlan(planId: PaidPlanId, interval: BillingInterval): string {
+  const id = productFor(dodoPlanProductIds(), planId, interval);
+  if (!id) throw new PlanProductNotConfiguredError(`No Dodo product configured for ${planId} (${interval})`);
+  return id;
 }
 
 function productForCredits(credits: number): string | undefined {
@@ -50,15 +57,16 @@ export const dodoProvider: BillingProvider = {
     return Boolean(
       process.env.DODO_PAYMENTS_API_KEY &&
       process.env.DODO_PAYMENTS_WEBHOOK_KEY &&
-      process.env.DODO_PRODUCT_STARTER &&
+      // 主收款渠道：月付与年付产品必须配齐（定价页对所有访客展示年付）。
       process.env.DODO_PRODUCT_PRO &&
-      process.env.DODO_PRODUCT_AGENCY,
+      process.env.DODO_PRODUCT_PRO_YEARLY &&
+      process.env.DODO_PRODUCT_AGENCY &&
+      process.env.DODO_PRODUCT_AGENCY_YEARLY,
     );
   },
 
-  async createCheckout({ planId, email, userId, baseUrl }: CreateCheckoutInput): Promise<string> {
-    const productId = productForPlan(planId);
-    if (!productId) throw new Error(`No Dodo product configured for plan: ${planId}`);
+  async createCheckout({ planId, interval, email, userId, baseUrl }: CreateCheckoutInput): Promise<string> {
+    const productId = productForPlan(planId, interval);
 
     const session = await dodoClient().checkoutSessions.create({
       product_cart: [{ product_id: productId, quantity: 1 }],
@@ -91,9 +99,8 @@ export const dodoProvider: BillingProvider = {
     return session.link;
   },
 
-  async changePlan(subscriptionId: string, planId: string): Promise<void> {
-    const productId = productForPlan(planId);
-    if (!productId) throw new Error(`No Dodo product configured for plan: ${planId}`);
+  async changePlan(subscriptionId: string, planId: PaidPlanId, interval: BillingInterval): Promise<void> {
+    const productId = productForPlan(planId, interval);
     // 按比例立即计费/抵扣；扣款失败则不切换（避免降到付不起的档还生效）。
     await dodoClient().subscriptions.changePlan(subscriptionId, {
       product_id: productId,

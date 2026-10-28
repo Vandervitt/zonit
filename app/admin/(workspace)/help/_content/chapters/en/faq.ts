@@ -50,7 +50,7 @@ export const faq: HelpChapterData = {
             },
             {
               q: "Why does my page have a platform watermark?",
-              a: "Free pages show a watermark in the footer. Upgrading to any paid plan (Starter or above) removes it automatically.",
+              a: "Free pages show a watermark in the footer. Upgrading to any paid plan (Pro or above) removes it automatically.",
             },
             {
               q: "What happens when my free Pro trial ends?",

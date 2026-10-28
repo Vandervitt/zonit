@@ -1,31 +1,38 @@
 // Creem provider 实现（备份收款渠道）。REST 很薄，直接 fetch，不引入 SDK。
 // 验签：HMAC-SHA256(raw body, CREEM_WEBHOOK_SECRET) 十六进制，对比 creem-signature 头。
 import crypto from "crypto";
-import type { PlanId } from "@/lib/plans";
-import type { BillingEvent, BillingProvider, CreateCheckoutInput, CreateCreditCheckoutInput } from "../types";
+import type { BillingInterval, PaidPlanId } from "@/lib/pricing/dodo-prices";
+import { planProductMap, productFor, type PlanProductIds } from "../products";
+import {
+  PlanProductNotConfiguredError,
+  type BillingEvent,
+  type BillingProvider,
+  type CreateCheckoutInput,
+  type CreateCreditCheckoutInput,
+} from "../types";
 import { parseCreemEvent, type CreemProductMap } from "./creem-events";
 
-export function creemProductMap(): CreemProductMap {
-  const planByProduct: Record<string, PlanId> = {};
-  const add = (id: string | undefined, plan: PlanId) => { if (id) planByProduct[id] = plan; };
-  add(process.env.CREEM_PRODUCT_STARTER, "starter");
-  add(process.env.CREEM_PRODUCT_PRO, "pro");
-  add(process.env.CREEM_PRODUCT_AGENCY, "agency");
+/** 各付费档 × 周期的产品 id（env）。年付产品对应 *_YEARLY。 */
+export function creemPlanProductIds(): PlanProductIds {
+  return {
+    pro: { month: process.env.CREEM_PRODUCT_PRO, year: process.env.CREEM_PRODUCT_PRO_YEARLY },
+    agency: { month: process.env.CREEM_PRODUCT_AGENCY, year: process.env.CREEM_PRODUCT_AGENCY_YEARLY },
+  };
+}
 
+/** 从 env 装配 product 映射（缺失的项跳过，isConfigured 会校验必需项）。 */
+export function creemProductMap(): CreemProductMap {
   const creditsByProduct: Record<string, number> = {};
   if (process.env.CREEM_CREDITS_50) creditsByProduct[process.env.CREEM_CREDITS_50] = 50;
   if (process.env.CREEM_CREDITS_200) creditsByProduct[process.env.CREEM_CREDITS_200] = 200;
 
-  return { planByProduct, creditsByProduct };
+  return { planByProduct: planProductMap(creemPlanProductIds()), creditsByProduct };
 }
 
-function productForPlan(planId: string): string | undefined {
-  const byPlan: Record<string, string | undefined> = {
-    starter: process.env.CREEM_PRODUCT_STARTER,
-    pro: process.env.CREEM_PRODUCT_PRO,
-    agency: process.env.CREEM_PRODUCT_AGENCY,
-  };
-  return byPlan[planId];
+function productForPlan(planId: PaidPlanId, interval: BillingInterval): string {
+  const id = productFor(creemPlanProductIds(), planId, interval);
+  if (!id) throw new PlanProductNotConfiguredError(`No Creem product configured for ${planId} (${interval})`);
+  return id;
 }
 
 function productForCredits(credits: number): string | undefined {
@@ -60,15 +67,14 @@ export const creemProvider: BillingProvider = {
     return Boolean(
       process.env.CREEM_API_KEY &&
       process.env.CREEM_WEBHOOK_SECRET &&
-      process.env.CREEM_PRODUCT_STARTER &&
+      // 备份渠道：只要求月付产品；年付未配时年付结账抛 PlanProductNotConfiguredError（503 业务码）。
       process.env.CREEM_PRODUCT_PRO &&
       process.env.CREEM_PRODUCT_AGENCY,
     );
   },
 
-  async createCheckout({ planId, email, userId, baseUrl }: CreateCheckoutInput): Promise<string> {
-    const productId = productForPlan(planId);
-    if (!productId) throw new Error(`No Creem product configured for plan: ${planId}`);
+  async createCheckout({ planId, interval, email, userId, baseUrl }: CreateCheckoutInput): Promise<string> {
+    const productId = productForPlan(planId, interval);
 
     const session = await creemPost<{ checkout_url?: string; url?: string }>("/v1/checkouts", {
       product_id: productId,
@@ -104,9 +110,8 @@ export const creemProvider: BillingProvider = {
     return res.customer_portal_link;
   },
 
-  async changePlan(subscriptionId: string, planId: string): Promise<void> {
-    const productId = productForPlan(planId);
-    if (!productId) throw new Error(`No Creem product configured for plan: ${planId}`);
+  async changePlan(subscriptionId: string, planId: PaidPlanId, interval: BillingInterval): Promise<void> {
+    const productId = productForPlan(planId, interval);
     // Creem 的 upgrade 端点同时处理升档与降档，按比例立即计费。
     await creemPost(`/v1/subscriptions/${encodeURIComponent(subscriptionId)}/upgrade`, {
       product_id: productId,

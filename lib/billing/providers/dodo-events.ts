@@ -1,12 +1,12 @@
 // Dodo webhook 原始事件 → 规范化 BillingEvent 的纯映射（无网络，可单测）。
 // Dodo 文档中 webhook data 字段存在两种形态（data.* 与 data.object.*），此处做防御性读取。
-import type { PlanId } from "@/lib/plans";
+import type { PlanProduct } from "../products";
 import type { BillingEvent } from "../types";
 
 /** product_id ↔ 套餐/额度映射（由 env 装配，测试可注入假配置）。 */
 export interface DodoProductMap {
-  /** 订阅产品 → 套餐档。 */
-  planByProduct: Record<string, PlanId>;
+  /** 订阅产品 → (套餐档, 计费周期)。 */
+  planByProduct: Record<string, PlanProduct>;
   /** 一次性产品 → 充值额度。 */
   creditsByProduct: Record<string, number>;
 }
@@ -75,12 +75,13 @@ export function parseDodoEvent(event: AnyRec, map: DodoProductMap): BillingEvent
       };
     }
     const productId = stringField(d, "product_id");
-    const plan = productId ? map.planByProduct[productId] : undefined;
-    if (!userId || !plan) return { kind: "ignored" };
+    const product = productId ? map.planByProduct[productId] : undefined;
+    if (!userId || !product) return { kind: "ignored" };
     return {
       kind: "subscription_activated",
       userId,
-      plan,
+      plan: product.plan,
+      interval: product.interval,
       customerId: customerIdOf(d),
       subscriptionId: stringField(d, "subscription_id"),
       eventTime,

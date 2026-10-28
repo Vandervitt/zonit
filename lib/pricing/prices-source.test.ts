@@ -11,11 +11,10 @@ import snapshot from "./prices.json";
 const read = (rel: string) => readFileSync(path.join(process.cwd(), rel), "utf8");
 
 describe("展示价来源", () => {
-  it("付费档月费等于快照（美分 → 美元），Free 固定为 0", () => {
+  it("付费档月费等于快照的月付价（美分 → 美元），Free 固定为 0", () => {
     expect(PLANS.free.priceAmount).toBe(0);
-    expect(PLANS.starter.priceAmount).toBe(snapshot.plans.starter / 100);
-    expect(PLANS.pro.priceAmount).toBe(snapshot.plans.pro / 100);
-    expect(PLANS.agency.priceAmount).toBe(snapshot.plans.agency / 100);
+    expect(PLANS.pro.priceAmount).toBe(snapshot.plans.pro.month / 100);
+    expect(PLANS.agency.priceAmount).toBe(snapshot.plans.agency.month / 100);
   });
 
   it("充值包价格等于快照", () => {

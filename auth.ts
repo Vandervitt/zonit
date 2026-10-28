@@ -9,7 +9,7 @@ import { Routes, UserRole, AuthProvider } from "@/lib/constants";
 import { isValidEmailFormat } from "@/lib/auth/trusted-email";
 import { verifyOtp } from "@/lib/auth/otp";
 import { provisionUserByEmail } from "@/lib/auth/provision";
-import { effectivePlan, activeCompPlan, SIGNUP_TRIAL_PLAN, signupTrialExpiry, type PlanId } from "@/lib/plans";
+import { effectivePlan, activeCompPlan, SIGNUP_TRIAL_PLAN, signupTrialExpiry, type BillingInterval, type PlanId } from "@/lib/plans";
 import { sendWelcomeEmail } from "@/lib/email";
 import { notifyAdminsOfSignup } from "@/lib/auth/signup-notify";
 import { recordMilestone } from "@/lib/platform-milestones";
@@ -165,7 +165,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const userId = user?.id ?? token.sub;
         if (userId) {
           const r = await pool.query(
-            "SELECT email, plan, comp_plan, comp_plan_expires_at, role, trial_expires_at, disabled_at, billing_expires_at, billing_subscription_id, locale FROM users WHERE id = $1",
+            "SELECT email, plan, comp_plan, comp_plan_expires_at, role, trial_expires_at, disabled_at, billing_expires_at, billing_subscription_id, billing_interval, locale FROM users WHERE id = $1",
             [userId]
           );
           const userData = r.rows[0];
@@ -221,6 +221,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             // 是否持有渠道真实订阅：赠送套餐（comp_plan）无 subscription_id，据此在 billing 页
             // 隐藏「更换套餐」自助换档区（换档会 404，对赠送用户无意义）。
             token.hasSubscription = Boolean(userData.billing_subscription_id);
+            // 当前订阅的计费周期；无订阅为 null。billing 页据此判定「改为年付 / 月付」。
+            token.billingInterval = userData.billing_subscription_id ? (userData.billing_interval ?? null) : null;
             token.role = (isHardwareAdmin ? UserRole.SUPER_ADMIN : (userData.role ?? UserRole.USER)) as UserRole;
             // 后台界面语言。脏值按「没选过」处理，交由 resolveAdminLocale 回退到注册来源，
             // 而不是让一个人工改库写错的值把整个后台钉死在某个语言上。
@@ -243,6 +245,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.role = token.role as UserRole;
       session.user.billingExpiresAt = (token.billingExpiresAt as string | null) ?? null;
       session.user.hasSubscription = Boolean(token.hasSubscription);
+      session.user.billingInterval = (token.billingInterval as BillingInterval | null | undefined) ?? null;
       session.user.locale = (token.locale as Locale | null | undefined) ?? null;
       return session;
     },

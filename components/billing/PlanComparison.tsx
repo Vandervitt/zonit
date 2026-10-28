@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 import { Routes } from "@/lib/constants";
@@ -7,12 +9,15 @@ import {
   PLAN_ORDER,
   SIGNUP_TRIAL_DAYS,
   SIGNUP_TRIAL_PLAN,
+  YEARLY_PRICE_MONTHS,
+  BILLING_INTERVALS,
   planComparisonLayout,
   planPriceText,
+  plansDictionary,
+  type BillingInterval,
   type PlanFeatureRow,
   type PlanId,
 } from "@/lib/plans";
-import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
 import type { Locale } from "@/lib/i18n/config";
 import { ctaGhost, ctaPrimary } from "@/lib/theme";
@@ -21,8 +26,10 @@ import { cn } from "@/components/ui/utils";
 /**
  * 套餐对比——全站唯一的套餐对照组件：营销站（首页 / 定价页）、后台计费页、超管设置页共用。
  *
- * 只用 Tailwind、不依赖 antd 也不用 hooks，因此 Server / Client 组件里都能直接渲染；
- * 后台需要的交互（结账、降档确认）由调用方经 `cta` 注入自己的 antd 按钮。
+ * 客户端组件（月付 / 年付切换需要状态），只用 Tailwind、不依赖 antd。
+ * 营销站（服务端组件）不能跨边界传函数，故访客按钮由 `audience="visitor"` 在组件内渲染；
+ * 后台需要的交互（结账、降档确认）由客户端调用方经 `cta` 注入自己的 antd 按钮。
+ * 文案取 plansDictionary 而非 getDictionary，避免把全部营销字典打进客户端包。
  *
  * 布局按**容器宽度**切换（@container），而不是视口：同一个组件嵌在后台内容区、
  * 首页分区或手机屏里，都按自己实际拿到的宽度决定用表格还是按档位纵排的卡片。
@@ -31,8 +38,12 @@ export interface PlanComparisonProps {
   locale?: Locale;
   /** 人民币参考换算汇率；不传（英文面 / 取不到汇率）则只展示美元。 */
   cnyRate?: number | null;
-  /** 每档的行动按钮；不传则不渲染按钮区（如超管只读参考）。返回 null 表示该档不放按钮。 */
-  cta?: (planId: PlanId) => ReactNode;
+  /** 访客视角：按钮一律去注册页（营销站用）。与 `cta` 二选一。 */
+  audience?: "visitor";
+  /** 每档的行动按钮（按当前选中的计费周期）；返回 null 表示该档不放按钮。都不传则不渲染按钮区。 */
+  cta?: (planId: PlanId, interval: BillingInterval) => ReactNode;
+  /** 初始展示的计费周期，默认月付。 */
+  defaultInterval?: BillingInterval;
   /** 当前所在档：该列高亮并标「当前套餐」。不传时高亮推荐档。 */
   currentPlan?: PlanId;
   /** 是否在注册试用档上标「注册即送 N 天」——只对还没注册的访客有意义。 */
@@ -41,7 +52,7 @@ export interface PlanComparisonProps {
 
 /** 访客（未登录）视角的按钮规格：一律去注册页，注册本身就送试用档。纯函数，便于测试。 */
 export function visitorCtaSpec(locale: Locale, planId: PlanId): { href: string; label: string; primary: boolean } {
-  const t = getDictionary(locale).plans.table;
+  const t = plansDictionary(locale).table;
   const href = localePath(locale, Routes.Register);
   if (planId === "free") return { href, label: t.ctaFree, primary: false };
   if (planId === SIGNUP_TRIAL_PLAN) {
@@ -50,19 +61,61 @@ export function visitorCtaSpec(locale: Locale, planId: PlanId): { href: string; 
   return { href, label: t.ctaChoose.replace("{plan}", PLANS[planId].label), primary: false };
 }
 
-/** 营销站用的 `cta`：渲染成链接按钮。 */
-export function visitorPlanCta(locale: Locale): (planId: PlanId) => ReactNode {
-  return function VisitorPlanCta(planId) {
-    const spec = visitorCtaSpec(locale, planId);
-    return (
-      <Link
-        href={spec.href}
-        className={cn(spec.primary ? ctaPrimary : ctaGhost, "w-full px-3 py-2.5 text-center text-sm")}
-      >
-        {spec.label}
-      </Link>
-    );
-  };
+function VisitorCta({ locale, planId }: { locale: Locale; planId: PlanId }) {
+  const spec = visitorCtaSpec(locale, planId);
+  return (
+    <Link
+      href={spec.href}
+      className={cn(spec.primary ? ctaPrimary : ctaGhost, "w-full px-3 py-2.5 text-center text-sm")}
+    >
+      {spec.label}
+    </Link>
+  );
+}
+
+/** 月付 / 年付切换：单选按钮组，方向键与 Tab 均可操作。 */
+function IntervalToggle({
+  value,
+  onChange,
+  t,
+}: {
+  value: BillingInterval;
+  onChange: (v: BillingInterval) => void;
+  t: { billingPeriod: string; intervalMonth: string; intervalYear: string; yearSave: string };
+}) {
+  const label = (v: BillingInterval) => (v === "month" ? t.intervalMonth : t.intervalYear);
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t.billingPeriod}
+      className="inline-flex rounded-full border border-aqua-100 bg-white p-1 text-sm"
+    >
+      {BILLING_INTERVALS.map((v) => (
+        <label
+          key={v}
+          className={cn(
+            "flex cursor-pointer items-center gap-2 rounded-full px-4 py-1.5 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-aqua-400",
+            value === v ? "bg-aqua-600 font-medium text-white" : "text-foreground/80 hover:text-aqua-700",
+          )}
+        >
+          <input
+            type="radio"
+            name="billing-interval"
+            value={v}
+            checked={value === v}
+            onChange={() => onChange(v)}
+            className="sr-only"
+          />
+          {label(v)}
+          {v === "year" && (
+            <span className={cn("text-xs", value === v ? "text-white/85" : "text-aqua-700")}>
+              {t.yearSave.replace("{months}", String(12 - YEARLY_PRICE_MONTHS))}
+            </span>
+          )}
+        </label>
+      ))}
+    </div>
+  );
 }
 
 function FeatureValue({ value, t }: { value: string | boolean; t: { included: string; notIncluded: string } }) {
@@ -88,7 +141,7 @@ function FeatureValue({ value, t }: { value: string | boolean; t: { included: st
 interface PlanView {
   id: PlanId;
   label: string;
-  price: { amount: string; suffix: string; approx: string | null };
+  price: { amount: string; suffix: string; approx: string | null; yearlyNote: string | null };
   badge: string | null;
   fit: string;
   action: ReactNode;
@@ -100,7 +153,7 @@ function PlanHead({ p, hasCta, compact = false }: { p: PlanView; hasCta: boolean
   return (
     <div className="flex flex-col gap-1 text-left">
       {/* 徽标单独占一行：与档位名同排时，窄列里长文案（英文尤甚）会顶出列宽压到相邻档。
-          表格模式下无徽标的列也保留这一行高度，让四档的档位名对齐。 */}
+          表格模式下无徽标的列也保留这一行高度，让各档的档位名对齐。 */}
       {(p.badge || !compact) && (
         <div className="min-h-6">
           {p.badge && (
@@ -117,6 +170,7 @@ function PlanHead({ p, hasCta, compact = false }: { p: PlanView; hasCta: boolean
       </p>
       {/* 参考换算另起一行：不能与美元金额同排，否则易被读成结算金额 */}
       <p className={cn("text-xs text-muted-foreground", !compact && "min-h-4")}>{p.price.approx}</p>
+      {p.price.yearlyNote && <p className="text-xs font-medium text-aqua-700">{p.price.yearlyNote}</p>}
       <p className="mt-1 text-sm leading-snug text-muted-foreground">{p.fit}</p>
       {hasCta && <div className="mt-3">{p.action}</div>}
     </div>
@@ -126,11 +180,15 @@ function PlanHead({ p, hasCta, compact = false }: { p: PlanView; hasCta: boolean
 export function PlanComparison({
   locale = "en",
   cnyRate,
+  audience,
   cta,
   currentPlan,
   showTrialBadge = false,
+  defaultInterval = "month",
 }: PlanComparisonProps) {
-  const t = getDictionary(locale).plans;
+  const [interval, setBillingInterval] = useState<BillingInterval>(defaultInterval);
+  const t = plansDictionary(locale);
+  const hasCta = audience === "visitor" || !!cta;
   const layout = planComparisonLayout(t, locale);
   const lanePlan: PlanId = currentPlan ?? PLAN_ORDER.find((id) => PLANS[id].highlight) ?? SIGNUP_TRIAL_PLAN;
 
@@ -146,10 +204,10 @@ export function PlanComparison({
     id,
     label: PLANS[id].label,
     config: PLANS[id],
-    price: planPriceText(PLANS[id], locale, cnyRate),
+    price: planPriceText(PLANS[id], locale, cnyRate, interval),
     badge: badgeFor(id),
     fit: t.fit[id],
-    action: cta?.(id) ?? null,
+    action: audience === "visitor" ? <VisitorCta locale={locale} planId={id} /> : (cta?.(id, interval) ?? null),
     inLane: id === lanePlan,
   }));
   const included = layout.common.length > 0 && (
@@ -178,6 +236,9 @@ export function PlanComparison({
 
   return (
     <div className="@container">
+      <div className="mb-5">
+        <IntervalToggle value={interval} onChange={setBillingInterval} t={t.table} />
+      </div>
       {included}
 
       {/* 宽容器：表格 */}
@@ -206,7 +267,7 @@ export function PlanComparison({
               ))}
             </tr>
             {/* 按钮单独一行：各档「适合谁」长短不一，同格排版时按钮会参差不齐 */}
-            {cta && (
+            {hasCta && (
               <tr>
                 <td />
                 {plans.map((p) => (
@@ -271,7 +332,7 @@ export function PlanComparison({
               p.inLane ? "border-aqua-200 bg-aqua-50/70" : "border-aqua-100 bg-white",
             )}
           >
-            <PlanHead p={p} hasCta={!!cta} compact />
+            <PlanHead p={p} hasCta={hasCta} compact />
             <ul className="mt-5 space-y-2 border-t border-aqua-100 pt-4 text-sm">
               {allRows.flatMap((row) => {
                 const v = row.valueFor(p.config);

@@ -14,8 +14,7 @@ interface Props {
 }
 
 const UPGRADE_TARGET: Record<PlanId, PlanId | null> = {
-  free: "starter",
-  starter: "pro",
+  free: "pro",
   pro: "agency",
   agency: null,
 };

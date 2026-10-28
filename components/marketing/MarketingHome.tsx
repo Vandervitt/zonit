@@ -17,7 +17,7 @@ import {
   Inbox,
 } from "lucide-react";
 import { Routes } from "@/lib/constants";
-import { PlanComparison, visitorPlanCta } from "@/components/billing/PlanComparison";
+import { PlanComparison } from "@/components/billing/PlanComparison";
 import { ctaPrimary, ctaGhost, gradientText, glassCard, pill, glowAura } from "@/lib/theme";
 import { Backdrop, SiteNav, SiteFooter, SectionHead, PricingLink, type Fonts } from "./chrome";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
@@ -592,7 +592,7 @@ function Pricing({
         fonts={fonts}
       />
       <div className="mx-auto mt-16 max-w-6xl">
-        <PlanComparison locale={locale} cnyRate={cnyRate} cta={visitorPlanCta(locale)} showTrialBadge />
+        <PlanComparison locale={locale} cnyRate={cnyRate} audience="visitor" showTrialBadge />
       </div>
     </section>
   );
