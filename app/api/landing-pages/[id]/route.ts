@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { ApiErrors } from "@/lib/constants";
 import { getLandingPage, updateLandingPageDraft, deleteLandingPage, renameLandingPage } from "@/lib/landing-pages/store";
+import { invalidateTenantRoutes } from "@/lib/landing-pages/published-cache";
 
 /** Postgres 唯一约束冲突（23505）：同名落地页撞 idx_landing_pages_user_name。 */
 function isUniqueViolation(err: unknown): boolean {
@@ -67,5 +68,7 @@ export async function DELETE(_req: NextRequest, ctx: RouteContext<"/api/landing-
   const { id } = await ctx.params;
   const ok = await deleteLandingPage(id, session.user.id);
   if (!ok) return NextResponse.json({ error: ApiErrors.NOT_FOUND }, { status: 404 });
+  // 删页级联删掉了它的 domain_routes；不失效映射的话，已发布页在缓存窗口内仍可访问。
+  invalidateTenantRoutes();
   return NextResponse.json({ ok: true });
 }

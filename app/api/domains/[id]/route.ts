@@ -11,6 +11,7 @@ import {
   getEnabledDomainCount,
 } from "@/lib/domains-db";
 import { removeDomainFromProject } from "@/lib/vercel";
+import { invalidateTenantRoutes } from "@/lib/landing-pages/published-cache";
 
 export async function PATCH(
   request: NextRequest,
@@ -44,6 +45,8 @@ export async function PATCH(
   const updated = await updateDomain(id, session.user.id, {
     ...(enabled !== undefined && { enabled }),
   });
+  // 停用域名必须立刻让其下所有页面从公网消失，不能等映射缓存过期。
+  invalidateTenantRoutes();
 
   return NextResponse.json(updated);
 }
@@ -65,6 +68,7 @@ export async function DELETE(
 
   await removeDomainFromProject(existing.domain).catch(() => {/* best-effort */});
   await deleteDomainById(id, session.user.id);
+  invalidateTenantRoutes();
 
   return NextResponse.json({ ok: true });
 }

@@ -16,6 +16,7 @@ import { isMainlandChinaDomain, mainlandNsProvider, normalizeDomain } from "@/li
 import { isPlatformOwnedHost, platformSubdomainRoots } from "@/lib/domains/subdomain";
 import { lookupNameservers } from "@/lib/domain-ns";
 import { recordMilestone } from "@/lib/platform-milestones";
+import { invalidateTenantRoutes } from "@/lib/landing-pages/published-cache";
 
 export async function GET() {
   const session = await auth();
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
     if (landingPageId) {
       await bindDomainToLandingPage(existing.id, session.user.id, landingPageId);
     }
+    invalidateTenantRoutes();
     return NextResponse.json({ ...updated, records, mainlandNs }, { status: 200 });
   }
 
@@ -113,6 +115,7 @@ export async function POST(request: Request) {
     await updateDomain(row.id, session.user.id, { verified: true });
     row.verified = true;
     await recordMilestone(session.user.id, "domain_verified");
+    invalidateTenantRoutes();
   }
 
   return NextResponse.json({ ...row, records: vercelConfig.records, mainlandNs }, { status: 201 });
