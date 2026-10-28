@@ -18,6 +18,7 @@ describe("visitorCtaSpec（营销站访客的套餐按钮）", () => {
     const primaries = PLAN_ORDER.filter((id) => visitorCtaSpec("zh", id).primary);
     expect(primaries).toEqual([SIGNUP_TRIAL_PLAN]);
     expect(visitorCtaSpec("zh", SIGNUP_TRIAL_PLAN).label).toBe(`免费试用 ${SIGNUP_TRIAL_DAYS} 天`);
-    expect(visitorCtaSpec("en", SIGNUP_TRIAL_PLAN).label).toBe(`Try free for ${SIGNUP_TRIAL_DAYS} days`);
+    // 英文按钮不带天数：窄列里放不下，天数已在该列徽标里。
+    expect(visitorCtaSpec("en", SIGNUP_TRIAL_PLAN).label).toBe("Start free trial");
   });
 });

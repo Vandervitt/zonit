@@ -18,10 +18,10 @@ export const plans = {
     // 窄屏卡片里「权益名: 额度」的分隔符。
     valueSeparator: ": ",
     // {days} is filled from SIGNUP_TRIAL_DAYS — never hard-code the number.
-    trialBadge: "{days} days free on sign-up",
+    trialBadge: "{days}-day free trial",
     currentBadge: "Your plan",
     ctaFree: "Start free",
-    ctaTrial: "Try free for {days} days",
+    ctaTrial: "Start free trial",
     ctaChoose: "Choose {plan}",
   },
   groups: { publish: "Publishing", tracking: "Tracking & leads", ai: "AI generation", scale: "Running at scale" },

@@ -86,7 +86,7 @@ test.describe("营销站双语", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/pricing");
     await expect(page.locator(`text=${PRO_PRICE} >> visible=true`).first()).toBeVisible();
-    await expect(page.getByRole("link", { name: `Try free for ${SIGNUP_TRIAL_DAYS} days` })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Start free trial" })).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
   });

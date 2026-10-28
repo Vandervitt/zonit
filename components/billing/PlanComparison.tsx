@@ -57,7 +57,7 @@ export function visitorPlanCta(locale: Locale): (planId: PlanId) => ReactNode {
     return (
       <Link
         href={spec.href}
-        className={cn(spec.primary ? ctaPrimary : ctaGhost, "w-full px-4 py-2.5 text-sm")}
+        className={cn(spec.primary ? ctaPrimary : ctaGhost, "w-full px-3 py-2.5 text-center text-sm")}
       >
         {spec.label}
       </Link>
@@ -98,23 +98,27 @@ interface PlanView {
 /** 档位抬头：名称 + 徽标、价格、参考换算、适合谁、按钮。表格表头与窄屏卡片共用。 */
 function PlanHead({ p, hasCta, compact = false }: { p: PlanView; hasCta: boolean; compact?: boolean }) {
   return (
-    <div className={cn("flex flex-col gap-1 text-left", !compact && "h-full")}>
-      <div className="flex min-h-6 items-center justify-between gap-2">
-        <span className="text-base font-semibold text-foreground">{p.label}</span>
-        {p.badge && (
-          <span className="rounded-full bg-aqua-600 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-white">
-            {p.badge}
-          </span>
-        )}
-      </div>
+    <div className="flex flex-col gap-1 text-left">
+      {/* 徽标单独占一行：与档位名同排时，窄列里长文案（英文尤甚）会顶出列宽压到相邻档。
+          表格模式下无徽标的列也保留这一行高度，让四档的档位名对齐。 */}
+      {(p.badge || !compact) && (
+        <div className="min-h-6">
+          {p.badge && (
+            <span className="inline-block rounded-full bg-aqua-600 px-2.5 py-0.5 text-xs leading-snug font-medium text-white">
+              {p.badge}
+            </span>
+          )}
+        </div>
+      )}
+      <span className="text-base font-semibold text-foreground">{p.label}</span>
       <p className="mt-1 whitespace-nowrap text-foreground">
         <span className="text-3xl font-bold tracking-tight tabular-nums">{p.price.amount}</span>
         {p.price.suffix && <span className="ml-0.5 text-sm text-muted-foreground">{p.price.suffix}</span>}
       </p>
       {/* 参考换算另起一行：不能与美元金额同排，否则易被读成结算金额 */}
       <p className={cn("text-xs text-muted-foreground", !compact && "min-h-4")}>{p.price.approx}</p>
-      <p className={cn("mt-1 text-sm leading-snug text-muted-foreground", !compact && "min-h-15")}>{p.fit}</p>
-      {hasCta && <div className={compact ? "mt-3" : "mt-auto pt-3"}>{p.action}</div>}
+      <p className="mt-1 text-sm leading-snug text-muted-foreground">{p.fit}</p>
+      {hasCta && <div className="mt-3">{p.action}</div>}
     </div>
   );
 }
@@ -177,11 +181,11 @@ export function PlanComparison({
       {included}
 
       {/* 宽容器：表格 */}
-      <div className="hidden @3xl:block">
+      <div className="hidden @5xl:block">
         <table className="w-full table-fixed border-separate border-spacing-0 text-sm">
           <caption className="sr-only">{t.table.feature}</caption>
           <colgroup>
-            <col className="w-[28%]" />
+            <col className="w-[24%]" />
             {plans.map((p) => (
               <col key={p.id} />
             ))}
@@ -195,12 +199,23 @@ export function PlanComparison({
                 <th
                   key={p.id}
                   scope="col"
-                  className={cn("px-5 pt-5 pb-6 align-top font-normal", lane(p, "top"))}
+                  className={cn("px-5 pt-5 pb-4 align-top font-normal", lane(p, "top"))}
                 >
-                  <PlanHead p={p} hasCta={!!cta} />
+                  <PlanHead p={p} hasCta={false} />
                 </th>
               ))}
             </tr>
+            {/* 按钮单独一行：各档「适合谁」长短不一，同格排版时按钮会参差不齐 */}
+            {cta && (
+              <tr>
+                <td />
+                {plans.map((p) => (
+                  <td key={p.id} className={cn("px-5 pb-6 align-top", lane(p))}>
+                    {p.action}
+                  </td>
+                ))}
+              </tr>
+            )}
           </thead>
           {layout.groups.map((group) => (
             <tbody key={group.id}>
@@ -247,7 +262,7 @@ export function PlanComparison({
       </div>
 
       {/* 窄容器（手机 / 窄内容区）：按档位纵排的卡片，只列该档拥有的权益 */}
-      <ul className="grid gap-4 @lg:grid-cols-2 @3xl:hidden">
+      <ul className="grid gap-4 @lg:grid-cols-2 @5xl:hidden">
         {plans.map((p) => (
           <li
             key={p.id}
