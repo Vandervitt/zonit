@@ -43,6 +43,12 @@ describe("auth 页 metadata", () => {
         const zh = build("zh");
         expect(zh.openGraph?.url).toBe(zh.alternates?.canonical);
       });
+
+      it("禁收录——登录/注册页没有搜索价值，与 sitemap 排除口径一致", () => {
+        for (const locale of ["en", "zh"] as const) {
+          expect(build(locale).robots).toEqual({ index: false, follow: false });
+        }
+      });
     });
   }
 });

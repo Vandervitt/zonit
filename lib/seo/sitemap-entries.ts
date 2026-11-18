@@ -25,6 +25,47 @@ const PRIORITY: Record<string, number> = {
 export const PENDING_ROUTES: readonly string[] = [];
 
 /**
+ * 不进 sitemap 的已国际化路由：登录/注册页没有搜索价值，列进去只会分走抓取预算。
+ * 它们仍留在 LOCALIZED_ROUTES——localePath 与语言切换器需要它们，sitemap 在这里单独排除。
+ * 对应地，lib/seo/auth-metadata.ts 给这两页加了 robots noindex，两边口径一致。
+ */
+export const SITEMAP_EXCLUDED_ROUTES: readonly string[] = ["/login", "/register"];
+
+/**
+ * 谷歌已判定不收录的平台页（GSC 2026-11-17 底数，44 条未收录里的 19 条模板面）：
+ * 16 张模板详情（10 条 8 月发现至今一次没被抓过，6 条抓了又丢）、1 张行业页、
+ * 画廊首页中英文 2 条。路径是语言相关的完整路径（/zh 前缀算在内），只排除
+ * 谷歌已判弱的那一侧——另一侧仍被收录的（如 /zh/templates/activewear）不动。
+ * 与 robots noindex 口径一致：这里不进 sitemap，页面本身也要输出 noindex，
+ * 两边缺一边都会给搜索引擎自相矛盾的信号。
+ */
+export const NOINDEX_PATHS: readonly string[] = [
+  // 画廊首页：中英文都没被抓过（2026-08-19 发现至今）。
+  "/templates",
+  "/zh/templates",
+  // 行业页：supplement 有 5 套模板、本身可索引，但同样没被抓过。
+  "/templates/industry/supplement",
+  // 模板详情（英文）：已发现未收录 5 条 + 已抓取未收录 6 条。
+  "/templates/activewear",
+  "/templates/joint",
+  "/templates/plus-size",
+  "/templates/storage",
+  "/templates/vision-correction",
+  "/templates/phone-case",
+  "/templates/educational-toy",
+  "/templates/weight-mgmt",
+  "/templates/moving",
+  "/templates/study-abroad",
+  "/templates/k12-tutoring",
+  // 模板详情（中文）：已发现未收录 5 条。
+  "/zh/templates/fast-fashion",
+  "/zh/templates/footwear",
+  "/zh/templates/fragrance",
+  "/zh/templates/plus-size",
+  "/zh/templates/vision-correction",
+];
+
+/**
  * 已国际化的动态详情页（如 33 个模板详情）：每条出双语两条并互挂 hreflang。
  * routePath 须落在 LOCALIZED_PREFIXES 之下，否则 localePath 会原样返回，两条 URL 撞车。
  */
@@ -36,10 +77,13 @@ export function localizedDetailEntries(
   const abs = (p: string) => `${base}${p}`;
   const entries: MetadataRoute.Sitemap = [];
   for (const { routePath, lastModified } of paths) {
+    // hreflang 只挂可索引的语言侧：指向 noindex 页的 alternate 会被谷歌忽略，
+    // 还会让它怀疑这组对应关系本身。
+    const indexableLocales = locales.filter((l) => !NOINDEX_PATHS.includes(localePath(l, routePath)));
     const languages = Object.fromEntries(
-      locales.map((l) => [hreflang[l], abs(localePath(l, routePath))]),
+      indexableLocales.map((l) => [hreflang[l], abs(localePath(l, routePath))]),
     );
-    for (const l of locales) {
+    for (const l of indexableLocales) {
       entries.push({
         url: abs(localePath(l, routePath)),
         lastModified,
@@ -57,11 +101,15 @@ export function marketingEntries(base: string, now: Date): MetadataRoute.Sitemap
   const entries: MetadataRoute.Sitemap = [];
 
   for (const route of LOCALIZED_ROUTES) {
+    if (SITEMAP_EXCLUDED_ROUTES.includes(route)) continue;
+    // 与 localizedDetailEntries 同理：noindex 的一侧不进 sitemap，hreflang 也不挂它。
+    const indexableLocales = locales.filter((l) => !NOINDEX_PATHS.includes(localePath(l, route)));
+    if (indexableLocales.length === 0) continue;
     const languages = Object.fromEntries(
-      locales.map((l) => [hreflang[l], abs(localePath(l, route))]),
+      indexableLocales.map((l) => [hreflang[l], abs(localePath(l, route))]),
     );
     const basePriority = PRIORITY[route] ?? 0.7;
-    for (const l of locales) {
+    for (const l of indexableLocales) {
       entries.push({
         url: abs(localePath(l, route)),
         lastModified: now,

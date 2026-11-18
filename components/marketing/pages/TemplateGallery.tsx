@@ -6,6 +6,7 @@ import { TEMPLATES } from "@/landing-editor/samples/registry";
 import { categoryLabel, conversionLabel, archetypeLabel } from "@/landing-editor/samples/templateFilter";
 import { Routes, templateDetailPath, templateIndustryPath } from "@/lib/constants";
 import { marketingMetadata } from "@/lib/seo/site";
+import { NOINDEX_PATHS } from "@/lib/seo/sitemap-entries";
 import { fillCounts } from "@/lib/templates/stats";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { localePath } from "@/lib/i18n/routes";
@@ -15,7 +16,7 @@ import type { Locale } from "@/lib/i18n/config";
 
 export function templateGalleryMetadata(locale: Locale): Metadata {
   const t = getDictionary(locale).templates.meta;
-  return marketingMetadata({
+  const base = marketingMetadata({
     locale,
     title: fillCounts(t.title),
     description: fillCounts(t.description),
@@ -23,6 +24,11 @@ export function templateGalleryMetadata(locale: Locale): Metadata {
     ogTitle: fillCounts(t.ogTitle),
     ogDescription: fillCounts(t.ogDescription),
   });
+  // 画廊首页中英文都没被谷歌抓过（见 NOINDEX_PATHS）：输出 noindex，仍 follow。
+  if (NOINDEX_PATHS.includes(localePath(locale, Routes.Templates))) {
+    return { ...base, robots: { index: false, follow: true } };
+  }
+  return base;
 }
 
 /** 按注册表出现顺序稳定分组（行业 → 模板列表）。 */

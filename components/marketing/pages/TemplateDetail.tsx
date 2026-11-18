@@ -11,6 +11,7 @@ import { IDENTITY_VARIANT } from "@/landing-renderer/variant";
 import { Routes, templateDetailPath, templateIndustryPath } from "@/lib/constants";
 import type { LandingPageDraft } from "@/types/schema.draft";
 import { marketingMetadata } from "@/lib/seo/site";
+import { NOINDEX_PATHS } from "@/lib/seo/sitemap-entries";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildTemplateSeoContent,
@@ -57,13 +58,19 @@ export async function templateDetailMetadata(slug: string, locale: Locale): Prom
   const description = d.description
     .replace("{tagline}", t.tagline[locale])
     .replace("{conversion}", conversionText(t, locale));
-  return marketingMetadata({
+  const base = marketingMetadata({
     locale,
     title,
     description,
     path: templateDetailPath(t.id),
     ogImage: t.thumbnail,
   });
+  // 谷歌已判定不收录的最弱模板详情（见 NOINDEX_PATHS）：输出 noindex，
+  // 但仍 follow——页面上的内链权重继续流向站内其他模板页。
+  if (NOINDEX_PATHS.includes(localePath(locale, templateDetailPath(t.id)))) {
+    return { ...base, robots: { index: false, follow: true } };
+  }
+  return base;
 }
 
 export async function TemplateDetailView({ slug, locale }: { slug: string; locale: Locale }) {

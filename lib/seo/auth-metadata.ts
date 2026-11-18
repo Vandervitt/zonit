@@ -9,20 +9,28 @@ import { marketingMetadata } from "./site";
 
 export function loginMetadata(locale: Locale): Metadata {
   const t = getDictionary(locale).auth.login;
-  return marketingMetadata({
-    locale,
-    title: t.metaTitle,
-    description: t.metaDescription,
-    path: Routes.Login,
-  });
+  return {
+    ...marketingMetadata({
+      locale,
+      title: t.metaTitle,
+      description: t.metaDescription,
+      path: Routes.Login,
+    }),
+    // 登录页没有搜索价值：与 sitemap 排除（SITEMAP_EXCLUDED_ROUTES）口径一致，禁收录。
+    robots: { index: false, follow: false },
+  };
 }
 
 export function registerMetadata(locale: Locale): Metadata {
   const t = getDictionary(locale).auth.register;
-  return marketingMetadata({
-    locale,
-    title: t.metaTitle,
-    description: t.metaDescription,
-    path: Routes.Register,
-  });
+  return {
+    ...marketingMetadata({
+      locale,
+      title: t.metaTitle,
+      description: t.metaDescription,
+      path: Routes.Register,
+    }),
+    // 注册页没有搜索价值：与 sitemap 排除（SITEMAP_EXCLUDED_ROUTES）口径一致，禁收录。
+    robots: { index: false, follow: false },
+  };
 }
