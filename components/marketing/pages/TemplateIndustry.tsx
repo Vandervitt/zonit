@@ -7,6 +7,7 @@ import { conversionLabel, archetypeLabel } from "@/landing-editor/samples/templa
 import { Routes, templateDetailPath, templateIndustryPath, guideDetailPath } from "@/lib/constants";
 import { getGuideForIndustry } from "@/app/guides/_content";
 import { marketingMetadata } from "@/lib/seo/site";
+import { NOINDEX_PATHS } from "@/lib/seo/sitemap-entries";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildIndustrySeoContent,
@@ -42,7 +43,8 @@ export async function templateIndustryMetadata(category: string, locale: Locale)
   });
   // 只有一套模板的行业，其行业页与那唯一一张详情页内容高度重合——放出去等于
   // 自造重复页。页面照常可访问、可内链（权重仍能流向详情页），但不请求收录。
-  if (isIndexableIndustry(category)) return base;
+  // 同理，谷歌已判定不收录的行业页（见 NOINDEX_PATHS，如 supplement）也一样处理。
+  if (isIndexableIndustry(category) && !NOINDEX_PATHS.includes(localePath(locale, templateIndustryPath(category)))) return base;
   return { ...base, robots: { index: false, follow: true } };
 }
 
